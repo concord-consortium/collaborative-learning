@@ -856,7 +856,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>TRY (Optional)</strong></p>",
-                        "<p>Please take a video of yourself catching an object and play it in slow motion. Please watch the <a href='https://www.youtube.com/watch?v=3XM-4Qavh5k&amp;ab_channel=Distort>example video</a>. </p>",
+                        "<p>Please take a video of yourself catching an object and play it in slow motion. Please watch the <a href='https://www.youtube.com/watch?v=3XM-4Qavh5k&amp;ab_channel=Distort'>example video</a>. </p>",
                         "<p>On iPhone: Go into the camera and click “Slo-mo” to take slow motion video</p>",
                         "<p>On Android: Go into the camera, click “video” and then select “slow motion” option.</p>",
                         "Document the links to your videos in your workspace and share them with your class."
@@ -968,6 +968,15 @@
                         "<p><strong>Marking the Components of the Nervous System</strong></p>",
                         "<p>Please review this <a href='https://my.clevelandclinic.org/health/articles/21202-nervous-system'>digital resource on the nervous system</a>, and mark the components of the nervous system (brain, spinal cord, and peripheral nerves) on your model from the previous lesson.</p>"
                       ]
+                    }
+                  },
+                  {
+                    "id": "wZjGsIYHxbSiWtT9",
+                    "title": "Nervous System Diagram",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/Nervous_system_diagram.png",
+                      "filename": "curriculum/neural-engineering/images/Nervous_system_diagram.png"
                     }
                   }
                 ]
@@ -2011,6 +2020,16 @@
                       ]
                     },
                     "layout": { "height": 276 }
+                  },
+                  {
+                    "id": "document_Text_1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>What are other ways you could model the nervous system. Can you make a program that simulates what happens when your brain tells your arm to move? Can you make a plot of moments in time that signals move in the body? Can you make a physical model and take a picture of it?</p>"
+                      ]
+                    }
                   }
                 ]
               }
@@ -2374,6 +2393,7 @@
                     },
                     {
                       "id": "nHcjmx6S8pJ4HydI",
+                      "title": "Backyard Brains App",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/neural-engineering/images/12.jpg",
@@ -2420,8 +2440,114 @@
                       "text": [
                         "<h2>DISCUSS</h2>",
                         "<p>Now, it is time to reflect on the activity as class!</p>",
-                        "<ul><li>Why does gathering EMG signals matter to you, your family, or others in the community? </li><li>Why does this matter to scientists, physicians, physical therapists, athletic trainers, and/or biomedical engineers?</li><li>How may gathering EMG data inform the design of a device that can help people with neurological conditions or missing limbs?</li></ul>"
+                        "<ul><li>Why does gathering EMG signals matter to you, your family, or others in the community? </li><li>Why does this matter to scientists, physicians, physical therapists, athletic trainers, and/or biomedical engineers?</li><li>How may gathering EMG data inform the design of a device that can help people with neurological conditions or missing limbs?</li></ul>",
+                        "<p>Here is a program that will display several different types of simulated EMG data that can show you some of the issues with using that data to manipulate another device. Drag this program into your Workspace, and choose from one of the three types of EMG demo data. Consider and describe the issues associated with using this data.</p>"
                       ]
+                    }
+                  },
+                  {
+                    "id": "d-FIqkKzZZml1NUM",
+                    "title": "EMG Data can be irregular",
+                    "content": {
+                      "type": "Dataflow",
+                      "programDataRate": 100,
+                      "programZoom": {
+                        "dx": 3.12890625,
+                        "dy": -1.04296875,
+                        "scale": 1.0902728103093464
+                      },
+                      "program": {
+                      "values": {
+                        "3180": {"currentValues": {"nodeValue": 40}},
+                        "3186": {"currentValues": {"nodeValue": 0.4}},
+                        "3207": {"currentValues": {"nodeValue": 100}},
+                        "3241": {"currentValues": {"nodeValue": 0.4}}
+                      },
+                      "id": "dataflow@0.1.0",
+                      "nodes": {
+                        "3180": {
+                          "id": 3180,
+                          "name": "Sensor",
+                          "x": 32.671875,
+                          "y": 38.34375,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3241-undefined-num1": {"node": 3241, "input": "num1", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {
+                            "plot": true,
+                            "type": "emg-reading",
+                            "sensor": "00009VIR",
+                            "virtual": true,
+                            "inputKeys": []
+                          }
+                        },
+                        "3186": {
+                          "id": 3186,
+                          "name": "Demo Output",
+                          "x": 539.1296528851293,
+                          "y": 41.20099613110444,
+                          "inputs": {
+                            "nodeValue": {
+                              "connections": {
+                                "3241-num-undefined": {"node": 3241, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {},
+                          "data": {"outputType": "Grabber", "demoOutput": 0.4, "inputKeys": []}
+                        },
+                        "3207": {
+                          "id": 3207,
+                          "name": "Number",
+                          "x": 34.27712269711077,
+                          "y": 294.6431626837267,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3241-undefined-num2": {"node": 3241, "input": "num2", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {"plot": false, "nodeValueUnits": "", "inputKeys": []}
+                        },
+                        "3241": {
+                          "id": 3241,
+                          "name": "Math",
+                          "x": 297.87842277795596,
+                          "y": 187.5670705537788,
+                          "inputs": {
+                            "num1": {
+                              "connections": {
+                                "3180-num-undefined": {"node": 3180, "output": "num", "data": {}}
+                              }
+                            },
+                            "num2": {
+                              "connections": {
+                                "3207-num-undefined": {"node": 3207, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3186-undefined-nodeValue": {
+                                  "node": 3186,
+                                  "input": "nodeValue",
+                                  "data": {}
+                                }
+                              }
+                            }
+                          },
+                          "data": {"plot": false, "mathOperator": "Divide", "inputKeys": []}
+                        }
+                      }
+                    }
                     }
                   },
                   {
@@ -2480,6 +2606,7 @@
                   },
                   {
                     "id": "NIkxcsP7Zwth_DUf",
+                    "title": "Sketch of muscle control of a robot gripper",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/13.jpg" 
@@ -2494,12 +2621,13 @@
                         "<p>Let’s learn how to control a robotic gripper with muscle sensors! In this activity, you can choose &#x27;Simulation&#x27; or the Arduino analog input pins with the materials illustrated below to visualize your real-time muscle movements and control a gripper with your muscle sensors.  You can also either select a gripper simulation or work with the analog gripper to observe the real-time changes. </p>",
                         "<p><strong>Setting up the Analog Muscle Sensors &amp; Gripper:</strong></p>",
                         "<p><strong>Materials: </strong></p>",
-                        "<p>You will need all the materials from the previous activity (image on the left) with the following additions (image on the right): (1) A robotic gripper; (2) An Arduino USB cable (blue cable)</p>"
+                        "<p>You will need all the materials from the previous activity (image below) with the following additions (image on the right): (1) A robotic gripper; (2) An Arduino USB cable (blue cable)</p>"
                       ]
                     }
                   },
                   {
                     "id": "ClSkJ9aDMd5oXpQS",
+                    "title": "Arduino kit components to get EMG signals into Dataflow",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/14.jpg"
@@ -2525,6 +2653,7 @@
                   },
                   {
                     "id": "P-LY18BXc3nQk6QD",
+                    "title": "Gripper and cable",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/15.jpg"
@@ -2542,6 +2671,7 @@
                   },
                   {
                     "id": "SNFVNIZDoFInF55J",
+                    "title": "Arduino and Shield",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/16.jpg"
@@ -2559,6 +2689,7 @@
                   },
                   {
                     "id": "8npmrdC0WXZmIThQ",
+                    "title": "Power cord",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/17.jpg"
@@ -2576,6 +2707,7 @@
                   },
                   {
                     "id": "5bOtNtKeEGz9C0Yl",
+                    "title": "Connect the Gripper",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/18.jpg"
@@ -2593,6 +2725,7 @@
                   },
                   {
                     "id": "_WgzTEJKQ9MFf_9F",
+                    "title": "Connect EMG Sensors",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/19.jpg"
@@ -2610,9 +2743,10 @@
                   },
                   {
                     "id": "54M3JuQkdfGSHcXT",
+                    "title": "Alligator clips attach to sensors",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/neural-engineering/images/20.jpg"
+                      "url": "curriculum/neural-engineering/images/10.jpg"
                     }
                   },
                   {
@@ -2631,15 +2765,119 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Place the code blocks to control the gripper/gripper with the muscle sensors. <em>IDO/TUGCE - do you want to change this to be documentation about Dataflow programming? Not sure you still want to be using the Backyard brains app at all.</em></p>"
+                        "<p>You can read the input signals from the muscle sensors using a sensor block in a Dataflow program tile. You can drive either the simulated or the real output claw using these sensors, or you can 'condition' the muscle signal first. There are lots of ways the following very simple program can be improved.</p>",
+                        "<p>When you first try to read an EMG signal or send signals to the grabber, you must click the gray lightning bolt button in the top left corner of the Dataflow tile to connect it to the Arduino. This is known as 'pairing' and it's the same as the instructions you might use to send music from your phone to a speaker.</p>"
                       ]
                     }
                   },
                   {
-                    "id": "szby0s6YvLrB9WEL",
+                    "id": "ljgXdA8hHMo9TLsy",
+                    "title": "Read EMG to Control Gripper",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/10.jpg"
+                      "type": "Dataflow",
+                      "programDataRate": 1000,
+                      "programZoom": {
+                        "dx": 0,
+                        "dy": -1.2421875,
+                        "scale": 1.2283236994572464
+                      },
+                      "program": {
+                      "values": {
+                        "1": {"currentValues": {"nodeValue": 87}},
+                        "18": {"currentValues": {"nodeValue": 43}},
+                        "39": {"currentValues": {"nodeValue": 0.435}},
+                        "46": {"currentValues": {"nodeValue": 200}}
+                      },
+                      "id": "dataflow@0.1.0",
+                      "nodes": {
+                        "1": {
+                          "id": 1,
+                          "name": "Sensor",
+                          "x": 36.2991455671697,
+                          "y": 12.363123852467389,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "39-undefined-num1": {"node": 39, "input": "num1", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {
+                            "plot": true,
+                            "type": "emg-reading",
+                            "sensor": "00007VIR",
+                            "virtual": true,
+                            "inputKeys": []
+                          }
+                        },
+                        "18": {
+                          "id": 18,
+                          "name": "Live Output",
+                          "x": 495.3019759867558,
+                          "y": 127.6894441735666,
+                          "inputs": {
+                            "nodeValue": {
+                              "connections": {
+                                "39-num-undefined": {"node": 39, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {},
+                          "data": {
+                            "plot": false,
+                            "outputType": "Grabber",
+                            "liveOutputType": "Grabber",
+                            "inputKeys": []
+                          }
+                        },
+                        "39": {
+                          "id": 39,
+                          "name": "Math",
+                          "x": 260.20033253349686,
+                          "y": 131.7286275913869,
+                          "inputs": {
+                            "num1": {
+                              "connections": {
+                                "1-num-undefined": {"node": 1, "output": "num", "data": {}}
+                              }
+                            },
+                            "num2": {
+                              "connections": {
+                                "46-num-undefined": {"node": 46, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "18-undefined-nodeValue": {
+                                  "node": 18,
+                                  "input": "nodeValue",
+                                  "data": {}
+                                }
+                              }
+                            }
+                          },
+                          "data": {"plot": false, "mathOperator": "Divide", "inputKeys": []}
+                        },
+                        "46": {
+                          "id": 46,
+                          "name": "Number",
+                          "x": 36.10750020168834,
+                          "y": 259.26145302136894,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "39-undefined-num2": {"node": 39, "input": "num2", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {"plot": false, "nodeValueUnits": "", "inputKeys": []}
+                        }
+                      }
+                    }
                     }
                   },
                   {
@@ -2668,7 +2906,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>TIP: </strong>While interacting with the gripper, pay close attention to how you could make it work better. Some options to consider are: </p>",
-                        "<ul><li>Changing the locations of the electrodes. For example, students may have more success controlling the gripper by placing the EMG electrodes on the fleshy part below their pinky and the reference electrode by their thumb. </li><li>Changing the sensitivity of the device by pressing the gray button the Muscle SpikerShield. </li><li>Adding, editing the parameters on the app</li><li>Grasping objects of different sizes/weights. </li></ul>"
+                        "<ul><li>Changing the locations of the electrodes. For example, students may have more success controlling the gripper by placing the EMG electrodes on the fleshy part below their pinky and the reference electrode by their thumb. </li><li>Changing the sensitivity of the device by pressing the gray button the Muscle SpikerShield. </li><li>Adding or editing the parameters and nodes in the Dataflow control program</li><li>Grasping objects of different sizes/weights. </li></ul>"
                       ]
                     }
                   }
@@ -2686,7 +2924,7 @@
                       "format": "html",
                       "text": [
                         "<p>Now, it is time to reflect on the activity as a group! Add tiles in your workspace to:</p>",
-                        "<ul><li>Evaluate the strengths and weaknesses of the EMG-controlled gripper and summarize your ideas in a table format.</li><li>Reflect on how the design of the gripper can be improved and please sketch out your ideas. </li><li>Reflecting back on the video with the young woman at the opening of the unit, discuss how a device like the gripper can serve her in her day-to-day life. </li></ul>"
+                        "<ul><li>Evaluate the strengths and weaknesses of the EMG-controlled gripper and summarize your ideas in a table format.</li><li>Reflect on how the design of the gripper can be improved and please sketch out your ideas. </li><li>The Demo Output node in the Dataflow program blocks has a more advanced gripper. Try some programs with that and reflect on how this is an improvement on the existing device.</li><li>Reflect back on the video with the young woman at the opening of the unit, discuss how a device like the gripper can serve her in her day-to-day life. </li></ul>"
                       ]
                     }
                   },
@@ -3066,14 +3304,15 @@
                     }
                   },
                   {
-                    "id": "S2lB-jJORPKlBK7b",
+                    "id": "yU7QpRbJyWfPXtEK",
+                    "title": "Read EMG and Pressure Sensors",
                     "content": {
                       "type": "Dataflow",
                       "programDataRate": 1000,
                       "programZoom": {
                         "dx": 0,
                         "dy": 0,
-                        "scale": 1.114758431587606
+                        "scale": 1.020000291714255
                       },
                       "program": {
                       "values": {"1": {"currentValues": {}}, "2": {"currentValues": {}}},
@@ -3082,12 +3321,12 @@
                         "1": {
                           "id": 1,
                           "name": "Sensor",
-                          "x": 46.69921875,
-                          "y": 213.1171875,
+                          "x": 273.76337909510426,
+                          "y": 57.84759654973931,
                           "inputs": {},
                           "outputs": {"num": {"connections": {}}},
                           "data": {
-                            "plot": false,
+                            "plot": true,
                             "type": "fsr-reading",
                             "sensor": "none",
                             "virtual": false,
@@ -3097,60 +3336,12 @@
                         "2": {
                           "id": 2,
                           "name": "Sensor",
-                          "x": 48.0703125,
-                          "y": 5.96484375,
+                          "x": 24.38005772448913,
+                          "y": 61.62890019391375,
                           "inputs": {},
                           "outputs": {"num": {"connections": {}}},
                           "data": {
-                            "plot": false,
-                            "type": "emg-reading",
-                            "sensor": "none",
-                            "virtual": false,
-                            "inputKeys": []
-                          }
-                        }
-                      }
-                    }
-                    }
-                  },
-                  {
-                    "id": "3AdRSMmT0ceo5c9T",
-                    "content": {
-                      "type": "Dataflow",
-                      "programDataRate": 1000,
-                      "programZoom": {
-                        "dx": 0.89453125,
-                        "dy": -0.30078125,
-                        "scale": 0.1
-                      },
-                      "program": {
-                      "values": {"1": {"currentValues": {}}, "2": {"currentValues": {}}},
-                      "id": "dataflow@0.1.0",
-                      "nodes": {
-                        "1": {
-                          "id": 1,
-                          "name": "Sensor",
-                          "x": 46.69921875,
-                          "y": 213.1171875,
-                          "inputs": {},
-                          "outputs": {"num": {"connections": {}}},
-                          "data": {
-                            "plot": false,
-                            "type": "fsr-reading",
-                            "sensor": "none",
-                            "virtual": false,
-                            "inputKeys": []
-                          }
-                        },
-                        "2": {
-                          "id": 2,
-                          "name": "Sensor",
-                          "x": 48.0703125,
-                          "y": 5.96484375,
-                          "inputs": {},
-                          "outputs": {"num": {"connections": {}}},
-                          "data": {
-                            "plot": false,
+                            "plot": true,
                             "type": "emg-reading",
                             "sensor": "none",
                             "virtual": false,
@@ -3167,10 +3358,279 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Next, try to use the gripper to pick up an object.  This Arduino code does two main things: (1) when a muscle is contracted, the signal is detected and triggers the claw to close. (2) When something presses against the force sensor, the voltage increase across the 10 kΏ resistor is detected and tells the claw to stop gripping. This is meant to prevent the claw from closing too strongly on the target (egg) and damaging it.</p>",
-                        "<p>13. Once you’ve uploaded the code, make sure that you can cause the gripper to close by clenching your muscles.</p>",
-                        "<p>14. To test the force sensor, try pinching the sensor and contracting your muscle. Does the gripper  move? Why or why not?</p>"
+                        "<p>Next, try to use the gripper to pick up an object by dragging this program into your Workspace and pairing the arduino devices with it.  This program does two main things: (1) when a muscle is contracted, the signal is detected and triggers the claw to close. (2) When something presses against the force sensor, the voltage increase across the 10 kΏ resistor is detected and tells the claw to stop gripping. This is meant to prevent the claw from closing too strongly on the target (egg) and damaging it.</p>",
+                        "<p>13. When the program is in your workspace and you've paired with your Arduino setup, make sure that you can cause the gripper to close by clenching your muscles.</p>",
+                        "<p>14. To test the force sensor, try pinching the sensor and contracting your muscle. Does the gripper move? Why or why not?</p>",
+                        "<p>What is the purpose of the Control block? Why are there so many conditions to check in the three logic blocks?</p>"
                       ]
+                    }
+                  },
+                  {
+                    "id": "z4xy6dFTjuc-Hjeh",
+                    "title": "Pressure feedback to keep claw from closing too far",
+                    "content": {
+                      "type": "Dataflow",
+                      "programDataRate": 100,
+                      "programZoom": {
+                        "dx": 0.203125,
+                        "dy": -0.20703125,
+                        "scale": 0.9721118612183195
+                      },
+                      "program": {
+                      "values": {
+                        "3186": {"currentValues": {"nodeValue": 40}},
+                        "3191": {"currentValues": {"nodeValue": 500}},
+                        "3196": {"currentValues": {"nodeValue": 0.08}},
+                        "3212": {"currentValues": {"nodeValue": 0.08}},
+                        "3213": {"currentValues": {"nodeValue": 0.08}},
+                        "3214": {"currentValues": {"nodeValue": 2}},
+                        "3215": {"currentValues": {"nodeValue": 0}},
+                        "3216": {"currentValues": {"nodeValue": 50}},
+                        "3217": {"currentValues": {"nodeValue": 0}},
+                        "3218": {"currentValues": {"nodeValue": 0}},
+                        "3219": {"currentValues": {"nodeValue": 40}}
+                      },
+                      "id": "dataflow@0.1.0",
+                      "nodes": {
+                        "3186": {
+                          "id": 3186,
+                          "name": "Sensor",
+                          "x": -6.208802263617637,
+                          "y": 253.41449541880104,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3196-undefined-num1": {"node": 3196, "input": "num1", "data": {}},
+                                "3218-undefined-num1": {"node": 3218, "input": "num1", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {
+                            "plot": false,
+                            "type": "emg-reading",
+                            "sensor": "00008VIR",
+                            "virtual": true,
+                            "inputKeys": []
+                          }
+                        },
+                        "3191": {
+                          "id": 3191,
+                          "name": "Number",
+                          "x": 1.8108177316116851,
+                          "y": 423.1035687766325,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3196-undefined-num2": {"node": 3196, "input": "num2", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {"plot": false, "nodeValueUnits": "", "inputKeys": []}
+                        },
+                        "3196": {
+                          "id": 3196,
+                          "name": "Math",
+                          "x": 306.4467360408912,
+                          "y": 411.86803599346047,
+                          "inputs": {
+                            "num1": {
+                              "connections": {
+                                "3186-num-undefined": {"node": 3186, "output": "num", "data": {}}
+                              }
+                            },
+                            "num2": {
+                              "connections": {
+                                "3191-num-undefined": {"node": 3191, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3213-undefined-num2": {"node": 3213, "input": "num2", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {"plot": false, "mathOperator": "Divide", "inputKeys": []}
+                        },
+                        "3212": {
+                          "id": 3212,
+                          "name": "Demo Output",
+                          "x": 985.2457365920405,
+                          "y": 98.45708055402545,
+                          "inputs": {
+                            "nodeValue": {
+                              "connections": {
+                                "3213-num-undefined": {"node": 3213, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {},
+                          "data": {"outputType": "Grabber", "demoOutput": 0.08, "inputKeys": []}
+                        },
+                        "3213": {
+                          "id": 3213,
+                          "name": "Control",
+                          "x": 757.6258265614418,
+                          "y": 245.45000240682847,
+                          "inputs": {
+                            "num1": {
+                              "connections": {
+                                "3217-num-undefined": {"node": 3217, "output": "num", "data": {}}
+                              }
+                            },
+                            "num2": {
+                              "connections": {
+                                "3196-num-undefined": {"node": 3196, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3212-undefined-nodeValue": {
+                                  "node": 3212,
+                                  "input": "nodeValue",
+                                  "data": {}
+                                }
+                              }
+                            }
+                          },
+                          "data": {"plot": false, "controlOperator": "Hold Prior", "inputKeys": []}
+                        },
+                        "3214": {
+                          "id": 3214,
+                          "name": "Sensor",
+                          "x": 48.47769944823017,
+                          "y": 4.948161412369174,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3215-undefined-num1": {"node": 3215, "input": "num1", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {
+                            "plot": false,
+                            "type": "fsr-reading",
+                            "sensor": "00010VIR",
+                            "virtual": true,
+                            "inputKeys": []
+                          }
+                        },
+                        "3215": {
+                          "id": 3215,
+                          "name": "Logic",
+                          "x": 333.37817825105054,
+                          "y": 46.30885293229212,
+                          "inputs": {
+                            "num1": {
+                              "connections": {
+                                "3214-num-undefined": {"node": 3214, "output": "num", "data": {}}
+                              }
+                            },
+                            "num2": {
+                              "connections": {
+                                "3216-num-undefined": {"node": 3216, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3217-undefined-num1": {"node": 3217, "input": "num1", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {"plot": false, "logicOperator": "Greater Than", "inputKeys": []}
+                        },
+                        "3216": {
+                          "id": 3216,
+                          "name": "Number",
+                          "x": 50.48336640964742,
+                          "y": 161.72504067251808,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3215-undefined-num2": {"node": 3215, "input": "num2", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {"plot": false, "nodeValueUnits": "", "inputKeys": []}
+                        },
+                        "3217": {
+                          "id": 3217,
+                          "name": "Logic",
+                          "x": 579.8953773516724,
+                          "y": 81.98029032729616,
+                          "inputs": {
+                            "num1": {
+                              "connections": {
+                                "3215-num-undefined": {"node": 3215, "output": "num", "data": {}}
+                              }
+                            },
+                            "num2": {
+                              "connections": {
+                                "3218-num-undefined": {"node": 3218, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3213-undefined-num1": {"node": 3213, "input": "num1", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {"plot": false, "logicOperator": "And", "inputKeys": []}
+                        },
+                        "3218": {
+                          "id": 3218,
+                          "name": "Logic",
+                          "x": 382.5921755501119,
+                          "y": 178.39350048108568,
+                          "inputs": {
+                            "num1": {
+                              "connections": {
+                                "3186-num-undefined": {"node": 3186, "output": "num", "data": {}}
+                              }
+                            },
+                            "num2": {
+                              "connections": {
+                                "3219-num-undefined": {"node": 3219, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3217-undefined-num2": {"node": 3217, "input": "num2", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {"plot": false, "logicOperator": "Greater Than", "inputKeys": []}
+                        },
+                        "3219": {
+                          "id": 3219,
+                          "name": "Number",
+                          "x": 185.9645386946577,
+                          "y": 276.7786425108403,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3218-undefined-num2": {"node": 3218, "input": "num2", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {"plot": false, "nodeValueUnits": "", "inputKeys": []}
+                        }
+                      }
+                    }
                     }
                   }
                 ]
@@ -3180,7 +3640,17 @@
               "type": "reflection",
               "content": {
                 "tiles": [
-
+                  {
+                    "id": "B1Pt8JLDEVX4tU27",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Evaluate your group&#x27;s design and discuss what can be improved. Think about the young woman who was portrayed in the video at the opening of the unit. How would touch sensors serve her in her day-to-day life? How the device could be further improved or modified? What other kinds of sensors might be employed to mimic human function? </p>",
+                        "<p>Write in your KWL Journal and reflect on this lesson.</p>"
+                      ]
+                    }
+                  }
                 ]
               }
             }
