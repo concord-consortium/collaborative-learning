@@ -143,11 +143,17 @@ context('single student functional test',()=>{
         });
         // TODO: Class Work changed with new feature changes.
         describe('publish canvas', ()=>{
+            it('verify published canvas thumbnail', () => {
+              cy.openTopTab('class-work');
+              cy.openSection('class-work','workspaces');
+              cy.getCanvasItemTitle('workspaces').should('have.length',1);
+            });
             it('verify publish canvas thumbnail appears in Class Work Published List',()=>{
                 canvas.publishCanvas("investigation");
                 cy.openTopTab('class-work');
                 cy.openSection('class-work','workspaces');
-                cy.getCanvasItemTitle('workspaces').should('have.length',1);
+                cy.getCanvasItemTitle('workspaces').should('have.length',2);
+                cy.getCanvasItemTitle('workspaces').first().should('contain', 'v2');
             });
             it('verify student name appears under thumbnail',()=>{
                 cy.get('[data-test=user-name]').then(($el)=>{
@@ -160,7 +166,7 @@ context('single student functional test',()=>{
               cy.openSection("class-work", "workspaces");
                 cy.get('[data-test=user-name]').then(($el)=>{
                     const user = $el.text();
-                    cy.getCanvasItemTitle('workspaces', user).click();
+                    cy.getCanvasItemTitle('workspaces', user).first().click();
                 });
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.text-tool').should('exist').and('contain','This is a smoke test');
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.geometry-content').should('exist');

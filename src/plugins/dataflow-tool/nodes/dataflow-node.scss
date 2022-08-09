@@ -252,6 +252,48 @@ $node-inner-width: 140px;
         border-top-color: $light-bulb-orange;
       }
     }
+    &.control {
+      background-color: $control-green;
+      border-color: $control-green-outline;
+      .main-color {
+        color: $control-green;
+        border: 2px solid $control-green;
+        &:hover {
+          background-color: $control-green-outline;
+        }
+      }
+      .control-color {
+        color: $control-green-control;
+      }
+      .control-color-hoverable:hover {
+        color: $control-green-node;
+      }
+      .active {
+        background-color: $control-green-control;
+      }
+      .type-options select {
+        background-color: $control-green-outline;
+      }
+      .type-options span {
+        border-top-color: $control-green;
+      }
+    }
+    &.has-gate .inputs {
+      div:first-of-type .socket {
+        transform:rotate(0deg);
+        background-image: url("../assets/icons/control/gate.svg");
+        transition: all .4s;
+        border-radius: 10px 4px 4px 10px;
+      }
+    }
+    &.has-gate.gate-active .inputs {
+      div:first-of-type .socket {
+        transform:rotate(180deg);
+        background-color: $control-green;
+        transition: all .4s;
+        border-radius: 4px 10px 10px 4px;
+      }
+    }
     &.data-storage {
       background-color: $data-storage-orange;
       border-color: $data-storage-orange-outline;

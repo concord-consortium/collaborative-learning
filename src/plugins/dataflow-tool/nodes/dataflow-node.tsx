@@ -1,4 +1,5 @@
 import React from "react";
+import classNames from "classnames";
 import { Node, Socket, Control } from "rete-react-render-plugin";
 import { DataflowNodePlot } from "./dataflow-node-plot";
 import { NodeType, NodeTypes } from "../model/utilities/node";
@@ -22,8 +23,13 @@ export class DataflowNode extends Node {
     const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
     const displayName = nodeType ? nodeType.displayName : node.name;
 
+    const dynamicClasses = classNames({
+      "has-gate": node.data.hasGate,
+      "gate-active": node.data.gateActive
+    });
+
     return (
-      <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")}`}>
+      <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}>
         <div className="top-bar">
           <div className="node-title">
             {displayName}

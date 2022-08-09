@@ -134,8 +134,7 @@ export class Firebase {
       [PersonalDocument]: () => this.getOtherDocumentPath(user, PersonalDocument, documentKey),
       [LearningLogDocument]: () => this.getOtherDocumentPath(user, LearningLogDocument, documentKey),
       [ProblemPublication]: () => `${this.getProblemPublicationsPath(user)}/${documentKey}`,
-      [PersonalPublication]: () => `${this.getPersonalPublicationsPath(user)}/${documentKey}`,
-      [LearningLogPublication]: () => `${this.getLearningLogPublicationsPath(user)}/${documentKey}`
+       // typed metadata for published personal documents and learning logs is stored under a different key
     };
     const typedMetadata = typedMetadataMap[documentType]?.() || "";
     return { content, metadata, typedMetadata };

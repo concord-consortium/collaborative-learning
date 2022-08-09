@@ -21,6 +21,7 @@ import { addTreeMonitor } from "../history/tree-monitor";
 import { ISharedModelDocumentManager, SharedModelDocumentManager } from "../tools/shared-model-document-manager";
 import { ITileEnvironment } from "../tools/tool-types";
 import { TreeManager } from "../history/tree-manager";
+import { ESupportType } from "../curriculum/support";
 
 interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
@@ -42,7 +43,9 @@ export const DocumentModel = Tree.named("Document")
     visibility: types.maybe(types.enumeration("VisibilityType", ["public", "private"])),
     groupUserConnections: types.map(types.boolean),
     originDoc: types.maybe(types.string),
-    changeCount: types.optional(types.number, 0)
+    changeCount: types.optional(types.number, 0),
+    pubVersion: types.maybe(types.number),
+    supportContentType: types.maybe(types.enumeration<ESupportType>("SupportType", Object.values(ESupportType)))
   })
   .volatile(self => ({
     queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined,
@@ -91,6 +94,10 @@ export const DocumentModel = Tree.named("Document")
     },
     getProperty(key: string) {
       return self.properties.get(key);
+    },
+    getNumericProperty(key: string) {
+      const val = self.properties.get(key);
+      return val != null ? Number(val) : 0;
     },
     copyProperties(): IDocumentProperties {
       return self.properties.toJSON();
@@ -177,6 +184,9 @@ export const DocumentModel = Tree.named("Document")
       else if (self.getProperty(key) !== value) {
         self.properties.set(key, value);
       }
+    },
+    setNumericProperty(key: string, value?: number) {
+      this.setProperty(key, value == null ? value : `${value}`);
     },
 
     setContent(snapshot: DocumentContentSnapshotType) {
@@ -275,7 +285,7 @@ export const DocumentModel = Tree.named("Document")
   }))
   .actions(self => ({
     afterCreate() {
-      // FIXME: it would be nice to unify this with the code in createDocumentModel
+      // TODO: it would be nice to unify this with the code in createDocumentModel
       const manager = TreeManager.create({document: {}, undoStore: {}});
       self.treeManagerAPI = manager;
       addTreeMonitor(self, manager, false);

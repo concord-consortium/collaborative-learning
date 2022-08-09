@@ -1,11 +1,9 @@
-import { Instance } from "mobx-state-tree";
 import { TreePatchRecordSnapshot } from "./history";
-import { IUndoManager, UndoStore } from "./undo-store";
+import { IUndoManager } from "./undo-store";
 
 export interface TreeManagerAPI {
     /**
-     * Propagate shared model state to other trees. This is called by either by
-     * the top level manager tree or by iframe trees.
+     * Propagate shared model state to other trees. 
      *
      * The shared model is identified by an id inside of the snapshot. The
      * sourceTreeId indicates which tree is sending this update. The new shared
@@ -48,11 +46,11 @@ export interface TreeManagerAPI {
      * - time traveling the document back to a previous state
      *
      * When the user does an undo the manager will send the inversePatches of
-     * the the recorded tree patch records that are grouped by the
+     * the recorded tree patch records that are grouped by the
      * historyEntryId to the tree with `applyPatchesFromManager`.
      *
      * When time traveling is done, the manager will collect all the history
-     * events from the current time to the desired time. It will then combine
+     * events from the current time to the desired time. It will then
      * group all of the patches in these events by tree and send them all to the
      * tree at the same time. This is done with `applyPatchesFromManager`.
      *
@@ -118,35 +116,36 @@ export interface TreeManagerAPI {
 
     /**
      * This starts a new "exchange" in the history entry. These exchanges are
-     * used by the manager to know when the history entry is complete. If
-     * there are any open exchanges, then the history entry is still recording.
-     * `addHistoryEntry` automatically starts a exchange, so it isn't necessary
+     * used by the manager to know when the history entry is complete. If there
+     * are any open exchanges, then the history entry is still recording.
+     * `addHistoryEntry` automatically starts an exchange, so it isn't necessary
      * to call `startExchange` before `addHistoryEntry`.  
      * When the manager calls the tree with `applyPatchesFromManager`, the
-     * manager starts a exchange. This explicit startExchange should be used
-     * when the tree wants to start some async code outside of one of these
-     * existing exchanges. It should call `startExchange` while it is handling
-     * an existing exchange. And it should wait for the promise of
-     * `startExchange` to resolve before it closes out the existing exchange (by
-     * calling addTreePatchRecord). This way there will not be a time when all
-     * the exchanges of this history entry are closed, so manager will keep the
-     * history entry "recording".
+     * manager starts an exchange. 
+     *
+     * startExchange should be called when the tree wants to start some async
+     * code outside of one of these existing exchanges. It should call
+     * `startExchange` while it is handling an existing exchange. And it should
+     * wait for the promise of `startExchange` to resolve before it closes out
+     * the existing exchange (by calling addTreePatchRecord). This way there
+     * will not be a time when all the exchanges of this history entry are
+     * closed, so the manager will keep the history entry "recording".
      *
      * This is currently used when the tree's tiles are updating themselves
-     * after the shared model has changed. It is also used by the undo and
-     * document store when they are replaying events.
+     * after the shared model has changed. It is also used by the undo store
+     * when it is replaying events to the trees.
      *
-     * @param historyEntryId the history entry id that this exchange is being added
-     * to. This could be the one that was created with addHistoryEntry or it
-     * could be one that was initialized by the manager. 
+     * @param historyEntryId the history entry id that this exchange is being
+     * added to. This could be the one that was created with addHistoryEntry or
+     * it could be one that was initialized by the manager. 
      *
-     * @param exchangeId a unique id created by the tree to identify this exchange.
-     * This same exchangeId needs to be passed to addTreePatchRecord to end this
-     * call.
-     * 
+     * @param exchangeId a unique id created by the tree to identify this
+     * exchange. This same exchangeId needs to be passed to addTreePatchRecord
+     * to end this call.
+     *
      * @param name this is an identifier that is useful for error messages if a
-     * history entry is not complete when it is expected to be complete the list of
-     * active exchanges can be viewed to see which one hasn't ended yet.
+     * history entry is not complete when it is expected to be complete. The list
+     * of active exchanges can be viewed to see which one hasn't ended yet.
      */
     startExchange: (historyEntryId: string, exchangeId: string, name: string) => Promise<void>;
 

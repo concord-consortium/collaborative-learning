@@ -15,7 +15,7 @@
   background-color: white;
   box-sizing: border-box;
   &.show-control {
-    width: calc(100% - 15px);
+    width: calc(100% - 2px);
     border-right: none;
     border-top-right-radius: 0px;
   }
@@ -89,15 +89,39 @@
       &.show-control {
         &.my-work {
           background-color: $workspace-teal-light-2;
+          &:hover {
+            background-color: $workspace-teal-light-3;
+          }
+          &:active {
+            background-color: $workspace-teal-light-2
+          }
         }
         &.class-work {
           background-color: $classwork-purple-light-2;
+          &:hover {
+            background-color: $classwork-purple-light-4;
+          }
+          &:active {
+            background-color: $classwork-purple-light-2;
+          }
         }
         &.student-work {
           background-color: $charcoal-light-2;
+          &:hover {
+            background-color: $charcoal-light-3;
+          }
+          &:active {
+            background-color: $charcoal-light-2
+          }
         }
         &.learning-log {
           background-color: $learninglog-green-light-2;
+          &:hover {
+            background-color: $learninglog-green-light-4;
+          }
+          &:active {
+            background-color: $learninglog-green-light-2;
+          }
         }
       }
     }

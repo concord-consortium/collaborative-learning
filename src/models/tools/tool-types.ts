@@ -113,6 +113,20 @@ export const ToolContentModel = types.model("ToolContentModel", {
     }
   }))
   .actions(self => ({
+    /**
+     * This will be called automatically by the tree monitor. 
+     * Currently the call tree looks like:
+     * addTreeMonitor.recordAction
+     * └ Tree.handleSharedModelChanges
+     *   └ Tree.updateTreeAfterSharedModelChangesInternal
+     *     └ Tree.updateTreeAfterSharedModelChanges
+     *       └ tile.content.updateAfterSharedModelChanges
+     * 
+     * It is also called after the manager has finished applying patches
+     * during an undo or replying history.
+     * 
+     * @param sharedModel 
+     */
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       throw new Error("not implemented");
     }
