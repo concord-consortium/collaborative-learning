@@ -1,4 +1,4 @@
-import { types, IJsonPatch, SnapshotIn } from "mobx-state-tree";
+import { types, IJsonPatch, SnapshotIn, Instance } from "mobx-state-tree";
 import { observable } from "mobx";
 
 export const TreePatchRecord = types.model("TreePatchRecord", {
@@ -34,12 +34,13 @@ export const HistoryEntry = types.model("HistoryEntry", {
 })
 .volatile(self => ({
     // The value of the map should be the name of the exchange. This is useful
-    // for debugging an activeExchange that hasn't been ended. 
-    // The last name param to observable.map is a feature of MobX that can also 
+    // for debugging an activeExchange that hasn't been ended.
+    // The last name param to observable.map is a feature of MobX that can also
     // help with debugging.
     activeExchanges: observable.map<string, string>({}, {name: "activeExchanges"})
 }));
 export interface HistoryEntrySnapshot extends SnapshotIn<typeof HistoryEntry> {}
+export interface HistoryEntryType extends Instance<typeof HistoryEntry> {}
 
 export enum HistoryOperation {
     Undo = "undo",

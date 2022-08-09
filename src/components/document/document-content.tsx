@@ -18,7 +18,7 @@ import "./document-content.sass";
 
 interface IProps extends IBaseProps {
   context: string;
-  documentId?: string;
+  documentId?: string | undefined;
   content?: DocumentContentModelType;
   typeClass: string;
   showPlayback?: boolean;
@@ -103,7 +103,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {viaTeacherDashboard, showPlayback} = this.props;
+    const {viaTeacherDashboard, showPlayback, documentId} = this.props;
     const {ui, user: {isNetworkedTeacher}} = this.stores;
     const isChatEnabled = isNetworkedTeacher;
     const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0;
@@ -121,7 +121,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       >
         {this.renderRows()}
         {this.renderSpacer()}
-        {showPlayback && <PlaybackComponent />}
+        {showPlayback && <PlaybackComponent documentId={documentId}/>}
       </div>
     );
   }

@@ -1,7 +1,7 @@
 import React from "react";
 import classNames from "classnames";
 import { useUIStore } from "../../hooks/use-stores";
-import { IMarkerProps } from "./slider";
+import { IMarkerProps } from "./playback-control";
 import AddMarkerIcon from "../../clue/assets/icons/playback/add-marker-icon.svg";
 import DeleteMarkerIcon from "../../clue/assets/icons/playback/delete-marker-icon.svg";
 import CommentMarkerIcon from "../../clue/assets/icons/playback/add-comment-to-marker-icon.svg";
