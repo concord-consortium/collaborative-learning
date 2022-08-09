@@ -712,7 +712,7 @@
         {
           "description": "Lesson 1.2",
           "ordinal": 2,
-          "title": "Lesson 1.2 - What controls our movement? (Part 1)",
+          "title": "Lesson 1.2 - What controls our movement? ",
           "subtitle": "",
           "disabled": [],
           "sections": 
@@ -950,7 +950,7 @@
         {
           "description": "Lesson 1.3",
           "ordinal": 3,
-          "title": "Lesson 1.3 - What controls our movement? (Part 2)",
+          "title": "Lesson 1.3 - How does nerve injury affect movement?",
           "subtitle": "",
           "disabled": [],
           "sections": 
@@ -2127,7 +2127,7 @@
           "description": "Lesson 1.4",
           "ordinal": 4,
           "title": "Lesson 1.4 -  How do muscles work?",
-          "subtitle": "Electromyography",
+          "subtitle": "",
           "disabled": [],
           "sections": 
           [
