@@ -75,7 +75,7 @@
             },
             {
               "initials": "LAB",
-              "title": "Lab Work",
+              "title": "Activities",
               "type": "problem-documents"
             },
             {
@@ -178,7 +178,7 @@
     },
     "labWork": {
       "initials": "LAB",
-      "title": "Lab Work",
+      "title": "Activities",
       "placeholder": "Discuss how to approach your experiment, take data, write programs."
     },
     "programming": {
