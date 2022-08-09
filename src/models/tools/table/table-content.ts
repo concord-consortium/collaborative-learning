@@ -315,7 +315,7 @@ export const TableContentModel = ToolContentModel
       console.warn("updateAfterSharedModelChanges hasn't been implemented for table content.");
     },
     setTableName(name: string) {
-      self.dataSet.name = name;
+      self.dataSet.setName(name);
 
       self.logChange({ action: "update", target: "table", props: { name } });
     },
@@ -328,7 +328,7 @@ export const TableContentModel = ToolContentModel
     setAttributeName(id: string, name: string) {
       const attr = self.dataSet.attrFromID(id);
       if (attr) {
-        attr.name = name;
+        attr.setName(name);
         // if the name of the "x" column is changed, formulas must be updated
         if (self.dataSet.attrIndexFromID(id) === 0) {
           self.metadata.clearRawExpressions(kSerializedXKey);
