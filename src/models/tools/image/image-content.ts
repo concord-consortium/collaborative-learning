@@ -47,23 +47,19 @@ export const ImageContentModel = ToolContentModel
   }))
   .actions(self => toolContentModelHooks({
       doPostCreate(metadata: ToolMetadataModelType) {
-        // console.log(`doPostCreate`);
         self.metadata = metadata;
       },
   }))
   .actions(self => ({
     setUrl(url: string, filename?: string) {
-      // console.log(`setUrl`);
       self.url = url;
       self.filename = filename;
     },
     updateImageUrl(oldUrl: string, newUrl: string) {
-      // console.log(`updateImageUrl`);
       if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
       if (self.url === oldUrl) self.url = newUrl;
     },
     setTitle(title: string) {
-      // console.log(`setTitle`);
       setTileTitleFromContent(self, title);
     }
   }));
