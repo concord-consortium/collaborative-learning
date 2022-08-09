@@ -22,10 +22,15 @@ export const isGeometryChangesContent = (snap: any) => {
 };
 
 export const convertChangesToModel = (changes: JXGChange[]) => {
-  // const changesJson = changes.map(change => JSON.stringify(change));
-  const changesJson = changes.map(change => change as any as string);
+  let changesJson: any[];
+  if (changes.length > 0 && typeof changes[0] === 'string') {
+    // The changes are actually already being passed in as strings for some reason.
+    changesJson = changes.map(change => change as any as string);
+  } else {
+    // The changes are in json format, so we need to convert them to strings
+    changesJson = changes.map(change => JSON.stringify(change));
+  }
   return exportGeometryModel(changesJson);
-  // return exportGeometryModel(changes);
 };
 
 export const convertModelToChanges = (model: GeometryBaseContentModelType): JXGChange[] => {

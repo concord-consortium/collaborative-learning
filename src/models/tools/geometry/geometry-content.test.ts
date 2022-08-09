@@ -153,7 +153,7 @@ describe("GeometryContent", () => {
 
   it("can create with default properties", () => {
     const content = GeometryContentModel.create();
-    expect(getSnapshot(content)).toEqual({ type: kGeometryToolID, board: defaultBoard(), objects: {}, links: [] });
+    expect(getSnapshot(content)).toEqual({ type: kGeometryToolID, board: defaultBoard(), objects: {} });
 
     destroy(content);
   });
@@ -175,8 +175,7 @@ describe("GeometryContent", () => {
         xAxis: { name: "authorX", min: kGeometryDefaultXAxisMin, unit: kGeometryDefaultPixelsPerUnit },
         yAxis: { name: "authorY", min: kGeometryDefaultYAxisMin, unit: kGeometryDefaultPixelsPerUnit }
       },
-      objects: {},
-      links: []
+      objects: {}
     });
 
     destroy(content);
