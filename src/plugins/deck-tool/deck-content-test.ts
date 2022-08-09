@@ -3,13 +3,13 @@ import { defaultDeckContent, DeckContentModel } from "./deck-content";
 describe("DeckContent", () => {
   it("has default content of 'hello world'", () => {
     const content = defaultDeckContent();
-    expect(content.text).toBe("Hello World");
+    expect(content.deckDescription).toBe("Hello World");
   });
 
-  it("supports changing the text", () => {
+  it("supports changing the description", () => {
     const content = DeckContentModel.create();
-    content.setText("New Text");
-    expect(content.text).toBe("New Text");
+    content.setDescription("New Text");
+    expect(content.deckDescription).toBe("New Text");
   });
 
   it("is always user resizable", () => {

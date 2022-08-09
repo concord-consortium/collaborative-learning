@@ -54,7 +54,7 @@ describe("DeckToolComponent", () => {
       render(<DeckToolComponent  {...defaultProps} {...{model}}></DeckToolComponent>);
     expect(getByText("Hello World")).toBeInTheDocument();
 
-    content.setText("New Text");
+    content.setDescription("New Text");
 
     expect(await findByText("New Text")).toBeInTheDocument();
   });
@@ -68,6 +68,6 @@ describe("DeckToolComponent", () => {
     userEvent.type(textBox, "{selectall}{del}Typed Text");
 
     expect(textBox).toHaveValue("Typed Text");
-    expect(content.text).toBe("Typed Text");
+    expect(content.deckDescription).toBe("Typed Text");
   });
 });

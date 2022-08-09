@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import React from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { DeckContentModelType } from "./deck-content";
+import { useEffect } from "react";
 import "./deck-tool.scss";
 
 export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
@@ -13,12 +14,12 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const content = props.model.content as DeckContentModelType;
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    content.setText(event.target.value);
+    content.setDescription(event.target.value);
   };
 
   return (
     <div className="deck-tool">
-      <textarea value={content.text} onChange={handleChange} />
+      <textarea value={content.deckDescription} onChange={handleChange} />
     </div>
   );
 });
