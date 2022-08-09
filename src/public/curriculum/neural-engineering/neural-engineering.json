@@ -240,6 +240,10 @@
         {
           "description": "Lesson 0.1",
           "ordinal": 1,
+      "problems": [
+        {
+          "description": "Lesson 0.1",
+          "ordinal": 1,
           "title": "Lesson 0.1 Using CLUE and Dataflow Programming",
           "subtitle": "",
           "disabled": [],
@@ -1934,6 +1938,15 @@
               }
             }
           ]
+        }
+      ]
+    },
+    {
+      "description": "Investigation 2",
+      "ordinal": 2,
+      "title": "Module 2: Touch",
+      "problems": [
+        {
         },
         {
           "description": "Lesson 2.2",
@@ -2581,6 +2594,44 @@
                         "<p>Design Thinking <a href='https://citl.illinois.edu/paradigms/design-thinking'>protocol</a></p>"
                       ]
                     }
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Can you grab an egg (with the gripper) without cracking it?</p>",
+                        "<p>Materials:</p>",
+                        "<ul><li>A gripper kit</li><li>Two gripper “mittens”, one will be a regular plastic attachment, the other will have a pressure sensor on it (see picture →)</li><li>10 kΩ ohm resistor</li><li>1 breadboard</li><li>2 segments of wire</li><li>A plastic egg or a drained egg</li><p></p></ul>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "labWork",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "s3n37sHI6K6rpa9O",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Assembly: </p>",
+                        "<p>1. Set up your gripper like normal. If you are stuck, reference the gripper directions in Lesson 1.5.  Attach the “pressure sensor mittens” to each side of the gripper,  like in the picture.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "R8jKw96R4bhk_fvp",
+                    "title": "Pressure sensor mounted on claw",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/mittens.jpg",
+                      "filename": "curriculum/neural-engineering/images/mittens.jpg"
+                    }
+                  },
+                  {
                   },
                   {
                     "id": "F9VOi053V8cis-la",
@@ -2695,10 +2746,60 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
+                      "text": [
                         "<p>Open your KWL Journal and add a row to the table to document your thoughts.</p>"
                       ]
                     }
                   }
+=======
+                        "<p>Next, try to use the gripper to pick up an object.  This Arduino code does two main things: (1) when a muscle is contracted, the signal is detected and triggers the claw to close. (2) When something presses against the force sensor, the voltage increase across the 10 kΏ resistor is detected and tells the claw to stop gripping. This is meant to prevent the claw from closing too strongly on the target (egg) and damaging it.</p>",
+                        "<p>13. Once you’ve uploaded the code, make sure that you can cause the gripper to close by clenching your muscles.</p>",
+                        "<p>14. To test the force sensor, try pinching the sensor and contracting your muscle. Does the gripper  move? Why or why not?</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Lesson 2.4",
+          "ordinal": 4,
+          "title": "Lesson 2.4 - Putting it all together",
+          "subtitle": "",
+          "disabled": [],
+          "sections": 
+          [
+            {
+              "type": "intro",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            },
+            {
+              "type": "labWork",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
+
                 ]
               }
             }
