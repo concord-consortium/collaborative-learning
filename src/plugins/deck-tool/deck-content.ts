@@ -2,8 +2,6 @@ import { types, Instance } from "mobx-state-tree";
 import { ToolContentModel } from "../../models/tools/tool-types";
 import { kDeckToolID } from "./deck-types";
 import { ITileExportOptions } from "../../models/tools/tool-content-info";
-import { ToolMetadataModelType } from "../../models/tools/tool-types";
-import { ToolTitleArea } from "../../components/tools/tool-title-area";
 
 export function defaultDeckContent(): DeckContentModelType {
   return DeckContentModel.create({deckDescription: "Hello World"});
@@ -14,14 +12,9 @@ export const DeckContentModel = ToolContentModel
   .props({
     type: types.optional(types.literal(kDeckToolID), kDeckToolID),
     deckDescription: "",
+    title: ""
   })
-  .volatile(self => ({
-    metadata: undefined as any as ToolMetadataModelType
-  }))
   .views(self => ({
-    get title() {
-      return self.metadata.title;
-    },
     get isUserResizable() {
       return true;
     },
@@ -29,14 +22,18 @@ export const DeckContentModel = ToolContentModel
       return [
         `{`,
         `  "type": "Deck",`,
+        `  "title": ${self.title}`,
         `  "deckDescription": ${self.deckDescription},`,
         `}`
-      ].join("\n")
+      ].join("\n");
     }
   }))
   .actions(self => ({
     setDescription(text: string) {
       self.deckDescription = text;
+    },
+    setTitle(text: string){
+      self.title = text;
     }
   }));
 
