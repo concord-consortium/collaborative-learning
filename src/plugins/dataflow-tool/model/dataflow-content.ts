@@ -1,10 +1,11 @@
 import { types, Instance, applySnapshot, getSnapshot } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
 import stringify from "json-stringify-pretty-compact";
-import { ToolContentModel } from "../../../models/tools/tool-types";
+import { ToolContentModel, ToolMetadataModelType, toolContentModelHooks } from "../../../models/tools/tool-types";
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
+import { setTileTitleFromContent } from "../../../models/tools/tool-tile";
 
 export const kDataflowToolID = "Dataflow";
 
@@ -34,6 +35,9 @@ export const DataflowContentModel = ToolContentModel
     programIsRunning: "",
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
+  .volatile(self => ({
+    metadata: undefined as any as ToolMetadataModelType
+  }))
   .views(self => ({
     programWithoutRecentValues() {
       const { values, ...rest } = getSnapshot(self.program);
@@ -49,6 +53,9 @@ export const DataflowContentModel = ToolContentModel
     }
   }))
   .views(self => ({
+    get title() {
+      return self.metadata.title;
+    },
     get isUserResizable() {
       return true;
     },
@@ -68,11 +75,19 @@ export const DataflowContentModel = ToolContentModel
       ].join("\n");
     }
   }))
+  .actions(self => toolContentModelHooks({
+    doPostCreate(metadata: ToolMetadataModelType){
+      self.metadata = metadata;
+    }
+  }))
   .actions(self => ({
     setProgram(program: any) {
       if (program) {
         applySnapshot(self.program, cloneDeep(program));
       }
+    },
+    setTitle(title: string) {
+      setTileTitleFromContent(self, title);
     },
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;

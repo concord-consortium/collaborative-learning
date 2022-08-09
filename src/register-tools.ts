@@ -13,6 +13,7 @@ const gToolRegistration: Record<string, () => void> = {
   "Drawing": () => import(/* webpackChunkName: "Drawing" */"./plugins/drawing-tool/drawing-registration"),
   "Geometry": () => import(/* webpackChunkName: "Geometry" */"./models/tools/geometry/geometry-registration"),
   "Image": () => import(/* webpackChunkName: "Image" */"./models/tools/image/image-registration"),
+  "Starter": () => import(/* webpackChuckName: "Starter" */"./plugins/starter/starter-registration"),
   "Table": () => import(/* webpackChunkName: "Table" */"./models/tools/table/table-registration"),
   "Text": () => import(/* webpackChunkName: "Text" */"./models/tools/text/text-registration")
 };

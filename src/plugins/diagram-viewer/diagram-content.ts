@@ -76,6 +76,8 @@ export const DiagramContentModel = ToolContentModel
             containerSharedModel = SharedVariables.create();
           } 
           
+          // TODO: This will currently generate multiple history events because it
+          // is running outside of a document tree action.
           // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, containerSharedModel);
 

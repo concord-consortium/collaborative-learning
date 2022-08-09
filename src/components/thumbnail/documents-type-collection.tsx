@@ -49,8 +49,7 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
       sectDocs.push(...documents.byTypeForUser(type as any, user.id));
     }
     else if (isPublishedType(type)) {
-      const publishedDocs: { [source: string]: DocumentModelType } = {};
-      // only show the most recent publication of each document
+      const publishedDocs: { [source: string]: DocumentModelType[] } = {};
       documents
         .byType(type as any)
         .forEach(doc => {
@@ -60,13 +59,15 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
           // shouldn't be published documents from other problems.
           const source = doc.originDoc || doc.uid;
           if (source) {
-            const entry = publishedDocs[source];
-            if (!entry || (entry.createdAt < doc.createdAt)) {
-              publishedDocs[source] = doc;
+            if (!publishedDocs.source) {
+              publishedDocs.source = [];
             }
+            publishedDocs.source.push(doc);
           }
         });
-        sectDocs.push(...Object.values(publishedDocs));
+      for (const sourceId in publishedDocs) {
+        sectDocs.push(...publishedDocs[sourceId]);
+      }
     }
   });
   // Reverse the order to approximate a most-recently-used ordering.

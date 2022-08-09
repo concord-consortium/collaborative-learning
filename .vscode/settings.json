@@ -13,9 +13,12 @@
     "ccimg",
     "democlass",
     "fbrtdb",
+    "iframes",
     "mcimage",
     "mcimages",
     "mcsupports",
-    "towle"
+    "todos",
+    "towle",
+    "undoable"
   ]
 }

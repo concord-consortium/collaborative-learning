@@ -29,6 +29,8 @@ export interface DBBaseDocumentMetadata {
   };
   createdAt: number;
   type: DBDocumentType;
+  // previously in DBOtherDocument
+  properties?: IDocumentProperties;
 }
 
 export interface DBBaseProblemDocumentMetadata extends DBBaseDocumentMetadata {
@@ -88,6 +90,7 @@ export interface DBOtherDocument {
     documentKey: string;
   };
   title: string;
+  // legacy properties; in DBBaseDocumentMetadata since ~2.2
   properties?: IDocumentProperties;
 }
 ```

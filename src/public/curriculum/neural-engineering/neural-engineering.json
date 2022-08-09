@@ -1,21 +1,14 @@
 {
   "code": "brain",
   "abbrevTitle": "BW",
-  "title": "Brainwaves",
+  "title": "Neural Engineering",
   "subtitle": "",
   "placeholderText": "Add your thoughts here.",
   "config": {
     "placeholderText": "Document your thoughts",
-    "autoSectionProblemDocuments": false,
+    "autoSectionProblemDocuments": true,
     "defaultDocumentTemplate": {
       "tiles": [
-        {
-          "content": {
-            "type": "Text",
-            "format": "html",
-            "text": "Welcome! To begin using the CLUE software, please click the My Resources bar at extreme left, and then click the tab labeled <strong>Lesson</strong>."
-          }
-        }
       ]
     },
     "defaultDocumentType": "problem",
@@ -160,6 +153,18 @@
               "addDocument": true
             }
           ]
+        },
+        {
+          "tab": "teacher-guide",
+          "label": "Teacher Guide",
+          "teacherOnly": true,
+          "sections": []
+        },
+        {
+          "tab": "student-work",
+          "label": "Student Work",
+          "teacherOnly": true,
+          "sections": []
         }
       ]
     },
@@ -184,7 +189,8 @@
     "reflection": {
       "initials": "RF",
       "title": "Reflection",
-      "type": "problem-documents"
+      "type": "problem-documents",
+      "placeholder": "Write up conclusions from your experiment. Fill out your KWL Journal on the My Work tab and capture the parts of your work you want to remember for next class there. "
     }
   },
   "planningDocument": {
@@ -221,14 +227,186 @@
   },
   "investigations": [
     {
+      "description": "Investigation 0",
+      "ordinal": 0,
+      "title": "Introduction to CLUE and Dataflow",
+      "problems": [
+        {
+          "description": "Lesson 0.1",
+          "ordinal": 1,
+          "title": "Lesson 0.1 Using CLUE and Dataflow Programming",
+          "subtitle": "",
+          "disabled": [],
+          "sections": 
+          [
+            {
+              "type": "intro",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "EBCpyeDU_FkLtXq8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Welcome to CLUE</h3>",
+                        "<p>On the right is <strong>your</strong> workspace. To edit your workspace, you must first add a <strong>tile</strong>. You get a tile in your workspace by either</p>",
+                        "<ul><li><strong>Dragging a tile from the content (left side) in CLUE into your workspace</strong></li><li><strong>Dragging a new  tile from the menu on the left of your workspace</strong></li><li><strong>Click a button on the menu to add a new tile to the bottom of your workspace</strong></li></ul>",
+                        "<p>All tiles have a <strong>waffle</strong> (gray box with six dots) in the upper right corner if you hover over it. To drag the tile, click the waffle and hold it down as you drag it to your workspace. As you drag the tile into the workspace, a blue line shows where the tile will go when you let go.</p>",
+                        "<p>OK, get ready... Here we go!</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_rU9plvleix0FlBS",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Introduction to tool types</h3>",
+                        "<p>Try to make a text tile in your <strong>Workspace</strong> on the right (press the menu button with the letter A on it). Write down some things you hope to learn in this Neural Engineering class.</p>",
+                        "<p>Now insert an image into your workspace. You can upload using the button or you can drag images from your desktop. Describe in your workspace how you might use images to document your work.</p>",
+                        "<p>Next, make a program. This is done with the button that has two connected boxes on it. Try to make a program that adds two numbers. What are the different ways that you see the result of the program?</p>",
+                        "<p>Finally, try to make a table. Fill the table in with some data, and change the column header names to something you might use for engineering design. Describe the meaning of your data in text.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "abc050820221728",
+                    "title": "CLUE Tile Menu",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/AllToolsToolBar-labeled.png"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "labWork",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "9plvleix0FlBS",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Group work - discussion</h3>",
+                        "<p>CLUE is designed to facilitate sharing of ideas, both in small lab groups and with the whole class. When you are ready to work in a group, you can split your workspace into 4 panes. The top right pane is yours, and your partners are in the others. You can borrow and update content from your partners' workspaces just as you can from any content you bring up from tabs on the left hand Resources.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "lJEIgDWNRXk02nZi",
+                    "title": "CLUE Interfaces for Sharing",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/share.jpg"
+                    }
+                  },
+                  {
+                    "id": "_rU9plvleix0FlBS",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Try Group Sharing</h3>",
+                        "<p><em>First, check that all the members of your group have the same group number at the top right of your screen. </em></p>",
+                        "<p>Talk about robots and bionic limbs with your group.  What do you know about bionics? </p>",
+                        "<p>Take some notes on your discussion in your Workspace. </p>",
+                        "<p>Take notes and make a list of what your group knows. Insert some images in your workspace relating to motion and robotics. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_aucv3h3VrZ_VNPK",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>When ready, share with the group</strong></p>",
+                        "<p>Use the group controls in the upper right of your workspace so that you can see and share each others&#x27; notes. See the image below for how to do that. Take a look at the list of terms in your groupmates&#x27; windows. You can drag tiles from their windows into yours, or just get ideas from what they have done.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_aucv3h3VrZ_VasfaNPK",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Making new workspaces</h3>",
+                        "<p>At the top of the Workspace window you will see a File menu. Using this menu you can make copies of your existing workspace to try different things, or you can start a whole new one. This is very useful if you are trying different versions of a program to solve a problem.</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "eGVyLGBx1SzYZJYh",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Discuss the research questions</strong></p>",
+                        "<p>Work with the members of your group to explore each other&#x27;s questions and ideas. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "sA84OvZZVt-8LVM3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Publish your work to the class</strong></p>",
+                        "<p>You can choose one member of your group to publish a summary of the group&#x27;s work, or you may each publish.  When you publish, your workspace will appear under the pink &quot;Extensions&quot; tab above. Student work will go under the Class Models and Data tab. Teacher work will go under the Custom Lessons tab.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "lJEIgDWNRasdfasXk02nZi",
+                    "title": "CLUE Publishing to Extensions Tab",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/share.jpg"
+                    }
+                  },
+                  {
+                    "id": "sA84ZVt-8VM3",
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Teacher Features</h3>",
+                        "<p>If you are looking at this Lesson as a teacher, you are seeing this green box with a 'solution' in it. You can choose to switch the solutions on and off so you can see Lessons as students do. You will also see additional tabs in your Resources - one for Teacher Guide and one for Student Worksheets. </p>",
+                        "<p>The Teacher Guide will have a variety of resources in it - materials sheets, instructions for running class activities, links to outside web sites, videos, etc. As with all other content in the Resources tabs, you can drag tiles into your Workspace so they can be modified or published to distribute to the class. This is particularly handy if you want to add an additional lesson or page of solutions or instructions to any of the existing Lessons. You can use the same publishing tool available to your students. Teacher published work will appear in the Custom Lessons tab under 'Extensions'. </p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "description": "Investigation 1",
       "ordinal": 1,
-      "title": "Biology and Motion",
+      "title": "Module 1: Motion",
       "problems": [
         {
           "description": "Lesson 1.1",
           "ordinal": 1,
-          "title": "Lesson 1.1 How do Bionic Arms Work?",
+          "title": "Lesson 1.1 - What is a bionic arm?",
           "subtitle": "",
           "disabled": [],
           "sections": 
@@ -303,12 +481,14 @@
                       "text": [
                         "<h2>Programs to Express Closing a Circuit</h2>",
                         "<p>We can use a program to turn lights on and off in the same way you just did with the Energy Sticks.</p>",
-                        "Here is a very simple program. Recreate this program with the program tool in your workspace. Then add some logic to make the lightbulb only turn on when the signal amplitude is over 0.5.",
+                        "Here is a very simple program. Recreate this program with the Dataflow program tool in your workspace. Start by pressing the tile button with two blocks and a connector line. Then try adding some logic to make the lightbulb only turn on when the signal amplitude is over 0.5.",
                         "<p>Programs are one way to express models of actual circuits."
                       ]
                     }
                   },
                   {
+                    "id": "abc050820221151",
+                    "title": "A Dataflow program tile",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/signalProgram.jpg"
@@ -404,8 +584,8 @@
         {
           "description": "Lesson 1.2",
           "ordinal": 2,
-          "title": "Lesson 1.2A What body systems contribute to limb movement",
-          "subtitle": "Part 1",
+          "title": "Lesson 1.2 - What controls our movement? (Part 1)",
+          "subtitle": "",
           "disabled": [],
           "sections": 
           [
@@ -642,8 +822,8 @@
         {
           "description": "Lesson 1.3",
           "ordinal": 3,
-          "title": "Lesson 1.2B What body systems contribute to limb movement",
-          "subtitle": "Part 2",
+          "title": "Lesson 1.3 - What controls our movement? (Part 2)",
+          "subtitle": "",
           "disabled": [],
           "sections": 
           [
@@ -1799,7 +1979,7 @@
         {
           "description": "Lesson 1.4",
           "ordinal": 4,
-          "title": "Lesson 1.4 Identify and Measure Muscle Activity",
+          "title": "Lesson 1.4 -  How do muscles work?",
           "subtitle": "Electromyography",
           "disabled": [],
           "sections": 
@@ -2150,7 +2330,7 @@
         {
           "description": "Lesson 1.5",
           "ordinal": 5,
-          "title": "Lesson 1.5 Control a Robot Claw with EMG Signals",
+          "title": "Lesson 1.5 - How to control a robotic gripper",
           "subtitle": "",
           "disabled": [],
           "sections": 
@@ -2160,14 +2340,14 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "NSxSrK1mHn_EtS5E",
+                    "id": "K1mHn_EtS5E2022",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "How can EMG signals be used to control a robotic claw?",
+                        "How can EMG signals be used to control a robotic gripper?",
                         "<h2>Objective</h2>",
-                        "<p>During this section, we will explore how EMG signals can be used to control a robotic claw.  For that, you will use electromyography (EMG) in coordination with a robotic claw to model the performance of a bionic arm. </p>"
+                        "<p>During this section, we will explore how EMG signals can be used to control a robotic gripper.  For that, you will use electromyography (EMG) in coordination with a robotic gripper to model the performance of a bionic arm. </p>"
                       ]
                     }
                   },
@@ -2184,10 +2364,10 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Let’s learn how to control a robotic claw with muscle sensors! In this activity, you can choose &#x27;Simulation&#x27; or the Arduino analog input pins with the materials illustrated below to visualize your real-time muscle movements and control a claw with your muscle sensors.  You can also either select a claw simulation or work with the analog claw to observe the real-time changes. </p>",
-                        "<p><strong>Setting up the Analog Muscle Sensors &amp; Claw:</strong></p>",
+                        "<p>Let’s learn how to control a robotic gripper with muscle sensors! In this activity, you can choose &#x27;Simulation&#x27; or the Arduino analog input pins with the materials illustrated below to visualize your real-time muscle movements and control a gripper with your muscle sensors.  You can also either select a gripper simulation or work with the analog gripper to observe the real-time changes. </p>",
+                        "<p><strong>Setting up the Analog Muscle Sensors &amp; Gripper:</strong></p>",
                         "<p><strong>Materials: </strong></p>",
-                        "<p>You will need all the materials from the previous activity (image on the left) with the following additions (image on the right): (1) A robotic claw; (2) An Arduino USB cable (blue cable)</p>"
+                        "<p>You will need all the materials from the previous activity (image on the left) with the following additions (image on the right): (1) A robotic gripper; (2) An Arduino USB cable (blue cable)</p>"
                       ]
                     }
                   },
@@ -2229,7 +2409,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>2. Connect the claw to the Muscle SpikerShield (the yellow board). Note that there is a cable coming out of the claw with three wires (yellow, red, and black). Look closely at the Muscle SpikerShield (the yellow board on top of the Arduino). Next to the gray-ish box, there are three pins labeled “Y” (for yellow), “R” (red), and “B” (black). Gently connect the claw to the Muscle SpikerShield as shown here:</p>"
+                        "<p>2. Connect the gripper to the Muscle SpikerShield (the yellow board). Note that there is a cable coming out of the gripper with three wires (yellow, red, and black). Look closely at the Muscle SpikerShield (the yellow board on top of the Arduino). Next to the gray-ish box, there are three pins labeled “Y” (for yellow), “R” (red), and “B” (black). Gently connect the gripper to the Muscle SpikerShield as shown here:</p>"
                       ]
                     }
                   },
@@ -2246,7 +2426,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>3. Power up the claw, connect a 9V battery to the Muscle SpikerShield (the yellow board):</p>"
+                        "<p>3. Power up the gripper, connect a 9V battery to the Muscle SpikerShield (the yellow board):</p>"
                       ]
                     }
                   },
@@ -2324,7 +2504,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Place the code blocks to control the claw/gripper with the muscle sensors. <em>IDO/TUGCE - do you want to change this to be documentation about Dataflow programming? Not sure you still want to be using the Backyard brains app at all.</em></p>"
+                        "<p>Place the code blocks to control the gripper/gripper with the muscle sensors. <em>IDO/TUGCE - do you want to change this to be documentation about Dataflow programming? Not sure you still want to be using the Backyard brains app at all.</em></p>"
                       ]
                     }
                   },
@@ -2360,8 +2540,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>TIP: </strong>While interacting with the claw, pay close attention to how you could make it work better. Some options to consider are: </p>",
-                        "<ul><li>Changing the locations of the electrodes. For example, students may have more success controlling the claw by placing the EMG electrodes on the fleshy part below their pinky and the reference electrode by their thumb. </li><li>Changing the sensitivity of the device by pressing the gray button the Muscle SpikerShield. </li><li>Adding, editing the parameters on the app</li><li>Grasping objects of different sizes/weights. </li></ul>"
+                        "<p><strong>TIP: </strong>While interacting with the gripper, pay close attention to how you could make it work better. Some options to consider are: </p>",
+                        "<ul><li>Changing the locations of the electrodes. For example, students may have more success controlling the gripper by placing the EMG electrodes on the fleshy part below their pinky and the reference electrode by their thumb. </li><li>Changing the sensitivity of the device by pressing the gray button the Muscle SpikerShield. </li><li>Adding, editing the parameters on the app</li><li>Grasping objects of different sizes/weights. </li></ul>"
                       ]
                     }
                   }
@@ -2379,7 +2559,7 @@
                       "format": "html",
                       "text": [
                         "<p>Now, it is time to reflect on the activity as a group! Add tiles in your workspace to:</p>",
-                        "<ul><li>Evaluate the strengths and weaknesses of the EMG-controlled claw and summarize your ideas in a table format.</li><li>Reflect on how the design of the claw can be improved and please sketch out your ideas. </li><li>Reflecting back on the video with the young woman at the opening of the unit, discuss how a device like the claw can serve her in her day-to-day life. </li></ul>"
+                        "<ul><li>Evaluate the strengths and weaknesses of the EMG-controlled gripper and summarize your ideas in a table format.</li><li>Reflect on how the design of the gripper can be improved and please sketch out your ideas. </li><li>Reflecting back on the video with the young woman at the opening of the unit, discuss how a device like the gripper can serve her in her day-to-day life. </li></ul>"
                       ]
                     }
                   },
@@ -2411,12 +2591,19 @@
               }
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "description": "Investigation 2",
+      "ordinal": 2,
+      "title": "Module 2: Touch",
+      "problems": [
         {
-          "description": "Lesson 1.6 - Sample",
-          "ordinal": 6,
-          "title": "Technology Assistance for Paralysis",
-          "subtitle": "EMG Signals",
+          "description": "Lesson 2.1",
+          "ordinal": 1,
+          "title": "Lesson 2.1 - How does touch impact movement?",
+          "subtitle": "",
           "disabled": [],
           "sections": 
           [
@@ -2425,39 +2612,87 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "zy34543woT6wp_c7IxjDmS",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>Objective</h2>",
-                        "<p>During this section, we will explore how EMG signals can be used to control a robotic claw.  For that, you will use electromyography (EMG) in coordination with a robotic claw to model the performance of a bionic arm.</p>" 
+                        "<h3>Lesson 2.1 Overview</h3>",
+                        "<p>Today let's talk about how sensory input impacts our ability to move and interact with objects.</p>",
+                        "<p>Materials:  \nFor every two students:<ul><li>A 30 cm ruler</li><li>Winter gloves</li></ul></p>",
+                        "<h3>Lesson Resources</strong></h3>",
+                        "<p>Watch this video <a href='https://www.pbs.org/newshour/show/how-sensors-rewiring-nerves-could-help-prosthetics-feel-and-function-like-real-limbs'>PBS News Hour story</a> about how technology could be used to improve the function of prosthetic limbs.</p>",
+                        "<p>Think about the EMG-controlled grabber we built in the previous lesson and discuss some challenges you might encounter when trying to hold an egg with the grabber. How would you improve the design of the system to overcome these challenges? Document some ideas in your workspace. You can use images, drawings, text or programs to record your ideas.</p>"
                       ]
                     }
-                  },
+                  } 
+                ]
+              }
+            },
+            {
+              "type": "labWork",
+              "content": {
+                "tiles": [
                   {
+                    "id": "BfEcsBHvG1mVwV4H",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>Group Brainstorming Activity</h2>",
-                        "<p>Whenever you explore a scientific topic, it's a good idea to start by identifying what questions you want to answer. With your group, generate a list of questions about the biology of paralysis and the kinds of technology you think would be beneficial. You can work as a group by sharing your documents using the share button and turning on the group view. When you are ready, publish your questions to the class.</p>",
-                        "Make a new text box by clicking the 'A' tool in your workspace on the right. You can drag text blocks and images from the lesson into your page, and also from your group-mates' workspaces. You can drag images on your computer onto your workspace too."
+                        "<h3>REACTION TIME AND TOUCH</h3>",
+                        "<p>In Lesson 1.2 you measured reaction time using a ruler, comparing your dominant and non-dominant hands.  Today we will conduct a similar experiment to investigate how tactile information impacts reaction time (in other words, if we can feel the ruler with our fingertips, how does this impacts how fast we are at catching it?. </p><p>Discuss with your group how to modify the reaction time experiment to answer this new research question. Design a new data recording table, similar to the one in Lesson 1.2, that allows you to record reaction time with and without a winter glove.</p>",
+                        "<p>Conduct your experiment as designed and record your findings here. Assign one member of the group to collect all the data from the groupmates and publish it to the class.</p>"
                       ]
                     }
-                  },
+                  }
+                ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
                   {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/headerHelp.jpg"
-                    }
-                  },
-                  {
-                    "display": "teacher",
+                    "id": "BfEsq345csBHvG1mVwV4H",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>In their CLUE Workspace journals, students should reflect critically about their readings and the questions they have brainstormed. Have students share what they observed during each type of stimulation. Then, ask students what the spike readings mean. Have students develop a quick sketch or description of how our brain communicates with our body.  This will transition the class into the next section on neuron anatomy and action potentials.</p>"
+                        "<p>With your group, discuss how prosthetic arms can be improved by incorporating sensory information (similar to the prosthetic leg example from the video). Sketch your ideas and consider how the motor command from the brain interacts with tactile information from objects.</p>",
+                        "<h3>KWL JOURNALS</h3>",
+                        "<p>Using your KWL journal, add new rows to the table to add to what you know, wonder, and learned about the role of tactile information in movement. </p>"
+                      ]
+                    }
+                  }
+
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Lesson 2.2",
+          "ordinal": 2,
+          "title": "Lesson 2.2 - How do we perceive touch?",
+          "subtitle": "",
+          "disabled": [],
+          "sections": 
+          [
+            {
+              "type": "intro",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "abc070820222018",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>In the last lesson we discussed how sensory information impacts movement?. Today we will explore how the nervous system processes sensory (and more specifically <em>tactile</em>) information. We'll speculate together on what problems could arise in this process.</p>",
+                        "<p>In today’s activity, you and your group will measure touch sensitivity across different parts of your body to create a model of your sense of touch. You will use a web site called Brainmapper.org to make this model called a “homunculus”. The model will help us understand how the brain processes touch.</p>",
+                        "<h3>Lesson Resources</strong></h3>",
+                        "<p>Read the information on the Brainmapper website about the science of brain receptor density to each part of your body.</p>",
+                        "<p><a href='https://brainmapper.org/'>https://brainmapper.org/</a></p>"
                       ]
                     }
                   }
@@ -2469,40 +2704,55 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "BfEcsB20022H",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Work with your group to find the signal strength and duration of axon signals. You might wish to organize your data in a table like the one below.</p>"
-
+                        "<p>Follow the instructions below, and enter measurements into <a href='https://brainmapper.org/'>https://brainmapper.org/</a>(Experiment tab → Enter the Results).</p>"
                       ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Table",
-                      "name": "Brain Axon Signals",
-                      "columns": [
-                        {"name":"Time (ns)","values":[0.1, 0.2, 0.3, 0.4]},
-                        {"name":"Signal","values":[0.1, 0.2, 1.6, 1.8]}
-                      ]
-                    }
-                  },
-                  {
+                    "id": "o3JbOhrMcfwYJdoT",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>Mimicing Axons</h2>",
-                        "<p>We can turn a signal on and off just like an axon does using a program. We will make programs using blocks that are connected from their outputs to their inputs.</p>",
-                        "Here is a very simple program. Recreate this program with the program tool in your workspace. Then add some logic to make the lightbulb only turn on when the signal amplitude is over 0.5."
+                        "<h3>Homunculus mapping</strong></h3>",
+                        "<p>Decide who is going to be the experimenter and who will be the test subject (you should take turns such that all team members will be a test subject once). </p>",
+                        "<ol><li>The test subject should close their eyes.</li><li>The experimenter should gently press the caliper’s jaws against the skin of the test subject, and ask them if they feel one point or two points of contact (the two points need to touch the skin at the same time).</li><li>Set the caliper’s jaw at a distance of 60mm (6cm) and keep testing smaller and smaller distances (30mm, 15mm, 7.5mm, 3.75mm) until the subject indicates that they feel one point only.</li><li>Test the forehead, back, arm, palm of the hand, leg, and feet as shown in the pictures in any order.</li><li>Record the first distance that the subject felt as one point (or the last distance that was tested) in the table - drag the table into your Workspace so you can fill it out for each person you test.</li><li>Enter these numbers at https://brainmapper.org/experiment/ and take a screenshot of the resulting homunculus. You can then upload your homunculus into your Workspace by creating an image tile and dragging or uploading the image from your desktop into the tile. </li></ol>"
                       ]
                     }
                   },
                   {
+                    "id": "3_tTOxXwRu6JojZJ",
+                    "title": "Caliper Placement for Homunculus Lab",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/neural-engineering/images/signalProgram.jpg"
+                      "url": "curriculum/neural-engineering/images/caliperPlacement.jpg"
+                    }
+                  },
+                  {
+                    "id": "yEXStfTzmTRi0zZ_",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Enter the shortest distance the subject felt two distinct points.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "NBq6S5SsVOBfimE6",
+                    "content": {
+                      "type": "Table",
+                      "name": "Homunculus Readings",
+                      "columns": [
+                        {"name":"Body Part","values":["Forehead","Back","Arm","Palm of Hand","Leg","Foot"]},
+                        {"name":"Subject 1","values":["","","","","",""]},
+                        {"name":"Subject 2","values":["","","","","",""]}
+                      ]
                     }
                   }
                 ]
@@ -2513,37 +2763,331 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "BfEcsB20022H",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Discuss with your group to find the signal strength and duration of axon signals. You might wish to organize your data in a table like the one below. </p>"
+                        "<p>Discuss the following questions with your group and record your answers in your workspace. Assign one group menber to collect the answers and publish them to the class:<ol><li> What is the most/least sensitive body part?</li><li> Why do different parts of the body have different sensitivity to touch?</li><li> Were there differences between students in their touch sensitivity? What can explain these differences? </li></ol></p>",
+                        "<p>Read this blurb on the neuroscience of touch. Identify which body parts are involved in processing touch information and make an annotated model that shows how they are connected to each other. Assign members of your group to research the following parts of the body and how they process touch:<ul><li>Touch receptors</li><li>Sensory nerves</li><li>Spinal cord</li><li>Thalamus</li><li>Somatosensory cortex.</li></ul></p><p><a href='https://https://www.brainfacts.org/'>Brainfacts.org</a> is a good source of information and has a <a href='https://www.brainfacts.org/3d-brain#intro=true'>3D model of the brain</a>.</p><p>Extension activity: Compare your model to the one created in Lesson 1.3 (control of movement).</p>",
+                        "<p>Using your KWL journal in the My Work > KWL Journal tab, add a new row to your table that describes what you know, wonder, and learned about the role of tactile information in movement. </p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Lesson 2.3",
+          "ordinal": 3,
+          "title": "Lesson 2.3 - Can robots sense objects?",
+          "subtitle": "",
+          "disabled": [],
+          "sections": 
+          [
+            {
+              "type": "intro",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "iEgQChsdHufMYUbi",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Can you grab an egg (with the gripper) without cracking it?</p>",
+                        "<p>Materials:</p>",
+                        "<ul><li>A gripper kit</li><li>Two gripper “mittens”, one will be a regular plastic attachment, the other will have a pressure sensor on it (see picture →)</li><li>10 kΩ ohm resistor</li><li>1 breadboard</li><li>2 segments of wire</li><li>A plastic egg or a drained egg</li><p></p></ul>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "labWork",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "s3n37sHI6K6rpa9O",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Assembly: </p>",
+                        "<p>1. Set up your gripper like normal. If you are stuck, reference the gripper directions in Lesson 1.5.  Attach the “pressure sensor mittens” to each side of the gripper,  like in the picture.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "R8jKw96R4bhk_fvp",
+                    "title": "Pressure sensor mounted on claw",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/mittens.jpg",
+                      "filename": "curriculum/neural-engineering/images/mittens.jpg"
+                    }
+                  },
+                  {
+                    "id": "5uBdFgEMg1kClzar",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>2. Grab the materials listed above and lay them out.</p>",
+                        "<p>3. Find the tiny breadboard.</p>",
+                        "<p>4. Place the 10K Ω (Brown - Black - Orange color bands on the resistor) resistor across the center of the board:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "XEUEgeONkNlgB_1-",
+                    "title": "Resistor Placed on Breadboard",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/breadboard.jpg",
+                      "filename": "curriculum/neural-engineering/images/breadboard.jpg"
+                    }
+                  },
+                  {
+                    "id": "vdWs-AJEEA-c7oqP",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>5. Take one of the wires coming out of the pressure sensor and plug it to the <strong>5V socket</strong> in the Arduino. (4th space.) Note: The wires coming from the pressure sensor may need the wire ends to be twisted a bit to fit well into the breadboard and Arduino.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "KrEizkJp-K4Dn3S1",
+                    "title": "Wire to Arduino",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/wireToArduino.jpg",
+                      "filename": "curriculum/neural-engineering/images/wireToArduino.jpg"
+                    }
+                  },
+                  {
+                    "id": "7HYJ1kGyLt9CaYnm",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>6. Take the other wire that is coming out of the pressure sensor and plug it to the left side of the 10K Ω resistor in the same row as the resistor:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "-Gzyv9sIz9rJOvHj",
+                    "title": "Wire to Breadboard",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/wireToBreadboard.jpg",
+                      "filename": "curriculum/neural-engineering/images/wireToBreadboard.jpg"
+                    }
+                  },
+                  {
+                    "id": "cJPRVe8rhvLo8KgJ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>7. Take a segment of wire. Plug one end to the <strong>ground socket (either the second or third space) </strong>of the Arduino and the other one to the opposite side as the pressure wire of the  of the 10K Ω resistor. This completes the circuit, allowing current to flow through the pressure sensor and the 10 kΩ resistor.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Kl_oPnn9T-4rjvRB",
+                    "title": "Ground socket wire",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/groundWire.jpg",
+                      "filename": "curriculum/neural-engineering/images/groundWire.jpg"
+                    }
+                  },
+                  {
+                    "id": "yoLd9jIUYJ7IZK3n",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>8. Take another segment of wire. Plug one end to <strong>socket A1</strong> in the Arduino. The other end should be connected to the same side as the pressure wire of the 10 K Ω resistor. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "MzfhGbECHkibVMZw",
+                    "title": "Socket A1 wire",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/socket.jpg",
+                      "filename": "curriculum/neural-engineering/images/socket.jpg"
+                    }
+                  },
+                  {
+                    "id": "LREbXfHuzyMc-DS1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>9. CONGRATULATIONS! You’ve just built a force sensing circuit. This circuit works like this: as force is applied to the pressure sensor on the gripper mitten, more electrical current flows through the circuit. As more current flows through the 10 kΏ resistor, the voltage across the resistor increases. We will measure the voltage changes using the Arduino (this is why the red wire from the circuit is connected to A1.)</p>",
+                        "<p>10. Connect your Arduino shield to your computer using the same cabling from Lesson 1.5. Create a Dataflow programming tile in your Workspace. You can also copy the one shown here by dragging it into your Workspace. Open up two sensor blocks and select EMG in one and Surface Pressure in the other. You will need to choose &quot;connect for live ...&quot; from one sensor block, and use the lightning bolt connection button in the left corner of the Dataflow screen to connect the program to the sensor input.  Once you do, you should begin to see readings show up in the block output fields. Is there a response on the screen? If not, check your circuit. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "S2lB-jJORPKlBK7b",
+                    "content": {
+                      "type": "Dataflow",
+                      "programDataRate": 1000,
+                      "programZoom": {
+                        "dx": 0,
+                        "dy": 0,
+                        "scale": 1.114758431587606
+                      },
+                      "program": {
+                      "values": {"1": {"currentValues": {}}, "2": {"currentValues": {}}},
+                      "id": "dataflow@0.1.0",
+                      "nodes": {
+                        "1": {
+                          "id": 1,
+                          "name": "Sensor",
+                          "x": 46.69921875,
+                          "y": 213.1171875,
+                          "inputs": {},
+                          "outputs": {"num": {"connections": {}}},
+                          "data": {
+                            "plot": false,
+                            "type": "fsr-reading",
+                            "sensor": "none",
+                            "virtual": false,
+                            "inputKeys": []
+                          }
+                        },
+                        "2": {
+                          "id": 2,
+                          "name": "Sensor",
+                          "x": 48.0703125,
+                          "y": 5.96484375,
+                          "inputs": {},
+                          "outputs": {"num": {"connections": {}}},
+                          "data": {
+                            "plot": false,
+                            "type": "emg-reading",
+                            "sensor": "none",
+                            "virtual": false,
+                            "inputKeys": []
+                          }
+                        }
+                      }
+                    }
+                    }
+                  },
+                  {
+                    "id": "3AdRSMmT0ceo5c9T",
+                    "content": {
+                      "type": "Dataflow",
+                      "programDataRate": 1000,
+                      "programZoom": {
+                        "dx": 0.89453125,
+                        "dy": -0.30078125,
+                        "scale": 0.1
+                      },
+                      "program": {
+                      "values": {"1": {"currentValues": {}}, "2": {"currentValues": {}}},
+                      "id": "dataflow@0.1.0",
+                      "nodes": {
+                        "1": {
+                          "id": 1,
+                          "name": "Sensor",
+                          "x": 46.69921875,
+                          "y": 213.1171875,
+                          "inputs": {},
+                          "outputs": {"num": {"connections": {}}},
+                          "data": {
+                            "plot": false,
+                            "type": "fsr-reading",
+                            "sensor": "none",
+                            "virtual": false,
+                            "inputKeys": []
+                          }
+                        },
+                        "2": {
+                          "id": 2,
+                          "name": "Sensor",
+                          "x": 48.0703125,
+                          "y": 5.96484375,
+                          "inputs": {},
+                          "outputs": {"num": {"connections": {}}},
+                          "data": {
+                            "plot": false,
+                            "type": "emg-reading",
+                            "sensor": "none",
+                            "virtual": false,
+                            "inputKeys": []
+                          }
+                        }
+                      }
+                    }
+                    }
+                  },
+                  {
+                    "id": "PydgYugDbZPtaiTX",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Next, try to use the gripper to pick up an object.  This Arduino code does two main things: (1) when a muscle is contracted, the signal is detected and triggers the claw to close. (2) When something presses against the force sensor, the voltage increase across the 10 kΏ resistor is detected and tells the claw to stop gripping. This is meant to prevent the claw from closing too strongly on the target (egg) and damaging it.</p>",
+                        "<p>13. Once you’ve uploaded the code, make sure that you can cause the gripper to close by clenching your muscles.</p>",
+                        "<p>14. To test the force sensor, try pinching the sensor and contracting your muscle. Does the gripper  move? Why or why not?</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
 
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Drag the table below into your learning log, and fill it in for this experiment.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Table",
-                      "name": "Record what you know, wonder, and learn about the topic.",
-                      "columns": [
-                        {"name":"Date"},
-                        {"name":"Today's Topic"},
-                        {"name":"Know"},
-                        {"name":"Wonder"},
-                        {"name":"Learn"}
-                      ]
-                    }
-                  }                  
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Lesson 2.4",
+          "ordinal": 4,
+          "title": "Lesson 2.4 - Putting it all together",
+          "subtitle": "",
+          "disabled": [],
+          "sections": 
+          [
+            {
+              "type": "intro",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            },
+            {
+              "type": "labWork",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
+
                 ]
               }
             }

@@ -44,6 +44,7 @@ export class DataflowProgramToolbar extends React.Component<IProps> {
         break;
       case "Math":
       case "Logic":
+      case "Control":
         nodeIcons.push(<div className="icon-node left top" key={"icon-node-l-t" + i}/>);
         nodeIcons.push(<div className="icon-node right mid" key={"icon-node-r-m" + i}/>);
         nodeIcons.push(<div className="icon-node left bottom" key={"icon-node-l-b" + i}/>);
@@ -59,13 +60,33 @@ export class DataflowProgramToolbar extends React.Component<IProps> {
         nodeIcons.push(<div className="icon-node left mid" key={"icon-node-l-m" + i}/>);
         break;
     }
+    const nodeIcon = (
+      <div className={iconClass}>
+        {nodeIcons}
+      </div>
+    );
     return (
       <button
         disabled={nodeType === "Data Storage" && this.props.isDataStorageDisabled || this.props.disabled}
         key={i} title={`Add ${nodeType} Block`}
         onClick={handleAddNodeButtonClick}
+        draggable="true"
+        onDragStart={event => {
+          event.dataTransfer.setData("text/plain", nodeType);
+          // const image = new Image();
+          // image.src = "../../assets/lightbulb-on.png";
+          // event.dataTransfer.setDragImage(image, 10, 10);
+          event.dataTransfer.dropEffect = "copy";
+          console.log("Start drag");
+        }}
+        onDrag={event => {
+          console.log("Dragging");
+        }}
+        onDragEnd={event => {
+          console.log("End drag");
+        }}
       >
-        <div className={iconClass}>{nodeIcons}</div>
+        {nodeIcon}
         <div className="label">{nodeType}</div>
       </button>
     );

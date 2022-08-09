@@ -56,9 +56,15 @@ export const NavTabSectionModel =
     showStarsForUser(user: UserModelType) {
       return user.type && (self.showStars.indexOf(user.type) !== -1);
     },
-    showDeleteForUser(user: UserModelType) {
-      // allow teachers to delete supports
-      return (user.type === "teacher") && (self.type === ENavTabSectionType.kTeacherSupports);
+    showDeleteForUser(user: UserModelType, userDocument?: any) { //DocumentModelType is a circular logic?
+      const userOwnsDocument = (userDocument && (user.id === userDocument || user.id === userDocument.uid));
+      // allow users to delete published document
+      const deletableTypes = [ENavTabSectionType.kPublishedPersonalDocuments,
+        ENavTabSectionType.kPublishedProblemDocuments,
+        ENavTabSectionType.kPublishedLearningLogs,
+        ENavTabSectionType.kTeacherSupports,
+       ];
+      return (deletableTypes.includes(self.type) && userOwnsDocument);
     },
   }));
 export type NavTabSectionSpec = SnapshotIn<typeof NavTabSectionModel>;
