@@ -2,11 +2,13 @@ import { cloneDeep } from "lodash";
 import { getParent, getSnapshot, getType, 
   Instance, SnapshotIn, SnapshotOut, types, ISerializedActionCall } from "mobx-state-tree";
 import { isPlaceholderContent } from "./placeholder/placeholder-content";
-import { ITileExportOptions } from "./tool-content-info";
+import { getToolContentInfoById, ITileExportOptions } from "./tool-content-info";
 import { findMetadata, ToolContentModelType, ToolContentUnion } from "./tool-types";
+import { DocumentContentModelType } from "../document/document-content";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 import { StringBuilder } from "../../utilities/string-builder";
+import { getParentWithTypeName } from "../../utilities/mst-utils";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -108,11 +110,28 @@ export const ToolTileModel = types
     }
   }))
   .actions(self => ({
+    setTitle(title: string) {
+      self.title = title;
+    }
+  }))
+  .actions(self => ({
     afterCreate() {
       const metadata = findMetadata(self.content.type, self.id, self.title);
       const content = self.content;
       if (metadata && content.doPostCreate) {
         content.doPostCreate(metadata);
+      }
+    },
+    afterAttach() {
+      if (!self.title) {
+        if (self.content?.type === "Image") {
+          const documentContent = getParentWithTypeName(self, "DocumentContent") as DocumentContentModelType;
+          const titleBase = getToolContentInfoById(self.content.type)?.titleBase || "Tile";
+          const getTitle = (tileId: string) => (documentContent.getTileContent(tileId) as any)?.title;
+          const newTitle = documentContent.getUniqueTitle(self.content.type, titleBase, getTitle);
+          // console.log(`new title ${newTitle}`);
+          self.setTitle(newTitle);
+        }
       }
     },
     onTileAction(call: ISerializedActionCall) {
@@ -124,9 +143,6 @@ export const ToolTileModel = types
     setDisabledFeatures(disabled: string[]) {
       const metadata: any = findMetadata(self.content.type, self.id);
       metadata && metadata.setDisabledFeatures && metadata.setDisabledFeatures(disabled);
-    },
-    setTitle(title: string) {
-      self.title = title;
     }
   }));
 
