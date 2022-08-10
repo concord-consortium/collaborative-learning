@@ -5,6 +5,7 @@ import { TreeManager } from "./tree-manager";
 
 import { HistoryEntry, HistoryOperation } from "./history";
 import { nanoid } from "nanoid";
+import { DEBUG_UNDO } from "../../lib/debug";
 
 export interface IUndoManager {
   undoLevels : number; 
@@ -123,6 +124,10 @@ export const UndoStore = types
       // HistoryEntry has already been added then we don't modify it,
       // but we do always reset the undoIdx to the end of the history.
       
+      if (DEBUG_UNDO) {
+        // eslint-disable-next-line no-console
+        console.log(`adding to undo history`, (entry as any).toJSON()/*.action*/);
+      }
       const existingEntry = self.findHistoryEntry(entry.id);
       if (!existingEntry) {
         // This is a new user action, so if they had undone some amount already
