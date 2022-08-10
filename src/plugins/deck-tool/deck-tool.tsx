@@ -28,20 +28,11 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     })
   },[])
 
-  const handleDescriptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    content.setDescription(event.target.value);
-  };
-
   return (
     <div className="deck-tool">
       <input
         value={theTitle()}
         onChange={e => content.setTitle(e.target.value)}
-      />
-      <textarea
-        value={content.deckDescription}
-        onChange={handleDescriptionChange}
-        style={{border: "1px solid silver", width: "200px", height: "20px", margin: "10px"}}
       />
     </div>
   );
