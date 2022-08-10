@@ -28,7 +28,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     })
   },[])
 
-  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleDescriptionChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     content.setDescription(event.target.value);
   };
 
@@ -40,8 +40,8 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
       />
       <textarea
         value={content.deckDescription}
-        onChange={handleChange}
-        style={{border: "1px solid silver"}}
+        onChange={handleDescriptionChange}
+        style={{border: "1px solid silver", width: "200px", height: "20px", margin: "10px"}}
       />
     </div>
   );
