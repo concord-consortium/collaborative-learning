@@ -36,6 +36,16 @@ export const ToolContentUnion = types.union(
 
 We also specify `ToolTileModel`, a general content model which is the base content model used by all tool tiles. This model contains a `content` property of type `ToolContentUnion`. This allows us to access the `content` property of `ToolTileModel` for any tile, cast it to the unique content model for that tile, and then access properties and methods specific to that tile type.
 
+### ToolMetadataModel
+
+Each tile content model can use a metadata model. This is used to store information that is shared across multiple instances of a document. It is also preserved across reloads. 
+
+When a tool is registered it provides a metadata MST "class". When needed the metadata is looked up in a global map from tile id to metadata instance. If a metadata instance is not found, then one is created and added for this tile id. This code is in `tool-types.ts`.
+
+The metadata is provided to the tile content model via a `doPostCreate` action called on the tile content model.
+
+**NOTE**: If the same tile id is used in different documents, they will share the same metadata instance. This is uncommon with user created documents tile ids are random strings. When a document is copied its tile ids are updated to new random strings (**TODO** is this true?). However it can happen with authored content, and there is nothing preventing multiple documents from being stored in the database with duplicate tile ids.
+
 ## ToolTileComponent
 `ToolTileComponent` is a React component that serves as the main container for each tile. Tool tile types are used in `ToolTileComponent` to determine which tool component will be rendered (a tool component is the unique React parent component created for each tool tile type). A tool component for each tool tile type is imported into `ToolTileComponent` and conditionally rendered based on the tool tile type.
 ```typescript

@@ -174,21 +174,6 @@ export const DocumentsModel = types
       self.all.remove(document);
     };
 
-    const update = (document: DocumentModelType) => {
-      if (!self.getDocument(document.key)) {
-        add(document);
-      }
-      else {
-        const i = self.all.findIndex((currDoc) => currDoc.key === document.key);
-        if (i !== -1) {
-          const oldDoc = self.all[i];
-          if (oldDoc && oldDoc.changeCount > document.changeCount) return;
-
-          self.all[i] = document;
-        }
-      }
-    };
-
     /*
      * The required document promises are used to facilitate the creation of required documents
      * while preventing the creation of redundant documents. Depending on the configuration, any
@@ -254,7 +239,6 @@ export const DocumentsModel = types
     return {
       add,
       remove,
-      update,
       addRequiredDocumentPromises,
       resolveRequiredDocumentPromise,
       resolveRequiredDocumentPromiseWithNull,
