@@ -1156,13 +1156,12 @@ export const GeometryContentModel = GeometryBaseContentModel
           return;
         }
 
-        // Link to shared models
+        // Link to shared models when importing legacy content
         const remainingLinks: string[] = [];
         self.links.forEach(tableId => {
           const sharedDataSet = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
           if (sharedDataSet) {
             sharedModelManager.addTileSharedModel(self, sharedDataSet);
-            // console.log(`Attached ${tableId}`);
           } else {
             // If the table doesn't yet have a sharedDataSet, save the id to attach this later
             remainingLinks.push(tableId);

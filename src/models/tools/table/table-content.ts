@@ -1,12 +1,11 @@
 import { Expression, Parser } from "expr-eval";
 import { cloneDeep } from "lodash";
 import { reaction } from "mobx";
-import { addDisposer, Instance, SnapshotIn, SnapshotOut, types, getType } from "mobx-state-tree";
+import { addDisposer, Instance, SnapshotIn, types, getType } from "mobx-state-tree";
 import { ITableChange } from "./table-change";
 import { exportTableContentAsJson } from "./table-export";
 import { convertChangesToSnapshot, convertImportToSnapshot, isTableImportSnapshot,
   convertLegacyDataSet } from "./table-import";
-// import { isLinkableValue, canonicalizeValue } from "./table-model-types";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { ToolMetadataModel, ToolContentModel, toolContentModelHooks } from "../tool-types";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
@@ -14,7 +13,6 @@ import { SharedDataSet, SharedDataSetType } from "../shared-data-set";
 import { SharedModelType } from "../shared-model";
 import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
-// import { getRowLabel, ILinkProperties } from "../table-link-types";
 import { uniqueId } from "../../../utilities/js-utils";
 
 export const kTableToolID = "Table";
