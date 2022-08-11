@@ -1,7 +1,7 @@
-import { action, autorun, makeObservable } from "mobx";
+import { action, autorun, makeObservable, observable } from "mobx";
 import { addDisposer, applySnapshot, getType, isAlive, types, getRoot, 
   isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
-  getSnapshot, addMiddleware,
+  getSnapshot, addMiddleware, getEnv,
   createActionTrackingMiddleware2} from "mobx-state-tree";
 
 describe("mst", () => {
@@ -262,6 +262,110 @@ describe("mst", () => {
     });
   });
 
+  test("getEnv is not observable by itself", () => {
+    let autorunCount = 0;
+    const doSomething = jest.fn();
+
+    const Todo = types.model({
+      name: types.string
+    })
+    .actions(self => ({
+      afterCreate() {
+        addDisposer(self, autorun(() => {
+          autorunCount++;
+          doSomething(getEnv(self).someValue);
+        }));
+      }
+    }));
+
+    const TodoList = types.model({
+      todos: types.array(Todo)
+    })
+    .actions(self => ({
+      addTodo(_todo: Instance<typeof Todo>) {
+        self.todos.push(_todo);
+      }
+    }));
+
+    // We are not passing an environment here so MST creates an
+    // empty object as the environment.
+    const todo = Todo.create({name: "hello"});
+    expect(autorunCount).toBe(1);
+    expect(doSomething).toBeCalledTimes(1);
+    expect(getEnv(todo)).toEqual({});
+
+    // Now we pass an environment with someValue
+    const todoList = TodoList.create({}, {someValue: 1});
+    todoList.addTodo(todo);
+
+    // The environment of the todo has now changed
+    expect(getEnv(todo)).toEqual({someValue: 1});
+
+    return new Promise(resolve => {
+      setTimeout(resolve, 50);
+    })
+    .then(() => {
+      // even though the environment has changed the autorun is not triggered 
+      // a second time
+      expect(autorunCount).toBe(1);
+      expect(doSomething).toBeCalledTimes(1);
+    });
+  });
+
+  test("the value of getEnv can be observable", () => {
+    let autorunCount = 0;
+    const doSomething = jest.fn();
+
+    const Todo = types.model({
+      name: types.string
+    })
+    .actions(self => ({
+      afterCreate() {
+        addDisposer(self, autorun(() => {
+          autorunCount++;
+          doSomething(getEnv(self)?.someValue);
+        }));
+      }
+    }));
+
+    const TodoList = types.model({
+      todos: types.array(Todo)
+    })
+    .actions(self => ({
+      addTodo(_todo: Instance<typeof Todo>) {
+        self.todos.push(_todo);
+      }
+    }));
+
+    // In order to trigger the autorun the environment needs to be an observable
+    // object. In this case we are not creating the todo first, instead it is
+    // created with the TodoList. This way the return value of getEnv(todo) is
+    // always the same object. With this approach mobx is able to record that we
+    // want the someValue property from this object in the autorun, and when that
+    // property is defined the autorun is triggered again.
+    const env = observable({}) as any;
+    const todoList = TodoList.create({
+      todos: [
+        {name: "hello"}
+      ]
+    }, env);
+    const todo = todoList.todos.at(0);
+    expect(autorunCount).toBe(1);
+    expect(doSomething).toBeCalledTimes(1);
+    expect(getEnv(todo)).toBe(env);
+
+    env.someValue = 1;
+
+    expect(getEnv(todo)).toEqual({someValue: 1});
+
+    return new Promise(resolve => {
+      setTimeout(resolve, 50);
+    })
+    .then(() => {
+      expect(autorunCount).toBe(2);
+      expect(doSomething).toBeCalledTimes(2);
+    });
+  });
 
   test("instances can be passed to snapshot methods", () => {
     const Todo = types.model({
