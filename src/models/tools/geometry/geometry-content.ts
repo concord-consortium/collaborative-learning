@@ -1,6 +1,6 @@
 import { castArray, difference, each, size as _size, union } from "lodash";
 import { reaction } from "mobx";
-import { addDisposer, getType, Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
+import { addDisposer, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { Optional } from "utility-types";
 import { SharedDataSet, SharedDataSetType } from "../shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
@@ -148,11 +148,11 @@ export const isGeometryContentReady = async (model: GeometryContentModelType): P
   return !model.bgImage || !!await gImageMap.getImage(model.bgImage.url);
 };
 
-////////// GEOMETRY CONTENT MODEL
 export const GeometryContentModel = GeometryBaseContentModel
   .named("GeometryContent")
   .volatile(self => ({
     metadata: undefined as any as GeometryMetadataModelType,
+    // Used to force linkedDataSets() to update. Hope to remove in the future.
     updateSharedModels: 0
   }))
   .actions(self => ({
@@ -162,13 +162,11 @@ export const GeometryContentModel = GeometryBaseContentModel
   }))
   .preProcessSnapshot(snapshot => {
     const imported = preprocessImportFormat(snapshot);
-    // TODO: handle imported title
-    // const { extras } = imported;
-    // do something with title
     return imported;
   })
   .views(self => ({
     get linkedDataSets(): SharedDataSetType[] {
+      // MobX isn't properly monitoring getTileSharedModels, so we're manually forcing an update to this view here
       // eslint-disable-next-line no-unused-expressions
       self.updateSharedModels;
       const sharedModelManager = self.tileEnv?.sharedModelManager;
@@ -1136,9 +1134,9 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
   }))
   .actions(self => ({
-    // Do we need an after attach for geometry tiles, since they don't require a shared model?
     afterAttach() {
-      // Monitor our parents and update our shared model when we have a document parent
+      // This reaction monitors legacy links and shared data sets, linking to tables as their
+      // sharedDataSets become available.
       addDisposer(self, reaction(() => {
         const sharedModelManager: ISharedModelManager | undefined = self.tileEnv?.sharedModelManager;
 
@@ -1146,11 +1144,10 @@ export const GeometryContentModel = GeometryBaseContentModel
           ? sharedModelManager.getSharedModelsByType("SharedDataSet")
           : [];
 
-        return { sharedModelManager, sharedDataSets, links: self.links /*, sharedDataSet, tileSharedModels*/ };
+        return { sharedModelManager, sharedDataSets, links: self.links };
       },
       // reaction/effect
-      ({sharedModelManager, sharedDataSets, links /*, sharedDataSet, tileSharedModels*/}) => {
-        // console.log('Trying to rehydrate links');
+      ({ sharedModelManager, sharedDataSets, links }) => {
         if (!sharedModelManager?.isReady) {
           // We aren't added to a document yet so we can't do anything yet
           return;
