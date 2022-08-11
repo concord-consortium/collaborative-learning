@@ -180,6 +180,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
+          showRecordUI={false}
         />}
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar

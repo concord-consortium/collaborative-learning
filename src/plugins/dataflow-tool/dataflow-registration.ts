@@ -8,7 +8,7 @@ import { ToolMetadataModel } from "../../../src/models/tools/tool-types";
 
 registerToolContentInfo({
   id: kDataflowToolID,
-  titleBase: "Dataflow",
+  titleBase: "Program",
   modelClass: DataflowContentModel,
   metadataClass: ToolMetadataModel,
   defaultHeight: kDataflowDefaultHeight,
