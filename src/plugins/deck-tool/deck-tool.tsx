@@ -19,9 +19,9 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
       const title = onRequestUniqueTitle(id);
       title && content.setTitle(title);
     } else {
-      return content.metadata.title
+      return content.metadata.title;
     }
-  }
+  };
 
   useEffect(() => {
     onRegisterToolApi({ getTitle: () => theTitle() });

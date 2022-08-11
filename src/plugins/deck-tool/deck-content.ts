@@ -19,7 +19,7 @@ export const DeckContentModel = ToolContentModel
   }))
   .views(self => ({
     get title() {
-      return self.metadata.title
+      return self.metadata.title;
     },
     get isUserResizable() {
       return true;
