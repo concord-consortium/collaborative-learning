@@ -2,18 +2,18 @@ import { observer } from "mobx-react";
 import React, { useEffect } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { DeckContentModelType } from "./deck-content";
-import { EditableTileTitle } from "../../components/tools/editable-tile-title";
 import { measureText } from "../../components/tools/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../components/constants";
 
 import "./deck-tool.scss";
 
 export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
-  const { onRegisterToolApi, model, scale, readOnly } = props;
+  const { onRegisterToolApi, model } = props;
 
   const content = model.content as DeckContentModelType;
 
   const theTitle = () => {
+    console.log("theTitle(): ", content.metadata.title)
     if (!content.metadata.title){
       const { model: { id }, onRequestUniqueTitle } = props;
       const title = onRequestUniqueTitle(id);
@@ -24,8 +24,9 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   };
 
   useEffect(() => {
+    console.log('effect')
     onRegisterToolApi({ getTitle: () => theTitle() });
-  }, [content.metadata.title]);
+  });
 
   const updateDeckTitle = (event: any) => {
     content.setTitle(event);
@@ -33,17 +34,25 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
 
   return (
     <div className="deck-tool" style={{ border: "3px dashed silver", padding: "6px" }}>
-      <EditableTileTitle
-        key="deck-title"
-        size={{width: null, height: null}}
-        scale={scale}
-        getTitle={theTitle}
-        readOnly={readOnly}
-        measureText={(text) => measureText(text, defaultTileTitleFont)}
-        onEndEdit={updateDeckTitle}
-      />
+        { content.metadata.title }
     </div>
   );
 });
 DeckToolComponent.displayName = "DeckToolComponent";
 
+// {
+//   "id": "Aexkg0vtFreMQOgK",
+//   "title": "Deck 1",
+//   "content": {
+//     "type": "Deck",
+//     "deckDescription": "description..."
+//   }
+// }
+
+// {
+//   "id": "tn3SKQIuJSOGe5hu",
+//   "content": {
+//     "type": "Deck",
+//     "deckDescription": "description..."
+//   }
+// }
