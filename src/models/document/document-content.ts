@@ -366,6 +366,14 @@ export const DocumentContentModel = types
       return builder.build();
     }
   }))
+  .views(self => ({
+    getNewTileTitle(tileContent: ToolContentModelType) {
+      const titleBase = getToolContentInfoById(tileContent.type)?.titleBase || tileContent.type;
+      const getTitle = (tileId: string) => (self.getTileContent(tileId) as any)?.title;
+      const newTitle = self.getUniqueTitle(tileContent.type, titleBase, getTitle);
+      return newTitle;
+    }
+  }))
   .actions(self => ({
     setImportContext(section: string) {
       self.importContextCurrentSection = section;
@@ -479,7 +487,8 @@ export const DocumentContentModel = types
   }))
   .actions(self => ({
     addTileContentInNewRow(content: ToolContentModelType, options?: INewTileOptions): INewRowTile {
-      return self.addTileInNewRow(ToolTileModel.create({ content }), options);
+      const title = self.getNewTileTitle(content);
+      return self.addTileInNewRow(ToolTileModel.create({ title, content }), options);
     },
     addTileSnapshotInNewRow(snapshot: ToolTileSnapshotInType, options?: INewTileOptions): INewRowTile {
       return self.addTileInNewRow(ToolTileModel.create(snapshot), options);

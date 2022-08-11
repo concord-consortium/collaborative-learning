@@ -123,7 +123,6 @@ export const UndoStore = types
       // HistoryEntry has already been added then we don't modify it,
       // but we do always reset the undoIdx to the end of the history.
       
-      console.log(`adding history ${entry.action}`);
       const existingEntry = self.findHistoryEntry(entry.id);
       if (!existingEntry) {
         // This is a new user action, so if they had undone some amount already
