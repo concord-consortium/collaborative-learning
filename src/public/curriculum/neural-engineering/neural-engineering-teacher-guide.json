@@ -41,13 +41,17 @@
                 "content": {
                   "tiles": [
                     {
+                      "id": "gvCW4G1XLOhLxRgG",
                       "content": {
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<h3>Problem Overview</strong></h3>",
+                          "<p><strong>Lesson 0.1 - Teacher Guide</strong></p>",
+                          "<p><u><strong>Overview tab:</strong></u></p>",
                           "<p>As a Teacher, you have extra tabs in your CLUE Resources. One of them is this tab, entitled Teacher Guide. It contains content your students will not see. You may choose to copy tiles from this section or any other into your workspace by dragging them to the right. You may edit them or use them as they are, and of course you may add new content of your own.</p>",
-                          "<p>Once your Workspace content is complete, you can publish it to the class. It will appear in the <strong>Extensions</strong> tab on the <strong>Custom Lessons</strong> section. Your students' published work will appear in the <strong>Class Models and Data</strong> section.</p>"
+                          "<p>Once your Workspace content is complete, you can publish it to the class. It will appear in the <strong>Extensions</strong> tab on the <strong>Custom Lessons</strong> section. Your students&#x27; published work will appear in the <strong>Class Models and Data</strong> section.</p>",
+                          "<p>Lesson 0 is designed as a self-guided exploration of CLUE, a collaborative learning platform that we will use throughout the neural engineering unit. </p>",
+                          "<p>As part of CLUE, students are also introduced to Dataflow, our visual computer programming interface. </p>"
                         ]
                       }
                     }
@@ -64,8 +68,13 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p><strong>Problem Launch</strong></p>",
-                          "<p>This section will include classroom specific tips.</p>"
+                          "<p></p>",
+                          "<p><u><strong>Instructional Sequence tab:</strong></u></p>",
+                          "<p>The proposed activities in the Lessons tab should take about 45-60 minutes for students to complete. </p>",
+                          "<p>At the end of the proposed sequence of activities, you can ask some students to present their Dataflow programs.  As students share their work, introduce the term &quot;computational thinking&quot; and bring to mind when and how students used computational thinking. Inform students that they will continue to apply and develop their ability to use computational thinking as the unit unfolds. </p>",
+                          "<p>Make sure that students add their first KWL Journal entry (see instructions in the student-facing lesson).  The KWL is a resource that can be used as both formative assessment of students’ thinking,  as well as a document in which students can record their knowledge and wonderings over time. Let students know that this is where they will record their learning and wonderings over the course of the unit. </p>",
+                          "<p><strong>Teacher Resources</strong></p>",
+                          "<p><a href='https://docs.google.com/presentation/d/1-nJ9tyrOD-N2WNjea3segkPSMy9MxITv/edit?usp=sharing&amp;ouid=107168184189898639613&amp;rtpof=true&amp;sd=true'>Computational thinking</a></p>"
                         ]
                       }
                     }
@@ -96,35 +105,25 @@
                   "content": {
                     "tiles": [
                       {
-                          "id": "zyoT6wp_c7IxjDmS",
-                          "content": {
-                            "type": "Text",
-                            "format": "html",
-                            "text": [
-                              "<h3>Lesson 1.1 Overview</h3",
-                              "<p>Students will be introduced to emerging robotics technology that helps people with neurological conditions or missing limbs.</p>",
-                              "<p>Materials: <a href='https://www.flinnsci.com/energy-stick/ap7598/'>Energy sticks</a></p>",
-                              "<p>Formative assessment: <a href='https://docs.google.com/document/d/1QkXZ72Z5av1igfhYAhGynJdfBTQQUeqfNjEzwtCGYzw/'>Listening to group conversations; reflecting on students’ questions</a>; KWL Journals</p>",
-                              "<p></p>",
-                              "<p><strong>Learning Objectives / NGSS alignment</strong></p>",
-                              "<p>To elicit questions and activate students’ knowledge about human body systems in order to inform the design of biomedical devices. (See <a href='https://www.nextgenscience.org/pe/hs-ls1-2-molecules-organisms-structures-and-processes'>NGSS HS-LS1-2</a>)</p>"
-                            ]
-                          }
-                      },
-                      {
-                          "id": "VXasdfsadfsd0fplHGo5DQbZPK",
-                          "content": {
-                              "type": "Table",
-                              "name": "After each activity, please record what you know, wonder, and learn about the topic.",
-                              "columns": [
-                              {"name":"Date","values":["","",""]},
-                              {"name":"Today's Topic","values":["","",""]},
-                              {"name":"Know","values":["","",""]},
-                              {"name":"Wonder","values":["","",""]},
-                              {"name":"Learn","values":["","",""]}
-                              ]
-                          }
-                      }       
+                        "id": "bfsShgpMoj8B6Kc0",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Lesson 1.1 - Teacher Guide</strong></p>",
+                            "<p><u><strong>Overview tab: </strong></u></p>",
+                            "<p>In this lesson, students will be introduced to emerging robotics technology that helps people with neurological conditions or missing limbs. </p>",
+                            "<p><strong>Learning Objectives</strong></p>",
+                            "<p>The goal of this lesson is to activate students’ knowledge about electricity and elicit questions about bionic arms. </p>",
+                            "<p><strong>NGSS Alignment</strong></p>",
+                            "<p>See <a href='https://www.nextgenscience.org/pe/hs-ls1-2-molecules-organisms-structures-and-processes'>NGSS HS-LS1-2</a></p>",
+                            "<p><strong>Formative assessment</strong></p>",
+                            "<p>Listening to group conversations; reflecting on students’ questions; KWL journals (found in student-facing CLUE tab for lesson 1.1).</p>",
+                            "<p><strong>Materials</strong></p>",
+                            "<p>Energy sticks (one for each group of 3-4 students) [<strong><a href='https://www.flinnsci.com/energy-stick/ap7598/'>LINK</a></strong>}</p>"
+                          ]
+                        }
+                      }    
                     ]
                   },
                   "supports": [ ]
@@ -134,39 +133,40 @@
                   "content": {
                     "tiles": [
                       {
-                          "id": "zyoT6wwrey979r6p_c7IxjDmS",
-                          "content": {
-                            "type": "Text",
-                            "format": "html",
-                            "text": [
-                              "<h3>Instructional Sequence</h3>",
-                              "<p><em>10 minutes</em></p>",
-                              "<p>Students explore “energy sticks” to bring to mind that charge flows through the human body. Ask students questions to provoke students’ thinking and observations. Some suggested explorations include:</p>",
-                              "<p>Pairs of students compare holding one end of the energy stick with one hand, with holding one end of the energy stick while simultaneously holding each other&#x27;s hand.</p>",
-                              "<p>Pairs of students compare holding one end of the energy stick while simultaneously holding one end of a piece of wood (e.g. wooden spoon), with  holding one end of the energy stick while simultaneously holding one end of a piece of metal (e.g. metal spoon).</p>",
-                              "<p><em>10 minutes</em></p>",
-                              "<p>Facilitate a discussion about students’ shared experience of playing with the energy sticks. Ask students to try to explain what they have observed. </p>",
-                              "<p>Guiding questions:</p>",
-                              "<ul><li>What makes our classroom light glow? (Flick light switch off) Why does flicking the switch stop the light from glowing? </li><li>What conditions appear to be necessary to make the light stick glow? What conditions appear to be necessary to make the light stick not glow? How can this be explained?</li></ul>",
-                              "<p> These guiding questions are to help elicit the following: electric current delivers electrical energy that can make materials glow; closed circuit supports flow through a system (a light switch opens and closes system, hands open and closes the energy stick system); in order to allow the electric current to flow the medium needs to be able to conduct electric current – the wooden spoon is not a conductor, it is an insulator; the human body conducts electric current.</p>",
-                              "<p><em>5 minutes</em></p>",
-                              "<p>Present one of the following video clips to introduce students to bionic arm technology:</p>",
-                              "<p>Tilly’s Bionic Arms clip [<strong>LINK </strong>to file in Google Drive Lesson 1.1]</p>",
-                              "<p>Beyond Robotics clip [<strong>LINK </strong>to file in Google Drive Lesson 1.1]</p>",
-                              "<p><em>10 minutes</em></p>",
-                              "<p>Using a KWL journal table posted at the end of the lesson, ask each student to record what they know, wonder, and learn that may help explain how bionic arms work. Encourage students to apply what they noticed in the video and energy stick activity (electric current can flow through the body), and any knowledge or wonderings they have about what they observed. Highlight the use of the term “bionic” and what does that suggest about this technology.</p>",
-                              "<p>The KWL is a resource that can be used as both formative assessment of students’ thinking,  as well as a document in which students can record their knowledge and wonderings over time. Let students know that this is where they will record their learning and wonderings over the course of the unit.  </p>",
-                              "<p>Make sure students create a new Journal under the KWL Journals tab in My Work. This journal will be available from Lesson to Lesson throughout the course so they can track their progress.</p>",
-                              "<p><em>1 minute</em></p>",
-                              "<p>After collecting students&#x27; responses, let them know that they will embark on a sequence of activities that will help them be able to explain how a bionic arm works, and ultimately be able to improve the design of a simple one. Direct students to the guiding question - How do bionic arms work?  Inform students that the first activity will help them know how the human body system interacts and what can negatively impact body movement.</p>",
-                              "<p></p>",
-                              "<p><strong>Lesson Resources</strong></p>",
-                              "<p>Tilly’s Bionic Arms (5:34) [<strong>LINK</strong>}</p>",
-                              "<p>Beyond Robotics clip [L<strong>INK}</strong></p>",
-                              "<p>KLW Journal [<strong>LINK</strong>: Google DRIVE]</p>"
-                            ]
-                          }
-                      }     
+                        "id": "eq9RbeHMU2sEDZMY",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<h3><u>Instructional Sequence tab:</u></h3>",
+                            "<p><em>10 minutes</em></p>",
+                            "<p>Students explore “energy sticks” to bring to mind that electricity flows through the human body. Ask students questions to provoke their thinking and observations. See suggested explorations in the student-facing lesson. </p>",
+                            "<p><em>10 minutes</em></p>",
+                            "<p>Facilitate a discussion about students’ shared experiences with the energy sticks. Ask students to try to explain what they have observed. </p>",
+                            "<p>Some guiding questions:</p>",
+                            "<ul><li>What conditions are necessary to make the light stick glow? </li><li>What conditions make the light stick not glow? </li><li>How can this be explained?</li></ul>",
+                            "<p>10 minutes</p>",
+                            "<p>Students use Dataflow to program a virtual light bulb to turn on and off (see student-facing lesson for instructions). </p>",
+                            "<p>The goal of this activity is to build student confidence in using Dataflow. </p>",
+                            "<p><em>5 minutes</em></p>",
+                            "<p>Present the &quot;Teen with Bionic Arms&quot; <a href='https://www.youtube.com/watch?v=q2MjTcmLuIQ'>video</a></p>",
+                            "<p><em>5 minutes</em></p>",
+                            "<p>In small groups, ask students to discuss how Tilly&#x27;s bionic arms might work. </p>",
+                            "<p><em>10 minutes</em></p>",
+                            "<p>Ask students to add an entry to their KWL journals where they reflect on what they know, wonder, and learn about how bionic arms work (see student-facing lesson for instructions). Encourage students to apply what they learned about electricity and bionic arms. </p>",
+                            "<p>The KWL is a resource that can be used as both formative assessment of students’ thinking,  as well as a document in which students can record their knowledge and wonderings over time. Let students know that this is where they will record their learning and wonderings over the course of the unit. If students haven&#x27;t created their journal in Lesson 0, they should do so today by navigating to <strong>My Work</strong> &gt;&gt; <strong>KWL Journals </strong>(the &quot;edit&quot; button will open the journal in students&#x27; workspace). </p>",
+                            "<p><em>1 minute</em></p>",
+                            "<p>After collecting students&#x27; responses, let them know that throughout the unit will further explore how bionic arms work and design a robotic gripper that opens and closes in response to their own muscle activity.  </p>",
+                            "<p><strong>Extensions</strong></p>",
+                            "<p>* If time permits (or as a homework assignment), ask students to watch the &quot;Beyong Bionics&quot; <a href='https://drive.google.com/file/d/1Frped4M9BUD-KCYwiucsM3Z7jasCNm8v/view?usp=sharing'>video</a> and develop additional questions on bionic arms.</p>",
+                            "<p>* Ask students to develop questions for a hypothetical interview with Tilly. </p>",
+                            "<p><strong>Teacher Resources</strong></p>",
+                            "<p>Facilitating student questions via the question formulation technique <strong><a href='https://www.teachingchannel.com/blog/5-tips-for-blending-the-question-formulation-technique-qft-with-ngss'>LINK</a></strong></p>",
+                            "<p>Introducing and establishing an anchoring phenomenon routine <strong><a href='https://ambitiousscienceteaching.org/presentations-on-anchoring-events-and-modeling/#1479473299605-ab2574f8-d6bab811-f21c'>LINK</a></strong></p>",
+                            "<p></p>"
+                          ]
+                        }
+                      } 
                     ]
                   },
                   "supports": [ ]

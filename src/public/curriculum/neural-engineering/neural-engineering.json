@@ -15,6 +15,12 @@
     "settings": {
       "table": { "numFormat": ".2~f" }
     },
+    "learningLog": {
+      "labels": {
+        "1": "KWL Journal",
+        "n": "KWL Journals"
+      }
+    },
     "toolbar": [
       {
         "id": "select",
@@ -244,167 +250,34 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "EBCpyeDU_FkLtXq8",
+                    "id": "ab4qD_VhNxbQSPDI",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Welcome to CLUE</h3>",
-                        "<p>On the right is <strong>your</strong> workspace. To edit your workspace, you must first add a <strong>tile</strong>. You get a tile in your workspace by either</p>",
-                        "<ul><li><strong>Dragging a tile from the content (left side) in CLUE into your workspace</strong></li><li><strong>Dragging a new  tile from the menu on the left of your workspace</strong></li><li><strong>Click a button on the menu to add a new tile to the bottom of your workspace</strong></li></ul>",
-                        "<p>All tiles have a <strong>waffle</strong> (gray box with six dots) in the upper right corner if you hover over it. To drag the tile, click the waffle and hold it down as you drag it to your workspace. As you drag the tile into the workspace, a blue line shows where the tile will go when you let go.</p>",
-                        "<p>OK, get ready... Here we go!</p>"
+                        "<p><strong>Lesson 0.1 - Student Guide</strong></p>",
+                        "<p><u><strong>Introduction tab</strong></u></p>",
+                        "<p><strong>Overview:</strong></p>",
+                        "<p>In this activity, you will be introduced to CLUE, a collaborative learning platform that we will use throughout the neural engineering unit. </p>",
+                        "<p>You will also be introduced to Dataflow, a visual computer programming interface that is part of the CLUE platform. </p>",
+                        "<p><strong>Learning Objectives:</strong></p>",
+                        "<p>After completing this activity, you will be able to add and share content on CLUE and make simple computer programs using Dataflow. </p>",
+                        "<p><strong>Welcome to CLUE!</strong></p>",
+                        "<p>In CLUE, everyone works in a group with up to four people. When you start an activity, CLUE drops you into a group randomly. <strong>You can change groups by clicking on the group number in the upper right corner.</strong> Then, you can either join an existing group that has fewer than four students, or start a new group. Your teacher may ask you to join a specific group. When you change groups, your work moves with you.</p>",
+                        "<p><strong>Groups are important in CLUE.</strong> You can learn from classmates in your group and they can learn from you. Many features of CLUE are designed to help you share information and learn from others in your group and in your class.</p>",
+                        "<p>Each lesson in CLUE has three parts. The tabs above display each part:</p>",
+                        "<ul><li>Introduction</li><li>Activities</li><li>Reflection</li></ul>"
                       ]
                     }
                   },
                   {
-                    "id": "_rU9plvleix0FlBS",
+                    "id": "Prn74UZEK92lKVjs",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Introduction to tool types</h3>",
-                        "<p>Try to make a text tile in your <strong>Workspace</strong> on the right (press the menu button with the letter A on it). Write down some things you hope to learn in this Neural Engineering class.</p>",
-                        "<p>Now insert an image into your workspace. You can upload using the button or you can drag images from your desktop. Describe in your workspace how you might use images to document your work.</p>",
-                        "<p>Finally, try to make a table. Fill the table in with some data, and change the column header names to something you might use for engineering design. Describe the meaning of your data in text.</p>"
+                        "<p>Please click on the &quot;Activities&quot; tab to continue. </p>"
                       ]
-                    }
-                  },
-                  {
-                    "id": "abc050820221728",
-                    "title": "CLUE Tile Menu",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/AllToolsToolBar-labeled.png"
-                    }
-                  },
-                  {
-                    "id": "07mebz-dv9AqiZDD",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Because these lessons are about engineering and robotics, you will also need a programming tool that can read sensor data and control outputs. In this course, the programming tool is called Dataflow, and it can be launched from the button with two connected boxes. Programs can be simple, adding or comparing two numbers, or sophisticated, with many nodes that control outputs based on inputs.</p>",
-                        "<p>Below is a sample program. Try to make one of your own that adds two numbers. What are the different ways that you see the result of the program?</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "dTVQIgkPCYu1K0uR",
-                    "title": "Dataflow 1",
-                    "content": {
-                      "type": "Dataflow",
-                      "programDataRate": 100,
-                      "programZoom": {
-                        "dx": -0.62109375,
-                        "dy": -0.00390625,
-                        "scale": 1.1022920561734122
-                      },
-                      "program": {
-                      "values": {
-                        "3180": {"currentValues": {"nodeValue": -0.31}},
-                        "3183": {"currentValues": {"nodeValue": 0}},
-                        "3216": {"currentValues": {"nodeValue": -0.31}},
-                        "3218": {"currentValues": {"nodeValue": 0}}
-                      },
-                      "id": "dataflow@0.1.0",
-                      "nodes": {
-                        "3180": {
-                          "id": 3180,
-                          "name": "Generator",
-                          "x": 58.33014984178641,
-                          "y": 190.49210993319966,
-                          "inputs": {},
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3216-undefined-num2": {"node": 3216, "input": "num2", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {
-                            "plot": false,
-                            "generatorType": "Sine",
-                            "amplitudeUnits": "",
-                            "amplitude": 1,
-                            "periodUnits": "sec",
-                            "period": 10,
-                            "inputKeys": []
-                          }
-                        },
-                        "3183": {
-                          "id": 3183,
-                          "name": "Demo Output",
-                          "x": 600.2348068059828,
-                          "y": 14.22744072778999,
-                          "inputs": {
-                            "nodeValue": {
-                              "connections": {
-                                "3216-num-undefined": {"node": 3216, "output": "num", "data": {}}
-                              }
-                            }
-                          },
-                          "outputs": {},
-                          "data": {"outputType": "Grabber", "demoOutput": 0, "inputKeys": []}
-                        },
-                        "3216": {
-                          "id": 3216,
-                          "name": "Control",
-                          "x": 354.1874913500653,
-                          "y": 95.55925193874609,
-                          "inputs": {
-                            "num1": {
-                              "connections": {
-                                "3218-num-undefined": {"node": 3218, "output": "num", "data": {}}
-                              }
-                            },
-                            "num2": {
-                              "connections": {
-                                "3180-num-undefined": {"node": 3180, "output": "num", "data": {}}
-                              }
-                            }
-                          },
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3183-undefined-nodeValue": {
-                                  "node": 3183,
-                                  "input": "nodeValue",
-                                  "data": {}
-                                }
-                              }
-                            }
-                          },
-                          "data": {
-                            "plot": false,
-                            "controlOperator": "Hold Current",
-                            "inputKeys": []
-                          }
-                        },
-                        "3218": {
-                          "id": 3218,
-                          "name": "Timer",
-                          "x": 54.48164622179425,
-                          "y": 22.330482559354067,
-                          "inputs": {},
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3216-undefined-num1": {"node": 3216, "input": "num1", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {
-                            "plot": false,
-                            "timeOnUnits": "sec",
-                            "timeOn": 2,
-                            "timeOffUnits": "sec",
-                            "timeOff": 4,
-                            "inputKeys": []
-                          }
-                        }
-                      }
-                    }
                     }
                   }
                 ]
@@ -415,57 +288,209 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "9plvleix0FlBS",
+                    "id": "nktXKxeXTDkfpIkB",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Group work - discussion</h3>",
-                        "<p>CLUE is designed to facilitate sharing of ideas, both in small lab groups and with the whole class. When you are ready to work in a group, you can split your workspace into 4 panes. The top right pane is yours, and your partners are in the others. You can borrow and update content from your partners' workspaces just as you can from any content you bring up from tabs on the left hand Resources.</p>"
+                        "<p><u><strong>Activities tab</strong></u></p>",
+                        "<p>On the right is <strong>your</strong> workspace. <strong>You can arrange the screen to show My Resources or My Workspace or to have the screen split.</strong> Hover over the three vertical dots on the divider between your Resources and your Workspace and click the arrows to change the screen. You can also close the Resources view by clicking the “X” on the upper right corner of the Resources panel.</p>",
+                        "<p>To edit your workspace, you must first add a <strong>tile</strong>. You get a tile in your workspace by either</p>",
+                        "<ul><li><strong>Dragging a tile from My Resources (left side) in CLUE into My Workspace (right side)</strong></li><li><strong>Dragging a new  tile from the menu on the left of your workspace</strong></li><li><strong>Click a button on the menu to add a new tile to the bottom of your workspace</strong></li></ul>",
+                        "<p>All tiles have a <strong>waffle</strong> (gray box with six dots) in the upper right corner if you hover over it. To drag the tile, click the waffle and hold it down as you drag it to your workspace. As you drag the tile into the workspace, a blue line shows where the tile will go when you let go.</p>",
+                        "<p><strong>Tip</strong>: When your working session is over, just close the browser window. Your workspace is saved automatically (there is no Save button) If you are on a shared computer, be sure to log out of the STEM Resource Finder. </p>",
+                        "<p>OK, get ready... Here we go!</p>"
+                      ]
+                    }
+                  },
+                  [{
+                    "id": "UWnx52iyDldW2ClX",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Introduction to tile types</p>",
+                        "<p>Try to make a text tile in your <strong>Workspace</strong> on the right (press the menu button with the letter A on it). Write down some things you hope to learn in this Neural Engineering unit.</p>",
+                        "<p><strong>Tip</strong>: by hovering your mouse over the tile menu you will see the function of each tile. </p>",
+                        "<p>Now insert an image into your workspace. You can upload using the button or you can drag images from your desktop. Describe in your workspace how you might use images to document your work.</p>",
+                        "<p>Next, try to make a table. Fill the table in with some numbers, and change the column header names to something you might use in this class. Describe the meaning of your data in text.</p>"
                       ]
                     }
                   },
                   {
-                    "id": "lJEIgDWNRXk02nZi",
-                    "title": "CLUE Interfaces for Sharing",
+                    "id": "abc050820221728",
+                    "title": "CLUE Tile Menu",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/mothed/images/share.jpg"
+                      "url": "curriculum/neural-engineering/images/ToolBar.jpeg"
                     }
-                  },
+                  }],
                   {
-                    "id": "_rU9plvleix0FlBS",
+                    "id": "f_KkdkpBCqi9KRxk",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Try Group Sharing</h3>",
-                        "<p><em>First, check that all the members of your group have the same group number at the top right of your screen. </em></p>",
-                        "<p>Talk about robots and bionic limbs with your group.  What do you know about bionics? </p>",
-                        "<p>Take some notes on your discussion in your Workspace. </p>",
-                        "<p>Take notes and make a list of what your group knows. Insert some images in your workspace relating to motion and robotics. </p>"
+                        "<h3>Introduction to Dataflow</h3>",
+                        "<p>Because these lessons involve engineering and robotics, you will also need a programming tool that can read sensor data and control outputs. In this unit, the programming tool is called Dataflow, and it can be launched from the button with two connected boxes. </p>",
+                        "<p>Programs can be simple, adding or comparing two numbers, or sophisticated, with many nodes that control outputs based on inputs.</p>",
+                        "<p>Try adding a Dataflow tile to your Workspace. Once you add the tile, you can add different types of blocks from the menu on the left side and connect them just like in the sample program below.</p>",
+                        "<p>Blocks can be:</p>",
+                        "<p>1.  Inputs (e.g., a temperatue sensor). These are the blue-ish blocks. </p>",
+                        "<p>2. Processing blocks (e.g., &quot;Math&quot; or &quot;Logic&quot;). These are the green-ish blocks. </p>",
+                        "<p>3. Outputs (e.g., a light bulb). These are the organge blocks.   </p>",
+                        "<p>Try to make one of your own Dataflow program that adds two numbers. What are the different ways that you see the result of the program?</p>"
                       ]
                     }
                   },
                   {
-                    "id": "_aucv3h3VrZ_VNPK",
+                    "id": "tXgvW073k6HcUl8L",
+                    "title": "Dataflow 1",
+                    "content": {
+                      "type": "Dataflow",
+                      "programDataRate": 1000,
+                      "programZoom": {
+                        "dx": 0,
+                        "dy": 0,
+                        "scale": 1.0973154362416124
+                      },
+                      "program": {
+                      "values": {
+                        "3277": {"currentValues": {}},
+                        "3282": {"currentValues": {}},
+                        "3289": {"currentValues": {"nodeValue": 20}},
+                        "3299": {"currentValues": {"nodeValue": 0}}
+                      },
+                      "id": "dataflow@0.1.0",
+                      "nodes": {
+                        "3277": {
+                          "id": 3277,
+                          "name": "Sensor",
+                          "x": 33.25769467309609,
+                          "y": 53.21068692833138,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3282-undefined-num1": {"node": 3282, "input": "num1", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {
+                            "plot": false,
+                            "type": "temperature",
+                            "sensor": "00001-VIR",
+                            "virtual": true,
+                            "inputKeys": []
+                          }
+                        },
+                        "3282": {
+                          "id": 3282,
+                          "name": "Logic",
+                          "x": 298.3169265484828,
+                          "y": 64.47449592314013,
+                          "inputs": {
+                            "num1": {
+                              "connections": {
+                                "3277-num-undefined": {"node": 3277, "output": "num", "data": {}}
+                              }
+                            },
+                            "num2": {
+                              "connections": {
+                                "3289-num-undefined": {"node": 3289, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3299-undefined-nodeValue": {
+                                  "node": 3299,
+                                  "input": "nodeValue",
+                                  "data": {}
+                                }
+                              }
+                            }
+                          },
+                          "data": {"plot": false, "logicOperator": "Greater Than", "inputKeys": []}
+                        },
+                        "3289": {
+                          "id": 3289,
+                          "name": "Number",
+                          "x": 106.42448613897218,
+                          "y": 270.9982112393583,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "3282-undefined-num2": {"node": 3282, "input": "num2", "data": {}}
+                              }
+                            }
+                          },
+                          "data": {"plot": false, "nodeValueUnits": "", "inputKeys": []}
+                        },
+                        "3299": {
+                          "id": 3299,
+                          "name": "Demo Output",
+                          "x": 568.3546131675333,
+                          "y": 65.78549269957654,
+                          "inputs": {
+                            "nodeValue": {
+                              "connections": {
+                                "3282-num-undefined": {"node": 3282, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {},
+                          "data": {"outputType": "Light Bulb", "demoOutput": 0, "inputKeys": []}
+                        }
+                      }
+                    }
+                    }
+                  },
+                  {
+                    "id": "Vgc6qoEDt_gV8hAb",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>When ready, share with the group</strong></p>",
-                        "<p>Use the group controls in the upper right of your workspace so that you can see and share each others&#x27; notes. See the image below for how to do that. Take a look at the list of terms in your groupmates&#x27; windows. You can drag tiles from their windows into yours, or just get ideas from what they have done.</p>"
+                        "<h3>Sharing your workspace with your group</h3>",
+                        "<p>CLUE allows you to share your screen in real-time with other students in your group. To do so, you need to turn on the Share option in top right of your Workspace, and click on &quot;Join group view&quot; icon next to the Share switch.  You can minimize My Resources (left side) to better view your groupmates&#x27; screens. If they haven&#x27;t shared their screen yet, ask them to do so.  </p>",
+                        "<p>Within your group, discuss the Dataflow programs that each one of you has created.  </p>"
                       ]
                     }
                   },
                   {
-                    "id": "_aucv3h3VrZ_VasfaNPK",
+                    "id": "H8UPWfxYHAlWuaV8",
+                    "title": "UI Buttons",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/UIbuttons.jpg",
+                      "filename": "curriculum/neural-engineering/images/UIbuttons.jpg"
+                    }
+                  },
+                  {
+                    "id": "FFsWGlSrLofqnz1h",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Making new workspaces</h3>",
-                        "<p>At the top of the Workspace window you will see a File menu. Using this menu you can make copies of your existing workspace to try different things, or you can start a whole new one. This is very useful if you are trying different versions of a program to solve a problem.</p>"
+                        "<h3>Publishing your workspace </h3>",
+                        "<p>When you&#x27;re done with today&#x27;s activities, try publishing your workspace. To do so, click on &quot;Publish Workspace&quot; at the top of your workspace.</p>",
+                        "<p>When you publish, your workspace will appear under the pink &quot;Extension&quot; tab above. Student work will go under the Class Models and Data tab. Teacher work will go under the Custom Lessons tab. </p>",
+                        "<p>Check if any of your classmates has published their workspace yet. </p>",
+                        "<p> </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "9R8Pq1QLUzthSal0",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Reflection</h3>",
+                        "<p>At the end of each lesson, you will be asked to post a brief reflection. Click on the &quot;Reflection&quot; tab to learn more. </p>"
                       ]
                     }
                   }
@@ -477,45 +502,32 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "eGVyLGBx1SzYZJYh",
+                    "id": "L5yWAVL_sIREbhOj",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Discuss the research questions</strong></p>",
-                        "<p>Work with the members of your group to explore each other&#x27;s questions and ideas. </p>"
+                        "<p><strong><u>Reflection tab:</u></strong></p>",
+                        "<p>Throughout the neural engineering unit, you will keep a learning journal called a KWL Journal (KWL stands for Know, Wonder, and Learn). </p>",
+                        "<p>At the end of each lesson, you will be asked to add a journal entry to track your learning throughout the unit. </p>",
+                        "<p>To start your journal, click on &quot;My Work&quot; &gt;&gt; &quot;KWL Journals&quot;</p>",
+                        "<p>Click on &quot;My First Learning Log&quot; and click &quot;Edit&quot; in the top right of the pane.</p>",
+                        "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions. </p>"
                       ]
                     }
                   },
                   {
-                    "id": "sA84OvZZVt-8LVM3",
+                    "id": "wM4PL8x9C83NYIRR",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Publish your work to the class</strong></p>",
-                        "<p>You can choose one member of your group to publish a summary of the group&#x27;s work, or you may each publish.  When you publish, your workspace will appear under the pink &quot;Extensions&quot; tab above. Student work will go under the Class Models and Data tab. Teacher work will go under the Custom Lessons tab.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "lJEIgDWNRasdfasXk02nZi",
-                    "title": "CLUE Publishing to Extensions Tab",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/mothed/images/share.jpg"
-                    }
-                  },
-                  {
-                    "id": "sA84ZVt-8VM3",
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h3>Teacher Features</h3>",
-                        "<p>If you are looking at this Lesson as a teacher, you are seeing this green box with a 'solution' in it. You can choose to switch the solutions on and off so you can see Lessons as students do. You will also see additional tabs in your Resources - one for Teacher Guide and one for Student Worksheets. </p>",
-                        "<p>The Teacher Guide will have a variety of resources in it - materials sheets, instructions for running class activities, links to outside web sites, videos, etc. As with all other content in the Resources tabs, you can drag tiles into your Workspace so they can be modified or published to distribute to the class. This is particularly handy if you want to add an additional lesson or page of solutions or instructions to any of the existing Lessons. You can use the same publishing tool available to your students. Teacher published work will appear in the Custom Lessons tab under 'Extensions'. </p>"
+                        "<p><strong>My First Journal Entry</strong></p>",
+                        "<p>Today&#x27;s date:</p>",
+                        "<p>Today&#x27;s topic:</p>",
+                        "<p>What do you like about CLUE and Dataflow?</p>",
+                        "<p>What can be improved?</p>",
+                        "<p>What kind of questions do you have?</p>"
                       ]
                     }
                   }
@@ -544,42 +556,27 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "FeiVDmGGmamqLrn5",
+                    "id": "zyoT6wp_c7IxjDmS",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>Objective: </h2>",
-                        "<p>During this lesson, we will explore emerging robotics technology that helps people with neurological conditions or missing limbs.</p>"
+                        "<p><strong>Lesson 1.1 - Student Guide</strong></p>",
+                        "<p><u><strong>Introduction</strong></u></p>",
+                        "<p><strong>Overview: </strong></p>",
+                        "<p>In this lesson, you will be introduced to emerging robotics technology that helps people with neurological conditions or missing limbs.</p>",
+                        "<p><strong>Learning Objectives: </strong></p>",
+                        "<p>This activity is intended to help you come up with questions about how body systems interact with one another and with technology. We will explore these questions throughout the unit. </p>"
                       ]
                     }
                   },
                   {
-                    "id": "dhCKo3wP2pRDcKhv",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h2>Let&#x27;s Explore Energy Sticks! </h2>",
-                        "<p>Please watch the video to explore what energy sticks are: <a href='https://www.youtube.com/watch?v=RYm3soCD9Jg&amp;ab_channel=ArborScientific'>Energy Stick Video</a></p>",
-                        "<p>Try creating some tiles in your workspace and write down some thoughts about what Energy sticks are and how they work. You can make text tiles (letter A), drawings (pencil), Tables and graphs, including pictures or photos, and even make programs, which we will work with in future lessons.</p>"
-                      ]
-                    }
-                  },
-                  {
+                    "id": "xA3ibkzFAO5iG7pU",
+                    "title": "Tilly with bionic arms: Credit: https://openbionics.com/bionic-tilly/",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/neural-engineering/images/energyStick.jpg"
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>In their CLUE Workspace, students should reflect critically about their readings and any questions they have brainstormed. Have students try out some of the tools to document what they learned.</p>"
-                      ]
+                      "url": "curriculum/neural-engineering/images/Lesson1img1.jpeg",
+                      "filename": "curriculum/neural-engineering/images/Lesson1img1.jpeg"
                     }
                   }
                 ]
@@ -590,36 +587,145 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "xvGNO49WAIVh6DIQ",
+                    "id": "7585vTDxl5wzHNQB",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>Experiment with Energy Sticks</h2>",
-                        "<p>Please pair up with the friend and play with the energy stick provided. While playing with it, you can try any of these activities:</p>",
-                        "<ul><li>compare each partner holding one end of the energy stick with one hand and keeping your other hand at your sides with holding one end of the energy stick while simultaneously holding hands with your partner.</li><li>compare holding one end of the energy stick while simultaneously holding one end of a piece of wood (e.g., wooden spoon) with holding one end of the energy stick while simultaneously holding one end of a piece of metal (e.g., metal spoon).</li></ul>",
-                        "<p>Document the results of each experiment. Then try making up a few experiments of your own. What does each trial prove?</p>"
+                        "<p><u><strong>Activities</strong></u></p>",
+                        "<p><strong>Experiment with Energy Sticks</strong></p>",
+                        "<p>Working with your classmates, explore the behavior of energy sticks. You may try the following: </p>",
+                        "<ul><li>Have one person touch both ends of the energy sticks. </li><li>Have two people touch an end of the energy stick while holding hands. </li><li>Get a group of students to hold hands in a circle. Put the energy stick between two of the students. Does it turn on?</li><li>Give one pair in the circuit something to hold between them (e.g.,  a metal key or a pencil). Do these objects conduct or insulate?</li></ul>"
                       ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h2>Programs to Express Closing a Circuit</h2>",
-                        "<p>We can use a program to turn lights on and off in the same way you just did with the Energy Sticks.</p>",
-                        "Here is a very simple program. Recreate this program with the Dataflow program tool in your workspace. Start by pressing the tile button with two blocks and a connector line. Then try adding some logic to make the lightbulb only turn on when the signal amplitude is over 0.5.",
-                        "<p>Programs are one way to express models of actual circuits."
-                      ]
-                    }
-                  },
-                  {
-                    "id": "abc050820221151",
-                    "title": "A Dataflow program tile",
+                    "id": "oA_UsTa2B_g6LJ2H",
+                    "title": "Student holding an energy stick",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/neural-engineering/images/signalProgram.jpg"
+                      "url": "curriculum/neural-engineering/images/Lesson1img2.png",
+                      "filename": "curriculum/neural-engineering/images/Lesson1img2.png"
+                    }
+                  },
+                  {
+                    "id": "m0tifT2uQB1mvKEL",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Create a text tile in your worksheet by clicking on the A icon and describe what you have observed. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "3IjoPVc-MA3bHMRU",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Program a Light Bulb to Turn On and Off</strong></p>",
+                        "<p>We can use a computer program to turn lights on and off in the same way you just did with the energy sticks. </p>",
+                        "<p>Here is a very simple program that turns a light bulb on and off based on a timer:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "3IjoPVc-MA3bHMRU",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Program a Light Bulb to Turn On and Off</strong></p>",
+                        "<p>We can use a computer program to turn lights on and off in the same way you just did with the energy sticks. </p>",
+                        "<p>Here is a very simple program that turns a light bulb on and off based on a timer:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "EJevZwyg4GvrIh2z",
+                    "title": "Dataflow 1",
+                    "content": {
+                      "type": "Dataflow",
+                      "programDataRate": 1000,
+                      "programZoom": {
+                        "dx": 0,
+                        "dy": 0,
+                        "scale": 0.9597151675995521
+                      },
+                      "program": {
+                      "values": {
+                        "95": {"currentValues": {"nodeValue": 0}},
+                        "98": {"currentValues": {"nodeValue": 0}}
+                      },
+                      "id": "dataflow@0.1.0",
+                      "nodes": {
+                        "95": {
+                          "id": 95,
+                          "name": "Timer",
+                          "x": 19.98323554065379,
+                          "y": 5,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "98-undefined-nodeValue": {
+                                  "node": 98,
+                                  "input": "nodeValue",
+                                  "data": {}
+                                }
+                              }
+                            }
+                          },
+                          "data": {
+                            "plot": false,
+                            "timeOnUnits": "sec",
+                            "timeOn": 2,
+                            "timeOffUnits": "sec",
+                            "timeOff": 5,
+                            "inputKeys": []
+                          }
+                        },
+                        "98": {
+                          "id": 98,
+                          "name": "Demo Output",
+                          "x": 335.51164572175264,
+                          "y": 12.038349825235073,
+                          "inputs": {
+                            "nodeValue": {
+                              "connections": {
+                                "95-num-undefined": {"node": 95, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {},
+                          "data": {"outputType": "Light Bulb", "demoOutput": 0, "inputKeys": []}
+                        }
+                      }
+                    }
+                    }
+                  },
+                  {
+                    "id": "wOSMFUGfijiejbu1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Recreate this program in your worksheet by pressing the DataFlow tile button .  You will need to add a timer and a demo output and connect them. </p>",
+                        "<p>Then, instead of a timer, use a generator to control the light bulb. To do so, delete the timer and add a generator. Select the &quot;Square&quot; option and add some logic to make the light bulb only turn on when the generated signal is over 0.5. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "kqaHDaV8PBw5LeEi",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Meet Tilly</strong></p>",
+                        "<p>Tilly is a real-life bionic teen.  At only 15 months old, Tilly had both her hands amputated at the wrist because of a very rare infection. For years she used basic silicon arms, but in 2018 she became the first child in the UK to have bionic arms. These high-tech, 3D printed arms give Tilly a much fuller range of movement. In class, you will watch a video about Tilly,  who is now a model, public speaker and make-up vlogger. In the video, Tilly showcases her colorful arm cases, before applying a full face of make-up - and trying out a new edgy look. </p>",
+                        "<p>This <a href='https://www.youtube.com/watch?v=q2MjTcmLuIQ'>video</a> received over 2M views on YouTube! You can read more about Tilly <a href='https://openbionics.com/bionic-tilly/'>here</a></p>"
+                      ]
                     }
                   }
                 ]
@@ -630,80 +736,35 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "tJZWTi-WSYcSULuW",
+                    "id": "P7m0jRM_FltsX8Gt",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>DISCUSS</h2>",
-                        "<p>Let&#x27;s Discuss your shared experience of playing with the energy sticks and what you have observed! Some questions you could think about are:</p>",
-                        "<ul><li>What makes our classroom light glow? (Flick light switch off) Why does flicking the switch stop the light from glowing? </li><li>What conditions appear to be necessary to make the light stick glow? What conditions appear to be necessary to make the light stick not glow? How can this be explained?</li></ul>"
+                        "<p><u><strong>Reflection</strong></u></p>",
+                        "<p>As you recall, throughout the neural engineering unit, you will keep a learning journal called a KWL Journal (KWL stands for Know, Wonder, and Learn). </p>",
+                        "<p>To access your journal, click on &quot;My Work&quot; &gt;&gt; &quot;KWL Journals&quot;</p>",
+                        "<p>Click on &quot;My First Learning Log&quot; and click &quot;Edit&quot; .</p>",
+                        "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>"
                       ]
                     }
                   },
                   {
-                    "id": "2LHRBzTmJD5hzG5R",
+                    "id": "hR3cMwt35vT0bYp_",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>How do Bionic Arms Work? </h2>",
-                        "<p>Please watch one of the following videos to learn about the bionic arms: </p>",
-                        "<p><a href=' https://docs.google.com/presentation/d/1dHXctK0ogUft9mhM8TBB1m_kDUP_i0jbgvDpBVIb1WI/edit#slide=id.g1f5a554dbf_0_404'>Tilly’s Bionic Arms</a></p>",
-                        "<p><a href='https://drive.google.com/file/d/1Frped4M9BUD-KCYwiucsM3Z7jasCNm8v/view'>Beyond Robotics</a></p>"
+                        "<p><strong>Lesson 1.1 Journal Entry</strong></p>",
+                        "<p>1. Today&#x27;s date:</p>",
+                        "<p>2. Today&#x27;s topic:</p>",
+                        "<p>3. What did you already know about bionic arms before today&#x27;s activity?</p>",
+                        "<p>4. What are the main things that you learned today about bionic arms?</p>",
+                        "<p>5. What questions do you have about bionic arms?</p>",
+                        "<p>6. What questions would you like to ask Tilly (the teen with the bionic arms from the video)?</p>"
                       ]
                     }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h2>Working in Groups</h2>",
-                        "<p>Please practice working in groups using the group sharing tools in CLUE. Switch to the Group View and share your documents. Swap ideas about what you saw in the Bionic Arm videos, and how you think they relate to the energy stick.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/headerHelp.jpg"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Drag the table below into your learning log, and fill it in for this experiment.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "pC1DYCIgCcBCcfiq",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h2>KWL JOURNAL</h2>",
-                        "<p>You will keep a journal of what you have learned throughout these lessons. Begin or Open a KWL Journal either from the File menu or from the My Work tab. Record today's date. Then drag the table below into your journal and fill it out.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "VX0fplHGo5DQbZPK",
-                    "content": {
-                      "type": "Table",
-                      "name": "After each activity, please record what you know, wonder, and learn about the topic.",
-                      "columns": [
-                        {"name":"Date","values":["","",""]},
-                        {"name":"Today's Topic","values":["","",""]},
-                        {"name":"Know","values":["","",""]},
-                        {"name":"Wonder","values":["","",""]},
-                        {"name":"Learn","values":["","",""]}
-                      ]
-                    }
-                  }                
+                  }           
                 ]
               }
             }
