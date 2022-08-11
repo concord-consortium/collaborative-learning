@@ -174,7 +174,7 @@ export const PolygonModel = GeometryObjectModel
   .props({
     type: typeField("polygon"),
     points: types.array(types.string),
-    labels: types.array(PolygonSegmentLabelModel)
+    labels: types.maybe(types.array(PolygonSegmentLabelModel))
   })
   .views(self => ({
     get dependencies(): string[] {
