@@ -1,5 +1,5 @@
 import { castArray, difference, each, size as _size, union } from "lodash";
-import { Instance, SnapshotIn, SnapshotOut, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { Lambda } from "mobx";
 import { Optional } from "utility-types";
 import { SelectionStoreModelType } from "../../stores/selection";
@@ -223,9 +223,6 @@ export const GeometryContentModel = GeometryBaseContentModel
   }))
   .preProcessSnapshot(snapshot => {
     const imported = preprocessImportFormat(snapshot);
-    // TODO: handle imported title
-    // const { extras } = imported;
-    // do something with title
     return imported;
   })
   .views(self => ({
@@ -301,18 +298,6 @@ export const GeometryContentModel = GeometryBaseContentModel
                   .filter(obj => self.isSelected(obj.id) &&
                           !obj.getAttribute("fixed") && !obj.getAttribute("clientUndeletable"))
                   .map(obj => obj.id);
-    },
-    canUndo() {
-      // const hasUndoableChanges = self.changes.length > 1;
-      // if (!hasUndoableChanges) return false;
-      // const lastChange = hasUndoableChanges ? self.changes[self.changes.length - 1] : undefined;
-      // const lastChangeParsed = safeJsonParse<JXGChange>(lastChange);
-      // if (!lastChangeParsed || !isUndoableChange(lastChangeParsed)) return false;
-      // const lastChangeLinks = lastChangeParsed.links;
-      // if (!lastChangeLinks) return true;
-      // // we don't support undoing changes linked to tables in this transition period
-      // // between undo/redo implementations
-      return false;
     }
   }))
   .views(self => ({

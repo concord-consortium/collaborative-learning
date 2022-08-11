@@ -1,5 +1,5 @@
 import { difference, intersection } from "lodash";
-import { applySnapshot, getSnapshot, getType, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { applySnapshot, getSnapshot, getType, IMSTArray, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { kGeometryToolID } from "./geometry-types";
 import { uniqueId } from "../../../utilities/js-utils";
 import { typeField } from "../../../utilities/mst-utils";
@@ -174,7 +174,7 @@ export const PolygonModel = GeometryObjectModel
   .props({
     type: typeField("polygon"),
     points: types.array(types.string),
-    labels: types.maybe(types.array(PolygonSegmentLabelModel))
+    labels: types.array(PolygonSegmentLabelModel)
   })
   .views(self => ({
     get dependencies(): string[] {
