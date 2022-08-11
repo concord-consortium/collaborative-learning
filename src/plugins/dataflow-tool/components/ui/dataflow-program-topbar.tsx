@@ -154,19 +154,18 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         />
 
         { props.showRecordUI &&
-          <RecordButton readOnly={props.readOnly} />
-        }
-
-        { props.showRecordUI &&
-          <button
-            className="program-state-button"
-            title="Stop Program"
-            onClick={props.onStopProgramClick}
-            disabled={!props.runningProgram || !props.readOnly}
-          >
-            <div className="icon stop" />
-            <div className="text">Stop</div>
-          </button>
+          <>
+            <RecordButton readOnly={props.readOnly} />
+            <button
+              className="program-state-button"
+              title="Stop Program"
+              onClick={props.onStopProgramClick}
+              disabled={!props.runningProgram || !props.readOnly}
+            >
+              <div className="icon stop" />
+              <div className="text">Stop</div>
+            </button>
+          </>
         }
 
       </div>
