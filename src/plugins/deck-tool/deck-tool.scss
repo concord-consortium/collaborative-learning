@@ -14,4 +14,15 @@
     width: 100%;
     height: 100%;
   }
+
+  .deck-toolbar {
+    border: solid 1.5px $charcoal-light-1;
+    background-color: $workspace-teal-light-5;
+    font-size: 13px;
+    color: $charcoal-dark-2;
+    margin: 30px;
+    padding: 10px;
+    width: 400px;
+    border-radius: 3px 3px 0px 0px;
+  }
 }

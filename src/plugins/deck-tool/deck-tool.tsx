@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { DeckContentModelType } from "./deck-content";
+import { TileLabelInput } from "../../components/tools/tile-label-input";
 
 import "./deck-tool.scss";
 
@@ -9,10 +10,12 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const { documentContent, model } = props;
   const content = model.content as DeckContentModelType;
 
+  const [isEditing, setIsEditing] = useState(false);
+
   const setDefaultTitle = () => {
     if (!content.metadata.title || content.metadata.title === ""){
       const count = documentContent?.getElementsByClassName('deck-tool-tile').length
-      content.setTitle(`Deck ${ count ? count : "1" }`)
+      content.setTitle(`Data Card Collection ${ count ? count : "1" }`)
     }
   }
 
@@ -26,15 +29,38 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     setTimeout(() => {
       setDefaultTitle();
     }, 2000);
-  })
+  },[content.metadata.title])
 
-  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     content.setTitle(event.target.value);
   };
 
+  const handleTitleClick = (event: any) => {
+    setIsEditing(true)
+  }
+
+  const handleTitleKeyDown = (event:  React.KeyboardEvent<HTMLInputElement>) => {
+    const { key } = event;
+    console.log("key: ", key)
+    if ( key === "Enter"){
+      setIsEditing(false);
+    }
+  }
+
   return (
-    <div className="deck-tool" style={{ border: "3px dashed silver", padding: "6px" }}>
-      <textarea value={content.metadata.title} onChange={handleChange} />
+    <div className="deck-tool">
+      <div className="deck-toolbar">
+      { isEditing
+        ? <input
+          value={content.metadata.title}
+          onChange={handleTitleChange}
+          onKeyDown={handleTitleKeyDown}
+        />
+        : <div className="editable-deck-title-text" onClick={handleTitleClick}>
+            { content.metadata.title }
+          </div>
+      }
+      </div>
     </div>
   );
 });
