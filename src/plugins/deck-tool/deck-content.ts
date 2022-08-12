@@ -29,7 +29,6 @@ export const DeckContentModel = ToolContentModel
     get dataSetName(){
       return self.dataSet.name
     },
-    get currentAttributes
     exportJson(options?: ITileExportOptions){
       return [
         `{`,
