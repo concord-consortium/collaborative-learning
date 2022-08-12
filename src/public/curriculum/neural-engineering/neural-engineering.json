@@ -1557,6 +1557,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
+                        "<p>Today we will explore how Electromyography (EMH) signals can be used to control a robotic gripper.</p>",
                         "<p><strong>Learning Objectives</strong></p>",
                         "<p>By the end of this activity, you will be able to model the performance of a bionic arm. </p>"
                       ]
@@ -1603,7 +1604,7 @@
                       "format": "html",
                       "text": [
                         
-                        "<p><u><strong>Step 1: Create a program that controls the gripper</strong></u></p>","<p><strong>Setting up:</strong></p>",
+                        "<p><strong>Step 1: Create a program that controls the gripper</strong></p>","<p><strong>Setting up:</strong></p>",
                         "<p>1. Connect the blue cable to the Arduino board and then connect the other end of the blue cable to your computer’s USB port: </p>"
                       ]
                     }
@@ -1651,124 +1652,30 @@
                         "<p>3. Look closely at the Muscle SpikerShield (the yellow board)  and find the EMG &lt;&gt; Control switch. Make sure that the switch in on &quot;Control&quot;</p>",
                         "<p>4. Create a Dataflow tile in your workspace and add a &quot;Live Output&quot; block. Select &quot;Grabber&quot; from the dropdown menu. </p>",
                         "<p>5. Click on the &quot;flashlight&quot; button in the top-right corner of the Dataflow tile in order to connect to the gripper. The browser will open a popup that says the site would like to connect to a Serial Port.  </p>",
-                        "<p>There should only be one choice.  Click on it and then hit the connect button. </p>",
-                        "<p>&lt;&lt; Insert connect2serial.jpg &gt;&gt;</p>",
+                        "<p>There should only be one choice.  Click on it and then hit the connect button. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ViQzY8KepP6uCiKN",
+                    "title": "Browser connection dialog to the Arduino",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/Connect2serial.png",
+                      "filename": "curriculum/neural-engineering/images/Connect2serial.png"
+                    }
+                  },
+                  {
+                    "id": "OKkKRvCqIfMFyqzH",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<p>6. To make the gripper open and close, you will need to add an input block (for example, a timer or a generator) and connect it to the output block. </p>",
                         "<p>7. Power up the gripper by connecting a 9V battery to the Muscle SpikerShield (the yellow board). The gripper should close, wait, and open. </p>",
                         "<p>8. Experiment with different input types (for example, if you used a timer, switch it to a generator). </p>",
                         "<p>9. When you&#x27;re done, delete the Dataflow tile and unplug the battery. </p>"
                       ]
-                    }
-                  }
-                
-                  {
-                    "id": "ljgXdA8hHMo9TLsy",
-                    "title": "Read EMG to Control Gripper",
-                    "content": {
-                      "type": "Dataflow",
-                      "programDataRate": 1000,
-                      "programZoom": {
-                        "dx": 0,
-                        "dy": -1.2421875,
-                        "scale": 1.2283236994572464
-                      },
-                      "program": {
-                      "values": {
-                        "1": {"currentValues": {"nodeValue": 87}},
-                        "18": {"currentValues": {"nodeValue": 43}},
-                        "39": {"currentValues": {"nodeValue": 0.435}},
-                        "46": {"currentValues": {"nodeValue": 200}}
-                      },
-                      "id": "dataflow@0.1.0",
-                      "nodes": {
-                        "1": {
-                          "id": 1,
-                          "name": "Sensor",
-                          "x": 36.2991455671697,
-                          "y": 12.363123852467389,
-                          "inputs": {},
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "39-undefined-num1": {"node": 39, "input": "num1", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {
-                            "plot": true,
-                            "type": "emg-reading",
-                            "sensor": "00007VIR",
-                            "virtual": true,
-                            "inputKeys": []
-                          }
-                        },
-                        "18": {
-                          "id": 18,
-                          "name": "Live Output",
-                          "x": 495.3019759867558,
-                          "y": 127.6894441735666,
-                          "inputs": {
-                            "nodeValue": {
-                              "connections": {
-                                "39-num-undefined": {"node": 39, "output": "num", "data": {}}
-                              }
-                            }
-                          },
-                          "outputs": {},
-                          "data": {
-                            "plot": false,
-                            "outputType": "Grabber",
-                            "liveOutputType": "Grabber",
-                            "inputKeys": []
-                          }
-                        },
-                        "39": {
-                          "id": 39,
-                          "name": "Math",
-                          "x": 260.20033253349686,
-                          "y": 131.7286275913869,
-                          "inputs": {
-                            "num1": {
-                              "connections": {
-                                "1-num-undefined": {"node": 1, "output": "num", "data": {}}
-                              }
-                            },
-                            "num2": {
-                              "connections": {
-                                "46-num-undefined": {"node": 46, "output": "num", "data": {}}
-                              }
-                            }
-                          },
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "18-undefined-nodeValue": {
-                                  "node": 18,
-                                  "input": "nodeValue",
-                                  "data": {}
-                                }
-                              }
-                            }
-                          },
-                          "data": {"plot": false, "mathOperator": "Divide", "inputKeys": []}
-                        },
-                        "46": {
-                          "id": 46,
-                          "name": "Number",
-                          "x": 36.10750020168834,
-                          "y": 259.26145302136894,
-                          "inputs": {},
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "39-undefined-num2": {"node": 39, "input": "num2", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {"plot": false, "nodeValueUnits": "", "inputKeys": []}
-                        }
-                      }
-                    }
                     }
                   },
                   {
@@ -1779,25 +1686,135 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Explanation of the above code blocks (not for students):</strong></p>",
-                        "<p>In this activity, there is only one muscle (EMG) sensor. Students can choose one of the  &#x27;Demo’ inputs or a connected Arduino. When the student choses &#x27;BB EMG’ from the Sensor block menu then they will get a browser dialog allowing them to select the hardware for real-time data input.</p>",
-                        "<p>The app visualizes the muscle electrical activity, allowing students to change the vertical scale of the signal with the ‘+’ and ‘-’ buttons.  </p>",
-                        "<p>Once a logic block is added, a horizontal threshold line is superimposed on the EMG data. Students can then choose an operation (e.g., ‘Greater than’) and enter a value (e.g., ‘8’). The horizontal red line (i.e., the threshold) shifts up/down accordingly.  </p>",
-                        "<p>Next, students add an ‘action’ and an ‘output device’ blocks.  </p>",
-                        "<p>Output: Students can either choose ‘Simulation’ for a simulated output device (a basic gripper that opens and closes) or one of the Arduino’s digital outputs to control an external device.   </p>",
-                        "<p>Under ‘Action’, students choose a specific movement (e.g., ‘close’). Some types of movements have additional parameters, like speed (in this case, how fast the gripper closes).  </p>",
-                        "<p>When the signal rises above the threshold the gripper closes, and when the signal drops below the threshold the gripper opens. </p>",
+                        "<p>In this activity, there is only one muscle (EMG) sensor. Students can choose one of the Demo inputs or a connected Arduino. When the student choses &#x27;BB EMG’ from the Sensor block menu then they will get a browser dialog allowing them to select the hardware for real-time data input.</p>",
+                        "<p>Output: Students can either choose ‘Demo Output’ blocks for a simulated output device (an animated gripper that opens and closes) or the Live Output block to control an external device.</p>",
+                        "<p>The signal is interpreted as a percentage between 0 and 1 mapped to how far the  gripper is closed. Note that students must normalize the signal inputs so that  </p>",
                         "<p>The logic block might need to detect if the EMG crosses the threshold with a rising or falling edge. The polarity of the cross may inform whether the gripper opens or closes. </p>"
                       ]
                     }
                   },
                   {
-                    "id": "XY7oFR3XIFHgn9tG",
+                    "id": "u-D-4fUm_3jvupew",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>TIP: </strong>While interacting with the gripper, pay close attention to how you could make it work better. Some options to consider are: </p>",
-                        "<ul><li>Changing the locations of the electrodes. For example, students may have more success controlling the gripper by placing the EMG electrodes on the fleshy part below their pinky and the reference electrode by their thumb. </li><li>Changing the sensitivity of the device by pressing the gray button the Muscle SpikerShield. </li><li>Adding or editing the parameters and nodes in the Dataflow control program</li><li>Grasping objects of different sizes/weights. </li></ul>"
+                        "<p><u><strong>Step 2: Create a program that reads EMG data</strong></u></p>",
+                        "<p>1. Stick two EMG surface electrodes on your forearm and one on your elbow.</p>",
+                        "<p>2. Find the orange cord that ends in two red and one black alligator clips. </p>",
+                        "<p>3. Connect the black alligator clip to the electrode on your elbow and the red alligator clips to the electrodes on your forearm. </p>",
+                        "<p>4. Plug the end of the orange wire into the orange connection box on the Muscle SpikerShield.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "1Rd3c6ll9UT2bcUa",
+                    "title": "diagram showing arm electrodes and Arduino",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/EMG_elec.png",
+                      "filename": "curriculum/neural-engineering/images/EMG_elec.png"
+                    }
+                  },
+                  {
+                    "id": "a6Y-_d7uJgXwYKSX",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>5. Create a new Dataflow tile and add a sensor block:</p>",
+                        "<p>- In the &quot;Select a sensor type&quot; drop-down menu, select EMG</p>",
+                        "<p>- In the &quot;Select a sensor&quot; drop-down menu, select &quot;connect for live EMG&quot;</p>",
+                        "<p>6. Click on the button with the flashlight, where it says &quot;click to finish connection&quot;</p>",
+                        "<p>- The browser may open a popup that says the site would like to connect to a Serial Port.  </p>",
+                        "<p>- There should only be one choice.  Click on it and then hit the connect button. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "nz61VSvy7o4fahSJ",
+                    "title": "Sensor Block asking for connection",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/EMG_sensor.png",
+                      "filename": "curriculum/neural-engineering/images/EMG_sensor.png"
+                    }
+                  },
+                  {
+                    "id": "I1DPyVivaatqn1j9",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>7. Set the sampling rate to 100ms</p>",
+                        "<p>8. Click on the graph icon in the EMG sensor block to visualize the incoming data. Do you see a change in the reading when you contract your arm muscles?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "3t_fpHwIINxmPfh_",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u><strong>Step 3: Add a simulated output</strong></u></p>",
+                        "<p>To make sure that the program reads your EMG data correctly, add a demo output. For example, try to make a program that turns on a virtual light bulb when the EMG reading is above a certain value. </p>",
+                        "<p><strong>Tip</strong>: you will need to use Logic and Number blocks.</p>",
+                        "<p>Next, instead of a light bulb choose a grabber demo. Can you make the simulated grabber open and close when you contract your arm muscles? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "hYx1wCzN11h6MHfw",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u><strong>Step 4: Control a real-life gripper with your muscles</strong></u></p>",
+                        "<p>Finally, replace the Demo Output block with a Live Output Block. In the drop-down menu, choose &quot;Grabber.&quot; </p>",
+                        "<p>Power up the gripper by connecting a 9V battery to the Muscle SpikerShield (the yellow board). </p>",
+                        "<p>Can you make the gripper open and close by contracting your arm muscles?</p>",
+                        "<p>Congratulations! You just created a model of bionic arm!</p>",
+                        "<p>Try experimenting with:</p>",
+                        "<p>1. The sensitivity of the device (can be changed by pressing the gray button on the Muscle SpikerShield). </p>",
+                        "<p>2.  The locations of the EMG electrodes. Can you control the gripper more effectively with different muscles?</p>",
+                        "<p>3. Grasping objects of different sizes/weights. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "uNijOQL2yeqEY1uL",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u><strong>Extra challenge</strong></u></p>",
+                        "<p>Can you make the gripper close in proportion to the amplitude of the EMG signal? In other words, can you make the gripper close just slightly with a minor muscle contraction and fully close with a major muscle contraction?</p>",
+                        "<p>Tip: The Live Grabber block expects a number between 0 and 1 that tells it how much to close. You will need to replace the Logic block with a Math block to convert the EMG signal to a number between 0 and 1. </p>",
+                        "<p>** Remember to disconnect the 9V battery at the end of class **</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "BoMrohzyu7zzPVhP",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><u><strong>Evaluate the design of the gripper</strong></u></p>",
+                        "<p>Discuss the strengths and weaknesses of the EMG-controlled gripper with your group and summarize the conversation in your workspace.  </p>",
+                        "<p>How would you improve the design of the gripper? Try to sketch some ideas on paper and upload a picture to your workspace. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "FySTI5ZeFjtBFivK",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflection</strong></p>",
+                        "<p>Please record your current thinking and learning in your KWL journal (see Reflection tab). </p>"
                       ]
                     }
                   }
@@ -1809,37 +1826,29 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "NnEsglq6h1cl1LLF",
+                    "id": "4SK51tx_E7wAPtD9",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Now, it is time to reflect on the activity as a group! Add tiles in your workspace to:</p>",
-                        "<ul><li>Evaluate the strengths and weaknesses of the EMG-controlled gripper and summarize your ideas in a table format.</li><li>Reflect on how the design of the gripper can be improved and please sketch out your ideas. </li><li>The Demo Output node in the Dataflow program blocks has a more advanced gripper. Try some programs with that and reflect on how this is an improvement on the existing device.</li><li>Reflect back on the video with the young woman at the opening of the unit, discuss how a device like the gripper can serve her in her day-to-day life. </li></ul>"
+                        "<p>Please load your KWL journal (&quot;My Work&quot; &gt;&gt; &quot;KWL Journals&quot;). </p>",
+                        "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>"
                       ]
                     }
                   },
                   {
-                    "id": "-stXSYhQihn8cigq",
+                    "id": "n0rsmTXnAaRje6B1",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Open your Journal and add a copy of the table below to document this activity.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "loDGgu4BfJ1642rw",
-                    "content": {
-                      "type": "Table",
-                      "name": "After each activity, please record what you know, wonder, and learn about the topic.",
-                      "columns": [
-                        {"name":"Date","values":["","","",""]},
-                        {"name":"Today's Topic","values":["","","",""]},
-                        {"name":"Know","values":["","","",""]},
-                        {"name":"Wonder","values":["","","",""]},
-                        {"name":"Learn","values":["","","",""]}
+                        "<p><strong>Lesson 1.5 Journal Entry</strong></p>",
+                        "<p>1. Today&#x27;s date:</p>",
+                        "<p>2. Today&#x27;s topic:</p>",
+                        "<p>3. What did you already know about bionic arms before today&#x27;s class? </p>",
+                        "<p>4. What are the main things that you learned today about bionic arms?</p>",
+                        "<p>5. What questions do you have about bionic arms?</p>",
+                        "<p>6. How would you modify the design of the EMG-controlled gripper to help Tilly? </p>"
                       ]
                     }
                   }
