@@ -89,7 +89,9 @@ export function getTableLinkColors(tableId?: string) {
           { fill: styles.linkColor4Light, stroke: styles.linkColor4Dark },
           { fill: styles.linkColor5Light, stroke: styles.linkColor5Dark }
         ];
-  const linkIndex = tableId ? getLinkedTableIndex(tableId) : -1;
+  // TODO Fix this!
+  // const linkIndex = tableId ? getLinkedTableIndex(tableId) : -1;
+  const linkIndex = 0;
   return linkIndex >= 0
           ? colors[linkIndex % colors.length]
           : undefined;
