@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { IToolApi } from "../../components/tools/tool-api";
 import { ToolTileModel } from "../../models/tools/tool-tile";
-import { defaultDeckContent, DeckContentModel } from "./deck-content";
+import { defaultDeckContent } from "./deck-content";
 import { DeckToolComponent } from "./deck-tool";
 
 // The deck tile needs to be registered so the ToolTileModel.create
@@ -46,28 +46,6 @@ describe("DeckToolComponent", () => {
   it("renders successfully", () => {
     const {getByText} =
       render(<DeckToolComponent  {...defaultProps} {...{model}}></DeckToolComponent>);
-    expect(getByText("Hello World")).toBeInTheDocument();
-  });
-
-  it("updates the text when the model changes", async () => {
-    const {getByText, findByText} =
-      render(<DeckToolComponent  {...defaultProps} {...{model}}></DeckToolComponent>);
-    expect(getByText("Hello World")).toBeInTheDocument();
-
-    content.setDescription("New Text");
-
-    expect(await findByText("New Text")).toBeInTheDocument();
-  });
-
-  it("updates the model when the user types", () => {
-    const {getByRole, getByText} =
-      render(<DeckToolComponent  {...defaultProps} {...{model}}></DeckToolComponent>);
-    expect(getByText("New Text")).toBeInTheDocument();
-
-    const textBox = getByRole("textbox");
-    userEvent.type(textBox, "{selectall}{del}Typed Text");
-
-    expect(textBox).toHaveValue("Typed Text");
-    expect(content.deckDescription).toBe("Typed Text");
+      expect(getByText("Data Card Collection 1")).toBeInTheDocument();
   });
 });

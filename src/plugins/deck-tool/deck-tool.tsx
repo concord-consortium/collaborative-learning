@@ -6,7 +6,7 @@ import { DeckContentModelType } from "./deck-content";
 import "./deck-tool.scss";
 
 export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
-  const { documentContent, model } = props;
+  const { documentContent, model, readOnly } = props;
   const content = model.content as DeckContentModelType;
 
   const [isEditing, setIsEditing] = useState(false);
@@ -35,12 +35,19 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   };
 
   const handleTitleClick = (event: any) => {
-    setIsEditing(true)
+    if (!readOnly){
+      setIsEditing(true)
+    }
+  }
+
+  const handleChange = (event: any) => {
+    if (!readOnly) {
+      content.setDescription(event.target.value)
+    }
   }
 
   const handleTitleKeyDown = (event:  React.KeyboardEvent<HTMLInputElement>) => {
     const { key } = event;
-    console.log("key: ", key)
     if ( key === "Enter"){
       setIsEditing(false);
     }
@@ -66,6 +73,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
         <div className="panel nav">
           Card 1 of 1
         </div>
+        <textarea value={content.deckDescription} onChange={handleChange} />
       </div>
     </div>
   );
