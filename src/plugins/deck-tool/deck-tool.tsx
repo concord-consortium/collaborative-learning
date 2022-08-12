@@ -40,7 +40,8 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   }
 
-  const handleChange = (event: any) => {
+  // This is a generic setter for dummy data in development, will be removed
+  const handleDescriptionChange = (event: any) => {
     if (!readOnly) {
       content.setDescription(event.target.value)
     }
@@ -73,7 +74,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
         <div className="panel nav">
           Card 1 of 1
         </div>
-        <textarea value={content.deckDescription} onChange={handleChange} />
+        {/* <textarea value={content.deckDescription} onChange={handleDescriptionChange} /> */}
       </div>
     </div>
   );
