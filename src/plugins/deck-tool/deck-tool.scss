@@ -49,8 +49,12 @@
     }
     .panel.nav {
       background-color: $workspace-teal-light-5;
+
       button {
-        border:0px;
+        border:.5px tungsten;
+        margin:3px;
+        padding:2px;
+        border-radius: 2px;
       }
 
       button.disable {

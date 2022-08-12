@@ -87,6 +87,12 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   };
 
+  function addCase(){
+    content.dataSet.addCanonicalCasesWithIDs([
+      { __id__: "iceCreamMoth", mothName: "Ice Cream Moth", sciName: "Cladara Galcius", captureDate: "9/3/21" },
+    ])
+  }
+
   return (
     <div className="deck-tool">
       <div className="deck-toolbar">
@@ -108,6 +114,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           Card { caseIndex + 1 } of { all.length }
           <button className={ canDecrement ? 'able' : 'disable' } onClick={previousCase}>previous</button>
           <button className={ canIncrement ? 'able' : 'disable' } onClick={nextCase}>next</button>
+          <button className={ canIncrement ? 'able' : 'disable' } onClick={addCase}>+</button>
         </div>
         <div className="data-area-wrap">
           { dataForCase() }
