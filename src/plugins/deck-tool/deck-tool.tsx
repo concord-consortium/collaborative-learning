@@ -9,6 +9,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const { documentContent, model, readOnly } = props;
   const content = model.content as DeckContentModelType;
 
+  console.log("content.dataSetName get dataSetName() ", content.dataSetName)
   const [isEditing, setIsEditing] = useState(false);
   const dummyDescriptionDataOn = false; //TODO - remove this, for dev only
 
@@ -74,6 +75,9 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
         </div>
         <div className="panel nav">
           Card 1 of 1
+        </div>
+        <div className="data-area-wrap">
+          dataSet
         </div>
         { dummyDescriptionDataOn && <textarea value={content.deckDescription} onChange={handleDescriptionChange} /> }
       </div>

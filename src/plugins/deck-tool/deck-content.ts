@@ -26,6 +26,10 @@ export const DeckContentModel = ToolContentModel
     get isUserResizable() {
       return true;
     },
+    get dataSetName(){
+      return self.dataSet.name
+    },
+    get currentAttributes
     exportJson(options?: ITileExportOptions){
       return [
         `{`,
@@ -43,7 +47,6 @@ export const DeckContentModel = ToolContentModel
   }))
   .actions(self => ({
     afterCreate(){
-      console.log('Creating: ', self)
       self.dataSet.setName("My Moth Collection");
       self.dataSet.addAttributeWithID({
         id: "mothName",
