@@ -10,13 +10,14 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const content = model.content as DeckContentModelType;
 
   const [isEditing, setIsEditing] = useState(false);
+  const dummyDescriptionDataOn = false; //TODO - remove this, for dev only
 
   const setDefaultTitle = () => {
     if (!content.metadata.title || content.metadata.title === ""){
-      const count = documentContent?.getElementsByClassName('deck-tool-tile').length
-      content.setTitle(`Data Card Collection ${ count ? count : "1" }`)
+      const count = documentContent?.getElementsByClassName('deck-tool-tile').length;
+      content.setTitle(`Data Card Collection ${ count ? count : "1" }`);
     }
-  }
+  };
 
   // on first load of tile, set default title
   useEffect(() => {
@@ -28,7 +29,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     setTimeout(() => {
       setDefaultTitle();
     }, 2000);
-  },[content.metadata.title])
+  },[content.metadata.title]);
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     content.setTitle(event.target.value);
@@ -36,23 +37,23 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
 
   const handleTitleClick = (event: any) => {
     if (!readOnly){
-      setIsEditing(true)
+      setIsEditing(true);
     }
-  }
+  };
 
   // This is a generic setter for dummy data in development, will be removed
   const handleDescriptionChange = (event: any) => {
     if (!readOnly) {
-      content.setDescription(event.target.value)
+      content.setDescription(event.target.value);
     }
-  }
+  };
 
   const handleTitleKeyDown = (event:  React.KeyboardEvent<HTMLInputElement>) => {
     const { key } = event;
     if ( key === "Enter"){
       setIsEditing(false);
     }
-  }
+  };
 
   return (
     <div className="deck-tool">
@@ -74,7 +75,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
         <div className="panel nav">
           Card 1 of 1
         </div>
-        {/* <textarea value={content.deckDescription} onChange={handleDescriptionChange} /> */}
+        { dummyDescriptionDataOn && <textarea value={content.deckDescription} onChange={handleDescriptionChange} /> }
       </div>
     </div>
   );

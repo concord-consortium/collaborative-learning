@@ -1,5 +1,4 @@
 import { render } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import React from "react";
 import { IToolApi } from "../../components/tools/tool-api";
 import { ToolTileModel } from "../../models/tools/tool-tile";
