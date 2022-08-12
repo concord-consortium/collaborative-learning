@@ -83,7 +83,7 @@ export class CanvasComponent extends BaseComponent<IProps> {
 
   private renderContent() {
     const {content, document, showPlayback, showPlaybackControls, ...others} = this.props;
-    const documentContent = document?.content;
+    const documentContent = content || document?.content; // we only pass in content if it is a problem panel
     const typeClass = document?.type === "planning" ? "planning-doc" : "";
 
     if (documentContent) {
