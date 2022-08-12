@@ -163,7 +163,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private suspendSnapshotResponse = 0;
   private boardPromise: Promise<JXG.Board> | undefined;
 
-  private debouncedUpdateImage = debounce((url: string, filename?: string) => {
+  private updateImage = (url: string, filename?: string) => {
             gImageMap.getImage(url, { filename })
               .then(image => {
                 if (!this._isMounted) return;
@@ -194,7 +194,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                   imageEntry: undefined
                 });
               });
-          }, 100);
+          };
 
   constructor(props: IProps) {
     super(props);
@@ -564,7 +564,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     if (!this.state.isLoading) {
       this.setState({ isLoading: true });
     }
-    this.debouncedUpdateImage(url, filename);
+    this.updateImage(url, filename);
   }
 
   private rescaleBoardAndAxes(params: IAxesParams) {
