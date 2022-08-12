@@ -38,6 +38,14 @@ export const DeckContentModel = ToolContentModel
     allCases(){
       return self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length)
     },
+    existingAttributes(){
+      return self.dataSet.attributes.map((a) => {
+        return { "attrName": a.name, "attrId": a.id }
+      })
+    },
+    attrById(str: string){
+      return self.dataSet.attrFromID(str)
+    },
     exportJson(options?: ITileExportOptions){
       return [
         `{`,
