@@ -1,6 +1,6 @@
 import { difference, intersection } from "lodash";
-import { applySnapshot, getSnapshot, getType, IMSTArray, Instance, SnapshotIn, types } from "mobx-state-tree";
-import { kGeometryToolID } from "./geometry-types";
+import { applySnapshot, getSnapshot, getType, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { kDefaultBoardModelInputProps, kGeometryToolID } from "./geometry-types";
 import { uniqueId } from "../../../utilities/js-utils";
 import { typeField } from "../../../utilities/mst-utils";
 import { ToolContentModel } from "../tool-types";
@@ -49,11 +49,9 @@ export const AxisModel = types.model("AxisModel", {
   setRange(range: number) {
     self.range = range;
   }
-}))
+}));
 export interface AxisModelType extends Instance<typeof AxisModel> {}
 export interface AxisModelSnapshot extends SnapshotIn<typeof AxisModel> {}
-
-const defaultAxis = () => AxisModel.create({ min: 0 });
 
 export const BoardModel = types.model("BoardModel", {
   xAxis: AxisModel,
@@ -61,7 +59,7 @@ export const BoardModel = types.model("BoardModel", {
 });
 export interface BoardModelType extends Instance<typeof BoardModel> {}
 
-export const defaultBoard = () => BoardModel.create({ xAxis: defaultAxis(), yAxis: defaultAxis() });
+export const defaultBoard = () => BoardModel.create(kDefaultBoardModelInputProps);
 
 export const GeometryObjectModel = types.model("GeometryObject", {
   type: types.optional(types.string, () => {throw "Type must be overridden";}),
