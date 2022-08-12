@@ -10,23 +10,23 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const content = model.content as DeckContentModelType;
 
   const setDefaultTitle = () => {
-    const count = documentContent?.getElementsByClassName('deck-tool-tile').length
-    content.setTitle(`Data Card Collection ${ count ? count : "1" }`)
+    if (!content.metadata.title || content.metadata.title === ""){
+      const count = documentContent?.getElementsByClassName('deck-tool-tile').length
+      content.setTitle(`Deck ${ count ? count : "1" }`)
+    }
   }
 
+  // on first load of tile, set default title
   useEffect(() => {
-      setTimeout(()=>{
-        if (content.metadata.title === ""){
-          setDefaultTitle()
-        }
-      }, 2000)
-  })
+    setDefaultTitle();
+  }, []);
 
+  // if user erases title, give them a moment and then reset default
   useEffect(() => {
-    if (!content.metadata.title){
+    setTimeout(() => {
       setDefaultTitle();
-    }
-  }, [])
+    }, 2000);
+  })
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     content.setTitle(event.target.value);
