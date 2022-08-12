@@ -240,10 +240,6 @@
         {
           "description": "Lesson 0.1",
           "ordinal": 1,
-      "problems": [
-        {
-          "description": "Lesson 0.1",
-          "ordinal": 1,
           "title": "Lesson 0.1 Using CLUE and Dataflow Programming",
           "subtitle": "",
           "disabled": [],
@@ -1938,15 +1934,6 @@
               }
             }
           ]
-        }
-      ]
-    },
-    {
-      "description": "Investigation 2",
-      "ordinal": 2,
-      "title": "Module 2: Touch",
-      "problems": [
-        {
         },
         {
           "description": "Lesson 2.2",
@@ -1993,7 +1980,6 @@
                   },
                   {
                     "id": "o3JbOhrMcfwYJdoT",
->>>>>>> master
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -2010,28 +1996,6 @@
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/caliperPlacement.jpg"
->>>>>>> master
-                    }
-                  }
-
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "description": "Lesson 2.2",
-          "ordinal": 2,
-          "title": "Lesson 2.2 - How do we perceive touch?",
-          "subtitle": "",
-          "disabled": [],
-          "sections": 
-          [
-            {
-              "type": "intro",
-              "content": {
-                "tiles": [
-                  {
                     }
                   },
                   {
@@ -2645,7 +2609,6 @@
                 "tiles": [
                   {
                     "id": "RhyzEuq9rqtjPydo",
->>>>>>> master
                     "content": {
                       "type": "Text",
                       "format": "html",
