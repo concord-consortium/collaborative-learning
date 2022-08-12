@@ -279,8 +279,8 @@ export const TableContentModel = ToolContentModel
         else {
           if (!sharedDataSet) {
             // The document doesn't have a shared model yet
-            const dataSet = !self.importedDataSet.isEmpty
-              ? DataSet.create(getSnapshot(self.importedDataSet)) : DataSet.create();
+            const dataSet = DataSet.create(!self.importedDataSet.isEmpty
+              ? getSnapshot(self.importedDataSet) : undefined);
             self.clearImportedDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
           }
