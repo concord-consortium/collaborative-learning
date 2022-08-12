@@ -35,13 +35,8 @@ export const DeckContentModel = ToolContentModel
     caseByIndex(index:number){
       return self.dataSet.getCanonicalCaseAtIndex(index)
     },
-    allCasesHardCoded(){
-      return self.dataSet.getCanonicalCases(['mottledGray', "sweaterMoth"])
-    },
     allCases(){
-      const length = self.dataSet.cases.length
-      console.log(length)
-      return self.dataSet.getCanonicalCases(['mottledGray', "sweaterMoth"])
+      return self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length)
     },
     exportJson(options?: ITileExportOptions){
       return [
@@ -77,7 +72,8 @@ export const DeckContentModel = ToolContentModel
         self.dataSet.addCanonicalCasesWithIDs([
           // case ids are always __id__, attribute ids ar id
           { __id__: "mottledGray", mothName: "Mottled Gray", sciName: "Cladara limitaria", captureDate: "9/3/21" },
-          { __id__: "sweaterMoth", mothName: "Sweater Moth", sciName: "Closeta Habituas", captureDate: "9/3/21" }
+          { __id__: "sweaterMoth", mothName: "Sweater Moth", sciName: "Closeta Habituas", captureDate: "9/3/21" },
+          { __id__: "pizzaMoth", mothName: "Pizza Moth", sciName: "Cladara Tomatus", captureDate: "9/3/21" }
         ]);
         console.log('Created: ', self.dataSet.cases)
       }

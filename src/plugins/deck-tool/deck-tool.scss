@@ -49,6 +49,14 @@
     }
     .panel.nav {
       background-color: $workspace-teal-light-5;
+      button {
+        border:0px;
+      }
+
+      button.disable {
+        color:rgb(208, 204, 204);
+        background-color: #c0bcbc;
+      }
     }
   }
 }
