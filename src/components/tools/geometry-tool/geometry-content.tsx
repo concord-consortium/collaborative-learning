@@ -789,14 +789,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   };
 
+  // duplicate selected objects without affecting clipboard
   private handleDuplicate = () => {
-    // copy the selected objects locally without affecting the clipboard
-    const copiedObjects = (this.handleCopy(false) || []) as GeometryObjectModelType[];
+    const copiedObjects = (this.copySelectedObjects() || []) as GeometryObjectModelType[];
     if (copiedObjects?.length) {
       // hash the copied objects to create a pasteId tied to the content
       const excludeKeys = (key: string) => ["id", "anchors", "points"].includes(key);
       const hash = objectHash(copiedObjects.map(obj => getSnapshot(obj)), { excludeKeys });
-      this.handlePaste({ pasteId: hash, isSameTile: true, objects: copiedObjects });
+      this.pasteObjects({ pasteId: hash, isSameTile: true, objects: copiedObjects });
     }
   };
 
@@ -808,50 +808,50 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return true;
   };
 
-  // handleCopy is being called with toClipboard as an event when cmd+c is pressed
-  private handleCopy = (toClipboard = true) => {
+  private copySelectedObjects() {
     const content = this.getContent();
     const { board } = this.state;
     if (board && content.hasSelection()) {
+      return content.copySelection(board);
+    }
+  }
+
+  // copy to clipboard
+  private handleCopy = () => {
+    const objects = this.copySelectedObjects();
+    if (objects) {
+      const content = this.getContent();
       const { clipboard } = this.stores;
-      const objects = content.copySelection(board);
-      if (toClipboard) {
-        const clipObjects = objects.map(obj => getSnapshot(obj));
-        clipboard.clear();
-        clipboard.addTileContent(content.metadata.id, content.type, clipObjects, this.stores);
-        return true;
-      }
-      return objects;
+      const clipObjects = objects.map(obj => getSnapshot(obj));
+      clipboard.clear();
+      clipboard.addTileContent(content.metadata.id, content.type, clipObjects, this.stores);
+      return true;
     }
   };
 
+  // cut to clipboard
   private handleCut = () => {
     this.handleCopy();
     return this.handleDelete();
   };
 
-  private getPasteContent(pasteContent?: IPasteContent): IPasteContent {
-    // We're getting some weird object as pasteContent, so make sure we have the content we actually need
-    if (pasteContent && Object.hasOwn(pasteContent, "objects")
-      && Object.hasOwn(pasteContent, "pasteId") && Object.hasOwn(pasteContent, "isSameTile")) {
-      return pasteContent;
-    }
-
+  // paste from clipboard
+  private handlePaste = () => {
     const content = this.getContent();
     const { clipboard } = this.stores;
     const objects = clipboard.getTileContent(content.type);
     const pasteId = clipboard.getTileContentId(content.type) || objectHash(objects);
     const isSameTile = clipboard.isSourceTile(content.type, content.metadata.id);
-    return { pasteId, isSameTile, objects };
-  }
+    this.pasteObjects({ pasteId, isSameTile, objects });
+  };
 
-  // pasteContent seems to be getting an event object, not IPasteContent
-  private handlePaste = (pasteContent?: IPasteContent) => {
+  // paste specified object content
+  private pasteObjects = (pasteContent: IPasteContent) => {
     const content = this.getContent();
     const { readOnly } = this.props;
     const { board } = this.state;
     if (!readOnly && board) {
-      const { pasteId, isSameTile, objects } = this.getPasteContent(pasteContent);
+      const { pasteId, isSameTile, objects } = pasteContent;
       if (objects?.length) {
         // track the number of times the same content has been pasted
         if (pasteId) {
