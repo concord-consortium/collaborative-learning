@@ -273,7 +273,6 @@ export const TableContentModel = ToolContentModel
           // "owner" of the data, we synchronize it with our local content.
           if (!self.importedDataSet.isEmpty) {
             sharedDataSet.dataSet = DataSet.create(getSnapshot(self.importedDataSet));
-            // sharedDataSet.dataSet = cloneDeep(self.importedDataSet) as unknown as IDataSet;
             self.clearImportedDataSet();
           }
         }
@@ -282,7 +281,6 @@ export const TableContentModel = ToolContentModel
             // The document doesn't have a shared model yet
             const dataSet = !self.importedDataSet.isEmpty
               ? DataSet.create(getSnapshot(self.importedDataSet)) : DataSet.create();
-            // const dataSet = !self.importedDataSet.isEmpty ? cloneDeep(self.importedDataSet) : DataSet.create();
             self.clearImportedDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
           }
