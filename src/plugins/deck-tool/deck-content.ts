@@ -27,7 +27,21 @@ export const DeckContentModel = ToolContentModel
       return true;
     },
     get dataSetName(){
-      return self.dataSet.name
+      return self.dataSet.name;
+    },
+    get attributes(){
+      return self.dataSet.attributes;
+    },
+    caseByIndex(index:number){
+      return self.dataSet.getCanonicalCaseAtIndex(index)
+    },
+    allCasesHardCoded(){
+      return self.dataSet.getCanonicalCases(['mottledGray', "sweaterMoth"])
+    },
+    allCases(){
+      const length = self.dataSet.cases.length
+      console.log(length)
+      return self.dataSet.getCanonicalCases(['mottledGray', "sweaterMoth"])
     },
     exportJson(options?: ITileExportOptions){
       return [
@@ -46,31 +60,34 @@ export const DeckContentModel = ToolContentModel
   }))
   .actions(self => ({
     afterCreate(){
-      self.dataSet.setName("My Moth Collection");
-      self.dataSet.addAttributeWithID({
-        id: "mothName",
-        name: "Moth Name"
-      });
-      self.dataSet.addAttributeWithID({
-        id: "sciName",
-        name: "Scientific Name"
-      });
-      self.dataSet.addAttributeWithID({
-        id: "captureDate",
-        name: "Capture Date"
-      });
-      self.dataSet.addCanonicalCasesWithIDs([
-        // case ids are always __id__, attribute ids ar id
-        { __id__: "mottledGray", mothName: "Mottled Gray", sciName: "Cladara limitaria", captureDate: "9/3/21" },
-      ]);
-      console.log('Created: ', self.dataSet.attributes)
+      if (!self.dataSet.name){
+        self.dataSet.setName("My Moth Collection");
+        self.dataSet.addAttributeWithID({
+          id: "mothName",
+          name: "Moth Name"
+        });
+        self.dataSet.addAttributeWithID({
+          id: "sciName",
+          name: "Scientific Name"
+        });
+        self.dataSet.addAttributeWithID({
+          id: "captureDate",
+          name: "Capture Date"
+        });
+        self.dataSet.addCanonicalCasesWithIDs([
+          // case ids are always __id__, attribute ids ar id
+          { __id__: "mottledGray", mothName: "Mottled Gray", sciName: "Cladara limitaria", captureDate: "9/3/21" },
+          { __id__: "sweaterMoth", mothName: "Sweater Moth", sciName: "Closeta Habituas", captureDate: "9/3/21" }
+        ]);
+        console.log('Created: ', self.dataSet.cases)
+      }
     },
     setDescription(text: string) {
       self.deckDescription = text;
     },
     setTitle(title: string) {
       setTileTitleFromContent(self, title);
-    },
+    }
   }));
 
 export interface DeckContentModelType extends Instance<typeof DeckContentModel> {}
