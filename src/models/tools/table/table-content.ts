@@ -1,7 +1,7 @@
 import { Expression, Parser } from "expr-eval";
 import { cloneDeep } from "lodash";
 import { reaction } from "mobx";
-import { addDisposer, Instance, SnapshotIn, types, getType } from "mobx-state-tree";
+import { addDisposer, Instance, SnapshotIn, types, getType, getSnapshot } from "mobx-state-tree";
 import { ITableChange } from "./table-change";
 import { exportTableContentAsJson } from "./table-export";
 import { convertChangesToSnapshot, convertImportToSnapshot, isTableImportSnapshot,
@@ -272,14 +272,17 @@ export const TableContentModel = ToolContentModel
           // The shared model has already been registered by a client, but as the
           // "owner" of the data, we synchronize it with our local content.
           if (!self.importedDataSet.isEmpty) {
-            sharedDataSet.dataSet = cloneDeep(self.importedDataSet) as unknown as IDataSet;
+            sharedDataSet.dataSet = DataSet.create(getSnapshot(self.importedDataSet));
+            // sharedDataSet.dataSet = cloneDeep(self.importedDataSet) as unknown as IDataSet;
             self.clearImportedDataSet();
           }
         }
         else {
           if (!sharedDataSet) {
             // The document doesn't have a shared model yet
-            const dataSet = !self.importedDataSet.isEmpty ? cloneDeep(self.importedDataSet) : DataSet.create();
+            const dataSet = !self.importedDataSet.isEmpty
+              ? DataSet.create(getSnapshot(self.importedDataSet)) : DataSet.create();
+            // const dataSet = !self.importedDataSet.isEmpty ? cloneDeep(self.importedDataSet) : DataSet.create();
             self.clearImportedDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
           }
