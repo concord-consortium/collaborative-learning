@@ -580,7 +580,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  // TODO This isn't currently being used, can we remove it?
   private autoRescaleBoardAndAxes(dataSet: IDataSet) {
     const { board } = this.state;
     if (board && (dataSet.attributes.length >= 2) && (dataSet.cases.length >= 1)) {
