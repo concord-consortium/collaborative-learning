@@ -234,27 +234,6 @@ export const TableContentModel = ToolContentModel
   .actions(self => toolContentModelHooks({
     doPostCreate(metadata) {
       self.metadata = metadata as TableMetadataModelType;
-
-      // TODO Move this elsewhere, after the sharedModel has been created and connected
-      // if (self.dataSet.attributes.length >= 2) {
-      //   const xAttr = self.dataSet.attributes[0];
-      //   const xName = xAttr.name;
-      //   self.dataSet.attributes.forEach((attr, i) => {
-      //     if (i > 0) {
-      //       attr.formula.synchronize(xName);
-      //       if (attr.formula.display) {
-      //         self.metadata.setRawExpression(attr.id, attr.formula.display);
-      //       }
-      //       if (attr.formula.canonical) {
-      //         self.metadata.setExpression(attr.id, attr.formula.canonical);
-      //       }
-      //     }
-      //   });
-      // }
-
-      // if (self.metadata.hasExpressions) {
-      //   self.metadata.updateDatasetByExpressions(self.dataSet);
-      // }
     }
   }))
   .actions(self => ({
@@ -313,6 +292,27 @@ export const TableContentModel = ToolContentModel
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       console.warn("updateAfterSharedModelChanges hasn't been implemented for table content.");
+
+      // TODO This was moved from doPostCreate and might need to be rethought.
+      // if (self.dataSet.attributes.length >= 2) {
+      //   const xAttr = self.dataSet.attributes[0];
+      //   const xName = xAttr.name;
+      //   self.dataSet.attributes.forEach((attr, i) => {
+      //     if (i > 0) {
+      //       attr.formula.synchronize(xName);
+      //       if (attr.formula.display) {
+      //         self.metadata.setRawExpression(attr.id, attr.formula.display);
+      //       }
+      //       if (attr.formula.canonical) {
+      //         self.metadata.setExpression(attr.id, attr.formula.canonical);
+      //       }
+      //     }
+      //   });
+      // }
+
+      // if (self.metadata.hasExpressions) {
+      //   self.metadata.updateDatasetByExpressions(self.dataSet);
+      // }
     },
     setTableName(name: string) {
       self.dataSet.setName(name);
