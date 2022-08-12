@@ -78,7 +78,7 @@ export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, 
     contentProps: { unlinkedTiles, linkedTiles, selectValue, setSelectValue },
     buttons: [
       { label: "Cancel" },
-      { label: content.isLinkedToTable(selectValue) ? "Link" : "Unlink",
+      { label: !content.isLinkedToTable(selectValue) ? "Link" : "Unlink",
         isDefault: true,
         isDisabled: !selectValue,
         onClick: handleClick
