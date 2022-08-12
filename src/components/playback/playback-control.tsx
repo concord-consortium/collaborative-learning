@@ -33,8 +33,10 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const [markers, setMarkers] = useState<IMarkerProps[]>([]);
   const [selectedMarkers, ] = useState<IMarkerProps[]>([]);
   const history = treeManager.document.history;
-  const maxValue = history.length > 0 ? history.length - 1 : 0;
-  const eventAtCurrentIndex = treeManager.getHistoryEntry(treeManager.currentHistoryIndex || 0);
+  const maxValue = history.length > 0 ? history.length : 0;
+  const eventAtCurrentIndex = treeManager.currentHistoryIndex === 0
+                                ? undefined
+                                : treeManager.getHistoryEntry(treeManager.currentHistoryIndex - 1);
   const eventCreatedTime = eventAtCurrentIndex?.created;
   const playbackDisabled = treeManager.currentHistoryIndex === undefined || sliderValue === maxValue;
 
@@ -48,10 +50,12 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   useEffect(() => {
     if (sliderPlaying) {
       const slider = setInterval(()=>{
-        if (sliderValue < maxValue) {
+        if (sliderValue <= maxValue) {
           setSliderValue(sliderValue + 1);
-          treeManager.setCurrentHistoryIndex(sliderValue);
-          treeManager.getHistoryEntry(sliderValue);
+          treeManager.goToHistoryEntry(sliderValue)
+            .then(()=>{
+              treeManager.setCurrentHistoryIndex(sliderValue);
+            });
         } else {
           handlePlayPauseToggle(false);
         }
@@ -85,8 +89,10 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
 
   const handleSliderValueChange = (value: any) => {
     setSliderValue(value);
-    treeManager.setCurrentHistoryIndex(value);
-    treeManager.getHistoryEntry(value);
+    treeManager.goToHistoryEntry(value)
+      .then(()=>{
+        treeManager.setCurrentHistoryIndex(value);
+      });
   };
 
   const handleAddMarker = (value: any) => {

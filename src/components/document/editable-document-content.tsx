@@ -1,6 +1,6 @@
 import React, { useContext, useRef, useState } from "react";
 import classNames from "classnames";
-import { clone } from "mobx-state-tree";
+import { clone, Instance, getSnapshot } from "mobx-state-tree";
 import { AppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
@@ -10,10 +10,11 @@ import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-fire
 import { useGroupsStore, useStores } from "../../hooks/use-stores";
 import { ToolbarComponent } from "../toolbar";
 import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from "../tools/tool-api";
-import { DocumentModelType } from "../../models/document/document";
+import { DocumentModel, DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { ToolbarModelType } from "../../models/stores/problem-configuration";
 import { WorkspaceMode } from "../../models/stores/workspace";
+import { CDocumentType, TreeManager } from "../../models/history/tree-manager";
 
 import "./editable-document-content.scss";
 
@@ -44,8 +45,35 @@ interface IOneUpCanvasProps {
   readOnly: boolean;
 }
 const OneUpCanvas: React.FC<IOneUpCanvasProps> = props => {
+  const {document, ...others} = props;
+  const [showPlaybackControls, setShowPlaybackControls] = useState(false);
+  const [documentToShow, setDocumentToShow] = useState<DocumentModelType>(document);
+
+  const handleTogglePlaybackControlComponent = () => {
+    setShowPlaybackControls(!showPlaybackControls);
+    const newState = !showPlaybackControls;
+    setDocumentToShow(newState
+                        ? getDocumentToShow()
+                        : document
+                      );
+  };
+  
+  const getDocumentToShow = () => {
+    const origDocManager = document.treeManagerAPI as Instance<typeof TreeManager>;
+    const docCopy = DocumentModel.create(getSnapshot(document));
+    const historySnapshot = (getSnapshot(origDocManager.document)) as unknown as CDocumentType;
+    const docCopyManager = docCopy.treeManagerAPI as Instance<typeof TreeManager>;
+    docCopyManager.setChangeDocument(historySnapshot);
+    docCopyManager.setCurrentHistoryIndex(origDocManager.currentHistoryIndex);
+    return docCopy;
+  };
+
   return (
-    <CanvasComponent context="1-up" {...props} />
+    <CanvasComponent context="1-up"
+                      showPlaybackControls={showPlaybackControls}
+                      onTogglePlaybackControls={handleTogglePlaybackControlComponent}
+                      document={documentToShow}
+                      {...others} />
   );
 };
 

@@ -1,29 +1,26 @@
-import React, { useState } from "react";
+import React from "react";
 import { Instance } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import { useDocumentFromStore, useUIStore } from "../../hooks/use-stores";
+import { useUIStore } from "../../hooks/use-stores";
 import { TreeManager } from "../../models/history//tree-manager";
+import { DocumentModelType } from "../../models/document/document";
 import { PlaybackControlComponent } from "./playback-control";
 import PlaybackIcon from "../../clue/assets/icons/playback/playback-icon.svg";
 
 import "./playback.scss";
 
 interface IProps {
-  documentId: string | undefined;
+  document: DocumentModelType | undefined;
+  showPlaybackControls: boolean | undefined;
+  onTogglePlaybackControls: (() => void) | undefined;
 }
 
 export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
-  const { documentId } = props;
+  const { document, showPlaybackControls, onTogglePlaybackControls  } = props;
   const { activeNavTab } = useUIStore();
-  const [showPlaybackControls, setShowPlaybackControls] = useState(false);
-  const document = useDocumentFromStore(documentId);
   const treeManager = document?.treeManagerAPI as Instance<typeof TreeManager>;
   const history = treeManager?.document.history;
-
-  const handleTogglePlaybackControlComponent = () => {
-    setShowPlaybackControls(!showPlaybackControls);
-  };
 
   const renderPlaybackToolbarButton = () => {
     const playbackToolbarButtonComponentStyle =
@@ -33,7 +30,7 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
       classNames("playback-toolbar-button", "themed", activeNavTab,
                 {"show-control": showPlaybackControls});
     return (
-      <div className={playbackToolbarButtonComponentStyle} onClick={handleTogglePlaybackControlComponent}>
+      <div className={playbackToolbarButtonComponentStyle} onClick={onTogglePlaybackControls}>
         <PlaybackIcon className={playbackToolbarButtonStyle}/>
       </div>
     );

@@ -9,6 +9,7 @@ import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDrag
 import { DocumentContentModelType, IDragToolCreateInfo, IDropRowInfo } from "../../models/document/document-content";
 import { getToolContentInfoById } from "../../models/tools/tool-content-info";
 import { IDragTiles } from "../../models/tools/tool-tile";
+import { DocumentModelType } from "../../models/document/document";
 import { ToolApiInterfaceContext } from "../tools/tool-api";
 import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tools/tool-tile";
 import { safeJsonParse } from "../../utilities/js-utils";
@@ -18,7 +19,7 @@ import "./document-content.sass";
 
 interface IProps extends IBaseProps {
   context: string;
-  documentId?: string | undefined;
+  document?: DocumentModelType | undefined;
   content?: DocumentContentModelType;
   typeClass: string;
   showPlayback?: boolean;
@@ -26,6 +27,8 @@ interface IProps extends IBaseProps {
   scale?: number;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
+  showPlaybackControls?: boolean;
+  onTogglePlaybackControls?: () => void;
 }
 
 interface IDragResizeRow {
@@ -103,7 +106,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {viaTeacherDashboard, showPlayback, documentId} = this.props;
+    const {viaTeacherDashboard, showPlayback, document, showPlaybackControls, onTogglePlaybackControls} = this.props;
     const {ui, user: {isNetworkedTeacher}} = this.stores;
     const isChatEnabled = isNetworkedTeacher;
     const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0;
@@ -121,7 +124,10 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       >
         {this.renderRows()}
         {this.renderSpacer()}
-        {showPlayback && <PlaybackComponent documentId={documentId}/>}
+        {showPlayback && <PlaybackComponent document={document}
+                                            showPlaybackControls={showPlaybackControls}
+                                            onTogglePlaybackControls={onTogglePlaybackControls} />
+        }
       </div>
     );
   }

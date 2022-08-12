@@ -22,9 +22,11 @@ interface IProps {
   document?: DocumentModelType;
   content?: DocumentContentModelType;
   showPlayback?: boolean;
+  showPlaybackControls?: boolean;
   overlayMessage?: string;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
+  onTogglePlaybackControls?: () => void;
 }
 
 @inject("stores")
@@ -80,17 +82,17 @@ export class CanvasComponent extends BaseComponent<IProps> {
   }
 
   private renderContent() {
-    const {content, document, showPlayback, ...others} = this.props;
-    const documentContent = document ? document.content : content;
-    const documentId = document?.key;
+    const {content, document, showPlayback, showPlaybackControls, ...others} = this.props;
+    const documentContent = document?.content;
     const typeClass = document?.type === "planning" ? "planning-doc" : "";
 
     if (documentContent) {
       return (
         <DocumentContentComponent content={documentContent}
-                                  documentId={documentId}
+                                  document={document}
                                   typeClass={typeClass}
                                   showPlayback={showPlayback}
+                                  showPlaybackControls={showPlaybackControls}
                                   {...others} />
       );
     }
