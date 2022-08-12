@@ -53,6 +53,10 @@ export function getLinkedTables(documentId: string) {
 }
 
 export function getLinkedTableIndex(tableId: string) {
+  // TODO This function is out of date and should be like the following
+  // But getTableContent requires an MST for the first argument, which I wasn't able to provide
+  // const tableContent = getTableContent(undefined, tableId);
+  // return tableContent?.sharedModel?.indexOfType || -1;
   const documentId = getTableDocument(tableId);
   if (!documentId) return -1;
   const linkedTables = getLinkedTables(documentId);
@@ -89,7 +93,7 @@ export function getTableLinkColors(tableId?: string) {
           { fill: styles.linkColor4Light, stroke: styles.linkColor4Dark },
           { fill: styles.linkColor5Light, stroke: styles.linkColor5Dark }
         ];
-  // TODO Fix this!
+  // TODO Fix this! See note in getLinkedTableIndex for more notes
   // const linkIndex = tableId ? getLinkedTableIndex(tableId) : -1;
   const linkIndex = 0;
   return linkIndex >= 0
