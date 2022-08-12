@@ -421,17 +421,17 @@ export const GeometryContentModel = GeometryBaseContentModel
             }
           });
         });
+      // TODO This should be moved into updateAfterSharedModelChanges()
       self.linkedDataSets.forEach(link => {
         const links: ILinkProperties = { tileIds: [link.providerId] };
         const parents: JXGCoordPair[] = [];
         const properties: Array<{ id: string }> = [];
         for (let ci = 0; ci < link.dataSet.cases.length; ++ci) {
           const x = link.dataSet.attributes[0]?.numericValue(ci);
-          for (let ai = 0; ai < link.dataSet.attributes.length; ++ai) {
+          for (let ai = 1; ai < link.dataSet.attributes.length; ++ai) {
             const attr = link.dataSet.attributes[ai];
             const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
-            const y = attr.numericValue(0);
-            // const y = attr.numericValue(ai);
+            const y = attr.numericValue(ci);
             if (isFinite(x) && isFinite(y)) {
               parents.push([x, y]);
               properties.push({ id });
