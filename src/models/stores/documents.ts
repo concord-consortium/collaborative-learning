@@ -9,6 +9,7 @@ import {
 } from "../document/document-types";
 import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
+import { DEBUG_DOCUMENT } from "../../lib/debug";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
   const latestPublications: DocumentModelType[] = [];
@@ -161,12 +162,18 @@ export const DocumentsModel = types
   }))
   .actions((self) => {
     const add = (document: DocumentModelType) => {
+      if (DEBUG_DOCUMENT) {
+        // eslint-disable-next-line no-console
+        console.log("adding document to DocumentsModel. Key", document.key, document.title);
+      }
       if (!self.getDocument(document.key)) {
         self.all.push(document);
         const documentEnv = getEnv(document)?.documentEnv as IDocumentEnvironment | undefined;
         if (documentEnv) {
           documentEnv.appConfig = self.appConfig;
         }
+      } else {
+        console.warn("Document with the same key already exists");
       }
     };
 
