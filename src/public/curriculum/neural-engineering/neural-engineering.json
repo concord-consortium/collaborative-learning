@@ -255,8 +255,6 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Lesson 0.1 - Student Guide</strong></p>",
-                        "<p><u><strong>Introduction tab</strong></u></p>",
                         "<p><strong>Overview:</strong></p>",
                         "<p>In this activity, you will be introduced to CLUE, a collaborative learning platform that we will use throughout the neural engineering unit. </p>",
                         "<p>You will also be introduced to Dataflow, a visual computer programming interface that is part of the CLUE platform. </p>",
@@ -293,7 +291,6 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Activities tab</strong></u></p>",
                         "<p>On the right is <strong>your</strong> workspace. <strong>You can arrange the screen to show My Resources or My Workspace or to have the screen split.</strong> Hover over the three vertical dots on the divider between your Resources and your Workspace and click the arrows to change the screen. You can also close the Resources view by clicking the “X” on the upper right corner of the Resources panel.</p>",
                         "<p>To edit your workspace, you must first add a <strong>tile</strong>. You get a tile in your workspace by either</p>",
                         "<ul><li><strong>Dragging a tile from My Resources (left side) in CLUE into My Workspace (right side)</strong></li><li><strong>Dragging a new  tile from the menu on the left of your workspace</strong></li><li><strong>Click a button on the menu to add a new tile to the bottom of your workspace</strong></li></ul>",
@@ -507,7 +504,6 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong><u>Reflection tab:</u></strong></p>",
                         "<p>Throughout the neural engineering unit, you will keep a learning journal called a KWL Journal (KWL stands for Know, Wonder, and Learn). </p>",
                         "<p>At the end of each lesson, you will be asked to add a journal entry to track your learning throughout the unit. </p>",
                         "<p>To start your journal, click on &quot;My Work&quot; &gt;&gt; &quot;KWL Journals&quot;</p>",
@@ -1026,18 +1022,19 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Marking the Components of the Nervous System</strong></p>",
-                        "<p>Please review this <a href='https://my.clevelandclinic.org/health/articles/21202-nervous-system'>digital resource on the nervous system</a>, and mark the components of the nervous system (brain, spinal cord, and peripheral nerves) on your model from the previous lesson.</p>"
+                        "<p>Today you will learn about the nervous system and investigate different neurological conditions that could affect movement. </p>",
+                        "<p><strong>Learning Objectives</strong></p>",
+                        "<p>By the end of this activity, you should be able to describe how different neurological conditions (e.g., spinal cord injury) impact movement.</p>"
                       ]
                     }
                   },
                   {
-                    "id": "wZjGsIYHxbSiWtT9",
-                    "title": "Nervous System Diagram",
+                    "id": "msAcurKPDmjIhMnE",
+                    "title": "Spine [Credit: Montana DPHHS]",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/neural-engineering/images/Nervous_system_diagram.png",
-                      "filename": "curriculum/neural-engineering/images/Nervous_system_diagram.png"
+                      "url": "curriculum/neural-engineering/images/lesson3NervousSystem1.jpeg",
+                      "filename": "curriculum/neural-engineering/images/lesson3NervousSystem1.jpeg"
                     }
                   }
                 ]
@@ -1048,1047 +1045,97 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "y7C7Txv6FKfts28w",
+                    "id": "TZ5hC-GJDRC3-B1Y",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Please list all body systems that affect our reaction time.  Then, co-construct an illustrated and annotated model of the sequence of events associated with the reaction time activity.</p>"
+                        "<p><strong>Anatomy of the nervous system</strong></p>",
+                        "<p>The nervous system guides almost everything you do. It controls complex functions, such as movement, thought, and memory, as well as vital functions, such as breathing. The nervous system is made of billions of specialized cells called neurons. Neurons use electrical signals to communicate with one another. Different kinds of neurons send different signals. Motor neurons make your muscles move, whereas sensory neurons pick up information from the environment (sight, sound, touch etc.) and send signals to your brain. </p>",
+                        "<p>The nervous system has two main parts</p>",
+                        "<p><strong>Central nervous system</strong>: Consists of the brain and spinal cord. </p>",
+                        "<p><strong>Peripheral nervous system</strong>: Consists of nerves that branch out from the brain and spinal cord all over your body. </p>",
+                        "<p>Annotate the parts of the nervous system in the following image:</p>"
                       ]
                     }
                   },
                   {
-                    "id": "JFp9daEbDz5Z8sHA",
+                    "id": "_ePQ8mK9tiyAhfsq",
+                    "title": "The Nervous System [Credit: Encyclopedia Britannica]",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/lesson3labeledNervousSystem.jpeg",
+                      "filename": "curriculum/neural-engineering/images/lesson3labeledNervousSystem.jpeg"
+                    }
+                  },
+                  {
+                    "id": "lNfXazNoNZ6jm3ec",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>List the body systems in a text tile in your workspace. Draw your model on the drawing tile. </p>"
+                        "<p><strong>Lesson 1.3 Journal Entry</strong></p>",
+                        "<p>1. Today&#x27;s date:</p>",
+                        "<p>2. Today&#x27;s topic:</p>",
+                        "<p>3. What did you already know about the nervous system before today&#x27;s activity?</p>",
+                        "<p>4. What are the main things that you learned today about the nervous system?</p>",
+                        "<p>5. What questions do you have about the nervous system?</p>",
+                        "<p>6. Do you think that Tilly&#x27;s nervous system works differently because of her condition? Please explain your answer</p>"
                       ]
                     }
                   },
                   {
-                    "id": "SMqJdhRUe3SidL0a",
+                    "id": "M5HPUPP5DioC-I3q",
                     "content": {
-                      "type": "Drawing",
-                      "objects": [
-                        {"type": "ellipse", "id": "N-iVj9Zb_HmE84b9", "x": 140, "y": 61, "stroke": "#000000", "strokeDashArray": "", "strokeWidth": 2, "fill": "#bfbfbf", "rx": 25, "ry": 25},
-                        {"type": "ellipse", "id": "Hp2b8YWWd36mKnWr", "x": 139, "y": 129, "stroke": "#000000", "strokeDashArray": "", "strokeWidth": 2, "fill": "none", "rx": 25, "ry": 43},
-                        {"type": "rectangle", "id": "1XdhErFDsFgbNIXr", "x": 232, "y": 38, "stroke": "#000000", "strokeDashArray": "", "strokeWidth": 2, "fill": "none", "width": 96, "height": 56},
-                        {
-                          "type": "line",
-                          "id": "luo0bD-7pceUIRmm",
-                          "x": 244,
-                          "y": 47,
-                          "stroke": "#000000",
-                          "strokeDashArray": "",
-                          "strokeWidth": 2,
-                          "deltaPoints": [
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": -1, "dy": 1},
-                            {"dx": 0, "dy": 2},
-                            {"dx": -1, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0}
-                          ]
-                        },
-                        {
-                          "type": "line",
-                          "id": "bv0DrwvNlTQW4Cve",
-                          "x": 242,
-                          "y": 46,
-                          "stroke": "#000000",
-                          "strokeDashArray": "",
-                          "strokeWidth": 2,
-                          "deltaPoints": [
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -2, "dy": 1},
-                            {"dx": -2, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": -1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": -1},
-                            {"dx": -2, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 0, "dy": 0}
-                          ]
-                        },
-                        {
-                          "type": "line",
-                          "id": "IshPY4I4w84nWkOv",
-                          "x": 254,
-                          "y": 48,
-                          "stroke": "#000000",
-                          "strokeDashArray": "",
-                          "strokeWidth": 2,
-                          "deltaPoints": [
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0}
-                          ]
-                        },
-                        {
-                          "type": "line",
-                          "id": "AbbvCQf0ieowJ01Q",
-                          "x": 273,
-                          "y": 51,
-                          "stroke": "#000000",
-                          "strokeDashArray": "",
-                          "strokeWidth": 2,
-                          "deltaPoints": [
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -3, "dy": -1},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -3, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 3, "dy": 0},
-                            {"dx": 2, "dy": -1},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 2, "dy": -1},
-                            {"dx": 2, "dy": -1},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 2},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 2, "dy": -1},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 2},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": -2},
-                            {"dx": 2, "dy": -2},
-                            {"dx": 2, "dy": -1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 3},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 4, "dy": -1},
-                            {"dx": 3, "dy": -2},
-                            {"dx": 2, "dy": -1},
-                            {"dx": 2, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 2},
-                            {"dx": 0, "dy": 0}
-                          ]
-                        },
-                        {
-                          "type": "line",
-                          "id": "2i25j10WwnLwV0rb",
-                          "x": 280,
-                          "y": 45,
-                          "stroke": "#000000",
-                          "strokeDashArray": "",
-                          "strokeWidth": 2,
-                          "deltaPoints": [
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0}
-                          ]
-                        },
-                        {
-                          "type": "line",
-                          "id": "eZ3iTbZg9pn1BjYq",
-                          "x": 248,
-                          "y": 62,
-                          "stroke": "#000000",
-                          "strokeDashArray": "",
-                          "strokeWidth": 2,
-                          "deltaPoints": [
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -2, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -3, "dy": 0},
-                            {"dx": -3, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": -2, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 5, "dy": 0},
-                            {"dx": 4, "dy": -1},
-                            {"dx": 3, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": -1, "dy": 1},
-                            {"dx": -1, "dy": 1},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -2, "dy": 1},
-                            {"dx": -3, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -2, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0}
-                          ]
-                        },
-                        {
-                          "type": "line",
-                          "id": "3NduG8XLojm3Cutp",
-                          "x": 261,
-                          "y": 64,
-                          "stroke": "#000000",
-                          "strokeDashArray": "",
-                          "strokeWidth": 2,
-                          "deltaPoints": [
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": -2},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -2, "dy": -1},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 2, "dy": -1},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 1, "dy": 2},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 1, "dy": 2},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": -1, "dy": 1},
-                            {"dx": -1, "dy": 1},
-                            {"dx": -1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": -1},
-                            {"dx": 0, "dy": -2},
-                            {"dx": -1, "dy": -1},
-                            {"dx": 0, "dy": -3},
-                            {"dx": 0, "dy": -2},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 2, "dy": -2},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 2, "dy": -1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 2},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -2, "dy": 0},
-                            {"dx": -3, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0}
-                          ]
-                        },
-                        {
-                          "type": "line",
-                          "id": "7i-JjsSbiy_juAKC",
-                          "x": 246,
-                          "y": 77,
-                          "stroke": "#000000",
-                          "strokeDashArray": "",
-                          "strokeWidth": 2,
-                          "deltaPoints": [
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 4},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": -2},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 1, "dy": -2},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 2, "dy": -1},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 2},
-                            {"dx": 1, "dy": 2},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": -2},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": -2},
-                            {"dx": 2, "dy": -1},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0}
-                          ]
-                        },
-                        {
-                          "type": "line",
-                          "id": "PvS39Gjaw_yyYEa5",
-                          "x": 274,
-                          "y": 81,
-                          "stroke": "#000000",
-                          "strokeDashArray": "",
-                          "strokeWidth": 2,
-                          "deltaPoints": [
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": -1, "dy": 2},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": -1},
-                            {"dx": -2, "dy": 0},
-                            {"dx": -1, "dy": -1},
-                            {"dx": -2, "dy": 0},
-                            {"dx": -3, "dy": -1},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0}
-                          ]
-                        },
-                        {
-                          "type": "line",
-                          "id": "kJrp90eiAlOEB4IH",
-                          "x": 286,
-                          "y": 79,
-                          "stroke": "#000000",
-                          "strokeDashArray": "",
-                          "strokeWidth": 2,
-                          "deltaPoints": [
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": -2},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 3, "dy": -1},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 2, "dy": -1},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -2, "dy": 0},
-                            {"dx": -3, "dy": 0},
-                            {"dx": -2, "dy": 0},
-                            {"dx": -3, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 2},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 3, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 3, "dy": -1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0}
-                          ]
-                        },
-                        {
-                          "type": "line",
-                          "id": "6D6QRBk-qoHHrz8R",
-                          "x": 176,
-                          "y": 63,
-                          "stroke": "#000000",
-                          "strokeDashArray": "",
-                          "strokeWidth": 2,
-                          "deltaPoints": [
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 3, "dy": 0},
-                            {"dx": 3, "dy": 0},
-                            {"dx": 3, "dy": 0},
-                            {"dx": 3, "dy": 0},
-                            {"dx": 3, "dy": 0},
-                            {"dx": 3, "dy": 0},
-                            {"dx": 3, "dy": 0},
-                            {"dx": 3, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 3, "dy": 0},
-                            {"dx": 2, "dy": 0},
-                            {"dx": 3, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0}
-                          ]
-                        },
-                        {
-                          "type": "line",
-                          "id": "aZrlp_GoRE8Zy07X",
-                          "x": 221,
-                          "y": 29.5,
-                          "stroke": "#000000",
-                          "strokeDashArray": "",
-                          "strokeWidth": 2,
-                          "deltaPoints": [
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": -1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": -1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": -1, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 1},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0}
-                          ]
-                        },
-                        {
-                          "type": "line",
-                          "id": "ph_rTxPcJR-950Gt",
-                          "x": 231,
-                          "y": 33.5,
-                          "stroke": "#000000",
-                          "strokeDashArray": "",
-                          "strokeWidth": 2,
-                          "deltaPoints": [
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": 1, "dy": 0},
-                            {"dx": 0, "dy": 0},
-                            {"dx": -1, "dy": 0},
-                            {"dx": 0, "dy": 0}
-                          ]
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Modeling movement</strong></p>",
+                        "<p>We can use a simple computer program to model how the brain controls limb movement. In the following program, the limb is represented by a robotic grabber that can open or close. Drag this program into your workspace and try to get the grabber to close.</p>",
+                        "<p><u>Hint</u>: You will need to add a &quot;brain&quot; to the program and connect it to the grabber. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "jm9bx6l797gF47ZA",
+                    "title": "Dataflow 1",
+                    "content": {
+                      "type": "Dataflow",
+                      "programDataRate": 1000,
+                      "programZoom": {
+                        "dx": 0,
+                        "dy": 0,
+                        "scale": 1
+                      },
+                      "program": {
+                      "values": {"6": {"currentValues": {"nodeValue": 0}}},
+                      "id": "dataflow@0.1.0",
+                      "nodes": {
+                        "6": {
+                          "id": 6,
+                          "name": "Demo Output",
+                          "x": 590.078125,
+                          "y": 51.61328125,
+                          "inputs": {"nodeValue": {"connections": {}}, "tilt": {"connections": {}}},
+                          "outputs": {},
+                          "data": {"outputType": "Grabber", "demoOutput": 0, "inputKeys": []}
                         }
-                      ]
-                    },
-                    "layout": { "height": 276 }
+                      }
+                    }
+                    }
                   },
                   {
-                    "id": "document_Text_1",
+                    "id": "lJ3td0Z3BqgQsVYS",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>What are other ways you could model the nervous system. Can you make a program that simulates what happens when your brain tells your arm to move? Can you make a plot of moments in time that signals move in the body? Can you make a physical model and take a picture of it?</p>"
+                        "<p><strong>How does nerve injury affect movement? </strong></p>",
+                        "<p>In the next activity, you will investigate how injury to different parts of the nervous system might impact limb movement. Your team may choose or  be assigned to explore one of the following injuries:</p>",
+                        "<ul><li><a href='https://theconversation.com/how-our-brain-controls-movement-and-makes-new-connections-when-parts-are-damaged-63520#:~:text=The%20brain%27s%20motor%20system%20is,and%20movement%20of%20specific%20muscles'>Brain Injury</a></li><li><a href='https://uihc.org/health-topics/how-does-spinal-cord-work'>Spinal Cord Injury</a></li><li><a href='https://orthoinfo.aaos.org/en/diseases--conditions/nerve-injuries/'>Peripheral Nerve Injury</a></li></ul>",
+                        "<p>Next, load the rection time model that you created in the previous lesson (Lesson 1.2) and mark the location of the injury that you read about.  Add a text tile below the model and explain how injury to that part of the nervous system would impact someone&#x27;s reaction time (would it make it longer or shorter and why?). </p>",
+                        "<p><strong>Reflection</strong></p>",
+                        "<p>Please record your current thinking and learning in your KWL journal (see Reflection tab). </p>"
                       ]
                     }
                   }
@@ -2100,85 +1147,33 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "KI-l9v7ujOlaG1rq",
+                    "id": "L95aJemvzkzy04my",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>DISCUSS</h2>",
-                        "<p>Select a member as a spokesperson to share your model with the class. </p>"
+                        "<p><u><strong>Reflection tab:</strong></u></p>",
+                        "<p>Please load your KWL journal (&quot;My Work&quot; &gt;&gt; &quot;KWL Journals&quot;). </p>",
+                        "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>"
                       ]
                     }
                   },
-            
                   {
-                    "id": "6i9qBnnPYuaa8ewO",
+                    "id": "lNfXazNoNZ6jm3ec",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Investigating how injury to different parts of the nervous system might impact limb movement</strong></p>",
-                        "<p>Please select one of the following injuries to explore more, and then mark the location of the injury/disorder on your model and add text that communicates some ways you predict limb movement would be affected. (Here again, the students need to be able to mark on their model. So, a larger section for their model might be better.)</p>"
+                        "<p><strong>Lesson 1.3 Journal Entry</strong></p>",
+                        "<p>1. Today&#x27;s date:</p>",
+                        "<p>2. Today&#x27;s topic:</p>",
+                        "<p>3. What did you already know about the nervous system before today&#x27;s activity?</p>",
+                        "<p>4. What are the main things that you learned today about the nervous system?</p>",
+                        "<p>5. What questions do you have about the nervous system?</p>",
+                        "<p>6. Do you think that Tilly&#x27;s nervous system works differently because of her condition? Please explain your answer</p>"
                       ]
                     }
-                  },
-                  [
-                    {
-                      "id": "5GPqBpf8BDohRk55",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p><strong>Brain Injury</strong> <a href='https://theconversation.com/how-our-brain-controls-movement-and-makes-new-connections-when-parts-are-damaged-63520#:~:text=The%20brain%27s%20motor%20system%20is,and%20movement%20of%20specific%20muscles'>reference document</a></p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "oOJbi34fMJdvXmqw",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p><strong>Spinal Cord Injury </strong>  <a href='https://uihc.org/health-topics/how-does-spinal-cord-work'>reference document</a></p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "8wwUD_VkgkOm4XQL",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p><strong>Peripheral Nerve Injury </strong> <a href='https://orthoinfo.aaos.org/en/diseases--conditions/nerve-injuries/'>reference document</a></p>"
-                        ]
-                      }
-                    }
-                  ],
-                  {
-                    "id": "pC1DYCIgCcBCcfiq",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h2>KWL JOURNAL</h2>",
-                        "<p>You will keep a journal of what you have learned throughout these lessons. Begin or Open a KWL Journal either from the File menu or from the My Work tab. Record today's date. Then drag the table below into your journal and fill it out.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "VX0fplHGo5DQbZPK",
-                    "content": {
-                      "type": "Table",
-                      "name": "After each activity, please record what you know, wonder, and learn about the topic.",
-                      "columns": [
-                        {"name":"Date","values":["","",""]},
-                        {"name":"Today's Topic","values":["","",""]},
-                        {"name":"Know","values":["","",""]},
-                        {"name":"Wonder","values":["","",""]},
-                        {"name":"Learn","values":["","",""]}
-                      ]
-                    }
-                  }        
+                  }
                 ]
               }
             }
@@ -2197,16 +1192,33 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "nf_i-PVBetdUFtBO",
+                    "id": "JjW7uhD05hjNttkr",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>Objective</h2>",
-                        "<p>How can we identify and measure the activity of muscles? During this lesson, you will use Electromyography (EMG) to investigate your own muscle activity. </p>"
+                        "<p>In this lesson, you will use a technique called Electromyography (EMG) to measure your muscle electrical activity. </p>",
+                        "<p><strong>Learning Objectives</strong></p>",
+                        "<p>By the end of today&#x27;s lesson, you will be able to acquire and make sense of muscle electrical activity (EMG) data.  </p>"
                       ]
                     }
                   },
+                  {
+                    "id": "Hrv_5ES6azIrisdb",
+                    "title": "Flexing muscles to make a EMG trace [Credit: Backyard Brains]",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/Lesson1_4img1.png",
+                      "filename": "curriculum/neural-engineering/images/Lesson1_4img1.png"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "labWork",
+              "content": {
+                "tiles": [
                   {
                     "id": "-lGkEOMNjsqf-LZx",
                     "content": {
@@ -2222,6 +1234,7 @@
                   [
                     {
                       "id": "PodHYZ4go3HA1HYi",
+                      "title": "SpikerShield",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/neural-engineering/images/1.jpg",
@@ -2234,7 +1247,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Muscle SpikerShield (yellow board) coupled with an Arduino board (blue). The Muscle SpikerShield allows you to record your muscle&#x27;s electrical activity (known as Electromyography or EMG). </p>"
+                          "<p>Muscle SpikerShield (yellow board) coupled with an Arduino board (blue). The Muscle SpikerShield allows you to record your muscle&#x27;s electrical activity (known as Electromyography or EMG). The yellow board has a small switch that reads 'EMG' on one side and 'Control' on the other. The switch should be on the 'EMG' position.</p>"
                         ]
                       }
                     }
@@ -2242,6 +1255,7 @@
                   [
                     {
                       "id": "4pWC3KJXXdYoa5vv",
+                      "title": "Alligator clips",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/neural-engineering/images/2.jpg",
@@ -2261,11 +1275,12 @@
                   ],
                   [
                     {
-                      "id": "mkXPYx1_SJ4rNsCg",
+                      "id": "vn4aa8kjXblKIQSA",
+                      "title": "USB Cable connects Arduino to Computer",
                       "content": {
                         "type": "Image",
-                        "url": "curriculum/neural-engineering/images/3.jpg",
-                        "filename": "curriculum/neural-engineering/images/3.jpg"
+                        "url": "curriculum/neural-engineering/images/Lesson1_4img2.jpeg",
+                        "filename": "curriculum/neural-engineering/images/Lesson1_4img2.jpeg"
                       }
                     },
                     {
@@ -2274,7 +1289,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Smartphone Data Cable and an Adapter. This cable connects the Muscle SpikerShield to a smartphone to visualize the muscle data. You will also need an adapter to connect the cable to your smartphone. </p>"
+                          "<p>A USB data cable that connects the Arduino board to a computer. </p>"
                         ]
                       }
                     }
@@ -2282,6 +1297,7 @@
                   [
                     {
                       "id": "I_o28skM9_9QVzEu",
+                      "title": "Sticker Electrodes",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/neural-engineering/images/4.jpg",
@@ -2314,7 +1330,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>A smartphone with the Backyard Brains Spike Recorder App. You can download the app for free from the App store or Google Play. </p>"
+                          "<p>The icon for the Backyard Brains Spike Recorder app in the app store.</p>"
                         ]
                       }
                     }
@@ -2322,10 +1338,11 @@
                   [
                     {
                       "id": "hB0y5oGIJC8z8tgZ",
+                      "title": "gripper",
                       "content": {
                         "type": "Image",
-                        "url": "curriculum/neural-engineering/images/6.jpg",
-                        "filename": "curriculum/neural-engineering/images/6.jpg"
+                        "url": "curriculum/neural-engineering/images/6.png",
+                        "filename": "curriculum/neural-engineering/images/Lesson1_4img6.png"
                       }
                     },
                     {
@@ -2338,27 +1355,10 @@
                         ]
                       }
                     }
-                  ]
-                ]
-              }
-            },
-            {
-              "type": "labWork",
-              "content": {
-                "tiles": [
-                  {
-                    "id": "vKWBej7rDSOc90FV",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>Procedure</strong></p>",
-                        "<p>1. Connect the 9V battery to the Arduino board (blue board)</p>"
-                      ]
-                    }
-                  },
+                  ],
                   {
                     "id": "UycXde31wVAn6h4h",
+                    "title": "Battery power to Arduino",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/7.jpg",
@@ -2371,12 +1371,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>2. Connect the smartphone data cable (the green cable) to the Muscle SpikerShield green connector. Make sure you connect the end of the green cable labeled as “SpikerBox” to the Muscle SpikerShield. The other end (labeled as “Smartphone”) should be connected to your smartphone (via the provided adapter).</p>"
+                        "<p>1. Connect the Arduino board to your computer using the blue USB cable.</p>"
                       ]
                     }
                   },
                   {
                     "id": "qa3UEw13ZY0pNRWJ",
+                    "title": "Connect Arduino to Computer",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/8.jpg",
@@ -2389,12 +1390,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>3. Decide who is going to be the study participant (you can take turns). Place two electrode stickers on the participant’s forearm close to each other and another one on the participant’s elbow (this is the reference electrode)</p>"
+                        "<p>2. Decide who is going to be the study participant (you can take turns). Place two electrode stickers on the participant’s forearm close to each other and another one on the participant’s elbow (this is the reference electrode)</p>"
                       ]
                     }
                   },
                   {
                     "id": "2hcaL4NZmS-uOSsY",
+                    "title": "Place electrodes",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/9.jpg",
@@ -2407,12 +1409,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>4. Connect the orange muscle electrode cable (the one with the three alligators) to the Muscle SpikerShield orange connector:</p>"
+                        "<p>3. Connect the orange muscle electrode cable (the one with the three alligators) to the Muscle SpikerShield orange connector:</p>"
                       ]
                     }
                   },
                   {
                     "id": "hGLe_2Xa-uVW069o",
+                    "title": "Connect Electrodes to shield",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/10.jpg",
@@ -2425,12 +1428,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>5. Connect the two red alligators to the electrodes on your arm. The black cable should be connected to the reference electrode:</p>"
+                        "<p>4. Connect the two red alligators to the electrodes on your arm. The black cable should be connected to the reference electrode:</p>"
                       ]
                     }
                   },
                   {
                     "id": "2r6t0lkN0WkyPi2i",
+                    "title": "Connect Electrodes to arm",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/11.jpg",
@@ -2444,7 +1448,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>6. Open the Backyard Brains Spike Recorder App on your phone. Your screen should look similar to this:</p>",
+                          "<p>5. Open the Backyard Brains Spike Recorder App on your phone. Your screen should look similar to this:</p>",
                           "<p> </p>",
                           "<p>Pinch to change the time scale (horizontal axis) to 1.5 - 2 seconds. You can also change the y-axis scale if needed.  </p>",
                           "<p> </p>",
@@ -2485,6 +1489,17 @@
                         {"name":"Evidence (may insert screen shots or images of illustrations)","values":["","","","","",""]}
                       ]
                     }
+                  },
+                  {
+                    "id": "FXdgLMJooVFMO_Lq",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflection</strong></p>",
+                        "<p>Please record your current thinking and learning in your KWL journal (see Reflection tab). </p>"
+                      ]
+                    }
                   }
                 ]
               }
@@ -2494,148 +1509,31 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "1LAoIq9nuvILIX29",
+                    "id": "bhBVksJOfx92fQrF",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>DISCUSS</h2>",
-                        "<p>Now, it is time to reflect on the activity as class!</p>",
-                        "<ul><li>Why does gathering EMG signals matter to you, your family, or others in the community? </li><li>Why does this matter to scientists, physicians, physical therapists, athletic trainers, and/or biomedical engineers?</li><li>How may gathering EMG data inform the design of a device that can help people with neurological conditions or missing limbs?</li></ul>",
-                        "<p>Here is a program that will display several different types of simulated EMG data that can show you some of the issues with using that data to manipulate another device. Drag this program into your Workspace, and choose from one of the three types of EMG demo data. Consider and describe the issues associated with using this data.</p>"
+                        "<p>Please load your KWL journal (&quot;My Work&quot; &gt;&gt; &quot;KWL Journals&quot;). </p>",
+                        "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>"
                       ]
                     }
                   },
                   {
-                    "id": "d-FIqkKzZZml1NUM",
-                    "title": "EMG Data can be irregular",
-                    "content": {
-                      "type": "Dataflow",
-                      "programDataRate": 100,
-                      "programZoom": {
-                        "dx": 3.12890625,
-                        "dy": -1.04296875,
-                        "scale": 1.0902728103093464
-                      },
-                      "program": {
-                      "values": {
-                        "3180": {"currentValues": {"nodeValue": 40}},
-                        "3186": {"currentValues": {"nodeValue": 0.4}},
-                        "3207": {"currentValues": {"nodeValue": 100}},
-                        "3241": {"currentValues": {"nodeValue": 0.4}}
-                      },
-                      "id": "dataflow@0.1.0",
-                      "nodes": {
-                        "3180": {
-                          "id": 3180,
-                          "name": "Sensor",
-                          "x": 32.671875,
-                          "y": 38.34375,
-                          "inputs": {},
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3241-undefined-num1": {"node": 3241, "input": "num1", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {
-                            "plot": true,
-                            "type": "emg-reading",
-                            "sensor": "00009VIR",
-                            "virtual": true,
-                            "inputKeys": []
-                          }
-                        },
-                        "3186": {
-                          "id": 3186,
-                          "name": "Demo Output",
-                          "x": 539.1296528851293,
-                          "y": 41.20099613110444,
-                          "inputs": {
-                            "nodeValue": {
-                              "connections": {
-                                "3241-num-undefined": {"node": 3241, "output": "num", "data": {}}
-                              }
-                            }
-                          },
-                          "outputs": {},
-                          "data": {"outputType": "Grabber", "demoOutput": 0.4, "inputKeys": []}
-                        },
-                        "3207": {
-                          "id": 3207,
-                          "name": "Number",
-                          "x": 34.27712269711077,
-                          "y": 294.6431626837267,
-                          "inputs": {},
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3241-undefined-num2": {"node": 3241, "input": "num2", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {"plot": false, "nodeValueUnits": "", "inputKeys": []}
-                        },
-                        "3241": {
-                          "id": 3241,
-                          "name": "Math",
-                          "x": 297.87842277795596,
-                          "y": 187.5670705537788,
-                          "inputs": {
-                            "num1": {
-                              "connections": {
-                                "3180-num-undefined": {"node": 3180, "output": "num", "data": {}}
-                              }
-                            },
-                            "num2": {
-                              "connections": {
-                                "3207-num-undefined": {"node": 3207, "output": "num", "data": {}}
-                              }
-                            }
-                          },
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3186-undefined-nodeValue": {
-                                  "node": 3186,
-                                  "input": "nodeValue",
-                                  "data": {}
-                                }
-                              }
-                            }
-                          },
-                          "data": {"plot": false, "mathOperator": "Divide", "inputKeys": []}
-                        }
-                      }
-                    }
-                    }
-                  },
-                  {
-                    "id": "pC1DYCIgCcBCcfiq",
+                    "id": "guld1K-WcL-GOupl",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>KWL JOURNAL</h2>",
-                        "<p>You will keep a journal of what you have learned throughout these lessons. Begin or Open a KWL Journal either from the File menu or from the My Work tab. Record today's date. Then drag the table below into your journal and fill it out.</p>"
+                        "<p><strong>Lesson 1.4 Journal Entry</strong></p>",
+                        "<p>1. Today&#x27;s date:</p>",
+                        "<p>2. Today&#x27;s topic:</p>",
+                        "<p>3. What did you already know about muscle activity before today&#x27;s activity?</p>",
+                        "<p>4. What are the main things that you learned today about muscle activity?</p>",
+                        "<p>5. What questions do you have about muscle activity?</p>"
                       ]
                     }
-                  },
-                  {
-                    "id": "VX0fplHGo5DQbZPK",
-                    "content": {
-                      "type": "Table",
-                      "name": "After each activity, please record what you know, wonder, and learn about the topic.",
-                      "columns": [
-                        {"name":"Date","values":["","",""]},
-                        {"name":"Today's Topic","values":["","",""]},
-                        {"name":"Know","values":["","",""]},
-                        {"name":"Wonder","values":["","",""]},
-                        {"name":"Learn","values":["","",""]}
-                      ]
-                    }
-                  }        
+                  }
                 ]
               }
             }
@@ -2654,14 +1552,13 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "K1mHn_EtS5E2022",
+                    "id": "c2UOT3E_nizwTfuP",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "How can EMG signals be used to control a robotic gripper?",
-                        "<h2>Objective</h2>",
-                        "<p>During this section, we will explore how EMG signals can be used to control a robotic gripper.  For that, you will use electromyography (EMG) in coordination with a robotic gripper to model the performance of a bionic arm. </p>"
+                        "<p><strong>Learning Objectives</strong></p>",
+                        "<p>By the end of this activity, you will be able to model the performance of a bionic arm. </p>"
                       ]
                     }
                   },
@@ -2672,17 +1569,22 @@
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/13.jpg" 
                     }
-                  },
+                  }
+                ]
+              }
+            },
+            {
+              "type": "labWork",
+              "content": {
+                "tiles": [
                   {
-                    "id": "tWbNyudvP6G960PT",
+                    "id": "-66T2fPypKhUIF43",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Let’s learn how to control a robotic gripper with muscle sensors! In this activity, you can choose &#x27;Simulation&#x27; or the Arduino analog input pins with the materials illustrated below to visualize your real-time muscle movements and control a gripper with your muscle sensors.  You can also either select a gripper simulation or work with the analog gripper to observe the real-time changes. </p>",
-                        "<p><strong>Setting up the Analog Muscle Sensors &amp; Gripper:</strong></p>",
-                        "<p><strong>Materials: </strong></p>",
-                        "<p>You will need all the materials from the previous activity (image below) with the following additions (image on the right): (1) A robotic gripper; (2) An Arduino USB cable (blue cable)</p>"
+                        "<p>Let&#x27;s learn how to control a robotic gripper with your muscle activity! </p>",
+                        "<p>Make sure that you have all the materials shown in this picture:</p>"
                       ]
                     }
                   },
@@ -2693,31 +1595,25 @@
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/14.jpg"
                     }
-                  }
-                ]
-              }
-            },
-            {
-              "type": "labWork",
-              "content": {
-                "tiles": [
+                  },
                   {
                     "id": "Wg76H3JcM_qGbOLS",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Setting up:</strong></p>",
+                        
+                        "<p><u><strong>Step 1: Create a program that controls the gripper</strong></u></p>","<p><strong>Setting up:</strong></p>",
                         "<p>1. Connect the blue cable to the Arduino board and then connect the other end of the blue cable to your computer’s USB port: </p>"
                       ]
                     }
                   },
                   {
-                    "id": "P-LY18BXc3nQk6QD",
-                    "title": "Gripper and cable",
+                    "id": "SNFVNIZDoFInF55J",
+                    "title": "Arduino and Shield",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/neural-engineering/images/15.jpg"
+                      "url": "curriculum/neural-engineering/images/16.jpg"
                     }
                   },
                   {
@@ -2731,39 +1627,11 @@
                     }
                   },
                   {
-                    "id": "SNFVNIZDoFInF55J",
-                    "title": "Arduino and Shield",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/16.jpg"
-                    }
-                  },
-                  {
-                    "id": "7UjZSEKyKt_ugJ3A",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>3. Power up the gripper, connect a 9V battery to the Muscle SpikerShield (the yellow board):</p>"
-                      ]
-                    }
-                  },
-                  {
                     "id": "8npmrdC0WXZmIThQ",
                     "title": "Power cord",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/17.jpg"
-                    }
-                  },
-                  {
-                    "id": "pKO6PU8wQ0Cbcf-w",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>4.  Decide who is going to be the study participant (you can take turns). Place two electrode stickers on the participant’s forearm close to each other and another one on the participant’s elbow (this is the reference electrode)</p>"
-                      ]
                     }
                   },
                   {
@@ -2775,62 +1643,24 @@
                     }
                   },
                   {
-                    "id": "wxWLZ6UABBf8HGF_",
+                    "id": "Y1Aogg2kgAWpL6tB",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>5. Connect the orange muscle electrode cable (the one with the three alligators) to the Muscle SpikerShield orange connector: </p>"
+                        "<p>3. Look closely at the Muscle SpikerShield (the yellow board)  and find the EMG &lt;&gt; Control switch. Make sure that the switch in on &quot;Control&quot;</p>",
+                        "<p>4. Create a Dataflow tile in your workspace and add a &quot;Live Output&quot; block. Select &quot;Grabber&quot; from the dropdown menu. </p>",
+                        "<p>5. Click on the &quot;flashlight&quot; button in the top-right corner of the Dataflow tile in order to connect to the gripper. The browser will open a popup that says the site would like to connect to a Serial Port.  </p>",
+                        "<p>There should only be one choice.  Click on it and then hit the connect button. </p>",
+                        "<p>&lt;&lt; Insert connect2serial.jpg &gt;&gt;</p>",
+                        "<p>6. To make the gripper open and close, you will need to add an input block (for example, a timer or a generator) and connect it to the output block. </p>",
+                        "<p>7. Power up the gripper by connecting a 9V battery to the Muscle SpikerShield (the yellow board). The gripper should close, wait, and open. </p>",
+                        "<p>8. Experiment with different input types (for example, if you used a timer, switch it to a generator). </p>",
+                        "<p>9. When you&#x27;re done, delete the Dataflow tile and unplug the battery. </p>"
                       ]
                     }
-                  },
-                  {
-                    "id": "_WgzTEJKQ9MFf_9F",
-                    "title": "Connect EMG Sensors",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/19.jpg"
-                    }
-                  },
-                  {
-                    "id": "PuDVhTBsxEpk-6JV",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>6. Connect the two red alligators to the electrodes on your arm. The black cable should be connected to the reference electrode:</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "54M3JuQkdfGSHcXT",
-                    "title": "Alligator clips attach to sensors",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/10.jpg"
-                    }
-                  },
-                  {
-                    "id": "5tJ4Yb_Srm1XmNw_",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h2>Programming</h2>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "ebQXEoEiGp5DadAU",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>You can read the input signals from the muscle sensors using a sensor block in a Dataflow program tile. You can drive either the simulated or the real output claw using these sensors, or you can 'condition' the muscle signal first. There are lots of ways the following very simple program can be improved.</p>",
-                        "<p>When you first try to read an EMG signal or send signals to the grabber, you must click the gray lightning bolt button in the top left corner of the Dataflow tile to connect it to the Arduino. This is known as 'pairing' and it's the same as the instructions you might use to send music from your phone to a speaker.</p>"
-                      ]
-                    }
-                  },
+                  }
+                
                   {
                     "id": "ljgXdA8hHMo9TLsy",
                     "title": "Read EMG to Control Gripper",
@@ -3720,7 +2550,7 @@
         {
           "description": "Lesson 2.4",
           "ordinal": 4,
-          "title": "Lesson 2.4 - Empowering Lives with Technology",
+          "title": "Lesson 2.4 - Can you design a human-machine interface?",
           "subtitle": "",
           "disabled": [],
           "sections": 
