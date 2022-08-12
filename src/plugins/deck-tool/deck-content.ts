@@ -33,18 +33,18 @@ export const DeckContentModel = ToolContentModel
       return self.dataSet.attributes;
     },
     caseByIndex(index:number){
-      return self.dataSet.getCanonicalCaseAtIndex(index)
+      return self.dataSet.getCanonicalCaseAtIndex(index);
     },
     allCases(){
-      return self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length)
+      return self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length);
     },
     existingAttributes(){
       return self.dataSet.attributes.map((a) => {
-        return { "attrName": a.name, "attrId": a.id }
-      })
+        return { "attrName": a.name, "attrId": a.id };
+      });
     },
     attrById(str: string){
-      return self.dataSet.attrFromID(str)
+      return self.dataSet.attrFromID(str);
     },
     exportJson(options?: ITileExportOptions){
       return [
@@ -83,7 +83,7 @@ export const DeckContentModel = ToolContentModel
           { __id__: "sweaterMoth", mothName: "Sweater Moth", sciName: "Closeta Habituas", captureDate: "9/3/21" },
           { __id__: "pizzaMoth", mothName: "Pizza Moth", sciName: "Cladara Tomatus", captureDate: "9/3/21" }
         ]);
-        console.log('Created: ', self.dataSet.cases)
+        console.log('Created: ', self.dataSet.cases);
       }
     },
     setDescription(text: string) {

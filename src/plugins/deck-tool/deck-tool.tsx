@@ -1,5 +1,4 @@
 import { observer } from "mobx-react";
-import classNames from "classnames";
 import React, { useEffect, useState } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { DeckContentModelType } from "./deck-content";
@@ -38,10 +37,10 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   },[caseIndex]);
 
   const dataForCase = () => {
-    let caso = content.caseByIndex(caseIndex);
+    const caso = content.caseByIndex(caseIndex);
     if (caso){
       const keysHere = Object.keys(caso).filter(k => k !== "__id__");
-      let caseData = keysHere.map((k) => {
+      const caseData = keysHere.map((k) => {
         const attrName = content.attrById(k).name;
         return caso ? { a: attrName, v: caso[k]} : undefined;
       });
@@ -51,10 +50,10 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           {caseData.map((theCase, i) => {
             return (
               <div key={i}><b>{theCase?.a}:</b> {theCase?.v}</div>
-            )
+            );
           })}
         </div>
-      )
+      );
     }
   };
 
@@ -99,10 +98,11 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   };
 
+  // hardcoded for now, will pull values from inputs like title
   function addCase(){
     content.dataSet.addCanonicalCasesWithIDs([
       { __id__: "nachoMoth", mothName: "Nacho Moth", sciName: "Cladara Tortillus", captureDate: "9/3/21" },
-    ])
+    ]);
   }
 
   return (
