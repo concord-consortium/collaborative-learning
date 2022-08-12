@@ -2,7 +2,6 @@ import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { DeckContentModelType } from "./deck-content";
-import { TileLabelInput } from "../../components/tools/tile-label-input";
 
 import "./deck-tool.scss";
 
@@ -50,16 +49,23 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   return (
     <div className="deck-tool">
       <div className="deck-toolbar">
-      { isEditing
-        ? <input
-          value={content.metadata.title}
-          onChange={handleTitleChange}
-          onKeyDown={handleTitleKeyDown}
-        />
-        : <div className="editable-deck-title-text" onClick={handleTitleClick}>
-            { content.metadata.title }
-          </div>
-      }
+        <div className="panel title">
+          { isEditing
+          ? <input
+              className="deck-title-input-editing"
+              value={content.metadata.title}
+              onChange={handleTitleChange}
+              onKeyDown={handleTitleKeyDown}
+              onBlur={() => setIsEditing(false)}
+          />
+          : <div className="editable-deck-title-text" onClick={handleTitleClick}>
+              { content.metadata.title }
+            </div>
+          }
+        </div>
+        <div className="panel nav">
+          Card 1 of 1
+        </div>
       </div>
     </div>
   );
