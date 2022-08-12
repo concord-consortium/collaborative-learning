@@ -165,9 +165,7 @@ export const TableContentModel = ToolContentModel
     type: types.optional(types.literal(kTableToolID), kTableToolID),
     isImported: false,
     // Used to store the dataset when importing legacy formats
-    importedDataSet: types.optional(DataSet, () => DataSet.create()),
-    // dataSet: types.optional(DataSet, () => DataSet.create()),
-    linkedGeometries: types.array(types.string)
+    importedDataSet: types.optional(DataSet, () => DataSet.create())
   })
   .volatile(self => ({
     metadata: undefined as any as TableMetadataModelType
@@ -199,6 +197,10 @@ export const TableContentModel = ToolContentModel
         return undefined;
       }
       return firstSharedModel as SharedDataSetType;
+    },
+    // Returns a list of ids, currently not implemented
+    get linkedGeometries(): string[] {
+      return [];
     }
   }))
   .views(self => ({
@@ -402,19 +404,7 @@ export const TableContentModel = ToolContentModel
       self.dataSet.removeCases(ids);
 
       self.logChange({ action: "delete", target: "rows", ids });
-    },
-    // addGeometryLink(geometryId: string) {
-    //   self.linkedGeometries.push(geometryId);
-    //   self.logChange({ action: "create", target: "geometryLink", ids: geometryId });
-    // },
-    // removeGeometryLink(geometryId: string) {
-    //   self.linkedGeometries.remove(geometryId);
-    //   self.logChange({
-    //         action: "delete",
-    //         target: "geometryLink",
-    //         ids: geometryId
-    //   });
-    // }
+    }
   }))
   .views(self => ({
     // getSharedData(canonicalize = true) {
