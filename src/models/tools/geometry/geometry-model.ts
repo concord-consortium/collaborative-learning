@@ -50,16 +50,6 @@ export const AxisModel = types.model("AxisModel", {
     self.range = range;
   }
 }))
-.actions(self => ({
-  setAll(properties: IAxisProperties) {
-    const { name, label, min, unit, range } = properties;
-    if (name !== undefined) self.setName(name);
-    if (label !== undefined) self.setLabel(label);
-    if (min !== undefined) self.setMin(min);
-    if (unit !== undefined) self.setUnit(unit);
-    if (range !== undefined) self.setRange(range);
-  }
-}));
 export interface AxisModelType extends Instance<typeof AxisModel> {}
 export interface AxisModelSnapshot extends SnapshotIn<typeof AxisModel> {}
 

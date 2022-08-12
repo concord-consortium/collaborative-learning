@@ -131,7 +131,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     const disposer = onSnapshot((model.content as any).dataSet.attributes, () => {
       triggerRowChange();
     });
-    return () => { disposer(); };
+    return () => disposer();
   });
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });

@@ -1,5 +1,5 @@
 import { castArray, difference, each, size as _size, union } from "lodash";
-import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { applySnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { Lambda } from "mobx";
 import { Optional } from "utility-types";
 import { SelectionStoreModelType } from "../../stores/selection";
@@ -523,7 +523,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         unit: unitX,
         range: xMax - xMin
       };
-      self.board?.xAxis.setAll(xAxisProperties);
       const yAxisProperties = {
         name: yName,
         label: yAnnotation,
@@ -531,7 +530,10 @@ export const GeometryContentModel = GeometryBaseContentModel
         unit: unitY,
         range: yMax - yMin
       };
-      self.board?.yAxis.setAll(yAxisProperties);
+      if (self.board) {
+        applySnapshot(self.board.xAxis, xAxisProperties);
+        applySnapshot(self.board.yAxis, yAxisProperties);
+      }
 
       const change: JXGChange = {
         operation: "update",
