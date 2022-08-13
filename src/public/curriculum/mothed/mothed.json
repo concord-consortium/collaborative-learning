@@ -6,7 +6,7 @@
   "subtitle": "Wings, Spots, and Legs",
   "config": {
     "placeholderText": "Document your thoughts",
-    "autoSectionProblemDocuments": false,
+    "autoSectionProblemDocuments": true,
     "defaultDocumentTemplate": {
       "tiles": [
         {
@@ -228,7 +228,7 @@
         {
           "description": "Activity 1.1",
           "ordinal": 1,
-          "title": "Welcome to MothEd CLUE",
+          "title": "Welcome to MothEd CLUE PD",
           "subtitle": "Application and Collaboration",
           "disabled": [],
           "sections":
@@ -518,7 +518,7 @@
         {
           "description": "Activity 1.2",
           "ordinal": 2,
-          "title": "All About Moths",
+          "title": "MothEd Middle School Activity",
           "subtitle": "",
           "disabled": [],
           "sections":
