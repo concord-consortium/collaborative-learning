@@ -105,6 +105,29 @@
               "properties": ["isTeacherDocument", "!isDeleted"]
             }
           ]
+        },
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Story Notes",
+              "type": "problem-documents",
+              "dataTestHeader": "my-work-section-investigations",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["problem", "planning"],
+              "order": "original",
+              "showStars": []
+            },
+            {
+              "title": "Story Notes",
+              "type": "learning-logs",
+              "dataTestHeader": "learning-log-section",
+              "documentTypes": ["learningLog"],
+              "properties": ["!isDeleted"],
+              "addDocument": false
+            }
+          ]
         }
       ]
     }
