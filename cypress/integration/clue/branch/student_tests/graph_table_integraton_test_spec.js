@@ -8,7 +8,7 @@ const clueCanvas = new ClueCanvas;
 const graphToolTile = new GraphToolTile;
 const tableToolTile = new TableToolTile;
 
-context('Graph Table Integration', function () {
+context.skip('Graph Table Integration', function () {
   before(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.3&qaGroup=5"; //using different problem bec. 2.1 disables graph table integration
     cy.clearQAData('all');

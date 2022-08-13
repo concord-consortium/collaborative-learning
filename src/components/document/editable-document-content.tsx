@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useRef, useState, useEffect } from "react";
 import classNames from "classnames";
 import { clone, Instance, getSnapshot } from "mobx-state-tree";
 import { AppConfigContext } from "../../app-config-context";
@@ -49,6 +49,10 @@ const OneUpCanvas: React.FC<IOneUpCanvasProps> = props => {
   const [showPlaybackControls, setShowPlaybackControls] = useState(false);
   const [documentToShow, setDocumentToShow] = useState<DocumentModelType>(document);
 
+  useEffect(() => {
+    setDocumentToShow(document);
+  },[document]);
+
   const handleTogglePlaybackControlComponent = () => {
     setShowPlaybackControls(!showPlaybackControls);
     const newState = !showPlaybackControls;
@@ -57,7 +61,7 @@ const OneUpCanvas: React.FC<IOneUpCanvasProps> = props => {
                         : document
                       );
   };
-  
+
   const getDocumentToShow = () => {
     const origDocManager = document.treeManagerAPI as Instance<typeof TreeManager>;
     const docCopy = DocumentModel.create(getSnapshot(document));
