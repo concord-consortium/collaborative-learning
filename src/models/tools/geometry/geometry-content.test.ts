@@ -209,6 +209,43 @@ describe("GeometryContent", () => {
     destroyContentAndBoard(content);
   });
 
+  it("can update axes parameters", () => {
+    const { content, board } = createContentAndBoard();
+
+    const params = {
+      xName: "xName",
+      xAnnotation: "xAnnotation",
+      xMin: -1,
+      xMax: 9,
+      yName: "yName",
+      yAnnotation: "yAnnotation",
+      yMin: -2,
+      yMax: 3
+    };
+
+    const axes = content.rescaleBoard(board, params);
+    expect(content.board?.xAxis.name).toBe("xName");
+    expect(content.board?.xAxis.label).toBe("xAnnotation");
+    expect(content.board?.xAxis.min).toBe(-1);
+    expect(content.board?.xAxis.range).toBe(10);
+    expect(content.board?.yAxis.name).toBe("yName");
+    expect(content.board?.yAxis.label).toBe("yAnnotation");
+    expect(content.board?.yAxis.min).toBe(-2);
+    expect(content.board?.yAxis.range).toBe(5);
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can update title", () => {
+    const { content, board } = createContentAndBoard();
+
+    content.setTitle("new title");
+
+    expect(content.title).toBe("new title");
+
+    destroyContentAndBoard(content, board);
+  });
+
   it("can add/remove/update points", () => {
     const { content, board } = createContentAndBoard();
     expect(isBoard(board)).toBe(true);
@@ -251,6 +288,24 @@ describe("GeometryContent", () => {
     destroyContentAndBoard(content, board);
   });
 
+  it("can add comments to points", () => {
+    const { content, board } = createContentAndBoard();
+    const p1Id = "point-1";
+    const p1 = content.addPoint(board, [1, 1], { id: p1Id }) as JXG.Point;
+    expect(content.lastObject).toEqual({ id: p1Id, type: "point", x: 1, y: 1 });
+
+    // add comment to point
+    const [comment] = content.addComment(board, p1Id)!;
+    expect(content.lastObject).toEqual({ id: comment.id, type: "comment", anchors: [p1Id] });
+    expect(isComment(comment)).toBe(true);
+
+    // update comment text
+    content.updateObjects(board, comment.id, { position: [5, 5], text: "new" });
+    expect(content.lastObject).toEqual({ id: comment.id, type: "comment", anchors: [p1Id], x: 4, y: 4, text: "new" });
+
+    destroyContentAndBoard(content, board);
+  });
+
   it("can add/remove/update polygons", () => {
     const { content, board } = createContentAndBoard();
     content.addPoints(board, [[1, 1], [3, 3], [5, 1]], [{ id: "p1" }, { id: "p2" }, { id: "p3" }]);
@@ -278,6 +333,26 @@ describe("GeometryContent", () => {
     // can't create polygon without vertices
     polygon = content.applyChange(board, { operation: "create", target: "polygon" }) as any as JXG.Polygon;
     expect(polygon).toBeUndefined();
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can add comments to polygons", () => {
+    const { content, board } = createContentAndBoard();
+
+    content.addPoints(board, [[0, 0], [0, 2], [2, 2], [2, 0]],
+      [{ id: "p1" }, { id: "p2" }, { id: "p3" }, { id: "p4" }]);
+    const polygon: JXG.Polygon | undefined = content.createPolygonFromFreePoints(board) as JXG.Polygon;
+
+    // add comment to polygon
+    const [comment] = content.addComment(board, polygon.id)!;
+    expect(content.lastObject).toEqual({ id: comment.id, type: "comment", anchors: [polygon.id] });
+    expect(isComment(comment)).toBe(true);
+
+    // update comment text
+    content.updateObjects(board, comment.id, { position: [5, 5], text: "new" });
+    expect(content.lastObject).toEqual(
+      { id: comment.id, type: "comment", anchors: [polygon.id], x: 4, y: 4, text: "new" });
 
     destroyContentAndBoard(content, board);
   });
