@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -8,11 +9,15 @@ import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-
 
 import "./image-toolbar.scss";
 
+// TODO The ImageUploadButton is now being used by three different tiles.
+// It would be good to move it into a more generic location.
 interface IImageUploadButtonProps {
   tooltipOffset?: { x?: number, y?: number };
   onUploadImageFile?: (file: File) => void;
+  extraClasses?: string;
 }
-export const ImageUploadButton: React.FC<IImageUploadButtonProps> = ({ tooltipOffset, onUploadImageFile }) => {
+export const ImageUploadButton: React.FC<IImageUploadButtonProps> =
+  ({ tooltipOffset, onUploadImageFile, extraClasses }) => {
   // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file
   // Next, we hide the <input> element — we do this because file inputs tend to be ugly, difficult
   // to style, and inconsistent in their design across browsers. Opacity is used to hide the file
@@ -29,9 +34,10 @@ export const ImageUploadButton: React.FC<IImageUploadButtonProps> = ({ tooltipOf
                           distance: tooltipOffset?.y || 0,
                           offset: tooltipOffset?.x || 0
                         });
+  const classes = classNames("toolbar-button", "image-upload", extraClasses);
   return (
     <Tooltip title="Upload image" {...tooltipOptions}>
-      <div className="toolbar-button image-upload">
+      <div className={classes}>
         <UploadButtonSvg />
         <input
           type="file"
