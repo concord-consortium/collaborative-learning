@@ -557,6 +557,31 @@ describe("Geometry migration", () => {
     expect(convertChangesToModelSnapshot(changes)).toEqual(kDefaultModelProps);
   });
 
+  it("should establish links from legacy saves", () => {
+    const changes: JXGChange[] = [
+      { operation: "create", target: "board", properties:
+        { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 } },
+      { operation: "create", target: "tableLink", targetID: "zKrcCQBIu1lN3atM", // properties:
+        // { ids: ["pruBjSfxu1kftw-v:Z5acWyQ31A2NOc-X"], points: [{ label: "p1", coords: [1,2] }] },
+        links: { /*id: "qRbVclfBbAJdSIcn",*/ tileIds: ["table1"] } } //,
+        // /*labels: [{ id: "xAxis", label: "x" }, { id: "yAxis", label: "y" },
+      // { id: "pruBjSfxu1kftw-v", label: "p1" }]*/ } }
+    ];
+
+    expect(convertChangesToJson(changes)).toEqual({
+      type: "Geometry",
+      board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
+      objects: [],
+      links: ["table1"]
+    });
+
+    const snapshot = convertChangesToModelSnapshot(changes);
+    expect(snapshot).toEqual({
+      ...kDefaultModelProps,
+      links: ["table1"]
+    });
+  });
+
   it("should migrate polygons", () => {
     const changes: JXGChange[] = [
       {

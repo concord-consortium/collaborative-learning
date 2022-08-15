@@ -615,7 +615,7 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
 
   const exportLinks = () => {
     if (outputJson) {
-      links.size && builder.pushLine(`"links": [${Array.from(links).join(", ")}]`);
+      links.size && builder.pushLine(`"links": ["${Array.from(links).join(`", "`)}"]`, 2);
     }
   };
 
