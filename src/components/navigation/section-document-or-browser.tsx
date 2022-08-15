@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from 'react-query';
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { DocumentModelType } from "../../models/document/document";
+import { Instance, getSnapshot } from "mobx-state-tree";
+import { CDocumentType, TreeManager } from "../../models/history/tree-manager";
+import { DocumentModel, DocumentModelType } from "../../models/document/document";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { ENavTabSectionType, NavTabSectionSpec, NavTabSpec } from "../../models/view/nav-tabs";
 import { EditableDocumentContent } from "../document/editable-document-content";
@@ -126,7 +128,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
     return (
       (type === "my-work") || (type === "learningLog")
         ?
-          <div className={`edit-button ${sClass}`} onClick={() => handleEditClick(document)}>
+          <div className={`edit-button ${sClass} ${showPlaybackControls ? "disabled" : ""}`}
+                onClick={() => handleEditClick(document)}>
             <EditIcon className={`edit-icon ${sClass}`} />
             <div>Edit</div>
           </div>
@@ -196,20 +199,51 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   };
 
   const showPlayback = user.isTeacher;
+  const [showPlaybackControls, setShowPlaybackControls] = useState(false);
+  const [documentToShow, setDocumentToShow] = useState<DocumentModelType>();
+
+  useEffect(() => {
+    setDocumentToShow(referenceDocument);
+  },[referenceDocument]);
+
+  const handleTogglePlaybackControlComponent = () => {
+    setShowPlaybackControls(!showPlaybackControls);
+    const newState = !showPlaybackControls;
+    setDocumentToShow(newState
+                        ? getDocumentToShow()
+                        : referenceDocument
+                      );
+  };
+
+  const getDocumentToShow = () => {
+    if (referenceDocument) {
+      const origDocManager = referenceDocument.treeManagerAPI as Instance<typeof TreeManager>;
+      const docCopy = DocumentModel.create(getSnapshot(referenceDocument));
+      const historySnapshot = (getSnapshot(origDocManager.document)) as unknown as CDocumentType;
+      const docCopyManager = docCopy.treeManagerAPI as Instance<typeof TreeManager>;
+      docCopyManager.setChangeDocument(historySnapshot);
+      docCopyManager.setCurrentHistoryIndex(origDocManager.currentHistoryIndex);
+      return docCopy;
+    }
+  };
+
   const documentView = referenceDocument && !referenceDocument?.getProperty("isDeleted") &&
     <div>
       <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
         <div className={`document-title`}>
           {getDocumentDisplayTitle(referenceDocument, appConfigStore, problemStore)}
         </div>
-        {!referenceDocument.isRemote && editButton(tabSpec.tab, sectionClass, referenceDocument)}
+        {(!referenceDocument.isRemote)
+            && editButton(tabSpec.tab, sectionClass, referenceDocument)}
       </div>
       <EditableDocumentContent
         mode={"1-up"}
         isPrimary={false}
-        document={referenceDocument}
+        document={documentToShow || referenceDocument}
         readOnly={true}
         showPlayback={showPlayback}
+        showPlaybackControls={showPlaybackControls}
+        onTogglePlaybackControls={handleTogglePlaybackControlComponent}
       />
     </div>;
 

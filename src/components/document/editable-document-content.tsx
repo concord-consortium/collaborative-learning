@@ -43,40 +43,18 @@ interface IOneUpCanvasProps {
   document: DocumentModelType;
   showPlayback?: boolean;
   readOnly: boolean;
+  showPlaybackControls?: boolean;
+  onTogglePlaybackControls?: () => void;
 }
 const OneUpCanvas: React.FC<IOneUpCanvasProps> = props => {
-  const {document, ...others} = props;
-  const [showPlaybackControls, setShowPlaybackControls] = useState(false);
-  const [documentToShow, setDocumentToShow] = useState<DocumentModelType>(document);
+  const {document, showPlaybackControls, onTogglePlaybackControls, ...others} = props;
 
-  useEffect(() => {
-    setDocumentToShow(document);
-  },[document]);
-
-  const handleTogglePlaybackControlComponent = () => {
-    setShowPlaybackControls(!showPlaybackControls);
-    const newState = !showPlaybackControls;
-    setDocumentToShow(newState
-                        ? getDocumentToShow()
-                        : document
-                      );
-  };
-
-  const getDocumentToShow = () => {
-    const origDocManager = document.treeManagerAPI as Instance<typeof TreeManager>;
-    const docCopy = DocumentModel.create(getSnapshot(document));
-    const historySnapshot = (getSnapshot(origDocManager.document)) as unknown as CDocumentType;
-    const docCopyManager = docCopy.treeManagerAPI as Instance<typeof TreeManager>;
-    docCopyManager.setChangeDocument(historySnapshot);
-    docCopyManager.setCurrentHistoryIndex(origDocManager.currentHistoryIndex);
-    return docCopy;
-  };
 
   return (
     <CanvasComponent context="1-up"
                       showPlaybackControls={showPlaybackControls}
-                      onTogglePlaybackControls={handleTogglePlaybackControlComponent}
-                      document={documentToShow}
+                      onTogglePlaybackControls={onTogglePlaybackControls}
+                      document={document}
                       {...others} />
   );
 };
@@ -98,15 +76,18 @@ interface IDocumentCanvasProps {
   document: DocumentModelType;
   readOnly: boolean;
   showPlayback?: boolean;
+  showPlaybackControls?: boolean;
+  onTogglePlaybackControls?: () => void;
 }
 const DocumentCanvas: React.FC<IDocumentCanvasProps> = props => {
-  const { mode, isPrimary, document, readOnly, showPlayback } = props;
+  const { mode, isPrimary, document, readOnly, showPlayback, showPlaybackControls, onTogglePlaybackControls } = props;
   const isFourUp = (document.type === ProblemDocument) && (isPrimary && (mode === "4-up"));
   return (
     <div className="canvas-area">
       {isFourUp
         ? <EditableFourUpCanvas userId={document.uid} />
-        : <OneUpCanvas document={document} readOnly={readOnly} showPlayback={showPlayback}/>}
+        : <OneUpCanvas document={document} readOnly={readOnly} showPlayback={showPlayback}
+            showPlaybackControls={showPlaybackControls} onTogglePlaybackControls={onTogglePlaybackControls} />}
     </div>
   );
 };
@@ -118,9 +99,12 @@ export interface IProps {
   showPlayback?: boolean;
   toolbar?: ToolbarModelType;
   readOnly?: boolean;
+  showPlaybackControls?: boolean;
+  onTogglePlaybackControls?: () => void;
 }
 export const EditableDocumentContent: React.FC<IProps> = props => {
-  const { mode, isPrimary, document, toolbar, readOnly, showPlayback } = props;
+  const { mode, isPrimary, document, toolbar, readOnly, showPlayback,
+          showPlaybackControls, onTogglePlaybackControls } = props;
 
   const documentContext = useDocumentContext(document);
   const { db: { firebase }, ui, user } = useStores();
@@ -138,7 +122,6 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
                                              {"comment-select" : documentSelectedForComment});
 
   useDocumentSyncToFirebase(user, firebase, document, readOnly);
-
   return (
     <DocumentContextReact.Provider value={documentContext}>
       <EditableToolApiInterfaceRefContext.Provider value={editableToolApiInterfaceRef}>
@@ -147,7 +130,8 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
           {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} />}
           {isShowingToolbar && <div className="canvas-separator"/>}
           <DocumentCanvas mode={mode} isPrimary={isPrimary} document={document} readOnly={isReadOnly}
-                          showPlayback={showPlayback} />
+                          showPlayback={showPlayback} showPlaybackControls={showPlaybackControls}
+                          onTogglePlaybackControls={onTogglePlaybackControls} />
         </div>
       </EditableToolApiInterfaceRefContext.Provider>
     </DocumentContextReact.Provider>
