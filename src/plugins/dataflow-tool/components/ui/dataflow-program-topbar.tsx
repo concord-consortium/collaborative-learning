@@ -21,6 +21,7 @@ interface TopbarProps {
   showRateUI: boolean;
   lastIntervalDuration: number;
   serialDevice: SerialDevice;
+  showRecordUI: boolean;
 }
 
 // const kProgressWidth = 76;
@@ -115,7 +116,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   );
 
   function serialMessage(){
-
     // nodes that use serial, but no device physically connected
     if (lastMsg !== "connect" && serialDevice.serialNodesCount > 0){
       return "connect a device";
@@ -145,22 +145,29 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         </div>
       </div>
       <div className="topbar-center">
+
         <RateSelectorComponent
           rateOptions={props.programDataRates}
           dataRate={props.dataRate}
           onRateSelectClick={props.onRateSelectClick}
           readOnly={props.readOnly}
         />
-        <RecordButton readOnly={props.readOnly} />
-        <button
-          className="program-state-button"
-          title="Stop Program"
-          onClick={props.onStopProgramClick}
-          disabled={!props.runningProgram || !props.readOnly}
-        >
-          <div className="icon stop" />
-          <div className="text">Stop</div>
-        </button>
+
+        { props.showRecordUI &&
+          <>
+            <RecordButton readOnly={props.readOnly} />
+            <button
+              className="program-state-button"
+              title="Stop Program"
+              onClick={props.onStopProgramClick}
+              disabled={!props.runningProgram || !props.readOnly}
+            >
+              <div className="icon stop" />
+              <div className="text">Stop</div>
+            </button>
+          </>
+        }
+
       </div>
       <div className="topbar-right">
         {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
