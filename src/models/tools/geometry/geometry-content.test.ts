@@ -544,6 +544,22 @@ describe("GeometryContent", () => {
     content.updateObjects(board, comment.id, { position: [5, 5], text: "new" });
     expect(content.lastObject).toEqual({ id: comment.id, type: "comment", anchors: ["ml"], x: 2, y: 2, text: "new" });
 
+    // can access the movable line's points
+    const p1 = content.getAnyObject("ml-point1");
+    expect(p1).toEqual({
+      id: "ml-point1",
+      type: "point",
+      x: 1,
+      y: 1
+    });
+    const p2 = content.getAnyObject("ml-point2");
+    expect(p2).toEqual({
+      id: "ml-point2",
+      type: "point",
+      x: 5,
+      y:5
+    });
+
     // removing the line removes the line and its comment from the model and the board
     content.removeObjects(board, "ml");
     expect(board.objects.ml).toBeUndefined();
