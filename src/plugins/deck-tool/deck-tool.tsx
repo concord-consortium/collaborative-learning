@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
@@ -13,14 +14,10 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const [canIncrement, setCanIncrement] = useState(true);
   const [canDecrement, setCanDecrement] = useState(false);
 
-  const all = content.allCases();
-  const existingAttributes = content.existingAttributes();
-  console.log("existing attributes: ", existingAttributes);
-
-  const dummyDescriptionDataOn = false; //TODO - remove this, for dev only
+  const allCases = content.allCases();
 
   function nextCase(){
-    if ( caseIndex < all.length - 1 ) {
+    if ( caseIndex < allCases.length - 1 ) {
       setCaseIndex(caseIndex + 1);
     }
   }
@@ -33,16 +30,16 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
 
   useEffect(()=>{
     setCanDecrement(caseIndex > 0);
-    setCanIncrement(caseIndex < all.length - 1);
+    setCanIncrement(caseIndex < allCases.length - 1);
   },[caseIndex]);
 
   const dataForCase = () => {
-    const caso = content.caseByIndex(caseIndex);
-    if (caso){
-      const keysHere = Object.keys(caso).filter(k => k !== "__id__");
+    const thisCase = content.caseByIndex(caseIndex);
+    if (thisCase){
+      const keysHere = Object.keys(thisCase).filter(k => k !== "__id__");
       const caseData = keysHere.map((k) => {
         const attrName = content.attrById(k).name;
-        return caso ? { a: attrName, v: caso[k]} : undefined;
+        return thisCase ? { a: attrName, v: thisCase[k]} : undefined;
       });
 
       return (
@@ -105,6 +102,16 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     ]);
   }
 
+  const previousButtonClasses = classNames(
+    "card-nav", "previous",
+    canDecrement ? "active" : "disabled",
+  );
+
+  const nextButtonClasses = classNames(
+    "card-nav", "next",
+    canIncrement ? "active" : "disabled",
+  );
+
   return (
     <div className="deck-tool">
       <div className="deck-toolbar">
@@ -123,15 +130,14 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           }
         </div>
         <div className="panel nav">
-          Card { caseIndex + 1 } of { all.length }
-          <button className={ canDecrement ? 'able' : 'disable' } onClick={previousCase}>previous</button>
-          <button className={ canIncrement ? 'able' : 'disable' } onClick={nextCase}>next</button>
+          Card { caseIndex + 1 } of { allCases.length }
+          <button className={ previousButtonClasses  } onClick={previousCase}>previous</button>
+          <button className={ nextButtonClasses } onClick={nextCase}>next</button>
           <button onClick={addCase}>+</button>
         </div>
         <div className="data-area-wrap">
           { dataForCase() }
         </div>
-        { dummyDescriptionDataOn && <textarea value={content.deckDescription} onChange={handleDescriptionChange} /> }
       </div>
     </div>
   );

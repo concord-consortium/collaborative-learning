@@ -57,7 +57,11 @@
         border-radius: 2px;
       }
 
-      button.disable {
+      button.active {
+        color:green;
+      }
+
+      button.disabled {
         color:rgb(208, 204, 204);
         background-color: #c0bcbc;
       }
