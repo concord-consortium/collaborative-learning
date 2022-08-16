@@ -385,14 +385,13 @@
                 "tiles":
                 [
                   {
-                    "id": "MCieYY_GiXnemWba",
+                    "id": "WgvCVh_rfY1KzMVH",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Trap Tutorial Video</strong></p>",
-                        "<p>Watch the video showing how to <a href='https://drive.google.com/file/d/1Vt-zeCGA7fy8prF19Jfm1m8Ror5uIXuN/view'>build a moth trap</a> trap using (mostly) stuff you've already got!</p>",
-                        "<p>https://drive.google.com/file/d/1Vt-zeCGA7fy8prF19Jfm1m8Ror5uIXuN/view</p>"
+                        "<p>Watch the video showing how to <a href='https://drive.google.com/file/d/135oeHF8WYpVd8iXIYk9Zaoyn-rQx7efG/view'>build a moth trap</a> using (mostly) stuff you&#x27;ve already got!</p>"
                       ]
                     }
                   },
@@ -614,14 +613,13 @@
                 "tiles":
                 [
                   {
-                    "id": "MCieYY_GiXnemWba2022",
+                    "id": "WgvCVh_rfY1KzMVH",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Trap Tutorial Video</strong></p>",
-                        "<p>Watch the video showing how to <a href='https://drive.google.com/file/d/1Vt-zeCGA7fy8prF19Jfm1m8Ror5uIXuN/view'>build a moth trap</a> trap using (mostly) stuff you've already got!</p>",
-                        "<p>https://drive.google.com/file/d/1Vt-zeCGA7fy8prF19Jfm1m8Ror5uIXuN/view</p>"
+                        "<p>Watch the video showing how to <a href='https://drive.google.com/file/d/135oeHF8WYpVd8iXIYk9Zaoyn-rQx7efG/view'>build a moth trap</a> using (mostly) stuff you&#x27;ve already got!</p>"
                       ]
                     }
                   },
@@ -641,15 +639,15 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "ToVynRaDMqiF10Ld2022",
+                    "id": "R9NR96j-7MyF-Z2y",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Moth Pinning Video</strong></p>",
                         "<p>Learn how to pin moths for studying, comparing, and identifying them.</p>",
-                        "<p>Oregon State <a href='https://extension.oregonstate.edu/video/pinning-butterflies-moths'>Pinning Tutorial</a></p>",
-                        "<p>https://extension.oregonstate.edu/video/pinning-butterflies-moths</p>"
+                        "<p>MSU Team Moth <a href='https://drive.google.com/file/d/1sVzZNz_2TR9jvpveACbKpBR6M7JA4IhH/view?usp=drivesdk'>Pinning Tutorial</a></p>",
+                        "<p>Oregon State <a href='https://extension.oregonstate.edu/video/pinning-butterflies-moths'>Pinning Tutorial</a></p>"
                       ]
                     }
                   }
