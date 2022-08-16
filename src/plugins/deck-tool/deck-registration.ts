@@ -1,6 +1,6 @@
 import { registerToolContentInfo } from "../../models/tools/tool-content-info";
 import { kDeckDefaultHeight, kDeckToolID } from "./deck-types";
-import DeckToolIcon from "./deck-icon.svg";
+import DeckToolIcon from "./assets/deck-icon.svg";
 import { DeckToolComponent } from "./deck-tool";
 import { defaultDeckContent, DeckContentModel } from "./deck-content";
 import { ToolMetadataModel } from "../../models/tools/tool-types";
