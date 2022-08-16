@@ -11,6 +11,7 @@ import { CDocument, TreeManager } from "./tree-manager";
 import { HistoryEntrySnapshot } from "./history";
 import { nanoid } from "nanoid";
 import { cloneDeep } from "lodash";
+import { withoutUndo } from "./tree-monitor";
 
 const TestSharedModel = SharedModel
   .named("TestSharedModel")
@@ -57,6 +58,10 @@ const TestTile = ToolContentModel
       self.text = sharedModelValue ? sharedModelValue + "-tile" : undefined;
     },
     setFlag(_flag: boolean) {
+      self.flag = _flag;
+    },
+    setFlagWithoutUndo(_flag: boolean){
+      withoutUndo();      
       self.flag = _flag;
     }
   }));
@@ -235,6 +240,34 @@ it("can redo a tile change", async () => {
     redoEntry
   ]);
 });  
+
+it("can skip adding an action to the undo list", async () => {
+  const {tileContent, manager, undoStore} = setupDocument();
+  // This should record a history entry with this change and any changes to tiles
+  // triggered by this change
+  tileContent.setFlagWithoutUndo(true);
+
+  // Make sure this entry is recorded before undoing it
+  await expectEntryToBeComplete(manager, 1);
+
+  expect(undoStore.canUndo).toBe(false);
+
+  expect(tileContent.flag).toBe(true);
+
+  const changeDocument = manager.document as Instance<typeof CDocument>;
+  expect(getSnapshot(changeDocument.history)).toEqual([ 
+    // override the action name of the initialUpdateEntry
+    {
+      ...initialUpdateEntry,
+      action: "/content/tileMap/t1/content/setFlagWithoutUndo",
+      undoable: false,
+      records: [{
+        ...initialUpdateEntry.records[0],
+        action: "/content/tileMap/t1/content/setFlagWithoutUndo",
+      }]
+    }
+  ]);
+});
 
 /**
  * Remove the Jest `expect.any(Number)` on created, and provide a real id.
