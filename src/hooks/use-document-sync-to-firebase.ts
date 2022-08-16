@@ -31,7 +31,7 @@ export function useDocumentSyncToFirebase(
   !readOnly && (user.id !== uid) && console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
   if (DEBUG_DOCUMENT && !readOnly) {
-    // The only update the currentDocument with writable documents
+    // Only update the currentDocument with writable documents
     // useDocumentSyncToFirebase is called with readOnly documents too
     (window as any).currentDocument = document;
   }

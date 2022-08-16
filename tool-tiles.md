@@ -38,13 +38,19 @@ We also specify `ToolTileModel`, a general content model which is the base conte
 
 ### ToolMetadataModel
 
-Each tile content model can use a metadata model. This is used to store information that is shared across multiple instances of a document. It is also preserved across reloads. 
+Each tile content model can use a metadata model. This is used to store information that is shared across multiple instances of a document. It is also preserved across tile content reloads. 
 
 When a tool is registered it provides a metadata MST "class". When needed the metadata is looked up in a global map from tile id to metadata instance. If a metadata instance is not found, then one is created and added for this tile id. This code is in `tool-types.ts`.
 
 The metadata is provided to the tile content model via a `doPostCreate` action called on the tile content model.
 
-**NOTE**: If the same tile id is used in different documents, they will share the same metadata instance. This is uncommon with user created documents tile ids are random strings. When a document is copied its tile ids are updated to new random strings (**TODO** is this true?). However it can happen with authored content, and there is nothing preventing multiple documents from being stored in the database with duplicate tile ids.
+The metadata model was introduced at a time when the response to a remote (i.e. firebase) content change was to replace the document content with a brand new `DocumentContent` instance, which meant that all local state associated with a content instance was regularly lost. We have since moved to use `applySnapshot()` in this situation, which preserves the content instance, so the metadata model should no longer be needed for that purpose.
+
+The metadata model is also used to communicate tile-specific information useful to the tile, notably the tile's id and title. The title is now accessible via the `getToolTileModel()` function and the id could be stored in a volatile property and set with a simple `setTileId()` action.
+
+In short, the notion of tile metadata may have outlived its usefulness and we should endeavor to replace its use with more appropriate mechanisms where possible.
+
+**NOTE**: If the same tile id is used in different documents, they will share the same metadata instance. This is uncommon with user created documents in which tile ids are random strings. When a document or set of tiles is copied the tile ids are updated to new random strings. However it can happen with authored content, and there is nothing preventing multiple documents from being stored in the database with duplicate tile ids.
 
 ## ToolTileComponent
 `ToolTileComponent` is a React component that serves as the main container for each tile. Tool tile types are used in `ToolTileComponent` to determine which tool component will be rendered (a tool component is the unique React parent component created for each tool tile type). A tool component for each tool tile type is imported into `ToolTileComponent` and conditionally rendered based on the tool tile type.
