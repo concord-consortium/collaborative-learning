@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { DeckContentModelType } from "./deck-content";
-import { IconButton } from "../../components/utilities/icon-button";
+import { DeckCardData } from "./components/deck-card-data";
 
 import "./deck-tool.scss";
 
@@ -34,27 +34,27 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     setCanIncrement(caseIndex < allCases.length - 1);
   },[caseIndex]);
 
-  const dataForCase = () => {
-    const thisCase = content.caseByIndex(caseIndex);
-    if (thisCase){
-      const keysHere = Object.keys(thisCase).filter(k => k !== "__id__");
-      const caseData = keysHere.map((k) => {
-        const attrName = content.attrById(k).name;
-        return thisCase ? { a: attrName, v: thisCase[k]} : undefined;
-      });
+  // const dataForCase = () => {
+  //   const thisCase = content.caseByIndex(caseIndex);
+  //   if (thisCase){
+  //     const keysHere = Object.keys(thisCase).filter(k => k !== "__id__");
+  //     const caseData = keysHere.map((k) => {
+  //       const attrName = content.attrById(k).name;
+  //       return thisCase ? { a: attrName, v: thisCase[k]} : undefined;
+  //     });
 
-      return (
-        caseData.map((theCase, i) => {
-          return (
-            <div className="case-item" key={i}>
-              <div className="attribute"><b>{theCase?.a}</b></div>
-              <div className="value">{theCase?.v}</div>
-            </div>
-          );
-        })
-      );
-    }
-  };
+  //     return (
+  //       caseData.map((theCase, i) => {
+  //         return (
+  //           <div className="case-item" key={i}>
+  //             <div className="attribute"><b>{theCase?.a}</b></div>
+  //             <div className="value">{theCase?.v}</div>
+  //           </div>
+  //         );
+  //       })
+  //     );
+  //   }
+  // };
 
   const setDefaultTitle = () => {
     if (!content.metadata.title || content.metadata.title === ""){
@@ -160,7 +160,8 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           </button>
         </div>
         <div className="data-area">
-          { dataForCase() }
+          {/* <DeckCardData caseIndex={caseIndex} model={model}/> */}
+          <DeckCardData caseIndex={caseIndex} />
         </div>
         <div className="add-attribute-area">
           <div className="new-attribute">new attribute</div>
