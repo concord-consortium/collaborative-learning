@@ -1,7 +1,8 @@
 import { clone, isEqualWith } from "lodash";
 import { destroy, getSnapshot } from "mobx-state-tree";
 import {
-  GeometryContentModel, GeometryContentModelType, defaultGeometryContent, GeometryMetadataModel
+  GeometryContentModel, GeometryContentModelType, defaultGeometryContent,
+  defaultGeometryContentSnapshot, GeometryMetadataModel
 } from "./geometry-content";
 import {
   CommentModel, defaultBoard, ImageModel, MovableLineModel, PointModel, PolygonModel,
@@ -13,9 +14,13 @@ import { isPointInPolygon, getPointsForVertexAngle, getPolygonEdge } from "./jxg
 import { canSupportVertexAngle, getVertexAngle, updateVertexAnglesFromObjects } from "./jxg-vertex-angle";
 import {
   isBoard, isComment, isFreePoint, isImage, isLine, isMovableLine, isPoint, isPolygon,
-  isText,
-  kGeometryDefaultPixelsPerUnit, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin
+  isText, kGeometryDefaultPixelsPerUnit, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin
 } from "./jxg-types";
+import { ToolTileModel, ToolTileModelType } from "../tool-tile";
+
+// This is needed so MST can deserialize snapshots referring to tools
+import { registerTools } from "../../../register-tools";
+registerTools(["Geometry"]);
 
 // Need to mock this so the placeholder that is added to the cache
 // has dimensions
@@ -131,9 +136,20 @@ describe("GeometryContent", () => {
     return { content, board };
   }
 
+  function createTileAndBoard(): { tile: ToolTileModelType, board: JXG.Board } {
+    const { content, board } = createContentAndBoard();
+    const tile = ToolTileModel.create({ content });
+    return { tile, board };
+  }
+
   function destroyContentAndBoard(content: GeometryContentModelType, board?: JXG.Board) {
     if (board) content.destroyBoard(board);
     destroy(content);
+  }
+
+  function destroyTileAndBoard(tile: ToolTileModelType, board: JXG.Board) {
+    if (board) (tile.content as GeometryContentModelType).destroyBoard(board);
+    destroy(tile);
   }
 
   it("can create with default properties", () => {
@@ -223,7 +239,7 @@ describe("GeometryContent", () => {
       yMax: 3
     };
 
-    const axes = content.rescaleBoard(board, params);
+    content.rescaleBoard(board, params);
     expect(content.board?.xAxis.name).toBe("xName");
     expect(content.board?.xAxis.label).toBe("xAnnotation");
     expect(content.board?.xAxis.min).toBe(-1);
@@ -237,13 +253,14 @@ describe("GeometryContent", () => {
   });
 
   it("can update title", () => {
-    const { content, board } = createContentAndBoard();
+    const { tile, board } = createTileAndBoard();
+    const content = tile.content as GeometryContentModelType;
 
     content.setTitle("new title");
 
     expect(content.title).toBe("new title");
 
-    destroyContentAndBoard(content, board);
+    destroyTileAndBoard(tile, board);
   });
 
   it("can add/remove/update points", () => {
@@ -291,7 +308,7 @@ describe("GeometryContent", () => {
   it("can add comments to points", () => {
     const { content, board } = createContentAndBoard();
     const p1Id = "point-1";
-    const p1 = content.addPoint(board, [1, 1], { id: p1Id }) as JXG.Point;
+    content.addPoint(board, [1, 1], { id: p1Id }) as JXG.Point;
     expect(content.lastObject).toEqual({ id: p1Id, type: "point", x: 1, y: 1 });
 
     // add comment to point

@@ -54,17 +54,26 @@ export interface IAxesParams {
   yMax: number;
 }
 
-export function defaultGeometryContent(options?: IDefaultContentOptions): GeometryContentModelType {
+export function defaultBoardSnapshot() {
   // TODO: title
   // const { title } = options || {};
   const xRange = kGeometryDefaultWidth / kGeometryDefaultPixelsPerUnit;
   const yRange = kGeometryDefaultHeight / kGeometryDefaultPixelsPerUnit;
-  return GeometryContentModel.create({
-    board: {
-      xAxis: { name: "x", label: "x", min: kGeometryDefaultXAxisMin, range: xRange },
-      yAxis: { name: "y", label: "y", min: kGeometryDefaultYAxisMin, range: yRange }
-    }
-   });
+  return {
+    type: "Geometry",
+    xAxis: { name: "x", label: "x", min: kGeometryDefaultXAxisMin, range: xRange },
+    yAxis: { name: "y", label: "y", min: kGeometryDefaultYAxisMin, range: yRange }
+  };
+}
+
+export function defaultGeometryContentSnapshot() {
+  return {
+    board: defaultBoardSnapshot()
+  };
+}
+
+export function defaultGeometryContent(options?: IDefaultContentOptions): GeometryContentModelType {
+  return GeometryContentModel.create(defaultGeometryContentSnapshot());
 }
 
 export interface IAxisLabels {
