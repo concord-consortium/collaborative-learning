@@ -16,21 +16,22 @@ export const DeckCardData: React.FC<IProps> = ({ caseIndex, model }) => {
     return null;
   }
 
-  const keysHere = Object.keys(thisCase).filter(k => k !== "__id__");
-  const caseData = keysHere.map((k) => {
-    const attrName = content.attrById(k).name;
-    return thisCase ? { a: attrName, v: thisCase[k]} : undefined;
+  const keysHere = Object.keys(thisCase).filter(keyName => keyName !== "__id__");
+  const caseData = keysHere.map((keyName) => {
+    const attrName = content.attrById(keyName).name;
+    return thisCase ? { attributeName: attrName, attributeValue: thisCase[keyName]} : undefined;
   });
 
   const caseHtml = caseData.map((caseDataPoint, i) => {
+    console.log(caseDataPoint)
     return (
       <div className="case-item" key={i}>
-        <div className="attribute"><b>{caseDataPoint?.a}</b></div>
-        <div className="value">{caseDataPoint?.v}</div>
+        <div className="attribute"><b>{caseDataPoint?.attributeName}</b></div>
+        <div className="value">{caseDataPoint?.attributeValue}</div>
       </div>
     )
   })
 
-  return (<>{caseHtml}</>)
+  return <>{caseHtml}</>
 };
 
