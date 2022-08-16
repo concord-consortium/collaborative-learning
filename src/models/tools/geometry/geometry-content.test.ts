@@ -6,6 +6,7 @@ import {
 } from "./geometry-content";
 import {
   CommentModel, defaultBoard, ImageModel, MovableLineModel, PointModel, PolygonModel,
+  PolygonModelType,
   segmentIdFromPointIds, VertexAngleModel
 } from "./geometry-model";
 import { kGeometryToolID } from "./geometry-types";
@@ -249,6 +250,20 @@ describe("GeometryContent", () => {
     expect(content.board?.yAxis.min).toBe(-2);
     expect(content.board?.yAxis.range).toBe(5);
 
+    const xAxis = content.board?.xAxis;
+    if (xAxis) {
+      xAxis.setName('x');
+      expect(xAxis.name).toBe('x');
+      xAxis.setLabel('xAxis');
+      expect(xAxis.label).toBe('xAxis');
+      xAxis.setMin(0);
+      expect(xAxis.min).toBe(0);
+      xAxis.setRange(20);
+      expect(xAxis.range).toBe(20);
+      xAxis.setUnit(2);
+      expect(xAxis.unit).toBe(2);
+    }
+
     destroyContentAndBoard(content, board);
   });
 
@@ -417,10 +432,14 @@ describe("GeometryContent", () => {
     expect(isPolygon(polygon)).toBe(true);
     expect(polygonId.startsWith("testid-")).toBe(true);
 
-    const segment = getPolygonEdge(board, polygonId, ["p1", "p2"]);
+    const pointPair: [string, string] = ["p1", "p2"];
+    const segment = getPolygonEdge(board, polygonId, pointPair);
     expect(isLine(segment)).toBe(true);
     expect(isText(segment?.label)).toBe(true);
     expect(typeof segment?.name).toBe("function");
+    const polygonModel = content.getObject(polygonId) as PolygonModelType;
+    expect(polygonModel.hasSegmentLabel(pointPair)).toBe(true);
+    expect(polygonModel.getSegmentLabel(pointPair)).toBeDefined();
 
     const segment2 = getPolygonEdge(board, polygonId, ["p2", "p3"]);
     expect(isLine(segment2)).toBe(true);
