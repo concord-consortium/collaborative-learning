@@ -161,7 +161,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
         </div>
         <div className="data-area">
           {/* <DeckCardData caseIndex={caseIndex} model={model}/> */}
-          <DeckCardData caseIndex={caseIndex} />
+          <DeckCardData caseIndex={caseIndex} model={{zip: "zap"}} />
         </div>
         <div className="add-attribute-area">
           <div className="new-attribute">new attribute</div>

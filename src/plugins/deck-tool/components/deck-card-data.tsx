@@ -1,12 +1,14 @@
 import React from "react";
 
-
 interface IProps {
   caseIndex: any;
+  model: any;
 }
-export const DeckCardData: React.FC<IProps> = ({ caseIndex }) => {
+
+export const DeckCardData: React.FC<IProps> = ({ caseIndex, model }) => {
   return (
     <div>
+      model: { model.zip }
       caseIndex: { caseIndex }
     </div>
   );
