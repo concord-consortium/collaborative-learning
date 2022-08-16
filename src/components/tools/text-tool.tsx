@@ -79,6 +79,7 @@ import "./text-tool.sass";
 interface IState {
   value?: EditorValue;
   selectedButtons?: string[];
+  editing?: boolean;
 }
 
 @inject("stores")
@@ -161,6 +162,13 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
   }
 
+  public componentDidUpdate(prevProps: IToolTileProps, prevState: IState) {
+    if (!this.state.editing && this.state.value && prevState.value !== this.state.value) {
+      const content = this.getContent();
+      content.setSlate(this.state.value);
+    }
+  }
+
   public componentWillUnmount() {
     this.disposers.forEach(disposer => disposer());
   }
@@ -202,7 +210,10 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
           placeholder={placeholderText}
           readOnly={readOnly}
           plugins={this.plugins}
-          onValueChange={this.handleChange} />
+          onValueChange={this.handleChange}
+          onFocus={ () => this.setState({ editing: true}) }
+          onBlur={ () => this.setState({ editing: false }) }
+        />
       </div>
     );
   }
