@@ -1,18 +1,35 @@
 import React from "react";
+import { ToolTileModelType } from "../../../models/tools/tool-tile";
+import { DeckContentModelType } from "../deck-content"
 
 interface IProps {
   caseIndex: any;
-  model: any;
+  model: ToolTileModelType;
 }
 
 export const DeckCardData: React.FC<IProps> = ({ caseIndex, model }) => {
+  const content = model.content as DeckContentModelType;
+  const thisCase = content.caseByIndex(caseIndex);
+
+  if (thisCase){
+    const keysHere = Object.keys(thisCase).filter(k => k !== "__id__");
+    const caseData = keysHere.map((k) => {
+      const attrName = content.attrById(k).name;
+      return thisCase ? { a: attrName, v: thisCase[k]} : undefined;
+    });
+
+    console.log(caseData);
+  }
+
+
+
   return (
     <div>
-      model: { model.zip }
       caseIndex: { caseIndex }
     </div>
   );
 };
+
 
 
 // import React from "react";
@@ -30,23 +47,9 @@ export const DeckCardData: React.FC<IProps> = ({ caseIndex, model }) => {
 // export const DeckCardData: React.FC = ({model, caseIndex}) => {
 //   const content = model.content as DeckContentModelType;
 //   const thisCase = content.caseByIndex(caseIndex);
-//   if (thisCase){
-//     const keysHere = Object.keys(thisCase).filter(k => k !== "__id__");
-//     const caseData = keysHere.map((k) => {
-//       const attrName = content.attrById(k).name;
-//       return thisCase ? { a: attrName, v: thisCase[k]} : undefined;
-//     });
 
-//     return (
-//       caseData.map((theCase, i) => {
-//         return (
-//           <div className="case-item" key={i}>
-//             <div className="attribute"><b>{theCase?.a}</b></div>
-//             <div className="value">{theCase?.v}</div>
-//           </div>
-//         );
-//       })
-//     );
+
+
 //   }
 
 
