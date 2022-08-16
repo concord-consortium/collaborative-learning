@@ -1,5 +1,15 @@
 @import "../../components/vars.sass";
 
+//TODO - clean this up
+
+// TODO vars based on what is rendered in table, find equivalents and sub in
+$card-width: 359px;//80%; // 259px;
+$data-row-min-height: 24px;
+$charcoal-light-border: rgb(206, 206, 206); //#dadada;
+$cell-padding: 0px 8px;
+$cell-text-color: #3f3f3f;
+$default-button-border-color: #979797;
+
 .deck-tool {
   width: 100%;
   height: 100%;
@@ -20,12 +30,12 @@
 
     .panel {
       border: solid 1px $charcoal-light-1;
-      width: 259px;
+      width: $card-width;
       height: 34px;
       font-family: Lato;
       font-size: 14px;
       font-weight: bold;
-      color: #3f3f3f;
+      color: $cell-text-color;
       line-height: normal;
       letter-spacing: normal;
       text-align: center;
@@ -49,21 +59,157 @@
     }
     .panel.nav {
       background-color: $workspace-teal-light-5;
+      display: flex;
+      justify-content: space-between;
+      padding: $cell-padding;
+
+      .card-nav-buttons {
+        width:40%;
+        .card-nav {
+          color:$workspace-teal;
+          width:26px;
+          height:26px;
+          border: 1.5px solid $default-button-border-color;
+          background-color: $workspace-teal-light-9;
+          margin:3px;
+          padding:$quarter-padding;
+          border-radius: 5px;
+        }
+        .previous {
+          background-image: url('./assets/arrow-back-icon.svg');
+          background-position-x: -1px;
+        }
+        .next {
+          background-image: url('./assets/arrow-back-icon.svg');
+          transform: rotateY(180deg);
+          background-position-x: -1px;
+        }
+        .active {
+          border-color:$default-button-border-color;
+          &:hover {
+            background-color: $workspace-teal-light-4;
+            cursor:pointer;
+          }
+          &:active {
+            background-color: $workspace-teal-light-3;
+          }
+        }
+
+        .next.disabled, .previous.disabled {
+          border-color:#d8d8d8;
+          color:$workspace-teal-light-4;
+          background-image: url('./assets/arrow-back-faded.svg');
+        }
+      }
+
+      .delete-card {
+        position: absolute;
+        left:390px;
+        border-radius:26px;
+        transform: translateY(2px);
+        cursor: pointer;
+        &:hover {
+          border:1px dotted green;
+        }
+        &:active{
+          border:1px dotted red;
+        }
+      }
+    }
+
+    .card-number-of-listing {
+      width:30%;
+      text-align: left;
+      justify-content: flex-start;
+    }
+
+    .add-card-button {
+      width: 30%;
+      text-align: end;
 
       button {
-        border:.5px tungsten;
-        margin:3px;
-        padding:2px;
-        border-radius: 2px;
-      }
+        background-color: transparent;
+        height:26px;
+        width:26px;
+        cursor:pointer;
+        border:0px;
+        margin-top:1px;
+        padding:0px;
+        position: relative;
+        left:9px;
+        top:1px;
 
-      button.active {
-        color:green;
+        svg {
+          fill:$workspace-teal;
+          //stroke:$workspace-teal;
+          height:24px;
+          width:24px;
+          transform: translateX(-6px);
+         // border:1px solid $workspace-teal-light-5;
+          border-radius:26px;
+          &:hover {
+            background-color: $workspace-teal-light-3;
+          }
+          &:active {
+            background-color: $workspace-teal;
+            fill: $workspace-teal;
+            border-color:white;
+          }
+        }
       }
+    }
 
-      button.disabled {
-        color:rgb(208, 204, 204);
-        background-color: #c0bcbc;
+    button.delete-card {
+      background-color: transparent;
+      border:0px;
+    }
+
+    .data-area {
+      width: $card-width;
+
+      .case-item {
+        display:flex;
+        min-height: $data-row-min-height;
+        line-height: $data-row-min-height;
+        border: 1px solid $charcoal-light-1;
+        border-top-width: 0px;
+
+        .attribute {
+          padding:$cell-padding;
+          background-color: $workspace-teal-light-5;
+          width:35%;
+          border-right: 1px solid $charcoal-light-1;
+          font-weight: bold;
+          text-align: right;
+          color: $cell-text-color;
+        }
+
+        .value {
+          padding:$cell-padding;
+          flex-grow: 1;
+          font-weight: normal;
+          color:$cell-text-color;
+        }
+      }
+    }
+    .add-attribute-area {
+      width: $card-width;
+      display: flex;
+      line-height: $data-row-min-height;
+      min-height: $data-row-min-height;
+      border: 1px solid $charcoal-light-border;
+      border-top-width: 0px;
+
+      .new-attribute {
+        text-align: right;
+        padding:$cell-padding;
+        width:35%;
+        background-color: $workspace-teal-light-8;
+        border-right: 1px solid $charcoal-light-border;
+      }
+      .new-value {
+        padding: $cell-padding;
+        flex-grow: 1;
       }
     }
   }

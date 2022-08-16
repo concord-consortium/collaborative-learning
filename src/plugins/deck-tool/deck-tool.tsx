@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { DeckContentModelType } from "./deck-content";
+import { IconButton } from "../../components/utilities/icon-button";
 
 import "./deck-tool.scss";
 
@@ -43,13 +44,14 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
       });
 
       return (
-        <div className="data-for-item">
-          {caseData.map((theCase, i) => {
-            return (
-              <div key={i}><b>{theCase?.a}:</b> {theCase?.v}</div>
-            );
-          })}
-        </div>
+        caseData.map((theCase, i) => {
+          return (
+            <div className="case-item" key={i}>
+              <div className="attribute"><b>{theCase?.a}</b></div>
+              <div className="value">{theCase?.v}</div>
+            </div>
+          );
+        })
       );
     }
   };
@@ -130,13 +132,39 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           }
         </div>
         <div className="panel nav">
-          Card { caseIndex + 1 } of { allCases.length }
-          <button className={ previousButtonClasses  } onClick={previousCase}>previous</button>
-          <button className={ nextButtonClasses } onClick={nextCase}>next</button>
-          <button onClick={addCase}>+</button>
+          <div className="card-number-of-listing">
+            Card { caseIndex + 1 } of { allCases.length }
+          </div>
+          <div className="card-nav-buttons">
+            <button className={ previousButtonClasses  } onClick={previousCase}></button>
+            <button className={ nextButtonClasses } onClick={nextCase}></button>
+          </div>
+          <div className="add-card-button">
+            <button onClick={addCase}>
+              <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <g fill="none" fill-rule="evenodd">
+                  <circle cx="12" cy="12" r="12"/>
+                  <path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#0481A0"/>
+                </g>
+              </svg>
+            </button>
+          </div>
+          <button className="delete-card">
+            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <g fill="none" fill-rule="evenodd">
+                    <path d="M0 0h24v24H0z"/>
+                    <circle cx="12" cy="12" r="12"/>
+                    <path d="M7 11v2h10v-2H7zm5-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#0481A0"/>
+                </g>
+            </svg>
+          </button>
         </div>
-        <div className="data-area-wrap">
+        <div className="data-area">
           { dataForCase() }
+        </div>
+        <div className="add-attribute-area">
+          <div className="new-attribute">new attribute</div>
+          <div className="new-value">new data</div>
         </div>
       </div>
     </div>
