@@ -29,11 +29,11 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const railRef = useRef<HTMLDivElement>(null);
   const [markerSelected, setMarkerSelected] = useState(false);
   const [addMarkerButtonSelected, setAddMarkerButtonSelected] = useState(false);
-  const [sliderValue, setSliderValue] = useState(100);
   const [markers, setMarkers] = useState<IMarkerProps[]>([]);
   const [selectedMarkers, ] = useState<IMarkerProps[]>([]);
   const history = treeManager.document.history;
   const maxValue = history.length > 0 ? history.length : 0;
+  const [sliderValue, setSliderValue] = useState(maxValue);
   const eventAtCurrentIndex = treeManager.currentHistoryIndex === 0
                                 ? undefined
                                 : treeManager.getHistoryEntry(treeManager.currentHistoryIndex - 1);
@@ -48,21 +48,27 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
                                   }
                                 },[sliderPlaying]);
   useEffect(() => {
+    if (sliderValue > maxValue) {
+      setSliderValue(maxValue);
+    }
+  },[maxValue]);
+
+  useEffect(() => {
     if (sliderPlaying) {
       const slider = setInterval(()=>{
         if (sliderValue <= maxValue) {
-          setSliderValue(sliderValue + 1);
           treeManager.goToHistoryEntry(sliderValue)
             .then(()=>{
               treeManager.setCurrentHistoryIndex(sliderValue);
+              setSliderValue(sliderValue + 1);
             });
         } else {
           handlePlayPauseToggle(false);
         }
-      }, 1000);
+      }, 500);
       return () => clearInterval(slider);
     }
-  }, [handlePlayPauseToggle, history.length, maxValue, sliderPlaying, sliderValue, treeManager]);
+  }, [handlePlayPauseToggle, sliderPlaying, sliderValue]);
 
 
   //TODO: need to add a modal that warns users about max number of markers. Currently, a generic alert is shown
@@ -111,7 +117,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     const minutes = date?.getMinutes();
     const ampm = hours && hours >= 12 ? 'pm' : 'am';
     hours = hours && hours % 12;
-    hours = date ? hours : 12; // the hour '0' should be '12'
+    hours = date && (hours !== 0) ? hours : 12; // the hour '0' should be '12'
     const minutesStr = minutes && minutes < 10 ? "0" + minutes : minutes;
     const strTime = date ? hours + ":" + minutesStr + " " + ampm : "";
 

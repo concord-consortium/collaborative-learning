@@ -4,7 +4,7 @@ import {
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
 import { IUndoManager, UndoStore } from "./undo-store";
-import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot } from "./history";
+import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot, HistoryOperation } from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 
 /**
@@ -116,7 +116,6 @@ export const TreeManager = types
       if (entry.records.length === 0) {
         self.document.history.remove(entry);
       }
-      self.currentHistoryIndex = self.document.history.length;
     }
   },
 
@@ -125,7 +124,7 @@ export const TreeManager = types
     let entry = self.findHistoryEntry(historyEntryId);
     if (entry) {
       throw new Error(`The entry already exists ${ json({historyEntryId})}`);
-    } 
+    }
     entry = HistoryEntry.create({
       id: historyEntryId,
       action: name,
@@ -208,14 +207,14 @@ export const TreeManager = types
 
     if (DEBUG_HISTORY) {
       // eslint-disable-next-line no-console
-      console.log("addTreePatchRecord", 
-        { action: record.action, historyEntryId, exchangeId, 
+      console.log("addTreePatchRecord",
+        { action: record.action, historyEntryId, exchangeId,
           exchangeName: entry.activeExchanges.get(exchangeId)});
     }
 
     self.endExchange(entry, exchangeId);
 
-    // Add the entry to the undo stack if it is undoable. 
+    // Add the entry to the undo stack if it is undoable.
     //
     // TODO: should we wait to add it until the full entry is complete?
     // It might be better to add it earlier so it has the right position
@@ -223,9 +222,9 @@ export const TreeManager = types
     // behavior that takes a while, should its place in the stack be at
     // the beginning or end of these changes?
     //
-    // If this is ending the last exchange and there are no patches, 
-    // endExchange will remove this entry from the document.history. 
-    // This should make the entry not alive, so it won't be added to the 
+    // If this is ending the last exchange and there are no patches,
+    // endExchange will remove this entry from the document.history.
+    // This should make the entry not alive, so it won't be added to the
     // undoStore.
     // TODO: add a test to confirm this
     if (isAlive(entry) && entry.undoable && treePatchRecord.patches.length > 0) {
@@ -333,7 +332,7 @@ export const TreeManager = types
         if (newHistoryIndex > self.currentHistoryIndex) {
           patches?.push(...treeEntry.patches);
         } else {
-          patches?.push(...treeEntry.inversePatches);
+          patches?.push(...treeEntry.getPatches(HistoryOperation.Undo));
         }
       }
     }
@@ -356,7 +355,6 @@ export const TreeManager = types
       return tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
     });
     yield Promise.all(finishPromises);
-    self.setCurrentHistoryIndex(newHistoryIndex);
 
     // TODO: if the tree/tile is written wrong, there might be some changes
     // that come in with a fake entry after finishApplyingPatchesFromManager.

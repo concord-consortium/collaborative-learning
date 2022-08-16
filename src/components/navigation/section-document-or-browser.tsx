@@ -222,7 +222,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
       const historySnapshot = (getSnapshot(origDocManager.document)) as unknown as CDocumentType;
       const docCopyManager = docCopy.treeManagerAPI as Instance<typeof TreeManager>;
       docCopyManager.setChangeDocument(historySnapshot);
-      docCopyManager.setCurrentHistoryIndex(origDocManager.currentHistoryIndex);
+      docCopyManager.setCurrentHistoryIndex(origDocManager.document.history.length);
       return docCopy;
     }
   };
