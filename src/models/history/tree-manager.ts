@@ -330,7 +330,7 @@ export const TreeManager = types
       for (const treeEntry of (entry?.records || [])) {
         const patches = treePatches[treeEntry.tree];
         if (newHistoryIndex > self.currentHistoryIndex) {
-          patches?.push(...treeEntry.patches);
+          patches?.push(...treeEntry.getPatches(HistoryOperation.Redo));
         } else {
           patches?.push(...treeEntry.getPatches(HistoryOperation.Undo));
         }
