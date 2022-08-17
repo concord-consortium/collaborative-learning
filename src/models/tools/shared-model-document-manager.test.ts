@@ -219,7 +219,7 @@ describe("SharedModelDocumentManager", () => {
     // make sure doSomethingAsync is finished
     await doSomethingPromise;
 
-    // Give the middleware time to handle the end of thee calls, it is really
+    // Give the middleware time to handle the end of the calls, it is really
     // difficult to wait for this precisely so we just wait with a timeout
     await wait(10);
 

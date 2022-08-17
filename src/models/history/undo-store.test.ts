@@ -1,4 +1,4 @@
-import { getSnapshot, getType, Instance, types } from "mobx-state-tree";
+import { flow, getSnapshot, getType, Instance, types } from "mobx-state-tree";
 import { IToolTileProps } from "src/components/tools/tool-tile";
 import { SharedModel, SharedModelType } from "../tools/shared-model";
 import { ToolContentModel } from "../tools/tool-types";
@@ -12,6 +12,10 @@ import { HistoryEntrySnapshot } from "./history";
 import { nanoid } from "nanoid";
 import { cloneDeep } from "lodash";
 import { withoutUndo } from "./tree-monitor";
+
+function wait(millis: number) {
+  return new Promise(resolve => setTimeout(resolve, millis));
+}
 
 const TestSharedModel = SharedModel
   .named("TestSharedModel")
@@ -48,6 +52,7 @@ const TestTile = ToolContentModel
     type: "TestTile", 
     text: types.maybe(types.string),
     flag: types.maybe(types.boolean),
+    counter: 0,
     child: types.maybe(TestTileChild)
   })
   .volatile(self => ({
@@ -76,6 +81,17 @@ const TestTile = ToolContentModel
       withoutUndo();      
       self.flag = _flag;
     },
+    updateCounterAsync: flow(function *updateCounterAsync(){
+      self.counter += 1;
+      yield wait(20);
+      self.counter += 1;
+    }),
+    updateCounterWithoutUndoAsync: flow(function *updateCounterWithoutUndoAsync(){
+      withoutUndo();
+      self.counter += 1;
+      yield wait(20);
+      self.counter += 1;
+    }),
     setChildValue(_value: string){
       self.child?.setValueWithoutUndo(_value);
     }
@@ -136,7 +152,7 @@ function setupDocument(initialContent? : DocumentContentSnapshotType) {
   return {docContent, sharedModel, tileContent, manager, undoStore};
 }
 
-const initialUpdateEntry = {
+const setFlagTrueEntry = {
   action: "/content/tileMap/t1/content/setFlag", 
   created: expect.any(Number), 
   id: expect.any(String),
@@ -166,7 +182,7 @@ it("records a tile change as one history event with one TreeRecordEntry", async 
   const changeDocument = manager.document as Instance<typeof CDocument>;
 
   expect(getSnapshot(changeDocument.history)).toEqual([ 
-    initialUpdateEntry 
+    setFlagTrueEntry 
   ]);
 });  
 
@@ -206,7 +222,7 @@ it("can undo a tile change", async () => {
 
   const changeDocument = manager.document as Instance<typeof CDocument>;
   expect(getSnapshot(changeDocument.history)).toEqual([ 
-    initialUpdateEntry,
+    setFlagTrueEntry,
     undoEntry
   ]);
 });  
@@ -252,11 +268,85 @@ it("can redo a tile change", async () => {
 
   const changeDocument = manager.document as Instance<typeof CDocument>;
   expect(getSnapshot(changeDocument.history)).toEqual([ 
-    initialUpdateEntry,
+    setFlagTrueEntry,
     undoEntry,
     redoEntry
   ]);
 });  
+
+
+it("records a async tile change as one history event with one TreeRecordEntry", async () => {
+  const {tileContent, manager} = setupDocument();
+  // This should record a history entry with this change and any changes to tiles
+  // triggered by this change
+  await tileContent.updateCounterAsync();
+
+  await expectEntryToBeComplete(manager, 1);
+  const changeDocument = manager.document as Instance<typeof CDocument>;
+
+  expect(getSnapshot(changeDocument.history)).toEqual([ 
+    {
+      action: "/content/tileMap/t1/content/updateCounterAsync", 
+      created: expect.any(Number), 
+      id: expect.any(String),
+      records: [
+        { action: "/content/tileMap/t1/content/updateCounterAsync", 
+          inversePatches: [
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 0},
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1}
+          ], 
+          patches: [
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1},
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 2}
+          ], 
+          tree: "test"
+        }, 
+      ], 
+      state: "complete", 
+      tree: "test", 
+      undoable: true
+    } 
+  ]);
+}); 
+
+it("records a async tile change and an interleaved history event with 2 entries", async () => {
+  const {tileContent, manager} = setupDocument();
+  // This should record a history entry with this change and any changes to tiles
+  // triggered by this change
+  const updateCounterPromise =  tileContent.updateCounterAsync();
+  await wait(1);
+  tileContent.setFlag(true);
+
+  await updateCounterPromise;
+
+  await expectEntryToBeComplete(manager, 2);
+  const changeDocument = manager.document as Instance<typeof CDocument>;
+
+  expect(getSnapshot(changeDocument.history)).toEqual([ 
+    setFlagTrueEntry,
+    {
+      action: "/content/tileMap/t1/content/updateCounterAsync", 
+      created: expect.any(Number), 
+      id: expect.any(String),
+      records: [
+        { action: "/content/tileMap/t1/content/updateCounterAsync", 
+          inversePatches: [
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 0},
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1}
+          ], 
+          patches: [
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1},
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 2}
+          ], 
+          tree: "test"
+        }, 
+      ], 
+      state: "complete", 
+      tree: "test", 
+      undoable: true
+    } 
+  ]);
+}); 
 
 it("can skip adding an action to the undo list", async () => {
   const {tileContent, manager, undoStore} = setupDocument();
@@ -275,11 +365,11 @@ it("can skip adding an action to the undo list", async () => {
   expect(getSnapshot(changeDocument.history)).toEqual([ 
     // override the action name of the initialUpdateEntry
     {
-      ...initialUpdateEntry,
+      ...setFlagTrueEntry,
       action: "/content/tileMap/t1/content/setFlagWithoutUndo",
       undoable: false,
       records: [{
-        ...initialUpdateEntry.records[0],
+        ...setFlagTrueEntry.records[0],
         action: "/content/tileMap/t1/content/setFlagWithoutUndo",
       }]
     }
@@ -345,6 +435,55 @@ it("will print a warning and still add the action to the undo list if any child 
   ]);
 });
 
+
+
+it("records undoable actions that happen in the middle async actions which are not undoable", async () => {
+  const {tileContent, manager, undoStore} = setupDocument();
+
+  const updateCounterPromise = tileContent.updateCounterWithoutUndoAsync();
+
+  await wait(1);
+
+  tileContent.setFlag(true);
+  
+  await updateCounterPromise;
+
+  // Make sure the entries are recorded
+  await expectEntryToBeComplete(manager, 2);
+
+  expect(undoStore.canUndo).toBe(true);
+
+  expect(tileContent.flag).toBe(true);
+  expect(tileContent.counter).toBe(2);
+
+  const changeDocument = manager.document as Instance<typeof CDocument>;
+  expect(getSnapshot(changeDocument.history)).toEqual([ 
+    setFlagTrueEntry,
+    {
+      action: "/content/tileMap/t1/content/updateCounterWithoutUndoAsync", 
+      created: expect.any(Number), 
+      id: expect.any(String),
+      records: [
+        { action: "/content/tileMap/t1/content/updateCounterWithoutUndoAsync", 
+          inversePatches: [
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 0},
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1}
+          ], 
+          patches: [
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1},
+            { op: "replace", path: "/content/tileMap/t1/content/counter", value: 2}
+          ], 
+          tree: "test"
+        }, 
+      ], 
+      state: "complete", 
+      tree: "test", 
+      undoable: false
+    }
+  ]);
+
+});
+
 /**
  * Remove the Jest `expect.any(Number)` on created, and provide a real id.
  * @param entry 
@@ -367,7 +506,7 @@ it("can replay the history entries", async () => {
     // Add the history entries used in the tests above so we can replay them all at 
     // the same time.
     const history = [
-      makeRealHistoryEntry(initialUpdateEntry),
+      makeRealHistoryEntry(setFlagTrueEntry),
       makeRealHistoryEntry(undoEntry),
       makeRealHistoryEntry(redoEntry)
     ];
