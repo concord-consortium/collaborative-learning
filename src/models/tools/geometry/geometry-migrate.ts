@@ -2,19 +2,148 @@ import { castArray } from "lodash";
 import { ITileExportOptions } from "../tool-content-info";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { comma, StringBuilder } from "../../../utilities/string-builder";
-import { JXGChange, JXGCoordPair, JXGImageParents, JXGObjectType, JXGProperties } from "./jxg-changes";
+import {
+  BoardModel, BoardModelType, CommentModel, CommentModelType, GeometryBaseContentModelType,
+  GeometryExtrasContentSnapshotType, GeometryObjectModelType, ImageModel, ImageModelType,
+  MovableLineModel, MovableLineModelType, pointIdsFromSegmentId, PointModel, PointModelType,
+  PolygonModel, PolygonModelType, PolygonSegmentLabelModelSnapshot, VertexAngleModel, VertexAngleModelType
+} from "./geometry-model";
+import {
+  ESegmentLabelOption, JXGChange, JXGCoordPair, JXGImageParents, JXGObjectType, JXGProperties
+} from "./jxg-changes";
 import {
   getMovableLinePointIds, kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth
 } from "./jxg-types";
+import { kDefaultBoardModelOutputProps, kGeometryToolID } from "./geometry-types";
+import { defaultGeometryBoardChange } from "./geometry-import";
+
+export const isGeometryChangesContent = (snap: any) => {
+  return (snap?.type === kGeometryToolID) && Array.isArray(snap.changes);
+};
+
+export const convertChangesToModel = (changes: JXGChange[]) => {
+  const changesJson = changes.map(change => JSON.stringify(change));
+  return exportGeometryModel(changesJson);
+};
+
+export const convertModelToChanges = (model: GeometryBaseContentModelType): JXGChange[] => {
+  const { board, bgImage, objects } = model;
+  const changes: JXGChange[] = [];
+  // convert the board
+  const { xAxis, yAxis } = board || BoardModel.create(kDefaultBoardModelOutputProps);
+  const { name: xName, label: xAnnotation } = xAxis;
+  const { name: yName, label: yAnnotation } = yAxis;
+  changes.push(defaultGeometryBoardChange(xAxis, yAxis, { xName, yName, xAnnotation, yAnnotation } ));
+  // convert the background image (if any)
+  if (bgImage) {
+    changes.push(...convertModelObjectToChanges(bgImage));
+  }
+  // convert the objects
+  changes.push(...convertModelObjectsToChanges(Array.from(objects.values())));
+  // identify redundant images
+  const imageChangeIndices: number[] = [];
+  changes.forEach((change, index) => {
+    if ((change.operation === "create") && (change.target === "image")) {
+      imageChangeIndices.push(index);
+    }
+  });
+  // filter out redundant images
+  if (imageChangeIndices.length > 1) {
+    for (let i = imageChangeIndices.length - 2; i >= 0; --i) {
+      changes.splice(imageChangeIndices[i], 1);
+    }
+  }
+  return changes;
+};
+
+// optional properties in MST objects result in `undefined` values in snapshots,
+// which can confuse JSXGraph, so we strip null/undefined properties in changes
+function omitNullish(inProps: Record<string, any>) {
+  const outProps: Record<string, any> = {};
+  for (const prop in inProps) {
+    if (inProps[prop] != null) outProps[prop] = inProps[prop];
+  }
+  return outProps;
+}
+
+export const convertModelObjectsToChanges = (objects: GeometryObjectModelType[]): JXGChange[] => {
+  const changes: JXGChange[] = [];
+  objects.forEach(obj => {
+    changes.push(...convertModelObjectToChanges(obj));
+  });
+  return changes;
+};
+
+export const convertModelObjectToChanges = (obj: GeometryObjectModelType): JXGChange[] => {
+  const changes: JXGChange[] = [];
+  switch (obj.type) {
+    case "comment": {
+      const { type, x, y, anchors, ...props } = obj as CommentModelType;
+      const anchor = anchors?.length ? anchors[0] : undefined;
+      const properties = omitNullish({ ...props, anchor });
+      changes.push({ operation: "create", target: "comment", parents: [x, y], properties });
+      break;
+    }
+    case "image": {
+      const { type, url, x, y, width, height, ...props } = obj as ImageModelType;
+      const properties = omitNullish(props);
+      changes.push({ operation: "create", target: "image", parents: [url, [x, y], [width, height]], properties });
+      break;
+    }
+    case "movableLine": {
+      const { type, p1, p2, ...props } = obj as MovableLineModelType;
+      const { x: p1x, y: p1y, ...pt1 } = p1;
+      const { x: p2x, y: p2y, ...pt2 } = p2;
+      const properties = omitNullish({ ...props, pt1, pt2 });
+      changes.push({ operation: "create", target: "movableLine", parents: [[p1x, p1y], [p2x, p2y]], properties });
+      break;
+    }
+    case "point": {
+      const { type, x, y, ...props } = obj as PointModelType;
+      const properties = omitNullish(props);
+      changes.push({ operation: "create", target: "point", parents: [x, y], properties });
+      break;
+    }
+    case "polygon": {
+      const poly = obj as PolygonModelType;
+      const { type, points: parents, labels, ...props } = poly;
+      const properties = omitNullish(props);
+      changes.push({ operation: "create", target: "polygon", parents, properties });
+      (labels || []).forEach(({ id, option }) => {
+        const pts = pointIdsFromSegmentId(id);
+        if (pts.length === 2) {
+          const _parents = [pts[0], pts[1]];
+          const _properties = { labelOption: option };
+          changes.push({
+            operation: "update", target: "polygon", targetID: poly.id, parents: _parents, properties: _properties });
+        }
+      });
+      break;
+    }
+    case "vertexAngle": {
+      const vAngle = obj as VertexAngleModelType;
+      const { type, points: parents, ...props } = vAngle;
+      const properties = omitNullish(props);
+      changes.push({ operation: "create", target: "vertexAngle", parents, properties });
+      break;
+    }
+    default:
+      console.warn("convertModelToChanges: no conversion for model of type:", obj.type);
+      break;
+  }
+  return changes;
+};
 
 // up to three decimal places; no trailing zeros
 const fix3 = (value: number) => {
   let s = value.toFixed(3);
+  // remove trailing zeros
   while (s[s.length - 1] === "0") {
-    s = s.substr(0, s.length - 1);
+    s = s.substring(0, s.length - 1);
   }
+  // remove trailing decimal place
   if (s[s.length - 1] === ".") {
-    s = s.substr(0, s.length - 1);
+    s = s.substring(0, s.length - 1);
   }
   return s;
 };
@@ -24,7 +153,7 @@ interface IGeomObjectInfo {
   type: JXGObjectType;
   changes: JXGChange[];   // changes that affect this object
   dependents: string[];   // ids of objects that depend on this object
-  dependencies: string[]; // ids of objects this objects depends upon
+  dependencies: string[]; // ids of objects this object depends upon
   isDeleted?: boolean;    // true if the object has been deleted
   noExport?: boolean;     // true if the object should not be exported individually
 }
@@ -51,6 +180,10 @@ function getDependenciesFromChange(change: JXGChange, objectInfoMap: Record<stri
   // polygon dependencies are the vertices
   if ((change.operation === "create") && (change.target === "polygon")) {
     return change.parents as string[];
+  }
+  // polygon segment label dependencies are the polygon and the labeled points
+  if ((change.operation === "update") && (change.target === "polygon") && (change.properties as any)?.labelOption) {
+    return [change.targetID, ...change.parents as string[]] as string[];
   }
   // vertex angle dependencies are the vertices and the polygon
   if ((change.operation === "create") && (change.target === "vertexAngle")) {
@@ -82,9 +215,36 @@ function getDependenciesFromChange(change: JXGChange, objectInfoMap: Record<stri
 }
 
 export const exportGeometryJson = (changes: string[], options?: ITileExportOptions) => {
+  return exportGeometry(changes, { ...options, json: true }) as string;
+};
+
+export const exportGeometryModel = (changes: string[], options?: ITileExportOptions) => {
+  return exportGeometry(changes, { ...options, json: false }) as GeometryExtrasContentSnapshotType;
+};
+
+export const exportGeometry = (changes: string[], options?: ITileExportOptions) => {
+  const outputJson = options?.json !== false;
   const objectInfoMap: Record<string, IGeomObjectInfo> = {};
   const orderedIds: string[] = [];
   const builder = new StringBuilder();
+  let title: string | undefined;
+  let boardModel: BoardModelType | undefined;
+  let bgImage: ImageModelType | undefined;
+  const objects = new Map<string, GeometryObjectModelType>();
+
+  const addObjectModel = (obj: GeometryObjectModelType) => {
+    objects.set(obj.id, obj);
+  };
+
+  const exportTitle = () => {
+    if (objectInfoMap.metadata) {
+      objectInfoMap.metadata.changes.forEach(change => {
+        const changeTitle = (change.properties as JXGProperties)?.title;
+        changeTitle && (title = changeTitle);
+      });
+      outputJson && title && builder.pushLine(`"title": "${title}",`, 2);
+    }
+  };
 
   const exportBoard = () => {
     if (!objectInfoMap.board) return;
@@ -94,24 +254,34 @@ export const exportGeometryJson = (changes: string[], options?: ITileExportOptio
       const boardProps = changeProps.boardScale || changeProps;
       props = { ...props, ...boardProps };
     });
-    const xMin: number = props.xMin ?? props.boundingBox[0];
-    const yMin: number = props.yMin ?? props.boundingBox[3];
+    const xMin: number = props.xMin ?? props.boundingBox?.[0];
+    const yMin: number = props.yMin ?? props.boundingBox?.[3];
     const xRange: number = props.unitX
                             ? kGeometryDefaultWidth / props.unitX
-                            : props.boundingBox[2] - xMin;
+                            : props.boundingBox?.[2] - xMin;
     const yRange: number = props.unitY
                             ? kGeometryDefaultHeight / props.unitY
-                            : props.boundingBox[1] - yMin;
-    const hasNames = (props.xName != null) || (props.yName != null);
-    const hasLabels = (props.xAnnotation != null) || (props.yAnnotation != null);
-    builder.pushLine(`"board": {`, 2);
-    builder.pushLine(`"properties": {`, 4);
-    builder.pushLine(`"axisMin": [${fix3(xMin)}, ${fix3(yMin)}],`, 6);
-    builder.pushLine(`"axisRange": [${fix3(xRange)}, ${fix3(yRange)}]${comma(hasNames || hasLabels)}`, 6);
-    hasNames && builder.pushLine(`"axisNames": ["${props.xName}", "${props.yName}"]${comma(hasLabels)}`, 6);
-    hasLabels && builder.pushLine(`"axisLabels": ["${props.xAnnotation}", "${props.yAnnotation}"]`, 6);
-    builder.pushLine(`}`, 4);
-    builder.pushLine(`},`, 2);
+                            : props.boundingBox?.[1] - yMin;
+    const xUnit = props.unitX ?? kGeometryDefaultWidth / xRange;
+    const yUnit = props.unitY ?? kGeometryDefaultHeight / yRange;
+    if (outputJson) {
+      const hasNames = (props.xName != null) || (props.yName != null);
+      const hasLabels = (props.xAnnotation != null) || (props.yAnnotation != null);
+      builder.pushLine(`"board": {`, 2);
+      builder.pushLine(`"properties": {`, 4);
+      builder.pushLine(`"axisMin": [${fix3(xMin)}, ${fix3(yMin)}],`, 6);
+      builder.pushLine(`"axisRange": [${fix3(xRange)}, ${fix3(yRange)}]${comma(hasNames || hasLabels)}`, 6);
+      hasNames && builder.pushLine(`"axisNames": ["${props.xName}", "${props.yName}"]${comma(hasLabels)}`, 6);
+      hasLabels && builder.pushLine(`"axisLabels": ["${props.xAnnotation}", "${props.yAnnotation}"]`, 6);
+      builder.pushLine(`}`, 4);
+      builder.pushLine(`},`, 2);
+    }
+    else {
+      boardModel = BoardModel.create({
+        xAxis: { name: props.xName, label: props.xAnnotation, min: xMin, unit: xUnit, range: xRange },
+        yAxis: { name: props.yName, label: props.yAnnotation, min: yMin, unit: yUnit, range: yRange }
+      });
+    }
   };
 
   const isValidId = (id: string) => objectInfoMap[id] && !objectInfoMap[id].isDeleted;
@@ -174,11 +344,19 @@ export const exportGeometryJson = (changes: string[], options?: ITileExportOptio
         inParents = [position[0] - anchorCentroid[0], position[1] - anchorCentroid[1]];
       }
     }
-    const parents = inParents ? `, "parents": [${inParents[0]}, ${inParents[1]}]` : "";
-    const otherProps = Object.keys(others).length > 0
-                        ? ` "properties": ${JSON.stringify(others)}`
-                        : "";
-    return `{ "type": "comment"${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+
+    if (outputJson) {
+      const parents = inParents ? `, "parents": [${inParents[0]}, ${inParents[1]}]` : "";
+      const otherProps = Object.keys(others).length > 0
+                          ? ` "properties": ${JSON.stringify(others)}`
+                          : "";
+      return `{ "type": "comment"${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+    }
+
+    addObjectModel(CommentModel.create({
+      x: inParents?.[0], y: inParents?.[1], anchors: [props.anchor], ...others
+    }));
+    return "";
   };
 
   const exportImage = (id: string, isLast: boolean) => {
@@ -196,12 +374,18 @@ export const exportGeometryJson = (changes: string[], options?: ITileExportOptio
     const x = position?.[0] ?? coords?.[0];
     const y = position?.[1] ?? coords?.[1];
     const pxSize = size.map(s => Math.round(s * kGeometryDefaultPixelsPerUnit));
-    const sizeValue = `[${pxSize[0]}, ${pxSize[1]}]`;
-    const parents = `"parents": { "url": "${transformedUrl}", "coords": [${x}, ${y}], "size": ${sizeValue} }`;
-    const otherProps = Object.keys(others).length > 0
-                        ? ` "properties": ${JSON.stringify(others)}`
-                        : "";
-    return `{ "type": "image", ${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+
+    if (outputJson) {
+      const sizeValue = `[${pxSize[0]}, ${pxSize[1]}]`;
+      const parents = `"parents": { "url": "${transformedUrl}", "coords": [${x}, ${y}], "size": ${sizeValue} }`;
+      const otherProps = Object.keys(others).length > 0
+                          ? ` "properties": ${JSON.stringify(others)}`
+                          : "";
+      return `{ "type": "image", ${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+    }
+
+    bgImage = ImageModel.create({ x, y, url, filename, width: pxSize[0], height: pxSize[1], ...others });
+    return "";
   };
 
   const getPointExportables = (id: string) => {
@@ -264,11 +448,18 @@ export const exportGeometryJson = (changes: string[], options?: ITileExportOptio
 
   const exportPoint = (id: string, isLast: boolean) => {
     const { parents: _parents, others } = getPointExportables(id);
-    const parents = `"parents": [${_parents[0]}, ${_parents[1]}]`;
-    const otherProps = Object.keys(others).length > 0
-                        ? ` "properties": ${JSON.stringify(others)}`
-                        : "";
-    return `{ "type": "point", ${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+    if (outputJson) {
+      const parents = `"parents": [${_parents[0]}, ${_parents[1]}]`;
+      const otherProps = Object.keys(others).length > 0
+                          ? ` "properties": ${JSON.stringify(others)}`
+                          : "";
+      return `{ "type": "point", ${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+    }
+
+    addObjectModel(PointModel.create({
+      x: _parents[0], y: _parents[1], ...others
+    }));
+    return "";
   };
 
   const validParentIds = (id: string) => {
@@ -281,22 +472,46 @@ export const exportGeometryJson = (changes: string[], options?: ITileExportOptio
                           : _changes[0].parents;
     return parents?.map(pId => {
       const parentId = pId as string;
-      return isValidId(parentId) ? `"${parentId}"` : undefined;
-    }).filter(vId => !!vId) || [];
+      return isValidId(parentId)
+              ? outputJson ? `"${parentId}"` : parentId
+              : undefined;
+    }).filter(vId => !!vId) as string[] || [];
   };
 
   const exportPolygon = (id: string, isLast: boolean) => {
     const _changes = objectInfoMap[id].changes;
+    const labelMap = new Map<string, { points: string[], option: ESegmentLabelOption }>();
     let props: any = {};
     _changes.forEach(change => {
-      props = {...props, ...change.properties };
+      const { parents, properties } = change;
+      const { labelOption } = properties as JXGProperties || {};
+      if (parents?.length && labelOption) {
+        const key = `${parents[0]}:${parents[1]}`;
+        labelMap.set(key, { points: parents as string[], option: labelOption });
+      }
+      else {
+        props = {...props, ...properties };
+      }
     });
     if (props.id !== id) props.id = id;
-    const parents = `"parents": [${validParentIds(id)?.join(", ")}]`;
-    const otherProps = Object.keys(props).length > 0
-                        ? `"properties": ${JSON.stringify(props)}`
-                        : "";
-    return `{ "type": "polygon", ${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+
+    if (outputJson) {
+      const parents = `"parents": [${validParentIds(id)?.join(", ")}]`;
+      const otherProps = Object.keys(props).length > 0
+                          ? `"properties": ${JSON.stringify(props)}`
+                          : "";
+      return `{ "type": "polygon", ${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+    }
+
+    const _labels: PolygonSegmentLabelModelSnapshot[] = [];
+    labelMap.forEach((label, segmentId) => {
+      _labels.push({ id: segmentId, option: label.option });
+    });
+    const labels = _labels.length ? _labels : undefined;
+    addObjectModel(PolygonModel.create({
+      points: validParentIds(props.id), labels, ...props
+    }));
+    return "";
   };
 
   const exportVertexAngle = (id: string, isLast: boolean) => {
@@ -306,16 +521,30 @@ export const exportGeometryJson = (changes: string[], options?: ITileExportOptio
       props = {...props, ...change.properties };
     });
     if (props.id !== id) props.id = id;
-    const type = `"type": "vertexAngle"`;
-    const parents = `"parents": [${validParentIds(id)?.join(", ")}]`;
-    const otherProps = Object.keys(props).length > 0
-                        ? `"properties": ${JSON.stringify(props)}`
-                        : "";
-    return `{ ${type}, ${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+
+    if (outputJson) {
+      const type = `"type": "vertexAngle"`;
+      const parents = `"parents": [${validParentIds(id)?.join(", ")}]`;
+      const otherProps = Object.keys(props).length > 0
+                          ? `"properties": ${JSON.stringify(props)}`
+                          : "";
+      return `{ ${type}, ${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+    }
+
+    addObjectModel(VertexAngleModel.create({
+      points: validParentIds(props.id), ...props
+    }));
+    return "";
   };
 
-  const exportMovableLinePoint = (position: JXGCoordPair) => {
-    return `{ "type": "point", "parents": [${position[0]}, ${position[1]}] }`;
+  const exportMovableLinePoint = (id: string) => {
+    const { parents } = getPointExportables(id);
+
+    if (outputJson) {
+      return `{ "type": "point", "parents": [${parents[0]}, ${parents[1]}] }`;
+    }
+
+    return { x: parents[0], y: parents[1] };
   };
 
   const exportMovableLine = (id: string, isLast: boolean) => {
@@ -325,15 +554,24 @@ export const exportGeometryJson = (changes: string[], options?: ITileExportOptio
       props = {...props, ...change.properties };
     });
     if (props.id !== id) props.id = id;
-    const type = `"type": "movableLine"`;
     const pointIds = getMovableLinePointIds(id);
-    const { parents: pt0Position } = getPointExportables(pointIds[0]);
-    const { parents: pt1Position } = getPointExportables(pointIds[1]);
-    const parents = `"parents": [${exportMovableLinePoint(pt0Position)}, ${exportMovableLinePoint(pt1Position)}]`;
-    const otherProps = Object.keys(props).length > 0
-                        ? `"properties": ${JSON.stringify(props)}`
-                        : "";
-    return `{ ${type}, ${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+
+    if (outputJson) {
+      const type = `"type": "movableLine"`;
+      const parents = `"parents": [${exportMovableLinePoint(pointIds[0])}, ${exportMovableLinePoint(pointIds[1])}]`;
+      const otherProps = Object.keys(props).length > 0
+                          ? `"properties": ${JSON.stringify(props)}`
+                          : "";
+      return `{ ${type}, ${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+    }
+
+    const { x: p1x, y: p1y } = exportMovableLinePoint(pointIds[0]) as { x: number, y: number };
+    const { x: p2x, y: p2y } = exportMovableLinePoint(pointIds[1]) as { x: number, y: number };
+    const { pt1, pt2, ...properties } = props;
+    const p1 = PointModel.create({ x: p1x, y: p1y, ...pt1, id: `${id}-point1` });
+    const p2 = PointModel.create({ x: p2x, y: p2y, ...pt2, id: `${id}-point2` });
+    addObjectModel(MovableLineModel.create({ p1, p2, ...properties }));
+    return "";
   };
 
   const exportFnMap: Partial<Record<JXGObjectType, (id: string, isLast: boolean) => string>> = {
@@ -428,18 +666,20 @@ export const exportGeometryJson = (changes: string[], options?: ITileExportOptio
     }
   });
 
-  builder.pushLine("{");
-  builder.pushLine(`"type": "Geometry",`, 2);
-  if (objectInfoMap.metadata) {
-    let title = "";
-    objectInfoMap.metadata.changes.forEach(change => {
-      const changeTitle = (change.properties as JXGProperties)?.title;
-      changeTitle && (title = changeTitle);
-    });
-    title && builder.pushLine(`"title": "${title}",`, 2);
+  if (outputJson) {
+    builder.pushLine("{");
+    builder.pushLine(`"type": "Geometry",`, 2);
+    exportTitle();
+    exportBoard();
+    exportObjects();
+    builder.pushLine("}");
+    return builder.build();
   }
-  exportBoard();
-  exportObjects();
-  builder.pushLine("}");
-  return builder.build();
+  else {
+    exportTitle();
+    exportBoard();
+    exportObjects();
+    const extras = title ? { extras: { title } } : undefined;
+    return { type: "Geometry", board: boardModel, bgImage, objects: Object.fromEntries(objects) as any, ...extras };
+  }
 };

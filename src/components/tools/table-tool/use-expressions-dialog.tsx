@@ -3,8 +3,8 @@ import SetExpressionIconSvg from "../../../clue/assets/icons/table/set-expressio
 import { useCurrent } from "../../../hooks/use-current";
 import { kLeaveModalOpen, useCustomModal } from "../../../hooks/use-custom-modal";
 import { IDataSet } from "../../../models/data/data-set";
+import { validateDisplayExpression } from "../../../models/data/expression-utils";
 import { TableMetadataModelType } from "../../../models/tools/table/table-content";
-import { validateDisplayExpression } from "./expression-utils";
 import { useEditableExpressions } from "./use-editable-expressions";
 
 import "./expressions-dialog.scss";

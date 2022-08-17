@@ -1,1 +1,1 @@
-import "@concord-consortium/jsxgraph/distrib/jsxgraphsrc.js";
+import "jsxgraph/distrib/jsxgraphsrc.js";

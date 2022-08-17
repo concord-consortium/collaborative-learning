@@ -1,27 +1,36 @@
-import React from "react";
+import { castArray, each, filter, find, keys as _keys, throttle, values } from "lodash";
+import { observe } from "mobx";
 import { inject, observer } from "mobx-react";
+import { getSnapshot, onSnapshot } from "mobx-state-tree";
+import objectHash from "object-hash";
+import React from "react";
 import { SizeMeProps } from "react-sizeme";
 import { BaseComponent } from "../../base";
 import { DocumentContentModelType } from "../../../models/document/document-content";
-import { getLinkedTableIndex, getTableLinkColors } from "../../../models/tools/table-links";
-import { getTableContent } from "../../../models/tools/table/table-content";
+import {
+  getLinkedTableIndex, getTableLinkColors, linkTableAndGeometryTiles, unlinkTableAndGeometryTiles
+} from "../../../models/tools/table-links";
 import { IGeometryProps, IActionHandlers } from "./geometry-shared";
-import { GeometryContentModelType, GeometryMetadataModelType, setElementColor, getImageUrl, IAxesParams
-        } from "../../../models/tools/geometry/geometry-content";
+import {
+  GeometryContentModelType, IAxesParams, isGeometryContentReady, setElementColor
+} from "../../../models/tools/geometry/geometry-content";
+import { convertModelObjectsToChanges } from "../../../models/tools/geometry/geometry-migrate";
+import {
+  cloneGeometryObject, GeometryObjectModelType, isPointModel
+} from "../../../models/tools/geometry/geometry-model";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tools/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
-import { getPointsByCaseId, resumeBoardUpdates, suspendBoardUpdates } from "../../../models/tools/geometry/jxg-board";
-import { ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair
-        } from "../../../models/tools/geometry/jxg-changes";
+import { getPointsByCaseId } from "../../../models/tools/geometry/jxg-board";
+import { ESegmentLabelOption, JXGCoordPair } from "../../../models/tools/geometry/jxg-changes";
 import { kSnapUnit } from "../../../models/tools/geometry/jxg-point";
 import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
 } from "../../../models/tools/geometry/jxg-polygon";
 import {
-  isAxis, isAxisLabel, isComment, isFreePoint, isGeometryElement, isImage, isLine, isMovableLine,
-  isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isVertexAngle, isVisibleEdge,
-  isVisibleMovableLine, isVisiblePoint, kGeometryDefaultPixelsPerUnit
+  isAxis, isAxisLabel, isComment, isFreePoint, isImage, isLine, isMovableLine,
+  isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isVertexAngle,
+  isVisibleEdge, isVisibleMovableLine, isVisiblePoint, kGeometryDefaultPixelsPerUnit
 } from "../../../models/tools/geometry/jxg-types";
 import {
   getVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
@@ -33,8 +42,6 @@ import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
-import { assign, castArray, debounce, each, filter, find, keys as _keys, throttle, values } from "lodash";
-import { Logger, LogEventName, LogEventMethod } from "../../../lib/logger";
 import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
 import AxisSettingsDialog from "./axis-settings-dialog";
 import { EditableTileTitle } from "../editable-tile-title";
@@ -44,7 +51,6 @@ import placeholderImage from "../../../assets/image_placeholder.png";
 import { LinkTableButton } from "./link-table-button";
 import ErrorAlert from "../../utilities/error-alert";
 import SingleStringDialog from "../../utilities/single-string-dialog";
-import { autorun, observe } from "mobx";
 
 import "./geometry-tool.sass";
 
@@ -94,48 +100,15 @@ interface IDragPoint {
   snapToGrid?: boolean;
 }
 
-interface IBoardContentMapEntry {
-  modelId: string;
-  metadata: GeometryMetadataModelType;
-}
-const sBoardContentMetadataMap: { [id: string]: IBoardContentMapEntry } = {};
-
 injectGetTableLinkColorsFunction(getTableLinkColors);
 
-function syncBoardChanges(board: JXG.Board, content: GeometryContentModelType,
-                          prevSyncedChanges?: number, readOnly?: boolean) {
-  const newElements: JXG.GeometryElement[] = [];
-  const changedElements: JXG.GeometryElement[] = [];
-  const syncedChanges = content.changes.length;
-  suspendBoardUpdates(board);
-  for (let i = prevSyncedChanges || 0; i < syncedChanges; ++i) {
-    try {
-      const change: JXGChange = JSON.parse(content.changes[i]);
-      const result = content.syncChange(board, change);
-      const elts = castArray(result).filter(isGeometryElement);
-      newElements.push(...elts);
-      if (change.operation === "update") {
-        const ids = castArray(change.targetID);
-        const targets = ids.map(id => board.objects[id]);
-        changedElements.push(...targets);
-      }
-    }
-    catch (e) {
-      // ignore exceptions
-    }
-  }
-
-  // update vertex angles affected by changed points
-  updateVertexAnglesFromObjects(changedElements);
-  resumeBoardUpdates(board);
-
-  return { newElements: newElements.length ? newElements : undefined };
+interface IPasteContent {
+  pasteId: string;
+  isSameTile: boolean;
+  objects: GeometryObjectModelType[];
 }
 
-let sViewCount = 0;
-function nextViewId() {
-  return ++sViewCount;
-}
+let sInstanceId = 0;
 
 @inject("stores")
 @observer
@@ -171,10 +144,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           axisSettingsOpen: false,
         };
 
+  private instanceId = ++sInstanceId;
   private elementId: string;
   private domElement: HTMLDivElement | null;
   private _isMounted: boolean;
-  private syncedChanges: number;
 
   private disposers: any[];
 
@@ -185,9 +158,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private isVertexDrag: boolean;
 
   private lastPasteId: string;
-  private lastPasteCount: number;
+  private lastPasteCount = 0;
 
-  private debouncedUpdateImage = debounce((url: string, filename?: string) => {
+  private suspendSnapshotResponse = 0;
+  private boardPromise: Promise<JXG.Board> | undefined;
+
+  private updateImage = (url: string, filename?: string) => {
             gImageMap.getImage(url, { filename })
               .then(image => {
                 if (!this._isMounted) return;
@@ -218,18 +194,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
                   imageEntry: undefined
                 });
               });
-          }, 100);
+          };
 
   constructor(props: IProps) {
     super(props);
 
     const { context, model, onSetActionHandlers } = props;
 
-    this.elementId = `${context}-${model.id}-${nextViewId()}`;
-    sBoardContentMetadataMap[this.elementId] = {
-      modelId: model.id,
-      metadata: (model.content as GeometryContentModelType).metadata
-    };
+    this.elementId = `${context}-${model.id}-${this.instanceId}`;
 
     if (onSetActionHandlers) {
       const handlers: IActionHandlers = {
@@ -255,7 +227,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   public componentDidMount() {
     this._isMounted = true;
-    this.syncedChanges = 0;
     this.disposers = [];
 
     this.initializeContent();
@@ -330,54 +301,18 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       }
     });
 
-    this.disposers.push(autorun(() => {
-      const { model: { content }, readOnly } = this.props;
-      const { board } = this.state;
-      const geometryContent = content as GeometryContentModelType;
-      if (geometryContent.changes.length !== this.syncedChanges && board) {
-        const nextState: IState = {} as any;
-
-        // synchronize background image changes
-        let lastUrl, lastFilename;
-        for (let i = this.syncedChanges; i < geometryContent.changes.length; ++i) {
-          const jsonChange = geometryContent.changes[i];
-          const change = safeJsonParse<JXGChange>(jsonChange);
-          const [url, filename] = getImageUrl(change) || [];
-          if (url) {
-            lastUrl = url;
-            lastFilename = filename;
-          }
-        }
-        if (lastUrl) {
-          // signal update to be triggered in componentDidUpdate
-          nextState.imageContentUrl = lastUrl;
-          nextState.imageFilename = lastFilename;
-        }
-        // If the incoming list of changes is shorter, an undo has occurred.
-        // In this case, clear the board and replay it.
-        if (this.syncedChanges > geometryContent.changes.length) {
-          suspendBoardUpdates(board);
-          // Board initialization creates 2 objects: the info box and the grid.
-          // These won't be recreated if the board already exists so we don't delete them.
-          const kDefaultBoardObjects = 2;
-          for (let i = board.objectsList.length - 1; i >= kDefaultBoardObjects; i--) {
-            board.removeObject(board.objectsList[i]);
-          }
-          resumeBoardUpdates(board);
-        }
-        const syncedChanges = this.syncedChanges > geometryContent.changes.length
-                                ? 0
-                                : this.syncedChanges;
-        assign(nextState, syncBoardChanges(board, geometryContent, syncedChanges, readOnly));
-        this.setState(nextState);
-        this.syncedChanges = geometryContent.changes.length;
+    this.disposers.push(onSnapshot(this.getContent(), () => {
+      if (!this.suspendSnapshotResponse) {
+        this.destroyBoard();
+        this.setState({ board: undefined });
+        this.initializeBoard();
       }
     }));
   }
 
   public componentDidUpdate() {
     // if we didn't initialize before now, try again
-    if (!this.state.board) {
+    if (!this.state.board && !this.boardPromise) {
       this.initializeContent();
     }
 
@@ -394,14 +329,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   public componentWillUnmount() {
     this.disposers.forEach(disposer => disposer());
-    const board = this.state.board;
-    if (board) {
-      delete sBoardContentMetadataMap[this.elementId];
 
+    if (this.state.board) {
       // delay so any asynchronous JSXGraph actions have time to complete
-      setTimeout(() => {
-        JXG.JSXGraph.freeBoard(board);
-      });
+      setTimeout(() => this.destroyBoard());
     }
 
     this.props.onUnregisterToolApi();
@@ -527,7 +458,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleTitleChange = (title?: string) => {
-    title && this.getContent().updateTitle(this.state.board, title);
+    title && this.applyChange(() => this.getContent().updateTitle(this.state.board, title));
     this.setState({ isEditingTitle: false });
   };
 
@@ -579,27 +510,37 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return this.props.model.content as GeometryContentModelType;
   }
 
-  private getTableContent(tableId: string) {
-    return getTableContent(this.getContent(), tableId);
+  private async initializeBoard(): Promise<JXG.Board> {
+    return new Promise((resolve, reject) => {
+      isGeometryContentReady(this.getContent()).then(() => {
+        const board = this.getContent().initializeBoard(this.elementId, this.handleCreateElements);
+        if (board) {
+          this.handleCreateBoard(board);
+          const { url, filename } = this.getContent().bgImage || {};
+          if (url) {
+            this.updateImageUrl(url, filename);
+          }
+          this.setState({ board });
+          resolve(board);
+        }
+      });
+    });
   }
 
-  private initializeContent() {
+  private destroyBoard() {
+    const { board } = this.state;
+    board && JXG.JSXGraph.freeBoard(board);
+  }
+
+  private async initializeContent() {
     const content = this.getContent();
     content.metadata.setSharedSelection(this.stores.selection);
     const domElt = document.getElementById(this.elementId);
     const eltBounds = domElt && domElt.getBoundingClientRect();
     // JSXGraph fails hard if the DOM element doesn't exist or has zero extent
     if (eltBounds && (eltBounds.width > 0) && (eltBounds.height > 0)) {
-      const board = content.initializeBoard(this.elementId, this.handleCreateElements);
-      if (board) {
-        this.handleCreateBoard(board);
-        const [imageUrl, filename] = this.getContent().getLastImageUrl() || [];
-        if (imageUrl) {
-          this.updateImageUrl(imageUrl, filename);
-        }
-        this.setState({ board });
-      }
-      this.syncedChanges = content.changes.length;
+      this.boardPromise = this.initializeBoard();
+      await this.boardPromise;
     }
     // if we haven't been assigned a title already, request one now
     // we set the title without updating the content, so the title is ephemeral
@@ -623,17 +564,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     if (!this.state.isLoading) {
       this.setState({ isLoading: true });
     }
-    this.debouncedUpdateImage(url, filename);
+    this.updateImage(url, filename);
   }
 
   private rescaleBoardAndAxes(params: IAxesParams) {
     const { board } = this.state;
-    const content = this.getContent();
     if (board) {
-      const axes = content.rescaleBoard(board, params);
-      if (axes) {
-        axes.forEach(this.handleCreateAxis);
-      }
+      this.applyChange(() => {
+        const content = this.getContent();
+        const axes = content.rescaleBoard(board, params);
+        if (axes) {
+          axes.forEach(this.handleCreateAxis);
+        }
+      });
     }
   }
 
@@ -739,11 +682,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       }
     }
   };
-      // Currently, we don't allow commenting of polygon edges because the commenting feature
-      // requires that objects have persistent/unique IDs, but polygon edges don't have such
-      // IDs because their IDs are generated by JSXGraph.
-      // If we ever support commenting on polygon segments, then we can change the Comment
-      // button logic when a line segment is selected.
+
+  // Currently, we don't allow commenting of polygon edges because the commenting feature
+  // requires that objects have persistent/unique IDs, but polygon edges don't have such
+  // IDs because their IDs are generated by JSXGraph.
+  // If we ever support commenting on polygon segments, then we can change the Comment
+  // button logic when a line segment is selected.
   // TODO: Create comments after the dialog is complete + prevent empty comments
   private handleCreateComment = () => {
     const { board } = this.state;
@@ -753,12 +697,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const activeComment = content.getOneSelectedComment(board);
       if (commentAnchor) {
         this.applyChange(() => {
-            const elems = content.addComment(board, commentAnchor.id);
-            const comment = elems?.find(isComment);
-            if (comment) {
-              this.handleCreateText(comment);
-              this.setState({selectedComment: comment});
-            }
+          const elems = content.addComment(board, commentAnchor.id);
+          const comment = elems?.find(isComment);
+          if (comment) {
+            this.handleCreateText(comment);
+            this.setState({selectedComment: comment});
+          }
         });
       } else if (activeComment) {
         this.setState({ selectedComment: activeComment });
@@ -768,7 +712,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private handleLabelSegment =
             (polygon: JXG.Polygon, points: [JXG.Point, JXG.Point], labelOption: ESegmentLabelOption) => {
-    this.getContent().updatePolygonSegmentLabel(this.state.board, polygon, points, labelOption);
+    this.applyChange(() => {
+      this.getContent().updatePolygonSegmentLabel(this.state.board, polygon, points, labelOption);
+    });
   };
 
   private handleOpenAxisSettings = () => {
@@ -779,7 +725,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { board } = this.state;
     const content = this.getContent();
     if (board) {
-      content.updateObjects(board, [commentId || ""], { text });
+      this.applyChange(() => {
+        content.updateObjects(board, [commentId || ""], { text });
+      });
     }
     this.setState({ selectedComment: undefined });
   };
@@ -812,17 +760,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     board.update();
 
     if (isComplete) {
-      const vertexCount = polygon.vertices.length - 1;
-      this.getContent()
-          .updateObjects(
-            board,
-            polygon.vertices
-              .map(vertex => vertex.id)
-              .slice(0, vertexCount),
-            vertexCoords
-              .map(coords => ({ snapToGrid: false,
-                                position: coords.usrCoords.slice(1) }))
-              .slice(0, vertexCount));
+      this.applyChange(() => {
+        const vertexCount = polygon.vertices.length - 1;
+        this.getContent()
+            .updateObjects(
+              board,
+              polygon.vertices
+                .map(vertex => vertex.id)
+                .slice(0, vertexCount),
+              vertexCoords
+                .map(coords => ({ snapToGrid: false,
+                                  position: coords.usrCoords.slice(1) }))
+                .slice(0, vertexCount));
+      });
     }
   };
 
@@ -831,96 +781,77 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const { readOnly } = this.props;
     const { board } = this.state;
     if (!readOnly && board && content.hasSelection()) {
-      content.deleteSelection(board);
+      this.applyChange(() => {
+        content.deleteSelection(board);
+      });
       return true;
     }
   };
 
+  // duplicate selected objects without affecting clipboard
   private handleDuplicate = () => {
-    this.handleCopy();
-    this.handlePaste();
+    const copiedObjects = (this.copySelectedObjects() || []) as GeometryObjectModelType[];
+    if (copiedObjects?.length) {
+      // hash the copied objects to create a pasteId tied to the content
+      const excludeKeys = (key: string) => ["id", "anchors", "points"].includes(key);
+      const hash = objectHash(copiedObjects.map(obj => getSnapshot(obj)), { excludeKeys });
+      this.pasteObjects({ pasteId: hash, isSameTile: true, objects: copiedObjects });
+    }
   };
 
   private handleUndo = () => {
-    const content = this.getContent();
-    const { board } = this.state;
-    if (board && content.canUndo()) {
-      const changeset = content.popChangeset();
-      if (changeset) {
-        board.showInfobox(false);
-        this.setState(state => ({ redoStack: state.redoStack.concat([changeset]) }));
-
-        // Reverse the changes so they're logged in the order they're undone
-        [...changeset].reverse().forEach(changeString => {
-          const change = safeJsonParse<JXGChange>(changeString);
-          if (change) {
-            Logger.logToolChange(LogEventName.GRAPH_TOOL_CHANGE, change.operation, change,
-                                  content.metadata?.id || "", LogEventMethod.UNDO);
-          }
-        });
-      }
-    }
-
     return true;
   };
 
   private handleRedo = () => {
-    const content = this.getContent();
-    const { redoStack, board } = this.state;
-    if (board) {
-      const changeset = redoStack[redoStack.length - 1];
-      if (changeset) {
-        board.showInfobox(false);
-        content.pushChangeset(changeset);
-        this.setState({
-          redoStack: redoStack.slice(0, redoStack.length - 1)
-        });
-
-        changeset.forEach(changeString => {
-          const change = safeJsonParse<JXGChange>(changeString);
-          if (change) {
-            Logger.logToolChange(LogEventName.GRAPH_TOOL_CHANGE, change.operation, change,
-                                  content.metadata?.id || "", LogEventMethod.REDO);
-          }
-        });
-      }
-    }
-
     return true;
   };
 
-  private handleCopy = () => {
+  private copySelectedObjects() {
     const content = this.getContent();
     const { board } = this.state;
     if (board && content.hasSelection()) {
+      return content.copySelection(board);
+    }
+  }
+
+  // copy to clipboard
+  private handleCopy = () => {
+    const objects = this.copySelectedObjects();
+    if (objects) {
+      const content = this.getContent();
       const { clipboard } = this.stores;
-      const changes = content.copySelection(board);
+      const clipObjects = objects.map(obj => getSnapshot(obj));
       clipboard.clear();
-      clipboard.addTileContent(content.metadata.id, content.type, changes, this.stores);
+      clipboard.addTileContent(content.metadata.id, content.type, clipObjects, this.stores);
       return true;
     }
   };
 
+  // cut to clipboard
   private handleCut = () => {
     this.handleCopy();
     return this.handleDelete();
   };
 
+  // paste from clipboard
   private handlePaste = () => {
+    const content = this.getContent();
+    const { clipboard } = this.stores;
+    const objects = clipboard.getTileContent(content.type);
+    const pasteId = clipboard.getTileContentId(content.type) || objectHash(objects);
+    const isSameTile = clipboard.isSourceTile(content.type, content.metadata.id);
+    this.pasteObjects({ pasteId, isSameTile, objects });
+  };
+
+  // paste specified object content
+  private pasteObjects = (pasteContent: IPasteContent) => {
     const content = this.getContent();
     const { readOnly } = this.props;
     const { board } = this.state;
     if (!readOnly && board) {
-      const { clipboard } = this.stores;
-      let changes: string[] = clipboard.getTileContent(content.type);
-      if (changes && changes.length) {
-        // Mark the first and last changes to create a batch
-        changes[0] = JSON.stringify({...safeJsonParse<JXGChange>(changes[0]), startBatch: true});
-        const lastChange = JSON.stringify({...safeJsonParse<JXGChange>(changes[changes.length - 1]), endBatch: true});
-        changes[changes.length - 1] = lastChange;
-
-        const pasteId = clipboard.getTileContentId(content.type);
-        const isSameTile = clipboard.isSourceTile(content.type, content.metadata.id);
+      const { pasteId, isSameTile, objects } = pasteContent;
+      if (objects?.length) {
         // track the number of times the same content has been pasted
         if (pasteId) {
           if (pasteId !== this.lastPasteId) {
@@ -931,55 +862,28 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             ++this.lastPasteCount;
           }
         }
+
+        // map old ids to new ones
+        const idMap: Record<string, string> = {};
+        objects.forEach((obj => idMap[obj.id] = uniqueId()));
+
         // To handle multiple pastes of the same clipboard content,
         // we must re-map ids to avoid duplication. We also offset
         // the locations of points slightly so multiple pastes
         // don't appear exactly on top of each other.
-        const idMap: { [id: string]: string } = {};
-        const newPointIds: string[] = [];
-        if (this.lastPasteCount > 0) {
-          changes = changes.map((jsonChange) => {
-            const change = safeJsonParse(jsonChange);
-            const kPixelOffset = 30 * this.lastPasteCount;
-            const xUserOffset = Math.round(10 * kPixelOffset / board.unitX) / 10;
-            const yUserOffset = Math.round(10 * kPixelOffset / board.unitY) / 10;
-            switch (change && change.operation) {
-              case "create":
-                // map ids of newly create object
-                if (change.properties && change.properties.id) {
-                  idMap[change.properties.id] = uniqueId();
-                  change.properties.id = idMap[change.properties.id];
-                }
-                // after the first paste, names/labels are auto-generated
-                if (change.properties && change.properties.name) {
-                  delete change.properties.name;
-                }
-                if (change.target === "point") {
-                  // offset locations of points
-                  change.parents[0] += xUserOffset;
-                  change.parents[1] -= yUserOffset;
-                  newPointIds.push(change.properties.id);
-                }
-                else if (["polygon", "vertexAngle"].indexOf(change.target) >= 0) {
-                  // map ids of parent object references
-                  change.parents = change.parents.map((parentId: string) => idMap[parentId]);
-                }
-                break;
-              case "update":
-              case "delete":
-                if (Array.isArray(change.targetID)) {
-                  change.targetID = change.targetID.map((id: string) => idMap[id]);
-                }
-                else {
-                  change.targetID = idMap[change.targetID];
-                }
-                break;
-            }
-            return JSON.stringify(change);
-          });
-        }
-        this.applyBatchChanges(changes);
-        // select newly pasted points
+        const objectsToPaste = objects.map((obj => {
+          const kPixelOffset = 30 * this.lastPasteCount;
+          const offset = { x: Math.round(10 * kPixelOffset / board.unitX) / 10,
+                           y: -Math.round(10 * kPixelOffset / board.unitY) / 10 };
+          return cloneGeometryObject(obj, { idMap, offset });
+        })).filter(obj => !!obj) as GeometryObjectModelType[];
+
+        this.applyChange(() => content.addObjectModels(objectsToPaste));
+
+        const changesToApply = convertModelObjectsToChanges(objectsToPaste);
+        content.applyBatchChanges(board, changesToApply, this.handleCreateElements);
+
+        const newPointIds = objects.filter(obj => isPointModel(obj)).map(obj => obj.id);
         if (newPointIds.length) {
           content.deselectAll(board);
           content.selectObjects(board, newPointIds);
@@ -1078,31 +982,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const geometryContent = this.getContent();
     const width = image.width! / kGeometryDefaultPixelsPerUnit;
     const height = image.height! / kGeometryDefaultPixelsPerUnit;
-    const imageIds = geometryContent
-                      .findObjects(board, (obj: JXG.GeometryElement) => obj.elType === "image")
-                      .map((obj: JXG.GeometryElement) => obj.id);
-    this.applyChanges(() => {
-      if (imageIds.length) {
-        // change URL if there's already an image present
-        const imageId = imageIds[imageIds.length - 1];
-        geometryContent.updateObjects(board, imageId, {
-                                        url: contentUrl,
-                                        size: [width, height]
-                                      });
-      }
-      else {
-        const properties = image.filename ? { filename: image.filename } : undefined;
-        geometryContent.addImage(board, contentUrl, [0, 0], [width, height], properties);
-      }
+    this.applyChange(() => {
+      const properties = image.filename ? { filename: image.filename } : undefined;
+      geometryContent.addImage(board, contentUrl, [0, 0], [width, height], properties);
     });
     this.updateImageUrl(contentUrl);
-    if (this.props.size.height && image.height! > this.props.size.height) {
+    if (this.props.size.height && image.height && (image.height > this.props.size.height)) {
       this.props.onRequestRowHeight(this.props.model.id, image.height);
     }
-  }
-
-  private getTableActionLinks(links: ILinkProperties): ILinkProperties {
-    return { id: links.id, tileIds: [this.props.model.id] };
   }
 
   private handleTableTileDrop(e: React.DragEvent<HTMLDivElement>) {
@@ -1113,43 +1000,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleTableTileLinkRequest = (tableTileId: string) => {
-    const { board } = this.state;
-    if (this.getContent().isLinkedToTable(tableTileId)) return;
-
-    const tableContent = this.getTableContent(tableTileId);
-    if (tableContent && board) {
-      if (!tableContent.isValidForGeometryLink()) {
-        this.setState({ showInvalidTableDataAlert: true });
-        return;
-      }
-      const dataSet = tableContent.getSharedData();
-      this.autoRescaleBoardAndAxes(dataSet);
-
-      const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet);
-      this.applyChange(() => {
-        const pts = this.getContent().addTableLink(board, tableTileId, dataSet, geomActionLinks);
-        pts.forEach((pt: JXG.Point) => {
-          this.handleCreatePoint(pt);
-        });
-      });
-
-      const _tableContent = this.getTableContent(tableTileId);
-      const tableActionLinks = this.getTableActionLinks(geomActionLinks);
-      _tableContent && _tableContent.addGeometryLink(this.props.model.id, tableActionLinks);
-    }
+    const content = this.getContent();
+    linkTableAndGeometryTiles(content, tableTileId, content.metadata.id);
   };
 
   private handleTableTileUnlinkRequest = (tableTileId: string) => {
-    const { board } = this.state;
-    const tableContent = this.getTableContent(tableTileId);
-    if (tableContent && board) {
-      const dataSet = tableContent.getSharedData();
-      const geomActionLinks = tableContent.getClientLinks(uniqueId(), dataSet);
-      this.getContent().removeTableLink(board, tableTileId, geomActionLinks);
-      const _tableContent = this.getTableContent(tableTileId);
-      const tableActionLinks = this.getTableActionLinks(geomActionLinks);
-      _tableContent && _tableContent.removeGeometryLink(this.props.model.id, tableActionLinks);
-    }
+    const content = this.getContent();
+    unlinkTableAndGeometryTiles(content, tableTileId, content.metadata.id);
   };
 
   private handleCreateElements = (elts?: JXG.GeometryElement | JXG.GeometryElement[]) => {
@@ -1180,43 +1037,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private applyChange(change: () => void) {
-    this.syncedChanges +=  1;
-    change();
-    this.setState({ redoStack: [] });
-  }
-
-  private applyChanges(changes: () => void) {
-    const { model: { content } } = this.props;
-    const geometryContent = content as GeometryContentModelType;
-    const { board } = this.state;
-    if (!geometryContent || !board) return;
-
-    // update the geometry without updating the model
-    geometryContent.suspendSync();
-    changes();
-
-    // update the model as a batch
-    const changeCount = geometryContent.batchChangeCount;
-    this.syncedChanges += changeCount;
-    geometryContent.resumeSync();
-  }
-
-  private applyBatchChanges(changes: string[]) {
-    this.applyChanges(() => {
-      changes.forEach(change => {
-        const content = this.getContent();
-        const { board } = this.state;
-        if (board) {
-          const parsedChange = safeJsonParse<JXGChange>(change);
-          if (parsedChange) {
-            const result = content.applyChange(board, parsedChange);
-            if (result) {
-              this.handleCreateElements(result as JXG.GeometryElement | JXG.GeometryElement[]);
-            }
-          }
-        }
-      });
-    });
+    try {
+      ++this.suspendSnapshotResponse;
+      change();
+      this.setState({ redoStack: [] });
+    }
+    finally {
+      --this.suspendSnapshotResponse;
+    }
   }
 
   private isSqrDistanceWithinThreshold(threshold: number, c1?: JXG.Coords, c2?: JXG.Coords) {
@@ -1599,10 +1427,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
         content.selectElement(board, line.id);
       }
-      // we can't prevent JSXGraph from dragging the edge, so don't deselect
-      // else if (hasSelectionModifier(evt)) {
-      //   vertices.forEach(vertex => content.deselectElement(vertex.id));
-      // }
 
       if (!readOnly) {
         // point handles vertex drags
@@ -1640,8 +1464,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           this.endDragSelectedPoints(evt, line, usrDiff);
         }
       }
-      // remove this polygon's vertices from the dragPts map
-      vertices.forEach(vertex => delete this.dragPts[vertex.id]);
       this.isVertexDrag = false;
     };
 
@@ -1685,7 +1507,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const inVertex = isInVertex(evt);
       const allVerticesSelected = areAllVerticesSelected();
       let selectPolygon = false;
-      // let deselectVertices = false;
       if (!inVertex && !allVerticesSelected) {
         // deselect other elements unless appropriate modifier key is down
         if (board && !hasSelectionModifier(evt)) {
@@ -1694,12 +1515,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         selectPolygon = true;
         this.lastSelectDown = evt;
       }
-      // we can't prevent JSXGraph from dragging the polygon, so don't deselect
-      // else if (!inVertex && allVerticesSelected) {
-      //   if (board && hasSelectionModifier(evt)) {
-      //     deselectVertices = true;
-      //   }
-      // }
       if (selectPolygon) {
         geometryContent.selectElement(board, polygon.id);
         each(polygon.ancestors, point => {
@@ -1743,8 +1558,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           this.endDragSelectedPoints(evt, polygon, usrDiff);
         }
       }
-      // remove this polygon's vertices from the dragPts map
-      polygon.vertices.forEach(vertex => delete this.dragPts[vertex.id]);
       this.isVertexDrag = false;
     };
 

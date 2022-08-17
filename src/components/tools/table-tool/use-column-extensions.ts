@@ -1,5 +1,5 @@
+import { getEditableExpression } from "../../../models/data/expression-utils";
 import { TableMetadataModelType } from "../../../models/tools/table/table-content";
-import { getEditableExpression } from "./expression-utils";
 import { IGridContext, isDataColumn, TColumn } from "./table-types";
 import { IContentChangeHandlers } from "./use-content-change-handlers";
 
