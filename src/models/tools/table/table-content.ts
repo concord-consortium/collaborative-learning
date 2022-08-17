@@ -180,10 +180,10 @@ export const TableContentModel = ToolContentModel
     }
     return convertLegacyDataSet(snapshot);
   })
-  .postProcessSnapshot(snapshot => {
-    const { importedDataSet, ...rest } = snapshot;
-    return { ...rest };
-  })
+  // .postProcessSnapshot(snapshot => {
+  //   const { importedDataSet, ...rest } = snapshot;
+  //   return { ...rest };
+  // })
   .views(self => ({
     get sharedModel() {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
