@@ -8,8 +8,11 @@ interface IProps {
 }
 
 export const DeckCardData: React.FC<IProps> = ({ caseIndex, model }) => {
+  console.log('render')
   const content = model.content as DeckContentModelType;
   const thisCase = content.caseByIndex(caseIndex);
+
+  console.log("thisCase: ", thisCase);
 
   const [valueBeingEditedAttrId, setValueBeingEditedAttrId] = useState("")
   const [attributeBeingEditedId, setAttributeBeingEditedId] = useState("");
@@ -38,9 +41,10 @@ export const DeckCardData: React.FC<IProps> = ({ caseIndex, model }) => {
   }
 
   function handleAttrNameChange(e: any){
+    console.log("handleAttrNameChange", e.target)
     //console.log("given the target value: ", e.target.classList[1])
     //console.log("change the name of the attribute with the id: ", "what here")
-    content.setAttName(e.target.classList[1], e.target.value)
+    content.setAttName("captureDate", "foo")
   }
 
   function handleAttrNameKeyDown(e:any){
@@ -48,6 +52,11 @@ export const DeckCardData: React.FC<IProps> = ({ caseIndex, model }) => {
     if ( key === "Enter"){
       setAttributeBeingEditedId("");
     }
+  }
+
+  function handleMottledGrayCaptureDateValueChange(e: any){
+    console.log(e.target);
+    content.setMottledGrayCaptureDate(e.target.value)
   }
 
   function getCaseData(myCase: any){
@@ -66,6 +75,29 @@ export const DeckCardData: React.FC<IProps> = ({ caseIndex, model }) => {
     });
     return caseData;
   }
+
+  function getThisDangValue(){
+    return content.dataSet.getValue("mottledGray", "captureDate")
+  }
+
+  return (
+    <>
+    <p><em>below is one iteration of a map over the data here for this case</em></p>
+    <p>attribute name: { content.attrById("captureDate").name}</p>
+    <p>attribute value: { thisCase?.captureDate}</p>
+    <p>attribute value input:
+      <input
+        className={`attribute-input ${thisCase.__id__}`}
+        value={getThisDangValue()}
+        onChange={handleMottledGrayCaptureDateValueChange}
+        //onKeyDown={handleAttrNameKeyDown}
+        //onBlur={() => setAttributeBeingEditedId("")}
+      />
+    </p>
+    </>
+  )
+
+  /*
   const caseData = getCaseData(thisCase);
 
   const caseHtml = caseData.map((dataPoint, i) => {
@@ -102,6 +134,14 @@ export const DeckCardData: React.FC<IProps> = ({ caseIndex, model }) => {
   })
 
   return <>{caseHtml}</>
+  */
+  /*
+  return (
+    <>
+      <b>{`foo`}</b>
+    </>
+  )
+  */
 };
 
 /*

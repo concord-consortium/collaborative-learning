@@ -94,6 +94,9 @@ export const DeckContentModel = ToolContentModel
     },
     setAttName(attrId: string, name: string){
      self.dataSet.setAttributeName(attrId, name);
+    },
+    setMottledGrayCaptureDate(val: string){
+      self.dataSet.setCaseValues([{ __id__: "mottledGray", captureDate: val }]);
     }
   }));
 
