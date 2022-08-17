@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { IToolApi } from "../../components/tools/tool-api";
 import { ToolTileModel } from "../../models/tools/tool-tile";
-import { defaultStarterContent, StarterContentModel } from "./starter-content";
+import { defaultStarterContent } from "./starter-content";
 import { StarterToolComponent } from "./starter-tool";
 
 // The starter tile needs to be registered so the ToolTileModel.create
@@ -15,7 +15,7 @@ describe("StarterToolComponent", () => {
   const model = ToolTileModel.create({content});
 
   const defaultProps = {
-    toolTile: null, 
+    toolTile: null,
     context: "",
     docId: "",
     documentContent: null,
@@ -44,13 +44,13 @@ describe("StarterToolComponent", () => {
   };
 
   it("renders successfully", () => {
-    const {getByText} = 
+    const {getByText} =
       render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
     expect(getByText("Hello World")).toBeInTheDocument();
   });
 
   it("updates the text when the model changes", async () => {
-    const {getByText, findByText} = 
+    const {getByText, findByText} =
       render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
     expect(getByText("Hello World")).toBeInTheDocument();
 
@@ -60,7 +60,7 @@ describe("StarterToolComponent", () => {
   });
 
   it("updates the model when the user types", () => {
-    const {getByRole, getByText} = 
+    const {getByRole, getByText} =
       render(<StarterToolComponent  {...defaultProps} {...{model}}></StarterToolComponent>);
     expect(getByText("New Text")).toBeInTheDocument();
 

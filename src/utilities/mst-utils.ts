@@ -1,5 +1,17 @@
-import { IAnyStateTreeNode, getParent, getType, hasParent } from "mobx-state-tree";
+import { IAnyStateTreeNode, getParent, getType, hasParent, types } from "mobx-state-tree";
 import { DocumentContentModelType } from "../models/document/document-content";
+
+/**
+ * This creates the definition for a type field in MST.
+ * The field is optional so it doesn't have to be specified when creating
+ * an instance.
+ *
+ * @param typeName the type
+ * @returns
+ */
+export function typeField(typeName: string) {
+  return types.optional(types.literal(typeName), typeName);
+}
 
 /**
  * Returns an ancestor of a node whose type name is `typeName`, if any.

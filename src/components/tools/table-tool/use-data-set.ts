@@ -12,8 +12,9 @@ import { IContentChangeHandlers } from "./use-content-change-handlers";
 import { useNumberFormat } from "./use-number-format";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 
-const isCellSelectable = (position: TPosition, columns: TColumn[]) => {
-  return (position.idx !== 0) && (position.idx !== columns.length - 1);
+const isCellSelectable = (position: TPosition, columns: TColumn[], readOnly: boolean) => {
+  return (position.idx !== 0) &&
+    (position.idx !== columns.length - (readOnly ? 0 : 1));
 };
 
 interface IUseDataSet {
@@ -54,10 +55,10 @@ export const useDataSet = ({
       triggerRowChange();
     }
 
-    if (!isCellSelectable(position, columns) && (columns.length > 2)) {
+    if (!isCellSelectable(position, columns, readOnly) && (columns.length > 2)) {
       let newPosition = { ...position };
       if (forward) {
-        while (!isCellSelectable(newPosition, columns)) {
+        while (!isCellSelectable(newPosition, columns, readOnly)) {
           // move from last cell to { -1, -1 }
           if ((newPosition.rowIdx >= rows.length) ||
               ((newPosition.rowIdx === rows.length - 1) && (newPosition.idx >= columns.length - 1))) {
@@ -71,14 +72,14 @@ export const useDataSet = ({
         }
       }
       else {  // backward
-        while (!isCellSelectable(newPosition, columns)) {
+        while (!isCellSelectable(newPosition, columns, readOnly)) {
           // move from first cell to { -1, -1 }
           if ((newPosition.rowIdx <= -1) || ((newPosition.rowIdx === 0) && (newPosition.idx < 1))) {
             newPosition = { rowIdx: -1, idx: -1 };
           }
           // otherwise move to previous selectable cell
           else if (--newPosition.idx < 1) {
-            newPosition.idx = columns.length - 2;
+            newPosition.idx = columns.length - (readOnly ? 1 : 2);
             --newPosition.rowIdx;
           }
         }

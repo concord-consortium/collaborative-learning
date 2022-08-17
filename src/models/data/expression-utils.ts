@@ -1,6 +1,8 @@
-import escapeStringRegexp from 'escape-string-regexp';
+import escapeStringRegexp from "escape-string-regexp";
 import { Parser } from "expr-eval";
-import { kSerializedXKey, kSerializedXKeyRegEx } from "../../../models/tools/table/table-model-types";
+
+export const kSerializedXKey = "__x__";
+export const kSerializedXKeyRegEx = /__x__/g;
 
 export const getEditableExpression = (
   rawExpression: string | undefined, canonicalExpression: string, xName: string

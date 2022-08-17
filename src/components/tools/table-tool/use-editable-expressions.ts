@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { useCurrent } from "../../../hooks/use-current";
+import { getEditableExpression } from "../../../models/data/expression-utils";
 import { TableMetadataModelType } from "../../../models/tools/table/table-content";
-import { getEditableExpression } from "./expression-utils";
 
 export const useEditableExpressions = (metadata: TableMetadataModelType, xName: string) => {
   const metadataRef = useCurrent(metadata);

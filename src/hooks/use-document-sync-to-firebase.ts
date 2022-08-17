@@ -30,7 +30,9 @@ export function useDocumentSyncToFirebase(
   const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
   !readOnly && (user.id !== uid) && console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
-  if (DEBUG_DOCUMENT) {
+  if (DEBUG_DOCUMENT && !readOnly) {
+    // Only update the currentDocument with writable documents
+    // useDocumentSyncToFirebase is called with readOnly documents too
     (window as any).currentDocument = document;
   }
 

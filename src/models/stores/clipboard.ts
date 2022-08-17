@@ -1,14 +1,14 @@
 import { types, Instance } from "mobx-state-tree";
 import { IStores } from "./stores";
 import { ToolContentModelType } from "../tools/tool-types";
-import { v4 as uuid } from "uuid";
+import { uniqueId } from "../../utilities/js-utils";
 
 export const kTypeText = "text";
 export const kJsonTileContent = "org.concord.clue.clipboard.tileJson";
 
 export const ClipboardEntryModel = types
   .model("Clipboard", {
-    id: types.optional(types.string, () => uuid()),
+    id: types.optional(types.string, () => uniqueId()),
     userId: "",
     srcDocumentId: "",
     srcDocumentType: "",

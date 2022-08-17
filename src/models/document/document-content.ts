@@ -54,19 +54,22 @@ export interface ITileCountsPerSection {
 
 // This intermediate type is added so we can store which tiles are using the
 // shared model. It is also necessary so the SharedModelUnion can be evaluated
-// late. If the sharedModelMap was a map directly to SharedModelUnion the late 
+// late. If the sharedModelMap was a map directly to SharedModelUnion the late
 // evaluation would happen immediately and not pick up the registered shared
 // model tiles. This issue with using late and maps is documented here:
 // `src/models/mst.test.ts`
 export const SharedModelEntry = types.model("SharedModelEntry", {
   sharedModel: SharedModelUnion,
+  provider: types.safeReference(ToolTileModel, {acceptsUndefined: true}),
   tiles: types.array(types.safeReference(ToolTileModel, {acceptsUndefined: false}))
 })
 .actions(self => ({
-  addTile(toolTile: ToolTileModelType) {
+  addTile(toolTile: ToolTileModelType, isProvider?: boolean) {
+    isProvider && (self.provider = toolTile);
     self.tiles.push(toolTile);
   },
   removeTile(toolTile: ToolTileModelType) {
+    (toolTile.id === self.provider?.id) && (self.provider = undefined);
     self.tiles.remove(toolTile);
   }
 }));
@@ -224,12 +227,19 @@ export const DocumentContentModel = types
 
         return snapshot;
       },
-      getFirstSharedModelByType<IT extends typeof SharedModel>(modelType: IT ): IT["Type"] | undefined {
+      getFirstSharedModelByType<IT extends typeof SharedModel>(
+        modelType: IT, tileId?: string): IT["Type"] | undefined {
         const sharedModelEntries = Array.from(self.sharedModelMap.values());
-        // Even if we use a snapshotProcessor generated type, getType will return the original 
+        // Even if we use a snapshotProcessor generated type, getType will return the original
         // type. This is documented: src/models/mst.test.ts
-        const firstEntry = sharedModelEntries.find(entry => getType(entry.sharedModel) === modelType);
+        const firstEntry = sharedModelEntries.find(entry =>
+          (getType(entry.sharedModel) === modelType) &&
+          (!tileId || !!entry.tiles.find(tile => tileId === tile.id)));
         return firstEntry?.sharedModel;
+      },
+      getSharedModelsByType<IT extends typeof SharedModel>(type: string): IT["Type"][] {
+        const sharedModelEntries = Array.from(self.sharedModelMap.values());
+        return sharedModelEntries.map(entry => entry.sharedModel).filter(model => model.type === type);
       }
     };
   })

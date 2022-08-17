@@ -1,6 +1,7 @@
 import { cloneDeep } from "lodash";
 import { getParent, getSnapshot, getType, 
   Instance, SnapshotIn, SnapshotOut, types, ISerializedActionCall } from "mobx-state-tree";
+import { GeometryContentModelType } from "./geometry/geometry-content";
 import { isPlaceholderContent } from "./placeholder/placeholder-content";
 import { ITileExportOptions } from "./tool-content-info";
 import { findMetadata, ToolContentModelType, ToolContentUnion } from "./tool-types";
@@ -36,8 +37,13 @@ export function cloneTileSnapshotWithNewId(tile: ToolTileModelType, newId?: stri
 }
 
 export function getToolTileModel(toolContentModel: ToolContentModelType) {
-  const parent = getParent(toolContentModel);
-  return getType(parent).name === "ToolTile" ? parent as ToolTileModelType : undefined;
+  try {
+    const parent = getParent(toolContentModel);
+    return getType(parent).name === "ToolTile" ? parent as ToolTileModelType : undefined;
+  } catch (e) {
+    console.warn(`Unable to find tool tile for content ${toolContentModel}`);
+    return undefined;
+  }
 }
 
 export function getTileTitleFromContent(toolContentModel: ToolContentModelType) {
@@ -59,6 +65,13 @@ export const ToolTileModel = types
     display: DisplayUserTypeEnum,
     // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel", ...
     content: ToolContentUnion
+  })
+  .preProcessSnapshot(snapshot => {
+    // Move the title up to handle legacy geometry tiles
+    if (snapshot.content.type === "Geometry" && !("title" in snapshot) && "title" in snapshot.content) {
+      return { ...snapshot, title: (snapshot.content as GeometryContentModelType).title };
+    }
+    return snapshot;
   })
   .views(self => ({
     // generally negotiated with tool, e.g. single column width for table

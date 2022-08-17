@@ -2,10 +2,10 @@ import { useCallback, useEffect } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { useFeatureFlag } from "../../../hooks/use-stores";
 import { kTableToolID } from "../../../models/tools/table/table-content";
+import { ITileLinkMetadata } from "../../../models/tools/table-link-types";
 import {
   addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
 } from "../../../models/tools/table-links";
-import { ITileLinkMetadata } from "../../../models/tools/table/table-model-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useLinkTableDialog } from "./use-link-table-dialog";
 import { IToolbarActionHandlers } from "./geometry-shared";
