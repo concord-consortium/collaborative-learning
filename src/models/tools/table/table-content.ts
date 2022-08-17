@@ -1,16 +1,18 @@
 import { Expression, Parser } from "expr-eval";
-import { types, Instance, SnapshotIn } from "mobx-state-tree";
+import { reaction } from "mobx";
+import { addDisposer, Instance, SnapshotIn, types, getType, getSnapshot } from "mobx-state-tree";
 import { ITableChange } from "./table-change";
 import { exportTableContentAsJson } from "./table-export";
-import { convertChangesToSnapshot, convertImportToSnapshot, isTableImportSnapshot } from "./table-import";
-import { isLinkableValue, canonicalizeValue } from "./table-model-types";
-import { clearTableLinksFromGeometries, kLabelAttrName } from "../table-links";
+import {
+  convertChangesToSnapshot, convertImportToSnapshot, convertLegacyDataSet, isTableImportSnapshot
+} from "./table-import";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { ToolMetadataModel, ToolContentModel, toolContentModelHooks } from "../tool-types";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
+import { SharedDataSet, SharedDataSetType } from "../shared-data-set";
+import { SharedModelType } from "../shared-model";
 import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
-import { getRowLabel, ILinkProperties } from "../table-link-types";
 import { uniqueId } from "../../../utilities/js-utils";
 
 export const kTableToolID = "Table";
@@ -162,8 +164,8 @@ export const TableContentModel = ToolContentModel
   .props({
     type: types.optional(types.literal(kTableToolID), kTableToolID),
     isImported: false,
-    dataSet: types.optional(DataSet, () => DataSet.create()),
-    linkedGeometries: types.array(types.string)
+    // Used to store the dataset when importing legacy formats
+    importedDataSet: types.optional(DataSet, () => DataSet.create())
   })
   .volatile(self => ({
     metadata: undefined as any as TableMetadataModelType
@@ -171,14 +173,43 @@ export const TableContentModel = ToolContentModel
   .preProcessSnapshot(snapshot => {
     const s = snapshot as any;
     if (isTableImportSnapshot(s)) {
-      return { isImported: true, ...convertImportToSnapshot(s) };
+      return convertLegacyDataSet({ isImported: true, ...convertImportToSnapshot(s) });
     }
     if (s?.changes) {
-      return convertChangesToSnapshot(s.changes);
+      return convertLegacyDataSet(convertChangesToSnapshot(s.changes));
     }
-    return snapshot;
+    return convertLegacyDataSet(snapshot);
+  })
+  .postProcessSnapshot(snapshot => {
+    const { importedDataSet, ...rest } = snapshot;
+    return { ...rest };
   })
   .views(self => ({
+    get sharedModel() {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
+      // just like findFirstSharedModelByType does
+      //
+      // For now we are checking the type ourselves, and we are assuming the shared model we want
+      // is the first one.
+      const firstSharedModel = sharedModelManager?.getTileSharedModels(self)?.[0];
+      if (!firstSharedModel || getType(firstSharedModel) !== SharedDataSet) {
+        return undefined;
+      }
+      return firstSharedModel as SharedDataSetType;
+    },
+    // Returns a list of ids, currently not implemented
+    get linkedGeometries(): string[] {
+      return [];
+    }
+  }))
+  .views(self => ({
+    get dataSet() {
+      if (self.sharedModel) {
+        return self.sharedModel.dataSet;
+      }
+      return self.importedDataSet;
+    },
     get isUserResizable() {
       return true;
     },
@@ -203,102 +234,123 @@ export const TableContentModel = ToolContentModel
   .actions(self => toolContentModelHooks({
     doPostCreate(metadata) {
       self.metadata = metadata as TableMetadataModelType;
-
-      if (self.dataSet.attributes.length >= 2) {
-        const xAttr = self.dataSet.attributes[0];
-        const xName = xAttr.name;
-        self.dataSet.attributes.forEach((attr, i) => {
-          if (i > 0) {
-            attr.formula.synchronize(xName);
-            if (attr.formula.display) {
-              self.metadata.setRawExpression(attr.id, attr.formula.display);
-            }
-            if (attr.formula.canonical) {
-              self.metadata.setExpression(attr.id, attr.formula.canonical);
-            }
-          }
-        });
-      }
-
-      if (self.metadata.hasExpressions) {
-        self.metadata.updateDatasetByExpressions(self.dataSet);
-      }
-    },
-    willRemoveFromDocument() {
-      clearTableLinksFromGeometries(self, self.metadata.id, self.linkedGeometries);
-      self.linkedGeometries.clear();
-    },
+    }
   }))
   .actions(self => ({
+    clearImportedDataSet() {
+      self.importedDataSet = DataSet.create();
+    },
     logChange(change: ITableChange) {
       const toolId = self.metadata?.id || "";
       Logger.logToolChange(LogEventName.TABLE_TOOL_CHANGE, change.action, change, toolId);
     }
   }))
   .actions(self => ({
-    setTableName(name: string) {
-      self.dataSet.name = name;
+    afterAttach() {
+      // Monitor our parents and update our shared model when we have a document parent
+      addDisposer(self, reaction(() => {
+        const sharedModelManager = self.tileEnv?.sharedModelManager;
 
-      self.logChange({
-              action: "update",
-              target: "table",
-              props: { name }
-            });
+        const sharedDataSet = sharedModelManager?.isReady
+          ? sharedModelManager?.findFirstSharedModelByType(SharedDataSet, self.metadata.id)
+          : undefined;
+
+        const tileSharedModels = sharedModelManager?.isReady
+          ? sharedModelManager?.getTileSharedModels(self)
+          : undefined;
+
+        return { sharedModelManager, sharedDataSet, tileSharedModels };
+      },
+      // reaction/effect
+      ({sharedModelManager, sharedDataSet, tileSharedModels}) => {
+        if (!sharedModelManager?.isReady) {
+          // We aren't added to a document yet so we can't do anything yet
+          return;
+        }
+
+        if (sharedDataSet && tileSharedModels?.includes(sharedDataSet)) {
+          // The shared model has already been registered by a client, but as the
+          // "owner" of the data, we synchronize it with our local content.
+          if (!self.importedDataSet.isEmpty) {
+            sharedDataSet.dataSet = DataSet.create(getSnapshot(self.importedDataSet));
+            self.clearImportedDataSet();
+          }
+        }
+        else {
+          if (!sharedDataSet) {
+            // The document doesn't have a shared model yet
+            const dataSet = DataSet.create(!self.importedDataSet.isEmpty
+              ? getSnapshot(self.importedDataSet) : undefined);
+            self.clearImportedDataSet();
+            sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
+          }
+
+          // Add the shared model to both the document and the tile
+          sharedModelManager.addTileSharedModel(self, sharedDataSet);
+        }
+      },
+      {name: "sharedModelSetup", fireImmediately: true}));
     },
-    addAttribute(id: string, name: string, links?: ILinkProperties) {
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+      console.warn("updateAfterSharedModelChanges hasn't been implemented for table content.");
+
+      // TODO This was moved from doPostCreate and might need to be rethought.
+      // if (self.dataSet.attributes.length >= 2) {
+      //   const xAttr = self.dataSet.attributes[0];
+      //   const xName = xAttr.name;
+      //   self.dataSet.attributes.forEach((attr, i) => {
+      //     if (i > 0) {
+      //       attr.formula.synchronize(xName);
+      //       if (attr.formula.display) {
+      //         self.metadata.setRawExpression(attr.id, attr.formula.display);
+      //       }
+      //       if (attr.formula.canonical) {
+      //         self.metadata.setExpression(attr.id, attr.formula.canonical);
+      //       }
+      //     }
+      //   });
+      // }
+
+      // if (self.metadata.hasExpressions) {
+      //   self.metadata.updateDatasetByExpressions(self.dataSet);
+      // }
+    },
+    setTableName(name: string) {
+      self.dataSet.setName(name);
+
+      self.logChange({ action: "update", target: "table", props: { name } });
+    },
+    addAttribute(id: string, name: string) {
       self.dataSet.addAttributeWithID({ id, name });
       self.metadata.updateDatasetByExpressions(self.dataSet);
 
-      self.logChange({
-            action: "create",
-            target: "columns",
-            ids: [id],
-            props: { columns: [{ name }] },
-            links
-          });
+      self.logChange({ action: "create", target: "columns", ids: [id], props: { columns: [{ name }] } });
     },
-    setAttributeName(id: string, name: string, links?: ILinkProperties) {
+    setAttributeName(id: string, name: string) {
       const attr = self.dataSet.attrFromID(id);
       if (attr) {
-        attr.name = name;
+        attr.setName(name);
         // if the name of the "x" column is changed, formulas must be updated
         if (self.dataSet.attrIndexFromID(id) === 0) {
           self.metadata.clearRawExpressions(kSerializedXKey);
         }
       }
 
-      self.logChange({
-              action: "update",
-              target: "columns",
-              ids: id,
-              props: { name },
-              links
-            });
+      self.logChange({ action: "update", target: "columns", ids: id, props: { name } });
     },
-    removeAttributes(ids: string[], links?: ILinkProperties) {
+    removeAttributes(ids: string[]) {
       ids.forEach(id => self.dataSet.removeAttribute(id));
       self.metadata.updateDatasetByExpressions(self.dataSet);
 
-      self.logChange({
-              action: "delete",
-              target: "columns",
-              ids,
-              links
-            });
+      self.logChange({ action: "delete", target: "columns", ids });
     },
-    setExpression(id: string, expression: string, rawExpression: string, links?: ILinkProperties) {
+    setExpression(id: string, expression: string, rawExpression: string) {
       self.dataSet.attrFromID(id)?.setFormula(rawExpression, expression);
       self.metadata.updateExpressions(id, rawExpression, expression, self.dataSet);
 
-      self.logChange({
-        action: "update",
-        target: "columns",
-        ids: id,
-        props: { expression, rawExpression },
-        links
-      });
+      self.logChange({ action: "update", target: "columns", ids: id, props: { expression, rawExpression } });
     },
-    setExpressions(rawExpressions: Map<string, string>, xName: string, links?: ILinkProperties) {
+    setExpressions(rawExpressions: Map<string, string>, xName: string) {
       rawExpressions.forEach((rawExpression, id) => {
         const attr = self.dataSet.attrFromID(id);
         if (attr) {
@@ -317,11 +369,10 @@ export const TableContentModel = ToolContentModel
                     .map(rawExpr => ({
                       expression: canonicalizeExpression(rawExpr, xName),
                       rawExpression: rawExpr
-                    })),
-        links
+                    }))
       });
     },
-    addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[], links?: ILinkProperties) {
+    addCanonicalCases(cases: ICaseCreation[], beforeID?: string | string[]) {
       addCanonicalCasesToDataSet(self.dataSet, cases, beforeID);
       self.metadata.updateDatasetByExpressions(self.dataSet);
 
@@ -335,11 +386,10 @@ export const TableContentModel = ToolContentModel
                       return { ...others };
                     }),
               beforeId: beforeID
-            },
-            links
+            }
           });
     },
-    setCanonicalCaseValues(caseValues: ICase[], links?: ILinkProperties) {
+    setCanonicalCaseValues(caseValues: ICase[]) {
       self.dataSet.setCanonicalCaseValues(caseValues);
       self.metadata.updateDatasetByExpressions(self.dataSet);
 
@@ -349,70 +399,15 @@ export const TableContentModel = ToolContentModel
                       ids.push(__id__);
                       return others;
                     });
-      self.logChange({
-            action: "update",
-            target: "rows",
-            ids,
-            props: values,
-            links
-      });
+      self.logChange({ action: "update", target: "rows", ids, props: values });
     },
-    removeCases(ids: string[], links?: ILinkProperties) {
+    removeCases(ids: string[]) {
       self.dataSet.removeCases(ids);
 
-      self.logChange({
-            action: "delete",
-            target: "rows",
-            ids,
-            links
-          });
-    },
-    addGeometryLink(geometryId: string) {
-      self.linkedGeometries.push(geometryId);
-      self.logChange({ action: "create", target: "geometryLink", ids: geometryId });
-    },
-    removeGeometryLink(geometryId: string) {
-      self.linkedGeometries.remove(geometryId);
-      self.logChange({
-            action: "delete",
-            target: "geometryLink",
-            ids: geometryId
-      });
+      self.logChange({ action: "delete", target: "rows", ids });
     }
   }))
   .views(self => ({
-    getSharedData(canonicalize = true) {
-      const dataSet = DataSet.create(self.dataSet);
-
-      // add a __label__ attribute to returned dataSet (used by GeometryContent.addTableLink)
-      const attrIds = dataSet.attributes.map(attr => attr.id);
-      const kLabelId = uniqueId();
-      dataSet.addAttributeWithID({ id: kLabelId, name: kLabelAttrName });
-      for (let i = 0; i < dataSet.cases.length; ++i) {
-        const caseId = dataSet.cases[i].__id__;
-        const label = getRowLabel(i);
-        const caseValues: ICase = { __id__: caseId, [kLabelId]: label };
-        if (canonicalize) {
-          attrIds.forEach(attrId => {
-            const value = dataSet.getValue(caseId, attrId);
-            caseValues[attrId] = canonicalizeValue(value);
-          });
-        }
-        dataSet.setCanonicalCaseValues([caseValues]);
-      }
-      return dataSet;
-    },
-    isValidDataSetForGeometryLink(dataSet: IDataSet) {
-      if ((dataSet.attributes.length < 2) || (dataSet.cases.length < 1)) return false;
-
-      const attrIds = dataSet.attributes.map(attr => attr.id);
-      for (const aCase of dataSet.cases) {
-        if (!attrIds.every(attrId => isLinkableValue(dataSet.getValue(aCase.__id__, attrId)))) {
-          return false;
-        }
-      }
-      return true;
-    },
     hasLinkableCases(dataSet: IDataSet) {
       if ((dataSet.attributes.length < 2) || (dataSet.cases.length < 1)) return false;
 
@@ -429,9 +424,9 @@ export const TableContentModel = ToolContentModel
     }
   }))
   .views(self => ({
-    isValidForGeometryLink() {
-      return self.isValidDataSetForGeometryLink(self.dataSet);
-    },
+    // isValidForGeometryLink() {
+    //   return self.isValidDataSetForGeometryLink(self.dataSet);
+    // },
     exportJson(options?: IDocumentExportOptions) {
       return exportTableContentAsJson(self.metadata, self.dataSet);
     }

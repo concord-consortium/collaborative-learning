@@ -57,18 +57,19 @@ interface IProps {
 export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, handleRequestTableUnlink }: IProps) => {
   const [selectValue, setSelectValue] = useState("");
   const handleClick = () => {
+    const _content = model.content as GeometryContentModelType;
     const tileInfo = tableTiles.find(tile => tile.id === selectValue);
     if (tileInfo) {
-      if (content.metadata.linkedTableIds.indexOf(tileInfo.id) < 0) {
-        handleRequestTableLink && handleRequestTableLink(tileInfo.id);
+      if (_content.isLinkedToTable(tileInfo.id)) {
+        handleRequestTableUnlink?.(tileInfo.id);
       } else {
-        handleRequestTableUnlink && handleRequestTableUnlink(tileInfo.id);
+        handleRequestTableLink?.(tileInfo.id);
       }
     }
   };
   const content = model.content as GeometryContentModelType;
-  const unlinkedTiles = tableTiles.filter(tileInfo => content.metadata.linkedTableIds.indexOf(tileInfo.id) < 0);
-  const linkedTiles = tableTiles.filter(tileInfo => content.metadata.linkedTableIds.indexOf(tileInfo.id) >= 0);
+  const unlinkedTiles = tableTiles.filter(tileInfo => !content.isLinkedToTable(tileInfo.id));
+  const linkedTiles = tableTiles.filter(tileInfo => content.isLinkedToTable(tileInfo.id));
   const [showModal, hideModal] = useCustomModal({
     className: "link-table",
     Icon: LinkGraphIcon,
@@ -77,7 +78,7 @@ export const useLinkTableDialog = ({ tableTiles, model, handleRequestTableLink, 
     contentProps: { unlinkedTiles, linkedTiles, selectValue, setSelectValue },
     buttons: [
       { label: "Cancel" },
-      { label: content.metadata.linkedTableIds.indexOf(selectValue) < 0 ? "Link" : "Unlink",
+      { label: !content.isLinkedToTable(selectValue) ? "Link" : "Unlink",
         isDefault: true,
         isDisabled: !selectValue,
         onClick: handleClick

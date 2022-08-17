@@ -53,6 +53,10 @@ export function getLinkedTables(documentId: string) {
 }
 
 export function getLinkedTableIndex(tableId: string) {
+  // TODO This function is out of date and should be like the following
+  // But getTableContent requires an MST for the first argument, which I wasn't able to provide
+  // const tableContent = getTableContent(undefined, tableId);
+  // return tableContent?.sharedModel?.indexOfType || -1;
   const documentId = getTableDocument(tableId);
   if (!documentId) return -1;
   const linkedTables = getLinkedTables(documentId);
@@ -89,7 +93,9 @@ export function getTableLinkColors(tableId?: string) {
           { fill: styles.linkColor4Light, stroke: styles.linkColor4Dark },
           { fill: styles.linkColor5Light, stroke: styles.linkColor5Dark }
         ];
-  const linkIndex = tableId ? getLinkedTableIndex(tableId) : -1;
+  // TODO Fix this! See note in getLinkedTableIndex for more notes
+  // const linkIndex = tableId ? getLinkedTableIndex(tableId) : -1;
+  const linkIndex = 0;
   return linkIndex >= 0
           ? colors[linkIndex % colors.length]
           : undefined;
@@ -110,42 +116,18 @@ export function getGeometryContent(requester: IAnyStateTreeNode, geometryId: str
   return content?.type === kGeometryToolID ? content as GeometryContentModelType : undefined;
 }
 
-export function linkTableAndGeometryTiles(requester: IAnyStateTreeNode, tableId: string, geometryId: string) {
-  const tableContent = getTableContent(requester, tableId);
-  const geometryContent = getGeometryContent(requester, geometryId);
-  if (!tableContent || !geometryContent) return;
-
-  tableContent.addGeometryLink(geometryId);
-  const linkProps = getTableClientLinks(requester, tableId);
-  geometryContent.addTableLink(undefined, tableId, tableContent.dataSet, linkProps);
-}
-
-export function unlinkTableAndGeometryTiles(requester: IAnyStateTreeNode, tableId: string, geometryId: string) {
-  const tableContent = getTableContent(requester, tableId);
-  const geometryContent = getGeometryContent(requester, geometryId);
-
+export function requestGeometryLinkToTable(tableContent: TableContentModelType, geometryId: string) {
+  const geometryContent = getGeometryContent(tableContent, geometryId);
   if (geometryContent) {
-    geometryContent.removeTableLink(undefined, tableId);
-  }
-  if (tableContent) {
-    tableContent.removeGeometryLink(geometryId);
+    geometryContent.addLinkedTable(tableContent.metadata.id);
   }
 }
 
-export function clearGeometryLinksFromTables(geometry: IAnyStateTreeNode, geometryId: string, tableIds: string[]) {
-  tableIds.forEach(tileId => {
-    const content = getTileContentById(geometry, tileId);
-    const tableContent = content && content as TableContentModelType;
-    tableContent?.removeGeometryLink(geometryId);
-  });
-}
-
-export function clearTableLinksFromGeometries(table: IAnyStateTreeNode, tableId: string, geometryIds: string[]) {
-  geometryIds.forEach(tileId => {
-    const content = getTileContentById(table, tileId);
-    const geometryContent = content && content as GeometryContentModelType;
-    geometryContent?.removeTableLink(undefined, tableId);
-  });
+export function requestGeometryUnlinkFromTable(tableContent: TableContentModelType, geometryId: string) {
+  const geometryContent = getGeometryContent(tableContent, geometryId);
+  if (geometryContent) {
+    geometryContent.removeLinkedTable(tableContent.metadata.id);
+  }
 }
 
 /*

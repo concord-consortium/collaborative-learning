@@ -1,13 +1,10 @@
 import { castArray, difference, each, size as _size, union } from "lodash";
-import { applySnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
-import { Lambda } from "mobx";
+import { reaction } from "mobx";
+import { addDisposer, applySnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { Optional } from "utility-types";
+import { SharedDataSet, SharedDataSetType } from "../shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
-import { getRowLabelFromLinkProps, ITableLinkProperties, linkedPointId } from "../table-link-types";
-import {
-  addLinkedTable, clearGeometryLinksFromTables, getAxisLabelsFromDataSet, isLinkableTable,
-  kLabelAttrName, removeLinkedTable
-} from "../table-links";
+import { ITableLinkProperties, linkedPointId } from "../table-link-types";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { toolContentModelHooks, ToolMetadataModel } from "../tool-types";
 import { ICreateRowsProperties, IRowProperties, ITableChange } from "../table/table-change";
@@ -20,8 +17,8 @@ import {
   isPointModel, isPolygonModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel
 } from "./geometry-model";
 import {
-  getAxisAnnotations, getBaseAxisLabels, getObjectById, guessUserDesiredBoundingBox, kAxisBuffer,
-  kXAxisMinBuffer, kXAxisTotalBuffer, kYAxisTotalBuffer, resumeBoardUpdates, suspendBoardUpdates, syncAxisLabels
+  getObjectById, guessUserDesiredBoundingBox, kAxisBuffer, kXAxisMinBuffer, kXAxisTotalBuffer, kYAxisTotalBuffer,
+  resumeBoardUpdates, suspendBoardUpdates
 } from "./jxg-board";
 import {
   ESegmentLabelOption, ILinkProperties, JXGChange, JXGCoordPair, JXGPositionProperty, JXGProperties, JXGUnsafeCoordPair
@@ -29,12 +26,12 @@ import {
 import { applyChange, applyChanges, IDispatcherChangeContext } from "./jxg-dispatcher";
 import {  kPointDefaults } from "./jxg-point";
 import { prepareToDeleteObjects } from "./jxg-polygon";
-import { getTableIdFromLinkChange } from "./jxg-table-link";
 import {
   isAxisArray, isBoard, isComment, isFreePoint, isImage, isMovableLine, isPoint, isPointArray, isPolygon,
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
+import { ISharedModelManager, SharedModelType } from "../shared-model";
 import { setTileTitleFromContent } from "../tool-tile";
 import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
@@ -54,39 +51,23 @@ export interface IAxesParams {
   yMax: number;
 }
 
-export function defaultBoardSnapshot() {
+export function defaultGeometryContent(options?: IDefaultContentOptions): GeometryContentModelType {
   // TODO: title
   // const { title } = options || {};
   const xRange = kGeometryDefaultWidth / kGeometryDefaultPixelsPerUnit;
   const yRange = kGeometryDefaultHeight / kGeometryDefaultPixelsPerUnit;
-  return {
-    type: "Geometry",
-    xAxis: { name: "x", label: "x", min: kGeometryDefaultXAxisMin, range: xRange },
-    yAxis: { name: "y", label: "y", min: kGeometryDefaultYAxisMin, range: yRange }
-  };
-}
-
-export function defaultGeometryContentSnapshot() {
-  return {
-    board: defaultBoardSnapshot()
-  };
-}
-
-export function defaultGeometryContent(options?: IDefaultContentOptions): GeometryContentModelType {
-  return GeometryContentModel.create(defaultGeometryContentSnapshot());
+  return GeometryContentModel.create({
+    board: {
+      xAxis: { name: "x", label: "x", min: kGeometryDefaultXAxisMin, range: xRange },
+      yAxis: { name: "y", label: "y", min: kGeometryDefaultYAxisMin, range: yRange }
+    }
+   });
 }
 
 export interface IAxisLabels {
   x: string | undefined;
   y: string | undefined;
 }
-
-const LinkedTableEntryModel = types
-  .model("LinkedTableEntryModel", {
-    id: types.string,
-    x: types.maybe(types.string),
-    y: types.maybe(types.string)
-  });
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
@@ -95,12 +76,10 @@ export const GeometryMetadataModel = ToolMetadataModel
   .props({
     title: types.maybe(types.string),
     disabled: types.array(types.string),
-    selection: types.map(types.boolean),
-    linkedTables: types.array(LinkedTableEntryModel)
+    selection: types.map(types.boolean)
   })
   .volatile(self => ({
-    sharedSelection: undefined as any as SelectionStoreModelType,
-    tableLinkDisposers: {} as { [id: string]: Lambda }
+    sharedSelection: undefined as any as SelectionStoreModelType
   }))
   .views(self => ({
     isSharedSelected(id: string) {
@@ -122,29 +101,6 @@ export const GeometryMetadataModel = ToolMetadataModel
     },
     hasSelection() {
       return Array.from(self.selection.values()).some(isSelected => isSelected);
-    },
-    isLinkedToTable(tableId: string) {
-      return self.linkedTables.findIndex(entry => entry.id === tableId) >= 0;
-    },
-    get linkedTableCount() {
-      return self.linkedTables.length;
-    },
-    get linkedTableIds() {
-      return self.linkedTables.map(t => t.id);
-    },
-    xAxisLabel(baseName = "x", annotation = "") {
-      const links = self.linkedTables
-                        .map(entry => entry.x)
-                        .filter(name => name && (name !== "x") && (name !== baseName));
-      annotation && links.unshift(annotation);
-      return links.length ? `${baseName} (${links.join(", ")})` : baseName;
-    },
-    yAxisLabel(baseName = "y", annotation = "") {
-      const links = self.linkedTables
-                        .map(entry => entry.y)
-                        .filter(name => name && (name !== "y") && (name !== baseName));
-      annotation && links.unshift(annotation);
-      return links.length ? `${baseName} (${links.join(", ")})` : baseName;
     }
   }))
   .actions(self => ({
@@ -165,39 +121,6 @@ export const GeometryMetadataModel = ToolMetadataModel
     },
     setSelection(id: string, select: boolean) {
       self.selection.set(id, select);
-    }
-  }))
-  .actions(self => ({
-    addTableLink(tableId: string, axes: IAxisLabels) {
-      if (self.linkedTables.findIndex(entry => entry.id === tableId) < 0) {
-        const disposer = self.sharedSelection.observe(tableId, change => {
-          const id = change.name as string;
-          self.setSelection(id, self.sharedSelection.isSelected(tableId, id));
-        });
-        disposer && (self.tableLinkDisposers[tableId] = disposer);
-        self.linkedTables.push({ id: tableId, ...axes });
-      }
-      addLinkedTable(tableId);
-    },
-    removeTableLink(tableId: string) {
-      const index = self.linkedTables.findIndex(entry => entry.id === tableId);
-      if (index >= 0) {
-        delete self.tableLinkDisposers[tableId];
-        self.linkedTables.splice(index, 1);
-      }
-      removeLinkedTable(tableId);
-    },
-    setTableLinkNames(tableId: string, x: string | undefined, y: string | undefined) {
-      const found = self.linkedTables.find(entry => entry.id === tableId);
-      if (found) {
-        if (x != null) found.x = x;
-        if (y != null) found.y = y;
-      }
-    },
-    clearLinkedTables() {
-      each(self.tableLinkDisposers, disposer => disposer());
-      self.tableLinkDisposers = {};
-      self.linkedTables.clear();
     }
   }));
 export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
@@ -228,12 +151,30 @@ export const isGeometryContentReady = async (model: GeometryContentModelType): P
 export const GeometryContentModel = GeometryBaseContentModel
   .named("GeometryContent")
   .volatile(self => ({
-    metadata: undefined as any as GeometryMetadataModelType
+    metadata: undefined as any as GeometryMetadataModelType,
+    // Used to force linkedDataSets() to update. Hope to remove in the future.
+    updateSharedModels: 0
+  }))
+  .actions(self => ({
+    forceSharedModelUpdate() {
+      self.updateSharedModels += 1;
+    }
   }))
   .preProcessSnapshot(snapshot => {
     const imported = preprocessImportFormat(snapshot);
     return imported;
   })
+  .views(self => ({
+    get linkedDataSets(): SharedDataSetType[] {
+      // MobX isn't properly monitoring getTileSharedModels, so we're manually forcing an update to this view here
+      // eslint-disable-next-line no-unused-expressions
+      self.updateSharedModels;
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      return sharedModelManager?.isReady
+              ? sharedModelManager.getTileSharedModels(self) as SharedDataSetType[]
+              : [];
+    }
+  }))
   .views(self => ({
     get title() {
       return self.metadata?.title;
@@ -288,10 +229,13 @@ export const GeometryContentModel = GeometryBaseContentModel
       return !!self.metadata?.hasSelection();
     },
     get isLinked() {
-      return (self.metadata?.linkedTables.length || 0) > 0;
+      return self.linkedDataSets.length > 0;
+    },
+    get linkedTableIds() {
+      return self.linkedDataSets.map(link => link.providerId);
     },
     isLinkedToTable(tableId: string) {
-      return !!self.metadata?.isLinkedToTable(tableId);
+      return self.linkedDataSets.some(link => link.providerId === tableId);
     }
   }))
   .views(self => ({
@@ -336,6 +280,28 @@ export const GeometryContentModel = GeometryBaseContentModel
     },
     setTitle(title: string) {
       setTileTitleFromContent(self, title);
+    },
+    addLinkedTable(tableId: string) {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      if (sharedModelManager?.isReady && !self.isLinkedToTable(tableId)) {
+        const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
+        sharedTable && sharedModelManager.addTileSharedModel(self, sharedTable);
+        self.forceSharedModelUpdate();
+      }
+      else {
+        console.warn("GeometryContent.addLinkedTable unable to link table");
+      }
+    },
+    removeLinkedTable(tableId: string) {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      if (sharedModelManager?.isReady && self.isLinkedToTable(tableId)) {
+        const sharedTable = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
+        sharedTable && sharedModelManager.removeTileSharedModel(self, sharedTable);
+        self.forceSharedModelUpdate();
+      }
+      else {
+        console.warn("GeometryContent.addLinkedTable unable to unlink table");
+      }
     }
   }))
   .actions(self => ({
@@ -353,10 +319,6 @@ export const GeometryContentModel = GeometryBaseContentModel
   .actions(self => toolContentModelHooks({
     doPostCreate(metadata) {
       self.metadata = metadata as GeometryMetadataModelType;
-    },
-    willRemoveFromDocument() {
-      clearGeometryLinksFromTables(self, self.metadata.id, self.metadata.linkedTableIds);
-      self.metadata.clearLinkedTables();
     }
   }))
   .actions(self => ({
@@ -414,42 +376,11 @@ export const GeometryContentModel = GeometryBaseContentModel
           setTileTitleFromContent(self, props.title);
         }
       }
-
-      const tableId = getTableIdFromLinkChange(change);
-      if (tableId) {
-        const links = change.links as ITableLinkProperties;
-        const xLabel = links?.labels?.find(entry => entry.id === "xAxis")?.label;
-        const yLabel = links?.labels?.find(entry => entry.id === "yAxis")?.label;
-        if (op === "create") {
-          if (isLinkableTable(self, tableId)) {
-            const axes: IAxisLabels = { x: xLabel, y: yLabel };
-            self.metadata.addTableLink(tableId, axes);
-          }
-          else {
-            return false; // table is no longer present; ignore the change
-          }
-        }
-        else if (op === "delete") {
-          self.metadata.removeTableLink(tableId);
-        }
-        else if (op === "update") {
-          if (xLabel || yLabel) {
-            self.metadata.setTableLinkNames(tableId, xLabel, yLabel);
-          }
-        }
-      }
+      return undefined;
     }
 
     function handleDidApplyChange(board: JXG.Board | undefined, change: JXGChange) {
-      const { operation } = change;
-      const target = change.target.toLowerCase();
-      if (board && (target === "tablelink" || (target === "board" && operation !== "delete"))) {
-        const [xName, yName] = getBaseAxisLabels(board);
-        const [xAnnotation, yAnnotation] = getAxisAnnotations(board);
-        syncAxisLabels(board,
-                        self.metadata.xAxisLabel(xName, xAnnotation),
-                        self.metadata.yAxisLabel(yName, yAnnotation));
-      }
+      // nop
     }
 
     function getDispatcherContext(): IDispatcherChangeContext {
@@ -481,6 +412,28 @@ export const GeometryContentModel = GeometryBaseContentModel
             }
           });
         });
+      // TODO This should be moved into updateAfterSharedModelChanges()
+      self.linkedDataSets.forEach(link => {
+        const links: ILinkProperties = { tileIds: [link.providerId] };
+        const parents: JXGCoordPair[] = [];
+        const properties: Array<{ id: string }> = [];
+        for (let ci = 0; ci < link.dataSet.cases.length; ++ci) {
+          const x = link.dataSet.attributes[0]?.numericValue(ci);
+          for (let ai = 1; ai < link.dataSet.attributes.length; ++ai) {
+            const attr = link.dataSet.attributes[ai];
+            const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
+            const y = attr.numericValue(ci);
+            if (isFinite(x) && isFinite(y)) {
+              parents.push([x, y]);
+              properties.push({ id });
+            }
+          }
+        }
+        if (board) {
+          const pts = applyChange(board, { operation: "create", target: "linkedPoint", parents, properties, links });
+          castArray(pts || []).forEach(pt => !isBoard(pt) && onCreate?.(pt));
+        }
+      });
       if (board) {
         resumeBoardUpdates(board);
       }
@@ -804,62 +757,6 @@ export const GeometryContentModel = GeometryBaseContentModel
       return isVertexAngle(angle) ? angle : undefined;
     }
 
-    function addTableLink(
-              board: JXG.Board | undefined, tableId: string, dataSet: IDataSet, links: ITableLinkProperties) {
-      const axes = {
-                    x: links.labels?.find(entry => entry.id === "xAxis")?.label,
-                    y: links.labels?.find(entry => entry.id === "yAxis")?.label
-                  };
-      if (!axes.x || !axes.y) {
-        const [xAxisLabel, yAxisLabel] = getAxisLabelsFromDataSet(dataSet);
-        !axes.x && xAxisLabel && (axes.x = xAxisLabel);
-        !axes.y && yAxisLabel && (axes.y = yAxisLabel);
-      }
-
-      // takes labels from dataSet (added by TableContent.getSharedData) if not in links.labels
-      const xAttr = dataSet.attributes.length >= 1 ? dataSet.attributes[0] : undefined;
-      const labelAttr = dataSet.attrFromName(kLabelAttrName);
-      const caseCount = dataSet.cases.length;
-      const ids: string[] = [];
-      const points: Array<{ label?: string, coords: JXGUnsafeCoordPair }> = [];
-      for (let i = 0; i < caseCount; ++i) {
-        const caseId = dataSet.cases[i].__id__;
-        const labelFromLinks = getRowLabelFromLinkProps(links, caseId);
-        const label = labelFromLinks ||
-                        (labelAttr ? String(dataSet.getValue(caseId, labelAttr.id)) : undefined);
-        const x = xAttr ? Number(dataSet.getValue(caseId, xAttr.id)) : undefined;
-        for (let attrIndex = 1; attrIndex < dataSet.attributes.length; ++attrIndex) {
-          const yAttr = dataSet.attributes[attrIndex];
-          if (caseId && yAttr && (yAttr.id !== labelAttr?.id)) {
-            const y = yAttr ? Number(dataSet.getValue(caseId, yAttr.id)) : undefined;
-            ids.push(`${caseId}:${yAttr.id}`);
-            points.push({ label, coords: [x, y] });
-          }
-        }
-      }
-      self.metadata.addTableLink(tableId, axes);
-      const change: JXGChange = {
-              operation: "create",
-              target: "tableLink",
-              targetID: tableId,
-              properties: { ids, points },
-              links
-            };
-      const pts = applyAndLogChange(board, change);
-      return (pts || []) as JXG.Point[];
-    }
-
-    function removeTableLink(board: JXG.Board | undefined, tableId: string, links?: ILinkProperties) {
-      self.metadata.removeTableLink(tableId);
-      const change: JXGChange = {
-              operation: "delete",
-              target: "tableLink",
-              targetID: tableId,
-              links
-            };
-      return applyAndLogChange(board, change);
-    }
-
     function updateAxisLabels(board: JXG.Board | undefined, tableId: string, links?: ILinkProperties) {
       const change: JXGChange = {
               operation: "update",
@@ -1142,8 +1039,6 @@ export const GeometryContentModel = GeometryBaseContentModel
         updateObjects,
         createPolygonFromFreePoints,
         addVertexAngle,
-        addTableLink,
-        removeTableLink,
         updateAxisLabels,
         updatePolygonSegmentLabel,
         deleteSelection,
@@ -1232,6 +1127,43 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
   }))
   .actions(self => ({
+    afterAttach() {
+      // This reaction monitors legacy links and shared data sets, linking to tables as their
+      // sharedDataSets become available.
+      addDisposer(self, reaction(() => {
+        const sharedModelManager: ISharedModelManager | undefined = self.tileEnv?.sharedModelManager;
+
+        const sharedDataSets = sharedModelManager?.isReady
+          ? sharedModelManager.getSharedModelsByType("SharedDataSet")
+          : [];
+
+        return { sharedModelManager, sharedDataSets, links: self.links };
+      },
+      // reaction/effect
+      ({ sharedModelManager, sharedDataSets, links }) => {
+        if (!sharedModelManager?.isReady) {
+          // We aren't added to a document yet so we can't do anything yet
+          return;
+        }
+
+        // Link to shared models when importing legacy content
+        const remainingLinks: string[] = [];
+        self.links.forEach(tableId => {
+          const sharedDataSet = sharedModelManager.findFirstSharedModelByType(SharedDataSet, tableId);
+          if (sharedDataSet) {
+            sharedModelManager.addTileSharedModel(self, sharedDataSet);
+          } else {
+            // If the table doesn't yet have a sharedDataSet, save the id to attach this later
+            remainingLinks.push(tableId);
+          }
+        });
+        self.replaceLinks(remainingLinks);
+      },
+      {name: "sharedModelSetup", fireImmediately: true}));
+    },
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+      console.warn("updateAfterSharedModelChanges hasn't been implemented for geometry content.");
+    },
     syncLinkedChange(dataSet: IDataSet, links: ITableLinkProperties) {
       // TODO: handle update
     }

@@ -347,14 +347,26 @@ export const GeometryBaseContentModel = ToolContentModel
     type: types.optional(types.literal(kGeometryToolID), kGeometryToolID),
     board: types.maybe(BoardModel),
     bgImage: types.maybe(ImageModel),
-    objects: types.map(types.union(CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel))
+    objects: types.map(types.union(CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel)),
+    // Used for importing table links from legacy documents
+    links: types.array(types.string)  // table tile ids
   })
   .preProcessSnapshot(snapshot => {
     if (!snapshot.board) {
       return { ...snapshot, board: defaultBoard() };
     }
     return snapshot;
-  });
+  })
+  .postProcessSnapshot(snapshot => {
+    // Remove links from snapshot
+    const { links, ...rest } = snapshot;
+    return { ...rest };
+  })
+  .actions(self => ({
+    replaceLinks(newLinks: string[]) {
+      self.links.replace(newLinks);
+    }
+  }));
 export interface GeometryBaseContentModelType extends Instance<typeof GeometryBaseContentModel> {}
 export interface GeometryBaseContentSnapshotType extends Instance<typeof GeometryBaseContentModel> {}
 

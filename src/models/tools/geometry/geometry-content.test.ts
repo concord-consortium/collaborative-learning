@@ -1,13 +1,11 @@
 import { clone, isEqualWith } from "lodash";
 import { destroy, getSnapshot } from "mobx-state-tree";
 import {
-  GeometryContentModel, GeometryContentModelType, defaultGeometryContent,
-  defaultGeometryContentSnapshot, GeometryMetadataModel
+  GeometryContentModel, GeometryContentModelType, defaultGeometryContent, GeometryMetadataModel
 } from "./geometry-content";
 import {
   CommentModel, defaultBoard, ImageModel, MovableLineModel, PointModel, PolygonModel,
-  PolygonModelType,
-  segmentIdFromPointIds, VertexAngleModel
+  PolygonModelType, segmentIdFromPointIds, VertexAngleModel
 } from "./geometry-model";
 import { kGeometryToolID } from "./geometry-types";
 import { ESegmentLabelOption, JXGChange } from "./jxg-changes";
@@ -152,6 +150,22 @@ describe("GeometryContent", () => {
     if (board) (tile.content as GeometryContentModelType).destroyBoard(board);
     destroy(tile);
   }
+
+  // eslint-disable-next-line no-console
+  const origConsoleLog = console.log;
+  let consoleSpy: jest.SpyInstance;
+  beforeAll(() => {
+    // ignore console.logs from JSXGraph about lack of IntersectionObserver
+    consoleSpy = jest.spyOn(console, "log").mockImplementation((...args: any[]) => {
+      if (!args.some(arg => typeof arg === "string" && arg.includes("IntersectionObserver not available"))) {
+        origConsoleLog(...args);
+      }
+    });
+  });
+
+  afterAll(() => {
+    consoleSpy.mockRestore();
+  });
 
   it("can create with default properties", () => {
     const content = GeometryContentModel.create();
@@ -351,6 +365,35 @@ describe("GeometryContent", () => {
     expect(content.getDependents(["p1"], { required: true })).toEqual(["p1"]);
     expect(content.getDependents(["p3"])).toEqual(["p3", polygonId]);
     expect(content.getDependents(["p3"], { required: true })).toEqual(["p3"]);
+
+    const ptInPolyCoords = new JXG.Coords(JXG.COORDS_BY_USER, [3, 2], board);
+    const [, ptInScrX, ptInScrY] = ptInPolyCoords.scrCoords;
+    expect(isPointInPolygon(ptInScrX, ptInScrY, polygon)).toBe(true);
+    const ptOutPolyCoords = new JXG.Coords(JXG.COORDS_BY_USER, [4, 4], board);
+    const [, ptOutScrX, ptOutScrY] = ptOutPolyCoords.scrCoords;
+    expect(isPointInPolygon(ptOutScrX, ptOutScrY, polygon)).toBe(false);
+
+    content.removeObjects(board, polygonId);
+    expect(content.getObject(polygonId)).toBeUndefined();
+    expect(board.objects[polygonId]).toBeUndefined();
+    // can't create polygon without vertices
+    polygon = content.applyChange(board, { operation: "create", target: "polygon" }) as any as JXG.Polygon;
+    expect(polygon).toBeUndefined();
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can add/remove/update polygons from model", () => {
+    let polygonId = "";
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "p1", x: 1, y: 1 }));
+      _content.addObjectModel(PointModel.create({ id: "p2", x: 3, y: 3 }));
+      _content.addObjectModel(PointModel.create({ id: "p3", x: 5, y: 1 }));
+      polygonId = _content.addObjectModel(PolygonModel.create({ points: ["p1", "p2", "p3"] }));
+    });
+    let polygon: JXG.Polygon | undefined = board.objects[polygonId] as JXG.Polygon;
+    expect(isPolygon(polygon)).toBe(true);
+    expect(polygonId.startsWith("testid-")).toBe(true);
 
     const ptInPolyCoords = new JXG.Coords(JXG.COORDS_BY_USER, [3, 2], board);
     const [, ptInScrX, ptInScrY] = ptInPolyCoords.scrCoords;
@@ -594,6 +637,55 @@ describe("GeometryContent", () => {
     expect(content.getObject(va0!.id)).toBeUndefined();
     expect(content.getObject(vax!.id)).toBeUndefined();
     expect(content.getObject(vay!.id)).toBeUndefined();
+
+    // removing second point results in removal of polygon
+    content.removeObjects(board, [px!.id]);
+    expect(content.getObject(px!.id)).toBeUndefined();
+    expect(content.getObject(poly!.id)).toBeUndefined();
+
+    expect(content.applyChange(board, { operation: "create", target: "vertexAngle" })).toBeUndefined();
+  });
+
+  it("can add a vertex angle to a polygon from model objects", () => {
+    let polygonId = "";
+    let vAngle0Id = "";
+    let vAngleXId = "";
+    let vAngleYId = "";
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "p0", x: 0, y: 0 }));
+      _content.addObjectModel(PointModel.create({ id: "px", x: 1, y: 0 }));
+      _content.addObjectModel(PointModel.create({ id: "py", x: 0, y: 1 }));
+      polygonId = _content.addObjectModel(PolygonModel.create({ points: ["p0", "px", "py"] }));
+      vAngle0Id = _content.addObjectModel(VertexAngleModel.create({ points: ["px", "p0", "py"] }));
+      vAngleXId = _content.addObjectModel(VertexAngleModel.create({ points: ["py", "px", "p0"] }));
+      vAngleYId = _content.addObjectModel(VertexAngleModel.create({ points: ["p0", "py", "px"] }));
+    });
+    const p0: JXG.Point = board.objects.p0 as JXG.Point;
+    const px: JXG.Point = board.objects.px as JXG.Point;
+    const py: JXG.Point = board.objects.py as JXG.Point;
+    const poly: JXG.Polygon = board.objects[polygonId] as JXG.Polygon;
+    const pSolo: JXG.Point = content.addPoint(board, [9, 9])!;
+    expect(canSupportVertexAngle(p0)).toBe(true);
+    expect(canSupportVertexAngle(pSolo)).toBe(false);
+    expect(getVertexAngle(p0)!.id).toBe(vAngle0Id);
+    expect(getVertexAngle(px)!.id).toBe(vAngleXId);
+    expect(getVertexAngle(py)!.id).toBe(vAngleYId);
+    expect(getPointsForVertexAngle(pSolo)).toBeUndefined();
+    expect(getPointsForVertexAngle(p0)!.map(p => p.id)).toEqual([px.id, p0.id, py.id]);
+    expect(getPointsForVertexAngle(px)!.map(p => p.id)).toEqual([py.id, px.id, p0.id]);
+    expect(getPointsForVertexAngle(py)!.map(p => p.id)).toEqual([p0.id, py.id, px.id]);
+    p0.setPosition(JXG.COORDS_BY_USER, [1, 1]);
+    updateVertexAnglesFromObjects([p0, px, py, poly]);
+    expect(getPointsForVertexAngle(p0)!.map(p => p.id)).toEqual([py.id, p0.id, px.id]);
+
+    content.removeObjects(board, [p0!.id]);
+    expect(content.getObject(p0!.id)).toBeUndefined();
+    // first point can be removed from polygon without deleting polygon
+    expect(content.getObject(poly!.id)).toEqual({ id: poly?.id, type: "polygon", points: [px!.id, py!.id] });
+    // vertex angles are deleted when any dependent point is deleted
+    expect(content.getObject(vAngle0Id)).toBeUndefined();
+    expect(content.getObject(vAngleXId)).toBeUndefined();
+    expect(content.getObject(vAngleYId)).toBeUndefined();
 
     // removing second point results in removal of polygon
     content.removeObjects(board, [px!.id]);

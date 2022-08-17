@@ -40,14 +40,19 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     this.document = document;
   }
 
-  findFirstSharedModelByType<IT extends typeof SharedModelUnion>(sharedModelType: IT): IT["Type"] | undefined {
+  findFirstSharedModelByType<IT extends typeof SharedModelUnion>(
+    sharedModelType: IT, providerId?: string): IT["Type"] | undefined {
     if (!this.document) {
       console.warn("findFirstSharedModelByType has no document");
     }
-    return this.document?.getFirstSharedModelByType(sharedModelType);
+    return this.document?.getFirstSharedModelByType(sharedModelType, providerId);
   }
 
-  addTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void {
+  getSharedModelsByType<IT extends typeof SharedModelUnion>(type: string): IT["Type"][] {
+    return this.document?.getSharedModelsByType<IT>(type) || [];
+  }
+
+  addTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType, isProvider = false): void {
     if (!this.document) {
       console.warn("addTileSharedModel has no document. this will have no effect");
       return;
@@ -60,6 +65,23 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       return;
     }
 
+      // assign an indexOfType if necessary
+      if (sharedModel.indexOfType < 0) {
+        const usedIndices = new Set<number>();
+        const sharedModels = this.document.getSharedModelsByType(sharedModel.type);
+        sharedModels.forEach(model => {
+          if (model.indexOfType >= 0) {
+            usedIndices.add(model.indexOfType);
+          }
+        });
+        for (let i = 1; sharedModel.indexOfType < 0; ++i) {
+          if (!usedIndices.has(i)) {
+            sharedModel.setIndexOfType(i);
+            break;
+          }
+        }
+      }
+
     // register it with the document if necessary.
     // This won't re-add it if it is already there
     const sharedModelEntry = this.document.addSharedModel(sharedModel);
@@ -69,7 +91,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       return;
     }
 
-    sharedModelEntry.addTile(toolTile);
+    sharedModelEntry.addTile(toolTile, isProvider);
 
     // When a shared model changes updateAfterSharedModelChanges is called on
     // the tile content model automatically by the tree monitor. However when

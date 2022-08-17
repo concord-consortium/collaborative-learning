@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
-import { ILinkProperties, ITileLinkMetadata } from "../../../models/tools/table-link-types";
-import { syncTableChangeToLinkedClient } from "../../../models/tools/table-links";
+import { ITileLinkMetadata } from "../../../models/tools/table-link-types";
+import { requestGeometryLinkToTable, requestGeometryUnlinkFromTable } from "../../../models/tools/table-links";
 import { getTableContentHeight, TableContentModelType } from "../../../models/tools/table/table-content";
 import { isLinkableValue } from "../../../models/tools/table/table-model-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
@@ -39,21 +39,6 @@ export const useContentChangeHandlers = ({
   /*
    * helper functions
    */
-  // link information attached to individual table changes/actions
-  const getTableActionLinks = useCallback((newClientId?: string): ILinkProperties | undefined => {
-    const linkedClients = getContent().linkedGeometries;
-    // if there are no linked clients, then we don't need to attach link info to the action
-    if (!linkedClients?.length && !newClientId) return;
-    const newClientIds = newClientId ? [newClientId] : [];
-    return { tileIds: [...linkedClients, ...newClientIds] };
-  }, [getContent]);
-
-  const syncLinkedClients = useCallback((tableActionLinks?: ILinkProperties) => {
-    tableActionLinks?.tileIds.forEach(tileId => {
-      syncTableChangeToLinkedClient(getContent(), tileId);
-    });
-  }, [getContent]);
-
   const validateCase = useCallback((aCase: ICaseCreation) => {
     const newCase: ICaseCreation = { __id__: uniqueId() };
     if (getContent().isLinked) {
@@ -85,76 +70,52 @@ export const useContentChangeHandlers = ({
 
   const setColumnName = useCallback((column: TColumn, columnName: string) => {
     if (readOnly) return;
-    const tableActionLinks = getTableActionLinks();
-    getContent().setAttributeName(column.key, columnName, tableActionLinks);
-    syncLinkedClients(tableActionLinks);
-  }, [readOnly, getTableActionLinks, getContent, syncLinkedClients]);
+    getContent().setAttributeName(column.key, columnName);
+  }, [readOnly, getContent]);
 
   const setColumnExpressions = useCallback((rawExpressions: Map<string, string>, xName: string) => {
     if (readOnly) return;
-    const tableActionLinks = getTableActionLinks();
-    getContent().setExpressions(rawExpressions, xName, tableActionLinks);
+    getContent().setExpressions(rawExpressions, xName);
     requestRowHeight();
-    syncLinkedClients(tableActionLinks);
-  }, [readOnly, getTableActionLinks, getContent, requestRowHeight, syncLinkedClients]);
+  }, [readOnly, getContent, requestRowHeight]);
 
   const addColumn = useCallback(() => {
     if (readOnly) return;
-    const tableActionLinks = getTableActionLinks();
     const attrId = uniqueId();
     const attrName = uniqueName("y", (name: string) => !dataSet.attrFromName(name));
-    getContent().addAttribute(attrId, attrName, tableActionLinks);
-    syncLinkedClients(tableActionLinks);
-  }, [dataSet, getContent, getTableActionLinks, readOnly, syncLinkedClients]);
+    getContent().addAttribute(attrId, attrName);
+  }, [dataSet, getContent, readOnly]);
 
   const removeColumn = useCallback((colId: string) => {
     if (readOnly) return;
-    const tableActionLinks = getTableActionLinks();
-    getContent().removeAttributes([colId], tableActionLinks);
-    syncLinkedClients(tableActionLinks);
-  }, [getContent, getTableActionLinks, readOnly, syncLinkedClients]);
+    getContent().removeAttributes([colId]);
+  }, [getContent, readOnly]);
 
   const addRows = useCallback((newCases: ICaseCreation[]) => {
     if (readOnly) return;
-    const tableActionLinks = getTableActionLinks();
     const cases = newCases.map(aCase => validateCase(aCase));
-    getContent().addCanonicalCases(cases, undefined, tableActionLinks);
+    getContent().addCanonicalCases(cases, undefined);
     requestRowHeight();
-    syncLinkedClients(tableActionLinks);
-  }, [readOnly, getTableActionLinks, getContent, requestRowHeight, syncLinkedClients, validateCase]);
+  }, [readOnly, getContent, requestRowHeight, validateCase]);
 
   const updateRow = useCallback((caseValues: ICase) => {
     if (readOnly) return;
-    const tableActionLinks = getTableActionLinks();
-    getContent().setCanonicalCaseValues([caseValues], tableActionLinks);
-    syncLinkedClients(tableActionLinks);
+    getContent().setCanonicalCaseValues([caseValues]);
     triggerRowChange();
-  }, [readOnly, getTableActionLinks, getContent, syncLinkedClients, triggerRowChange]);
+  }, [readOnly, getContent, triggerRowChange]);
 
   const removeRows = useCallback((rowIds: string[]) => {
     if (readOnly) return;
-    const tableActionLinks = getTableActionLinks();
-    getContent().removeCases(rowIds, tableActionLinks);
-    syncLinkedClients(tableActionLinks);
-  }, [readOnly, getTableActionLinks, getContent, syncLinkedClients]);
+    getContent().removeCases(rowIds);
+  }, [readOnly, getContent]);
 
   const linkGeometryTile = useCallback((geomTileInfo: ITileLinkMetadata) => {
-    if (!getContent().isValidForGeometryLink()) return;
-
-    // add action to table content
-    const tableActionLinks = getTableActionLinks(geomTileInfo.id);
-    if (!tableActionLinks) return;
-    getContent().addGeometryLink(geomTileInfo.id);
-    // sync change to the newly linked client - not all linked clients
-    syncTableChangeToLinkedClient(getContent(), geomTileInfo.id);
-  }, [getContent, getTableActionLinks]);
+    !readOnly && requestGeometryLinkToTable(getContent(), geomTileInfo.id);
+  }, [getContent, readOnly]);
 
   const unlinkGeometryTile = useCallback((geomTileInfo: ITileLinkMetadata) => {
-    const tableActionLinks = getTableActionLinks(geomTileInfo.id);
-    if (!tableActionLinks) return;
-    getContent().removeGeometryLink(geomTileInfo.id);
-    syncTableChangeToLinkedClient(getContent(), geomTileInfo.id);
-  }, [getContent, getTableActionLinks]);
+    !readOnly && requestGeometryUnlinkFromTable(getContent(), geomTileInfo.id);
+  }, [getContent, readOnly]);
 
   return { onSetTableTitle: setTableTitle, onSetColumnName: setColumnName, onSetColumnExpressions: setColumnExpressions,
           onAddColumn: addColumn, onRemoveColumn: removeColumn,

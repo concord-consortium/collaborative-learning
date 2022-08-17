@@ -203,8 +203,13 @@ export function convertChangesToSnapshot(changes: string[]) {
       });
     }
   });
-  // const linkedGeometries = Array.from(linksMap.values());
-  // TODO LINKS
-  const linkedGeometries: string[] = [];
-  return { dataSet, linkedGeometries };
+  return { dataSet };
+}
+
+export function convertLegacyDataSet(snapshot: any) {
+  const { dataSet, ...rest } = snapshot;
+  if (dataSet) {
+    return { importedDataSet: dataSet, ...rest };
+  }
+  return snapshot;
 }
