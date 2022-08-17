@@ -11,8 +11,8 @@ export const DeckCardData: React.FC<IProps> = ({ caseIndex, model }) => {
   const content = model.content as DeckContentModelType;
   const thisCase = content.caseByIndex(caseIndex);
 
-  const [valueBeingEditedAttrId, setDataPointBeingEdited] = useState("")
-  const [attributeBeingEditedId, setAttributeBeingEdited] = useState("");
+  const [valueBeingEditedAttrId, setValueBeingEditedAttrId] = useState("")
+  const [attributeBeingEditedId, setAttributeBeingEditedId] = useState("");
 
   const [newAttribute, setNewAttribute] = useState("");
   const [newValue, setNewValue] = useState("");
@@ -23,17 +23,35 @@ export const DeckCardData: React.FC<IProps> = ({ caseIndex, model }) => {
   }
 
   function handleAttributeDoubleClick(e: any){
-    console.log('attribute was double clicked: ', e.target)
+    // TODO, works because second class is attribute id,
+    // could improve with a filter should these elements
+    // get other classes dynamically from some other library or something
+    setAttributeBeingEditedId(e.target.classList[1]);
   }
 
-  function handleValueClick(e: any){
-    console.log('value was clicked: ', e)
+  function handleValueDoubleClick(e: any){
+    setValueBeingEditedAttrId(e.target.classList[1]);
   }
 
   function handleNewAttrFocus(e:any){
     console.log('newAttr area in focus: ', e)
   }
+
+  function handleAttrNameChange(e: any){
+    //console.log("given the target value: ", e.target.classList[1])
+    //console.log("change the name of the attribute with the id: ", "what here")
+    content.setAttName(e.target.classList[1], e.target.value)
+  }
+
+  function handleAttrNameKeyDown(e:any){
+    const { key } = e;
+    if ( key === "Enter"){
+      setAttributeBeingEditedId("");
+    }
+  }
+
   function getCaseData(myCase: any){
+    console.log('running getCaseData')
     const keysHere = Object.keys(myCase).filter(keyName => keyName !== "__id__");
     const caseData = keysHere.map((keyName) => {
       const attrName = content.attrById(keyName).name;
@@ -51,17 +69,29 @@ export const DeckCardData: React.FC<IProps> = ({ caseIndex, model }) => {
   const caseData = getCaseData(thisCase);
 
   const caseHtml = caseData.map((dataPoint, i) => {
+    if (!dataPoint){
+      return;
+    }
+
     const attrShowStaticText = dataPoint?.attributeName && dataPoint.attributeId !== attributeBeingEditedId;
     const valueShowStaticText = dataPoint?.attributeValue && dataPoint.attributeId !== valueBeingEditedAttrId;
+    const modelAttrName = content.attrById(dataPoint.attributeId).name;
+
     return (
       <div className="case-item" key={i}>
         <div className={`attribute ${dataPoint?.attributeId}`} onDoubleClick={handleAttributeDoubleClick}>
           { attrShowStaticText
-            ? <>{dataPoint?.attributeName}</>
-            : <input width="100"/>
+            ? dataPoint?.attributeName
+            : <input
+                className={`attribute-input ${dataPoint?.attributeId}`}
+                value={modelAttrName}
+                onChange={handleAttrNameChange}
+                onKeyDown={handleAttrNameKeyDown}
+                onBlur={() => setAttributeBeingEditedId("")}
+              />
           }
         </div>
-        <div className="value">
+        <div className={`value ${dataPoint?.attributeId}`} onDoubleClick={handleValueDoubleClick}>
           { valueShowStaticText
             ? dataPoint?.attributeValue
             : <input />

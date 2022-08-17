@@ -91,6 +91,9 @@ export const DeckContentModel = ToolContentModel
     },
     setTitle(title: string) {
       setTileTitleFromContent(self, title);
+    },
+    setAttName(attrId: string, name: string){
+     self.dataSet.setAttributeName(attrId, name);
     }
   }));
 
