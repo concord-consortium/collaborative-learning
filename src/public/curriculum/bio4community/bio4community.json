@@ -15,14 +15,15 @@
     "defaultDocumentTemplate": {
       "tiles": [
         {
-          "id": "IEWlL8U3LlJtj3g0",
+          "id": "Zjeqn-ImDsaUDuLU",
           "content": {
             "type": "Text",
             "format": "html",
             "text": [
               "<p></p>",
-              "<p><strong>Welcome! To get started, do these 3 steps:</strong></p>",
-              "<ol><li>Click the <strong>orange My Resources bar</strong> at extreme left to open the Resources.</li><li>Click the <strong>&quot;My Work&quot; tab</strong>, and open My First Learning Log. </li><li>Click the <strong>Edit</strong> button and then return to the Story Tab to read Rakesh&#x27;s Story.</li></ol>"
+              "<p><strong>Welcome! To get started, create your Learning Log:</strong></p>",
+              "<ol><li>Click the<strong> My Resources bar</strong> at extreme left to open the Resources.</li><li>Click on <strong>My First Learning Log</strong>. </li><li>Click the <strong>Edit</strong> button to move your log over where you can edit it. </li></ol>",
+              "<p>Then read the Story (click on the Story tab).</p>"
             ]
           }
         }
