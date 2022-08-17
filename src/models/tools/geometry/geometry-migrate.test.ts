@@ -558,27 +558,58 @@ describe("Geometry migration", () => {
   });
 
   it("should establish links from legacy saves", () => {
-    const changes: JXGChange[] = [
+    const linkChanges1: JXGChange[] = [
       { operation: "create", target: "board", properties:
         { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 } },
-      { operation: "create", target: "tableLink", targetID: "zKrcCQBIu1lN3atM", // properties:
-        // { ids: ["pruBjSfxu1kftw-v:Z5acWyQ31A2NOc-X"], points: [{ label: "p1", coords: [1,2] }] },
-        links: { /*id: "qRbVclfBbAJdSIcn",*/ tileIds: ["table1"] } } //,
-        // /*labels: [{ id: "xAxis", label: "x" }, { id: "yAxis", label: "y" },
-      // { id: "pruBjSfxu1kftw-v", label: "p1" }]*/ } }
+      { operation: "create", target: "tableLink", targetID: "table1",
+        links: { tileIds: ["table1"] } }
     ];
 
-    expect(convertChangesToJson(changes)).toEqual({
+    expect(convertChangesToJson(linkChanges1)).toEqual({
       type: "Geometry",
       board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
       objects: [],
       links: ["table1"]
     });
 
-    const snapshot = convertChangesToModelSnapshot(changes);
+    const snapshot = convertChangesToModelSnapshot(linkChanges1);
     expect(snapshot).toEqual({
       ...kDefaultModelProps,
       links: ["table1"]
+    });
+
+    const linkChanges2: JXGChange[] = linkChanges1.concat([
+      { operation: "create", target: "tableLink", targetID: "table2",
+        links: { tileIds: ["table2"] } }
+    ]);
+
+    expect(convertChangesToJson(linkChanges2)).toEqual({
+      type: "Geometry",
+      board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
+      objects: [],
+      links: ["table1", "table2"]
+    });
+
+    expect(convertChangesToModelSnapshot(linkChanges2)).toEqual({
+      ...kDefaultModelProps,
+      links: ["table1", "table2"]
+    });
+
+    const linkChanges3: JXGChange[] = linkChanges2.concat([
+      { operation: "delete", target: "tableLink", targetID: "table1",
+        links: { tileIds: ["table1"] } }
+    ]);
+
+    expect(convertChangesToJson(linkChanges3)).toEqual({
+      type: "Geometry",
+      board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
+      objects: [],
+      links: ["table2"]
+    });
+
+    expect(convertChangesToModelSnapshot(linkChanges3)).toEqual({
+      ...kDefaultModelProps,
+      links: ["table2"]
     });
   });
 
