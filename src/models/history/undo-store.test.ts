@@ -31,12 +31,24 @@ registerSharedModelInfo({
   modelClass: TestSharedModel
 });
 
+const TestTileChild = types.model("TestTileChild", {
+  value: types.string
+})
+.actions(self => ({
+  setValue(_value: string) { self.value = _value; },
+  setValueWithoutUndo(_value: string) {
+    withoutUndo();
+    self.value = _value;
+  }
+}));
+
 const TestTile = ToolContentModel
   .named("TestTile")
   .props({
     type: "TestTile", 
     text: types.maybe(types.string),
-    flag: types.maybe(types.boolean)
+    flag: types.maybe(types.boolean),
+    child: types.maybe(TestTileChild)
   })
   .volatile(self => ({
     updateCount: 0
@@ -63,6 +75,9 @@ const TestTile = ToolContentModel
     setFlagWithoutUndo(_flag: boolean){
       withoutUndo();      
       self.flag = _flag;
+    },
+    setChildValue(_value: string){
+      self.child?.setValueWithoutUndo(_value);
     }
   }));
 interface TestTileType extends Instance<typeof TestTile> {}
@@ -81,26 +96,28 @@ registerToolContentInfo({
   toolTileClass: "test-tile"
 });
 
-function setupDocument(initialContent? : DocumentContentSnapshotType) {
-  const docContentSnapshot = initialContent ||  {
-    sharedModelMap: {
-      "sm1": {
-        sharedModel: {
-          id: "sm1",
-          type: "TestSharedModel"
-        },
-        tiles: [ "t1" ]
-      }
-    },
-    tileMap: {
-      "t1": {
-        id: "t1",
-        content: {
-          type: "TestTile"
-        },
-      }
+const defaultDocumentContent = {
+  sharedModelMap: {
+    "sm1": {
+      sharedModel: {
+        id: "sm1",
+        type: "TestSharedModel"
+      },
+      tiles: [ "t1" ]
     }
-  };
+  },
+  tileMap: {
+    "t1": {
+      id: "t1",
+      content: {
+        type: "TestTile"
+      },
+    }
+  }
+};
+
+function setupDocument(initialContent? : DocumentContentSnapshotType) {
+  const docContentSnapshot = initialContent || defaultDocumentContent;
   const docContent = DocumentContentModel.create(docContentSnapshot);
   
   // This is needed to setup the tree monitor and shared model manager
@@ -265,6 +282,65 @@ it("can skip adding an action to the undo list", async () => {
         ...initialUpdateEntry.records[0],
         action: "/content/tileMap/t1/content/setFlagWithoutUndo",
       }]
+    }
+  ]);
+});
+
+it("will print a warning and still add the action to the undo list if any child actions call withoutUndo", async () => {
+  const documentWithTileChild = {
+    ...defaultDocumentContent,
+    tileMap: {
+      "t1": {
+        id: "t1",
+        content: {
+          type: "TestTile",
+          child: { 
+            value: "initial child value"
+          }
+        },
+      }
+    }  
+  };
+  
+  const {tileContent, manager, undoStore} = setupDocument(documentWithTileChild);
+
+  jestSpyConsole("warn", spy => {
+    tileContent.setChildValue("new child value");
+
+    // It currently prints a warning when withoutUndo is called by a child action
+    expect(spy).toHaveBeenCalled();
+  });
+
+  // Make sure this entry is recorded before undoing it
+  await expectEntryToBeComplete(manager, 1);
+
+  expect(undoStore.canUndo).toBe(true);
+
+  expect(tileContent.child?.value).toBe("new child value");
+
+  const changeDocument = manager.document as Instance<typeof CDocument>;
+
+  expect(getSnapshot(changeDocument.history)).toEqual([ 
+    {
+      action: "/content/tileMap/t1/content/setChildValue", 
+      created: expect.any(Number), 
+      id: expect.any(String),
+      records: [
+        { action: "/content/tileMap/t1/content/setChildValue", 
+          inversePatches: [
+            { op: "replace", path: "/content/tileMap/t1/content/child/value", 
+              value: "initial child value"}
+          ], 
+          patches: [
+            { op: "replace", path: "/content/tileMap/t1/content/child/value", 
+              value: "new child value"}
+          ], 
+          tree: "test"
+        }, 
+      ], 
+      state: "complete", 
+      tree: "test", 
+      undoable: true
     }
   ]);
 });
