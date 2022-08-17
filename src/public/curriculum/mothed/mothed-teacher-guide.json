@@ -33,7 +33,7 @@
         {
           "description": "Problem 1.1",
           "ordinal": 1,
-          "title": "Introduction to MothEd",
+          "title": "Welcome to MothEd CLUE PD",
           "subtitle": "",
           "sections": [
             {
@@ -41,36 +41,73 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "rogiegnxN_BUxgaD",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Problem Overview</strong></p>",
-                        "<p>This section will discuss the educational goals of the curriculum.</p>"
+                        "<h3>Middle School MothEd Digital Teacher binder</h3>",
+                        "<p><a href='https://docs.google.com/presentation/d/1z6gWEzq8Phtq2bRj7XaOEeSs0L6Bup1ti7QVGvedNu8/edit?usp=sharing'>Digital Teacher Binder</a></p>"
                       ]
                     }
                   }
                 ]
               },
               "supports": [ ]
-            },
+            }
+          ]
+        },
+        {
+          "description": "Problem 1.2",
+          "ordinal": 2,
+          "title": "MothEd Middle School Activity",
+          "subtitle": "",
+          "sections": [
             {
-              "type": "teach",
+              "type": "overview",
               "content": {
                 "tiles": [
                   {
+                    "id": "rogiegnxN_BUxgaD",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Problem Launch</strong></p>",
-                        "<p>This section will include classroom specific tips.</p>"
+                        "<h3>Middle School MothEd Digital Teacher binder</h3>",
+                        "<p><a href='https://docs.google.com/presentation/d/1z6gWEzq8Phtq2bRj7XaOEeSs0L6Bup1ti7QVGvedNu8/edit?usp=sharing'>Digital Teacher Binder</a></p>"
                       ]
                     }
                   }
                 ]
               },
-              "supports": []
+              "supports": [ ]
+            }
+          ]
+        },
+        {
+          "description": "Problem 1.3",
+          "ordinal": 3,
+          "title": "MothEd Original Sample",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "overview",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "rogiegnxN_asdfBUxgaD",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Middle School MothEd Digital Teacher binder</h3>",
+                        "<p><a href='https://docs.google.com/presentation/d/1z6gWEzq8Phtq2bRj7XaOEeSs0L6Bup1ti7QVGvedNu8/edit?usp=sharing'>Digital Teacher Binder</a></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
             }
           ]
         }
