@@ -119,15 +119,32 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     });
 
     this.disposers = [];
-    if (this.props.readOnly) {
-      this.disposers.push(autorun(() => {
-        const textContent = this.getContent();
-        if (this.prevText !== textContent.text) {
-          this.setState({ value: textContent.asSlate() });
-          this.prevText = textContent.text;
+    this.disposers.push(reaction(
+      () => {
+        const readOnly = this.props.readOnly;
+        const editing = this.state.editing;
+        const text = this.getContent().text;
+        return { readOnly, editing, text };
+      },
+      ({ readOnly, editing, text }) => {
+        if (readOnly || !editing) {
+          if (this.prevText !== text) {
+            const textContent = this.getContent();
+            this.setState({ value: textContent.asSlate() });
+            this.prevText = text;
+          }
         }
-      }));
-    }
+      }
+    ));
+    // this.disposers.push(autorun(() => {
+    //   if (this.props.readOnly || !this.state.editing) {
+    //     const textContent = this.getContent();
+    //     if (this.prevText !== textContent.text) {
+    //       this.setState({ value: textContent.asSlate() });
+    //       this.prevText = textContent.text;
+    //     }
+    //   }
+    // }));
     // blur editor when tile is deselected
     this.disposers.push(reaction(
       () => {
@@ -160,13 +177,6 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
 
 
     this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
-  }
-
-  public componentDidUpdate(prevProps: IToolTileProps, prevState: IState) {
-    if (!this.state.editing && this.state.value && prevState.value !== this.state.value) {
-      const content = this.getContent();
-      content.setSlate(this.state.value);
-    }
   }
 
   public componentWillUnmount() {
@@ -212,7 +222,9 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
           plugins={this.plugins}
           onValueChange={this.handleChange}
           onFocus={ () => this.setState({ editing: true}) }
-          onBlur={ () => this.setState({ editing: false }) }
+          onBlur={ () => {
+            this.setState({ editing: false });
+          }}
         />
       </div>
     );
