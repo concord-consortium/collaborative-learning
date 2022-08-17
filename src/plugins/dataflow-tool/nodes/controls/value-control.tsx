@@ -1,4 +1,5 @@
 import React from "react";
+import classNames from "classnames";
 import Rete, { NodeEditor, Node } from "rete";
 import { roundNodeValue } from "../../model/utilities/node";
 import "./value-control.sass";
@@ -15,16 +16,15 @@ export class ValueControl extends Rete.Control {
     this.key = key;
 
     this.component = (compProps: { value: number; sentence: string, class: string }) => {
-      let sizeClass = "";
-      if (compProps.sentence.length > 15) {
-        sizeClass = "smallest";
-      } else if (compProps.sentence.length > 13) {
-        sizeClass = "small";
-      } else if (compProps.sentence.length > 11) {
-        sizeClass = "medium";
-      }
+      const sentLen = compProps.sentence.length;
+      const dynamicClasses = classNames({
+        "smallest": sentLen >= 15,
+        "small": sentLen > 13 && sentLen < 15,
+        "medium": sentLen > 11 && sentLen <= 13
+      });
+
       return (
-        <div className={`value-container ${compProps.class.toLowerCase().replace(/ /g, "-")} ${sizeClass}`}
+        <div className={`value-container ${compProps.class.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}
              title={"Node Value"}>
           {compProps.sentence
             ? compProps.sentence

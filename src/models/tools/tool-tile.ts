@@ -54,9 +54,7 @@ export function setTileTitleFromContent(toolContentModel: ToolContentModelType, 
   const toolTile = getToolTileModel(toolContentModel);
   const metadata = toolTile?.id
     ? findMetadata(toolContentModel.type, toolTile?.id)
-    : (toolContentModel as any).metadata
-    ? (toolContentModel as any).metadata
-    : undefined;
+    : (toolContentModel as any).metadata || undefined;
   toolTile?.setTitle(title);
   metadata?.setTitle(title);
 }

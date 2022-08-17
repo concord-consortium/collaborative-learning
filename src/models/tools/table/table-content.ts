@@ -1,11 +1,11 @@
 import { Expression, Parser } from "expr-eval";
-import { cloneDeep } from "lodash";
 import { reaction } from "mobx";
 import { addDisposer, Instance, SnapshotIn, types, getType, getSnapshot } from "mobx-state-tree";
 import { ITableChange } from "./table-change";
 import { exportTableContentAsJson } from "./table-export";
-import { convertChangesToSnapshot, convertImportToSnapshot, isTableImportSnapshot,
-  convertLegacyDataSet } from "./table-import";
+import {
+  convertChangesToSnapshot, convertImportToSnapshot, convertLegacyDataSet, isTableImportSnapshot
+} from "./table-import";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { ToolMetadataModel, ToolContentModel, toolContentModelHooks } from "../tool-types";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
@@ -408,38 +408,6 @@ export const TableContentModel = ToolContentModel
     }
   }))
   .views(self => ({
-    // getSharedData(canonicalize = true) {
-    //   const dataSet = DataSet.create(self.dataSet);
-
-    //   // add a __label__ attribute to returned dataSet (used by GeometryContent.addTableLink)
-    //   const attrIds = dataSet.attributes.map(attr => attr.id);
-    //   const kLabelId = uniqueId();
-    //   dataSet.addAttributeWithID({ id: kLabelId, name: kLabelAttrName });
-    //   for (let i = 0; i < dataSet.cases.length; ++i) {
-    //     const caseId = dataSet.cases[i].__id__;
-    //     const label = getRowLabel(i);
-    //     const caseValues: ICase = { __id__: caseId, [kLabelId]: label };
-    //     if (canonicalize) {
-    //       attrIds.forEach(attrId => {
-    //         const value = dataSet.getValue(caseId, attrId);
-    //         caseValues[attrId] = canonicalizeValue(value);
-    //       });
-    //     }
-    //     dataSet.setCanonicalCaseValues([caseValues]);
-    //   }
-    //   return dataSet;
-    // },
-    // isValidDataSetForGeometryLink(dataSet: IDataSet) {
-    //   if ((dataSet.attributes.length < 2) || (dataSet.cases.length < 1)) return false;
-
-    //   const attrIds = dataSet.attributes.map(attr => attr.id);
-    //   for (const aCase of dataSet.cases) {
-    //     if (!attrIds.every(attrId => isLinkableValue(dataSet.getValue(aCase.__id__, attrId)))) {
-    //       return false;
-    //     }
-    //   }
-    //   return true;
-    // },
     hasLinkableCases(dataSet: IDataSet) {
       if ((dataSet.attributes.length < 2) || (dataSet.cases.length < 1)) return false;
 

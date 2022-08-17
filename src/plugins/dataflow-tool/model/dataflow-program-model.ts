@@ -77,6 +77,9 @@ const DataflowNodeDataModel = types.
     // Transform
     transformOperator: types.maybe(types.string),
 
+    // Control
+    controlOperator: types.maybe(types.string),
+
     // Relay
     relayList: types.maybe(types.string),
 

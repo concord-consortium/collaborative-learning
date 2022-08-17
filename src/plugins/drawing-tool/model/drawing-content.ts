@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn, getSnapshot, onAction, isStateTreeNode} from "mobx-state-tree";
+import { types, Instance, SnapshotIn, getSnapshot, isStateTreeNode} from "mobx-state-tree";
 import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { StampModel, StampModelType } from "./stamp";
@@ -8,7 +8,7 @@ import { kDrawingStateVersion, kDrawingToolID } from "./drawing-types";
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
-import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject, 
+import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
   isStrokedObject, ToolbarModalButton } from "../objects/drawing-object";
 import { LogEventName, Logger } from "../../../lib/logger";
 
@@ -42,7 +42,7 @@ interface ObjectMap {
 }
 
 export interface DrawingObjectMove {
-  id: string, 
+  id: string,
   destination: {x: number, y: number}
 }
 
@@ -113,7 +113,7 @@ export const DrawingContentModel = ToolContentModel
       });
 
       // json-stringify-pretty-compact is used, so the exported content is more
-      // compact. It results in something close to what we used to get when the 
+      // compact. It results in something close to what we used to get when the
       // export was created using a string builder.
       return stringify({type, objects}, {maxLength: 200});
     }
@@ -126,7 +126,7 @@ export const DrawingContentModel = ToolContentModel
       const {name, ...loggedChangeProps} = call;
       // TODO: logToolChange includes an explicit DrawingToolLogEvent
       // this isn't a good pattern to support generic plugins logging events
-      Logger.logToolChange(LogEventName.DRAWING_TOOL_CHANGE, name, 
+      Logger.logToolChange(LogEventName.DRAWING_TOOL_CHANGE, name,
         loggedChangeProps, self.metadata?.id ?? "");
     }
   }))
@@ -134,7 +134,7 @@ export const DrawingContentModel = ToolContentModel
 
     function forEachObjectId(ids: string[], func: (object: DrawingObjectType, id: string) => void) {
       if (ids.length === 0) return;
-      
+
       const { objectMap } = self;
       ids.forEach(id => {
         const object = objectMap[id];
@@ -148,15 +148,15 @@ export const DrawingContentModel = ToolContentModel
       actions: {
         addObject(object: DrawingObjectSnapshotForAdd) {
           // The reason only snapshots are allowed is so the logged action
-          // includes the snapshot in the `call` that is passed to `onAction`. 
-          // If an instance is passed instead of a snapshot, then MST will just 
+          // includes the snapshot in the `call` that is passed to `onAction`.
+          // If an instance is passed instead of a snapshot, then MST will just
           // log something like:
-          // `{ $MST_UNSERIALIZABLE: true, type: "someType" }`. 
+          // `{ $MST_UNSERIALIZABLE: true, type: "someType" }`.
           // More details can be found here: https://mobx-state-tree.js.org/API/#onaction
           if (isStateTreeNode(object as any)) {
             throw new Error("addObject requires a snapshot");
           }
-  
+
           self.objects.push(object);
         },
 
@@ -250,11 +250,11 @@ export type DrawingContentModelSnapshot = SnapshotIn<typeof DrawingContentModel>
 
 // The migrator sometimes modifies the content model it is trying to migrate.
 // This weird migrator behavior is demonstrated here: src/models/mst.test.ts
-// 
+//
 // The create of the content model goes through the migrator when this happens.
-// In that case if the snapshot passed to create doesn't have a version 
-// the migrator might mess up the snapshot. 
-// Because of behavior, this createDrawingContent method should be used instead 
+// In that case if the snapshot passed to create doesn't have a version
+// the migrator might mess up the snapshot.
+// Because of behavior, this createDrawingContent method should be used instead
 // of directly calling DrawingContentModel.create
 export function createDrawingContent(snapshot?: SnapshotIn<typeof DrawingContentModel>) {
   return DrawingContentModel.create({

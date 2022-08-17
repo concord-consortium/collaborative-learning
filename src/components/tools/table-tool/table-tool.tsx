@@ -72,7 +72,6 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     ref: gridRef, gridContext, inputRowId, selectedCell, getSelectedRows, ...gridProps
   } = useGridContext({ modelId: model.id, showRowLabels, triggerColumnChange });
   const measureHeaderText = useMeasureText(defaultBoldFont);
-  // const measureBodyText = useMeasureText(defaultFont);
   const { getTitle, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, dataSet: dataSet.current, readOnly,
     onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle
@@ -132,7 +131,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     const disposer = onSnapshot((model.content as any).dataSet.attributes, () => {
       triggerRowChange();
     });
-    return () => { disposer(); };
+    return () => disposer();
   });
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });

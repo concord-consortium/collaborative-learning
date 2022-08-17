@@ -4,7 +4,7 @@ import { useUIStore } from "../../hooks/use-stores";
 import { IMarkerProps } from "./slider";
 import AddMarkerIcon from "../../clue/assets/icons/playback/add-marker-icon.svg";
 import DeleteMarkerIcon from "../../clue/assets/icons/playback/delete-marker-icon.svg";
-import CommentMarkerIcon from "../../clue/assets/icons/playback/add-comment-to-marker-icon.svg";
+// import CommentMarkerIcon from "../../clue/assets/icons/playback/add-comment-to-marker-icon.svg";
 
 import "./marker-toolbar.scss";
 
@@ -39,7 +39,7 @@ export const PlaybackMarkerToolbar: React.FC<IProps> = ({markerSelected, addMark
   };
   const DeleteMarkerButton: React.FC = () => {
     const handleDeleteMarker = () => {
-      console.log("Delete Marker");
+      //TODO handle deleting markers
     };
 
     return (
@@ -49,24 +49,24 @@ export const PlaybackMarkerToolbar: React.FC<IProps> = ({markerSelected, addMark
       </div>
     );
   };
-  const CommentMarkerButton: React.FC = () => {
-    const handleAddCommentToMarker = () => {
-      console.log("Add Comment to Marker");
-    };
+  // const CommentMarkerButton: React.FC = () => {
+  //   const handleAddCommentToMarker = () => {
+  //     //TODO handle commenting on markers
+  //   };
 
-    return (
-      <div className={`comment-marker-button  ${activeNavTab} ${!markerSelected ?  "disabled" : ""}`}
-            onClick={handleAddCommentToMarker}>
-        <CommentMarkerIcon />
-      </div>
-    );
-  };
+  //   return (
+  //     <div className={`comment-marker-button  ${activeNavTab} ${!markerSelected ?  "disabled" : ""}`}
+  //           onClick={handleAddCommentToMarker}>
+  //       <CommentMarkerIcon />
+  //     </div>
+  //   );
+  // };
 
   return (
     <div className={`marker-toolbar ${activeNavTab}`}>
       <AddMarkerButton />
       <DeleteMarkerButton />
-      <CommentMarkerButton />
+      {/* <CommentMarkerButton /> */}
     </div>
   );
 };

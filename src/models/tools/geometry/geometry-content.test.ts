@@ -5,7 +5,7 @@ import {
 } from "./geometry-content";
 import {
   CommentModel, defaultBoard, ImageModel, MovableLineModel, PointModel, PolygonModel,
-  segmentIdFromPointIds, VertexAngleModel
+  PolygonModelType, segmentIdFromPointIds, VertexAngleModel
 } from "./geometry-model";
 import { kGeometryToolID } from "./geometry-types";
 import { ESegmentLabelOption, JXGChange } from "./jxg-changes";
@@ -13,9 +13,13 @@ import { isPointInPolygon, getPointsForVertexAngle, getPolygonEdge } from "./jxg
 import { canSupportVertexAngle, getVertexAngle, updateVertexAnglesFromObjects } from "./jxg-vertex-angle";
 import {
   isBoard, isComment, isFreePoint, isImage, isLine, isMovableLine, isPoint, isPolygon,
-  isText,
-  kGeometryDefaultPixelsPerUnit, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin
+  isText, kGeometryDefaultPixelsPerUnit, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin
 } from "./jxg-types";
+import { ToolTileModel, ToolTileModelType } from "../tool-tile";
+
+// This is needed so MST can deserialize snapshots referring to tools
+import { registerTools } from "../../../register-tools";
+registerTools(["Geometry"]);
 
 // Need to mock this so the placeholder that is added to the cache
 // has dimensions
@@ -131,11 +135,23 @@ describe("GeometryContent", () => {
     return { content, board };
   }
 
+  function createTileAndBoard(): { tile: ToolTileModelType, board: JXG.Board } {
+    const { content, board } = createContentAndBoard();
+    const tile = ToolTileModel.create({ content });
+    return { tile, board };
+  }
+
   function destroyContentAndBoard(content: GeometryContentModelType, board?: JXG.Board) {
     if (board) content.destroyBoard(board);
     destroy(content);
   }
 
+  function destroyTileAndBoard(tile: ToolTileModelType, board: JXG.Board) {
+    if (board) (tile.content as GeometryContentModelType).destroyBoard(board);
+    destroy(tile);
+  }
+
+  // eslint-disable-next-line no-console
   const origConsoleLog = console.log;
   let consoleSpy: jest.SpyInstance;
   beforeAll(() => {
@@ -224,6 +240,58 @@ describe("GeometryContent", () => {
     destroyContentAndBoard(content);
   });
 
+  it("can update axes parameters", () => {
+    const { content, board } = createContentAndBoard();
+
+    const params = {
+      xName: "xName",
+      xAnnotation: "xAnnotation",
+      xMin: -1,
+      xMax: 9,
+      yName: "yName",
+      yAnnotation: "yAnnotation",
+      yMin: -2,
+      yMax: 3
+    };
+
+    content.rescaleBoard(board, params);
+    expect(content.board?.xAxis.name).toBe("xName");
+    expect(content.board?.xAxis.label).toBe("xAnnotation");
+    expect(content.board?.xAxis.min).toBe(-1);
+    expect(content.board?.xAxis.range).toBe(10);
+    expect(content.board?.yAxis.name).toBe("yName");
+    expect(content.board?.yAxis.label).toBe("yAnnotation");
+    expect(content.board?.yAxis.min).toBe(-2);
+    expect(content.board?.yAxis.range).toBe(5);
+
+    const xAxis = content.board?.xAxis;
+    if (xAxis) {
+      xAxis.setName('x');
+      expect(xAxis.name).toBe('x');
+      xAxis.setLabel('xAxis');
+      expect(xAxis.label).toBe('xAxis');
+      xAxis.setMin(0);
+      expect(xAxis.min).toBe(0);
+      xAxis.setRange(20);
+      expect(xAxis.range).toBe(20);
+      xAxis.setUnit(2);
+      expect(xAxis.unit).toBe(2);
+    }
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can update title", () => {
+    const { tile, board } = createTileAndBoard();
+    const content = tile.content as GeometryContentModelType;
+
+    content.setTitle("new title");
+
+    expect(content.title).toBe("new title");
+
+    destroyTileAndBoard(tile, board);
+  });
+
   it("can add/remove/update points", () => {
     const { content, board } = createContentAndBoard();
     expect(isBoard(board)).toBe(true);
@@ -262,6 +330,24 @@ describe("GeometryContent", () => {
     // requests to remove points with invalid IDs are ignored
     content.removeObjects(board, ["foo"]);
     content.applyChange(board, { operation: "delete", target: "point" });
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can add comments to points", () => {
+    const { content, board } = createContentAndBoard();
+    const p1Id = "point-1";
+    content.addPoint(board, [1, 1], { id: p1Id }) as JXG.Point;
+    expect(content.lastObject).toEqual({ id: p1Id, type: "point", x: 1, y: 1 });
+
+    // add comment to point
+    const [comment] = content.addComment(board, p1Id)!;
+    expect(content.lastObject).toEqual({ id: comment.id, type: "comment", anchors: [p1Id] });
+    expect(isComment(comment)).toBe(true);
+
+    // update comment text
+    content.updateObjects(board, comment.id, { position: [5, 5], text: "new" });
+    expect(content.lastObject).toEqual({ id: comment.id, type: "comment", anchors: [p1Id], x: 4, y: 4, text: "new" });
 
     destroyContentAndBoard(content, board);
   });
@@ -317,6 +403,55 @@ describe("GeometryContent", () => {
     expect(isPointInPolygon(ptOutScrX, ptOutScrY, polygon)).toBe(false);
 
     content.removeObjects(board, polygonId);
+    expect(content.getObject(polygonId)).toBeUndefined();
+    expect(board.objects[polygonId]).toBeUndefined();
+    // can't create polygon without vertices
+    polygon = content.applyChange(board, { operation: "create", target: "polygon" }) as any as JXG.Polygon;
+    expect(polygon).toBeUndefined();
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can add comments to polygons", () => {
+    const { content, board } = createContentAndBoard();
+
+    content.addPoints(board, [[0, 0], [0, 2], [2, 2], [2, 0]],
+      [{ id: "p1" }, { id: "p2" }, { id: "p3" }, { id: "p4" }]);
+    const polygon: JXG.Polygon | undefined = content.createPolygonFromFreePoints(board) as JXG.Polygon;
+
+    // add comment to polygon
+    const [comment] = content.addComment(board, polygon.id)!;
+    expect(content.lastObject).toEqual({ id: comment.id, type: "comment", anchors: [polygon.id] });
+    expect(isComment(comment)).toBe(true);
+
+    // update comment text
+    content.updateObjects(board, comment.id, { position: [5, 5], text: "new" });
+    expect(content.lastObject).toEqual(
+      { id: comment.id, type: "comment", anchors: [polygon.id], x: 4, y: 4, text: "new" });
+
+    destroyContentAndBoard(content, board);
+  });
+
+  it("can add/remove/update polygons from model", () => {
+    let polygonId = "";
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "p1", x: 1, y: 1 }));
+      _content.addObjectModel(PointModel.create({ id: "p2", x: 3, y: 3 }));
+      _content.addObjectModel(PointModel.create({ id: "p3", x: 5, y: 1 }));
+      polygonId = _content.addObjectModel(PolygonModel.create({ points: ["p1", "p2", "p3"] }));
+    });
+    let polygon: JXG.Polygon | undefined = board.objects[polygonId] as JXG.Polygon;
+    expect(isPolygon(polygon)).toBe(true);
+    expect(polygonId.startsWith("testid-")).toBe(true);
+
+    const ptInPolyCoords = new JXG.Coords(JXG.COORDS_BY_USER, [3, 2], board);
+    const [, ptInScrX, ptInScrY] = ptInPolyCoords.scrCoords;
+    expect(isPointInPolygon(ptInScrX, ptInScrY, polygon)).toBe(true);
+    const ptOutPolyCoords = new JXG.Coords(JXG.COORDS_BY_USER, [4, 4], board);
+    const [, ptOutScrX, ptOutScrY] = ptOutPolyCoords.scrCoords;
+    expect(isPointInPolygon(ptOutScrX, ptOutScrY, polygon)).toBe(false);
+
+    content.removeObjects(board, polygonId);
     expect(board.objects[polygonId]).toBeUndefined();
     // can't create polygon without vertices
     polygon = content.applyChange(board, { operation: "create", target: "polygon" }) as any as JXG.Polygon;
@@ -340,10 +475,14 @@ describe("GeometryContent", () => {
     expect(isPolygon(polygon)).toBe(true);
     expect(polygonId.startsWith("testid-")).toBe(true);
 
-    const segment = getPolygonEdge(board, polygonId, ["p1", "p2"]);
+    const pointPair: [string, string] = ["p1", "p2"];
+    const segment = getPolygonEdge(board, polygonId, pointPair);
     expect(isLine(segment)).toBe(true);
     expect(isText(segment?.label)).toBe(true);
     expect(typeof segment?.name).toBe("function");
+    const polygonModel = content.getObject(polygonId) as PolygonModelType;
+    expect(polygonModel.hasSegmentLabel(pointPair)).toBe(true);
+    expect(polygonModel.getSegmentLabel(pointPair)).toBeDefined();
 
     const segment2 = getPolygonEdge(board, polygonId, ["p2", "p3"]);
     expect(isLine(segment2)).toBe(true);
@@ -539,6 +678,55 @@ describe("GeometryContent", () => {
     updateVertexAnglesFromObjects([p0, px, py, poly]);
     expect(getPointsForVertexAngle(p0)!.map(p => p.id)).toEqual([py.id, p0.id, px.id]);
 
+    content.removeObjects(board, [p0!.id]);
+    expect(content.getObject(p0!.id)).toBeUndefined();
+    // first point can be removed from polygon without deleting polygon
+    expect(content.getObject(poly!.id)).toEqual({ id: poly?.id, type: "polygon", points: [px!.id, py!.id] });
+    // vertex angles are deleted when any dependent point is deleted
+    expect(content.getObject(vAngle0Id)).toBeUndefined();
+    expect(content.getObject(vAngleXId)).toBeUndefined();
+    expect(content.getObject(vAngleYId)).toBeUndefined();
+
+    // removing second point results in removal of polygon
+    content.removeObjects(board, [px!.id]);
+    expect(content.getObject(px!.id)).toBeUndefined();
+    expect(content.getObject(poly!.id)).toBeUndefined();
+
+    expect(content.applyChange(board, { operation: "create", target: "vertexAngle" })).toBeUndefined();
+  });
+
+  it("can add a vertex angle to a polygon from model objects", () => {
+    let polygonId = "";
+    let vAngle0Id = "";
+    let vAngleXId = "";
+    let vAngleYId = "";
+    const { content, board } = createContentAndBoard((_content) => {
+      _content.addObjectModel(PointModel.create({ id: "p0", x: 0, y: 0 }));
+      _content.addObjectModel(PointModel.create({ id: "px", x: 1, y: 0 }));
+      _content.addObjectModel(PointModel.create({ id: "py", x: 0, y: 1 }));
+      polygonId = _content.addObjectModel(PolygonModel.create({ points: ["p0", "px", "py"] }));
+      vAngle0Id = _content.addObjectModel(VertexAngleModel.create({ points: ["px", "p0", "py"] }));
+      vAngleXId = _content.addObjectModel(VertexAngleModel.create({ points: ["py", "px", "p0"] }));
+      vAngleYId = _content.addObjectModel(VertexAngleModel.create({ points: ["p0", "py", "px"] }));
+    });
+    const p0: JXG.Point = board.objects.p0 as JXG.Point;
+    const px: JXG.Point = board.objects.px as JXG.Point;
+    const py: JXG.Point = board.objects.py as JXG.Point;
+    const poly: JXG.Polygon = board.objects[polygonId] as JXG.Polygon;
+    const pSolo: JXG.Point = content.addPoint(board, [9, 9])!;
+    expect(canSupportVertexAngle(p0)).toBe(true);
+    expect(canSupportVertexAngle(pSolo)).toBe(false);
+    expect(getVertexAngle(p0)!.id).toBe(vAngle0Id);
+    expect(getVertexAngle(px)!.id).toBe(vAngleXId);
+    expect(getVertexAngle(py)!.id).toBe(vAngleYId);
+    expect(getPointsForVertexAngle(pSolo)).toBeUndefined();
+    expect(getPointsForVertexAngle(p0)!.map(p => p.id)).toEqual([px.id, p0.id, py.id]);
+    expect(getPointsForVertexAngle(px)!.map(p => p.id)).toEqual([py.id, px.id, p0.id]);
+    expect(getPointsForVertexAngle(py)!.map(p => p.id)).toEqual([p0.id, py.id, px.id]);
+    p0.setPosition(JXG.COORDS_BY_USER, [1, 1]);
+    updateVertexAnglesFromObjects([p0, px, py, poly]);
+    expect(getPointsForVertexAngle(p0)!.map(p => p.id)).toEqual([py.id, p0.id, px.id]);
+
     expect(content.applyChange(board, { operation: "create", target: "vertexAngle" })).toBeUndefined();
   });
 
@@ -558,6 +746,22 @@ describe("GeometryContent", () => {
     // update comment text
     content.updateObjects(board, comment.id, { position: [5, 5], text: "new" });
     expect(content.lastObject).toEqual({ id: comment.id, type: "comment", anchors: ["ml"], x: 2, y: 2, text: "new" });
+
+    // can access the movable line's points
+    const p1 = content.getAnyObject("ml-point1");
+    expect(p1).toEqual({
+      id: "ml-point1",
+      type: "point",
+      x: 1,
+      y: 1
+    });
+    const p2 = content.getAnyObject("ml-point2");
+    expect(p2).toEqual({
+      id: "ml-point2",
+      type: "point",
+      x: 5,
+      y:5
+    });
 
     // removing the line removes the line and its comment from the model and the board
     content.removeObjects(board, "ml");

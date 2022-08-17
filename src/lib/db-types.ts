@@ -52,6 +52,8 @@ export interface DBBaseDocumentMetadata {
   };
   createdAt: number;
   type: DBDocumentType;
+  // previously in DBOtherDocument
+  properties?: IDocumentProperties;
 }
 
 export interface DBBaseProblemDocumentMetadata extends DBBaseDocumentMetadata {
@@ -121,6 +123,7 @@ export interface DBOtherDocument {
     documentKey: string;
   };
   title: string;
+  // legacy properties; in DBBaseDocumentMetadata since ~2.2
   properties?: IDocumentProperties;
 }
 
@@ -136,6 +139,7 @@ export interface DBPublication {
   groupId?: string;
   userId: string;
   groupUserConnections?: DBGroupUserConnections;
+  pubVersion: number;
 }
 
 // metadata written to {classHash}/personalPublications for published personal documents
@@ -150,6 +154,7 @@ export interface DBOtherPublication {
   properties: IDocumentProperties;
   uid: string;
   originDoc: string;
+  pubVersion: number
 }
 
 export type DBUnpublishedTypedDocumentMetadata = DBOfferingUserProblemDocument | DBOtherDocument;

@@ -16,6 +16,7 @@ const gToolRegistration: Record<string, () => void> = {
     import(/* webpackChunkName: "SharedDataSet" */"./models/tools/shared-data-set-registration");
   },
   "Image": () => import(/* webpackChunkName: "Image" */"./models/tools/image/image-registration"),
+  "Starter": () => import(/* webpackChunkName: "Starter" */"./plugins/starter/starter-registration"),
   "Table": () => {
     import(/* webpackChunkName: "Table" */"./models/tools/table/table-registration");
     import(/* webpackChunkName: "SharedDataSet" */"./models/tools/shared-data-set-registration");

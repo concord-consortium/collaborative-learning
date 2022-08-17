@@ -35,6 +35,5 @@ export const useRowsFromDataSet = ({ dataSet, readOnly, inputRowId, rowChanges, 
     !readOnly && rows.push(canonicalize(dataSet, { __id__: inputRowId, __context__: context }));
     rowChanges; // eslint-disable-line no-unused-expressions
     return { rows, rowKeyGetter, rowClass };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [context, dataSet, inputRowId, readOnly, rowChanges]);
 };

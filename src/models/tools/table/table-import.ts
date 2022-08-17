@@ -72,17 +72,12 @@ function applyCreate(dataSet: IDataSet, change: ITableChange) {
     }
     // fallthrough
     case "columns": {
-      // let hasExpressions = false;
       const props = change?.props as ICreateColumnsProperties;
       props?.columns?.forEach((col, index) => {
         const id = col.id || change.ids?.[index] || uniqueId();
         const { expression, rawExpression, ...otherCol } = col;
-        // hasExpressions ||= !!expression || !!rawExpression;
         dataSet.addAttributeWithID({ id, formula: rawExpression, ...otherCol });
-        // rawExpression && self.metadata.setRawExpression(id, rawExpression);
-        // expression && self.metadata.setExpression(id, expression);
       });
-      // hasExpressions && self.metadata.updateDatasetByExpressions(dataSet);
       break;
     }
     case "rows": {
@@ -94,17 +89,9 @@ function applyCreate(dataSet: IDataSet, change: ITableChange) {
       const beforeId = props?.beforeId;
       if (rows?.length) {
         dataSet.addCanonicalCasesWithIDs(rows, beforeId);
-        // self.metadata.updateDatasetByExpressions(dataSet);
       }
       break;
     }
-    // case "geometryLink":
-    //   if (!dataSetOnly) {
-    //     const geometryId = change.ids && change.ids as string;
-    //     const geometryContent = geometryId && getGeometryContent(self, geometryId);
-    //     geometryContent && self.metadata.addLinkedGeometry(geometryId!);
-    //   }
-    //   break;
   }
 }
 
@@ -128,18 +115,12 @@ function applyUpdate(dataSet: IDataSet, change: ITableChange) {
             switch (prop) {
               case "name": {
                 dataSet.setAttributeName(colId, _value);
-                // if (colIndex === 0) {
-                //   self.metadata.clearRawExpressions(kSerializedXKey);
-                // }
                 break;
               }
               case "expression":
-                // self.metadata.setExpression(colId, _value);
-                // self.metadata.updateDatasetByExpressions(dataSet);
                 attr.formula.setCanonical(_value);
                 break;
               case "rawExpression":
-                // self.metadata.setRawExpression(colId, _value);
                 attr.formula.setDisplay(_value);
                 break;
             }
@@ -159,7 +140,6 @@ function applyUpdate(dataSet: IDataSet, change: ITableChange) {
         rowProps.forEach((row, rowIndex) => {
           dataSet.setCanonicalCaseValues([{ __id__: ids[rowIndex], ...row }]);
         });
-        // self.metadata.updateDatasetByExpressions(dataSet);
       }
       break;
     }
@@ -173,8 +153,6 @@ function applyDelete(dataSet: IDataSet, change: ITableChange) {
       if (ids?.length) {
         ids.forEach(id => {
           dataSet.removeAttribute(id);
-          // remove expressions from maps
-          // self.metadata.clearExpression(id);
         });
       }
       break;
@@ -183,12 +161,6 @@ function applyDelete(dataSet: IDataSet, change: ITableChange) {
         dataSet.removeCases(ids);
       }
       break;
-    // case "geometryLink":
-    //   if (!dataSetOnly) {
-    //     const geometryIds = castArray(change.ids);
-    //     geometryIds.forEach(id => self.metadata.removeLinkedGeometry(id));
-    //   }
-    //   break;
   }
 }
 

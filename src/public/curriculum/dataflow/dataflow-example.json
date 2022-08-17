@@ -75,6 +75,18 @@
         "isTileTool": true
       },
       {
+        "id": "undo",
+        "title": "Undo",
+        "iconId": "icon-undo-tool",
+        "isTileTool": false
+      },
+      {
+        "id": "redo",
+        "title": "Redo",
+        "iconId": "icon-redo-tool",
+        "isTileTool": false
+      },
+      {
         "id": "delete",
         "title": "Delete",
         "iconId": "icon-delete-tool",

@@ -21,7 +21,6 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
 
   public render() {
     const { appConfig: {autoAssignStudentsToIndividualGroups}, user, ui } = this.stores;
-    const isTeacher = user && user.isTeacher;
 
     const panels: IPanelGroupSpec = [{
                     panelId: EPanelId.workspace,
@@ -37,7 +36,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
     }
     const teacherPanelKey = ui.teacherPanelKey
       ? ui.teacherPanelKey
-      : isTeacher ? EPanelId.dashboard : EPanelId.workspace;
+      : EPanelId.workspace;
 
     const currentPanelSpec = panels.find(spec => spec.panelId === teacherPanelKey);
     const currentPanelContent = currentPanelSpec && currentPanelSpec.content;

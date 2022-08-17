@@ -32,6 +32,9 @@ class DrawToolTile{
     getDrawToolVariable(){
       return cy.get('.primary-workspace .drawing-tool-button.button-variable');
     }
+    getDrawToolUploadImage(){
+      return cy.get('.primary-workspace .drawing-tool-button.image-upload input');
+    }
     getDrawToolDelete(){
       return cy.get('.primary-workspace .drawing-tool-button.button-delete');
     }

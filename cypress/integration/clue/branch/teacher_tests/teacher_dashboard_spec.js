@@ -10,16 +10,17 @@ context.skip('Teacher Dashboard View', () => {
     cy.clearQAData('all');
     cy.visit(queryParams);
     cy.waitForLoad();
+    dashboard.switchView("Dashboard");
     dashboard.switchWorkView('Published');
     cy.wait(8000);
     dashboard.clearAllStarsFromPublishedWork();
     dashboard.switchWorkView('Current');
   });
-  
+
   beforeEach(() => {
     cy.fixture("teacher-dash-data-CLUE-test.json").as("clueData");
   });
-  
+
   describe('UI visibility', () => {
     it('verify header elements', () => {
       cy.get('@clueData').then((clueData) => {
