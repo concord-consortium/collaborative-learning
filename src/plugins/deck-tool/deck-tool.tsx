@@ -1,4 +1,5 @@
 import classNames from "classnames";
+import { uniqueId } from "lodash";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
@@ -27,6 +28,10 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     if (caseIndex > 0){
       setCaseIndex(caseIndex - 1);
     }
+  }
+
+  function goToLatestCase(){
+    setCaseIndex(allCases.length)
   }
 
   useEffect(()=>{
@@ -71,9 +76,11 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   // TODO hardcoded for now, will pull values from inputs like title
   // may be easier to move this down a level
   function addCase(){
+    const tempIdSolution =
     content.dataSet.addCanonicalCasesWithIDs([
-      { __id__: "nachoMoth", mothName: "Nacho Moth", sciName: "Cladara Tortillus", captureDate: "9/3/21" },
+      { __id__: uniqueId("moth"), mothName: "brand brand new moth", sciName: "science", captureDate: "9/7/21" },
     ]);
+    goToLatestCase()
   }
 
   const previousButtonClasses = classNames(
