@@ -30,7 +30,8 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
       classNames("playback-toolbar-button", "themed", activeNavTab,
                 {"show-control": showPlaybackControls});
     return (
-      <div className={playbackToolbarButtonComponentStyle} onClick={onTogglePlaybackControls}>
+      <div className={playbackToolbarButtonComponentStyle} onClick={onTogglePlaybackControls}
+          data-testid="playback-component-button">
         <PlaybackIcon className={playbackToolbarButtonStyle}/>
       </div>
     );
@@ -41,7 +42,7 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
                                             {"show-control" : showPlaybackControls,
                                               "disabled" : disablePlayback});
   return (
-    <div className={playbackComponentClass}>
+    <div className={playbackComponentClass} data-testid="playback-component">
       {renderPlaybackToolbarButton()}
       {showPlaybackControls && <PlaybackControlComponent treeManager={treeManager} />}
     </div>

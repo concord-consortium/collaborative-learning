@@ -50,6 +50,63 @@ context('Teacher Workspace', () => {
         cy.wrap(subTab).text().should('contain', teacherGuideSubTabs[index]);
       });
     });
+
+    describe('verify playback', () => {
+      it('verify playback is disabled if there is not history', function() {
+        cy.openTopTab('my-work');
+        cy.openDocumentThumbnail('workspaces', this.investigationTitle);
+        cy.get('[data-testid="playback-component"]').should('have.class', 'disabled');
+      });
+      it('verify playback button enables when there is a history', () => {
+        clueCanvas.addTile('drawing');
+        cy.get('[data-testid="playback-component"]').should('not.have.class', 'disabled');
+      });
+      it('verify playback controls open', () => {
+        cy.get('[data-testid="playback-component-button"]').click();
+        cy.get('[data-testid="playback-slider"]').should('be.visible');
+        cy.get('[data-testid="playback-time-info"]').should('be.visible');
+      });
+      it('verify play button is disabled when slider handle is at the right end', () => {
+        cy.get('[data-testid="playback-play-button"]').should('have.class', "disabled");
+      });
+      it('verify added tile is visible in the playback document', () => {
+        cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .drawing-tool-tile').should('be.visible');
+      });
+      it('verify play button is enabled when playback is rewound', () => {
+        cy.get('.rc-slider-horizontal').click('left');
+        cy.get('[data-testid="playback-play-button"]').should('not.have.class', 'disabled');
+      });
+      it('verify correct document state is shown in playback document when slider is moved', () => {
+        cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .drawing-tool-tile').should('not.exist');
+      });
+      it('verify primary document remains unchanged during playback', () => {
+        cy.get('.primary-workspace .editable-document-content .canvas .document-content .drawing-tool-tile').should('be.visible');
+      });
+      it('verify playback document does not have changes to primary document', () => {
+        drawToolTile.getDrawToolLine().click();
+        drawToolTile.getDrawTile()
+          .trigger('mousedown')
+          .trigger('mousemove', 50,0)
+          .trigger('mouseup');
+        cy.get('.primary-workspace .editable-document-content .canvas .document-content .drawing-tool .drawing-layer line').should('be.visible');
+        cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .drawing-tool .drawing-layer line').should('not.exist');
+      });
+      it('verify playback document is updated when playback controls is closed and reopened', () => {
+        cy.get('[data-testid="playback-component-button"]').click(); //close playback controls
+        cy.get('[data-testid="playback-component-button"]').click(); //open playback controls
+        cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .drawing-tool .drawing-layer line').should('be.visible');
+      });
+      it('verify playback of history', () => {
+        cy.get('.rc-slider-horizontal').click('left');
+        cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .drawing-tool .drawing-layer line').should('not.exist');
+        cy.get('[data-testid="playback-play-button"]').click();
+        cy.wait(2000);
+        cy.get('[data-test="subtab-workspaces"] .editable-document-content .canvas .document-content .drawing-tool .drawing-layer line').should('be.visible');
+      });
+      after('cleanup', () => {
+        clueCanvas.deleteTile('draw');
+      });
+    });
   });
 
   describe('teacher document functionality', function () {

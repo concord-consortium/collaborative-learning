@@ -58,7 +58,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
 
   useEffect(() => {
     if (sliderPlaying) {
-      const slider = setInterval(()=>{
+      const slider = setTimeout(()=>{
         if (sliderValue <= history.length) {
           treeManager.goToHistoryEntry(sliderValue)
             .then(()=>{
@@ -125,7 +125,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     const strTime = date ? hours + ":" + minutesStr + " " + ampm : "";
 
     return (
-      <div className={"time-info"}>
+      <div className={"time-info"} data-testid="playback-time-info">
         <div className={"date-info"}>{monthStr} {dateDay}, {year}</div>
         <div className={"time-info"}>{strTime}</div>
       </div>
@@ -142,9 +142,11 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     const playButtonStyle = classNames("play-button", "themed", activeNavTab, {"disabled" : playbackDisabled});
     const pauseButtonStyle = classNames("pause-button", "themed", activeNavTab, {"playing" : sliderPlaying});
     if (sliderPlaying) {
-      return <PauseButton className={pauseButtonStyle} onClick={()=>handlePlayPauseToggle()}/>;
+      return <PauseButton className={pauseButtonStyle} onClick={()=>handlePlayPauseToggle()}
+                data-testid="playback-pause-button" />;
     } else {
-      return <PlayButton className={playButtonStyle} onClick={()=>handlePlayPauseToggle()}/>;
+      return <PlayButton className={playButtonStyle} onClick={()=>handlePlayPauseToggle()}
+                data-testid="playback-play-button" />;
     }
   };
 
@@ -162,7 +164,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
 
     return (
       <>
-        <div className="slider-container" ref={sliderContainerRef}>
+        <div className="slider-container" ref={sliderContainerRef} data-testid="playback-slider">
           <Slider min={0} max={history.length} step={1} value={sliderValue} ref={railRef}
                   className={`${activeNavTab}`} onChange={handleSliderValueChange} />
         </div>

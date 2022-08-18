@@ -74,6 +74,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
     setReferenceDocument(undefined);
     ui.updateFocusDocument();
     ui.setSelectedTile();
+    setShowPlaybackControls(false);
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
       tab_section_name: title,
       tab_section_type: type
@@ -207,7 +208,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   },[referenceDocument]);
 
   const handleTogglePlaybackControlComponent = () => {
-    setShowPlaybackControls(!showPlaybackControls);
+    setShowPlaybackControls(showControls => !showControls);
     const newState = !showPlaybackControls;
     setDocumentToShow(newState
                         ? getDocumentToShow()
