@@ -25,7 +25,8 @@ jest.mock("../../utilities/js-utils", () => {
 
 jest.mock("../../utilities/mst-utils", () => {
   return {
-    getParentWithTypeName: () => null
+    ...jest.requireActual("../../utilities/mst-utils"),
+    getParentWithTypeName: () => null,
   };
 });
 
@@ -337,6 +338,12 @@ describe("DocumentContentModel -- sectioned documents --", () => {
   //   console.log("***", label, "[end] ***");
   // }
 
+  /*
+   * Note that contrary to unit-testing best practices, the separate `it()` blocks here
+   * are inter-dependent -- each subsequent test relies on the document content to be in
+   * the state that the previous test should have left it.
+   */
+
   it("can create sectioned documents", () => {
     // []
     content.addSectionHeaderRow("A");
@@ -406,7 +413,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
         { content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
-});
+  });
 
   it("will restore placeholder tiles when deleting the last row in the last section", () => {
     // [Header:A, Placeholder, Header:B, Text]

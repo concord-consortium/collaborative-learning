@@ -1,27 +1,16 @@
+import { cloneDeep, findIndex } from "lodash";
 import { applyAction, getEnv, Instance, ISerializedActionCall,
           onAction, types, getSnapshot, SnapshotOut } from "mobx-state-tree";
 import { Attribute, IAttribute, IAttributeCreation, IValueType } from "./attribute";
-// see https://medium.com/@martin_hotell/tree-shake-lodash-with-webpack-jest-and-typescript-2734fa13b5cd
-// for more efficient ways of importing lodash functions
-import { cloneDeep, findIndex, padStart } from "lodash";
-import { v4 as uuid } from "uuid";
+import { uniqueId, uniqueSortableId } from "../../utilities/js-utils";
 
-let localIDCounter = 0;
-
-// TODO: handle case ordering without requiring sortable IDs.
-// For now, we combine an incrementing counter with a UUID.
-export const localId = () => {
-  const uuidRight = uuid().substr(8),
-        count = ++localIDCounter,
-        uuidLeft = padStart(String(count), 8, "0");
-  return uuidLeft + uuidRight;
-};
+export const newCaseId = uniqueSortableId;
 
 export const CaseID = types.model("CaseID", {
-  __id__: types.optional(types.identifier, () => localId())
+  __id__: types.optional(types.identifier, () => newCaseId())
   // __index__: types.number
 });
-export type ICaseID = typeof CaseID.Type;
+export interface ICaseID extends Instance<typeof CaseID> {}
 
 export interface ICase {
   __id__: string;
@@ -46,7 +35,7 @@ interface IEnvContext {
 }
 
 export const DataSet = types.model("DataSet", {
-  id: types.optional(types.identifier, () => uuid()),
+  id: types.optional(types.identifier, () => uniqueId()),
   sourceID: types.maybe(types.string),
   name: types.maybe(types.string),
   attributes: types.array(Attribute),
@@ -54,6 +43,11 @@ export const DataSet = types.model("DataSet", {
 })
 .volatile(self => ({
   transactionCount: 0
+}))
+.views(self => ({
+  get isEmpty() {
+    return self.attributes.length === 0 && self.cases.length === 0;
+  }
 }))
 .extend(self => {
   const attrIDMap: { [index: string]: IAttribute } = {},
@@ -65,7 +59,7 @@ export const DataSet = types.model("DataSet", {
   let inFlightActions = 0;
 
   function derive(name?: string) {
-    return { id: uuid(), sourceID: self.id, name: name || self.name, attributes: [], cases: [] };
+    return { id: uniqueId(), sourceID: self.id, name: name || self.name, attributes: [], cases: [] };
   }
 
   function attrIndexFromID(id: string) {
@@ -332,6 +326,7 @@ export const DataSet = types.model("DataSet", {
         // build attrIDMap
         self.attributes.forEach(attr => {
           attrIDMap[attr.id] = attr;
+          attrNameMap[attr.name] = attr.id;
         });
 
         // build caseIDMap
@@ -440,13 +435,15 @@ export const DataSet = types.model("DataSet", {
         self.name = name;
       },
       addAttributeWithID(snapshot: IAttributeCreation, beforeID?: string) {
+        const { formula, ...others } = snapshot;
+        const attrSnap = { formula: { display: formula }, ...others };
         const beforeIndex = beforeID ? attrIndexFromID(beforeID) : undefined;
         let newIndex = beforeIndex;
         if (beforeIndex != null) {
-          self.attributes.splice(beforeIndex, 0, snapshot as IAttribute);
+          self.attributes.splice(beforeIndex, 0, attrSnap as IAttribute);
         }
         else {
-          newIndex = self.attributes.push(snapshot as IAttribute) - 1;
+          newIndex = self.attributes.push(attrSnap as IAttribute) - 1;
         }
         const attribute = self.attributes[newIndex as number];
         attrIDMap[attribute.id] = attribute;
@@ -588,7 +585,7 @@ export type IDataSetSnapshot = SnapshotOut<typeof DataSet>;
 
 export function addAttributeToDataSet(dataset: IDataSet, snapshot: IAttributeCreation, beforeID?: string) {
   if (!snapshot.id) {
-    snapshot.id = localId();
+    snapshot.id = uniqueId();
   }
   dataset.addAttributeWithID(snapshot, beforeID);
 }
@@ -597,7 +594,7 @@ export function addCasesToDataSet(dataset: IDataSet, cases: ICaseCreation[], bef
   const newCases = cloneDeep(cases) as ICase[];
   newCases.forEach((aCase) => {
     if (!aCase.__id__) {
-      aCase.__id__ = localId();
+      aCase.__id__ = newCaseId();
     }
   });
   dataset.addCasesWithIDs(newCases, beforeID);
@@ -608,7 +605,7 @@ export function addCanonicalCasesToDataSet(dataset: IDataSet, cases: ICaseCreati
   const newCases = cloneDeep(cases) as ICase[];
   newCases.forEach((aCase) => {
     if (!aCase.__id__) {
-      aCase.__id__ = localId();
+      aCase.__id__ = newCaseId();
     }
   });
   dataset.addCanonicalCasesWithIDs(newCases, beforeID);

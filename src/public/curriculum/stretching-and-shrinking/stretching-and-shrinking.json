@@ -2033,7 +2033,7 @@
                         { "type": "polygon", "parents": ["F1BW_A7MgEqyihqQ", "EohbIRXKgTIPoieB", "a5iwQhGjFi-UUSro", "9SWSBKHflaZYVjaB"],"properties": {"id":"O9g96dSZdBdCQ_Cw"} },
                         { "type": "point", "parents": [6, 8], "properties": {"id":"8XGWAWqnm-LmTzME","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
                         { "type": "point", "parents": [8, 10], "properties": {"id":"L0B6h_yJGbOvhboJ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                        { "type": "point", "parents": [10, 8], "properties": {"id":"wwJx0cMCloVenQw3","     snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [10, 8], "properties": {"id":"wwJx0cMCloVenQw3","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
                         { "type": "polygon", "parents": ["8XGWAWqnm-LmTzME", "L0B6h_yJGbOvhboJ", "wwJx0cMCloVenQw3"],"properties": {"id":"ZoutCN-fiZLrGGOg"} },
                         { "type": "point", "parents": [4, 10], "properties": {"id":"X3QYLeMmc-Blve1C","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
                         { "type": "point", "parents": [12, 10], "properties": {"id":"8Q9LhOGj5mzLGtS_","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }

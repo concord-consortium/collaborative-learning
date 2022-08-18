@@ -1,8 +1,8 @@
+import { castArray } from "lodash";
+import { uniqueId } from "../../../utilities/js-utils";
 import { JXGChangeAgent, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
 import { objectChangeAgent, isPositionGraphable, getGraphablePosition } from "./jxg-object";
 import { prepareToDeleteObjects } from "./jxg-polygon";
-import { castArray } from "lodash";
-import { v4 as uuid } from "uuid";
 
 // For snap to grid
 const kPrevSnapUnit = 0.2;
@@ -35,7 +35,7 @@ export function createPoint(board: JXG.Board, parents: JXGUnsafeCoordPair, chang
   // If id is not provided we generate one, but this will prevent
   // model-level synchronization. This should only occur for very
   // old geometry tiles created before the introduction of the uuid.
-  const props = { id: uuid(), ...defaultProps, ...syncClientColors(changeProps) };
+  const props = { id: uniqueId(), ...defaultProps, ...syncClientColors(changeProps) };
 
   // default snap size has changed over time
   if (props.snapSizeX === kPrevSnapUnit) {

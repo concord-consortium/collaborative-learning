@@ -1,8 +1,8 @@
+import { splitLinkedPointId } from "../table-link-types";
 import { resumeBoardUpdates, suspendBoardUpdates, syncLinkedPoints } from "./jxg-board";
 import { ILinkProperties, ITableLinkProperties, JXGChange, JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
 import { createPoint, pointChangeAgent } from "./jxg-point";
 import { isPoint } from "./jxg-types";
-import { splitLinkedPointId } from "../table/table-model-types";
 
 export function getTableIdFromLinkChange(change: JXGChange) {
   return change.target.toLowerCase() === "tablelink"

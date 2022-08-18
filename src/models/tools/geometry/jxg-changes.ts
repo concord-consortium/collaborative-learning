@@ -1,5 +1,5 @@
 import { castArray } from "lodash";
-import { ILinkProperties, ITableLinkProperties } from "../table-links";
+import { ILinkProperties, ITableLinkProperties } from "../table-link-types";
 export { ILinkProperties, ITableLinkProperties };
 
 export type JXGOperation = "create" | "update" | "delete";
@@ -14,7 +14,7 @@ export type JXGStringPair = [string?, string?];
 
 export type JXGImageParents = [string, JXGCoordPair, JXGCoordPair];
 
-export type JXGParentType = string | number | JXGCoordPair | JXGUnsafeCoordPair;
+export type JXGParentType = string | number | undefined | JXGCoordPair | JXGUnsafeCoordPair;
 
 export enum ESegmentLabelOption {
   kNone = "none",

@@ -62,7 +62,7 @@ export function updateVertexAnglesFromObjects(objects: JXG.GeometryElement[]) {
     board = angle.board;
     updateVertexAngle(angle);
   });
-  board && board.update();
+  board?.update();
 }
 
 export const vertexAngleChangeAgent: JXGChangeAgent = {
