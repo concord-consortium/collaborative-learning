@@ -135,8 +135,10 @@ describe("GeometryContent", () => {
     return { content, board };
   }
 
-  function createTileAndBoard(): { tile: ToolTileModelType, board: JXG.Board } {
-    const { content, board } = createContentAndBoard();
+  function createTileAndBoard(
+    configContent?: (content: GeometryContentModelType) => void):
+    { tile: ToolTileModelType, board: JXG.Board } {
+    const { content, board } = createContentAndBoard(configContent);
     const tile = ToolTileModel.create({ content });
     return { tile, board };
   }
@@ -146,7 +148,7 @@ describe("GeometryContent", () => {
     destroy(content);
   }
 
-  function destroyTileAndBoard(tile: ToolTileModelType, board: JXG.Board) {
+  function destroyTileAndBoard(tile: ToolTileModelType, board?: JXG.Board) {
     if (board) (tile.content as GeometryContentModelType).destroyBoard(board);
     destroy(tile);
   }
@@ -198,9 +200,10 @@ describe("GeometryContent", () => {
   });
 
   it("can create/destroy a JSXGraph board", () => {
-    const { content, board } = createContentAndBoard(_content => {
+    const { tile, board } = createTileAndBoard(_content => {
       _content.addObjectModel(PointModel.create({ x: 1, y: 1 }));
     });
+    const content = tile.content as GeometryContentModelType;
     expect(isBoard(board)).toBe(true);
 
     content.resizeBoard(board, 200, 200);
@@ -217,14 +220,13 @@ describe("GeometryContent", () => {
           };
     content.applyChange(board, change);
 
-    expect(content.title).toBeUndefined();
     // ignore warning about not being able to find parent in getToolTileModel(),
     // in which case the title will be set directly in the metadata instead
     const spy = jest.spyOn(console, "warn").mockImplementation(() => null);
+    expect(content.title).toBeUndefined();
     content.updateTitle(board, "New Title");
+    expect(content.title).toBe("New Title");
     spy.mockRestore();
-    // TODO Figure out how to fix this test
-    // expect(content.title).toBe("New Title");
 
     const badChange: JXGChange = { operation: "update", target: "board", targetID: "foo" };
     content.applyChange(board, badChange);
@@ -242,7 +244,7 @@ describe("GeometryContent", () => {
     // can delete board with change
     content.applyChange(board, { operation: "delete", target: "board", targetID: boardId });
 
-    destroyContentAndBoard(content);
+    destroyTileAndBoard(tile);
   });
 
   it("can update axes parameters", () => {
@@ -284,17 +286,6 @@ describe("GeometryContent", () => {
     }
 
     destroyContentAndBoard(content, board);
-  });
-
-  it("can update title", () => {
-    const { tile, board } = createTileAndBoard();
-    const content = tile.content as GeometryContentModelType;
-
-    content.setTitle("new title");
-
-    expect(content.title).toBe("new title");
-
-    destroyTileAndBoard(tile, board);
   });
 
   it("can add/remove/update points", () => {
