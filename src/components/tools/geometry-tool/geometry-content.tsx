@@ -797,11 +797,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleUndo = () => {
-    return true;
+    return false;
   };
 
   private handleRedo = () => {
-    return true;
+    return false;
   };
 
   private copySelectedObjects() {
