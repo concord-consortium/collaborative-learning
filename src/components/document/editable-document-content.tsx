@@ -1,6 +1,6 @@
-import React, { useContext, useRef, useState, useEffect } from "react";
+import React, { useContext, useRef, useState } from "react";
 import classNames from "classnames";
-import { clone, Instance, getSnapshot } from "mobx-state-tree";
+import { clone } from "mobx-state-tree";
 import { AppConfigContext } from "../../app-config-context";
 import { CanvasComponent } from "./canvas";
 import { DocumentContextReact } from "./document-context";
@@ -10,11 +10,10 @@ import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-fire
 import { useGroupsStore, useStores } from "../../hooks/use-stores";
 import { ToolbarComponent } from "../toolbar";
 import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from "../tools/tool-api";
-import { DocumentModel, DocumentModelType } from "../../models/document/document";
+import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { ToolbarModelType } from "../../models/stores/problem-configuration";
 import { WorkspaceMode } from "../../models/stores/workspace";
-import { CDocumentType, TreeManager } from "../../models/history/tree-manager";
 
 import "./editable-document-content.scss";
 

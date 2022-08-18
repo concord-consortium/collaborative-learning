@@ -9,26 +9,22 @@ import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDrag
 import { DocumentContentModelType, IDragToolCreateInfo, IDropRowInfo } from "../../models/document/document-content";
 import { getToolContentInfoById } from "../../models/tools/tool-content-info";
 import { IDragTiles } from "../../models/tools/tool-tile";
-import { DocumentModelType } from "../../models/document/document";
 import { ToolApiInterfaceContext } from "../tools/tool-api";
 import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tools/tool-tile";
 import { safeJsonParse } from "../../utilities/js-utils";
-import { PlaybackComponent } from "../playback/playback";
 
 import "./document-content.sass";
 
 interface IProps extends IBaseProps {
   context: string;
-  document?: DocumentModelType | undefined;
+  documentId?: string;
   content?: DocumentContentModelType;
+  showPlaybackSpacer?: boolean;
   typeClass: string;
-  showPlayback?: boolean;
   readOnly?: boolean;
   scale?: number;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
-  showPlaybackControls?: boolean;
-  onTogglePlaybackControls?: () => void;
 }
 
 interface IDragResizeRow {
@@ -106,7 +102,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const {viaTeacherDashboard, showPlayback, document, showPlaybackControls, onTogglePlaybackControls} = this.props;
+    const {viaTeacherDashboard} = this.props;
     const {ui, user: {isNetworkedTeacher}} = this.stores;
     const isChatEnabled = isNetworkedTeacher;
     const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0;
@@ -124,10 +120,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       >
         {this.renderRows()}
         {this.renderSpacer()}
-        {showPlayback && <PlaybackComponent document={document}
-                                            showPlaybackControls={showPlaybackControls}
-                                            onTogglePlaybackControls={onTogglePlaybackControls} />
-        }
       </div>
     );
   }
@@ -209,7 +201,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderSpacer = () => {
-    const spacerClass = classNames({"spacer" : !this.props.readOnly, "playback-spacer": this.props.showPlayback});
+    const spacerClass = classNames({"spacer" : !this.props.readOnly, "playback-spacer": this.props.showPlaybackSpacer});
     return <div className={spacerClass} onClick={this.handleClick} />;
   };
 

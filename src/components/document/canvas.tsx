@@ -7,6 +7,7 @@ import { DocumentContentComponent } from "./document-content";
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
+import { PlaybackComponent } from "../playback/playback";
 import {
   IToolApi, IToolApiInterface, IToolApiMap, ToolApiInterfaceContext, EditableToolApiInterfaceRefContext
 } from "../tools/tool-api";
@@ -82,18 +83,22 @@ export class CanvasComponent extends BaseComponent<IProps> {
   }
 
   private renderContent() {
-    const {content, document, showPlayback, showPlaybackControls, ...others} = this.props;
+    const {content, document, showPlayback, showPlaybackControls, onTogglePlaybackControls, ...others} = this.props;
     const documentContent = content || document?.content; // we only pass in content if it is a problem panel
     const typeClass = document?.type === "planning" ? "planning-doc" : "";
 
     if (documentContent) {
       return (
-        <DocumentContentComponent content={documentContent}
-                                  document={document}
-                                  typeClass={typeClass}
-                                  showPlayback={showPlayback}
-                                  showPlaybackControls={showPlaybackControls}
-                                  {...others} />
+        <>
+          <DocumentContentComponent content={documentContent}
+                                    documentId={document?.key}
+                                    typeClass={typeClass}
+                                    {...others} />
+          {showPlayback && <PlaybackComponent document={document}
+                                              showPlaybackControls={showPlaybackControls}
+                                              onTogglePlaybackControls={onTogglePlaybackControls} />
+          }
+        </>
       );
     }
     else {
