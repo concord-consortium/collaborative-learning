@@ -123,6 +123,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
             </button>
           </div>
           <button className="delete-card">
+            {/* TODO: bring these in properly */}
             <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <g fill="none" fill-rule="evenodd">
                     <path d="M0 0h24v24H0z"/>
@@ -136,11 +137,12 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           <DeckCardData caseIndex={caseIndex} model={model} />
         </div>
         <div className="add-attribute-area">
-          {/* TODO: make this work, should be new component */}
+          {/* TODO: JB make this work, should be new component */}
           <div className="new-attribute">new attribute</div>
           <div className="new-value">new data</div>
         </div>
       </div>
+      <div>EA replace me with image toolbar component</div>
     </div>
   );
 });
