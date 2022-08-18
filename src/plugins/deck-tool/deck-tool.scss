@@ -167,14 +167,14 @@ $default-button-border-color: #979797;
     .data-area {
       width: $card-width;
 
-      .attribute-value-pair {
+      .attribute-name-value-pair {
         display:flex;
         min-height: $data-row-min-height;
         line-height: $data-row-min-height;
         border: 1px solid $charcoal-light-1;
         border-top-width: 0px;
 
-        .attribute {
+        .name {
           padding:$cell-padding;
           background-color: $workspace-teal-light-5;
           width:35%;

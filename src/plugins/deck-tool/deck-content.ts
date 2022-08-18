@@ -79,7 +79,7 @@ export const DeckContentModel = ToolContentModel
         });
         self.dataSet.addCanonicalCasesWithIDs([
           // // case ids are always __id__, attribute ids ar id
-          // { __id__: "mottledGray", mothName: "Mottled Gray", sciName: "Cladara limitaria", captureDate: "9/3/21" },
+          { __id__: "mottledGray", mothName: "Mottled Gray", sciName: "Cladara limitaria", captureDate: "9/3/22" },
           // { __id__: "sweaterMoth", mothName: "Sweater Moth", sciName: "Closeta Habituas", captureDate: "9/3/21" },
           // { __id__: "pizzaMoth", mothName: "Pizza Moth", sciName: "Cladara Tomatus", captureDate: "9/3/21" }
         ]);
@@ -94,6 +94,11 @@ export const DeckContentModel = ToolContentModel
     },
     setAttName(attrId: string, name: string){
      self.dataSet.setAttributeName(attrId, name);
+    },
+    setAttValue(caseId: string, attrId: string, val: string){
+      self.dataSet.setCanonicalCaseValues([
+        { __id__: caseId, [attrId]: val }
+      ])
     },
     setMottledGrayCaptureDate(val: string){
       console.log("3: setMottledGrayCaptureDate: ", val)
