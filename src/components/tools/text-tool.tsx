@@ -136,15 +136,6 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
         }
       }
     ));
-    // this.disposers.push(autorun(() => {
-    //   if (this.props.readOnly || !this.state.editing) {
-    //     const textContent = this.getContent();
-    //     if (this.prevText !== textContent.text) {
-    //       this.setState({ value: textContent.asSlate() });
-    //       this.prevText = textContent.text;
-    //     }
-    //   }
-    // }));
     // blur editor when tile is deselected
     this.disposers.push(reaction(
       () => {
