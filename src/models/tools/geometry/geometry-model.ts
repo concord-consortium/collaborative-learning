@@ -404,9 +404,14 @@ export function cloneGeometryObject(
   }
   if (isPolygonModel(obj)) {
     const points = obj.points.map(ptId => idMap[ptId]);
+    const _labels = obj.labels?.map(label => {
+      const [p1Id, p2Id] = pointIdsFromSegmentId(label.id);
+      return { ...label, id: `${segmentIdFromPointIds([idMap[p1Id], idMap[p2Id]])}`, };
+    });
+    const labels = _labels ? { labels: _labels } : undefined;
     // all vertices must be selected/copied to copy a polygon
     if (points.every(ptId => !!ptId)) {
-      return PolygonModel.create({ ...obj, id, points });
+      return PolygonModel.create({ ...obj, id, points, ...labels });
     }
   }
   if (isVertexAngleModel(obj)) {

@@ -218,7 +218,11 @@ describe("GeometryContent", () => {
     content.applyChange(board, change);
 
     expect(content.title).toBeUndefined();
+    // ignore warning about not being able to find parent in getToolTileModel(),
+    // in which case the title will be set directly in the metadata instead
+    const spy = jest.spyOn(console, "warn").mockImplementation(() => null);
     content.updateTitle(board, "New Title");
+    spy.mockRestore();
     // TODO Figure out how to fix this test
     // expect(content.title).toBe("New Title");
 
@@ -792,6 +796,8 @@ describe("GeometryContent", () => {
     const px: JXG.Point = content.addPoint(board, [1, 0])!;
     const py: JXG.Point = content.addPoint(board, [0, 1])!;
     const poly: JXG.Polygon = content.createPolygonFromFreePoints(board)!;
+    const polygon = content.getObject(poly.id)! as PolygonModelType;
+    expect(polygon.type).toBe("polygon");
 
     // copies selected points
     content.selectObjects(board, p0.id);
@@ -816,6 +822,12 @@ describe("GeometryContent", () => {
     // copies polygons if all vertices are selected
     content.selectObjects(board, [px.id, py.id]);
     expect(content.getSelectedIds(board)).toEqual([p0.id, px.id, py.id]);
+    expect(content.copySelection(board))
+      .toEqualWithUniqueIds(Array.from(content.objects.values()));
+
+    // copies segment labels when copying polygons
+    polygon.setSegmentLabel([p0.id, px.id], ESegmentLabelOption.kLabel);
+    content.selectObjects(board, [p0.id, px.id, py.id]);
     expect(content.copySelection(board))
       .toEqualWithUniqueIds(Array.from(content.objects.values()));
 
