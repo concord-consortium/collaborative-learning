@@ -2,6 +2,7 @@ import { observer } from "mobx-react";
 import React, { useState, useEffect, useMemo } from "react";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DeckContentModelType } from "../deck-content"
+import { NewCardAttribute } from "./new-card-attribute"
 
 interface IProps {
   caseIndex: any;
@@ -109,6 +110,8 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model }) =>
         </div>
       )
     })}
+
+    <NewCardAttribute model={model} currentCaseIndex={caseIndex}/>
 
   </>)
 

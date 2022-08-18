@@ -136,13 +136,8 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
         <div className="data-area">
           <DeckCardData caseIndex={caseIndex} model={model} />
         </div>
-        <div className="add-attribute-area">
-          {/* TODO: JB make this work, should be new component */}
-          <div className="new-attribute">new attribute</div>
-          <div className="new-value">new data</div>
-        </div>
       </div>
-      <div>EA replace me with image toolbar component</div>
+      <div>replace me with image toolbar component</div>
     </div>
   );
 });
