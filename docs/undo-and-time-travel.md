@@ -2,7 +2,7 @@
 
 When a tile is used in a CLUE document, the history of changes to that tile's content model are recorded by the history framework. The details of the implementation of the framework are described in [history-framework.md](./history-framework.md). These history entries are used to support undo and time traveling.
 
-The history entries are based on the actions called on the tile's content model. If one action (the parent) calls another action (a child), a single entry is recorded with a name of the parent action.  This single entry has the changes from the parent and child actions.
+The history entries are based on the actions called on the tile's content model. If one action (the parent) calls another action (a child), a single entry is recorded with the name of the parent action.  This single entry has the changes from the parent and child actions.
 
 ## withoutUndo
 
