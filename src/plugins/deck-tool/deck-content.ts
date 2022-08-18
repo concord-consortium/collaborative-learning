@@ -63,28 +63,28 @@ export const DeckContentModel = ToolContentModel
   }))
   .actions(self => ({
     afterCreate(){
-      if (!self.dataSet.name){
-        self.dataSet.setName("My Moth Collection");
-        self.dataSet.addAttributeWithID({
-          id: "mothName",
-          name: "Moth Name"
-        });
-        self.dataSet.addAttributeWithID({
-          id: "sciName",
-          name: "Scientific Name"
-        });
-        self.dataSet.addAttributeWithID({
-          id: "captureDate",
-          name: "Capture Date"
-        });
-        self.dataSet.addCanonicalCasesWithIDs([
-          // // case ids are always __id__, attribute ids ar id
-          { __id__: "mottledGray", mothName: "Mottled Gray", sciName: "Cladara limitaria", captureDate: "9/3/22" },
-          // { __id__: "sweaterMoth", mothName: "Sweater Moth", sciName: "Closeta Habituas", captureDate: "9/3/21" },
-          // { __id__: "pizzaMoth", mothName: "Pizza Moth", sciName: "Cladara Tomatus", captureDate: "9/3/21" }
-        ]);
-        console.log('Created: ', self.dataSet.cases);
-      }
+      // TODO is set default empty data (along with empty data states and dummy text)
+      // FOR now, if starting dev, uncomment this if you have no data to access
+
+      // if (!self.dataSet.name){
+      //   self.dataSet.setName("My Moth Collection");
+      //   self.dataSet.addAttributeWithID({
+      //     id: "mothName",
+      //     name: "Moth Name"
+      //   });
+      //   self.dataSet.addAttributeWithID({
+      //     id: "sciName",
+      //     name: "Scientific Name"
+      //   });
+      //   self.dataSet.addAttributeWithID({
+      //     id: "captureDate",
+      //     name: "Capture Date"
+      //   });
+      //   self.dataSet.addCanonicalCasesWithIDs([
+      //     { __id__: "mottledGray", mothName: "Mottled Gray", sciName: "Cladara limitaria", captureDate: "9/3/22" },
+      //   ]);
+      //   console.log('Created: ', self.dataSet.cases);
+      // }
     },
     setDescription(text: string) {
       self.deckDescription = text;
@@ -99,11 +99,6 @@ export const DeckContentModel = ToolContentModel
       self.dataSet.setCanonicalCaseValues([
         { __id__: caseId, [attrId]: val }
       ])
-    },
-    setMottledGrayCaptureDate(val: string){
-      console.log("3: setMottledGrayCaptureDate: ", val)
-      self.dataSet.setCanonicalCaseValues([{ __id__: "mottledGray", captureDate: val }]);
-
     }
   }));
 
