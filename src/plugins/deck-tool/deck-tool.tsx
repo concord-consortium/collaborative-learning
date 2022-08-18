@@ -78,6 +78,13 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     setCaseIndex(allCases.length);
   }
 
+  function deleteCase(){
+    const thisCaseId = content.dataSet.caseIDFromIndex(caseIndex)
+    if (thisCaseId) {
+      content.dataSet.removeCases([thisCaseId]);
+    }
+  }
+
   const previousButtonClasses = classNames(
     "card-nav", "previous",
     canDecrement ? "active" : "disabled",
@@ -124,7 +131,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
               </svg>
             </button>
           </div>
-          <button className="delete-card">
+          <button className="delete-card" onClick={deleteCase}>
             {/* TODO: bring these in properly */}
             <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <g fill="none" fill-rule="evenodd">

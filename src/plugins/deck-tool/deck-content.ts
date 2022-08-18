@@ -64,7 +64,6 @@ export const DeckContentModel = ToolContentModel
   }))
   .actions(self => ({
     afterCreate(){
-      // TODO is set default empty data (along with empty data states and dummy text)
       if (!self.dataSet.name){
         const firstCaseId = uuid();
         const firstAttrId = uuid();
