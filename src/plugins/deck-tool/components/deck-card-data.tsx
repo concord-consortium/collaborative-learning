@@ -16,6 +16,7 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model }) =>
   const [activeAttrId, setActiveAttrId] = useState("");
   const [activeFacet, setActiveFacet] = useState<null | "name" | "value">(null);
   const [candidate, setCandidate] = useState("");
+  const [isEditingNewCard, setIsEditingNewCard] = useState(false); //may not need this
   // const [approved, setApproved] = useState(false); ToDO - does saving need a more explicit approval?
 
   const caseHere = content.caseByIndex(caseIndex);
