@@ -31,7 +31,7 @@ There are currently 2 ways to group changes:
 
 ### Parent Action
 
-The parent action approach was described above. To repeat: any action that calls another action creates a single entry for the parent action.  If you have an event handler in a component which calling 2 actions on a model, this would result in 2 separate history entries. Instead you should create a single action in the model which calls these 2 actions.  This has [benefits beyond undo and time travel](https://mobx.js.org/actions.html#:~:text=to%20leverage%20the%20transactional%20nature%20of%20mobx%20as%20much%20as%20possible).
+The parent action approach was described above. To repeat: any action that calls another (child) action creates a single entry for the parent action.  If you have an event handler in a component which calls two actions on a model, this would result in two separate history entries. Instead you should create a single action in the model which calls these two actions.  This has [benefits beyond undo and time travel](https://mobx.js.org/actions.html#:~:text=to%20leverage%20the%20transactional%20nature%20of%20mobx%20as%20much%20as%20possible).
 
 ### MST Flow
 
