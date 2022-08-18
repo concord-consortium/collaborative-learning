@@ -32,13 +32,12 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const [markers, setMarkers] = useState<IMarkerProps[]>([]);
   const [selectedMarkers, ] = useState<IMarkerProps[]>([]);
   const history = treeManager.document.history;
-  const maxValue = history.length > 0 ? history.length : 0;
-  const [sliderValue, setSliderValue] = useState(maxValue);
+  const [sliderValue, setSliderValue] = useState(history.length);
   const eventAtCurrentIndex = treeManager.currentHistoryIndex === 0
                                 ? undefined
                                 : treeManager.getHistoryEntry(treeManager.currentHistoryIndex - 1);
   const eventCreatedTime = eventAtCurrentIndex?.created;
-  const playbackDisabled = treeManager.currentHistoryIndex === undefined || sliderValue === maxValue;
+  const playbackDisabled = treeManager.currentHistoryIndex === undefined || sliderValue === history.length;
 
   const handlePlayPauseToggle = useCallback((playing?: boolean) => {
                                   if (playing) {
@@ -47,16 +46,20 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
                                     setSliderPlaying(!sliderPlaying);
                                   }
                                 },[sliderPlaying]);
+
+  // If our slider value is ever beyond the end of the known history, rein it in.
+  // This happens on initial load as seemingly spurious entries are automatically
+  // removed from the history.
   useEffect(() => {
-    if (sliderValue > maxValue) {
-      setSliderValue(maxValue);
+    if (sliderValue > history.length) {
+      setSliderValue(history.length);
     }
-  },[maxValue]);
+  },[history.length, sliderValue]);
 
   useEffect(() => {
     if (sliderPlaying) {
       const slider = setInterval(()=>{
-        if (sliderValue <= maxValue) {
+        if (sliderValue <= history.length) {
           treeManager.goToHistoryEntry(sliderValue)
             .then(()=>{
               treeManager.setCurrentHistoryIndex(sliderValue);
@@ -68,7 +71,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
       }, 500);
       return () => clearInterval(slider);
     }
-  }, [handlePlayPauseToggle, sliderPlaying, sliderValue]);
+  }, [handlePlayPauseToggle, history.length, sliderPlaying, sliderValue, treeManager]);
 
 
   //TODO: need to add a modal that warns users about max number of markers. Currently, a generic alert is shown
@@ -95,10 +98,10 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
 
   const handleSliderValueChange = (value: any) => {
     setSliderValue(value);
-    treeManager.goToHistoryEntry(value)
-      .then(()=>{
-        treeManager.setCurrentHistoryIndex(value);
-      });
+      treeManager.goToHistoryEntry(value)
+        .then(()=>{
+          treeManager.setCurrentHistoryIndex(value);
+        });
   };
 
   const handleAddMarker = (value: any) => {
@@ -160,7 +163,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     return (
       <>
         <div className="slider-container" ref={sliderContainerRef}>
-          <Slider min={0} max={maxValue} step={1} value={sliderValue} ref={railRef}
+          <Slider min={0} max={history.length} step={1} value={sliderValue} ref={railRef}
                   className={`${activeNavTab}`} onChange={handleSliderValueChange} />
         </div>
         { markers.map(marker => {
