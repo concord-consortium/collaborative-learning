@@ -290,10 +290,6 @@ export const addTreeMonitor = (tree: Instance<typeof Tree>,  manager: TreeManage
     };
 };
 
-// TODO: add tests using this with:
-// - nested actions: I suspect this will allow any child action to disable the undo
-//   of the parent action. That is probably OK, but we need to define it.
-// - async flow actions: I'd think this will work fine, but it needs tests
 export function withoutUndo() {
     const actionCall = getRunningActionContext();
     if (!actionCall) {
