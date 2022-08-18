@@ -136,10 +136,15 @@ describe("GeometryContent", () => {
   }
 
   function createTileAndBoard(
-    configContent?: (content: GeometryContentModelType) => void):
-    { tile: ToolTileModelType, board: JXG.Board } {
+      configContent?: (content: GeometryContentModelType) => void):
+      { tile: ToolTileModelType, board: JXG.Board } {
+    // ignore warning about not being able to find parent in getToolTileModel()
+    // I believe this warning is occuring because we're passing a content model, rather than
+    // a snapshot, to ToolTileModel.create(), and the content model has a title getter
+    const spy = jest.spyOn(console, "warn").mockImplementation(() => null);
     const { content, board } = createContentAndBoard(configContent);
     const tile = ToolTileModel.create({ content });
+    spy.mockRestore();
     return { tile, board };
   }
 
@@ -220,13 +225,9 @@ describe("GeometryContent", () => {
           };
     content.applyChange(board, change);
 
-    // ignore warning about not being able to find parent in getToolTileModel(),
-    // in which case the title will be set directly in the metadata instead
-    const spy = jest.spyOn(console, "warn").mockImplementation(() => null);
     expect(content.title).toBeUndefined();
     content.updateTitle(board, "New Title");
     expect(content.title).toBe("New Title");
-    spy.mockRestore();
 
     const badChange: JXGChange = { operation: "update", target: "board", targetID: "foo" };
     content.applyChange(board, badChange);
