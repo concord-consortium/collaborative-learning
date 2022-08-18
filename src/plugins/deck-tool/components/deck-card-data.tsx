@@ -34,6 +34,14 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model }) =>
   }
 
   function setCandidateAndActiveInput(e:any){
+
+    // console.log("activeAttrId: ", activeAttrId)
+    // console.log("activeFacet: ", activeFacet)
+    // // already editing, ignore double clicks here
+    // if ( activeFacet === "name" || "value"){
+    //   return;
+    // }
+
     // user clicked on an attr's name facet or value facet
     const attrToEdit = e.target.classList[1];
     const facetToEdit = e.target.classList[0];
@@ -46,13 +54,7 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model }) =>
       setActiveFacet(facetToEdit);
       setActiveAttrId(attrToEdit);
 
-      // set the ephemeral candidate value
-      // const newCandidate = facetToEdit === "name"
-      //   ? content.attrById(attrToEdit)
-      //   : content.dataSet.getValue(thisCase.__id__, attrToEdit);
-
-      // setCandidate(newCandidate);
-      // look up the existing value and set the candidate to that existing value
+      // look up the existing name or value and set the candidate to that string
       if (facetToEdit === "name"){
         setCandidate(content.attrById(attrToEdit).name)
       }
@@ -63,13 +65,6 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model }) =>
       }
     }
 
-    console.log(e.target.classList)
-
-    // where did we click? get that value and make it candidate
-    // render the input by doing
-    //   setActiveFacet(where clicked facet)
-    //   setActiveAttrId(where clicked id)
-    //   setCandidate(value in location clicked)
   }
 
   return (<>
@@ -97,7 +92,10 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model }) =>
           </div>
 
           {/* attribute value render || input  */}
-          <div className={`value ${attr}`}>
+          <div
+            className={`value ${attr}`}
+            onDoubleClick={setCandidateAndActiveInput}
+          >
             { activeAttrId === attr && activeFacet === "value"
               ? <input
                   type="text"
