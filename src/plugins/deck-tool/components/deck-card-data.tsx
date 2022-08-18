@@ -9,21 +9,18 @@ interface IProps {
   model: ToolTileModelType;
 }
 
-let fakeCase = Object({ __id__: "fake", fakeAttribute: "something" });
-
 export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model }) => {
   const content = model.content as DeckContentModelType;
   const [activeAttrId, setActiveAttrId] = useState("");
-  const [activeFacet, setActiveFacet] = useState<null | "name" | "value">(null);
+  const [activeFacet, setActiveFacet] = useState("");
   const [candidate, setCandidate] = useState("");
   const [isEditingNewCard, setIsEditingNewCard] = useState(false); //may not need this
   // const [approved, setApproved] = useState(false); ToDO - does saving need a more explicit approval?
 
   const caseHere = content.caseByIndex(caseIndex);
-  const thisCase = caseHere ? caseHere : fakeCase;
-  const attrs = Object.keys(thisCase).filter(attr => attr !== "__id__");
 
-  console.log("1: thisCase: ", thisCase)
+  const thisCase = caseHere ? caseHere : Object({ __id__: "bad", foo: "no" });
+  const attrs = Object.keys(thisCase).filter(attr => attr !== "__id__");
 
   function saveAndClearCandidate(str: string){
     if (activeFacet === "value"){
@@ -31,7 +28,7 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model }) =>
     } else if (activeFacet === "name") {
       content.setAttName(activeAttrId, candidate);
     }
-    setActiveFacet(null);
+    setActiveFacet("");
     setActiveAttrId("");
   }
 
@@ -84,6 +81,7 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model }) =>
           >
             { activeAttrId === attr && activeFacet === "name"
               ? <input
+                  key={`${attr}_name`}
                   type="text"
                   value={candidate}
                   onChange={(e:any) => setCandidate(e.target.value)}
@@ -100,6 +98,7 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model }) =>
           >
             { activeAttrId === attr && activeFacet === "value"
               ? <input
+              key={`${attr}_value`}
                   type="text"
                   value={candidate}
                   onChange={(e:any) => setCandidate(e.target.value)}

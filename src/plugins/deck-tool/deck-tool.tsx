@@ -19,6 +19,11 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
 
   const allCases = content.allCases();
 
+  console.log("HELOO")
+  if (!allCases){
+    content.setEmptyCaseOnExistingDataSet();
+  }
+
   function nextCase(){
     if ( caseIndex < allCases.length - 1 ) {
       setCaseIndex(caseIndex + 1);
@@ -71,7 +76,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   };
 
   function addEmptyCase(){
-    // get existing attributes
+    // TODO? get existing attributes and add them as empty strings?
     content.dataSet.addCanonicalCasesWithIDs([
       { __id__: `${uuid()}` },
     ]);
@@ -124,7 +129,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
             <button onClick={addEmptyCase}>
               {/* TODO: bring these in properly */}
               <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <g fill="none" fill-rule="evenodd">
+                <g fill="none" fillRule="evenodd">
                   <circle cx="12" cy="12" r="12"/>
                   <path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#0481A0"/>
                 </g>
@@ -134,7 +139,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           <button className="delete-card" onClick={deleteCase}>
             {/* TODO: bring these in properly */}
             <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <g fill="none" fill-rule="evenodd">
+                <g fill="none" fillRule="evenodd">
                     <path d="M0 0h24v24H0z"/>
                     <circle cx="12" cy="12" r="12"/>
                     <path d="M7 11v2h10v-2H7zm5-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#0481A0"/>

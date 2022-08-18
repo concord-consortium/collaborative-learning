@@ -7,14 +7,14 @@ import { DataSet } from "../../models/data/data-set";
 import { v4 as uuid } from "uuid";
 
 export function defaultDeckContent(): DeckContentModelType {
-  return DeckContentModel.create({deckDescription: "description..."});
+  return DeckContentModel.create();
 }
 
 export const DeckContentModel = ToolContentModel
   .named("DeckTool")
   .props({
     type: types.optional(types.literal(kDeckToolID), kDeckToolID),
-    deckDescription: "",
+    //deckDescription: "",
     dataSet: types.optional(DataSet, () => DataSet.create())
   })
   .volatile(self => ({
@@ -31,13 +31,21 @@ export const DeckContentModel = ToolContentModel
       return self.dataSet.name;
     },
     get attributes(){
+      console.log(self.dataSet.attributes)
       return self.dataSet.attributes;
     },
     caseByIndex(index:number){
       return self.dataSet.getCanonicalCaseAtIndex(index);
     },
+    // hasCases(){
+    //   return
+    // },
     allCases(){
       return self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length);
+      // const allCasesArr = self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length);
+      // if (allCasesArr.length > 0 ){
+      //   return self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length);
+      // }
     },
     existingAttributes(){
       return self.dataSet.attributes.map((a) => {
@@ -51,7 +59,6 @@ export const DeckContentModel = ToolContentModel
       return [
         `{`,
         `  "type": "Deck",`,
-        `  "deckDescription": "${self.deckDescription}"`,
         `  "dataSet.name": "${self.dataSet.name}"`,
         `}`
       ].join("\n");
@@ -64,25 +71,61 @@ export const DeckContentModel = ToolContentModel
   }))
   .actions(self => ({
     afterCreate(){
+      if(self.dataSet.name){
+        console.log("LETS DELETE THINGS")
+      }
       if (!self.dataSet.name){
-        const firstCaseId = uuid();
-        const firstAttrId = uuid();
+        this.createEmptyDataSetAndAddCase();
 
-        self.dataSet.setName("Data Card Collection");
-        self.dataSet.addAttributeWithID({
-          id: firstAttrId,
-          name: "Label1"
-        });
+        // const firstCaseId = uuid();
+        // const firstAttrId = uuid();
 
-        self.dataSet.addCanonicalCasesWithIDs([
-          { __id__: firstCaseId, [firstAttrId]: "" },
-        ]);
-        console.log('Created: ', self.dataSet.cases);
+        // self.dataSet.setName("Data Card Collection");
+        // self.dataSet.addAttributeWithID({
+        //   id: firstAttrId,
+        //   name: "Label1"
+        // });
+
+        // self.dataSet.addCanonicalCasesWithIDs([
+        //   { __id__: firstCaseId, [firstAttrId]: "" },
+        // ]);
+      }
+      if(self.dataSet.name && self.dataSet.cases.length < 1){
+        this.setEmptyCaseOnExistingDataSet();
+
+        // const firstCaseId = uuid();
+        // const firstAttrId = uuid();
+
+        // self.dataSet.addCanonicalCasesWithIDs([
+        //   { __id__: firstCaseId, [firstAttrId]: "" },
+        // ]);
       }
     },
-    setDescription(text: string) {
-      self.deckDescription = text;
+    createEmptyDataSetAndAddCase(){
+      const firstCaseId = uuid();
+      const firstAttrId = uuid();
+
+      self.dataSet.setName("Data Card Collection");
+      self.dataSet.addAttributeWithID({
+        id: firstAttrId,
+        name: "Label1"
+      });
+
+      self.dataSet.addCanonicalCasesWithIDs([
+        { __id__: firstCaseId, [firstAttrId]: "" },
+      ]);
     },
+    setEmptyCaseOnExistingDataSet(){
+      const firstCaseId = uuid();
+      const firstAttrId = uuid();
+
+      self.dataSet.addCanonicalCasesWithIDs([
+        { __id__: firstCaseId, [firstAttrId]: "" },
+      ]);
+    },
+    // setDescription(text: string) {
+    //   self.deckDescription = text;
+    // },
     setTitle(title: string) {
       setTileTitleFromContent(self, title);
     },
