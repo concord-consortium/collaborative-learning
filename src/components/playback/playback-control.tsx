@@ -40,11 +40,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const playbackDisabled = treeManager.currentHistoryIndex === undefined || sliderValue === history.length;
 
   const handlePlayPauseToggle = useCallback((playing?: boolean) => {
-                                  if (playing) {
-                                    setSliderPlaying(playing);
-                                  } else {
-                                    setSliderPlaying(!sliderPlaying);
-                                  }
+                                  setSliderPlaying(playing || !sliderPlaying);
                                 },[sliderPlaying]);
 
   // If our slider value is ever beyond the end of the known history, rein it in.

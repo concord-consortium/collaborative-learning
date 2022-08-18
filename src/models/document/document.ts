@@ -49,7 +49,6 @@ export const DocumentModel = Tree.named("Document")
   })
   .volatile(self => ({
     queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined,
-    instanceId: nanoid()
   }))
   .views(self => ({
     // This is needed for the tree monitor and manager
