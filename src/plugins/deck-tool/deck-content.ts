@@ -64,7 +64,7 @@ export const DeckContentModel = ToolContentModel
   .actions(self => ({
     afterCreate(){
       // TODO is set default empty data (along with empty data states and dummy text)
-      // FOR now, if starting dev, uncomment this if you have no data to access
+      // EA FOR now, if starting dev, uncomment this if you have no data to access, you might not have that problem
 
       // if (!self.dataSet.name){
       //   self.dataSet.setName("My Moth Collection");
@@ -98,7 +98,7 @@ export const DeckContentModel = ToolContentModel
     setAttValue(caseId: string, attrId: string, val: string){
       self.dataSet.setCanonicalCaseValues([
         { __id__: caseId, [attrId]: val }
-      ])
+      ]);
     }
   }));
 

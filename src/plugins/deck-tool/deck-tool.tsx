@@ -34,28 +34,6 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     setCanIncrement(caseIndex < allCases.length - 1);
   },[caseIndex]);
 
-  // const dataForCase = () => {
-  //   const thisCase = content.caseByIndex(caseIndex);
-  //   if (thisCase){
-  //     const keysHere = Object.keys(thisCase).filter(k => k !== "__id__");
-  //     const caseData = keysHere.map((k) => {
-  //       const attrName = content.attrById(k).name;
-  //       return thisCase ? { a: attrName, v: thisCase[k]} : undefined;
-  //     });
-
-  //     return (
-  //       caseData.map((theCase, i) => {
-  //         return (
-  //           <div className="case-item" key={i}>
-  //             <div className="attribute"><b>{theCase?.a}</b></div>
-  //             <div className="value">{theCase?.v}</div>
-  //           </div>
-  //         );
-  //       })
-  //     );
-  //   }
-  // };
-
   const setDefaultTitle = () => {
     if (!content.metadata.title || content.metadata.title === ""){
       const count = documentContent?.getElementsByClassName('deck-tool-tile').length;
@@ -83,13 +61,6 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   };
 
-  // This is a generic setter for dummy data in development, will be removed
-  const handleDescriptionChange = (event: any) => {
-    if (!readOnly) {
-      content.setDescription(event.target.value);
-    }
-  };
-
   const handleTitleKeyDown = (event:  React.KeyboardEvent<HTMLInputElement>) => {
     const { key } = event;
     if ( key === "Enter"){
@@ -97,7 +68,8 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   };
 
-  // hardcoded for now, will pull values from inputs like title
+  // TODO hardcoded for now, will pull values from inputs like title
+  // may be easier to move this down a level
   function addCase(){
     content.dataSet.addCanonicalCasesWithIDs([
       { __id__: "nachoMoth", mothName: "Nacho Moth", sciName: "Cladara Tortillus", captureDate: "9/3/21" },
@@ -141,6 +113,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           </div>
           <div className="add-card-button">
             <button onClick={addCase}>
+              {/* TODO: bring these in properly */}
               <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <g fill="none" fill-rule="evenodd">
                   <circle cx="12" cy="12" r="12"/>
@@ -163,6 +136,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           <DeckCardData caseIndex={caseIndex} model={model} />
         </div>
         <div className="add-attribute-area">
+          {/* TODO: make this work, should be new component */}
           <div className="new-attribute">new attribute</div>
           <div className="new-value">new data</div>
         </div>
