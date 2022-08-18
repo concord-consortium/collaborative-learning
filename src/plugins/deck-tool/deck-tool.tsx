@@ -1,10 +1,11 @@
 import classNames from "classnames";
-import { uniqueId } from "lodash";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { DeckContentModelType } from "./deck-content";
 import { DeckCardData } from "./components/deck-card-data";
+import { v4 as uuid } from "uuid";
+
 
 import "./deck-tool.scss";
 
@@ -28,10 +29,6 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     if (caseIndex > 0){
       setCaseIndex(caseIndex - 1);
     }
-  }
-
-  function goToLatestCase(){
-    setCaseIndex(allCases.length)
   }
 
   useEffect(()=>{
@@ -73,14 +70,12 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   };
 
-  // TODO hardcoded for now, will pull values from inputs like title
-  // may be easier to move this down a level
-  function addCase(){
-    const tempIdSolution =
+  function addEmptyCase(){
+    // get existing attributes
     content.dataSet.addCanonicalCasesWithIDs([
-      { __id__: uniqueId("moth"), mothName: "brand brand new moth", sciName: "science", captureDate: "9/7/21" },
+      { __id__: `${uuid()}` },
     ]);
-    goToLatestCase()
+    setCaseIndex(allCases.length);
   }
 
   const previousButtonClasses = classNames(
@@ -119,7 +114,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
             <button className={ nextButtonClasses } onClick={nextCase}></button>
           </div>
           <div className="add-card-button">
-            <button onClick={addCase}>
+            <button onClick={addEmptyCase}>
               {/* TODO: bring these in properly */}
               <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <g fill="none" fill-rule="evenodd">

@@ -4,6 +4,7 @@ import { kDeckToolID } from "./deck-types";
 import { ITileExportOptions } from "../../models/tools/tool-content-info";
 import { setTileTitleFromContent } from "../../models/tools/tool-tile";
 import { DataSet } from "../../models/data/data-set";
+import { v4 as uuid } from "uuid";
 
 export function defaultDeckContent(): DeckContentModelType {
   return DeckContentModel.create({deckDescription: "description..."});
@@ -64,27 +65,21 @@ export const DeckContentModel = ToolContentModel
   .actions(self => ({
     afterCreate(){
       // TODO is set default empty data (along with empty data states and dummy text)
-      // EA FOR now, if starting dev, uncomment this if you have no data to access, you might not have that problem
+      if (!self.dataSet.name){
+        const firstCaseId = uuid();
+        const firstAttrId = uuid();
 
-      // if (!self.dataSet.name){
-      //   self.dataSet.setName("My Moth Collection");
-      //   self.dataSet.addAttributeWithID({
-      //     id: "mothName",
-      //     name: "Moth Name"
-      //   });
-      //   self.dataSet.addAttributeWithID({
-      //     id: "sciName",
-      //     name: "Scientific Name"
-      //   });
-      //   self.dataSet.addAttributeWithID({
-      //     id: "captureDate",
-      //     name: "Capture Date"
-      //   });
-      //   self.dataSet.addCanonicalCasesWithIDs([
-      //     { __id__: "mottledGray", mothName: "Mottled Gray", sciName: "Cladara limitaria", captureDate: "9/3/22" },
-      //   ]);
-      //   console.log('Created: ', self.dataSet.cases);
-      // }
+        self.dataSet.setName("Data Card Collection");
+        self.dataSet.addAttributeWithID({
+          id: firstAttrId,
+          name: "Label1"
+        });
+
+        self.dataSet.addCanonicalCasesWithIDs([
+          { __id__: firstCaseId, [firstAttrId]: "" },
+        ]);
+        console.log('Created: ', self.dataSet.cases);
+      }
     },
     setDescription(text: string) {
       self.deckDescription = text;
