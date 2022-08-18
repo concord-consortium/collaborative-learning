@@ -1,6 +1,16 @@
 import { addMiddleware, flow, types } from "mobx-state-tree";
 import { createActionTrackingMiddleware3, IActionTrackingMiddleware3Call } from "./create-action-tracking-middleware-3";
 
+/**
+ * This is based on MST's own createActionTrackingMiddleware2 test. The change
+ * is that the actual MST actionCall is provided to the filter, onStart, and
+ * onFinish hooks. This makes it possible to match this up with the
+ * getRunningActionContext.
+ *
+ * That change required updating this test so instead of `call.name` it is now
+ * call.actionCall.name
+ */
+
 function createTestMiddleware(m: any, actionName: string, value: number, calls: string[]) {
   function checkCall(call: IActionTrackingMiddleware3Call<any>) {
     expect(call.actionCall.name).toBe(actionName);
