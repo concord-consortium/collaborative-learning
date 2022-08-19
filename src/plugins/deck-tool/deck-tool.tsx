@@ -37,7 +37,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
 
   useEffect(() => {
     setTotalCases(content.totalCases());
-  });
+  }, [content]);
 
   useEffect(()=>{
     setCanDecrement(caseIndex > 0);
