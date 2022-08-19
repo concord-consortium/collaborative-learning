@@ -46,6 +46,10 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   };
 
+  useEffect(()=>{
+    setDefaultTitle();
+  },[])
+
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     content.setTitle(event.target.value);
   };
@@ -81,6 +85,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
       content.dataSet.removeCases([thisCaseId]);
     }
     setTotalCases(content.totalCases());
+    setCaseIndex(totalCases - 2);
   }
 
   const previousButtonClasses = classNames(
@@ -113,8 +118,8 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
         <div className="panel nav">
           <div className="card-number-of-listing">
             { totalCases > 0
-              ? <>Card { caseIndex + 1 } of { totalCases } </>
-              : <>Add a card</>
+              ? <>Card { caseIndex + 1 } of { totalCases } <code>[{ caseIndex }]</code></>
+              : <><small>Add a card <code>caseIndex: [{ caseIndex }]</code></small></>
             }
           </div>
           <div className="card-nav-buttons">

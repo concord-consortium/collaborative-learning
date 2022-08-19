@@ -4,6 +4,7 @@ import { kDeckToolID } from "./deck-types";
 import { ITileExportOptions } from "../../models/tools/tool-content-info";
 import { setTileTitleFromContent } from "../../models/tools/tool-tile";
 import { DataSet, addCanonicalCasesToDataSet } from "../../models/data/data-set";
+import { v4 as uuid } from "uuid";
 
 export function defaultDeckContent(): DeckContentModelType {
   return DeckContentModel.create();
@@ -73,31 +74,28 @@ export const DeckContentModel = ToolContentModel
 
         self.dataSet.setName("Data Card Collection");
 
-        /* basic version to get everything working */
+        /* QUESTION for KIRK
+            I would like to make this id dynamic
+            Couldn't find a dataSet api method that would do it?
+            I have a uuid based on commented out below...
+        */
+
         self.dataSet.addAttributeWithID({
           id: "label1",
           name: "Label 1"
         });
-        self.dataSet.addAttributeWithID({
-          id: "label2",
-          name: "Label 2"
-        });
-        addCanonicalCasesToDataSet(self.dataSet, [{ label1: "one", label2: "two" }]);
+        addCanonicalCasesToDataSet(self.dataSet, [{ label1: "" }]);
 
-        /* dynamic version to save for later
+        // const firstCaseId = uuid();
+        // const firstAttrId = uuid();
 
-        const firstCaseId = uuid();
-        const firstAttrId = uuid();
+        // self.dataSet.addAttributeWithID({
+        //   id: firstAttrId,
+        //   name: " "
+        // });
 
-        self.dataSet.addAttributeWithID({
-          id: firstAttrId,
-          name: " "
-        });
+        // addCanonicalCasesToDataSet(self.dataSet, [{ [firstAttrId]: "" }]);
 
-        self.dataSet.addCanonicalCasesWithIDs([
-          { __id__: firstCaseId, [firstAttrId]: "" },
-        ]);
-        end dynamic version to save for later */
       }
     },
     setTitle(title: string) {
