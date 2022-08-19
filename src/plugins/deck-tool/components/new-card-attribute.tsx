@@ -1,8 +1,8 @@
 import { observer } from "mobx-react";
-import React, { useState, useEffect, useMemo } from "react";
+import React from "react";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 
-import '../deck-tool.scss'
+import '../deck-tool.scss';
 
 interface IProps {
   currentCaseIndex: any;

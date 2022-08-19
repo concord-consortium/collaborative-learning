@@ -47,7 +47,7 @@ export const DeckContentModel = ToolContentModel
     },
     existingAttributes(){
       return self.dataSet.attributes.map((a) => {
-        return a.id
+        return a.id;
       });
     },
     attrById(str: string){

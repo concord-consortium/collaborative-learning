@@ -1,8 +1,8 @@
 import { observer } from "mobx-react";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { DeckContentModelType } from "../deck-content"
-import { NewCardAttribute } from "./new-card-attribute"
+import { DeckContentModelType } from "../deck-content";
+import { NewCardAttribute } from "./new-card-attribute";
 
 interface IProps {
   caseIndex: any;
@@ -16,13 +16,12 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
   const [activeFacet, setActiveFacet] = useState("");
   const [candidate, setCandidate] = useState("");
   const [currentCaseId, setCurrentCaseId] = useState("");
-  const [currentCaseObj, setCurrentCaseObj] = useState({});
   const [attrKeys, setAttrKeys] = useState(["label1"]);
 
   useEffect(()=>{
     setCurrentCaseId(() => {
       return content.caseByIndex(caseIndex)?.__id__ || "no_id";
-    })
+    });
   }, [caseIndex]);
 
   useEffect(()=>{
@@ -35,22 +34,20 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
     const attrToEdit = (e.target.classList[1]);
     const facetToEdit = (e.target.classList[0]);
 
-    if (facetToEdit === "name" || "value"){
+    if (facetToEdit === "name"){
       setActiveFacet(facetToEdit);
       setActiveAttrId(attrToEdit);
-
-      if (facetToEdit === "name"){
-        setCandidate(content.attrById(attrToEdit).name)
-      }
-
-      if (facetToEdit === "value"){
-        const currentVal = content.dataSet.getValue(currentCaseId, attrToEdit);
-        setCandidate(currentVal as string);
-      }
+      setCandidate(content.attrById(attrToEdit).name);
     }
-  };
+    if (facetToEdit === "value"){
+      setActiveFacet(facetToEdit);
+      setActiveAttrId(attrToEdit);
+      const currentVal = content.dataSet.getValue(currentCaseId, attrToEdit);
+      setCandidate(currentVal as string);
+    }
+  }
 
-  function saveClear(){
+  const saveClear = () => {
     if (activeFacet === "value"){
       content.setAttValue(currentCaseId, activeAttrId, candidate);
       setCandidate("");
@@ -60,7 +57,6 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
     }
     setActiveFacet("");
     setActiveAttrId("");
-
   };
 
   return (
@@ -75,7 +71,7 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
                     type="text"
                     value={candidate}
                     onChange={(e:any) => setCandidate(e.target.value)}
-                    onBlur={() => {saveClear()}}
+                    onBlur={saveClear}
                   />
                 : content.dataSet.attrFromID(a).name
               }
@@ -88,18 +84,16 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
                     type="text"
                     value={candidate || ""}
                     onChange={(e:any) => setCandidate(e.target.value)}
-                    onBlur={() => {saveClear()}}
+                    onBlur={saveClear}
                   />
                 : content.dataSet.getValue(currentCaseId, a)
               }
             </div>
           </div>
-        )
+        );
       })}
        <NewCardAttribute model={model} currentCaseIndex={caseIndex}/>
     </>
-  )
-
-
-})
+  );
+});
 
