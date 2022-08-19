@@ -89,7 +89,7 @@ export const DeckContentModel = ToolContentModel
 
         self.dataSet.addAttributeWithID({
           id: "label1",
-          name: "Label 1"
+          name: ""
         });
         addCanonicalCasesToDataSet(self.dataSet, [{ label1: "" }]);
 
