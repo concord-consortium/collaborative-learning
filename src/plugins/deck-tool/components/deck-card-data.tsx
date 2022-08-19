@@ -7,113 +7,44 @@ import { NewCardAttribute } from "./new-card-attribute"
 interface IProps {
   caseIndex: any;
   model: ToolTileModelType;
+  totalCases: number;
 }
 
-export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model }) => {
+export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, totalCases }) => {
   const content = model.content as DeckContentModelType;
   const [activeAttrId, setActiveAttrId] = useState("");
   const [activeFacet, setActiveFacet] = useState("");
   const [candidate, setCandidate] = useState("");
-  const [isEditingNewCard, setIsEditingNewCard] = useState(false); //may not need this
-  // const [approved, setApproved] = useState(false); ToDO - does saving need a more explicit approval?
+  const [currentCaseId, setCurrentCaseId] = useState("");
+  const [currentCaseObj, setCurrentCaseObj] = useState({});
+  const [attrKeys, setAttrKeys] = useState(["label1"]);
 
-  const caseHere = content.caseByIndex(caseIndex);
+  useEffect(()=>{
+    setCurrentCaseId(() => {
+      return content.caseByIndex(caseIndex)?.__id__ || "no_id"
+    })
+  }, [caseIndex])
 
-  const thisCase = caseHere ? caseHere : Object({ __id__: "bad", foo: "no" });
-  const attrs = Object.keys(thisCase).filter(attr => attr !== "__id__");
+  useEffect(()=>{
+    const raw = content.caseByIndex(caseIndex);
+    const filteredKeys = raw ? Object.keys(raw).filter(k => k !== "__id__") : ["label1"];
+    setAttrKeys(filteredKeys);
+  },[model])
 
-  function saveAndClearCandidate(str: string){
-    if (activeFacet === "value"){
-      content.setAttValue(thisCase.__id__, activeAttrId, candidate);
-    } else if (activeFacet === "name") {
-      content.setAttName(activeAttrId, candidate);
-    }
-    setActiveFacet("");
-    setActiveAttrId("");
-  }
-
-  function setCandidateAndActiveInput(e:any){
-
-    // console.log("activeAttrId: ", activeAttrId)
-    // console.log("activeFacet: ", activeFacet)
-    // // already editing, ignore double clicks here
-    // if ( activeFacet === "name" || "value"){
-    //   return;
-    // }
-
-    // user clicked on an attr's name facet or value facet
-    const attrToEdit = e.target.classList[1];
-    const facetToEdit = e.target.classList[0];
-
-    const currentVal = content.dataSet.getValue(thisCase.__id__, attrToEdit);
-    console.log("currentVal: ", currentVal);
-
-    if (facetToEdit === "name" || "value"){
-      // open input where we have clicked
-      setActiveFacet(facetToEdit);
-      setActiveAttrId(attrToEdit);
-
-      // look up the existing name or value and set the candidate to that string
-      if (facetToEdit === "name"){
-        setCandidate(content.attrById(attrToEdit).name)
-      }
-
-      if (facetToEdit === "value"){
-        const currentVal = content.dataSet.getValue(thisCase.__id__, attrToEdit);
-        setCandidate(currentVal as string);
-      }
-    }
-
-  }
-
-  return (<>
-
-    { attrs.map((attr) => {
-      const attrName = content.attrById(attr).name;
-      const attrValue = thisCase[attr];
-      return (
-        <div key={attr} className={`attribute-name-value-pair ${thisCase.__id__}`}>
-
-          {/* attribute name render || input */}
-          <div
-            className={`name ${attr}`}
-            onDoubleClick={setCandidateAndActiveInput}
-          >
-            { activeAttrId === attr && activeFacet === "name"
-              ? <input
-                  key={`${attr}_name`}
-                  type="text"
-                  value={candidate}
-                  onChange={(e:any) => setCandidate(e.target.value)}
-                  onBlur={() => {saveAndClearCandidate(candidate)}}
-                />
-              : attrName
-            }
+  return (
+    <>
+      { attrKeys.map((a) => {
+        return (
+          <div key={a} className={`attribute-name-value-pair ${currentCaseId}`}>
+            <div className={`name ${a}`}>{ content.dataSet.attrFromID(a).name}</div>
+            <div className={`value ${a}`}>{content.dataSet.getValue(currentCaseId, a ) }</div>
           </div>
+        )
+      })}
+       <NewCardAttribute model={model} currentCaseIndex={caseIndex}/>
+    </>
+  )
 
-          {/* attribute value render || input  */}
-          <div
-            className={`value ${attr}`}
-            onDoubleClick={setCandidateAndActiveInput}
-          >
-            { activeAttrId === attr && activeFacet === "value"
-              ? <input
-              key={`${attr}_value`}
-                  type="text"
-                  value={candidate}
-                  onChange={(e:any) => setCandidate(e.target.value)}
-                  onBlur={() => {saveAndClearCandidate(candidate)}}
-                />
-              : attrValue
-            }
-          </div>
-        </div>
-      )
-    })}
-
-    <NewCardAttribute model={model} currentCaseIndex={caseIndex}/>
-
-  </>)
 
 })
 

@@ -3,8 +3,7 @@ import { ToolContentModel, ToolMetadataModelType, toolContentModelHooks } from "
 import { kDeckToolID } from "./deck-types";
 import { ITileExportOptions } from "../../models/tools/tool-content-info";
 import { setTileTitleFromContent } from "../../models/tools/tool-tile";
-import { DataSet } from "../../models/data/data-set";
-import { v4 as uuid } from "uuid";
+import { DataSet, addCanonicalCasesToDataSet } from "../../models/data/data-set";
 
 export function defaultDeckContent(): DeckContentModelType {
   return DeckContentModel.create();
@@ -14,7 +13,6 @@ export const DeckContentModel = ToolContentModel
   .named("DeckTool")
   .props({
     type: types.optional(types.literal(kDeckToolID), kDeckToolID),
-    //deckDescription: "",
     dataSet: types.optional(DataSet, () => DataSet.create())
   })
   .volatile(self => ({
@@ -41,10 +39,6 @@ export const DeckContentModel = ToolContentModel
     },
     allCases(){
       return self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length);
-      // const allCasesArr = self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length);
-      // if (allCasesArr.length > 0 ){
-      //   return self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length);
-      // }
     },
     existingAttributes(){
       return self.dataSet.attributes.map((a) => {
@@ -71,33 +65,33 @@ export const DeckContentModel = ToolContentModel
   .actions(self => ({
     afterCreate(){
       if (!self.dataSet.name){
-        this.createEmptyDataSetAndAddCase();
+
+        self.dataSet.setName("Data Card Collection");
+
+        /* basic version to get everything working */
+        self.dataSet.addAttributeWithID({
+          id: "label1",
+          name: "Label 1"
+        });
+        addCanonicalCasesToDataSet(self.dataSet, [{ label1: "i m a value" }]);
+
+
+
+        /* dynamic version to save for later
+
+        const firstCaseId = uuid();
+        const firstAttrId = uuid();
+
+        self.dataSet.addAttributeWithID({
+          id: firstAttrId,
+          name: " "
+        });
+
+        self.dataSet.addCanonicalCasesWithIDs([
+          { __id__: firstCaseId, [firstAttrId]: "" },
+        ]);
+        end dynamic version to save for later */
       }
-      if(self.dataSet.name && self.dataSet.cases.length < 1){
-        this.setEmptyCaseOnExistingDataSet();
-      }
-    },
-    createEmptyDataSetAndAddCase(){
-      const firstCaseId = uuid();
-      const firstAttrId = uuid();
-
-      self.dataSet.setName("Data Card Collection");
-      self.dataSet.addAttributeWithID({
-        id: firstAttrId,
-        name: "Label1"
-      });
-
-      self.dataSet.addCanonicalCasesWithIDs([
-        { __id__: firstCaseId, [firstAttrId]: "" },
-      ]);
-    },
-    setEmptyCaseOnExistingDataSet(){
-      const firstCaseId = uuid();
-      const firstAttrId = uuid();
-
-      self.dataSet.addCanonicalCasesWithIDs([
-        { __id__: firstCaseId, [firstAttrId]: "" },
-      ]);
     },
     setTitle(title: string) {
       setTileTitleFromContent(self, title);

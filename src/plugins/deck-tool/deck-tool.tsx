@@ -14,18 +14,12 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const content = model.content as DeckContentModelType;
   const [isEditing, setIsEditing] = useState(false);
   const [caseIndex, setCaseIndex] = useState(0);
+  const [totalCases, setTotalCases] = useState(0);
   const [canIncrement, setCanIncrement] = useState(true);
   const [canDecrement, setCanDecrement] = useState(false);
 
-  const allCases = content.allCases();
-
-  console.log("HELOO")
-  if (!allCases){
-    content.setEmptyCaseOnExistingDataSet();
-  }
-
   function nextCase(){
-    if ( caseIndex < allCases.length - 1 ) {
+    if ( caseIndex < totalCases - 1 ) {
       setCaseIndex(caseIndex + 1);
     }
   }
@@ -38,7 +32,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
 
   useEffect(()=>{
     setCanDecrement(caseIndex > 0);
-    setCanIncrement(caseIndex < allCases.length - 1);
+    setCanIncrement(caseIndex < totalCases - 1);
   },[caseIndex]);
 
   const setDefaultTitle = () => {
@@ -48,7 +42,9 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   };
 
+  //set the title when we arrive
   useEffect(() => {
+    setTotalCases(content.totalCases());
     setDefaultTitle();
   }, []);
 
@@ -75,12 +71,12 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   };
 
-  function addEmptyCase(){
-    // TODO? get existing attributes and add them as empty strings?
-    content.dataSet.addCanonicalCasesWithIDs([
-      { __id__: `${uuid()}` },
-    ]);
-    setCaseIndex(allCases.length);
+  function addNewCase(){
+    alert("addNewCase()")
+    // content.dataSet.addCanonicalCasesWithIDs([
+    //   { __id__: `${uuid()}` },
+    // ]);
+    // setCaseIndex(allCases.length);
   }
 
   function deleteCase(){
@@ -119,14 +115,17 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
         </div>
         <div className="panel nav">
           <div className="card-number-of-listing">
-            Card { caseIndex + 1 } of { allCases.length }
+            { totalCases > 0
+              ? <>Card { caseIndex + 1 } of { totalCases } </>
+              : <>Add a card</>
+            }
           </div>
           <div className="card-nav-buttons">
             <button className={ previousButtonClasses  } onClick={previousCase}></button>
             <button className={ nextButtonClasses } onClick={nextCase}></button>
           </div>
           <div className="add-card-button">
-            <button onClick={addEmptyCase}>
+            <button onClick={addNewCase}>
               {/* TODO: bring these in properly */}
               <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <g fill="none" fillRule="evenodd">
@@ -148,7 +147,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           </button>
         </div>
         <div className="data-area">
-          <DeckCardData caseIndex={caseIndex} model={model} />
+          <DeckCardData caseIndex={caseIndex} model={model} totalCases={totalCases} />
         </div>
       </div>
       <div>replace me with image toolbar component</div>
