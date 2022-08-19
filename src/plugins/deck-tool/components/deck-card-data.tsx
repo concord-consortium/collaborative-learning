@@ -92,7 +92,7 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
               }
             </div>
 
-            <div className={`value ${a}`} onDoubleClick={activateInput} onHover={displayInputPlaceholder}>
+            <div className={`value ${a}`} onDoubleClick={activateInput}>
               { activeAttrId === a && activeFacet === "value" && !readOnly
                 ? <input
                     className="candidate-input"
