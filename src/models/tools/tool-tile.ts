@@ -69,7 +69,7 @@ export const ToolTileModel = types
   .preProcessSnapshot(snapshot => {
     // Move the title up to handle legacy geometry tiles
     if (snapshot.content.type === "Geometry" && !("title" in snapshot) && "title" in snapshot.content) {
-      const title = (snapshot.content as any).title;
+      const title = (snapshot.content as GeometryContentModelType).title;
       return { ...snapshot, title };
     }
     return snapshot;
