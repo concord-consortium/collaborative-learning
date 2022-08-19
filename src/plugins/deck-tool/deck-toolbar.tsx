@@ -2,12 +2,12 @@ import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
 import { Tooltip } from "react-tippy";
-import UploadButtonSvg from "../../../assets/icons/upload-image/upload-image-icon.svg";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { IFloatingToolbarProps, useFloatingToolbarLocation }
   from "../../components/tools/hooks/use-floating-toolbar-location";
+import UploadButtonSvg from "../../assets/icons/upload-image/upload-image-icon.svg";
 
-import "./image-toolbar.scss";
+import "./deck-toolbar.scss";
 
 interface IImageUploadButtonProps {
   tooltipOffset?: { x?: number, y?: number };
@@ -48,27 +48,27 @@ export const ImageUploadButton: React.FC<IImageUploadButtonProps> = ({ tooltipOf
 
 interface IProps extends IFloatingToolbarProps {
   onUploadImageFile: (file: File) => void;
-  setImageUrlToAdd: (url: string) => void;
 }
-export const DeckToolToolbar: React.FC<IProps> = observer(({
-  documentContent, onIsEnabled, onUploadImageFile, ...others
-}) => {
+
+export const DeckToolToolBar: React.FC<IProps> = observer((
+              { documentContent, toolTile, onIsEnabled, onUploadImageFile, ...others }: IProps) => {
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
-                    documentContent,
-                    toolbarHeight: 34,
-                    toolbarTopOffset: 2,
-                    enabled,
-                    ...others
-                  });
-  // required for proper placement and label centering
+                  documentContent,
+                  toolTile,
+                  toolbarHeight: 34,
+                  toolbarTopOffset: 2,
+                  enabled,
+                  ...others
+                });
   const tooltipOffset = { x: -19, y: -32 };
   return documentContent
     ? ReactDOM.createPortal(
-        <div className={`deck-tool-toolbar ${enabled && location ? "enabled" : "disabled"}`}
-            style={location}
-            onMouseDown={e => e.stopPropagation()}>
+      <div className={`deck-tool-toolbar ${enabled && location ? "enabled" : "disabled"}`}
+            style={location} onMouseDown={e => e.stopPropagation()}>
+        <div className="toolbar-buttons">
           <ImageUploadButton tooltipOffset={tooltipOffset} onUploadImageFile={onUploadImageFile} />
-        </div>, documentContent)
-    : null;
+        </div>
+      </div>, documentContent)
+  : null;
 });

@@ -1,4 +1,4 @@
-@import "../../vars.sass";
+@import "../../components/vars.sass";
 
 .deck-tool-toolbar {
   position: absolute;
@@ -10,30 +10,38 @@
     display: none;
   }
 
-  .toolbar-button {
-    position: relative;
-    width: $toolbar-button-width;
+  .toolbar-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
     height: $toolbar-button-height;
-    background-color: $workspace-teal-light-9;
 
-    &:hover {
-      background-color: $workspace-teal-light-6;
-    }
-
-    &:active {
-      background-color: $workspace-teal-light-4;
-
-      svg path {
-        fill: $workspace-teal-dark-1;
-      }
-    }
-
-    input {
-      position: absolute;
-      left: 0;
-      top: 0;
+    .toolbar-button {
+      position: relative;
       width: $toolbar-button-width;
       height: $toolbar-button-height;
+      background-color: $workspace-teal-light-9;
+
+      &:hover {
+        background-color: $workspace-teal-light-6;
+      }
+
+      &:active {
+        background-color: $workspace-teal-light-4;
+
+        svg path {
+          fill: $workspace-teal-dark-1;
+        }
+      }
+
+      input {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: $toolbar-button-width;
+        height: $toolbar-button-height;
+      }
     }
   }
 }
