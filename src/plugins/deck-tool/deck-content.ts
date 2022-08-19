@@ -79,14 +79,6 @@ export const DeckContentModel = ToolContentModel
 
         self.dataSet.setName("Data Card Collection");
 
-        /* QUESTION for KIRK
-            I would like to make this id dynamic
-            Couldn't find a dataSet api method that would do it?
-            I have a uuid based on commented out below...
-            ...actually I take it all back - maybe it doesn't need to be dynamic
-            since it's scoped to this deck?
-        */
-
         self.dataSet.addAttributeWithID({
           id: "label1",
           name: ""

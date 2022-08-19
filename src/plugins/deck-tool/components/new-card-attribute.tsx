@@ -19,22 +19,13 @@ export const NewCardAttribute: React.FC<IProps> = observer(({ caseIndex, model, 
   const attrId = useRef("");
 
   useEffect(()=>{
-    // if (attrId.current === ""){
-    //   console.log("no attr in play, lets set it.");
-    //   setUpNewAttr();
-    //   attrId.current = "bob123"
-    // } else {
-    //   console.log("existing attr being worked on");
-    // }
-    // console.log(attrId.current);
+    console.log('main effect on new-card-attribute');
   });
 
   function setUpNewAttr(){
     const nextLabel = `Label ${attrsCount + 1}`;
     console.log("ok, here is nextLabel: ", nextLabel);
-
-    addAttributeToDataSet(content.dataSet, { name: nextLabel });
-
+    // addAttributeToDataSet(content.dataSet, { name: nextLabel });
     //setAttrsCount(content.existingAttributes().length);
   }
 

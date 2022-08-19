@@ -33,29 +33,6 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
 
   function shouldHideDelete(){
     return totalCases < 1;
-    //TODO - spec says if there is a card with no value in first attribute
-    // then do not show the remove button until it has some value
-    // right now this shows if there is a card to delete, period.
-    // below sort of does as spec says but needs some debugging
-
-    // if (totalCases === 0 ){
-    //   return true;
-    // }
-
-    // if (totalCases === 1){
-    //   const firstCaseId = content.dataSet.caseIDFromIndex(0);
-
-    //   if (firstCaseId){
-    //     const firstCase = content.dataSet.getCanonicalCase(firstCaseId)
-    //     const someValue =  firstCase?.label1?.toString();
-    //     console.log("length of first val: ", someValue?.length);
-    //     return someValue?.length === 0;
-    //   }
-    // }
-
-    // else {
-    //   return false;
-    // }
   }
 
   useEffect(() => {
@@ -80,7 +57,6 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   };
 
   useEffect(()=>{
-    //console.log("attributes", content.existingAttributes());
     setDefaultTitle();
   },[]);
 
