@@ -32,8 +32,8 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
   },[model]);
 
   const handleCandidateInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCandidate(event.target.value)
-  }
+    setCandidate(event.target.value);
+  };
 
   const handleCandidateKeyDown = (event:  React.KeyboardEvent<HTMLInputElement>) => {
     const { key } = event;

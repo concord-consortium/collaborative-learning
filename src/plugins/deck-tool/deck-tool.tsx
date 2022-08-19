@@ -17,7 +17,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const [totalCases, setTotalCases] = useState(0);
   const [canIncrement, setCanIncrement] = useState(true);
   const [canDecrement, setCanDecrement] = useState(false);
-  const [hideDelete, setHideDelete] = useState(false)
+  const [hideDelete, setHideDelete] = useState(false);
 
   function nextCase(){
     if ( caseIndex < totalCases - 1 ) {
@@ -32,41 +32,45 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   }
 
   function shouldHideDelete(){
-    console.log("testing totalCases: ", totalCases)
-    if (totalCases === 0 ){
-      return true;
-    }
+    return totalCases < 1;
+    //TODO - spec says if there is a card with no value in first attribute
+    // then do not show the remove button until it has some value
+    // right now this shows if there is a card to delete, period.
+    // below sort of does as spec says but needs some debugging
 
-    if (totalCases === 1){
-      const firstCaseId = content.dataSet.caseIDFromIndex(0);
+    // if (totalCases === 0 ){
+    //   return true;
+    // }
 
-      if (firstCaseId){
-        const firstCase = content.dataSet.getCanonicalCase(firstCaseId)
-        const someValue =  firstCase?.label1?.toString();
-        console.log("length of first val: ", someValue?.length);
-        return someValue?.length === 0;
-      }
-    }
+    // if (totalCases === 1){
+    //   const firstCaseId = content.dataSet.caseIDFromIndex(0);
 
-    else {
-      return false;
-    }
+    //   if (firstCaseId){
+    //     const firstCase = content.dataSet.getCanonicalCase(firstCaseId)
+    //     const someValue =  firstCase?.label1?.toString();
+    //     console.log("length of first val: ", someValue?.length);
+    //     return someValue?.length === 0;
+    //   }
+    // }
+
+    // else {
+    //   return false;
+    // }
   }
 
   useEffect(() => {
     setTotalCases(content.totalCases());
-    console.log("effect setTotalCases to: ", totalCases);
   });
 
   useEffect(()=>{
     setCanDecrement(caseIndex > 0);
     setCanIncrement(caseIndex < totalCases - 1);
-    setHideDelete(shouldHideDelete() || false)
+    setHideDelete(shouldHideDelete() || false);
   },[caseIndex, totalCases]);
 
   useEffect(()=>{
     goToLatestCase();
-  }, [totalCases])
+  }, [totalCases]);
 
   const setDefaultTitle = () => {
     if (!content.metadata.title || content.metadata.title === ""){
@@ -77,7 +81,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
 
   useEffect(()=>{
     setDefaultTitle();
-  },[])
+  },[]);
 
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     content.setTitle(event.target.value);
@@ -117,7 +121,6 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   }
 
   function goToLatestCase(){
-    console.log("given currentIndex: ", caseIndex, "totalCases: ", totalCases, "what index should I go to?");
     setCaseIndex(totalCases - 1);
   }
 

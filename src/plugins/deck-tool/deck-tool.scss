@@ -109,10 +109,10 @@ $default-button-border-color: #979797;
         transform: translateY(2px);
         cursor: pointer;
         &:hover {
-          border:1px dotted green;
+          //border:1px dotted green;
         }
         &:active{
-          border:1px dotted red;
+          //border:1px dotted red;
         }
       }
     }
