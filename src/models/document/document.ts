@@ -1,6 +1,5 @@
 import { applySnapshot, types, Instance, SnapshotIn, getEnv, onAction, addDisposer } from "mobx-state-tree";
 import { forEach } from "lodash";
-import { nanoid } from "nanoid";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
 import {

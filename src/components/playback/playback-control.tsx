@@ -65,7 +65,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
           handlePlayPauseToggle(false);
         }
       }, 500);
-      return () => clearInterval(slider);
+      return () => clearTimeout(slider);
     }
   }, [handlePlayPauseToggle, history.length, sliderPlaying, sliderValue, treeManager]);
 
