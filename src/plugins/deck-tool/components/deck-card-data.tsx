@@ -29,14 +29,17 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
   }, [caseIndex]);
 
   useEffect(()=>{
+    // unless we are on a brand new deck with no attr names or values, we'll see the new att area
+    const firstCase = content.dataSet.getCanonicalCaseAtIndex(0);
+    const valLength = (firstCase?.label1 as string).length;
+    const nameLength = content.dataSet.attrFromID("label1").name.length;
+    setReadyForNewAttribute(valLength + nameLength > 0);
+
+    // collect our keys first
     const raw = content.caseByIndex(caseIndex);
     const filteredKeys = raw ? Object.keys(raw).filter(k => k !== "__id__") : ["label1"];
     setAttrKeys(filteredKeys);
   },[model]);
-
-  useEffect(()=> {
-    // console.log("candidate change effect CANDIDATE: ", candidate);
-  }, [candidate]);
 
   const handleCandidateInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCandidate(event.target.value);
@@ -124,7 +127,7 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
       })}
 
       { readyForNewAttribute &&
-        <NewCardAttribute model={model} currentCaseIndex={caseIndex}/>
+        <NewCardAttribute model={model} caseIndex={caseIndex} readOnly={readOnly} />
       }
 
     </>
