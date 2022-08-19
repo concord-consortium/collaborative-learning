@@ -17,6 +17,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const [totalCases, setTotalCases] = useState(0);
   const [canIncrement, setCanIncrement] = useState(true);
   const [canDecrement, setCanDecrement] = useState(false);
+  const [hideDelete, setHideDelete] = useState(false)
 
   function nextCase(){
     if ( caseIndex < totalCases - 1 ) {
@@ -30,14 +31,42 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   }
 
+  function shouldHideDelete(){
+    console.log("testing totalCases: ", totalCases)
+    if (totalCases === 0 ){
+      return true;
+    }
+
+    if (totalCases === 1){
+      const firstCaseId = content.dataSet.caseIDFromIndex(0);
+
+      if (firstCaseId){
+        const firstCase = content.dataSet.getCanonicalCase(firstCaseId)
+        const someValue =  firstCase?.label1?.toString();
+        console.log("length of first val: ", someValue?.length);
+        return someValue?.length === 0;
+      }
+    }
+
+    else {
+      return false;
+    }
+  }
+
   useEffect(() => {
     setTotalCases(content.totalCases());
+    console.log("effect setTotalCases to: ", totalCases);
   });
 
   useEffect(()=>{
     setCanDecrement(caseIndex > 0);
     setCanIncrement(caseIndex < totalCases - 1);
+    setHideDelete(shouldHideDelete() || false)
   },[caseIndex, totalCases]);
+
+  useEffect(()=>{
+    goToLatestCase();
+  }, [totalCases])
 
   const setDefaultTitle = () => {
     if (!content.metadata.title || content.metadata.title === ""){
@@ -85,7 +114,11 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
       content.dataSet.removeCases([thisCaseId]);
     }
     setTotalCases(content.totalCases());
-    setCaseIndex(totalCases - 2);
+  }
+
+  function goToLatestCase(){
+    console.log("given currentIndex: ", caseIndex, "totalCases: ", totalCases, "what index should I go to?");
+    setCaseIndex(totalCases - 1);
   }
 
   const previousButtonClasses = classNames(
@@ -131,9 +164,11 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
               <AddDataCardIcon />
             </button>
           </div>
-          <button className="delete-card" onClick={deleteCase}>
-            <RemoveDataCardIcon />
-          </button>
+          { !hideDelete &&
+            <button className="delete-card" onClick={deleteCase}>
+              <RemoveDataCardIcon />
+            </button>
+          }
         </div>
         <div className="data-area">
           <DeckCardData caseIndex={caseIndex} model={model} totalCases={totalCases} readOnly={readOnly} />

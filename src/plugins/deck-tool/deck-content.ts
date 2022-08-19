@@ -4,7 +4,6 @@ import { kDeckToolID } from "./deck-types";
 import { ITileExportOptions } from "../../models/tools/tool-content-info";
 import { setTileTitleFromContent } from "../../models/tools/tool-tile";
 import { DataSet, addCanonicalCasesToDataSet } from "../../models/data/data-set";
-import { v4 as uuid } from "uuid";
 
 export function defaultDeckContent(): DeckContentModelType {
   return DeckContentModel.create();
