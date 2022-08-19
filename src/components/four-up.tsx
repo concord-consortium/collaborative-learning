@@ -164,19 +164,23 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const nwCanvas = (
       <CanvasComponent context="four-up-nw" scale={nwCell.scale}
                        readOnly={isGhostUser /* Ghost users do not own group documents and cannot edit others' */}
-                       document={groupDoc(0)} overlayMessage={canvasMessage(groupDoc(0))} {...others} />
+                       document={groupDoc(0)} overlayMessage={canvasMessage(groupDoc(0))}
+                       showPlayback={toggledContext === "four-up-nw"} {...others} />
     );
     const neCanvas = (
       <CanvasComponent context="four-up-ne" scale={neCell.scale}
-                       readOnly={true} document={groupDoc(1)} overlayMessage={canvasMessage(groupDoc(1))} {...others} />
+                       readOnly={true} document={groupDoc(1)} overlayMessage={canvasMessage(groupDoc(1))}
+                       showPlayback={toggledContext === "four-up-ne"} {...others} />
     );
     const seCanvas = (
       <CanvasComponent context="four-up-se" scale={seCell.scale}
-                       readOnly={true} document={groupDoc(2)} overlayMessage={canvasMessage(groupDoc(2))} {...others}/>
+                       readOnly={true} document={groupDoc(2)} overlayMessage={canvasMessage(groupDoc(2))}
+                       showPlayback={toggledContext === "four-up-se"} {...others}/>
     );
     const swCanvas = (
       <CanvasComponent context="four-up-sw" scale={swCell.scale}
-                       readOnly={true} document={groupDoc(3)} overlayMessage={canvasMessage(groupDoc(3))} {...others}/>
+                       readOnly={true} document={groupDoc(3)} overlayMessage={canvasMessage(groupDoc(3))}
+                       showPlayback={toggledContext === "four-up-sw"} {...others}/>
     );
 
     const memberName = (context: string) => {
