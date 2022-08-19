@@ -53,12 +53,14 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
   function saveClear(){
     if (activeFacet === "value"){
       content.setAttValue(currentCaseId, activeAttrId, candidate);
+      setCandidate("");
     } else if (activeFacet === "name") {
       content.setAttName(activeAttrId, candidate);
+      setCandidate("");
     }
     setActiveFacet("");
     setActiveAttrId("");
-    setCandidate("");
+
   };
 
   return (

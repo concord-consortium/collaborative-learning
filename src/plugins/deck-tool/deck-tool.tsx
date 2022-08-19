@@ -18,6 +18,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const [canIncrement, setCanIncrement] = useState(true);
   const [canDecrement, setCanDecrement] = useState(false);
 
+  console.log("ALL CASES: ", content.allCases());
   function nextCase(){
     if ( caseIndex < totalCases - 1 ) {
       setCaseIndex(caseIndex + 1);
