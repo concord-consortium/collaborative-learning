@@ -66,7 +66,18 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
       { attrKeys.map((a) => {
         return (
           <div key={a} className={`attribute-name-value-pair ${currentCaseId}`}>
-            <div className={`name ${a}`}>{ content.dataSet.attrFromID(a).name}</div>
+            <div className={`name ${a}`} onDoubleClick={activateInput}>
+              { activeAttrId === a && activeFacet === "name"
+                ? <input
+                    key={`${a}_name`}
+                    type="text"
+                    value={candidate}
+                    onChange={(e:any) => setCandidate(e.target.value)}
+                    onBlur={() => {saveClear()}}
+                  />
+                : content.dataSet.attrFromID(a).name
+              }
+            </div>
 
             <div className={`value ${a}`} onDoubleClick={activateInput}>
               { activeAttrId === a && activeFacet === "value"
