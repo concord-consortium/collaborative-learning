@@ -286,7 +286,7 @@ export const DocumentModel = Tree.named("Document")
       // TODO: it would be nice to unify this with the code in createDocumentModel
       const manager = TreeManager.create({document: {}, undoStore: {}});
       self.treeManagerAPI = manager;
-      new TreeMonitor(self, manager, false);
+      self.treeMonitor = new TreeMonitor(self, manager, false);
       manager.putTree(self.treeId, self);
     },
     undoLastAction() {

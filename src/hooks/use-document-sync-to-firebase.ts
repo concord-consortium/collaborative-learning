@@ -33,12 +33,17 @@ export function useDocumentSyncToFirebase(
   useEffect(() => {
     if (!readOnly) {
       // enable history tracking on this document
-      // document.treeManagerAPI
+      if (document.treeMonitor) {
+        document.treeMonitor.enabled = true;
+      }
       return () => {
         // disable history tracking on this document
+        if (document.treeMonitor) {
+          document.treeMonitor.enabled = false;
+        }
       };
     }
-  }, [readOnly]);
+  }, [readOnly, document.treeMonitor]);
 
   if (!readOnly && DEBUG_DOCUMENT) {
     // provide the document to the console so developers can inspect its content

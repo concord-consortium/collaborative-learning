@@ -106,6 +106,7 @@ export function withoutUndo() {
 export class TreeMonitor {
   tree: Instance<typeof Tree>;
   manager: TreeManagerAPI;
+  enabled = false;
 
   constructor(tree: Instance<typeof Tree>,  manager: TreeManagerAPI, includeHooks: boolean) {
     // We don't care how `this` is handled by createAcionTrackingMiddleware
@@ -118,8 +119,13 @@ export class TreeMonitor {
 
     const treeMonitorMiddleware = createActionTrackingMiddleware3<CallEnv>({
       filter(call) {
-        if (call.env) {
-          // already recording
+
+        // Note: If we switch to a synchronizing readonly documents over the network using
+        // the history instead of the document content, then we'll need to enable 
+        // the middleware even for readOnly documents. So then `enabled` would just mean that
+        // the recording of events is enabled.
+        if (!self.enabled || call.env) {
+          // monitoring is disabled ore we are already recording 
           return false;
         }
         return true;
