@@ -8,7 +8,7 @@ interface IProps {
   caseIndex: any;
   model: ToolTileModelType;
   totalCases: number;
-  readOnly: any; // TODO - find the correct pattern
+  readOnly: any; // TODO - find the correct type or pattern for this
 }
 
 export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, totalCases, readOnly }) => {
