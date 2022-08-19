@@ -162,6 +162,11 @@ $default-button-border-color: #979797;
     button.delete-card {
       background-color: transparent;
       border:0px;
+      svg {
+        path {
+          stroke: $workspace-teal;
+        }
+      }
     }
 
     .data-area {
@@ -204,6 +209,13 @@ $default-button-border-color: #979797;
 
         .name .candidate-input {
           text-align: right;
+        }
+        &.singleattr {
+          border-color: $charcoal-light-border;
+          .name {
+            background-color: $workspace-teal-light-7;
+            border-color: $charcoal-light-border;
+          }
         }
       }
     }

@@ -1,8 +1,10 @@
 import { observer } from "mobx-react";
+import classNames from "classnames";
 import React, { useState, useEffect } from "react";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DeckContentModelType } from "../deck-content";
 import { NewCardAttribute } from "./new-card-attribute";
+
 
 interface IProps {
   caseIndex: any;
@@ -18,6 +20,7 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
   const [candidate, setCandidate] = useState("");
   const [currentCaseId, setCurrentCaseId] = useState("");
   const [attrKeys, setAttrKeys] = useState(["label1"]);
+  const [readyForNewAttribute, setReadyForNewAttribute] = useState(false);
 
   useEffect(()=>{
     setCurrentCaseId(() => {
@@ -30,6 +33,10 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
     const filteredKeys = raw ? Object.keys(raw).filter(k => k !== "__id__") : ["label1"];
     setAttrKeys(filteredKeys);
   },[model]);
+
+  useEffect(()=> {
+    // console.log("candidate change effect CANDIDATE: ", candidate);
+  }, [candidate]);
 
   const handleCandidateInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCandidate(event.target.value);
@@ -69,13 +76,19 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
     }
     setActiveFacet("");
     setActiveAttrId("");
+    setReadyForNewAttribute(true);
   };
+
+  const pairClassNames = classNames(
+    "attribute-name-value-pair", `${currentCaseId}`,
+    { singleattr: content.existingAttributes().length === 1 && !readyForNewAttribute }
+  );
 
   return (
     <>
       { attrKeys.map((a) => {
         return (
-          <div key={a} className={`attribute-name-value-pair ${currentCaseId}`}>
+          <div key={a} className={pairClassNames}>
             <div className={`name ${a}`} onDoubleClick={activateInput}>
               { activeAttrId === a && activeFacet === "name" && !readOnly
                 ? <input
@@ -109,7 +122,11 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
           </div>
         );
       })}
-       <NewCardAttribute model={model} currentCaseIndex={caseIndex}/>
+
+      { readyForNewAttribute &&
+        <NewCardAttribute model={model} currentCaseIndex={caseIndex}/>
+      }
+
     </>
   );
 });

@@ -80,6 +80,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   };
 
   useEffect(()=>{
+    //console.log("attributes", content.existingAttributes());
     setDefaultTitle();
   },[]);
 
@@ -175,7 +176,9 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           }
         </div>
         <div className="data-area">
-          <DeckCardData caseIndex={caseIndex} model={model} totalCases={totalCases} readOnly={readOnly} />
+          { totalCases > 0 &&
+            <DeckCardData caseIndex={caseIndex} model={model} totalCases={totalCases} readOnly={readOnly} />
+          }
         </div>
       </div>
       <div>replace me with image toolbar component</div>
