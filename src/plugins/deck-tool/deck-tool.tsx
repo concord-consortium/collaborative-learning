@@ -113,6 +113,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   }
 
   function deleteCase(){
+    alert("the modal -- see src/components/delete-button");
     const thisCaseId = content.dataSet.caseIDFromIndex(caseIndex);
     if (thisCaseId) {
       content.dataSet.removeCases([thisCaseId]);
