@@ -31,15 +31,14 @@ export const DeckContentModel = ToolContentModel
       return self.dataSet.name;
     },
     get attributes(){
-      console.log(self.dataSet.attributes)
       return self.dataSet.attributes;
     },
     caseByIndex(index:number){
       return self.dataSet.getCanonicalCaseAtIndex(index);
     },
-    // hasCases(){
-    //   return
-    // },
+    totalCases(){
+      return self.dataSet.cases.length;
+    },
     allCases(){
       return self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length);
       // const allCasesArr = self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length);
@@ -71,34 +70,11 @@ export const DeckContentModel = ToolContentModel
   }))
   .actions(self => ({
     afterCreate(){
-      if(self.dataSet.name){
-        console.log("LETS DELETE THINGS")
-      }
       if (!self.dataSet.name){
         this.createEmptyDataSetAndAddCase();
-
-        // const firstCaseId = uuid();
-        // const firstAttrId = uuid();
-
-        // self.dataSet.setName("Data Card Collection");
-        // self.dataSet.addAttributeWithID({
-        //   id: firstAttrId,
-        //   name: "Label1"
-        // });
-
-        // self.dataSet.addCanonicalCasesWithIDs([
-        //   { __id__: firstCaseId, [firstAttrId]: "" },
-        // ]);
       }
       if(self.dataSet.name && self.dataSet.cases.length < 1){
         this.setEmptyCaseOnExistingDataSet();
-
-        // const firstCaseId = uuid();
-        // const firstAttrId = uuid();
-
-        // self.dataSet.addCanonicalCasesWithIDs([
-        //   { __id__: firstCaseId, [firstAttrId]: "" },
-        // ]);
       }
     },
     createEmptyDataSetAndAddCase(){
@@ -123,9 +99,6 @@ export const DeckContentModel = ToolContentModel
         { __id__: firstCaseId, [firstAttrId]: "" },
       ]);
     },
-    // setDescription(text: string) {
-    //   self.deckDescription = text;
-    // },
     setTitle(title: string) {
       setTileTitleFromContent(self, title);
     },
