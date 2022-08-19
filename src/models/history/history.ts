@@ -1,4 +1,4 @@
-import { types, IJsonPatch, SnapshotIn } from "mobx-state-tree";
+import { types, IJsonPatch, SnapshotIn, Instance } from "mobx-state-tree";
 import { observable } from "mobx";
 
 export const TreePatchRecord = types.model("TreePatchRecord", {
@@ -40,6 +40,7 @@ export const HistoryEntry = types.model("HistoryEntry", {
   activeExchanges: observable.map<string, string>({}, {name: "activeExchanges"})
 }));
 export interface HistoryEntrySnapshot extends SnapshotIn<typeof HistoryEntry> {}
+export interface HistoryEntryType extends Instance<typeof HistoryEntry> {}
 
 export enum HistoryOperation {
   Undo = "undo",
