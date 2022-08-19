@@ -16,7 +16,7 @@ import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { Tree } from "../history/tree";
-import { addTreeMonitor } from "../history/tree-monitor";
+import { TreeMonitor } from "../history/tree-monitor";
 import { ISharedModelDocumentManager, SharedModelDocumentManager } from "../tools/shared-model-document-manager";
 import { ITileEnvironment } from "../tools/tool-types";
 import { TreeManager } from "../history/tree-manager";
@@ -286,7 +286,7 @@ export const DocumentModel = Tree.named("Document")
       // TODO: it would be nice to unify this with the code in createDocumentModel
       const manager = TreeManager.create({document: {}, undoStore: {}});
       self.treeManagerAPI = manager;
-      addTreeMonitor(self, manager, false);
+      new TreeMonitor(self, manager, false);
       manager.putTree(self.treeId, self);
     },
     undoLastAction() {
