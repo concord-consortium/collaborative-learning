@@ -1,4 +1,4 @@
-import { destroy, Instance, types, getEnv } from "mobx-state-tree";
+import { destroy, Instance, types, getEnv, flow } from "mobx-state-tree";
 import { when } from "mobx";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { SharedModel, SharedModelType } from "./shared-model";
@@ -9,6 +9,10 @@ import { DocumentContentModel } from "../document/document-content";
 import { createDocumentModel, DocumentModelType } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
 
+function wait(millis: number) {
+  return new Promise(resolve => setTimeout(resolve, millis));
+}
+
 const TestSharedModel = SharedModel
   .named("TestSharedModel")
   .props({
@@ -18,7 +22,12 @@ const TestSharedModel = SharedModel
   .actions(self => ({
     setValue(value: string){
       self.value = value;
-    }
+    },
+    setValueAsync: flow(function *setValueAsync(value: string){
+      self.value = value;
+      yield wait(20);
+      self.value = value+1;
+    })
   }));
 interface TestSharedModelType extends Instance<typeof TestSharedModel> {}
 
@@ -61,11 +70,21 @@ const TestTile = ToolContentModel
   .named("TestTile")
   .props({
     type: "TestTile", 
-    updateCount: 0})
+    updateCount: 0,
+    something: 0
+  })
   .actions(self => ({
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       self.updateCount++;
-    }
+    },
+    doSomething() {
+      self.something += 1;
+    },
+    doSomethingAsync: flow(function *doSomethingAsync() {
+      self.something += 1;
+      yield wait(20);
+      self.something += 1;
+    })
   }));
 interface TestTileType extends Instance<typeof TestTile> {}
 
@@ -137,6 +156,72 @@ describe("SharedModelDocumentManager", () => {
     expect(sharedModel).toBeDefined();
 
     sharedModel.setValue("something");
+
+    await expectUpdateToBeCalledTimes(tileContent, 1);
+
+    destroy(docModel);
+  });
+
+  it("calls tileContent#updateAfterSharedModelChanges only for shared model changes", async () => {
+    const doc = DocumentContentModel.create({
+      sharedModelMap: {
+        "sm1": {
+          sharedModel: {
+            id: "sm1",
+            type: "TestSharedModel"
+          },
+          tiles: [ "t1" ]
+        }
+      },
+      tileMap: {
+        "t1": {
+          id: "t1",
+          content: {
+            type: "TestTile",
+          },
+        }
+      }
+    });
+
+    // This is needed to setup the tree monitor and shared model manager
+    const docModel = createDocumentModel({
+      uid: "1",
+      type: ProblemDocument,
+      key: "test",
+      content: doc as any
+    });
+    
+    const toolTile = doc.tileMap.get("t1");
+    assertIsDefined(toolTile);
+    const tileContent = toolTile.content as TestTileType;
+    assertIsDefined(tileContent);
+    await expectUpdateToBeCalledTimes(tileContent, 0);
+
+    const sharedModel = doc.sharedModelMap.get("sm1")?.sharedModel as TestSharedModelType;
+    expect(sharedModel).toBeDefined();
+
+    // We call an async action on the tile
+    // Then while the async action is running we change the sharedModel
+    // In the end 'updateAfterSharedModelChanges' should only be called 
+    // one time. This isn't critical because it shouldn't break anything
+    // if 'updateAfterSharedModelChanges' is called twice. It is just 
+    // inefficient and can make debugging confusing if it does.
+    //
+    // This is a tricky case because the middleware recording changes to 
+    // the shared model will have 2 'recordAction' functions going at the 
+    // same time. Only the one started by the shared model change should
+    // actually cause 'updateAfterSharedModelChanges' to be called.
+    const doSomethingPromise = tileContent.doSomethingAsync();
+    // Give the middleware time to handle this call first
+    await wait(1);
+    sharedModel.setValue("new value");
+
+    // make sure doSomethingAsync is finished
+    await doSomethingPromise;
+
+    // Give the middleware time to handle the end of the calls, it is really
+    // difficult to wait for this precisely so we just wait with a timeout
+    await wait(10);
 
     await expectUpdateToBeCalledTimes(tileContent, 1);
 
