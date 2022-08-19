@@ -30,11 +30,25 @@ export function useDocumentSyncToFirebase(
   const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
   !readOnly && (user.id !== uid) && console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
-  if (DEBUG_DOCUMENT && !readOnly) {
-    // Only update the currentDocument with writable documents
+  useEffect(() => {
+    if (!readOnly) {
+      // enable history tracking on this document
+      // document.treeManagerAPI
+      return () => {
+        // disable history tracking on this document
+      };
+    }
+  }, [readOnly]);
+
+  if (!readOnly && DEBUG_DOCUMENT) {
+    // provide the document to the console so developers can inspect its content
+    // and history. Only !readOnly documents are made available, this way it is obvious
+    // which document currentDocument is pointing to.
     // useDocumentSyncToFirebase is called with readOnly documents too
     (window as any).currentDocument = document;
   }
+  
+
 
   // sync visibility (public/private) for problem documents
   useSyncMstPropToFirebase<typeof document.visibility>({
