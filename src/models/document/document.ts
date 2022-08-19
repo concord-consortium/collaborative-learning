@@ -189,7 +189,9 @@ export const DocumentModel = Tree.named("Document")
 
     setContent(snapshot: DocumentContentSnapshotType) {
       if (self.content) {
+        self.content.willUpdateContent();
         applySnapshot(self.content, snapshot);
+        self.content.didUpdateContent();
       }
       else {
         self.content = DocumentContentModel.create(snapshot);

@@ -58,6 +58,19 @@ export const DataSet = types.model("DataSet", {
         disposers: { [index: string]: () => void } = {};
   let inFlightActions = 0;
 
+  function rebuildMaps() {
+    // build attrIDMap
+    self.attributes.forEach(attr => {
+      attrIDMap[attr.id] = attr;
+      attrNameMap[attr.name] = attr.id;
+    });
+
+    // build caseIDMap
+    self.cases.forEach((aCase, index) => {
+      caseIDMap[aCase.__id__] = index;
+    });
+  }
+
   function derive(name?: string) {
     return { id: uniqueId(), sourceID: self.id, name: name || self.name, attributes: [], cases: [] };
   }
@@ -279,6 +292,7 @@ export const DataSet = types.model("DataSet", {
       get isSynchronizing() {
         return inFlightActions > 0;
       },
+      rebuildMaps,
       onSynchronized() {
         if (inFlightActions <= 0) {
           return Promise.resolve(self);
@@ -323,16 +337,7 @@ export const DataSet = types.model("DataSet", {
               { srcDataSet, derivationSpec = {} } = context,
               { attributeIDs, filter, synchronize } = derivationSpec;
 
-        // build attrIDMap
-        self.attributes.forEach(attr => {
-          attrIDMap[attr.id] = attr;
-          attrNameMap[attr.name] = attr.id;
-        });
-
-        // build caseIDMap
-        self.cases.forEach((aCase, index) => {
-          caseIDMap[aCase.__id__] = index;
-        });
+        rebuildMaps();
 
         // set up onAction handler to perform synchronization with source
         if (srcDataSet && synchronize) {

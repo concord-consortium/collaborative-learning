@@ -1,6 +1,7 @@
 import { cloneDeep } from "lodash";
-import { getParent, getSnapshot, getType, 
-  Instance, SnapshotIn, SnapshotOut, types, ISerializedActionCall } from "mobx-state-tree";
+import {
+  getParent, getSnapshot, getType, Instance, ISerializedActionCall, SnapshotIn, SnapshotOut, types
+} from "mobx-state-tree";
 import { GeometryContentModelType } from "./geometry/geometry-content";
 import { isPlaceholderContent } from "./placeholder/placeholder-content";
 import { ITileExportOptions } from "./tool-content-info";
@@ -132,6 +133,12 @@ export const ToolTileModel = types
     },
     onTileAction(call: ISerializedActionCall) {
       self.content.onTileAction?.(call);
+    },
+    willUpdateContent() {
+      self.content.willUpdateContent?.();
+    },
+    didUpdateContent() {
+      self.content.didUpdateContent?.();
     },
     willRemoveFromDocument() {
       return self.content.willRemoveFromDocument?.();

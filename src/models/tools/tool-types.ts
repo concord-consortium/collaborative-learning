@@ -44,9 +44,17 @@ export interface IToolContentModelHooks {
   onTileAction?(call: ISerializedActionCall): void,
 
   /**
+   * These functions are called before and after applySnapshot() is used to replace the document
+   * content, e.g. in response to a remote/firebase update, to give clients an opportunity to
+   * rebuild any caches, or otherwise respond to the fact that the underlying model is being replaced.
+   */
+  willUpdateContent?(): void,
+  didUpdateContent?(): void,
+
+  /**
    * This is called before the tile is removed from the row of the document.
    * Immediately after the tile is removed from the row it is also removed from
-   * the tileMap which is the actual container of the tile. 
+   * the tileMap which is the actual container of the tile.
    */
   willRemoveFromDocument?(): void
 }
@@ -114,18 +122,18 @@ export const ToolContentModel = types.model("ToolContentModel", {
   }))
   .actions(self => ({
     /**
-     * This will be called automatically by the tree monitor. 
+     * This will be called automatically by the tree monitor.
      * Currently the call tree looks like:
      * addTreeMonitor.recordAction
      * └ Tree.handleSharedModelChanges
      *   └ Tree.updateTreeAfterSharedModelChangesInternal
      *     └ Tree.updateTreeAfterSharedModelChanges
      *       └ tile.content.updateAfterSharedModelChanges
-     * 
+     *
      * It is also called after the manager has finished applying patches
      * during an undo or replying history.
-     * 
-     * @param sharedModel 
+     *
+     * @param sharedModel
      */
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       throw new Error("not implemented");
