@@ -31,6 +31,17 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
     setAttrKeys(filteredKeys);
   },[model]);
 
+  const handleCandidateInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setCandidate(event.target.value)
+  }
+
+  const handleCandidateKeyDown = (event:  React.KeyboardEvent<HTMLInputElement>) => {
+    const { key } = event;
+    if ( key === "Enter"){
+      saveClear();
+    }
+  };
+
   function activateInput(e:any){
     const attrToEdit = (e.target.classList[1]);
     const facetToEdit = (e.target.classList[0]);
@@ -68,10 +79,12 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
             <div className={`name ${a}`} onDoubleClick={activateInput}>
               { activeAttrId === a && activeFacet === "name" && !readOnly
                 ? <input
+                    className="candidate-input"
                     key={`${a}_name`}
                     type="text"
                     value={candidate}
-                    onChange={(e:any) => setCandidate(e.target.value)}
+                    onChange={handleCandidateInputChange}
+                    onKeyDown={handleCandidateKeyDown}
                     onBlur={saveClear}
                   />
                 : content.dataSet.attrFromID(a).name
@@ -79,12 +92,14 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
             </div>
 
             <div className={`value ${a}`} onDoubleClick={activateInput}>
-              { activeAttrId === a && activeFacet === "value"
+              { activeAttrId === a && activeFacet === "value" && !readOnly
                 ? <input
+                    className="candidate-input"
                     key={`${a}_value`}
                     type="text"
                     value={candidate || ""}
-                    onChange={(e:any) => setCandidate(e.target.value)}
+                    onChange={handleCandidateInputChange}
+                    onKeyDown={handleCandidateKeyDown}
                     onBlur={saveClear}
                   />
                 : content.dataSet.getValue(currentCaseId, a)
