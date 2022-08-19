@@ -12,8 +12,8 @@ interface IProps {
 export const NewCardAttribute: React.FC<IProps> = observer((props) => {
   return (
     <div className="add-attribute-area">
-      <div className="new-attribute">new attribute input</div>
-      <div className="new-value">new attribute data input</div>
+      <div className="new-attribute" style={{color: "silver"}}><em>new attribute</em></div>
+      <div className="new-value"style={{color: "silver"}}><em>new data</em></div>
     </div>
   );
 });

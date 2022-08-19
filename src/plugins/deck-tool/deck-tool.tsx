@@ -118,8 +118,8 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
         <div className="panel nav">
           <div className="card-number-of-listing">
             { totalCases > 0
-              ? <>Card { caseIndex + 1 } of { totalCases } <code>[{ caseIndex }]</code></>
-              : <><small>Add a card <code>caseIndex: [{ caseIndex }]</code></small></>
+              ? <>Card { caseIndex + 1 } of { totalCases } </>
+              : <>Add a card</>
             }
           </div>
           <div className="card-nav-buttons">
