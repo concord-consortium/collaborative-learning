@@ -41,6 +41,11 @@ export const DeckContentModel = ToolContentModel
     allCases(){
       return self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length);
     },
+    allCasesJsonString(){
+      const obj = this.allCases();
+      const str = JSON.stringify(obj);
+      return str;
+    },
     existingAttributesWithNames(){
       return self.dataSet.attributes.map((a) => {
         return { "attrName": a.name, "attrId": a.id };
@@ -59,6 +64,7 @@ export const DeckContentModel = ToolContentModel
         `{`,
         `  "type": "Deck",`,
         `  "dataSet.name": "${self.dataSet.name}"`,
+        `  "dataSet.allCases": "${this.allCasesJsonString()}"`,
         `}`
       ].join("\n");
     }
@@ -78,6 +84,8 @@ export const DeckContentModel = ToolContentModel
             I would like to make this id dynamic
             Couldn't find a dataSet api method that would do it?
             I have a uuid based on commented out below...
+            ...actually I take it all back - maybe it doesn't need to be dynamic
+            since it's scoped to this deck?
         */
 
         self.dataSet.addAttributeWithID({
