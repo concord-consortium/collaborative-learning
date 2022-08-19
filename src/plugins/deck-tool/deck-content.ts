@@ -40,9 +40,14 @@ export const DeckContentModel = ToolContentModel
     allCases(){
       return self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length);
     },
-    existingAttributes(){
+    existingAttributesWithNames(){
       return self.dataSet.attributes.map((a) => {
         return { "attrName": a.name, "attrId": a.id };
+      });
+    },
+    existingAttributes(){
+      return self.dataSet.attributes.map((a) => {
+        return a.id
       });
     },
     attrById(str: string){
@@ -73,9 +78,11 @@ export const DeckContentModel = ToolContentModel
           id: "label1",
           name: "Label 1"
         });
-        addCanonicalCasesToDataSet(self.dataSet, [{ label1: "i m a value" }]);
-
-
+        self.dataSet.addAttributeWithID({
+          id: "label2",
+          name: "Label 2"
+        });
+        addCanonicalCasesToDataSet(self.dataSet, [{ label1: "one", label2: "two" }]);
 
         /* dynamic version to save for later
 
@@ -103,6 +110,10 @@ export const DeckContentModel = ToolContentModel
       self.dataSet.setCanonicalCaseValues([
         { __id__: caseId, [attrId]: val }
       ]);
+    },
+    addNewCase(atts: string[]){
+      const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
+      addCanonicalCasesToDataSet(self.dataSet, [obj]);
     }
   }));
 

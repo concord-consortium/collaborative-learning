@@ -33,7 +33,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   useEffect(()=>{
     setCanDecrement(caseIndex > 0);
     setCanIncrement(caseIndex < totalCases - 1);
-  },[caseIndex]);
+  },[caseIndex, totalCases]);
 
   const setDefaultTitle = () => {
     if (!content.metadata.title || content.metadata.title === ""){
@@ -42,9 +42,12 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   };
 
+  useEffect(() => {
+    console.log('now?')
+    setTotalCases(content.totalCases());
+  })
   //set the title when we arrive
   useEffect(() => {
-    setTotalCases(content.totalCases());
     setDefaultTitle();
   }, []);
 
@@ -72,11 +75,8 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   };
 
   function addNewCase(){
-    alert("addNewCase()")
-    // content.dataSet.addCanonicalCasesWithIDs([
-    //   { __id__: `${uuid()}` },
-    // ]);
-    // setCaseIndex(allCases.length);
+    content.addNewCase(content.existingAttributes());
+    setTotalCases(content.totalCases());
   }
 
   function deleteCase(){
