@@ -318,8 +318,11 @@ export function withoutUndo() {
 
     const call = runningCalls.get(actionCall);
     if (!call){
-        throw new Error("cannot find action tracking middleware call, " + 
-          "perhaps the middleware is not added to this tree");
+        return;
+        // Rows in the problem tab have a root Unit instead of a DocumentModel, which is what sets up the
+        // middleware, so we cannot safely throw an error here.
+        // throw new Error("cannot find action tracking middleware call, " + 
+        //   "perhaps the middleware is not added to this tree");
     }
     if (!call.env) {
         throw new Error("environment is not setup on action tracking middleware call");
