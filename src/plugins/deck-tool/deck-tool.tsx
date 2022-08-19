@@ -18,7 +18,6 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const [canIncrement, setCanIncrement] = useState(true);
   const [canDecrement, setCanDecrement] = useState(false);
 
-  console.log("ALL CASES: ", content.allCases());
   function nextCase(){
     if ( caseIndex < totalCases - 1 ) {
       setCaseIndex(caseIndex + 1);
@@ -30,6 +29,10 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
       setCaseIndex(caseIndex - 1);
     }
   }
+
+  useEffect(() => {
+    setTotalCases(content.totalCases());
+  });
 
   useEffect(()=>{
     setCanDecrement(caseIndex > 0);
@@ -43,16 +46,11 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   };
 
-  useEffect(() => {
-    setTotalCases(content.totalCases());
-    setDefaultTitle();
-  },[model]);
-
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     content.setTitle(event.target.value);
   };
 
-  const handleTitleClick = (event: any) => {
+  const handleTitleClick = () => {
     if (!readOnly){
       setIsEditing(true);
     }
@@ -82,6 +80,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     if (thisCaseId) {
       content.dataSet.removeCases([thisCaseId]);
     }
+    setTotalCases(content.totalCases());
   }
 
   const previousButtonClasses = classNames(
@@ -132,7 +131,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           </button>
         </div>
         <div className="data-area">
-          <DeckCardData caseIndex={caseIndex} model={model} totalCases={totalCases} />
+          <DeckCardData caseIndex={caseIndex} model={model} totalCases={totalCases} readOnly={readOnly} />
         </div>
       </div>
       <div>replace me with image toolbar component</div>

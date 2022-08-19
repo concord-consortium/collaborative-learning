@@ -8,9 +8,10 @@ interface IProps {
   caseIndex: any;
   model: ToolTileModelType;
   totalCases: number;
+  readOnly: any; // TODO - find the correct pattern
 }
 
-export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, totalCases }) => {
+export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, totalCases, readOnly }) => {
   const content = model.content as DeckContentModelType;
   const [activeAttrId, setActiveAttrId] = useState("");
   const [activeFacet, setActiveFacet] = useState("");
@@ -65,7 +66,7 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
         return (
           <div key={a} className={`attribute-name-value-pair ${currentCaseId}`}>
             <div className={`name ${a}`} onDoubleClick={activateInput}>
-              { activeAttrId === a && activeFacet === "name"
+              { activeAttrId === a && activeFacet === "name" && !readOnly
                 ? <input
                     key={`${a}_name`}
                     type="text"
