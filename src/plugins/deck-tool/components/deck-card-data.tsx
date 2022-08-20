@@ -23,6 +23,9 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
   const [readyForNewAttribute, setReadyForNewAttribute] = useState(false);
 
   useEffect(()=>{
+    console.log('make stuff re-render')
+  })
+  useEffect(()=>{
     setCurrentCaseId(() => {
       return content.caseByIndex(caseIndex)?.__id__ || "no_id";
     });

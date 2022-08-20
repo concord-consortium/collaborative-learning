@@ -12,12 +12,22 @@ import "./deck-tool.scss";
 export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const { documentContent, model, readOnly } = props;
   const content = model.content as DeckContentModelType;
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [caseIndex, setCaseIndex] = useState(0);
-  const [totalCases, setTotalCases] = useState(0);
+  const [totalCases, setTotalCases] = useState(content.totalCases());
   const [canIncrement, setCanIncrement] = useState(true);
   const [canDecrement, setCanDecrement] = useState(false);
   const [hideDelete, setHideDelete] = useState(false);
+
+  useEffect(() => {
+    setDefaultTitle();
+  }, [content]);
+
+  useEffect(()=>{
+    setCanDecrement(caseIndex > 0);
+    setCanIncrement(caseIndex < totalCases - 1);
+    setHideDelete(shouldHideDelete() || false);
+  },[caseIndex, totalCases]);
 
   function nextCase(){
     if ( caseIndex < totalCases - 1 ) {
@@ -35,20 +45,6 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     return totalCases < 1;
   }
 
-  useEffect(() => {
-    setTotalCases(content.totalCases());
-  }, [content]);
-
-  useEffect(()=>{
-    setCanDecrement(caseIndex > 0);
-    setCanIncrement(caseIndex < totalCases - 1);
-    setHideDelete(shouldHideDelete() || false);
-  },[caseIndex, totalCases]);
-
-  useEffect(()=>{
-    goToLatestCase();
-  }, [totalCases]);
-
   const setDefaultTitle = () => {
     if (!content.metadata.title || content.metadata.title === ""){
       const count = documentContent?.getElementsByClassName('deck-tool-tile').length;
@@ -56,24 +52,20 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   };
 
-  useEffect(()=>{
-    setDefaultTitle();
-  },[]);
-
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     content.setTitle(event.target.value);
   };
 
   const handleTitleClick = () => {
     if (!readOnly){
-      setIsEditing(true);
+      setIsEditingTitle(true);
     }
   };
 
   const handleTitleKeyDown = (event:  React.KeyboardEvent<HTMLInputElement>) => {
     const { key } = event;
     if ( key === "Enter"){
-      setIsEditing(false);
+      setIsEditingTitle(false);
     }
   };
 
@@ -81,25 +73,23 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     if (content.metadata.title === ""){
       setDefaultTitle();
     }
-    setIsEditing(false);
+    setIsEditingTitle(false);
   };
 
   function addNewCase(){
-    content.addNewCase(content.existingAttributes());
-    setTotalCases(content.totalCases());
+    console.log("CALLED: addNewCase using keys: ", content.existingAttributes());
+    content.addNewCaseFromAttrKeys(content.existingAttributes());
+    setTotalCases(totalCases + 1);
+    setCaseIndex(totalCases);
   }
 
   function deleteCase(){
-    alert("the modal -- see src/components/delete-button");
+    // TODO -- modal -- see src/components/delete-button");
     const thisCaseId = content.dataSet.caseIDFromIndex(caseIndex);
     if (thisCaseId) {
       content.dataSet.removeCases([thisCaseId]);
     }
-    setTotalCases(content.totalCases());
-  }
-
-  function goToLatestCase(){
-    setCaseIndex(totalCases - 1);
+    setTotalCases(totalCases - 1);
   }
 
   const previousButtonClasses = classNames(
@@ -116,7 +106,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     <div className="deck-tool">
       <div className="deck-toolbar">
         <div className="panel title">
-          { isEditing
+          { isEditingTitle
           ? <input
               className="deck-title-input-editing"
               value={content.metadata.title}

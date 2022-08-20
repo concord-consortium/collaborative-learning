@@ -76,25 +76,12 @@ export const DeckContentModel = ToolContentModel
   .actions(self => ({
     afterCreate(){
       if (!self.dataSet.name){
-
         self.dataSet.setName("Data Card Collection");
-
         self.dataSet.addAttributeWithID({
-          id: "label1",
+          id: "label1", // TODO - assuming this is ok since cases are scoped to DataSet?
           name: ""
         });
         addCanonicalCasesToDataSet(self.dataSet, [{ label1: "" }]);
-
-        // const firstCaseId = uuid();
-        // const firstAttrId = uuid();
-
-        // self.dataSet.addAttributeWithID({
-        //   id: firstAttrId,
-        //   name: " "
-        // });
-
-        // addCanonicalCasesToDataSet(self.dataSet, [{ [firstAttrId]: "" }]);
-
       }
     },
     setTitle(title: string) {
@@ -108,7 +95,7 @@ export const DeckContentModel = ToolContentModel
         { __id__: caseId, [attrId]: val }
       ]);
     },
-    addNewCase(atts: string[]){
+    addNewCaseFromAttrKeys(atts: string[]){
       const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
       addCanonicalCasesToDataSet(self.dataSet, [obj]);
     }
