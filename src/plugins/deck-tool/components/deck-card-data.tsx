@@ -24,11 +24,12 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
 
   const makeNewAtt = () => {
     content.addNewAtt();
+    setAttrKeys(content.existingAttributes);
   }
 
   return (
     <>
-      <button onClick={makeNewAtt}>Make new att</button>
+      <button style={{ position: "absolute", bottom: "100px" }}onClick={makeNewAtt}>Make new att</button>
       { attrKeys.map((attrKey) => {
           return <CaseAttribute key={attrKey} model={ model } caseId={ currentCaseId } attrKey={attrKey} readOnly={readOnly} />
         })
