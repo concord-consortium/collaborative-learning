@@ -227,6 +227,13 @@ $default-button-border-color: #979797;
       }
     }
 
+    .attribute-name-value-pair.has-been-saved,
+    .attribute-name-value-pair.has-been-saved:hover {
+      .ghost {
+        display: none;
+      }
+    }
+
     .attribute-name-value-pair.not-saved:hover{
       .ghost {
         display: inherit;

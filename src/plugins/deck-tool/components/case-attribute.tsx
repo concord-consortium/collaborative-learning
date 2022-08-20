@@ -24,13 +24,39 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
   const [labelN, setLabelN] = useState(`Label ${attrsCount}`);
 
   useEffect(()=>{
-    //if we have any initial values then they have been saved
     const initialValue = content.dataSet.getValue(caseId, attrKey);
     const initialLabel = content.dataSet.attrFromID(attrKey).name.length;
-    if (initialValue || initialLabel > 0 ){
-      setHasBeenSaved(true);
+
+    const hasValue = initialValue !== undefined && initialValue !== "";
+    const hasName = initialLabel > 0;
+
+    console.log("VAL: ", initialValue, "-> hasValue: ", hasValue);
+    console.log("LAB: ", initialLabel, "-> hasName: ", hasName);
+
+    if (hasValue || hasName){
+      setHasBeenSaved(true)
+    } else {
+      setHasBeenSaved(false)
     }
-  },[content]);
+
+    console.log("SOooo has it been saved? ", hasBeenSaved);
+    // console.log("1 init val: ", initialValue);
+
+    // const initialLabel = content.dataSet.attrFromID(attrKey).name.length;
+    // console.log("2 init label: ", initialLabel);
+
+    // if (initialValue === undefined && initialLabel === 0 ){
+    //   console.log('3a about to set')
+    //   setHasBeenSaved(false);
+    //   console.log('4a done setting')
+    //   console.log("5a hasBeenSaved? ", hasBeenSaved);
+    // } else {
+    //   console.log('3b about to set')
+    //   setHasBeenSaved(true);
+    //   console.log('4b done setting')
+    //   console.log("5b hasBeenSaved? ", hasBeenSaved);
+    // }
+  });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (isEditingFacet === "name"){
