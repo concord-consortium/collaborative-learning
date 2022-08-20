@@ -19,19 +19,22 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
   const [activeFacet, setActiveFacet] = useState("");
   const [candidate, setCandidate] = useState("");
   const [currentCaseId, setCurrentCaseId] = useState("");
-  const [attrKeys, setAttrKeys] = useState(["label1"]);
+  const [attrKeys, setAttrKeys] = useState(content.existingAttributes());
   const [readyForNewAttribute, setReadyForNewAttribute] = useState(false);
 
-  useEffect(()=>{
-    console.log('make stuff re-render')
-  })
   useEffect(()=>{
     setCurrentCaseId(() => {
       return content.caseByIndex(caseIndex)?.__id__ || "no_id";
     });
   }, [caseIndex]);
 
+  // lets start by basing things off existing attr keys
+  useEffect(() => {
+    console.log('use me!')
+  })
+
   useEffect(()=>{
+    console.log("use effect of model")
     // unless we are on a brand new deck with no attr names or values, we'll see the new att area
     const firstCase = content.dataSet.getCanonicalCaseAtIndex(0);
     const valLength = (firstCase?.label1 as string).length;

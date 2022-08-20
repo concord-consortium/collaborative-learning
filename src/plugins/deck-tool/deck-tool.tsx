@@ -77,7 +77,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   };
 
   function addNewCase(){
-    console.log("CALLED: addNewCase using keys: ", content.existingAttributes());
+    console.log("deck-tool > addNewCase(existingAttributes): ", content.existingAttributes());
     content.addNewCaseFromAttrKeys(content.existingAttributes());
     setTotalCases(totalCases + 1);
     setCaseIndex(totalCases);
@@ -144,7 +144,12 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
         </div>
         <div className="data-area">
           { totalCases > 0 &&
-            <DeckCardData caseIndex={caseIndex} model={model} totalCases={totalCases} readOnly={readOnly} />
+            <DeckCardData
+              caseIndex={caseIndex}
+              model={model}
+              totalCases={totalCases}
+              readOnly={readOnly}
+            />
           }
         </div>
       </div>
