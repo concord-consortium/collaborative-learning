@@ -90,6 +90,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
       content.dataSet.removeCases([thisCaseId]);
     }
     setTotalCases(totalCases - 1);
+    previousCase();
   }
 
   const previousButtonClasses = classNames(
