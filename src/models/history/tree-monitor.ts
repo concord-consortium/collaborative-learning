@@ -1,6 +1,6 @@
 import { addDisposer, addMiddleware, 
   getPath, 
-  getRoot, getMembers,
+  getRoot,
   getRunningActionContext, 
   IActionContext, 
   IJsonPatch, Instance, IPatchRecorder, isActionContextThisOrChildOf, 

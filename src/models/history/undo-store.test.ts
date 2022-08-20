@@ -405,7 +405,7 @@ it("can handle withoutUndo even when tree isn't monitored", async () => {
 });
 
 it("does not warn about withoutUndo when tree isn't monitored and DEBUG_UNDO is on", async () => {
-  const {tileContent, manager, undoStore, docModel} = setupDocument();
+  const {tileContent, docModel} = setupDocument();
 
   // disable the monitor
   docModel.treeMonitor!.enabled = false;
