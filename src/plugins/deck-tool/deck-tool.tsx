@@ -142,16 +142,16 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
             </button>
           }
         </div>
-        <div className="data-area">
-          { totalCases > 0 &&
-            <DeckCardData
-              caseIndex={caseIndex}
-              model={model}
-              totalCases={totalCases}
-              readOnly={readOnly}
-            />
-          }
-        </div>
+      </div>
+      <div className="data-area">
+        { totalCases > 0 &&
+          <DeckCardData
+            caseIndex={caseIndex}
+            model={model}
+            totalCases={totalCases}
+            readOnly={readOnly}
+          />
+        }
       </div>
       <div>replace me with image toolbar component</div>
     </div>

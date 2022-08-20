@@ -20,6 +20,10 @@ interface IProps {
   [ ] hover stuff
   [ ] modal?
 
+  save snippets:
+  content.setAttValue(caseId, attrKey, value);
+  content.setAttName(activeAttrId, label);
+
 */
 export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKey, readOnly }) => {
   const content = model.content as DeckContentModelType;
@@ -27,7 +31,7 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
   const [value, setValue] = useState("");
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [isEditingValue, setIsEditingValue] = useState(false)
-  const [isRealized, setIsRealized] = useState(false);
+  const [hasBeenSaved, setHasBeenSaved] = useState(false);
 
   useEffect(()=>{
     console.log('main effect on Attribute component');
@@ -46,6 +50,7 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
 
   const labelSave = () => {
     console.log('label save: ', label);
+    setHasBeenSaved(true);
   };
 
   const valueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,18 +66,25 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
 
   const valueSave = () => {
     console.log("val save: ", value);
+    setHasBeenSaved(true)
   };
 
-  const handleClick = () => {
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     //detect where click is and handle it - likely toggling various inputs and selections
+    console.log("handleClick: ", event.target)
   }
 
-  const handleDoubleClick = () => {
+  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     //detect where click is and handle it - likely toggling various inputs and selections
+    console.log("handleDoubleClick: ", event.target)
   }
 
   const pairClassNames = classNames(
-    "attribute-name-value-pair", `${attrKey}`, { realized: isRealized }
+    "attribute-name-value-pair",
+    `${attrKey}`,
+    { "editing-label": isEditingLabel},
+    { "editing-value": isEditingValue},
+    hasBeenSaved ? "has-been-saved" : "not-saved"
   );
 
   return (
@@ -105,10 +117,3 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
     </div>
   );
 });
-
-/* snippets we'll be needing
-
-  content.setAttValue(caseId, attrKey, value);
-  content.setAttName(activeAttrId, label);
-
-*/
