@@ -543,7 +543,6 @@
           "ordinal": 1,
           "title": "Cats 2022",
           "subtitle": "",
-          "disabled": [],
           "sections": [
             {
               "type": "help",
@@ -637,7 +636,6 @@
           "ordinal": 2,
           "title": "Schools 2022",
           "subtitle": "",
-          "disabled": [],
           "sections": [
             {
               "type": "help",
@@ -692,7 +690,7 @@
                       "filename": "curriculum/m2studio/images/MS2_EmploymentForm.png"
                     }
                   }
-                  
+
                 ]
               },
               "supports": []
