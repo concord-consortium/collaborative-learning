@@ -13,35 +13,31 @@ interface IProps {
   readOnly: any;
 }
 
-/* tasks
 
-  [ ] reimplement cards crud
-  [ ] add create of new attributes
-  [ ] hover stuff
-  [ ] modal?
-
-  save snippets:
-  content.setAttValue(caseId, attrKey, value);
-  content.setAttName(activeAttrId, label);
-
-*/
 export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKey, readOnly }) => {
   const content = model.content as DeckContentModelType;
-  const [label, setLabel] = useState("");
-  const [value, setValue] = useState("");
+  const [labelCandidate, setLabelCandidate] = useState("");
+  const [valueCandidate, setValueCandidate] = useState("");
   const [isEditingFacet, setIsEditingFacet] = useState("none");
   const [hasBeenSaved, setHasBeenSaved] = useState(false);
   const [attrsCount, setAttrsCount] = useState(content.existingAttributes().length);
   const [labelN, setLabelN] = useState(`Label ${attrsCount}`)
 
   useEffect(()=>{
-    console.log('main effect on Attribute component');
+    //console.log('main effect on Attribute component');
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const [facet, attr, status] = event.currentTarget.classList;
-    const inputVal = event.target.value;
-    console.log("handleChange, given: ", facet, attr, status, value )
+    if (isEditingFacet === "name"){
+      const inputVal = event.target.value;
+      setLabelCandidate(inputVal);
+      console.log("labelCandidate: ", labelCandidate);
+    }
+    if (isEditingFacet === "value"){
+      const inputVal = event.target.value;
+      setValueCandidate(inputVal);
+      console.log("valueCandidate: ", valueCandidate);
+    }
   };
 
   const handleKeyDown = (event:  React.KeyboardEvent<HTMLInputElement>) => {
@@ -55,22 +51,47 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
     const [facet, attr, status] = event.currentTarget.classList;
     console.log("handleClick: ",  facet, attr, status);
 
-    setIsEditingFacet(facet);
+    //setIsEditingFacet(facet);
   }
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const [facet, attr, status] = event.currentTarget.classList;
     console.log("handleDoubleClick: ",  facet, attr, status);
+
+    activateInput(facet);
   }
 
   const saveClear = () => {
-    console.log("save value or label and clear: ", value, label)
-    setIsEditingFacet("")
+    console.log("we are editing a: ", isEditingFacet);
+    console.log("save value or label and clear: ", valueCandidate, labelCandidate);
+
+    if (isEditingFacet === "name"){
+      content.setAttName(attrKey, labelCandidate);
+    }
+
+    if (isEditingFacet === "value"){
+      content.setAttValue(caseId, attrKey, valueCandidate);
+    }
+    setIsEditingFacet("");
+    setHasBeenSaved(true); //might not need this
   };
 
   const activateInput = (facet: string) => {
-    console.log("open correct input")
     setIsEditingFacet(facet);
+    console.log("should activate input for facet: ", facet);
+
+    if (facet === "name"){
+      setLabelCandidate(content.attrById(attrKey).name);
+    }
+
+    if (facet === "value"){
+      const modelVal = content.dataSet.getValue(caseId, attrKey);
+      if (modelVal){
+        setValueCandidate(modelVal as string);
+      } else {
+        setValueCandidate("");
+      }
+    }
   }
 
   const pairClassNames = classNames(
@@ -91,16 +112,31 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
     hasBeenSaved ? "saved" : "unsaved"
   )
 
+  const shouldShowGhost = () => {
+    if (!hasBeenSaved){
+      return true;
+    }
+    else if (isEditingFacet === "name"){
+      return false;
+    }
+    else if (isEditingFacet === "value"){
+      return false;
+    }
+    else {
+      return true;
+    }
+  }
+
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onDoubleClick={handleDoubleClick} onClick={handleClick}>
-        { !hasBeenSaved &&
+        { shouldShowGhost() &&
           <div className="ghost">{ labelN }</div>
         }
         { isEditingFacet === "name"
           ? <input
               type="text"
-              value={label}
+              value={labelCandidate}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               onBlur={saveClear}
@@ -113,7 +149,7 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
         { isEditingFacet === "value"
           ? <input
               type="text"
-              value={value}
+              value={valueCandidate}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               onBlur={saveClear}
@@ -124,3 +160,10 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
     </div>
   );
 });
+
+/* snippets
+
+  const [labelCandidate, setLabelCandidate] = useState(content.attrById(attrKey).name);
+  const [valueCandidate, setValueCandidate] = useState(content.dataSet.getValue(caseId, attrKey));
+
+*/
