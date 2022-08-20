@@ -76,18 +76,17 @@ export function withoutUndo() {
   const call = runningCalls.get(actionCall);
   if (!call){
     // It is normal for there to be no running calls. This can happen in two cases:
-    //   - the document isn't being edited so the tree monitor is disabled (coming soon)
+    //   - the document isn't being edited so the tree monitor is disabled
     //   - the document content is part of the authored unit. In this case there is no
     //     DocumentModel so there is no middleware.
     if (DEBUG_UNDO) {
       try {
         const {context} = actionCall;
         const root = getRoot(context);
-        const rootViews = getMembers(root).views;
-        // Use duck typing to figure out if the root is a tree
-        if (rootViews.includes("treeId")) {
-          console.warn("cannot find action tracking middleware call, " + 
-              "perhaps the middleware is not added to this tree");
+        // Use duck typing to figure out if the root is a tree 
+        // and it tree monitor is enabled
+        if ((root as any).treeMonitor?.enabled) {
+          console.warn("cannot find action tracking middleware call");
         }
       } catch ( error ) {
         console.warn("cannot find action tracking middleware call, " + 

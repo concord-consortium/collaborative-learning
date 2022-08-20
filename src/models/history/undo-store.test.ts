@@ -13,6 +13,9 @@ import { nanoid } from "nanoid";
 import { cloneDeep } from "lodash";
 import { withoutUndo } from "./tree-monitor";
 
+// way to get a writable reference to libDebug
+const libDebug = require("../../lib/debug");
+
 function wait(millis: number) {
   return new Promise(resolve => setTimeout(resolve, millis));
 }
@@ -152,7 +155,7 @@ function setupDocument(initialContent? : DocumentContentSnapshotType) {
   const manager = docModel.treeManagerAPI as Instance<typeof TreeManager>;
   const undoStore = manager.undoStore;
 
-  return {docContent, sharedModel, tileContent, manager, undoStore};
+  return {docModel, docContent, sharedModel, tileContent, manager, undoStore};
 }
 
 const setFlagTrueEntry = {
@@ -377,6 +380,62 @@ it("can skip adding an action to the undo list", async () => {
       }]
     }
   ]);
+});
+
+it("can handle withoutUndo even when tree isn't monitored", async () => {
+  const {tileContent, manager, undoStore, docModel} = setupDocument();
+
+  // disable the monitor
+  docModel.treeMonitor!.enabled = false;
+
+  // Because the monitor is disabled this won't record an entry,
+  // and the withoutUndo should basically be ignored
+  jestSpyConsole("warn", spy => {
+    tileContent.setFlagWithoutUndo(true);
+    expect(spy).not.toBeCalled();
+  });
+
+  // We can't undo because nothing was recorded
+  expect(undoStore.canUndo).toBe(false);
+
+  expect(tileContent.flag).toBe(true);
+
+  const changeDocument = manager.document as Instance<typeof CDocument>;
+  expect(getSnapshot(changeDocument.history)).toEqual([]);
+});
+
+it("does not warn about withoutUndo when tree isn't monitored and DEBUG_UNDO is on", async () => {
+  const {tileContent, manager, undoStore, docModel} = setupDocument();
+
+  // disable the monitor
+  docModel.treeMonitor!.enabled = false;
+
+  libDebug.DEBUG_UNDO = true;
+
+  // Because the monitor is disabled this won't record an entry,
+  // and the withoutUndo should basically be ignored
+  jestSpyConsole("warn", spy => {
+    tileContent.setFlagWithoutUndo(true);
+    expect(spy).not.toBeCalled();
+  });
+
+  libDebug.DEBUG_UNDO = false;
+});
+
+it("does not warn about withoutUndo if tile is not in a tree and DEBUG_UNDO is on", async () => {
+
+  // This type of case can happen when a tile is added to the authored content
+  // in that case there is no tree
+  const tileContent = TestTile.create();
+
+  libDebug.DEBUG_UNDO = true;
+
+  jestSpyConsole("warn", spy => {
+    tileContent.setFlagWithoutUndo(true);
+    expect(spy).not.toBeCalled();
+  });
+
+  libDebug.DEBUG_UNDO = false;
 });
 
 it("will print a warning and still add the action to the undo list if any child actions call withoutUndo", async () => {
