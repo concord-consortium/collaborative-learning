@@ -12,30 +12,6 @@
     "placeholderText": "Enter notes here",
     "defaultDocumentType": "problem",
     "defaultDocumentTitle": "Untitled",
-    "defaultDocumentTemplate": {
-      "tiles": [
-        {
-          "content": {
-            "type": "Text",
-            "format": "html",
-            "text": [
-              "<p><strong>Instructions and Tips: </strong></p>",
-              "<p>* Use the space below to consider how you would approach your first task. </p>",
-              "<p>        &lt;&gt; First, drag the prompt from your task into this workspace using the 6 dots in the corner of that tile. </p>",
-              "<p>        &lt;&gt;Then use the prompt questions at left to help you organize your thoughts. </p>",
-              "<p>* You can use any of the tile types (diagram, text, drawing, image, table) to help you with your assignment.  </p>",
-              "<p>* Make sure you label your answers with the number of the question you are answering. </p>",
-              "<p></p>"
-            ]
-          }
-        },
-        { "layout": {
-          "height": 700
-        },
-          "content": { "type": "Text", "text": "" } },
-        { "content": { "type": "Diagram" } }
-      ]
-    },
     "documentLabels": {
       "personal": {
         "labels": {
@@ -55,7 +31,7 @@
         "numFormat": ".3~f"
       },
       "text": {
-        "tools": ["bold", "subscript", "superscript", "m2s-variables"]
+        "tools": ["bold", "italic", "bulleted-list", "subscript", "superscript", "m2s-variables"]
       },
       "drawing": {"tools": ["select", "line", "vector", "rectangle", "ellipse", "stamp", "stroke-color", "fill-color", "variable", "delete"]}
     },
@@ -223,23 +199,23 @@
     },
     "taska": {
       "initials": "A",
-      "title": "Task A",
-      "placeholder": "Work on Task A here"
+      "title": "Board",
+      "placeholder": "Work on the task here"
     },
     "taskb": {
       "initials": "B",
-      "title": "Task B",
-      "placeholder": "Work on Task B here"
+      "title": "Council",
+      "placeholder": "Work on the task here"
     },
     "taskc": {
       "initials": "C",
-      "title": "Task C",
-      "placeholder": "Work on Task C here"
+      "title": "Researcher",
+      "placeholder": "Work on the task here"
     },
     "taskd": {
       "initials": "D",
       "title": "Task D",
-      "placeholder": "Work on Task D here"
+      "placeholder": "Work on the task here"
     }
   },
   "investigations": [
@@ -551,6 +527,269 @@
             }
           ],
           "config": {
+            "toolbar": []
+          },
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "M2Studio Fall 2022",
+      "ordinal": 2,
+      "title": "M2Studio Exercises Fall 2022",
+      "problems": [
+        {
+          "description": "Cats 2022",
+          "ordinal": 1,
+          "title": "Cats 2022",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "blahblah2022",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Instructions and Tips: </strong></p>",
+                        "<p>* Use the workspace at right to answer your question about cats. </p>",
+                        "<p>* You can use any of the tile types (diagram, text, drawing, image, table, graph) to help you with your assignment.  </p>",
+                        "<p>* Make sure you label your drawings. </p>",
+                        "<p>* Variables can be created in the drawing, text, and diagram tiles. Once a variable has been created, you can reuse it in any of your other tiles.</p>",
+                        "<p>* Double click on an existing variable chip to edit it.</p>",
+                        "<p>* When you create a new variable, it will also appear in your diagram tile. The variables might stack, so move them around to see what is behind them.</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "psjUt4noZJyaf7C9",
+                    "title": "Cats and kittens",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/cats_420kgraphic2.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to teacher solutions</strong></p>",
+                        "<p><strong>Some tips for this workspace:</strong></p>",
+                        "<p>If your students are having trouble, consider putting some tips in a document of your own and publishing it with the uparrow button near the File menu. This will appear in Class Work and students can see the examples you post. They can publish too and the class can share ideas.</p>",
+                        "<p>All content from the left hand panels can be dragged into working documents on the right. Some curriculum pieces are intended to be dragged in as starting places for student work.</p>",
+                        "<p></p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "ldfL_iJ2D20LPrIW",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>The question my group wants to answer is: _________________________________</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "document_Text_2",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>My notes</strong></p>",
+                      "<p><em>Here is a space for you to take notes. We have also suggested some of the variables for you. Create variables using the variable tool on text tiles or in the diagram tile.</em></p>",
+                      "<p>Some sample variables could be</p>",
+                      "<p>[initial number of cats]</p>",
+                      "<p>[litter size]</p>",
+                      "<p>[number of litters per year]</p>",
+                      "<p>[length of a cat pregnancy]</p>",
+                      "<p>[ratio of female to male kittens per litter]</p>",
+                      "<p>[age at which a cat is old enough to have kittens]</p>",
+                      "<p><u></u></p>",
+                      "<p><u></u></p>"
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "supports": []
+        },
+        {
+          "description": "Schools 2022",
+          "ordinal": 2,
+          "title": "Schools 2022",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "CKKKdOjV9JM2AnH_",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to your work space! In here, you will find information and questions. You will work both individually and in groups, so be sure to listen to your teacher about what to do when. </strong></p>",
+                        "<p></p>",
+                        "<p><strong>Some tips for this workspace:</strong></p>",
+                        "<p>To the right, you can see 7 buttons. These will add tiles to your workspace:</p>",
+                        "<ul><li>The top button will create a space for you to create a diagram</li><li>The next button (with the A) will create a space for you to write down your thoughts</li><li>The button with the pencil will create a space where you can draw</li><li>The button with the mountain allows you to import images</li><li>The button with the table lets you build a table</li><li>The button with the graph lets you plot points</li><li>The X will delete a tile (this cannot be undone!)</li></ul>",
+                        "<p>You can rearrange your spaces by clicking on the top right-hand corner of the tile (where you will see 6 dots). This will allow you drag and move the tiles. </p>",
+                        "<p>You can click on the bottom right corner of any tile and then drag it up or down to make it smaller or bigger. </p>",
+                        "<p>You can share your work with your group-mates by using the Share slider on the top right corner, or publish your work to the whole class by clicking the button with the up-arrow next to the File menu.</p>",
+                        "<p>You can also look at the work of your group-mates by clicking the Group View icon on the top bar (it looks like a window). </p>",
+                        "<p></p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+
+            },
+            {
+              "type": "taska",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "_d6yvXzaCM9C2Mfe",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Your client: </strong>The School Board</p>",
+                        "<p><strong>Their goal:</strong> Determine how long the school should be open each day. They want the school open as a place for study and learning when needed, but it can also be expensive to keep open so would like to close it when it is not being used.</p>",
+                        "<p><strong>Your first task: </strong>Help the school board by determining how much time <em>students</em> typically spend at school.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "HrDnzjJ4h94ew4cI",
+                    "title": "Employment Application",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/MS2_EmploymentForm.png",
+                      "filename": "curriculum/m2studio/images/MS2_EmploymentForm.png"
+                    }
+                  }
+                  
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "taskb",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "pbKhPgs6NtdGDfhL",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Your client:</strong> The Student Council</p>",
+                        "<p><strong>Their goal: </strong>Create a template to help students and their families figure out if a student has enough time to also have an after-school job and still be successful at their other obligations and activities.</p>",
+                        "<p><strong>Your first task: </strong> Help the student council by determining how much time students typically spend <em>at school</em>.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "GD6Rt24RHeGXzuya",
+                    "title": "School Building",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/MS2_SchoolBuilding.png",
+                      "filename": "curriculum/m2studio/images/MS2_SchoolBuilding.png"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "taskc",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "6pUswCUlaazuiVc6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Your client: </strong>The Researcher</p>",
+                        "<p><strong>Their goal:</strong> Compare the length of time students spend at school in different countries of the world. They read that in South Korea, students spend about 12 hours per day in school! Korean students attend both a day school and a night academy. They next want to know how much time students spend learning (being taught by a teacher or doing other activities supervised by a teacher) in your state.</p>",
+                        "<p><strong>Your first task:</strong> Help the researcher by determining how much time students <em>typically</em> spend at school in your state.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "uROTxGox2WukkETi",
+                    "title": "Schedule",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/MS2_BellSchedule.png",
+                      "filename": "curriculum/m2studio/images/MS2_BellSchedule.png"
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "document_Text_1",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Instructions and Tips: </strong></p>",
+                      "<p>* Use the space below to consider how you would approach your first task. </p>",
+                      "<p>        &lt;&gt; First, drag the prompt from your task into this workspace using the 6 dots in the corner of that tile. </p>",
+                      "<p>        &lt;&gt;Then use the prompt questions at left to help you organize your thoughts. </p>",
+                      "<p>* You can use any of the tile types (diagram, text, drawing, image, table, graph) to help you with your task.  </p>",
+                      "<p>* Make sure you label your answers with the number of the question you are answering. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "document_Text_2",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p></p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "document_Diagram_1",
+                  "content": {"nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                }
+              ]
+            },
             "toolbar": []
           },
           "supports": []
