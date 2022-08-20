@@ -169,6 +169,7 @@ $default-button-border-color: #979797;
   .data-area {
     width: $card-width;
 
+    /* default for saved attributes */
     .attribute-name-value-pair {
       display:flex;
       min-height: $data-row-min-height;
@@ -207,11 +208,16 @@ $default-button-border-color: #979797;
       .name .candidate-input {
         text-align: right;
       }
-      &.singleattr {
+
+      /* when attribute is in "about to be created" state */
+      &.not-saved {
         border-color: $charcoal-light-border;
         .name {
           background-color: $workspace-teal-light-7;
           border-color: $charcoal-light-border;
+        }
+        &:hover {
+          border:1px dotted green;
         }
       }
     }

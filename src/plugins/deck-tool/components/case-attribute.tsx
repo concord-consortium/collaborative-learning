@@ -87,9 +87,21 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
     hasBeenSaved ? "has-been-saved" : "not-saved"
   );
 
+  const labelClassNames = classNames(
+    `name ${attrKey}`,
+    { "editing": isEditingLabel},
+    hasBeenSaved ? "saved" : "unsaved"
+  )
+
+  const valueClassNames = classNames(
+    `value ${attrKey}`,
+    { "editing": isEditingValue},
+    hasBeenSaved ? "saved" : "unsaved"
+  )
+
   return (
     <div className={pairClassNames}>
-      <div className={`name ${attrKey}`} onDoubleClick={handleDoubleClick} onClick={handleClick}>
+      <div className={labelClassNames} onDoubleClick={handleDoubleClick} onClick={handleClick}>
         { isEditingLabel
           ? <input
               type="text"
@@ -102,7 +114,7 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
         }
       </div>
 
-      <div className={`value ${attrKey}`} onDoubleClick={handleDoubleClick} onClick={handleClick}>
+      <div className={valueClassNames} onDoubleClick={handleDoubleClick} onClick={handleClick}>
         { isEditingValue
           ? <input
               type="text"
