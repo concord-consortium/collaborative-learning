@@ -13,6 +13,14 @@ interface IProps {
   readOnly: any;
 }
 
+/* tasks
+
+  [ ] reimplement cards crud
+  [ ] add create of new attributes
+  [ ] hover stuff
+  [ ] modal?
+
+*/
 export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKey, readOnly }) => {
   const content = model.content as DeckContentModelType;
   const [label, setLabel] = useState("");
