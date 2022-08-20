@@ -223,12 +223,17 @@ $default-button-border-color: #979797;
         left:97px;
       }
     }
+
     .attribute-name-value-pair.not-saved:hover{
       .ghost {
         display: inherit;
         font-style: italic;
         color: #999;
       }
+    }
+
+    .name.editing:hover .ghost {
+      display: none;
     }
   }
 }
