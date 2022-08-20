@@ -26,36 +26,9 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
   useEffect(()=>{
     const initialValue = content.dataSet.getValue(caseId, attrKey);
     const initialLabel = content.dataSet.attrFromID(attrKey).name.length;
-
     const hasValue = initialValue !== undefined && initialValue !== "";
     const hasName = initialLabel > 0;
-
-    console.log("VAL: ", initialValue, "-> hasValue: ", hasValue);
-    console.log("LAB: ", initialLabel, "-> hasName: ", hasName);
-
-    if (hasValue || hasName){
-      setHasBeenSaved(true)
-    } else {
-      setHasBeenSaved(false)
-    }
-
-    console.log("SOooo has it been saved? ", hasBeenSaved);
-    // console.log("1 init val: ", initialValue);
-
-    // const initialLabel = content.dataSet.attrFromID(attrKey).name.length;
-    // console.log("2 init label: ", initialLabel);
-
-    // if (initialValue === undefined && initialLabel === 0 ){
-    //   console.log('3a about to set')
-    //   setHasBeenSaved(false);
-    //   console.log('4a done setting')
-    //   console.log("5a hasBeenSaved? ", hasBeenSaved);
-    // } else {
-    //   console.log('3b about to set')
-    //   setHasBeenSaved(true);
-    //   console.log('4b done setting')
-    //   console.log("5b hasBeenSaved? ", hasBeenSaved);
-    // }
+    setHasBeenSaved(hasValue || hasName)
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,14 +54,14 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const [facet, attr, status] = event.currentTarget.classList;
     console.log("handleClick: ",  facet, attr, status);
-    selectInput(facet);
+    activateInput(facet);
   }
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const [facet, attr, status] = event.currentTarget.classList;
     console.log("handleDoubleClick: ",  facet, attr, status);
 
-    activateInput(facet);
+    // activateInput(facet);
   }
 
   const selectInput = (facet: string) => {
@@ -166,18 +139,19 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onDoubleClick={handleDoubleClick} onClick={handleClick}>
-        { !hasBeenSaved &&
+        {/* { !hasBeenSaved &&
           <div className={ghostClassNames}>{ labelN }</div>
-        }
-        { isEditingFacet === "name"
+        } */}
+        { isEditingFacet === "name" || !hasBeenSaved
           ? <input
               type="text"
               value={labelCandidate}
+              placeholder={ hasBeenSaved ? "" : labelN}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               onBlur={handleNameBlur}
             />
-          : content.dataSet.attrFromID(attrKey).name
+          : <div className="cell-value">{content.dataSet.attrFromID(attrKey).name}</div>
         }
       </div>
 
@@ -190,7 +164,7 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
               onKeyDown={handleKeyDown}
               onBlur={saveClear}
             />
-          : content.dataSet.getValue(caseId, attrKey)
+          : <div className="cell-value">{content.dataSet.getValue(caseId, attrKey)}</div>
         }
       </div>
     </div>
