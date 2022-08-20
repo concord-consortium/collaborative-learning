@@ -32,6 +32,8 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [isEditingValue, setIsEditingValue] = useState(false)
   const [hasBeenSaved, setHasBeenSaved] = useState(false);
+  const [attrsCount, setAttrsCount] = useState(content.existingAttributes().length);
+  const [labelN, setLabelN] = useState(`Label ${attrsCount}`)
 
   useEffect(()=>{
     console.log('main effect on Attribute component');
@@ -57,6 +59,7 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
   const valueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value);
     console.log('value change: ', value);
+    setAttrsCount(content.existingAttributes().length);
   };
 
   const valueKeyDown = (event:  React.KeyboardEvent<HTMLInputElement>) => {
@@ -66,9 +69,20 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
     }
   };
 
+  const activateNameInput = () => {
+    setIsEditingValue(false);
+    setIsEditingLabel(true);
+  }
+
+  const activateValueInput = () => {
+    setIsEditingLabel(false);
+    setIsEditingValue(true);
+  }
+
   const valueSave = () => {
+    setHasBeenSaved(true);
     console.log("val save: ", value);
-    setHasBeenSaved(true)
+    setAttrsCount(content.existingAttributes().length);
   };
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -104,6 +118,9 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onDoubleClick={handleDoubleClick} onClick={handleClick}>
+        { !hasBeenSaved &&
+          <div className="ghost ghost-name">{ labelN }</div>
+        }
         { isEditingLabel
           ? <input
               type="text"

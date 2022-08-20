@@ -169,7 +169,7 @@ $default-button-border-color: #979797;
   .data-area {
     width: $card-width;
 
-    /* default for saved attributes */
+    /* saved state attributes */
     .attribute-name-value-pair {
       display:flex;
       min-height: $data-row-min-height;
@@ -217,8 +217,17 @@ $default-button-border-color: #979797;
         background-color: $workspace-teal-light-7;
         border-color: $charcoal-light-border;
       }
-      &:hover {
-        border:1px dotted yellow;
+      .ghost {
+        display:none;
+        position: absolute;
+        left:97px;
+      }
+    }
+    .attribute-name-value-pair.not-saved:hover{
+      .ghost {
+        display: inherit;
+        font-style: italic;
+        color: #999;
       }
     }
   }
