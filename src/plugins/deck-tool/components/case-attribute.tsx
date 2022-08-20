@@ -39,6 +39,7 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
 
   const labelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLabel(event.target.value);
+    console.log('label change: ', label);
   };
 
   const labelKeyDown = (event:  React.KeyboardEvent<HTMLInputElement>) => {
@@ -55,6 +56,7 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
 
   const valueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setValue(event.target.value);
+    console.log('value change: ', value);
   };
 
   const valueKeyDown = (event:  React.KeyboardEvent<HTMLInputElement>) => {
@@ -70,20 +72,20 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
   };
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    //detect where click is and handle it - likely toggling various inputs and selections
-    console.log("handleClick: ", event.target)
+    const [facet, attr, status] = event.currentTarget.classList;
+    console.log("handleClick: ",  facet, attr, status);
   }
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    //detect where click is and handle it - likely toggling various inputs and selections
-    console.log("handleDoubleClick: ", event.target)
+    const [facet, attr, status] = event.currentTarget.classList;
+    console.log("handleDoubleClick: ",  facet, attr, status);
   }
 
   const pairClassNames = classNames(
     "attribute-name-value-pair",
     `${attrKey}`,
-    { "editing-label": isEditingLabel},
-    { "editing-value": isEditingValue},
+    { "editing editing-label": isEditingLabel},
+    { "editing editing-value": isEditingValue},
     hasBeenSaved ? "has-been-saved" : "not-saved"
   );
 
