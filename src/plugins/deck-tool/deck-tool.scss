@@ -208,21 +208,25 @@ $default-button-border-color: #979797;
       .name .candidate-input {
         text-align: right;
       }
+    }
 
-      /* when attribute is in "about to be created" state */
-      &.not-saved {
+    /* when attribute is in "about to be created" state */
+    .attribute-name-value-pair.not-saved {
+      border-color: $charcoal-light-border;
+      .name {
+        background-color: $workspace-teal-light-7;
         border-color: $charcoal-light-border;
-        .name {
-          background-color: $workspace-teal-light-7;
-          border-color: $charcoal-light-border;
-        }
-        &:hover {
-          border:1px dotted green;
-        }
+      }
+      &:hover {
+        border:1px dotted yellow;
       }
     }
   }
 }
+
+
+
+
 
 /*
 .add-attribute-area {
