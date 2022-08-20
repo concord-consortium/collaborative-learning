@@ -1,9 +1,12 @@
 import { types, Instance } from "mobx-state-tree";
+import { v4 as uuid } from "uuid";
 import { ToolContentModel, ToolMetadataModelType, toolContentModelHooks } from "../../models/tools/tool-types";
 import { kDeckToolID } from "./deck-types";
 import { ITileExportOptions } from "../../models/tools/tool-content-info";
 import { setTileTitleFromContent } from "../../models/tools/tool-tile";
 import { DataSet, addCanonicalCasesToDataSet, addAttributeToDataSet } from "../../models/data/data-set";
+
+import { } from "lodash"
 
 export function defaultDeckContent(): DeckContentModelType {
   return DeckContentModel.create();
@@ -107,21 +110,28 @@ export const DeckContentModel = ToolContentModel
       addCanonicalCasesToDataSet(self.dataSet, [obj]);
     },
     addNewAtt(){
-      // got it working with manual manipulation this way:
-      // self.dataSet.addAttributeWithID({
-      //   id: "label2",
-      //   name: ""
-      // });
-      // we need this to be able to happen for every existing case
-      // self.dataSet.setCanonicalCaseValues(
-      //   [
-      //     { __id__: "00000001-1bb9-4259-8a60-367315a83688", label1: "fromcode", label2: "noicefromcode" },
-      //   ]);
+       // 1 create the attribute with an id
+      const newAttrId = uuid();
+      self.dataSet.addAttributeWithID({
+        id: newAttrId,
+        name: ""
+      });
 
-      // will probably loop over above, but one last test is this:
-      // it failed with the nulls
-      const ds = self.dataSet;
-      addAttributeToDataSet(ds, {  id: "label3", name: "baek"} );
+      let casesArr = self.allCases().map(c => c?.__id__);
+      let attrsArr = self.existingAttributes();
+
+      casesArr.forEach((caseId) => {
+        if (caseId){
+          attrsArr.forEach((attr) => {
+            console.log("BEFORE: caseId attr val: ", caseId, attr, self.dataSet.getValue(caseId, attr));
+            const notSet = self.dataSet.getValue(caseId, attr) === undefined;
+            if (notSet){
+              this.setAttValue(caseId, attr, "");
+              console.log("AFTER: caseId attr val: ", caseId, attr, self.dataSet.getValue(caseId, attr))
+            }
+          })
+        }
+      });
     }
   }));
 

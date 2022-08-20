@@ -153,7 +153,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           />
         }
       </div>
-      <div>replace me with image toolbar component</div>
+      {/* <div>replace me with image toolbar component</div> */}
     </div>
   );
 });
