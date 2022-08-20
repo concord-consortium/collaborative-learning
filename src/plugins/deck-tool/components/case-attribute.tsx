@@ -18,14 +18,19 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
   const content = model.content as DeckContentModelType;
   const [labelCandidate, setLabelCandidate] = useState("");
   const [valueCandidate, setValueCandidate] = useState("");
-  const [isEditingFacet, setIsEditingFacet] = useState("none");
+  const [isEditingFacet, setIsEditingFacet] = useState("");
   const [hasBeenSaved, setHasBeenSaved] = useState(false);
   const [attrsCount, setAttrsCount] = useState(content.existingAttributes().length);
-  const [labelN, setLabelN] = useState(`Label ${attrsCount}`)
+  const [labelN, setLabelN] = useState(`Label ${attrsCount}`);
 
   useEffect(()=>{
-    //console.log('main effect on Attribute component');
-  });
+    //if we have any initial values then they have been saved
+    const initialValue = content.dataSet.getValue(caseId, attrKey);
+    const initialLabel = content.dataSet.attrFromID(attrKey).name.length;
+    if (initialValue || initialLabel > 0 ){
+      setHasBeenSaved(true);
+    }
+  },[content]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (isEditingFacet === "name"){
@@ -50,8 +55,7 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const [facet, attr, status] = event.currentTarget.classList;
     console.log("handleClick: ",  facet, attr, status);
-
-    //setIsEditingFacet(facet);
+    selectInput(facet);
   }
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -59,6 +63,23 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
     console.log("handleDoubleClick: ",  facet, attr, status);
 
     activateInput(facet);
+  }
+
+  const selectInput = (facet: string) => {
+    console.log("select but do not activate input: ", facet);
+  }
+
+  const handleNameBlur = () => {
+    if (labelCandidate === ""){
+      console.log("we need to save a label name, and it should be: ", labelN);
+      content.setAttName(attrKey, labelN);
+      setIsEditingFacet("");
+      setHasBeenSaved(true);
+    }
+     else {
+      console.log("label name saveClear default")
+      saveClear();
+    }
   }
 
   const saveClear = () => {
@@ -73,7 +94,7 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
       content.setAttValue(caseId, attrKey, valueCandidate);
     }
     setIsEditingFacet("");
-    setHasBeenSaved(true); //might not need this
+    setHasBeenSaved(true);
   };
 
   const activateInput = (facet: string) => {
@@ -104,34 +125,23 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
     `name ${attrKey}`,
     { "editing": isEditingFacet === "name"},
     hasBeenSaved ? "saved" : "unsaved"
-  )
+  );
 
   const valueClassNames = classNames(
     `value ${attrKey}`,
     { "editing": isEditingFacet === "value"},
     hasBeenSaved ? "saved" : "unsaved"
-  )
+  );
 
-  const shouldShowGhost = () => {
-    if (!hasBeenSaved){
-      return true;
-    }
-    else if (isEditingFacet === "name"){
-      return false;
-    }
-    else if (isEditingFacet === "value"){
-      return false;
-    }
-    else {
-      return true;
-    }
-  }
+  const ghostClassNames = classNames(
+    "ghost", { "show": !hasBeenSaved, "hide": isEditingFacet !== "" }
+  );
 
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onDoubleClick={handleDoubleClick} onClick={handleClick}>
-        { shouldShowGhost() &&
-          <div className="ghost">{ labelN }</div>
+        { !hasBeenSaved &&
+          <div className={ghostClassNames}>{ labelN }</div>
         }
         { isEditingFacet === "name"
           ? <input
@@ -139,7 +149,7 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
               value={labelCandidate}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
-              onBlur={saveClear}
+              onBlur={handleNameBlur}
             />
           : content.dataSet.attrFromID(attrKey).name
         }

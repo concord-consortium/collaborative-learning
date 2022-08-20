@@ -177,6 +177,9 @@ $default-button-border-color: #979797;
       border: 1px solid $charcoal-light-1;
       border-top-width: 0px;
 
+      .ghost {
+        display:none;
+      }
       .name {
         padding:$cell-padding;
         background-color: $workspace-teal-light-5;
@@ -230,11 +233,6 @@ $default-button-border-color: #979797;
         font-style: italic;
         color: #999;
       }
-    }
-
-    .name.editing:hover .ghost,
-    .editing .ghost {
-      display: none;
     }
   }
 }
