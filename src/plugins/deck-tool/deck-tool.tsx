@@ -7,8 +7,6 @@ import { DeckCardData } from "./components/deck-card-data";
 import { v4 as uuid } from "uuid";
 import { DeckToolToolBar } from "./deck-toolbar";
 import { useToolbarToolApi } from "../../components/tools/hooks/use-toolbar-tool-api";
-import { gImageMap } from "../../models/image-map";
-import { ImageContentModelType } from "../../models/tools/image/image-content";
 
 import "./deck-tool.scss";
 
@@ -19,6 +17,9 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const [caseIndex, setCaseIndex] = useState(0);
   const [canIncrement, setCanIncrement] = useState(true);
   const [canDecrement, setCanDecrement] = useState(false);
+  const [imageUrlToAdd, setImageUrlToAdd] = useState("");
+  const [activeFacet, setActiveFacet] = useState<null | "name" | "value">(null);
+
 
   const allCases = content.allCases();
 
@@ -98,31 +99,20 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     canIncrement ? "active" : "disabled",
   );
 
-  const [imageIsLoading, setImageIsLoading] = useState(false);
-  const [imageEntry, setImageEntry] = useState<ImageContentModelType>();
-  const getContent = () => {
-    return model.content as ImageContentModelType;
+  const handleSetImageUrl = (url: string) => {
+    setImageUrlToAdd(url);
   };
 
-  const handleUploadImageFile = (file: File) => {
-    setImageIsLoading(true);
-    gImageMap.addFileImage(file)
-      .then(image => {
-          const imageContent = getContent();
-          setImageIsLoading(false);
-          setImageEntry(image as any);
-          if (image.contentUrl && (image.contentUrl !== imageContent.url)) {
-            imageContent.setUrl(image.contentUrl, file.name);
-          }
-      });
+  const handleSetActiveFacet = (facet: null | "name" | "value") => {
+    setActiveFacet(facet);
   };
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
 
   return (
     <div className="deck-tool">
-      <DeckToolToolBar documentContent={documentContent} toolTile={toolTile} onUploadImageFile={handleUploadImageFile}
-          {...toolbarProps} />
+      <DeckToolToolBar documentContent={documentContent} toolTile={toolTile} activeFacet={activeFacet}
+          onSetImageUrl={(url)=>handleSetImageUrl(url)} {...toolbarProps} />
       <div className="deck-toolbar">
         <div className="panel title">
           { isEditing
@@ -169,7 +159,8 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           </button>
         </div>
         <div className="data-area">
-          <DeckCardData caseIndex={caseIndex} model={model} />
+          <DeckCardData caseIndex={caseIndex} model={model} activeFacet={activeFacet}
+            onSetActiveFacet={(facet) =>  handleSetActiveFacet(facet)}/>
         </div>
       </div>
     </div>
