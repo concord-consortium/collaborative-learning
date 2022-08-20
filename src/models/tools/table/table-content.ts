@@ -238,9 +238,6 @@ export const TableContentModel = ToolContentModel
   .actions(self => toolContentModelHooks({
     doPostCreate(metadata) {
       self.metadata = metadata as TableMetadataModelType;
-    },
-    didUpdateContent() {
-      self.dataSet.rebuildMaps();
     }
   }))
   .actions(self => ({

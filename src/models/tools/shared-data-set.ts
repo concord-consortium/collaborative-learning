@@ -18,5 +18,10 @@ export const SharedDataSet = SharedModel
   get yLabel() {
     return self.dataSet.attributes[1]?.name;
   },
+}))
+.actions(self => ({
+  didUpdateContent() {
+    self.dataSet.rebuildMaps();
+  }
 }));
 export interface SharedDataSetType extends Instance<typeof SharedDataSet> {}
