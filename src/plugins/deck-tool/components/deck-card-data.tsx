@@ -5,7 +5,6 @@ import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DeckContentModelType } from "../deck-content";
 import { NewCardAttribute } from "./new-card-attribute";
 
-
 interface IProps {
   caseIndex: any;
   model: ToolTileModelType;
@@ -33,19 +32,24 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
     console.log('use me!')
   })
 
-  useEffect(()=>{
-    console.log("use effect of model")
-    // unless we are on a brand new deck with no attr names or values, we'll see the new att area
-    const firstCase = content.dataSet.getCanonicalCaseAtIndex(0);
-    const valLength = (firstCase?.label1 as string).length;
-    const nameLength = content.dataSet.attrFromID("label1").name.length;
-    setReadyForNewAttribute(valLength + nameLength > 0);
 
-    // collect our keys first
-    const raw = content.caseByIndex(caseIndex);
-    const filteredKeys = raw ? Object.keys(raw).filter(k => k !== "__id__") : ["label1"];
-    setAttrKeys(filteredKeys);
-  },[model]);
+
+
+
+  // this is a big problem...it runs once, trash it
+  // useEffect(()=>{
+
+  //   // unless we are on a brand new deck with no attr names or values, we'll see the new att area
+  //   const firstCase = content.dataSet.getCanonicalCaseAtIndex(0);
+  //   const valLength = (firstCase?.label1 as string).length;
+  //   const nameLength = content.dataSet.attrFromID("label1").name.length;
+  //   setReadyForNewAttribute(valLength + nameLength > 0);
+
+  //   // collect our keys first
+  //   const raw = content.caseByIndex(caseIndex);
+  //   const filteredKeys = raw ? Object.keys(raw).filter(k => k !== "__id__") : ["label1"];
+  //   setAttrKeys(filteredKeys);
+  // },[model]);
 
   const handleCandidateInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setCandidate(event.target.value);
@@ -98,6 +102,7 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
       { attrKeys.map((a) => {
         return (
           <div key={a} className={pairClassNames}>
+            <div>{ attrKeys }</div>
             <div className={`name ${a}`} onDoubleClick={activateInput}>
               { activeAttrId === a && activeFacet === "name" && !readOnly
                 ? <input
