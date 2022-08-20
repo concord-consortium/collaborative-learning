@@ -22,8 +22,13 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
     });
   }, [caseIndex]);
 
+  const makeNewAtt = () => {
+    content.addNewAtt();
+  }
+
   return (
     <>
+      <button onClick={makeNewAtt}>Make new att</button>
       { attrKeys.map((attrKey) => {
           return <CaseAttribute key={attrKey} model={ model } caseId={ currentCaseId } attrKey={attrKey} readOnly={readOnly} />
         })
@@ -31,4 +36,3 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
     </>
   );
 });
-
