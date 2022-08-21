@@ -22,15 +22,14 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, read
     });
   }, [caseIndex]);
 
-  //For manual testing
-  const makeNewAttr = () => {
+  const handleAttrsArray = () => {
     content.addNewAttr();
     setAttrKeys(content.existingAttributes);
   };
 
   return (
     <>
-      <button style={{ position: "absolute", bottom: "100px" }}onClick={makeNewAttr}>Make new attr</button>
+      {/* <button style={{ position: "absolute", bottom: "100px" }}onClick={makeNewAttr}>Make new attr</button> */}
       { attrKeys.map((attrKey) => {
           return (
             <CaseAttribute
@@ -39,6 +38,7 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, read
               caseId={ currentCaseId }
               attrKey={attrKey}
               readOnly={readOnly}
+              handleAttrsArray={handleAttrsArray}
             />
           );
         })

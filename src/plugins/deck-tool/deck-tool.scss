@@ -105,12 +105,6 @@ $default-button-border-color: #979797;
         border-radius:26px;
         transform: translateY(2px);
         cursor: pointer;
-        &:hover {
-          //border:1px dotted green;
-        }
-        &:active{
-          //border:1px dotted red;
-        }
       }
     }
 
@@ -177,9 +171,6 @@ $default-button-border-color: #979797;
       border: 1px solid $charcoal-light-1;
       border-top-width: 0px;
 
-      .ghost {
-        display:none;
-      }
       .name {
         background-color: $workspace-teal-light-5;
         width:35%;
@@ -241,6 +232,7 @@ $default-button-border-color: #979797;
     }
     .attribute-name-value-pair.not-saved:hover {
       input::placeholder {
+        padding-right:4px;
         color:#7b7b7b;
       }
     }
