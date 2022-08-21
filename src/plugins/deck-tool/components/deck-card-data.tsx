@@ -22,7 +22,7 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, read
     });
   }, [caseIndex]);
 
-  const handleAttrsArray = () => {
+  const createEmptyAttr = () => {
     content.addNewAttr();
     setAttrKeys(content.existingAttributes);
   };
@@ -38,7 +38,7 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, read
               caseId={ currentCaseId }
               attrKey={attrKey}
               readOnly={readOnly}
-              handleAttrsArray={handleAttrsArray}
+              createEmptyAttr={createEmptyAttr}
             />
           );
         })

@@ -10,10 +10,10 @@ interface IProps {
   caseId: string;
   attrKey: string;
   readOnly: any;
-  handleAttrsArray: () => void;
+  createEmptyAttr: () => void;
 }
 
-export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKey, readOnly, handleAttrsArray }) => {
+export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKey, readOnly, createEmptyAttr }) => {
   const content = model.content as DeckContentModelType;
   const [labelCandidate, setLabelCandidate] = useState("");
   const [valueCandidate, setValueCandidate] = useState("");
@@ -31,17 +31,6 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
     const hasName = initialLabel > 0;
     setHasBeenSaved(hasValue || hasName);
   },[content]);
-
-  useEffect(()=>{
-    // because of the above effect `hasBeenSaved` should only be changed
-    // to "true" once in the existence of an attr row
-    // as its id is persistent in dataSet - so we use that to
-    // trigger creation of new, empty attribute
-    if (hasBeenSaved === true){
-      handleAttrsArray();
-      //setAttrsCount(content.existingAttributes().length);
-    }
-  },[hasBeenSaved])
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (isEditingFacet === "name"){
@@ -81,11 +70,13 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
     if (isEditingFacet === "name"){
       content.setAttName(attrKey, labelCandidate);
     }
-
     if (isEditingFacet === "value"){
       content.setAttValue(caseId, attrKey, valueCandidate);
     }
     setIsEditingFacet("");
+    if (!hasBeenSaved){
+      createEmptyAttr();
+    }
     setHasBeenSaved(true);
     setAttrsCount(content.existingAttributes().length);
   };
