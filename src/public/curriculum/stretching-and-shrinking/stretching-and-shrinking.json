@@ -133,6 +133,7 @@
                   },
                   {
                     "id": "0JPeZra2cygU7GLQ",
+                    "title": "Collaborative Classroom",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/inscriptions3_450w.png"
@@ -253,6 +254,7 @@
                   },
                   {
                     "id": "85R9h791ebdw1NbA",
+                    "title": "Open and close Workspace and esources views",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/WholeScreen-400w.png"
@@ -291,6 +293,7 @@
                     },
                     {
                       "id": "_acGcUoGuBg5sXvL",
+                      "title": "Tool Tiles on the CLUE Toolbar",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/stretching-and-shrinking/images/AllToolsToolBar-labeled.png"
@@ -315,6 +318,7 @@
                     },
                     {
                       "id": "kKGmMgSxgJId6zJW",
+                      "title": "Text controls",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/stretching-and-shrinking/images/TextTray.png"
@@ -450,6 +454,7 @@
                     },
                     {
                       "id": "8l7oyYGXkc9uVEps",
+                      "title": "Graph controls",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/stretching-and-shrinking/images/GraphTrayLabled.png"
@@ -472,9 +477,9 @@
                   [
                     {
                       "id": "50dFm8k1u_26729x",
+                      "title": "Graph Play",
                       "content": {
                         "type": "Geometry",
-                        "title": "Graph Play",
                         "board": {
                           "properties": {
                             "axisMin": [-2.186, -1.093],
@@ -514,6 +519,7 @@
                   },
                   {
                     "id": "ldQbqn6TNXqeGSnU",
+                    "title": "Snapshot of physical work loaded in CLUE",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/ImageTool-StudentWork_450w.png"
@@ -544,6 +550,7 @@
                   },
                   {
                     "id": "gOJ6rVNNfONMKs3K",
+                    "title": "Drawing controls",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/DrawTrayLabeled_450w.png"
@@ -599,6 +606,7 @@
                     },
                     {
                       "display": "teacher",
+                      "title": "Graph with picture of dog",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/stretching-and-shrinking/images/DogGraphTeacherImage_350w.png"
@@ -682,6 +690,7 @@
                   },
                   {
                     "id": "9xpInLKuRpI_mMhg",
+                    "title": "Group Sharing controls",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/GroupSharingControls.png"
@@ -718,6 +727,7 @@
                   },
                   {
                     "id": "07QJRxughLLyUbJf",
+                    "title": "Publishing in CLUE",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/PublishFileIcons-Labled.png"
@@ -843,6 +853,8 @@
                     }
                   },
                   {
+                    "id": "20AUG20220932",
+                    "title": "Daphne’s photo of the mystery teacher by a magazine rack",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_1_1_06_magazine_rack_500w.png"
@@ -997,6 +1009,8 @@
                       }
                   },
                   {
+                    "id": "20AUG20220933",
+                    "title": "Did You Know?: Measurement in police work",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_1_1_NW_07_did_you_know_350w.png"
@@ -1055,6 +1069,8 @@
                     }
                   },
                   {
+                    "id": "20AUG20220935",
+                    "title": "Mystery club flier",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_1_2_In_08_flyer_350w.png"
@@ -1087,6 +1103,8 @@
                     }
                   },
                   {
+                    "id": "20AUG20220935123",
+                    "title": "Left-handed and right-handed setup for using a rubber band stretcher",
                     "content": {
                     "type": "Image",
                     "url": "curriculum/stretching-and-shrinking/images/SS_1_2_rubberbands.jpg"
@@ -1184,6 +1202,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "20AUG20220936",
+                    "title": "Sample diagram for Merve’s comparison",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_A_1.png"
@@ -1212,6 +1232,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "20AUG20220937",
+                    "title": "Sample diagram for Ashley’s comparison",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_A_2.png"
@@ -1239,6 +1261,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "20AUG20220938",
+                    "title": "Sample diagram for Eli’s comparison",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_A_3.png"
@@ -1257,6 +1281,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "20AUG20220940",
+                    "title": "Sample diagram for Soro’s comparison",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_A_4.png"
@@ -1299,6 +1325,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "20AUG202209399",
+                    "title": "Results of moving the anchor point for a rubber band stretcher",
                     "content":
                     {
                       "type": "Image",
@@ -1321,6 +1349,8 @@
 
                   {
                     "display": "teacher",
+                    "id": "20AUG202209349",
+                    "title": "Side lengths for similar figures from a three rubber band stretcher (knot closer to anchor point)",
                     "content":
                     {
                       "type": "Image",
@@ -1340,6 +1370,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "20AUG20220941",
+                    "title": "Areas for similar figures from a three rubber band stretcher (knot closer to anchor point)",
                     "content":
                     {
                       "type": "Image",
@@ -1359,6 +1391,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "20AUG20220942",
+                    "title": "Side lengths for similar figures from a three rubber band stretcher (knot closer to pencil)",
                     "content":
                     {
                       "type": "Image",
@@ -1378,6 +1412,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "20AUG20220942",
+                    "title": "Areas of similar figures from a three rubber band stretcher (knot closer to pencil)",
                     "content":
                     {
                       "type": "Image",
@@ -1478,15 +1514,18 @@
                     }
                   },
                   {
+                    "id": "21AUG20220843AM",
+                    "title": "Corresponding sides and corresponding angles for similar triangles ABC and DEF",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_1_3_corresponding.jpg"
                     }
                   },
                   {
+                    "id": "21AUG20220528PM",
+                    "title": "Corresponding Angles",
                     "content": {
                       "type": "Geometry",
-                      "title": "Corresponding Angles",
                       "board": {
                         "properties": {
                           "axisMin": [-2, -2],
@@ -1517,6 +1556,8 @@
                     }
                   },
                   {
+                    "id": "21AUG20220847AM",
+                    "title": "Names of angles in triangle ABCF",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_1_3_identify_angles.jpg"
@@ -1533,6 +1574,8 @@
                     }
                   },
                   {
+                    "id": "21AUG20220849AM",
+                    "title": "Similar triangles with an unknown side length",
                     "content": {
                     "type": "Image",
                     "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_35_Q2A_350w.png"
@@ -1556,6 +1599,8 @@
                     }
                   },
                   {
+                    "id": "21AUG20220850AM",
+                    "title": "Copies of Super Sleuth with different percent size factors.",
                     "content": {
                     "type": "Image",
                     "url": "curriculum/stretching-and-shrinking/images/SS_1_3_In_11_results_500w.png"
@@ -1582,6 +1627,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220850AM",
+                    "title": "Comparing side lengths for Super Sleuth and Copy 2",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/1-3_Initial_Challenge_1.png"
@@ -1600,6 +1647,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220850AM",
+                    "title": "Comparing side lengths for Super Sleuth and Copy 1",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/1-3_Initial_Challenge_2.png"
@@ -1955,9 +2004,10 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220528PM",
+                    "title": "Mug",
                     "content": {
                       "type": "Geometry",
-                      "title": "Mug",
                       "board": {
                         "properties": {
                           "axisMin": [-2.186, -1.093],
@@ -2003,9 +2053,10 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220527PM",
+                    "title": "Zug",
                     "content": {
                       "type": "Geometry",
-                      "title": "Zug",
                       "board": {
                         "properties": {
                           "axisMin": [-2.186, -1.093],
@@ -2042,9 +2093,10 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220526PM",
+                    "title": "Lug",
                     "content": {
                       "type": "Geometry",
-                      "title": "Lug",
                       "board": {
                         "properties": {
                           "axisMin": [-2.186, -1.093],
@@ -2081,9 +2133,10 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220525PM",
+                    "title": "Bug",
                     "content": {
                       "type": "Geometry",
-                      "title": "Bug",
                       "board": {
                         "properties": {
                           "axisMin": [-2.186, -1.093],
@@ -2119,13 +2172,14 @@
                     }
                   },
                   {
+                    "id": "21AUG20220524PM",
+                    "title": "Glug",
                     "layout": {
                       "height": 400
                     },
                     "display": "teacher",
                     "content": {
                       "type": "Geometry",
-                      "title": "Glug",
                       "board": {
                         "properties": {
                           "axisMin": [-2.186, -1.093],
@@ -2417,6 +2471,8 @@
                     }
                   },
                   {
+                    "id": "21AUG20220851AM",
+                    "title": "Did You Know?: Images in computer graphics",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_2_1_In_13_did_you_know_350w.png"
@@ -2449,12 +2505,16 @@
                     }
                   },
                   {
+                    "id": "-6wzAUG20220914AM",
+                    "title": "Mug’s hat",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_2_2_In_15_mug_hat_500w.png"
                     }
                   },
                   {
+                    "id": "21AUG20220518PM",
+                    "title": "Mug's Hat",
                     "layout": {
                       "height": 200
                     },
@@ -2518,6 +2578,8 @@
                     }
                   },
                   {
+                    "id": "-6wzAUG20220915AM",
+                    "title": "Rules for transforming Mug’s hat",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_2_2_In_16_rules_mug_hat_500w.png"
@@ -2585,12 +2647,13 @@
                   },
                   [{
                     "display": "teacher",
+                    "id": "21AUG20220517PM",
+                    "title": "Mug’s Hat",
                     "layout": {
                       "height": 200
                     },
                     "content": {
                       "type": "Geometry",
-                      "title": "Mug’s Hat",
                       "board": {
                         "properties": {
                           "axisMin": [-1, -1],
@@ -2650,9 +2713,10 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220517sfaPM",
+                    "title": "Hat 1",
                     "content": {
                       "type": "Geometry",
-                      "title": "Hat 1",
                       "board": {
                         "properties": {
                           "axisMin": [-2.186, -1.093],
@@ -2672,9 +2736,10 @@
                   }],
                   [{
                     "display": "teacher",
+                    "id": "21AUG20220516PM",
+                    "title": "Hat 2",
                     "content": {
                       "type": "Geometry",
-                      "title": "Hat 2",
                       "board": {
                         "properties": {
                           "axisMin": [-2.186, -1.093],
@@ -2694,9 +2759,10 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220515PM",
+                    "title": "Hat3",
                     "content": {
                       "type": "Geometry",
-                      "title": "Hat 3",
                       "board": {
                         "properties": {
                           "axisMin": [-2.186, -1.093],
@@ -2717,9 +2783,10 @@
                   [
                     {
                       "display": "teacher",
+                      "id": "21AUG20220514PM",
+                      "title": "Hat4",
                       "content": {
                         "type": "Geometry",
-                        "title": "Hat 4",
                         "board": {
                           "properties": {
                             "axisMin": [-2.186, -1.093],
@@ -2739,9 +2806,10 @@
                     },
                     {
                       "display": "teacher",
+                      "id": "21AUG20220521PM",
+                      "title": "Hat 5",
                       "content": {
                         "type": "Geometry",
-                        "title": "Hat 5",
                         "board": {
                           "properties": {
                             "axisMin": [-2.186, -1.093],
@@ -2919,6 +2987,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-6wzAUG20221115AM",
+                    "title": "Mug Hat on Mug",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_2_2_MughatOnMug.jpg"
@@ -2987,6 +3057,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-6wzAUG20220915AM",
+                    "title": "Comparing nose lengths for Zug and Bug",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_2_2_NWDYK_Mug.jpg"
@@ -3019,6 +3091,8 @@
                     }
                   },
                   {
+                    "id": "AUG20221120AM",
+                    "title":"Character animations for the Wumps and imposters",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_2_3_In_17_three_characters_500w.png"
@@ -3061,6 +3135,8 @@
                     }
                   },
                   {
+                    "id": "AUG20221121AM",
+                    "title":"Comparing side lengths for similar rectangles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_2_3_In_18_rectangles_500w.png"
@@ -3093,12 +3169,8 @@
                     }
                   },
                   {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_2_3_IC_19_shapes_350w.png"
-                    }
-                  },
-                  {
+                    "id": "21AUG20220512PM",
+                    "title": "Wump Mouths and Noses",
                     "layout": {
                       "height": 420
                     },
@@ -3585,6 +3657,8 @@
                     }
                   },
                   {
+                    "id": "AUG20221123AM",
+                    "title":"The Chicago Model City",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_2_3_chicago.png"
@@ -3593,12 +3667,6 @@
                 ]
               },
               "supports": [
-                {
-                  "text": "How can you find the scale factor if you used rubber bands to make similar figures?"
-                },
-                {
-                  "text": "How can you find the scale factor if you used coordinate graphs to make similar figures?"
-                }
               ]
             }
           ],
@@ -3639,6 +3707,8 @@
                     }
                   },
                   {
+                    "id": "21AUG20221123AM",
+                    "title": "Examples of tesselations",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_1_In_20_rep_tiles_350w.png"
@@ -3654,6 +3724,8 @@
                     }
                   },
                   {
+                    "id": "21AUG20221124AM",
+                    "title": "Similar squares with a scale factor of 3 or 1/3",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_1_Intro_scale3.jpg"
@@ -3669,6 +3741,8 @@
                     }
                   },
                   {
+                    "id": "21AUG20221125AM",
+                    "title": "Similar squares with a scale factor of 2 or 1/2",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_1_Intro_scale2.jpg"
@@ -3693,6 +3767,8 @@
                     }
                   },
                   {
+                    "id": "6wzAUG20221255AM",
+                    "title": "Tiling with hexagons",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_1_Intro_hexagons.jpg"
@@ -3784,12 +3860,16 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "6wzAUG20221256AM",
+                    "title": "Summary of results for rep-tiles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-1_Initial_Challenge.png"
                     }
                   },
                   {
+                    "id": "21AUG20220509PM",
+                    "title": "Reptile shapes for reuse",
                     "layout": {
                       "height": 360
                     },
@@ -4026,6 +4106,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "6wzAUG2022125asd6AM",
+                    "title": "Dividing a rectangle into rep-tiles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_1.png"
@@ -4033,6 +4115,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "6wzAUG20221257pM",
+                    "title": "Dividing a parallelogram into rep-tiles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_2.png"
@@ -4088,6 +4172,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "6wzAUG20221258324pM",
+                    "title": "Dividing a triangle into rep-tiles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_3.png"
@@ -4095,6 +4181,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "6wzAUG20221259pM",
+                    "title": "Subdividing sides of a triangle to create 4 rep-tiles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_4.png"
@@ -4112,6 +4200,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "6wzAUG20220117pM",
+                    "title": "Drawing 4 rep-tile triangles using subdivided sides and parallel lines",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_5.png"
@@ -4129,6 +4219,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "6wzAUG20220117pM",
+                    "title": "Subdividing sides of a triangle to create 9 rep-tiles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_6.png"
@@ -4206,6 +4298,8 @@
                     }
                   },
                   {
+                    "id": "6wzAUG20220118pM",
+                    "title": "Kazuko’s Claim: Measuring corresponding angles using a unit rep-tile",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_1_similar.jpg"
@@ -4223,6 +4317,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "6wzAUG20220119pM",
+                    "title": "Unit rep-tile",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_C_1.png"
@@ -4230,6 +4326,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "6wzAUG202201120pM",
+                    "title": "Measuring corresponding angles using a unit rep-tile",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_C_2.png"
@@ -4238,98 +4336,6 @@
                 ]
               },
               "supports": [
-                {
-                  "type": "document",
-                  "content": {
-                    "tiles": [
-                      {
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "What is the scale factor from the smaller square to the larger square? "
-                            ]
-                        }
-                      },
-                      {
-                        "layout": {
-                          "height": 200
-                        },
-                        "content": {
-                          "type":"Geometry",
-                          "objects": [
-                            {
-                              "type": "polygon",
-                              "parents": [
-                                {
-                                  "type": "point",
-                                  "parents": [1, 1],
-                                  "properties": {
-                                    "name": "A"
-                                  }
-                                },
-                                {
-                                  "type": "point",
-                                  "parents": [2, 1],
-                                  "properties": {
-                                    "name": "B"
-                                  }
-                                },
-                                {
-                                  "type": "point",
-                                  "parents": [2, 2],
-                                  "properties": {
-                                    "name": "C"
-                                  }
-                                },
-                                {
-                                  "type": "point",
-                                  "parents": [1, 2],
-                                  "properties": {
-                                    "name": "D"
-                                  }
-                                }
-                              ]
-                            },
-                            {
-                              "type": "polygon",
-                              "parents": [
-                                {
-                                  "type": "point",
-                                  "parents": [4, 1],
-                                  "properties": {
-                                    "name": "A"
-                                  }
-                                },
-                                {
-                                  "type": "point",
-                                  "parents": [7, 1],
-                                  "properties": {
-                                    "name": "B"
-                                  }
-                                },
-                                {
-                                  "type": "point",
-                                  "parents": [7, 4],
-                                  "properties": {
-                                    "name": "C"
-                                  }
-                                },
-                                {
-                                  "type": "point",
-                                  "parents": [4, 4],
-                                  "properties": {
-                                    "name": "D"
-                                  }
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      }
-                    ]
-                  }
-                }
               ]
             },
             {
@@ -4363,6 +4369,8 @@
                     }
                   },
                   {
+                    "id": "6wzAUG202201121pM",
+                    "title": "Did You Know?: Tiling and crystals",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_1_NW_22_did_you_know_350w.png"
@@ -4407,6 +4415,8 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "-6zAUG20220128pm",
+                    "title": "Rectangle A and Triangle B",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_2_In_23_A_B_350w.png"
@@ -4436,6 +4446,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-6zAUG20220129pm",
+                    "title": "Comparing Rectangle A and Rectangle P",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_1.png"
@@ -4462,6 +4474,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-6zAUG20220130pm",
+                    "title": "Comparing Rectangle A and Rectangle Q",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_2.png"
@@ -4498,6 +4512,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-6zAUG20220131pm",
+                    "title": "Comparing Rectangle A and Rectangle R",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_3.png"
@@ -4514,6 +4530,8 @@
                     }
                   },
                   {
+                    "id": "21AUG20220506PM",
+                    "title": "Rectangle and Triangle Figures",
                     "layout": {
                       "height": 260
                     },
@@ -4605,6 +4623,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-6zAUG20220132pm",
+                    "title": "Comparing Triangle B and Triangle X",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_4.png"
@@ -4631,9 +4651,11 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-6zAUG20220133pm",
+                    "title": "Comparing Triangle B and Triangle Y",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_5.png"
+                      "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_4.png"
                     }
                   },
                   {
@@ -4657,6 +4679,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-6zAUG20220133pm",
+                    "title": "Comparing Triangle B and Triangle Z",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_6.png"
@@ -4664,9 +4688,10 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-6wzAUG20220134PM",
+                    "title": "Comparing Triangles using Graphs",
                     "content": {
                       "type": "Geometry",
-                      "title": "Graph 1",
                       "board": {
                         "properties": {
                           "axisMin": [-2.186, -1.093],
@@ -4721,6 +4746,8 @@
                     }
                   },
                   {
+                    "id": "-6wzAUG20220136pM",
+                    "title": "Similar rectangles with an unknown side length",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_2_WI_24_Q1_500w.png"
@@ -4738,6 +4765,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-6wzAUG20220137pM",
+                    "title": "Sample diagram using scale factor to find an unknown side length",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-2_What_If_Situation_A_1.png"
@@ -4763,6 +4792,8 @@
                     }
                   },
                   {
+                    "id": "-6wzAUG202201df38pM",
+                    "title": "Similar triangles with unknown side lengths and angles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_2_WI_25_Q2_500w.png"
@@ -4770,6 +4801,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-6wzAUG20220138pM",
+                    "title": "Sample diagram using scale factor to find unknown side lengths and angles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/3-2_What_If_Situation_B_2.jpg"
@@ -4868,6 +4901,8 @@
                     }
                   },
                   {
+                    "id": "-6wzAUG202201df45pM",
+                    "title": "Diagram of the river with similar triangles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_3_In_26_river_triangle_500w.png"
@@ -4931,6 +4966,8 @@
                     }
                   },
                   {
+                    "id": "-6wzAUG202201df46pM",
+                    "title": "Another Diagram of the river with similar triangles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_3_3_WI_27_river_triangle2_500w.png"
@@ -5007,12 +5044,16 @@
                         "We can enhance a report or story by adding photographs, drawings, or diagrams. If we place a graphic in an electronic document, we can enlarge, reduce, or move it. When we click on the graphic, it appears inside a frame with handles along the sides, such as the figure shown below."
                       ]
                     }
-                  }, {
+                  }, 
+                  {
+                    "id": "-6wzAUG202201df4at43q56pM",
+                    "title": "Original image",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_In_28_fish_350w.png"
                     }
-                  }, {
+                  }, 
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -5020,12 +5061,16 @@
                         "We can change the size and shape of the image by dragging the handles."
                       ]
                     }
-                  }, {
+                  }, 
+                  {
+                    "id": "-6wzAUG202201df47pM",
+                    "title": "Stretched images",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_In_29_fish_resized_350w.png"
                     }
-                  }, {
+                  }, 
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -5033,7 +5078,8 @@
                         "<em>How did this technique produce these variations of the original shape? Which of these images appears to be similar to the original? Why?</em>"
                       ]
                     }
-                  }, {
+                  }, 
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -5043,11 +5089,14 @@
                     }
                   },
                   {
+                    "id": "-6wzAUG202201dardtf47pM",
+                    "title": "Comparing all image measurements",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_In_30_image_table_350w.png"
                     }
-                  }, {
+                  }, 
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -5055,7 +5104,10 @@
                         "The comparisons “10 to 8” and “5 to 4” are equivalent ratios. We can scale the ratio 10 to 8 down by multiplying each quantity by 1/2. Or we could scale the ratio 5 to 4 up by multiplying each quantity by 2. \n\nEquivalent ratios are like equivalent fractions. In fact, ratios are often written in fraction form. You can express equivalent ratios with equations. A proportion is an equation stating that two ratios are equal. \n\n10 to 8 equals 5 to 4   8 to 10 equals 4 to 5"
                       ]
                     }
-                  }, {
+                  }, 
+                  {
+                    "id": "-6wzAUG202201df48pM",
+                    "title": "Equivalent ratios",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_In_31_proportion_350w.png"
@@ -5089,6 +5141,8 @@
                     }
                   },
                   {
+                    "id": "21AUG20200148pm",
+                    "title": "Rectangles A, B, C, and D",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_IC_32_rectangles_350w.png"
@@ -5117,12 +5171,16 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20200149pm",
+                    "title": "Scale factors for similar Rectangles A, B, and C",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-1_Initial_Challenge_1.png"
                     }
                   },
                   {
+                    "id": "21AUG20200150pm",
+                    "title": "Triangles A, B, C, and D",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_IC_33_triangles_350w.png"
@@ -5147,12 +5205,16 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20200151pm",
+                    "title": "Scale factors for similar Triangles A, C, and D",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-1_Initial_Challenge_2.png"
                     }
                   },
                   {
+                    "id": "21AUG20200152pm",
+                    "title": "Parallelograms E, F, and G",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_IC_34_parallelograms_350w.png"
@@ -5176,6 +5238,8 @@
                     },
                     {
                       "display": "teacher",
+                      "id": "21AUG20200153pm",
+                      "title": "Scale factors for similar Parallelograms F and G",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/stretching-and-shrinking/images/4-1_Initial_Challenge_3.png"
@@ -5195,15 +5259,6 @@
                 ]
               },
               "supports" : [
-                {
-                  "text": "Can finding corresponding angles help?"
-                },
-                {
-                  "text": "Can finding corresponding side lengths help?"
-                },
-                {
-                  "text": "How are rectangles different from other parallelograms?"
-                }
               ]
             },
             {
@@ -5220,6 +5275,8 @@
                     }
                   },
                   {
+                    "id": "-AUG20220204PM",
+                    "title": "Four sets of similar figures with missing side lengths",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_WhatIf_4Shapes.jpg"
@@ -5227,6 +5284,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-AUG20220205PM",
+                    "title": "Sample reasoning for similar triangles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-1_What_If_Set_4.png"
@@ -5234,6 +5293,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-AUG20220206PM",
+                    "title": "Sample reasoning for similar rectangles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-1_What_If_Set_5.png"
@@ -5241,6 +5302,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-AUG20220207PM",
+                    "title": "Sample reasoning for similar parallelograms",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-1_What_If_Set_6.png"
@@ -5248,6 +5311,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-AUG20220208PM",
+                    "title": "Sample reasoning for irregular figures",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-1_What_If_Set_7.png"
@@ -5263,6 +5328,8 @@
                     }
                   },
                   {
+                    "id": "-AUG20220209PM",
+                    "title": "Diagram of the river with similar triangles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-1_What_If_B.png"
@@ -5280,6 +5347,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "-AUG20220210PM",
+                    "title": "Sample reasoning to find the missing side length",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-1_What_If_8.jpg"
@@ -5298,9 +5367,6 @@
                 ]
               },
               "supports" : [
-                {
-                  "text": "In the Initial Challenge, can you find a pair of similar figures that satisfies each person’s claims?"
-                }
               ]
             },
             {
@@ -5317,6 +5383,8 @@
                     }
                   },
                   {
+                    "id": "-AUG20220211PM",
+                    "title": "Did You Know?: Non-rectangular buildings",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_DYK.jpg"
@@ -5378,6 +5446,8 @@
                     }
                   },
                   {
+                    "id": "21AUG2022M20214pm",
+                    "title": "Diagram of Ashton’s mirror method",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Mirror_IC.png"
@@ -5404,6 +5474,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG2022M20215pm",
+                    "title": "Diagram showing similar triangles in the mirror method",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Initial_Challenge_2.png"
@@ -5421,6 +5493,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG2022M20216pm",
+                    "title": "Sample reasoning to find the principal’s height",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Initial_Challenge_3.png"
@@ -5447,6 +5521,8 @@
                     }
                   },
                   {
+                    "id": "21AUG2022M20217pm",
+                    "title": "Setting up similar triangles using shadows",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_39_statue_liberty_500w.png"
@@ -5501,12 +5577,16 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG2022M20218pm",
+                    "title": "Labeled diagram of similar triangles created by camera lenses",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_2_WhatIf_B_Ans.jpg"
                     }
                   },
                   {
+                    "id": "21AUG2022M20219pm",
+                    "title": "Diagram of similar triangles created by camera lenses",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Camera.png"
@@ -5523,6 +5603,8 @@
                     }
                   },
                   {
+                    "id": "21AUG2022M20220pm",
+                    "title": "Sample reasoning using ratio of adjacent sides",
                     "display": "teacher",
                     "content": {
                       "type": "Image",
@@ -5541,6 +5623,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG2022M20221pm",
+                    "title": "Sample reasoning using scale factor",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-2_What_If_Situation_B_3.png"
@@ -5549,8 +5633,6 @@
                 ]
               },
               "supports": [
-                { "text": "Are the two triangles similar? Why?"},
-                { "text": "What are  the corresponding side lengths and corresponding angles?"}
               ]
             },
             {
@@ -5621,36 +5703,48 @@
                     }
                   },
                   [{
+                      "id": "21AUG20220235PM",
+                      "title": "Rectangles 1, 2, and 3",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_1.png"
                       }
                     },
                     {
+                      "id": "21AUG20220236PM",
+                      "title": "Stars 1, 2, and 3",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_2.png"
                       }
                     }],
                   [{
+                      "id": "21AUG20220237PM",
+                      "title": "Flags 1, 2, and 3",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_8.png"
                       }
                     },
                     {
+                      "id": "21AUG20220238PM",
+                      "title": "Circles 1, 2, and 3",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_9.png"
                       }
                   }],
                   [{
+                      "id": "21AUG20220239PM",
+                      "title": "Squares 1, 2, and 3",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_13.png"
                       }
                     },
                     {
+                      "id": "21AUG20220240PM",
+                      "title": "Hats 1, 2, and 3",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_14.png"
@@ -5669,6 +5763,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220241PM",
+                    "title": "Geometric reasoning for similar Rectangles 2 and 3",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_6.png"
@@ -5686,6 +5782,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220242PM",
+                    "title": "Ratio reasoning for similar and non-similar rectangles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_7.png"
@@ -5707,6 +5805,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220243PM",
+                    "title": "Geometric reasoning for non-similar Rectangle 1",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_4.png"
@@ -5742,6 +5842,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220244PM",
+                    "title": "Scale factor reasoning for similar Stars 1 and 3",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_3.png"
@@ -5759,6 +5861,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220245PM",
+                    "title": "Ratio reasoning for similar and non-similar stars",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_5.png"
@@ -5781,6 +5885,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220246PM",
+                    "title": "Scale factor reasoning for similar Triangles 1 and 3",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_10.png"
@@ -5799,6 +5905,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220247PM",
+                    "title": "Ratio reasoning for similar and non-similar triangles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_11.png"
@@ -5818,6 +5926,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220248PM",
+                    "title": "Ratio reasoning for circles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_11.png"
@@ -5835,6 +5945,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220249PM",
+                    "title": "Ratio reasoning for squares",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_11.png"
@@ -5869,6 +5981,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220250PM",
+                    "title": "Ratio reasoning for similar and non-similar hats",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_16.png"
@@ -5890,6 +6004,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220251aPM",
+                    "title": "Geometric reasoning for similar Hats 1 and 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -5900,6 +6016,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220252PM",
+                    "title": "Geometric reasoning for similar Hats 1 and 3",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_17.png"
@@ -5907,6 +6025,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "21AUG20220455PM",
+                    "title": "Ratio reasoning for similar and non-similar hats",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_18.png"
@@ -6075,6 +6195,8 @@
                     }
                   },
                   {
+                    "id": "21AUG20220503PM",
+                    "title": "Did You Know?: Non-rectangular buildings",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_3_NWDYK.png"
