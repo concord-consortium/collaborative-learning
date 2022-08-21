@@ -8,10 +8,10 @@ interface IProps {
   caseIndex: any;
   model: ToolTileModelType;
   totalCases: number;
-  readOnly: any; // TODO - find the correct type or pattern for this
+  readOnly: any;
 }
 
-export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, totalCases, readOnly }) => {
+export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, readOnly }) => {
   const content = model.content as DeckContentModelType;
   const [currentCaseId, setCurrentCaseId] = useState("");
   const [attrKeys, setAttrKeys] = useState(content.existingAttributes());
@@ -22,16 +22,25 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, tota
     });
   }, [caseIndex]);
 
-  const makeNewAtt = () => {
-    content.addNewAtt();
+  //For manual testing
+  const makeNewAttr = () => {
+    content.addNewAttr();
     setAttrKeys(content.existingAttributes);
-  }
+  };
 
   return (
     <>
-      <button style={{ position: "absolute", bottom: "100px" }}onClick={makeNewAtt}>Make new att</button>
+      <button style={{ position: "absolute", bottom: "100px" }}onClick={makeNewAttr}>Make new attr</button>
       { attrKeys.map((attrKey) => {
-          return <CaseAttribute key={attrKey} model={ model } caseId={ currentCaseId } attrKey={attrKey} readOnly={readOnly} />
+          return (
+            <CaseAttribute
+              key={attrKey}
+              model={ model }
+              caseId={ currentCaseId }
+              attrKey={attrKey}
+              readOnly={readOnly}
+            />
+          );
         })
       }
     </>

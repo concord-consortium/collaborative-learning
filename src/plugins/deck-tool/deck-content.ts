@@ -1,12 +1,10 @@
 import { types, Instance } from "mobx-state-tree";
-import { v4 as uuid } from "uuid";
+import { uniqueId } from "../../utilities/js-utils";
 import { ToolContentModel, ToolMetadataModelType, toolContentModelHooks } from "../../models/tools/tool-types";
 import { kDeckToolID } from "./deck-types";
 import { ITileExportOptions } from "../../models/tools/tool-content-info";
 import { setTileTitleFromContent } from "../../models/tools/tool-tile";
-import { DataSet, addCanonicalCasesToDataSet, addAttributeToDataSet } from "../../models/data/data-set";
-
-import { } from "lodash"
+import { DataSet, addCanonicalCasesToDataSet } from "../../models/data/data-set";
 
 export function defaultDeckContent(): DeckContentModelType {
   return DeckContentModel.create();
@@ -87,11 +85,12 @@ export const DeckContentModel = ToolContentModel
     afterCreate(){
       if (!self.dataSet.name){
         self.dataSet.setName("Data Card Collection");
+        const firstAttrId = uniqueId();
         self.dataSet.addAttributeWithID({
-          id: "label1", // TODO - assuming this is ok since cases are scoped to DataSet?
+          id: firstAttrId,
           name: ""
         });
-        addCanonicalCasesToDataSet(self.dataSet, [{ label1: "" }]);
+        addCanonicalCasesToDataSet(self.dataSet, [{ [firstAttrId]: "" }]);
       }
     },
     setTitle(title: string) {
@@ -109,27 +108,24 @@ export const DeckContentModel = ToolContentModel
       const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
       addCanonicalCasesToDataSet(self.dataSet, [obj]);
     },
-    addNewAtt(){
-       // 1 create the attribute with an id
-      const newAttrId = uuid();
+    addNewAttr(){
+      const newAttrId = uniqueId();
       self.dataSet.addAttributeWithID({
         id: newAttrId,
         name: ""
       });
 
-      let casesArr = self.allCases().map(c => c?.__id__);
-      let attrsArr = self.existingAttributes();
+      const casesArr = self.allCases().map(c => c?.__id__);
+      const attrsArr = self.existingAttributes();
 
       casesArr.forEach((caseId) => {
         if (caseId){
           attrsArr.forEach((attr) => {
-            console.log("BEFORE: caseId attr val: ", caseId, attr, self.dataSet.getValue(caseId, attr));
             const notSet = self.dataSet.getValue(caseId, attr) === undefined;
             if (notSet){
               this.setAttValue(caseId, attr, "");
-              console.log("AFTER: caseId attr val: ", caseId, attr, self.dataSet.getValue(caseId, attr))
             }
-          })
+          });
         }
       });
     }

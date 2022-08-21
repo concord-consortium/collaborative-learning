@@ -15,8 +15,6 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [caseIndex, setCaseIndex] = useState(0);
   const [totalCases, setTotalCases] = useState(content.totalCases());
-  const [canIncrement, setCanIncrement] = useState(true);
-  const [canDecrement, setCanDecrement] = useState(false);
   const [hideDelete, setHideDelete] = useState(false);
 
   useEffect(() => {
@@ -24,8 +22,6 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   }, [content]);
 
   useEffect(()=>{
-    setCanDecrement(caseIndex > 0);
-    setCanIncrement(caseIndex < totalCases - 1);
     setHideDelete(shouldHideDelete() || false);
   },[caseIndex, totalCases]);
 
@@ -64,7 +60,7 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
 
   const handleTitleKeyDown = (event:  React.KeyboardEvent<HTMLInputElement>) => {
     const { key } = event;
-    if ( key === "Enter"){
+    if ( key === "Enter" || key === "Escape"){
       setIsEditingTitle(false);
     }
   };
@@ -77,14 +73,13 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   };
 
   function addNewCase(){
-    console.log("deck-tool > addNewCase(existingAttributes): ", content.existingAttributes());
     content.addNewCaseFromAttrKeys(content.existingAttributes());
     setTotalCases(totalCases + 1);
     setCaseIndex(totalCases);
   }
 
   function deleteCase(){
-    // TODO -- modal -- see src/components/delete-button");
+    // TODO modal (see src/components/delete-button)
     const thisCaseId = content.dataSet.caseIDFromIndex(caseIndex);
     if (thisCaseId) {
       content.dataSet.removeCases([thisCaseId]);
@@ -95,19 +90,19 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
 
   const previousButtonClasses = classNames(
     "card-nav", "previous",
-    canDecrement ? "active" : "disabled",
+    caseIndex > 0 ? "active" : "disabled",
   );
 
   const nextButtonClasses = classNames(
     "card-nav", "next",
-    canIncrement ? "active" : "disabled",
+    caseIndex < totalCases - 1 ? "active" : "disabled",
   );
 
   return (
     <div className="deck-tool">
       <div className="deck-toolbar">
         <div className="panel title">
-          { isEditingTitle
+          { isEditingTitle && !readOnly
           ? <input
               className="deck-title-input-editing"
               value={content.metadata.title}
@@ -132,11 +127,13 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
             <button className={ nextButtonClasses } onClick={nextCase}></button>
           </div>
           <div className="add-card-button">
-            <button onClick={addNewCase}>
-              <AddDataCardIcon />
-            </button>
+            { !readOnly &&
+              <button onClick={addNewCase}>
+                <AddDataCardIcon />
+              </button>
+            }
           </div>
-          { !hideDelete &&
+          { !hideDelete && !readOnly &&
             <button className="delete-card" onClick={deleteCase}>
               <RemoveDataCardIcon />
             </button>
