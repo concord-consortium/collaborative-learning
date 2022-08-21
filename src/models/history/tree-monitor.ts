@@ -24,27 +24,28 @@ type SharedModelModifications = Record<string, number>;
 
 const runningCalls = new WeakMap<IActionContext, IActionTrackingMiddleware3Call<CallEnv>>();
 
-function getActionName(call: IActionTrackingMiddleware3Call<CallEnv>) {
+function getActionPath(call: IActionTrackingMiddleware3Call<CallEnv>) {
   return `${getPath(call.actionCall.context)}/${call.actionCall.name}`;
 }
 
+const actionsFromManager = [
+  // Because we haven't implemented applySharedModelSnapshotFromManager
+  // yet, all calls to handleSharedModelChanges are actually internal
+  // calls. However we treat those calls as actions from the manager
+  // because we want any changes triggered by a shared model update added
+  // to the same history entry.
+  "handleSharedModelChanges",
+  "applyPatchesFromManager",
+  "startApplyingPatchesFromManager",
+  "finishApplyingPatchesFromManager",
+  // We haven't implemented this yet, it is needed to support two trees
+  // working with the same shared model
+  "applySharedModelSnapshotFromManager"
+];
+
 function isActionFromManager(call: IActionTrackingMiddleware3Call<CallEnv>) {
   const actionName = call.actionCall.name;
-  return (
-    // Because we haven't implemented applySharedModelSnapshotFromManager
-    // yet, all calls to handleSharedModelChanges are actually internal
-    // calls. However we treat those calls as actions from the manager
-    // because we want any changes triggered by a shared model update added
-    // to the same history entry.
-    
-    actionName === "handleSharedModelChanges" ||
-    actionName === "applyPatchesFromManager" ||
-    actionName === "startApplyingPatchesFromManager" ||
-    actionName === "finishApplyingPatchesFromManager" ||
-    // We haven't implemented this yet, it is needed to support two trees
-    // working with the same shared model
-    actionName === "applySharedModelSnapshotFromManager"
-  );
+  return actionsFromManager.includes(actionName);    
 }
 
 export function withoutUndo() {
@@ -297,7 +298,7 @@ export class TreeMonitor {
       // added the history entry.
       //
       await this.manager.addHistoryEntry(historyEntryId, exchangeId, this.tree.treeId, 
-          getActionName(call), undoable);
+          getActionPath(call), undoable);
     }
 
     // Call the shared model notification function if there are changes.
@@ -373,7 +374,7 @@ export class TreeMonitor {
     // patches. This API is how the manager knows the exchangeId is finished. 
     const record: TreePatchRecordSnapshot = {
       tree: this.tree.treeId,
-      action: getActionName(call),
+      action: getActionPath(call),
       patches,
       inversePatches,
     };
