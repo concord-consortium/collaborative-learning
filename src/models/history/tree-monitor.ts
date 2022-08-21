@@ -55,7 +55,7 @@ export function withoutUndo() {
 
   if (actionCall.parentActionEvent) {
     // It is a little weird to print all this, but it seems like a good way to leave
-    // this part un implemented.
+    // this part unimplemented.
     console.warn([
       "withoutUndo() called by a child action. If calling a child action " + 
       "with withoutUndo is something you need to do, update this code to support it. " + 
@@ -84,7 +84,7 @@ export function withoutUndo() {
         const {context} = actionCall;
         const root = getRoot(context);
         // Use duck typing to figure out if the root is a tree 
-        // and it tree monitor is enabled
+        // and its tree monitor is enabled
         if ((root as any).treeMonitor?.enabled) {
           console.warn("cannot find action tracking middleware call");
         }
@@ -124,7 +124,7 @@ export class TreeMonitor {
         // the middleware even for readOnly documents. So then `enabled` would just mean that
         // the recording of events is enabled.
         if (!self.enabled || call.env) {
-          // monitoring is disabled ore we are already recording 
+          // monitoring is disabled or we are already recording 
           return false;
         }
         return true;
