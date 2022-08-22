@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { DeckContentModelType } from "./deck-content";
 import { DeckCardData } from "./components/deck-card-data";
+import AddDataCardIcon from "./assets/add-data-card-icon.svg";
+import RemoveDataCardIcon from "./assets/remove-data-card-icon.svg";
 import { v4 as uuid } from "uuid";
 import { DeckToolToolBar } from "./deck-toolbar";
 import { useToolbarToolApi } from "../../components/tools/hooks/use-toolbar-tool-api";
@@ -13,18 +15,24 @@ import "./deck-tool.scss";
 export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const { documentContent, model, readOnly, toolTile, onRegisterToolApi, onUnregisterToolApi } = props;
   const content = model.content as DeckContentModelType;
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [caseIndex, setCaseIndex] = useState(0);
+  const [totalCases, setTotalCases] = useState(content.totalCases());
+  const [hideDelete, setHideDelete] = useState(false);
+
+  useEffect(() => {
+    setDefaultTitle();
+  }, [content]);
   const [canIncrement, setCanIncrement] = useState(true);
   const [canDecrement, setCanDecrement] = useState(false);
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
-  const [activeFacet, setActiveFacet] = useState<null | "name" | "value">(null);
 
-
-  const allCases = content.allCases();
+  useEffect(()=>{
+    setHideDelete(shouldHideDelete() || false);
+  },[caseIndex, totalCases]);
 
   function nextCase(){
-    if ( caseIndex < allCases.length - 1 ) {
+    if ( caseIndex < totalCases - 1 ) {
       setCaseIndex(caseIndex + 1);
     }
   }
@@ -35,10 +43,9 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   }
 
-  useEffect(()=>{
-    setCanDecrement(caseIndex > 0);
-    setCanIncrement(caseIndex < allCases.length - 1);
-  },[caseIndex]);
+  function shouldHideDelete(){
+    return totalCases < 1;
+  }
 
   const setDefaultTitle = () => {
     if (!content.metadata.title || content.metadata.title === ""){
@@ -47,56 +54,54 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     }
   };
 
-  useEffect(() => {
-    setDefaultTitle();
-  }, []);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setDefaultTitle();
-    }, 2000);
-  },[content.metadata.title]);
-
   const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     content.setTitle(event.target.value);
   };
 
-  const handleTitleClick = (event: any) => {
+  const handleTitleClick = () => {
     if (!readOnly){
-      setIsEditing(true);
+      setIsEditingTitle(true);
     }
   };
 
   const handleTitleKeyDown = (event:  React.KeyboardEvent<HTMLInputElement>) => {
     const { key } = event;
-    if ( key === "Enter"){
-      setIsEditing(false);
+    if ( key === "Enter" || key === "Escape"){
+      setIsEditingTitle(false);
     }
   };
 
-  function addEmptyCase(){
-    // get existing attributes
-    content.dataSet.addCanonicalCasesWithIDs([
-      { __id__: `${uuid()}` },
-    ]);
-    setCaseIndex(allCases.length);
+  const handleTitleBlur = (e: any) => {
+    if (content.metadata.title === ""){
+      setDefaultTitle();
+    }
+    setIsEditingTitle(false);
+  };
+
+  function addNewCase(){
+    content.addNewCaseFromAttrKeys(content.existingAttributes());
+    setTotalCases(totalCases + 1);
+    setCaseIndex(totalCases);
   }
 
   function deleteCase(){
+    // TODO modal (see src/components/delete-button)
     const thisCaseId = content.dataSet.caseIDFromIndex(caseIndex);
     if (thisCaseId) {
       content.dataSet.removeCases([thisCaseId]);
     }
+    setTotalCases(totalCases - 1);
+    previousCase();
   }
 
   const previousButtonClasses = classNames(
     "card-nav", "previous",
-    canDecrement ? "active" : "disabled",
+    caseIndex > 0 ? "active" : "disabled",
   );
 
   const nextButtonClasses = classNames(
     "card-nav", "next",
-    canIncrement ? "active" : "disabled",
+    caseIndex < totalCases - 1 ? "active" : "disabled",
   );
 
   const handleSetImageUrl = (url: string) => {
@@ -115,13 +120,13 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
           onSetImageUrl={(url)=>handleSetImageUrl(url)} {...toolbarProps} />
       <div className="deck-toolbar">
         <div className="panel title">
-          { isEditing
+          { isEditingTitle && !readOnly
           ? <input
               className="deck-title-input-editing"
               value={content.metadata.title}
               onChange={handleTitleChange}
               onKeyDown={handleTitleKeyDown}
-              onBlur={() => setIsEditing(false)}
+              onBlur={handleTitleBlur}
           />
           : <div className="editable-deck-title-text" onClick={handleTitleClick}>
               { content.metadata.title }
@@ -130,39 +135,40 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
         </div>
         <div className="panel nav">
           <div className="card-number-of-listing">
-            Card { caseIndex + 1 } of { allCases.length }
+            { totalCases > 0
+              ? <>Card { caseIndex + 1 } of { totalCases } </>
+              : <>Add a card</>
+            }
           </div>
           <div className="card-nav-buttons">
             <button className={ previousButtonClasses  } onClick={previousCase}></button>
             <button className={ nextButtonClasses } onClick={nextCase}></button>
           </div>
           <div className="add-card-button">
-            <button onClick={addEmptyCase}>
-              {/* TODO: bring these in properly */}
-              <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <g fill="none" fillRule="evenodd">
-                  <circle cx="12" cy="12" r="12"/>
-                  <path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4V7zm-1-5C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#0481A0"/>
-                </g>
-              </svg>
-            </button>
+            { !readOnly &&
+              <button onClick={addNewCase}>
+                <AddDataCardIcon />
+              </button>
+            }
           </div>
-          <button className="delete-card" onClick={deleteCase}>
-            {/* TODO: bring these in properly */}
-            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <g fill="none" fillRule="evenodd">
-                    <path d="M0 0h24v24H0z"/>
-                    <circle cx="12" cy="12" r="12"/>
-                    <path d="M7 11v2h10v-2H7zm5-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#0481A0"/>
-                </g>
-            </svg>
-          </button>
-        </div>
-        <div className="data-area">
-          <DeckCardData caseIndex={caseIndex} model={model} activeFacet={activeFacet}
-            onSetActiveFacet={(facet) =>  handleSetActiveFacet(facet)}/>
+          { !hideDelete && !readOnly &&
+            <button className="delete-card" onClick={deleteCase}>
+              <RemoveDataCardIcon />
+            </button>
+          }
         </div>
       </div>
+      <div className="data-area">
+        { totalCases > 0 &&
+          <DeckCardData
+            caseIndex={caseIndex}
+            model={model}
+            totalCases={totalCases}
+            readOnly={readOnly}
+          />
+        }
+      </div>
+      {/* <div>replace me with image toolbar component</div> */}
     </div>
   );
 });

@@ -1,20 +1,19 @@
 import { types, Instance } from "mobx-state-tree";
+import { uniqueId } from "../../utilities/js-utils";
 import { ToolContentModel, ToolMetadataModelType, toolContentModelHooks } from "../../models/tools/tool-types";
 import { kDeckToolID } from "./deck-types";
 import { ITileExportOptions } from "../../models/tools/tool-content-info";
 import { setTileTitleFromContent } from "../../models/tools/tool-tile";
-import { DataSet } from "../../models/data/data-set";
-import { v4 as uuid } from "uuid";
+import { DataSet, addCanonicalCasesToDataSet } from "../../models/data/data-set";
 
 export function defaultDeckContent(): DeckContentModelType {
-  return DeckContentModel.create({deckDescription: "description..."});
+  return DeckContentModel.create();
 }
 
 export const DeckContentModel = ToolContentModel
   .named("DeckTool")
   .props({
     type: types.optional(types.literal(kDeckToolID), kDeckToolID),
-    deckDescription: "",
     dataSet: types.optional(DataSet, () => DataSet.create())
   })
   .volatile(self => ({
@@ -36,23 +35,43 @@ export const DeckContentModel = ToolContentModel
     caseByIndex(index:number){
       return self.dataSet.getCanonicalCaseAtIndex(index);
     },
+    totalCases(){
+      return self.dataSet.cases.length;
+    },
     allCases(){
       return self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length);
     },
-    existingAttributes(){
+    allCasesJsonString(){
+      const obj = this.allCases();
+      const str = JSON.stringify(obj);
+      return str;
+    },
+    allAttributesJsonString(){
+      const obj = self.dataSet.attributes;
+      const str = JSON.stringify(obj);
+      return str;
+    },
+    existingAttributesWithNames(){
       return self.dataSet.attributes.map((a) => {
         return { "attrName": a.name, "attrId": a.id };
+      });
+    },
+    existingAttributes(){
+      return self.dataSet.attributes.map((a) => {
+        return a.id;
       });
     },
     attrById(str: string){
       return self.dataSet.attrFromID(str);
     },
     exportJson(options?: ITileExportOptions){
+      this.allAttributesJsonString();
       return [
         `{`,
         `  "type": "Deck",`,
-        `  "deckDescription": "${self.deckDescription}"`,
         `  "dataSet.name": "${self.dataSet.name}"`,
+        `  "dataSet.attributes": "${this.allAttributesJsonString()}`,
+        `  "dataSet.allCases": "${this.allCasesJsonString()}"`,
         `}`
       ].join("\n");
     }
@@ -65,23 +84,14 @@ export const DeckContentModel = ToolContentModel
   .actions(self => ({
     afterCreate(){
       if (!self.dataSet.name){
-        const firstCaseId = uuid();
-        const firstAttrId = uuid();
-
         self.dataSet.setName("Data Card Collection");
+        const firstAttrId = uniqueId();
         self.dataSet.addAttributeWithID({
           id: firstAttrId,
-          name: "Label1"
+          name: ""
         });
-
-        self.dataSet.addCanonicalCasesWithIDs([
-          { __id__: firstCaseId, [firstAttrId]: "" },
-        ]);
-        console.log('Created: ', self.dataSet.cases);
+        addCanonicalCasesToDataSet(self.dataSet, [{ [firstAttrId]: "" }]);
       }
-    },
-    setDescription(text: string) {
-      self.deckDescription = text;
     },
     setTitle(title: string) {
       setTileTitleFromContent(self, title);
@@ -93,6 +103,31 @@ export const DeckContentModel = ToolContentModel
       self.dataSet.setCanonicalCaseValues([
         { __id__: caseId, [attrId]: val }
       ]);
+    },
+    addNewCaseFromAttrKeys(atts: string[]){
+      const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
+      addCanonicalCasesToDataSet(self.dataSet, [obj]);
+    },
+    addNewAttr(){
+      const newAttrId = uniqueId();
+      self.dataSet.addAttributeWithID({
+        id: newAttrId,
+        name: ""
+      });
+
+      const casesArr = self.allCases().map(c => c?.__id__);
+      const attrsArr = self.existingAttributes();
+
+      casesArr.forEach((caseId) => {
+        if (caseId){
+          attrsArr.forEach((attr) => {
+            const notSet = self.dataSet.getValue(caseId, attr) === undefined;
+            if (notSet){
+              this.setAttValue(caseId, attr, "");
+            }
+          });
+        }
+      });
     }
   }));
 
