@@ -4,16 +4,16 @@ import {
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
 import { IUndoManager, UndoStore } from "./undo-store";
-import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot } from "./history";
+import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot, HistoryOperation } from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 
 /**
  * Helper method to print objects in template strings
  * In console statements they can be "printed", just by adding them as extra
  * parameters.  But in error messages it is useful to do the same thing.
- * 
+ *
  * @param value any object
- * @returns 
+ * @returns
  */
 const json = (value: any) => JSON.stringify(value);
 
@@ -24,7 +24,7 @@ export const CDocument = types
 .model("CDocument", {
   // TODO: switch to a map, so we get faster lookups in the map and MST can
   // do better at applying snapshots and patches by reusing existing
-  // objects. 
+  // objects.
   history: types.array(HistoryEntry)
 });
 export interface CDocumentType extends Instance<typeof CDocument> {}
@@ -36,7 +36,8 @@ export const TreeManager = types
   undoStore: UndoStore,
 })
 .volatile(self => ({
-  trees: {} as Record<string, TreeAPI>
+  trees: {} as Record<string, TreeAPI>,
+  currentHistoryIndex: 0
 }))
 .views((self) => ({
   get undoManager() : IUndoManager {
@@ -51,6 +52,10 @@ export const TreeManager = types
   // This is only currently used for tests
   setChangeDocument(cDoc: CDocumentType) {
     self.document = cDoc;
+  },
+
+  setCurrentHistoryIndex(value: number){
+    self.currentHistoryIndex = value;
   },
 
   putTree(treeId: string, tree: TreeAPI) {
@@ -73,8 +78,8 @@ export const TreeManager = types
     // Make sure this entry wasn't marked complete before
     if (entry.state === "complete") {
       throw new Error(`The entry was already marked complete ${ json({historyEntryId, exchangeId})}`);
-    }            
-    
+    }
+
     // start a new open exchange with this exchangeId
     // Check if there is a open exchange already with this id:
     const activeExchangeValue = entry.activeExchanges.get(exchangeId);
@@ -91,10 +96,10 @@ export const TreeManager = types
       throw new Error(`There is no active exchange matching ${ json({historyEntryId: entry.id, exchangeId}) }`);
     }
 
-    entry.activeExchanges.delete(exchangeId);    
-    
+    entry.activeExchanges.delete(exchangeId);
+
     // TODO: We could use autorun for watching this observable map instead of
-    // changing the entry state here. 
+    // changing the entry state here.
     if (entry.activeExchanges.size === 0) {
       entry.state = "complete";
 
@@ -114,12 +119,12 @@ export const TreeManager = types
     }
   },
 
-  createHistoryEntry(historyEntryId: string, exchangeId: string, name: string, 
+  createHistoryEntry(historyEntryId: string, exchangeId: string, name: string,
     treeId: string, undoable: boolean) {
     let entry = self.findHistoryEntry(historyEntryId);
     if (entry) {
       throw new Error(`The entry already exists ${ json({historyEntryId})}`);
-    } 
+    }
     entry = HistoryEntry.create({
       id: historyEntryId,
       action: name,
@@ -155,8 +160,8 @@ export const TreeManager = types
       // tree after updateSharedModel is called. updateSharedModel will be
       // waited for, so it should not be possible for the historyEntry to be
       // closed before this new exchangeId is setup. So really we don't need the
-      // exchangeId to be passed, but it can be useful for debugging. 
-      // 
+      // exchangeId to be passed, but it can be useful for debugging.
+      //
       // TODO: how is exchangeId handled in case #2?
       const applyExchangeId = nanoid();
       self.startExchange(historyEntryId, applyExchangeId, "updateSharedModel.apply");
@@ -166,13 +171,13 @@ export const TreeManager = types
     return Promise.all(applyPromises).then() as Promise<void>;
   },
 
-  addHistoryEntry(historyEntryId: string, exchangeId: string, treeId: string, actionName: string, 
+  addHistoryEntry(historyEntryId: string, exchangeId: string, treeId: string, actionName: string,
     undoable: boolean) {
     self.createHistoryEntry(historyEntryId, exchangeId, actionName, treeId, undoable);
     return Promise.resolve();
   },
 
-  addTreePatchRecord(historyEntryId: string, exchangeId: string, 
+  addTreePatchRecord(historyEntryId: string, exchangeId: string,
     record: TreePatchRecordSnapshot) {
 
     if (historyEntryId === FAKE_HISTORY_ENTRY_ID) {
@@ -202,14 +207,14 @@ export const TreeManager = types
 
     if (DEBUG_HISTORY) {
       // eslint-disable-next-line no-console
-      console.log("addTreePatchRecord", 
-        { action: record.action, historyEntryId, exchangeId, 
+      console.log("addTreePatchRecord",
+        { action: record.action, historyEntryId, exchangeId,
           exchangeName: entry.activeExchanges.get(exchangeId)});
     }
 
     self.endExchange(entry, exchangeId);
 
-    // Add the entry to the undo stack if it is undoable. 
+    // Add the entry to the undo stack if it is undoable.
     //
     // TODO: should we wait to add it until the full entry is complete?
     // It might be better to add it earlier so it has the right position
@@ -217,9 +222,9 @@ export const TreeManager = types
     // behavior that takes a while, should its place in the stack be at
     // the beginning or end of these changes?
     //
-    // If this is ending the last exchange and there are no patches, 
-    // endExchange will remove this entry from the document.history. 
-    // This should make the entry not alive, so it won't be added to the 
+    // If this is ending the last exchange and there are no patches,
+    // endExchange will remove this entry from the document.history.
+    // This should make the entry not alive, so it won't be added to the
     // undoStore.
     // TODO: add a test to confirm this
     if (isAlive(entry) && entry.undoable && treePatchRecord.patches.length > 0) {
@@ -229,7 +234,7 @@ export const TreeManager = types
 
   /**
    * Replay the whole history to the trees.
-   * 
+   *
    * This should not record this "replay" into the history again
    */
   replayHistoryToTrees: flow(function* replayHistoryToTrees() {
@@ -270,27 +275,98 @@ export const TreeManager = types
       if (patches && patches.length > 0) {
         const tree = self.trees[treeId];
         return tree?.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches);
-      } 
+      }
     });
     yield Promise.all(applyPromises);
 
     // finish the patch application
     // Need to tell all of the tiles to re-enable the sync and run the sync
     // to resync their tile models with any changes applied to the shared models
-    // For this final step, we still use promises so we can wait for everything to complete. 
-    // This can be used in the future to make sure multiple applyPatchesToTrees are not 
+    // For this final step, we still use promises so we can wait for everything to complete.
+    // This can be used in the future to make sure multiple applyPatchesToTrees are not
     // running at the same time.
     const finishPromises = trees.map(tree => {
       return tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
     });
     yield Promise.all(finishPromises);
 
-    // TODO: if the tree/tile is written wrong, there might be some changes 
+    // TODO: if the tree/tile is written wrong, there might be some changes
     // that come in with a fake entry after finishApplyingPatchesFromManager.
-    // This is because the changes might trigger updateTreeAfterSharedModelChanges 
+    // This is because the changes might trigger updateTreeAfterSharedModelChanges
     // and that will happen async. With some work we should be able to identify this
     // and print a warning to the console.
-    // One way might be using unique history_entry_ids that we mark as closed 
+    // One way might be using unique history_entry_ids that we mark as closed
     // after the finish call.
-  })
+  }),
+
+  goToHistoryEntry: flow(function* goToHistoryEntry(
+                                      newHistoryIndex: number) {
+    const trees = Object.values(self.trees);
+
+    if (newHistoryIndex === self.currentHistoryIndex) return;
+    if (self.currentHistoryIndex === undefined) return;
+    // Disable shared model syncing on all of the trees. This is
+    // different than when the undo store applies patches because in
+    // this case we are going to apply lots of history entries all at
+    // once. We use FAKE ids here so any responses from tree are
+    // not recorded in the history.
+    const startPromises = trees.map(tree => {
+      return tree.startApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
+    });
+    yield Promise.all(startPromises);
+
+    const treePatches: Record<string, IJsonPatch[] | undefined> = {};
+    Object.keys(self.trees).forEach(treeId => treePatches[treeId] = []);
+
+    // direction tells us which direction to go
+    // startingIndex and endingIndex are so we don't add the currentHistoryEvent into patches
+    // because we are going to assume that it has already been played, and we don't want to play it
+    // again if we are going forward.
+    const direction = newHistoryIndex > self.currentHistoryIndex ? 1 : -1;
+    const startingIndex = direction === 1 ? self.currentHistoryIndex : self.currentHistoryIndex - 1;
+    const endingIndex = direction === 1 ? newHistoryIndex : newHistoryIndex - 1;
+    for (let i=startingIndex; i !== endingIndex; i=i+direction) {
+      const entry = self.document.history.at(i);
+      for (const treeEntry of (entry?.records || [])) {
+        const patches = treePatches[treeEntry.tree];
+        if (newHistoryIndex > self.currentHistoryIndex) {
+          patches?.push(...treeEntry.getPatches(HistoryOperation.Redo));
+        } else {
+          patches?.push(...treeEntry.getPatches(HistoryOperation.Undo));
+        }
+      }
+    }
+
+    const applyPromises = Object.entries(treePatches).map(([treeId, patches]) => {
+      if (patches && patches.length > 0) {
+        const tree = self.trees[treeId];
+        return tree?.applyPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID, patches);
+      }
+    });
+    yield Promise.all(applyPromises);
+
+    // finish the patch application
+    // Need to tell all of the tiles to re-enable the sync and run the sync
+    // to resync their tile models with any changes applied to the shared models
+    // For this final step, we still use promises so we can wait for everything to complete.
+    // This can be used in the future to make sure multiple applyPatchesToTrees are not
+    // running at the same time.
+    const finishPromises = trees.map(tree => {
+      return tree.finishApplyingPatchesFromManager(FAKE_HISTORY_ENTRY_ID, FAKE_EXCHANGE_ID);
+    });
+    yield Promise.all(finishPromises);
+
+    // TODO: if the tree/tile is written wrong, there might be some changes
+    // that come in with a fake entry after finishApplyingPatchesFromManager.
+    // This is because the changes might trigger updateTreeAfterSharedModelChanges
+    // and that will happen async. With some work we should be able to identify this
+    // and print a warning to the console.
+    // One way might be using unique history_entry_ids that we mark as closed
+    // after the finish call.
+  }),
+
+  getHistoryEntry: (historyIndex: number) => {
+    return self.document.history.at(historyIndex);
+  }
+
 }));

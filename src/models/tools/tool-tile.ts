@@ -52,11 +52,7 @@ export function getTileTitleFromContent(toolContentModel: ToolContentModelType) 
 
 export function setTileTitleFromContent(toolContentModel: ToolContentModelType, title: string) {
   const toolTile = getToolTileModel(toolContentModel);
-  const metadata = toolTile?.id
-    ? findMetadata(toolContentModel.type, toolTile?.id)
-    : (toolContentModel as any).metadata || undefined;
   toolTile?.setTitle(title);
-  metadata?.setTitle(title);
 }
 
 export const ToolTileModel = types
@@ -73,7 +69,8 @@ export const ToolTileModel = types
   .preProcessSnapshot(snapshot => {
     // Move the title up to handle legacy geometry tiles
     if (snapshot.content.type === "Geometry" && !("title" in snapshot) && "title" in snapshot.content) {
-      return { ...snapshot, title: (snapshot.content as GeometryContentModelType).title };
+      const title = (snapshot.content as GeometryContentModelType).title;
+      return { ...snapshot, title };
     }
     return snapshot;
   })
@@ -123,8 +120,13 @@ export const ToolTileModel = types
     }
   }))
   .actions(self => ({
+    setTitle(title: string) {
+      self.title = title;
+    }
+  }))
+  .actions(self => ({
     afterCreate() {
-      const metadata = findMetadata(self.content.type, self.id, self.title);
+      const metadata = findMetadata(self.content.type, self.id);
       const content = self.content;
       if (metadata && content.doPostCreate) {
         content.doPostCreate(metadata);
@@ -139,9 +141,6 @@ export const ToolTileModel = types
     setDisabledFeatures(disabled: string[]) {
       const metadata: any = findMetadata(self.content.type, self.id);
       metadata && metadata.setDisabledFeatures && metadata.setDisabledFeatures(disabled);
-    },
-    setTitle(title: string) {
-      self.title = title;
     }
   }));
 

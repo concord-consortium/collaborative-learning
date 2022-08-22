@@ -24,7 +24,7 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
   className, readOnly, size: contentSize, scale, getTitle, measureText, onBeginEdit, onEndEdit
 }) => {
   // getTitle() and observer() allow this component to re-render
-  // when the title changes without re-rendering the entire Geometry
+  // when the title changes without re-rendering the entire tile
   const title = getTitle() || "Tile Title";
   const kTitlePadding = 30;
   // There can be one render before we know our container size, which will then be
@@ -35,6 +35,7 @@ export const EditableTileTitle: React.FC<IProps> = observer(({
   const left = contentSize.width ? (contentSize.width / (scale || 1) - width) / 2: kContainerlessPosition;
   const [isEditing, setIsEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState(title);
+
   const handleClick = () => {
     if (!readOnly && !isEditing) {
       onBeginEdit?.();

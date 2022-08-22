@@ -229,9 +229,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     this.initializeContent();
 
-    const metadata = this.getContent().metadata;
     this.props.onRegisterToolApi({
-      getTitle: () => metadata.title,
+      getTitle: () => this.getContent().title,
       hasSelection: () => {
         const geometryContent = this.props.model.content as GeometryContentModelType;
         // Note: hasSelection() returns true when there is a selection whether or not
@@ -538,13 +537,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     if (eltBounds && (eltBounds.width > 0) && (eltBounds.height > 0)) {
       this.boardPromise = this.initializeBoard();
       await this.boardPromise;
-    }
-    // if we haven't been assigned a title already, request one now
-    // we set the title without updating the content, so the title is ephemeral
-    if (!content.metadata.title) {
-      const { model: { id }, onRequestUniqueTitle } = this.props;
-      const title = onRequestUniqueTitle(id);
-      title && content.metadata.setTitle(title);
     }
   }
 

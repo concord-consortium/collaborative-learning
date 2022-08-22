@@ -47,8 +47,8 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
   };
 
   const saveChange = (newValue: string) => {
-    _column.appData?.onEndBodyCellEdit?.(newValue);
     onClose(true);
+    _column.appData?.onEndBodyCellEdit?.(newValue);
   };
 
   const finishAndSave = () => {

@@ -163,8 +163,13 @@ export const DocumentsModel = types
   .actions((self) => {
     const add = (document: DocumentModelType) => {
       if (DEBUG_DOCUMENT) {
-        // eslint-disable-next-line no-console
-        console.log("adding document to DocumentsModel. Key", document.key, document.title);
+        // eslint-disable-next-line no-console        
+        console.log("adding document to DocumentsModel", {
+          key: document.key,
+          title: document.title,
+          uid: document.uid,
+          type: document.type
+        });
       }
       if (!self.getDocument(document.key)) {
         self.all.push(document);
