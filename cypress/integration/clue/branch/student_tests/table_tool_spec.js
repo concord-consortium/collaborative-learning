@@ -77,7 +77,7 @@ context('Table Tool Tile', function () {
         tableToolTile.getColumnHeader().should('have.length', 2);
         tableToolTile.getColumnHeaderText().then((text) => {
           expect(text[0]).to.be.eq('pluto');
-          expect(text[1]).to.be.eq('y2');
+          expect(text[1]).to.be.eq('y');
         });
       });
     });
@@ -117,7 +117,7 @@ context('Table Tool Tile', function () {
       });
       cy.get('.modal-title').should('contain', "Set Expression");
       cy.get('.modal-content .prompt select').should('not.exist');
-      cy.get('.modal-content .prompt').should('contain', "y2");
+      cy.get('.modal-content .prompt').should('contain', "y");
     });
     it('will enter a formula', function () {
       cy.get('#expression-input').click().type(formula + '{enter}');
@@ -125,7 +125,7 @@ context('Table Tool Tile', function () {
     });
     it('verify formula appears under correct column header', function () {
       cy.get('.editable-header-cell')
-        .contains('y2')
+        .contains('y')
         .first()
         .siblings('.expression-cell.has-expression')
         .should('contain', formula);
