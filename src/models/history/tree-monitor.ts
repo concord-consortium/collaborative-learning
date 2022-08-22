@@ -1,163 +1,262 @@
 import { addDisposer, addMiddleware, 
-    getPath, 
-    getRunningActionContext, 
-    IActionContext, 
-    IJsonPatch, Instance, IPatchRecorder, isActionContextThisOrChildOf, 
-    isAlive, recordPatches } from "mobx-state-tree";
+  getPath, 
+  getRoot,
+  getRunningActionContext, 
+  IActionContext, 
+  IJsonPatch, Instance, IPatchRecorder, isActionContextThisOrChildOf, 
+  isAlive, recordPatches } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { TreeManagerAPI } from "./tree-manager-api";
 import { TreePatchRecordSnapshot } from "./history";
 import { Tree } from "./tree";
 import { createActionTrackingMiddleware3, IActionTrackingMiddleware3Call } from "./create-action-tracking-middleware-3";
+import { DEBUG_UNDO } from "../../lib/debug";
 
 interface CallEnv {
-    recorder: IPatchRecorder;
-    sharedModelModifications: SharedModelModifications;
-    historyEntryId: string;
-    exchangeId: string;
-    undoable: boolean;
+  recorder: IPatchRecorder;
+  sharedModelModifications: SharedModelModifications;
+  historyEntryId: string;
+  exchangeId: string;
+  undoable: boolean;
 }
 
 type SharedModelModifications = Record<string, number>;
 
 const runningCalls = new WeakMap<IActionContext, IActionTrackingMiddleware3Call<CallEnv>>();
 
-export const addTreeMonitor = (tree: Instance<typeof Tree>,  manager: TreeManagerAPI, includeHooks: boolean) => {
+function getActionPath(call: IActionTrackingMiddleware3Call<CallEnv>) {
+  return `${getPath(call.actionCall.context)}/${call.actionCall.name}`;
+}
+
+const actionsFromManager = [
+  // Because we haven't implemented applySharedModelSnapshotFromManager
+  // yet, all calls to handleSharedModelChanges are actually internal
+  // calls. However we treat those calls as actions from the manager
+  // because we want any changes triggered by a shared model update added
+  // to the same history entry.
+  "handleSharedModelChanges",
+  "applyPatchesFromManager",
+  "startApplyingPatchesFromManager",
+  "finishApplyingPatchesFromManager",
+  // We haven't implemented this yet, it is needed to support two trees
+  // working with the same shared model
+  "applySharedModelSnapshotFromManager"
+];
+
+function isActionFromManager(call: IActionTrackingMiddleware3Call<CallEnv>) {
+  const actionName = call.actionCall.name;
+  return actionsFromManager.includes(actionName);    
+}
+
+export function withoutUndo() {
+  const actionCall = getRunningActionContext();
+  if (!actionCall) {
+    throw new Error("withoutUndo called outside of an MST action");
+  }
+
+  if (actionCall.parentActionEvent) {
+    // It is a little weird to print all this, but it seems like a good way to leave
+    // this part unimplemented.
+    console.warn([
+      "withoutUndo() called by a child action. If calling a child action " + 
+      "with withoutUndo is something you need to do, update this code to support it. " + 
+      "There are several options for supporting it:", 
+      "   1. Ignore the call",
+      "   2. Apply the withoutUndo to the parent action",
+      "   3. Apply the withoutUndo just to the child action",
+      "Notes:",
+      "   - option 1 will be hard to debug, so if you do this, you should add a debug " +
+      "option to print out a message when it is ignored",
+      "   - option 3 will require changing the undo stack so it can record different " +
+      "entries from the history stack. It will also require changing the recordPatches " +
+      "function to somehow track this child action information."
+    ].join('\n'));
+    return;
+  }
+
+  const call = runningCalls.get(actionCall);
+  if (!call){
+    // It is normal for there to be no running calls. This can happen in two cases:
+    //   - the document isn't being edited so the tree monitor is disabled
+    //   - the document content is part of the authored unit. In this case there is no
+    //     DocumentModel so there is no middleware.
+    if (DEBUG_UNDO) {
+      try {
+        const {context} = actionCall;
+        const root = getRoot(context);
+        // Use duck typing to figure out if the root is a tree 
+        // and its tree monitor is enabled
+        if ((root as any).treeMonitor?.enabled) {
+          console.warn("cannot find action tracking middleware call");
+        }
+      } catch ( error ) {
+        console.warn("cannot find action tracking middleware call, " + 
+          "error thrown while trying to find the tree", error);
+      }
+    }
+    return;
+  }
+  
+  if (!call.env) {
+    throw new Error("environment is not setup on action tracking middleware call");
+  }
+  call.env.undoable = false;
+}
+
+export class TreeMonitor {
+  tree: Instance<typeof Tree>;
+  manager: TreeManagerAPI;
+  enabled = false;
+
+  constructor(tree: Instance<typeof Tree>,  manager: TreeManagerAPI, includeHooks: boolean) {
+    // We don't care how `this` is handled by createAcionTrackingMiddleware
+    // so we save it as self to make sure we have access to it in onFinish so we
+    // call `recordAction`
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    this.tree = tree;
+    this.manager = manager;
+
     const treeMonitorMiddleware = createActionTrackingMiddleware3<CallEnv>({
-        filter(call) {
-            if (call.env) {
-                // already recording
+      filter(call) {
+
+        // Note: If we switch to a synchronizing readonly documents over the network using
+        // the history instead of the document content, then we'll need to enable 
+        // the middleware even for readOnly documents. So then `enabled` would just mean that
+        // the recording of events is enabled.
+        if (!self.enabled || call.env) {
+          // monitoring is disabled or we are already recording 
+          return false;
+        }
+        return true;
+      },
+      onStart(call) {
+        // Add this call to our global WeakMap so other functions can 
+        // modify these calls.
+        runningCalls.set(call.actionCall, call);
+
+        // DEBUG:
+        // console.log("onStart", getActionName(call));
+        const sharedModelModifications: SharedModelModifications = {};
+
+        let historyEntryId;
+        let exchangeId;
+  
+        // We are looking for specific actions which we know include a
+        // historyEntryId and exchangeId as their first two arguments. This
+        // is so we can link all of the changes with this same
+        // historyEntryId and exchangeId. These actions are all defined on
+        // the common `Tree` model which is composed into the actual root of
+        // the MST tree. So individual trees should not be defining these
+        // actions themselves.
+        //
+        // TODO: We might be able use the `decorate` feature of MST to make
+        // it more clear in the Tile model that these actions are special. 
+        if (isActionFromManager(call)) {
+          historyEntryId = call.actionCall.args[0];
+          exchangeId = call.actionCall.args[1];
+        } else {
+          historyEntryId = nanoid();
+          exchangeId = nanoid();
+        }
+  
+        const recorder = recordPatches(
+          call.actionCall.tree,
+          (_patch, _inversePatch, actionContext) => {
+            // This function should return true if the patch should be recorded
+            // This function is basically an onPatch handler 
+
+            // Only pay attention to patches that were generated by this action or children of this action
+            if (!actionContext || 
+                (!!actionContext && !isActionContextThisOrChildOf(actionContext, call.actionCall.id))) {
                 return false;
             }
-            return true;
-        },
-        onStart(call) {
-            // Add this call to our global WeakMap so other functions can 
-            // modify these calls.
-            runningCalls.set(call.actionCall, call);
 
-            // DEBUG:
-            // console.log("onStart", getActionName(call));
-            const sharedModelModifications: SharedModelModifications = {};
-
-            let historyEntryId;
-            let exchangeId;
-
-            // We are looking for specific actions which we know include a
-            // historyEntryId and exchangeId as their first two arguments. This
-            // is so we can link all of the changes with this same
-            // historyEntryId and exchangeId. These actions are all defined on
-            // the common `Tree` model which is composed into the actual root of
-            // the MST tree. So individual trees should not be defining these
-            // actions themselves.
+            // See if the patch is modifying one of the mounted shared
+            // models or shared model views.
             //
-            // TODO: We might be able use the `decorate` feature of MST to make
-            // it more clear in the Tile model that these actions are special. 
-            if (isActionFromManager(call)) {
-                historyEntryId = call.actionCall.args[0];
-                exchangeId = call.actionCall.args[1];
-            } else {
-                historyEntryId = nanoid();
-                exchangeId = nanoid();
+            // If it is a shared model view, then don't record this
+            // patch.
+            //
+            // Also track the modification so we can notify the tree
+            // when the action is done. The tree needs to know about
+            // these modifications so it can tell the tiles to update
+            // themselves based on the changes in the shared model or
+            // shared model view. And the manager needs to know about
+            // the shared model changes so it can send them any other
+            // trees.
+            //
+            // This is kind of a hack, but we identify the shared model
+            // changes based on their path in the document.
+            // CLUE doesn't support shared model views yet, so we just
+            // look for shared models in the sharedModelMap of the
+            // document. 
+            //
+            // This should only match changes to the shared models themselves
+            // not the map and not when a new tile is referencing a shared model.
+            // 
+            // When a new shared model is added to the document the path will be
+            //   /content/sharedModelMap/${sharedModelId}
+            // We a new tile is referencing a shared model the path will be:
+            //   /content/sharedModelMap/${sharedModelId}/tiles/[index]
+            //
+            // When a new shared model is added via addTileSharedModel the
+            // shared model manager will call updateAfterSharedModelChanges after it
+            // adds model to the document and tile to the entry. So there currently
+            // isn't a need for the tree monitor to handle that case.
+            const pathMatch = _patch.path.match(/(.*\/content\/sharedModelMap\/[^/]+\/sharedModel)\//);
+            if(pathMatch) {
+              const sharedModelPath = pathMatch[1];
+
+              if (!sharedModelModifications[sharedModelPath]) {
+                sharedModelModifications[sharedModelPath] = 1;
+              } else {
+                // increment the number of modifications made to the shared model
+                sharedModelModifications[sharedModelPath]++;
+              }
+
+              // TODO: If this is a shared model view, we shouldn't record the
+              // patch, so we should return false.
+              // 
+              // Currently CLUE doesn't support shared model views, so this isn't
+              // implemented yet.
             }
 
-            const recorder = recordPatches(
-                call.actionCall.tree,
-                (_patch, _inversePatch, actionContext) => {
-                    // This function should return true if the patch should be recorded
-                    // This function is basically an onPatch handler 
-
-                    // Only pay attention to patches that were generated by this action or children of this action
-                    if (!actionContext || 
-                        (!!actionContext && !isActionContextThisOrChildOf(actionContext, call.actionCall.id))) {
-                        return false;
-                    }
-
-                    // See if the patch is modifying one of the mounted shared
-                    // models or shared model views.
-                    //
-                    // If it is a shared model view, then don't record this
-                    // patch.
-                    //
-                    // Also track the modification so we can notify the tree
-                    // when the action is done. The tree needs to know about
-                    // these modifications so it can tell the tiles to update
-                    // themselves based on the changes in the shared model or
-                    // shared model view. And the manager needs to know about
-                    // the shared model changes so it can send them any other
-                    // trees.
-                    //
-                    // This is kind of a hack, but we identify the shared model
-                    // changes based on their path in the document.
-                    // CLUE doesn't support shared model views yet, so we just
-                    // look for shared models in the sharedModelMap of the
-                    // document. 
-                    //
-                    // This should only match changes to the shared models themselves
-                    // not the map and not when a new tile is referencing a shared model.
-                    // 
-                    // When a new shared model is added to the document the path will be
-                    //   /content/sharedModelMap/${sharedModelId}
-                    // We a new tile is referencing a shared model the path will be:
-                    //   /content/sharedModelMap/${sharedModelId}/tiles/[index]
-                    //
-                    // When a new shared model is added via addTileSharedModel the
-                    // shared model manager will call updateAfterSharedModelChanges after it
-                    // adds model to the document and tile to the entry. So there currently
-                    // isn't a need for the tree monitor to handle that case.
-                    const pathMatch = _patch.path.match(/(.*\/content\/sharedModelMap\/[^/]+\/sharedModel)\//);
-                    if(pathMatch) {
-                        const sharedModelPath = pathMatch[1];
-
-                        if (!sharedModelModifications[sharedModelPath]) {
-                            sharedModelModifications[sharedModelPath] = 1;
-                        } else {
-                            // increment the number of modifications made to the shared model
-                            sharedModelModifications[sharedModelPath]++;
-                        }
-
-                        // If this is a shared model view, we shouldn't record the
-                        // patch, so we should return false.
-                        // 
-                        // Currently CLUE doesn't support shared model views, so this isn't
-                        // implemented yet.
-                    }
-
-                    return true;
-                }
-            );
-            recorder.resume();
-
-            call.env = {
-                recorder,
-                sharedModelModifications,
-                historyEntryId,
-                exchangeId,
-                undoable: true
-            };
-        },
-        onFinish(call, error) {
-            const { recorder, sharedModelModifications, historyEntryId, exchangeId, undoable } = call.env || {};
-            if (!recorder || !sharedModelModifications || !historyEntryId || !exchangeId || undoable === undefined) {
-                throw new Error(`The call.env is corrupted: ${ JSON.stringify(call.env)}`);
-            }
-            call.env = undefined;
-            recorder.stop();
-
-            if (error === undefined) {
-                // recordAction is async
-                recordAction(call, historyEntryId, exchangeId, recorder, sharedModelModifications, undoable);
-            } else {
-                // TODO: This is a new feature that is being added to the tree:
-                // any errors that happen during an action will cause the tree to revert back to 
-                // how it was before. 
-                // This might be a good thing to do, but it needs to be analyzed to see what happens
-                // with the shared models when the patches are undone.
-                recorder.undo();
-            }
+            return true;
+          }
+        );
+        recorder.resume();
+  
+        call.env = {
+          recorder,
+          sharedModelModifications,
+          historyEntryId,
+          exchangeId,
+          undoable: true
+        };
+      },
+      onFinish(call, error) {
+        const { recorder, sharedModelModifications, historyEntryId, exchangeId, undoable } = call.env || {};
+        if (!recorder || !sharedModelModifications || !historyEntryId || !exchangeId || undoable === undefined) {
+          throw new Error(`The call.env is corrupted: ${ JSON.stringify(call.env)}`);
         }
-    });
+        call.env = undefined;
+        recorder.stop();
 
+        if (error === undefined) {
+          // recordAction is async
+          self.recordAction(call, historyEntryId, exchangeId, recorder, sharedModelModifications, undoable);
+        } else {
+          // TODO: This is a new feature that is being added to the tree:
+          // any errors that happen during an action will cause the tree to revert back to 
+          // how it was before. 
+          // This might be a good thing to do, but it needs to be analyzed to see what happens
+          // with the shared models when the patches are undone.
+          recorder.undo();
+        }
+      }
+    });
+  
     // I'd guess in our case we always want to include hooks. If a model makes some 
     // changes to its state when it is added to the tree during an action we'd want that
     // to be part of the undo stack.  
@@ -170,103 +269,100 @@ export const addTreeMonitor = (tree: Instance<typeof Tree>,  manager: TreeManage
 
     // We might need an option to not add this disposer, but it seems it would generally
     // ge a good thing to do.
-    addDisposer(tree, middlewareDisposer);
+    addDisposer(tree, middlewareDisposer);    
+  }
 
-    const getActionName = (call: IActionTrackingMiddleware3Call<CallEnv>) => {
-        return `${getPath(call.actionCall.context)}/${call.actionCall.name}`;
-    };
+  // recordAction is async because it needs to wait for the manager to
+  // respond, to the addHistoryEntry, startExchange, and
+  // handleSharedModelChanges calls before it can call addTreePatchRecord. The
+  // recorded changes are safe because each action creates a new recorder, and
+  // the recorder stores the changes. So even if another action is triggered
+  // before the changes are sent it will be OK. 
+  //
+  // If a shared model has been modified, the state of the shared model is
+  // captured just before it is sent so the shared model might have been
+  // modified after recordAction was was called. This is OK because this
+  // shared model state sending is just to synchronize other views of the
+  // shared model in other trees. The actual changes to the shared model are 
+  // stored in the recorder.
+  async recordAction(call: IActionTrackingMiddleware3Call<CallEnv>, 
+    historyEntryId: string, exchangeId: string,
+    recorder: IPatchRecorder, sharedModelModifications: SharedModelModifications,
+    undoable: boolean) {
+    if (!isActionFromManager(call)) {
+      // We record the start of the action even if it doesn't have any
+      // patches. This is useful when an action only modifies the shared
+      // tree
+      //
+      // If the manager triggered the action then the manager already 
+      // added the history entry.
+      //
+      await this.manager.addHistoryEntry(historyEntryId, exchangeId, this.tree.treeId, 
+          getActionPath(call), undoable);
+    }
 
-    // recordAction is async because it needs to wait for the manager to
-    // respond, to the addHistoryEntry, startExchange, and
-    // handleSharedModelChanges calls before it can call addTreePatchRecord. The
-    // recorded changes are safe because each action creates a new recorder, and
-    // the recorder stores the changes. So even if another action is triggered
-    // before the changes are sent it will be OK. 
+    // Call the shared model notification function if there are changes.
+    // This is needed so the changes can be sent to the manager, and so
+    // the changes can trigger a update/sync of the tile model.
     //
-    // If a shared model has been modified, the state of the shared model is
-    // captured just before it is sent so the shared model might have been
-    // modified after recordAction was was called. This is OK because this
-    // shared model state sending is just to synchronize other views of the
-    // shared model in other trees. The actual changes to the shared model are 
-    // stored in the recorder.
-    const recordAction = async (call: IActionTrackingMiddleware3Call<CallEnv>, 
-        historyEntryId: string, exchangeId: string,
-        recorder: IPatchRecorder, sharedModelModifications: SharedModelModifications,
-        undoable: boolean) => {
-            if (!isActionFromManager(call)) {
-                // We record the start of the action even if it doesn't have any
-                // patches. This is useful when an action only modifies the shared
-                // tree
-                //
-                // If the manager triggered the action then the manager already 
-                // added the history entry.
-                //
-                await manager.addHistoryEntry(historyEntryId, exchangeId, tree.treeId, 
-                    getActionName(call), undoable);
-            }
-    
-            // Call the shared model notification function if there are changes.
-            // This is needed so the changes can be sent to the manager, and so
-            // the changes can trigger a update/sync of the tile model.
-            //
-            // TODO: If there are multiple shared model changes, we might want
-            // to send them all to the tree at the same time, that way it can
-            // inform the tiles of all changes at the same time.
-            for (const [sharedModelPath, numModifications] of Object.entries(sharedModelModifications)) {
-                if (numModifications > 0) {
-                    // Run the callbacks tracking changes to the shared model.
-                    // We need to wait for these to complete because the manager
-                    // needs to know when this history entry is complete. If it
-                    // gets the addTreePatchRecord before any changes from the
-                    // shared models it will mark the entry complete too soon.
-                    //
-                    // A new exchangeId needs to be created and startExchange
-                    // needs to be called because handleSharedModelChanges is
-                    // treated the same as a call from the TreeManager. As
-                    // described above the middleware expects the exchange to
-                    // have already been started. handleSharedModelChanges needs
-                    // to be treated this way so the same historyEntryId is used
-                    // by the middleware. This way any changes triggered by the
-                    // shared model update are recorded in the same HistoryEntry
-                    //
-                    const sharedModelChangesExchangeId = nanoid();
-                    await manager.startExchange(historyEntryId, sharedModelChangesExchangeId, 
-                        "recordAction.sharedModelChanges");
+    // TODO: If there are multiple shared model changes, we might want
+    // to send them all to the tree at the same time, that way it can
+    // inform the tiles of all changes at the same time.
+    for (const [sharedModelPath, numModifications] of Object.entries(sharedModelModifications)) {
+      if (numModifications > 0) {
+        // Run the callbacks tracking changes to the shared model.
+        // We need to wait for these to complete because the manager
+        // needs to know when this history entry is complete. If it
+        // gets the addTreePatchRecord before any changes from the
+        // shared models it will mark the entry complete too soon.
+        //
+        // A new exchangeId needs to be created and startExchange
+        // needs to be called because handleSharedModelChanges is
+        // treated the same as a call from the TreeManager. As
+        // described above the middleware expects the exchange to
+        // have already been started. handleSharedModelChanges needs
+        // to be treated this way so the same historyEntryId is used
+        // by the middleware. This way any changes triggered by the
+        // shared model update are recorded in the same HistoryEntry
+        //
+        const sharedModelChangesExchangeId = nanoid();
+        await this.manager.startExchange(historyEntryId, sharedModelChangesExchangeId, 
+          "recordAction.sharedModelChanges");
 
-                    // Recursion: handleSharedModelChanges is an action on the
-                    // tree, and we are currently in a middleware that is
-                    // monitoring actions on that tree. At this point in the
-                    // middleware we are finishing a different action. Calling
-                    // handleSharedModelChanges starts a new top level action:
-                    // an action with no parent actions. This is what we want so
-                    // we can record any changes made to the tree as part of the
-                    // undo entry. I don't know if calling an action from a
-                    // middleware is an officially supported or tested approach.
-                    // It is working now. If it stops working we could delay the
-                    // call to handleSharedModelChanges with a setTimeout.
-                    //
-                    // It is recursive because we will end up back in this
-                    // recordAction function. Because we are awaiting
-                    // handleSharedModelChanges that second recursive
-                    // recordAction will get kicked off before this call to
-                    // handleSharedModelChanges returns. The tree's
-                    // implementation of handleSharedModelChanges should not
-                    // modify the shared model itself or we could get into an
-                    // infinite loop. 
-                    //
-                    // Within this recursive call to recordAction,
-                    // addTreePatchRecord will be called. This is how the
-                    // startExchange above is closed out.
-                    await tree.handleSharedModelChanges(historyEntryId, sharedModelChangesExchangeId, 
-                        call, sharedModelPath);
-                }
-            }
+        // Recursion: handleSharedModelChanges is an action on the
+        // tree, and we are currently in a middleware that is
+        // monitoring actions on that tree. At this point in the
+        // middleware we are finishing a different action. Calling
+        // handleSharedModelChanges starts a new top level action:
+        // an action with no parent actions. This is what we want so
+        // we can record any changes made to the tree as part of the
+        // undo entry. I don't know if calling an action from a
+        // middleware is an officially supported or tested approach.
+        // It is working now. If it stops working we could delay the
+        // call to handleSharedModelChanges with a setTimeout.
+        //
+        // It is recursive because we will end up back in this
+        // recordAction function. Because we are awaiting
+        // handleSharedModelChanges that second recursive
+        // recordAction will get kicked off before this call to
+        // handleSharedModelChanges returns. The tree's
+        // implementation of handleSharedModelChanges should not
+        // modify the shared model itself or we could get into an
+        // infinite loop. 
+        //
+        // Within this recursive call to recordAction,
+        // addTreePatchRecord will be called. This is how the
+        // startExchange above is closed out.
+        await this.tree.handleSharedModelChanges(historyEntryId, sharedModelChangesExchangeId, 
+          call, sharedModelPath);
+      }
+    }
 
-            // The tree might have been destroyed in the meantime. This happens during tests.
-            // In that case we bail and don't record anything
-            if (!isAlive(tree)) {
-                return;
-            }
+    // The tree might have been destroyed in the meantime. This happens during tests.
+    // In that case we bail and don't record anything
+    if (!isAlive(this.tree)) {
+      return;
+    }
 
             // TODO: CLUE Specific filtering of 'changeCount', should we record
             // this or not?
@@ -274,77 +370,15 @@ export const addTreeMonitor = (tree: Instance<typeof Tree>,  manager: TreeManage
             const patches = recorder.patches.filter(filterChangeCount);
             const inversePatches = recorder.inversePatches.filter(filterChangeCount);
 
-            // Always send the record to the manager even if there are no
-            // patches. This API is how the manager knows the exchangeId is finished. 
-            const record: TreePatchRecordSnapshot = {
-                tree: tree.treeId,
-                action: getActionName(call),
-                patches,
-                inversePatches,
-            };
-            manager.addTreePatchRecord(historyEntryId, exchangeId, record);
-        };
-
-    return {
-        middlewareDisposer,
+    // Always send the record to the manager even if there are no
+    // patches. This API is how the manager knows the exchangeId is finished. 
+    const record: TreePatchRecordSnapshot = {
+      tree: this.tree.treeId,
+      action: getActionPath(call),
+      patches,
+      inversePatches,
     };
-};
-
-export function withoutUndo() {
-    const actionCall = getRunningActionContext();
-    if (!actionCall) {
-        throw new Error("withoutUndo called outside of an MST action");
-    }
-
-    if (actionCall.parentActionEvent) {
-        // It is a little weird to print all this, but it seems like a good way to leave
-        // this part un implemented.
-        console.warn([
-            "withoutUndo() called by a child action. If calling a child action " + 
-            "with withoutUndo is something you need to do, update this code to support it. " + 
-            "There are several options for supporting it:", 
-            "   1. Ignore the call",
-            "   2. Apply the withoutUndo to the parent action",
-            "   3. Apply the withoutUndo just to the child action",
-            "Notes:",
-            "   - option 1 will be hard to debug, so if you do this, you should add a debug " +
-            "option to print out a message when it is ignored",
-            "   - option 3 will require changing the undo stack so it can record different " +
-            "entries from the history stack. It will also require changing the recordPatches " +
-            "function to somehow track this child action information."
-        ].join('\n'));
-        return;
-    }
-
-    const call = runningCalls.get(actionCall);
-    if (!call){
-        return;
-        // Rows in the problem tab have a root Unit instead of a DocumentModel, which is what sets up the
-        // middleware, so we cannot safely throw an error here.
-        // throw new Error("cannot find action tracking middleware call, " + 
-        //   "perhaps the middleware is not added to this tree");
-    }
-    if (!call.env) {
-        throw new Error("environment is not setup on action tracking middleware call");
-    }
-    call.env.undoable = false;
+    this.manager.addTreePatchRecord(historyEntryId, exchangeId, record);
+  }
 }
 
-function isActionFromManager(call: IActionTrackingMiddleware3Call<CallEnv>) {
-    const actionName = call.actionCall.name;
-    return (
-        // Because we haven't implemented applySharedModelSnapshotFromManager
-        // yet, all calls to handleSharedModelChanges are actually internal
-        // calls. However we treat those calls as actions from the manager
-        // because we want any changes triggered by a shared model update added
-        // to the same history entry.
-        
-        actionName === "handleSharedModelChanges" ||
-        actionName === "applyPatchesFromManager" ||
-        actionName === "startApplyingPatchesFromManager" ||
-        actionName === "finishApplyingPatchesFromManager" ||
-        // We haven't implemented this yet, it is needed to support two trees
-        // working with the same shared model
-        actionName === "applySharedModelSnapshotFromManager"
-    );
-}

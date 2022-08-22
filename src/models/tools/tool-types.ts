@@ -116,7 +116,7 @@ export const ToolContentModel = types.model("ToolContentModel", {
     /**
      * This will be called automatically by the tree monitor. 
      * Currently the call tree looks like:
-     * addTreeMonitor.recordAction
+     * TreeMonitor.recordAction
      * └ Tree.handleSharedModelChanges
      *   └ Tree.updateTreeAfterSharedModelChangesInternal
      *     └ Tree.updateTreeAfterSharedModelChanges

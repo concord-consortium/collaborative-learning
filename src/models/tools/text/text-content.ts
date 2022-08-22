@@ -9,7 +9,6 @@ import { ITileExportOptions } from "../tool-content-info";
 import { ToolContentModel } from "../tool-types";
 import { SharedModelType } from "../shared-model";
 import { getAllTextPluginInfos } from "./text-plugin-info";
-import { getToolTileModel } from "../tool-tile";
 
 export const kTextToolID = "Text";
 
@@ -44,9 +43,6 @@ export const TextContentModel = ToolContentModel
     }
   }))
   .views(self => ({
-    get title() {
-      return getToolTileModel(self)?.title;
-    },
     asSlate(): Value {
       switch (self.format) {
         case "slate":
@@ -100,7 +96,7 @@ export const TextContentModel = ToolContentModel
   .actions(self => ({
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       getAllTextPluginInfos().forEach(pluginInfo => {
-        pluginInfo?.updateTextContentAfterSharedModelChanges?.(self, sharedModel);
+        pluginInfo?.updateTextContentAfterSharedModelChanges?.(self, sharedModel); 
       });
     }
   }));

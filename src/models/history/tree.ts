@@ -4,12 +4,14 @@ import { DocumentContentModelType } from "../document/document-content";
 import { SharedModelType } from "../tools/shared-model";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { TreeManagerAPI } from "./tree-manager-api";
+import { TreeMonitor } from "./tree-monitor";
 
 export const Tree = types.model("Tree", {
 })
 .volatile(self => ({
   applyingManagerPatches: false,
-  treeManagerAPI: undefined as TreeManagerAPI | undefined
+  treeManagerAPI: undefined as TreeManagerAPI | undefined,
+  treeMonitor: undefined as TreeMonitor | undefined
 }))
 .views(self => ({
   get treeId(): string {
