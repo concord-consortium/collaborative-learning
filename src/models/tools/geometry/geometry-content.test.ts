@@ -139,7 +139,7 @@ describe("GeometryContent", () => {
       configContent?: (content: GeometryContentModelType) => void):
       { tile: ToolTileModelType, board: JXG.Board } {
     // ignore warning about not being able to find parent in getToolTileModel()
-    // I believe this warning is occuring because we're passing a content model, rather than
+    // I believe this warning is occurring because we're passing a content model, rather than
     // a snapshot, to ToolTileModel.create(), and the content model has a title getter
     const spy = jest.spyOn(console, "warn").mockImplementation(() => null);
     const { content, board } = createContentAndBoard(configContent);
