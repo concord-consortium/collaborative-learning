@@ -73,6 +73,7 @@ export const SharedModelEntry = types.model("SharedModelEntry", {
     self.tiles.remove(toolTile);
   }
 }));
+export type SharedModelEntryType = Instance<typeof SharedModelEntry>;
 
 export const DocumentContentModel = types
   .model("DocumentContent", {
@@ -194,28 +195,38 @@ export const DocumentContentModel = types
       },
       snapshotWithUniqueIds(asTemplate = false) {
         const snapshot = cloneDeep(getSnapshot(self));
-        const idMap: { [id: string]: string } = {};
+        const tileIdMap: { [id: string]: string } = {};
 
         snapshot.tileMap = (tileMap => {
           const _tileMap: { [id: string]: ToolTileSnapshotOutType } = {};
           each(tileMap, (tile, id) => {
-            idMap[id] = tile.id = uniqueId();
+            tileIdMap[id] = tile.id = uniqueId();
             _tileMap[tile.id] = tile;
           });
           return _tileMap;
         })(snapshot.tileMap);
 
+        // Update the sharedModels with new tile ids
+        each(snapshot.sharedModelMap, (sharedModelEntry, id) => {
+          const _tiles = cloneDeep(sharedModelEntry.tiles);
+          sharedModelEntry.tiles = [];
+          _tiles.forEach(tile => {
+            sharedModelEntry.tiles.push(tileIdMap[tile]);
+          });
+        });
+        // TODO: Give the shared models new ids
+
         each(snapshot.tileMap, tile => {
           getToolContentInfoById(tile.content.type)
-            ?.snapshotPostProcessor?.(tile.content, idMap, asTemplate);
+            ?.snapshotPostProcessor?.(tile.content, tileIdMap, asTemplate);
         });
 
         snapshot.rowMap = (rowMap => {
           const _rowMap: { [id: string]: TileRowSnapshotOutType } = {};
           each(rowMap, (row, id) => {
-            idMap[id] = row.id = uniqueId();
+            tileIdMap[id] = row.id = uniqueId();
             row.tiles = row.tiles.map(tileLayout => {
-              tileLayout.tileId = idMap[tileLayout.tileId];
+              tileLayout.tileId = tileIdMap[tileLayout.tileId];
               return tileLayout;
             });
             _rowMap[row.id] = row;
@@ -223,7 +234,7 @@ export const DocumentContentModel = types
           return _rowMap;
         })(snapshot.rowMap);
 
-        snapshot.rowOrder = snapshot.rowOrder.map(rowId => idMap[rowId]);
+        snapshot.rowOrder = snapshot.rowOrder.map(rowId => tileIdMap[rowId]);
 
         return snapshot;
       },
