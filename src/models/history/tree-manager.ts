@@ -133,13 +133,12 @@ export const TreeManager = types
 
       // Add the entry to the undo stack if it is undoable.
       //
-      // TODO: is it best to wait until the entry is complete like this?
-      // It might be better to add it earlier so it has the right position
-      // in the undo stack. For example if a user action caused some async
-      // behavior that takes a while, should its place in the stack be at
-      // the beginning or end of these changes?
-      // If we add it earlier the undo stack will have incomplete entry 
-      // in it at least for a little while.
+      // TODO: Is it best to wait until the entry is complete like this? It
+      // might be better to add it earlier so it has the right position in the
+      // undo stack. For example if a user action caused some async behavior
+      // that takes a while, should its place in the stack be at the beginning
+      // or end of these changes? As a downside, if we add it earlier the undo
+      // stack will have incomplete entries in sometimes.
       if (entry.undoable) {
         self.undoStore.addHistoryEntry(entry);
       }
