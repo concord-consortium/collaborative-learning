@@ -1,10 +1,10 @@
 import {
-  types, Instance, flow, IJsonPatch, isAlive
+  types, Instance, flow, IJsonPatch, isAlive, detach, destroy
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
 import { IUndoManager, UndoStore } from "./undo-store";
-import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot, HistoryOperation } from "./history";
+import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot, HistoryOperation, HistoryEntryType } from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 
 /**
@@ -34,6 +34,11 @@ export const TreeManager = types
 .model("TreeManager", {
   document: CDocument,
   undoStore: UndoStore,
+  // This is not volatile, so the TreeManager actions can modify it directly
+  // When the history is serialized, we'll only serialize the CDocument, so it
+  // shouldn't matter that these uncompleted history entries are part of the
+  // tree.
+  activeHistoryEntries: types.array(HistoryEntry)
 })
 .volatile(self => ({
   trees: {} as Record<string, TreeAPI>,
@@ -47,6 +52,10 @@ export const TreeManager = types
   findHistoryEntry(historyEntryId: string) {
     return self.document.history.find(entry => entry.id === historyEntryId);
   },
+
+  findActiveHistoryEntry(historyEntryId: string) {
+    return self.activeHistoryEntries.find(entry => entry.id === historyEntryId);
+  }
 }))
 .actions((self) => ({
   // This is only currently used for tests
@@ -70,7 +79,7 @@ export const TreeManager = types
     }
 
     // Find if there is already an entry with this historyEntryId
-    const entry = self.findHistoryEntry(historyEntryId);
+    const entry = self.findActiveHistoryEntry(historyEntryId);
     if (!entry) {
       throw new Error(`History Entry doesn't exist ${ json({historyEntryId})} `);
     }
@@ -103,35 +112,52 @@ export const TreeManager = types
     if (entry.activeExchanges.size === 0) {
       entry.state = "complete";
 
-      // If the history entry resulted in no changes delete it.
-      // TODO: we might not want to do this, it could be useful for
-      // researchers to see actions the student took even if they
-      // didn't change state. For example if a button was clicked even
-      // if it didn't change the state we might want to show that to
-      // the researcher somehow. There are lots of entries that are
-      // empty though so they are removed for the time being.
-      // TODO: we probably should store the entry in volatile until it
-      // is complete and then add it to the document.history when it
-      // is complete. This way it won't be incomplete in the history.
+      // Remove the entry from the activeHistoryEntries
+      detach(entry);
+ 
+      // If the history entry resulted in no changes don't add it to the real
+      // history.
+      //
+      // TODO: we might not want to do this, it could be useful for researchers
+      // and teachers to see actions the student took even if they didn't change
+      // state. For example if a button was clicked even if it didn't change the
+      // state we might want to show that somehow. There are lots of entries
+      // that are empty though, so they are removed for the time being.
       if (entry.records.length === 0) {
-        self.document.history.remove(entry);
+        destroy(entry);
+        return;
+      }
+
+      // Re-attach the entry to the history
+      self.document.history.push(entry);
+
+      // Add the entry to the undo stack if it is undoable.
+      //
+      // TODO: is it best to wait until the entry is complete like this?
+      // It might be better to add it earlier so it has the right position
+      // in the undo stack. For example if a user action caused some async
+      // behavior that takes a while, should its place in the stack be at
+      // the beginning or end of these changes?
+      // If we add it earlier the undo stack will have incomplete entry 
+      // in it at least for a little while.
+      if (entry.undoable) {
+        self.undoStore.addHistoryEntry(entry);
       }
     }
   },
 
   createHistoryEntry(historyEntryId: string, exchangeId: string, name: string,
     treeId: string, undoable: boolean) {
-    let entry = self.findHistoryEntry(historyEntryId);
-    if (entry) {
+    if (self.findHistoryEntry(historyEntryId) || self.findActiveHistoryEntry(historyEntryId)) {
       throw new Error(`The entry already exists ${ json({historyEntryId})}`);
     }
-    entry = HistoryEntry.create({
+    const entry = HistoryEntry.create({
       id: historyEntryId,
       action: name,
       tree: treeId,
       undoable
     });
-    self.document.history.push(entry);
+    self.activeHistoryEntries.push(entry);
 
     entry.activeExchanges.set(exchangeId, `TreeManager.createHistoryEntry ${name}`);
 
@@ -189,9 +215,9 @@ export const TreeManager = types
     const treePatchRecord = TreePatchRecord.create(record);
 
     // Find if there is already an entry with this historyEntryId
-    const entry = self.findHistoryEntry(historyEntryId);
+    const entry = self.findActiveHistoryEntry(historyEntryId);
     if (!entry) {
-      throw new Error(`There isn't an entry for ${ json({historyEntryId, exchangeId})}`);
+      throw new Error(`There isn't an active entry for ${ json({historyEntryId, exchangeId})}`);
     }
 
     // Make sure this entry wasn't marked complete before
@@ -213,23 +239,6 @@ export const TreeManager = types
     }
 
     self.endExchange(entry, exchangeId);
-
-    // Add the entry to the undo stack if it is undoable.
-    //
-    // TODO: should we wait to add it until the full entry is complete?
-    // It might be better to add it earlier so it has the right position
-    // in the undo stack. For example if a user action caused some async
-    // behavior that takes a while, should its place in the stack be at
-    // the beginning or end of these changes?
-    //
-    // If this is ending the last exchange and there are no patches,
-    // endExchange will remove this entry from the document.history.
-    // This should make the entry not alive, so it won't be added to the
-    // undoStore.
-    // TODO: add a test to confirm this
-    if (isAlive(entry) && entry.undoable && treePatchRecord.patches.length > 0) {
-      self.undoStore.addHistoryEntry(entry);
-    }
   },
 
   /**
