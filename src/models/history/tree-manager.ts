@@ -1,10 +1,10 @@
 import {
-  types, Instance, flow, IJsonPatch, isAlive, detach, destroy
+  types, Instance, flow, IJsonPatch, detach, destroy
 } from "mobx-state-tree";
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
 import { IUndoManager, UndoStore } from "./undo-store";
-import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot, HistoryOperation, HistoryEntryType } from "./history";
+import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot, HistoryOperation } from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 
 /**
