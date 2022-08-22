@@ -1,4 +1,4 @@
-import { destroy, Instance, types, getEnv, flow } from "mobx-state-tree";
+import { destroy, Instance, types, getEnv, flow, SnapshotIn } from "mobx-state-tree";
 import { when } from "mobx";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { SharedModel, SharedModelType } from "./shared-model";
@@ -117,26 +117,28 @@ describe("SharedModelDocumentManager", () => {
     expect(manager.isReady).toBe(true);
   });
 
-  it("calls tileContent#updateAfterSharedModelChanges when the shared model changes", async () => {
-    const doc = DocumentContentModel.create({
-      sharedModelMap: {
-        "sm1": {
-          sharedModel: {
-            id: "sm1",
-            type: "TestSharedModel"
-          },
-          tiles: [ "t1" ]
-        }
-      },
-      tileMap: {
-        "t1": {
-          id: "t1",
-          content: {
-            type: "TestTile",
-          },
-        }
+  const defaultDocumentContent = {
+    sharedModelMap: {
+      "sm1": {
+        sharedModel: {
+          id: "sm1",
+          type: "TestSharedModel"
+        },
+        tiles: [ "t1" ]
       }
-    });
+    },
+    tileMap: {
+      "t1": {
+        id: "t1",
+        content: {
+          type: "TestTile",
+        },
+      }
+    }
+  };
+
+  function setupDocument(documentContent? : SnapshotIn<typeof DocumentContentModel>) {
+    const doc = DocumentContentModel.create(documentContent || defaultDocumentContent);
 
     // This is needed to setup the tree monitor and shared model manager
     const docModel = createDocumentModel({
@@ -146,6 +148,14 @@ describe("SharedModelDocumentManager", () => {
       content: doc as any
     });
     
+    // Enable the tree monitor so changes to the shared model trigger the update.
+    docModel.treeMonitor!.enabled = true;
+
+    return {doc, docModel};
+  }
+
+  it("calls tileContent#updateAfterSharedModelChanges when the shared model changes", async () => {
+    const {doc, docModel} = setupDocument();    
     const toolTile = doc.tileMap.get("t1");
     assertIsDefined(toolTile);
     const tileContent = toolTile.content as TestTileType;
@@ -163,34 +173,8 @@ describe("SharedModelDocumentManager", () => {
   });
 
   it("calls tileContent#updateAfterSharedModelChanges only for shared model changes", async () => {
-    const doc = DocumentContentModel.create({
-      sharedModelMap: {
-        "sm1": {
-          sharedModel: {
-            id: "sm1",
-            type: "TestSharedModel"
-          },
-          tiles: [ "t1" ]
-        }
-      },
-      tileMap: {
-        "t1": {
-          id: "t1",
-          content: {
-            type: "TestTile",
-          },
-        }
-      }
-    });
+    const {doc, docModel} = setupDocument();
 
-    // This is needed to setup the tree monitor and shared model manager
-    const docModel = createDocumentModel({
-      uid: "1",
-      type: ProblemDocument,
-      key: "test",
-      content: doc as any
-    });
-    
     const toolTile = doc.tileMap.get("t1");
     assertIsDefined(toolTile);
     const tileContent = toolTile.content as TestTileType;
@@ -229,7 +213,7 @@ describe("SharedModelDocumentManager", () => {
   });
 
   it("starts monitoring shared models added after the document", async () => {
-    const doc = DocumentContentModel.create({
+    const {doc, docModel} = setupDocument({
       tileMap: {
         "t1": {
           id: "t1",
@@ -238,14 +222,6 @@ describe("SharedModelDocumentManager", () => {
           },
         }
       }
-    });
-
-    // This is needed to setup the tree monitor and shared model manager
-    const docModel = createDocumentModel({
-      uid: "1",
-      type: ProblemDocument,
-      key: "test",
-      content: doc as any
     });
     
     const toolTile = doc.tileMap.get("t1");
@@ -270,7 +246,7 @@ describe("SharedModelDocumentManager", () => {
   });
 
   it("updates tiles added after the document", async () => {
-    const doc = DocumentContentModel.create({
+    const {doc, docModel} = setupDocument({
       sharedModelMap: {
         "sm1": {
           sharedModel: {
@@ -279,14 +255,6 @@ describe("SharedModelDocumentManager", () => {
           }
         }
       },
-    });
-
-    // This is needed to setup the tree monitor and shared model manager
-    const docModel = createDocumentModel({
-      uid: "1",
-      type: ProblemDocument,
-      key: "test",
-      content: doc as any
     });
 
     const sharedModel = doc.sharedModelMap.get("sm1")?.sharedModel as TestSharedModelType;
@@ -322,6 +290,7 @@ describe("SharedModelDocumentManager", () => {
     });
     const manager = new SharedModelDocumentManager();
     manager.setDocument(doc);
+
     const sharedModel = manager.findFirstSharedModelByType(TestSharedModel);
     expect(sharedModel?.id).toBe("sm1");
 
@@ -508,7 +477,7 @@ describe("SharedModelDocumentManager", () => {
   });
 
   it("a shared model can be added to multiple tiles", async () => {
-    const doc = DocumentContentModel.create({
+    const { doc, docModel } = setupDocument({
       tileMap: {
         "t1": {
           id: "t1",
@@ -523,14 +492,6 @@ describe("SharedModelDocumentManager", () => {
           },
         }
       }
-    });
-
-    // This is needed to setup the tree monitor and shared model manager
-    const docModel = createDocumentModel({
-      uid: "1",
-      type: ProblemDocument,
-      key: "test",
-      content: doc as any
     });
 
     const tileContent1 = doc.tileMap.get("t1")?.content as TestTileType;
@@ -620,7 +581,7 @@ describe("SharedModelDocumentManager", () => {
   });
 
   it("a second shared model can be added to a tile", async () => {
-    const doc = DocumentContentModel.create({
+    const { doc, docModel } = setupDocument({
       tileMap: {
         "t1": {
           id: "t1",
@@ -631,14 +592,6 @@ describe("SharedModelDocumentManager", () => {
       }
     });
 
-    // This is needed to setup the tree monitor and shared model manager
-    const docModel = createDocumentModel({
-      uid: "1",
-      type: ProblemDocument,
-      key: "test",
-      content: doc as any
-    });
-            
     const tileContent = doc.tileMap.get("t1")?.content as TestTileType;
     assertIsDefined(tileContent);
 
@@ -799,7 +752,7 @@ describe("SharedModelDocumentManager", () => {
   });
 
   it("handles a tile being deleted that references a shared model", async () => {
-    const doc = DocumentContentModel.create({
+    const {doc, docModel} = setupDocument({
       sharedModelMap: {
         "sm1": {
           sharedModel: {
@@ -823,14 +776,6 @@ describe("SharedModelDocumentManager", () => {
           },
         },
       }
-    });
-
-    // This is needed to setup the tree monitor and shared model manager
-    const docModel = createDocumentModel({
-      uid: "1",
-      type: ProblemDocument,
-      key: "test",
-      content: doc as any
     });
 
     const tileContent1 = doc.tileMap.get("t1")?.content as TestTileType;
@@ -862,7 +807,7 @@ describe("SharedModelDocumentManager", () => {
   });
 
   it("handles a loading a shared model entry with a broken reference", async () => {
-    const doc = DocumentContentModel.create({
+    const {doc, docModel} = setupDocument({
       sharedModelMap: {
         "sm1": {
           sharedModel: {
@@ -882,14 +827,6 @@ describe("SharedModelDocumentManager", () => {
       }
     });
 
-    // This is needed to setup the tree monitor and shared model manager
-    const docModel = createDocumentModel({
-      uid: "1",
-      type: ProblemDocument,
-      key: "test",
-      content: doc as any
-    });
-    
     // Make sure this is working normally
     const tileContent1 = doc.tileMap.get("t1")?.content as TestTileType;
     const sharedModel = doc.sharedModelMap.get("sm1")?.sharedModel as TestSharedModelType;
