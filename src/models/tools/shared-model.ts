@@ -42,6 +42,12 @@ export const SharedModel = types.model("SharedModel", {
 .actions(self => ({
   setIndexOfType(index: number) {
     self.indexOfType = index;
+  },
+  willUpdateContent() {
+    // "derived" shared model objects can override
+  },
+  didUpdateContent() {
+    // "derived" shared model objects can override
   }
 }));
 

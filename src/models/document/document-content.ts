@@ -481,6 +481,14 @@ export const DocumentContentModel = types
         self.addPlaceholderRowIfAppropriate(i);
       }
     },
+    willUpdateContent() {
+      self.tileMap.forEach(tile => tile.willUpdateContent?.());
+      self.sharedModelMap.forEach(entry => entry.sharedModel.willUpdateContent?.());
+    },
+    didUpdateContent() {
+      self.sharedModelMap.forEach(entry => entry.sharedModel.didUpdateContent?.());
+      self.tileMap.forEach(tile => tile.didUpdateContent?.());
+    },
     addTileInNewRow(tile: ToolTileModelType, options?: INewTileOptions): INewRowTile {
       const o = options || {};
       if (o.rowIndex === undefined) {
