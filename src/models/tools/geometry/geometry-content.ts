@@ -32,7 +32,7 @@ import {
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
 import { ISharedModelManager, SharedModelType } from "../shared-model";
-import { setTileTitleFromContent } from "../tool-tile";
+import { getToolTileModel, setTileTitleFromContent } from "../tool-tile";
 import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
@@ -52,8 +52,6 @@ export interface IAxesParams {
 }
 
 export function defaultGeometryContent(options?: IDefaultContentOptions): GeometryContentModelType {
-  // TODO: title
-  // const { title } = options || {};
   const xRange = kGeometryDefaultWidth / kGeometryDefaultPixelsPerUnit;
   const yRange = kGeometryDefaultHeight / kGeometryDefaultPixelsPerUnit;
   return GeometryContentModel.create({
@@ -74,7 +72,6 @@ export interface IAxisLabels {
 export const GeometryMetadataModel = ToolMetadataModel
   .named("GeometryMetadata")
   .props({
-    title: types.maybe(types.string),
     disabled: types.array(types.string),
     selection: types.map(types.boolean)
   })
@@ -104,9 +101,6 @@ export const GeometryMetadataModel = ToolMetadataModel
     }
   }))
   .actions(self => ({
-    setTitle(title: string) {
-      self.title = title;
-    },
     setSharedSelection(sharedSelection: SelectionStoreModelType) {
       self.sharedSelection = sharedSelection;
     },
@@ -176,8 +170,8 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
   }))
   .views(self => ({
-    get title() {
-      return self.metadata?.title;
+    get title(): string | undefined {
+      return getToolTileModel(self)?.title;
     },
     getObject(id: string) {
       return self.objects.get(id);
@@ -370,10 +364,11 @@ export const GeometryContentModel = GeometryBaseContentModel
       const op = change.operation.toLowerCase();
       const target = change.target.toLowerCase();
 
+      // TODO Remove this or change metadata to tilecontainer or something
       if ((op === "update") && (target === "metadata")) {
         const props = change?.properties as JXGProperties | undefined;
         if (props?.title) {
-          setTileTitleFromContent(self, props.title);
+          self.setTitle(props.title);
         }
       }
       return undefined;
@@ -646,6 +641,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       return applyAndLogChange(board, change);
     }
 
+    // TODO Remove this or change metadata to tilecontainer or something
     function updateTitle(board: JXG.Board | undefined, title: string) {
       const change: JXGChange = {
               operation: "update",
@@ -654,6 +650,11 @@ export const GeometryContentModel = GeometryBaseContentModel
             };
       return applyAndLogChange(board, change);
     }
+
+    // If we remove the above we could easily replace it with this
+    // function updateTitle(board: JXG.Board | undefined, title: string) {
+    //   self.setTitle(title);
+    // }
 
     function getCentroid(obj: GeometryObjectModelUnion) {
       const forceNumber = (num: number | undefined) => num || 0;

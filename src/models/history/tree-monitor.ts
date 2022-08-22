@@ -364,11 +364,11 @@ export class TreeMonitor {
       return;
     }
 
-    // TODO: CLUE Specific filtering of 'changeCount', should we record
-    // this or not?
-    const filterChangeCount = (patch: IJsonPatch) => !patch.path.match(/\/changeCount/);
-    const patches = recorder.patches.filter(filterChangeCount);
-    const inversePatches = recorder.inversePatches.filter(filterChangeCount);
+            // TODO: CLUE Specific filtering of 'changeCount', should we record
+            // this or not?
+            const filterChangeCount = (patch: IJsonPatch) => !patch.path.match(/\/changeCount/);
+            const patches = recorder.patches.filter(filterChangeCount);
+            const inversePatches = recorder.inversePatches.filter(filterChangeCount);
 
     // Always send the record to the manager even if there are no
     // patches. This API is how the manager knows the exchangeId is finished. 

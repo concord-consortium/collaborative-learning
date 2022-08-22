@@ -2,6 +2,7 @@ import { types, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { IDropRowInfo } from "../document/document-content";
 import { uniqueId } from "../../utilities/js-utils";
+import { withoutUndo } from "../history/tree-monitor";
 
 export const TileLayoutModel = types
   .model("TileLayout", {
@@ -113,6 +114,12 @@ export const TileRowModel = types
       if (!self.isUserResizable) {
         self.height = undefined;
       }
+    }
+  }))
+  .actions(self => ({
+    setRowHeightWithoutUndo(height?: number) {
+      withoutUndo();
+      self.setRowHeight(height);
     }
   }));
 

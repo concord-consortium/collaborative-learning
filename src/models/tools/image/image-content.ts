@@ -1,7 +1,7 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { exportImageTileSpec, isLegacyImageTileImport, convertLegacyImageTile } from "./image-import-export";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
-import { setTileTitleFromContent } from "../tool-tile";
+import { getToolTileModel, setTileTitleFromContent } from "../tool-tile";
 import { toolContentModelHooks, ToolContentModel, ToolMetadataModelType } from "../tool-types";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -30,7 +30,7 @@ export const ImageContentModel = ToolContentModel
   })
   .views(self => ({
     get title() {
-      return self.metadata.title;
+      return getToolTileModel(self)?.title;
     },
     get isUserResizable() {
       return true;

@@ -27,8 +27,8 @@ export const useRowsFromDataSet = ({ dataSet, readOnly, inputRowId, rowChanges, 
   return useMemo(() => {
     const rowKeyGetter = (row: TRow) => row.__id__;
     const rowClass = (row: TRow) => row.__id__ === inputRowId ? "input-row" : undefined;
-    const rows = dataSet.getCanonicalCasesAtIndices()
-                        .map((_case, i) => canonicalize(dataSet, {
+    const _rows = dataSet.getCanonicalCasesAtIndices();
+    const rows = _rows.map((_case, i) => canonicalize(dataSet, {
                           __index__: i + 1,
                           __context__: context,
                           ..._case } as TRow));
