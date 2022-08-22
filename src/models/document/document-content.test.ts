@@ -166,7 +166,7 @@ describe("DocumentContentModel", () => {
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         { title: "Image 1", content: { type: "Image", url: placeholderImage } },
-        { title: "Text 2", content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         { title: "Image 2", content: { type: "Image", url: placeholderImage } }
       ]
     });
@@ -206,7 +206,7 @@ describe("DocumentContentModel", () => {
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
           { title: "Image 1", content: { type: "Image", url: placeholderImage } },
-          { title: "Text 2", content: { type: "Text", format: "html", text: ["<p></p>"] } }
+          { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ]
       ]
     });
@@ -250,7 +250,7 @@ describe("DocumentContentModel", () => {
           { title: "Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
-        { title: "Text 2", content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -292,7 +292,7 @@ describe("DocumentContentModel", () => {
         [
           { title: "Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } },
-          { title: "Text 2", content: { type: "Text", format: "html", text: ["<p></p>"] } }
+          { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ]
       ]
     });
@@ -393,7 +393,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { title: "Text 2", content: { type: "Text", format: "html", text: ["<p>foo</p>"] } },
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p>foo</p>"] } },
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
