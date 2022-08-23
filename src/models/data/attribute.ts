@@ -1,5 +1,6 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
-import { v4 as uuid } from "uuid";
+import { uniqueId } from "../../utilities/js-utils";
+import { Formula } from "./formula";
 
 const ValueType = types.union(types.number, types.string, types.undefined);
 export type IValueType = number | string | undefined;
@@ -11,11 +12,12 @@ export const Attribute = types.model("Attribute", {
   name: types.string,
   hidden: false,
   units: "",
-  formula: "",
+  formula: types.optional(Formula, () => Formula.create()),
   values: types.array(ValueType)
 }).preProcessSnapshot((snapshot) => {
-  const { id, ...others } = snapshot;
-  return { id: id || uuid(), ...others };
+  const { id, values: inValues, ...others } = snapshot;
+  const values = (inValues || []).map(v => v == null ? undefined : v);
+  return { id: id || uniqueId(), values, ...others };
 }).views(self => ({
   get length() {
     return self.values.length;
@@ -38,6 +40,18 @@ export const Attribute = types.model("Attribute", {
   },
   setUnits(units: string) {
     self.units = units;
+  },
+  clearFormula() {
+    self.formula.setDisplay();
+    self.formula.setCanonical();
+  },
+  setDisplayFormula(display: string, xName: string) {
+    self.formula.setDisplay(display);
+    self.formula.canonicalize(xName);
+  },
+  setFormula(display: string, canonical: string) {
+    self.formula.setDisplay(display);
+    self.formula.setCanonical(canonical);
   },
   addValue(value: IValueType, beforeIndex?: number) {
     if ((beforeIndex != null) && (beforeIndex < self.values.length)) {

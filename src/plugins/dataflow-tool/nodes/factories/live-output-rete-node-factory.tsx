@@ -14,7 +14,6 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     super.defaultBuilder(node);
     if (this.editor) {
       this.addInput(node, "nodeValue");
-      // TODO (CLAW)- add "hold" input?
       node
         .addControl(new DropdownListControl(this.editor, "liveOutputType", node, NodeLiveOutputTypes, true));
 
@@ -43,7 +42,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
           nodeValue?.setDisplayMessage(newValue === 0 ? "off" : "on");
         }
 
-        if (outputType === "Backyard Claw"){
+        if (outputType === "Grabber"){
           if (n1 > 1){
             newValue = 100;
           } else if (n1 < 0) {
@@ -52,7 +51,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
             newValue = parseInt((n1 * 100).toFixed(2), 10);
           }
           const roundedDisplayValue = Math.round((newValue / 10) * 10);
-          // at the moment, physical claw is driven by a nearest 1%, not nearest 10%
+          // at the moment, physical grabber is driven by a nearest 1%, not nearest 10%
           // However, now displaying the rounded to nearest 10% for consistency.
           // Swap commented/uncommented below to change to display of nearest 1%
           // nodeValue?.setDisplayMessage(`${newValue}% closed`);

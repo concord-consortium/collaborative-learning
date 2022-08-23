@@ -167,6 +167,7 @@ export interface IPublishSupportParams extends IFirebaseFunctionBaseParams {
   originDocType: string;
   resource_link_id: string;
   resource_url: string;
+  pubVersion?: number;
 }
 export type IPublishSupportUnionParams = IPublishSupportParams | IFirebaseFunctionWarmUpParams;
 

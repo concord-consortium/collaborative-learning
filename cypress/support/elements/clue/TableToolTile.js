@@ -21,20 +21,28 @@ class TableToolTile{
       return cy.get('.column-header-cell .editable-header-cell');
     }
     renameColumn(column, title){
-        this.getColumnHeader().contains(column).dblclick().type(title+'{enter}');
+      this.getColumnHeader().contains(column).dblclick().type(title+'{enter}');
     }
     removeRow(i){
       this.getTableRow().eq(i).click();
       this.getRemoveRowButton().click();
     }
     getTableRow(){
-        return cy.get('.canvas-area .rdg-row');
+      return cy.get('.canvas-area .rdg-row');
     }
     getColumnHeaderText(i){
-        return this.getColumnHeader().text();
+      return this.getColumnHeader().text();
     }
     getTableCell(){
-        return cy.get('.rdg-row .rdg-cell');
+      return cy.get('.rdg-row .rdg-cell');
+    }
+    getTableCellEdit(){
+      return cy.get('.rdg-row .rdg-cell .rdg-text-editor');
+    }
+    typeInTableCell(i, text) {
+      this.getTableCell().eq(i).dblclick().then(() => {
+        this.getTableCellEdit().type(`${text}{enter}`);
+      });
     }
     getTableCellWithColIndex(colIndex, colValue){
         return cy.get('.rdg-row').contains('.rdg-cell[aria-colindex="' + colIndex + '"]', colValue);

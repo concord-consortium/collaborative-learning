@@ -1,8 +1,10 @@
 import DrawToolTile from '../../../../support/elements/clue/DrawToolTile';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
+import ImageToolTile from '../../../../support/elements/clue/ImageToolTile';
 
 let clueCanvas = new ClueCanvas,
   drawToolTile = new DrawToolTile;
+const imageToolTile = new ImageToolTile;
 
 // NOTE: For some reason cypress+chrome thinks that the SVG elements are in a
 // scrollable container. Because of this when cypress does an action on a SVG
@@ -43,7 +45,7 @@ context('Draw Tool Tile', function () {
       });
       it("selects freehand drawing", () => {
         drawToolTile.getDrawToolSelect().click();
-        // First make sure we don't select it even if we are inside of its 
+        // First make sure we don't select it even if we are inside of its
         // bounding box
         drawToolTile.getDrawTile()
           .trigger("mousedown", 370, 50)
@@ -280,6 +282,23 @@ context('Draw Tool Tile', function () {
         drawToolTile.getImageDrawing().click({force:true, scrollBehavior: false});
         drawToolTile.getDrawToolDelete().click();
         drawToolTile.getImageDrawing().should("not.exist");
+      });
+    });
+    describe("Image", () => {
+      it("drags images from image tiles", () => {
+        const imageFilePath='image.png';
+        clueCanvas.addTile('image');
+        cy.uploadFile(imageToolTile.imageChooseFileButton(), imageFilePath, 'image/png');
+        cy.wait(2000);
+        // Doesn't seem like the image is actually loading into the image tile.
+        // Once that's fixed, we should drag that image into the drawing tile.
+      });
+      it("uploads images", () => {
+        const imageFilePath='image.png';
+        cy.uploadFile(drawToolTile.getDrawToolUploadImage(), imageFilePath, 'image/png');
+        cy.wait(2000);
+        // Uploading images doesn't seem to be working at the moment.
+        // drawToolTile.getImageDrawing().should("exist").and("have.length", 1);
       });
     });
   });

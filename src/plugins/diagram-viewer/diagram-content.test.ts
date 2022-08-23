@@ -1,6 +1,6 @@
 import { castToSnapshot, IAnyStateTreeNode, IAnyType, isAlive, onSnapshot, types } from "mobx-state-tree";
 import { when } from "mobx";
-import { createDiagramContent, defaultDiagramContent, 
+import { createDiagramContent, defaultDiagramContent,
   DiagramContentModel, DiagramContentModelType } from "./diagram-content";
 import { ISharedModelManager, SharedModelType } from "../../models/tools/shared-model";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
@@ -15,6 +15,9 @@ const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelMa
     isReady: true,
     findFirstSharedModelByType<IT extends IAnyType>(sharedModelType: IT): IT["Type"] | undefined {
       return variables;
+    },
+    getSharedModelsByType<IT extends IAnyType>(type: string): IT["Type"][] {
+      return [variables];
     },
     addTileSharedModel(tileContentModel: IAnyStateTreeNode): SharedModelType | undefined {
       return variables;
@@ -39,11 +42,11 @@ const setupContainer = (content: DiagramContentModelType, variables?: SharedVari
   if (variables) {
     onSnapshot(variables, () => {
       content.updateAfterSharedModelChanges(variables);
-    });  
+    });
   }
 
-  // So far it hasn't been necessary to wait for the MobX reaction to run inside of 
-  // DocumentContent#afterAttach. It seems to run immediately in the line above, so 
+  // So far it hasn't been necessary to wait for the MobX reaction to run inside of
+  // DocumentContent#afterAttach. It seems to run immediately in the line above, so
   // we can write expectations on this content without waiting.
   return {content, sharedModelManager};
 };
@@ -76,7 +79,7 @@ describe("DiagramContent", () => {
     expect(content.root.variablesAPI).toBeDefined();
   });
 
-  // This is more of an integration test because it is testing the innards of 
+  // This is more of an integration test because it is testing the innards of
   // DQRoot, but it exercises code provided by the diagram-content in the process
   it("supports creating Nodes", () => {
     const content = setupContent();
@@ -86,7 +89,7 @@ describe("DiagramContent", () => {
 
     content.root.createNode({x: 1, y: 1});
     expect(content.root.nodes.size).toBe(1);
-    const newNode = Array.from(content.root.nodes.values())[0]; 
+    const newNode = Array.from(content.root.nodes.values())[0];
     assertIsDefined(newNode);
 
     expect(content.sharedModel?.variables.length).toBe(1);
@@ -120,7 +123,7 @@ describe("DiagramContent", () => {
       variables: [
         {
           id: "variable1",
-          name: "test variable"          
+          name: "test variable"
         }
       ]
     });
@@ -131,7 +134,7 @@ describe("DiagramContent", () => {
     const content = createBasicModel();
 
     expect(content.root.nodes.size).toBe(1);
-    const firstNode = Array.from(content.root.nodes.values())[0]; 
+    const firstNode = Array.from(content.root.nodes.values())[0];
     assertIsDefined(firstNode);
 
     expect(content.sharedModel?.variables.length).toBe(1);
@@ -143,7 +146,7 @@ describe("DiagramContent", () => {
     const variablesAPI = content.root.variablesAPI;
     assertIsDefined(variablesAPI);
 
-    const firstNode = Array.from(content.root.nodes.values())[0]; 
+    const firstNode = Array.from(content.root.nodes.values())[0];
     assertIsDefined(firstNode);
 
     variablesAPI.removeVariable(firstNode.variable);
@@ -167,12 +170,12 @@ describe("DiagramContent", () => {
       {content: castToSnapshot(content)},
       {sharedModelManager}
     );
-  
+
     expect(addTileSharedModelSpy).toHaveBeenCalled();
   });
 
   it("handles off chance that updateAfterSharedModelChanges is called before things are ready", () => {
     const content = createDiagramContent();
     expect(() => content.updateAfterSharedModelChanges()).not.toThrow();
-  });  
+  });
 });

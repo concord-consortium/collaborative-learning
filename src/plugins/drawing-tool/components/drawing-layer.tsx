@@ -1,6 +1,6 @@
 import React from "react";
 import { reaction, IReactionDisposer } from "mobx";
-import { clone, isAlive } from "mobx-state-tree";
+import { clone, isAlive, getSnapshot } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { extractDragTileType, kDragTileContent } from "../../../components/tools/tool-tile";
 import { DrawingContentModelType, DrawingObjectMove } from "../model/drawing-content";
@@ -31,6 +31,8 @@ interface DrawingLayerViewProps {
   readOnly?: boolean;
   scale?: number;
   onSetCanAcceptDrop: (tileId?: string) => void;
+  imageUrlToAdd?: string;
+  setImageUrlToAdd?: (url: string) => void;
 }
 
 interface DrawingLayerViewState {
@@ -107,6 +109,13 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       () => this.getContent().toolbarSettings,
       settings => this.setCurrentToolSettings(settings)
     ));
+  }
+
+  public componentDidUpdate(prevProps: DrawingLayerViewProps, prevState: DrawingLayerViewState) {
+    if (this.props.imageUrlToAdd) {
+      this.addImage(this.props.imageUrlToAdd);
+      this.props.setImageUrlToAdd?.("");
+    }
   }
 
   public componentWillUnmount() {
@@ -439,6 +448,10 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   };
 
   private handleImageDrop(url: string) {
+    this.props.setImageUrlToAdd?.(url);
+  }
+
+  private addImage(url: string) {
     gImageMap.getImage(url)
       .then(imageEntry => {
         if (!this._isMounted || !imageEntry.contentUrl) return;
@@ -455,7 +468,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           width: imageEntry.width!,
           height: imageEntry.height!
         });
-        this.addNewDrawingObject(image);
+        this.addNewDrawingObject(getSnapshot(image));
       });
   }
 

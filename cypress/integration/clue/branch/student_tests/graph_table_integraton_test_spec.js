@@ -8,7 +8,7 @@ const clueCanvas = new ClueCanvas;
 const graphToolTile = new GraphToolTile;
 const tableToolTile = new TableToolTile;
 
-context('Graph Table Integration', function () {
+context.skip('Graph Table Integration', function () {
   before(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.3&qaGroup=5"; //using different problem bec. 2.1 disables graph table integration
     cy.clearQAData('all');
@@ -67,7 +67,7 @@ context('Graph Table Integration', function () {
         graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).children('svg').attribute('data-indicator-width').should('exist');
         graphToolTile.getGraph().should('have.class', 'is-linked');
       });
-      it('verify points added has p1 label in table and graph', function () {
+      it.skip('verify points added has p1 label in table and graph', function () {
         tableToolTile.getIndexNumberToggle().click();
         tableToolTile.getTableIndexColumnCell().first().should('contain', '1');
         graphToolTile.getGraphPointLabel().contains('p1').should('exist');
@@ -77,19 +77,19 @@ context('Graph Table Integration', function () {
         cy.linkTableToGraph('Table 1', "Graph 2");
         graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('have.length', 2);
       });
-      it('verify unlink of graph and table', function () {
+      it.skip('verify unlink of graph and table', function () {
         cy.unlinkTableToGraph('Table 1', "Graph 2");
         graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('have.length', 1);
         graphToolTile.getGraph().last().should('not.have.class', 'is-linked');
       });
-      it('verify point no longer has p1 in table and graph', function () {
+      it.skip('verify point no longer has p1 in table and graph', function () {
         graphToolTile.getGraphPointLabel().contains('p1').should('have.length', 1);
       });
       after(function () {
         clueCanvas.deleteTile('graph');
       });
     });
-    describe('test creating a polygon', function () {
+    describe.skip('test creating a polygon', function () {
       it('will create a polygon', function () {
         graphToolTile.getGraphPoint().last().click({ force: true }).dblclick({ force: true });
         graphToolTile.getGraphPolygon().should('exist');
@@ -131,7 +131,7 @@ context('Graph Table Integration', function () {
         // graphToolTile.getAngleAdornment().should('not.exist'); TODO
       });
     });
-    describe('text axes changes', function () {
+    describe.skip('text axes changes', function () {
       it('will change the name of the x-axis in the table', function () {
         tableToolTile.getTableTile().click();
         cy.get(".primary-workspace").within((workspace) => {
@@ -159,7 +159,7 @@ context('Graph Table Integration', function () {
           });
       });
     });
-    describe('normal graph interactions', function () {
+    describe.skip('normal graph interactions', function () {
       it('will add a polygon directly onto the graph', function () {
         graphToolTile.getGraphTile().click();
         graphToolTile.addPointToGraph(10, 10); //not sure why this isn't appearing
@@ -183,7 +183,7 @@ context('Graph Table Integration', function () {
     });
 
   });
-  context('Save and restore keeps the connection between table and graph', function () {
+  context.skip('Save and restore keeps the connection between table and graph', function () {
     before(function () {
       let title = '2.3 Mouthing Off and Nosing Around';
       canvas.createNewExtraDocumentFromFileMenu("empty",'my-work');
@@ -197,7 +197,7 @@ context('Graph Table Integration', function () {
       graphToolTile.getGraphPointLabel().contains('p1').should('exist');
     });
   });
-  context('Delete connected table', function () {
+  context.skip('Delete connected table', function () {
     it('will delete connected table', function () {
       clueCanvas.deleteTile('table');
       graphToolTile.getGraphPointLabel().contains('p1').should('not.exist');
@@ -209,4 +209,3 @@ context('Graph Table Integration', function () {
     });
   });
 });
-

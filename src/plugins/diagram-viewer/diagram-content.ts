@@ -54,7 +54,7 @@ export const DiagramContentModel = ToolContentModel
         const containerSharedModel = sharedModelManager?.isReady ?
           sharedModelManager?.findFirstSharedModelByType(SharedVariables) : undefined;
 
-        const tileSharedModels = sharedModelManager?.isReady ? 
+        const tileSharedModels = sharedModelManager?.isReady ?
           sharedModelManager?.getTileSharedModels(self) : undefined;
 
         const values = {sharedModelManager, containerSharedModel, tileSharedModels};
@@ -68,14 +68,16 @@ export const DiagramContentModel = ToolContentModel
 
         if (containerSharedModel && tileSharedModels?.includes(containerSharedModel)) {
           // We already have a shared model so we skip some steps
-          // below. If we don't skip these steps we can get in an infinite 
+          // below. If we don't skip these steps we can get in an infinite
           // loop.
         } else {
           if (!containerSharedModel) {
             // The document doesn't have a shared model yet
             containerSharedModel = SharedVariables.create();
-          } 
-          
+          }
+
+          // TODO: This will currently generate multiple history events because it
+          // is running outside of a document tree action.
           // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, containerSharedModel);
 
@@ -85,15 +87,15 @@ export const DiagramContentModel = ToolContentModel
           // multiple shared models at the same time.
           //
           // If we do that then this reference probably should be kept in sync
-          // with the tileSharedModels. So if it is removed from there then the 
-          // reference is cleaned up. 
+          // with the tileSharedModels. So if it is removed from there then the
+          // reference is cleaned up.
         }
 
         // We add the shared model as the variables API even if the shared model
         // was already added to this tile. This is necessary when deserializing
         // a document from storage.
         self.root.setVariablesAPI(containerSharedModel);
-      }, 
+      },
       {name: "sharedModelSetup", fireImmediately: true}));
     }
   }))
@@ -105,20 +107,20 @@ export const DiagramContentModel = ToolContentModel
         if (!isValidReference(() => node.variable)) {
           destroy(node);
         }
-      });        
-    
+      });
+
       if (!self.sharedModel) {
-        // We should never get into this case, but this is here to just in case 
+        // We should never get into this case, but this is here to just in case
         // somehow we do
         console.warn("updateAfterSharedModelChanges was called with no shared model present");
         return;
       }
-  
+
       Array.from(self.sharedModel.variables.values()).forEach(variable => {
         // sync up shared data model items with the tile data of items
         // look for this item in the itemList, if it is not there add it
         const sharedItemId = variable.id;
-        
+
         // the dereferencing of sharedItem should be safe here because we first cleaned up any
         // items that referenced invalid shared items.
         const nodes = Array.from(self.root.nodes.values());
@@ -133,7 +135,7 @@ export const DiagramContentModel = ToolContentModel
 
 export interface DiagramContentModelType extends Instance<typeof DiagramContentModel> {}
 
-// The migrator sometimes modifies the diagram content model so that its create 
+// The migrator sometimes modifies the diagram content model so that its create
 // method actually goes through the migrator. When that happens if the snapshot doesn't
 // have a version the snapshot will be ignored.
 // This weird migrator behavior is demonstrated here: src/models/mst.test.ts
@@ -148,5 +150,3 @@ export function createDiagramContent(snapshot?: SnapshotIn<typeof DiagramContent
 export function defaultDiagramContent(options?: IDefaultContentOptions) {
   return createDiagramContent({ root: getSnapshot(DQRoot.create()) });
 }
-
-

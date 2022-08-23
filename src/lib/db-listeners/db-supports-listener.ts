@@ -176,7 +176,8 @@ export class DBSupportsListener extends BaseListener {
       authoredTime: authoredDate.getTime(),
       originDoc: dbSupport.originDoc,
       caption: dbSupport.properties?.caption,
-      deleted: dbSupport.deleted || !!dbSupport.properties?.isDeleted
+      deleted: dbSupport.deleted || !!dbSupport.properties?.isDeleted,
+      pubVersion: dbSupport.pubVersion
     });
   }
 

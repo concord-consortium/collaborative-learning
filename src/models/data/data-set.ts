@@ -1,27 +1,16 @@
+import { cloneDeep, findIndex } from "lodash";
 import { applyAction, getEnv, Instance, ISerializedActionCall,
           onAction, types, getSnapshot, SnapshotOut } from "mobx-state-tree";
 import { Attribute, IAttribute, IAttributeCreation, IValueType } from "./attribute";
-// see https://medium.com/@martin_hotell/tree-shake-lodash-with-webpack-jest-and-typescript-2734fa13b5cd
-// for more efficient ways of importing lodash functions
-import { cloneDeep, findIndex, padStart } from "lodash";
-import { v4 as uuid } from "uuid";
+import { uniqueId, uniqueSortableId } from "../../utilities/js-utils";
 
-let localIDCounter = 0;
-
-// TODO: handle case ordering without requiring sortable IDs.
-// For now, we combine an incrementing counter with a UUID.
-export const localId = () => {
-  const uuidRight = uuid().substr(8),
-        count = ++localIDCounter,
-        uuidLeft = padStart(String(count), 8, "0");
-  return uuidLeft + uuidRight;
-};
+export const newCaseId = uniqueSortableId;
 
 export const CaseID = types.model("CaseID", {
-  __id__: types.optional(types.identifier, () => localId())
+  __id__: types.optional(types.identifier, () => newCaseId())
   // __index__: types.number
 });
-export type ICaseID = typeof CaseID.Type;
+export interface ICaseID extends Instance<typeof CaseID> {}
 
 export interface ICase {
   __id__: string;
@@ -46,7 +35,7 @@ interface IEnvContext {
 }
 
 export const DataSet = types.model("DataSet", {
-  id: types.optional(types.identifier, () => uuid()),
+  id: types.optional(types.identifier, () => uniqueId()),
   sourceID: types.maybe(types.string),
   name: types.maybe(types.string),
   attributes: types.array(Attribute),
@@ -55,17 +44,38 @@ export const DataSet = types.model("DataSet", {
 .volatile(self => ({
   transactionCount: 0
 }))
+.views(self => ({
+  get isEmpty() {
+    return self.attributes.length === 0 && self.cases.length === 0;
+  },
+  get attrIDMap() {
+    const attrIDMap: { [index: string]: IAttribute } = {};
+    self.attributes.forEach(attr => {
+      attrIDMap[attr.id] = attr;
+    });
+    return attrIDMap;
+  },
+  get attrNameMap() {
+    const attrNameMap: { [index: string]: string } = {};
+    self.attributes.forEach(attr => {
+      attrNameMap[attr.name] = attr.id;
+    });
+    return attrNameMap;
+  },
+  get caseIDMap() {
+    const caseIDMap: { [index: string]: number } = {};
+    self.cases.forEach((aCase, index) => {
+      caseIDMap[aCase.__id__] = index;
+    });
+    return caseIDMap;
+  }
+}))
 .extend(self => {
-  const attrIDMap: { [index: string]: IAttribute } = {},
-        // map from attribute names to attribute IDs
-        attrNameMap: { [index: string]: string } = {},
-        // map from case IDs to indices
-        caseIDMap: { [index: string]: number } = {},
-        disposers: { [index: string]: () => void } = {};
+  const disposers: { [index: string]: () => void } = {};
   let inFlightActions = 0;
 
   function derive(name?: string) {
-    return { id: uuid(), sourceID: self.id, name: name || self.name, attributes: [], cases: [] };
+    return { id: uniqueId(), sourceID: self.id, name: name || self.name, attributes: [], cases: [] };
   }
 
   function attrIndexFromID(id: string) {
@@ -75,10 +85,10 @@ export const DataSet = types.model("DataSet", {
 
   function mapBeforeID(srcDataSet?: IDataSet, beforeID?: string) {
     let id: string | undefined = beforeID;
-    while (id && (caseIDMap[id] == null)) {
+    while (id && (self.caseIDMap[id] == null)) {
       id = srcDataSet && srcDataSet.nextCaseID(id);
     }
-    return id && caseIDMap[id] ? id : undefined;
+    return id && self.caseIDMap[id] ? id : undefined;
   }
 
   function mapBeforeIDArg(beforeID?: string | string[]) {
@@ -93,7 +103,7 @@ export const DataSet = types.model("DataSet", {
   }
 
   function getCase(caseID: string): ICase | undefined {
-    const index = caseIDMap[caseID];
+    const index = self.caseIDMap[caseID];
     if (index == null) { return undefined; }
 
     const aCase: ICase = { __id__: caseID };
@@ -111,7 +121,7 @@ export const DataSet = types.model("DataSet", {
 
   // canonical cases are keyed by attribute ID rather than attribute name
   function getCanonicalCase(caseID: string): ICase | undefined {
-    const index = caseIDMap[caseID];
+    const index = self.caseIDMap[caseID];
     if (index == null) { return undefined; }
 
     const aCase: ICase = { __id__: caseID };
@@ -130,37 +140,29 @@ export const DataSet = types.model("DataSet", {
   function beforeIndexForInsert(index: number, beforeID?: string | string[]) {
     if (!beforeID) { return self.cases.length; }
     return Array.isArray(beforeID)
-            ? caseIDMap[beforeID[index]]
-            : caseIDMap[beforeID];
+            ? self.caseIDMap[beforeID[index]]
+            : self.caseIDMap[beforeID];
   }
 
   function insertCaseIDAtIndex(id: string, beforeIndex: number) {
-    // const newCase = { __id__: id, __index__: beforeIndex };
     const newCase = { __id__: id };
     if ((beforeIndex != null) && (beforeIndex < self.cases.length)) {
       self.cases.splice(beforeIndex, 0, newCase );
-      // increment indices of all subsequent cases
-      for (let i = beforeIndex + 1; i < self.cases.length; ++i) {
-        const aCase = self.cases[i];
-        ++caseIDMap[aCase.__id__];
-        // aCase.__index__ = i;
-      }
     }
     else {
       self.cases.push(newCase);
       beforeIndex = self.cases.length - 1;
     }
-    caseIDMap[self.cases[beforeIndex].__id__] = beforeIndex;
   }
 
   function setCaseValues(caseValues: ICase) {
-    const index = caseIDMap[caseValues.__id__];
+    const index = self.caseIDMap[caseValues.__id__];
     if (index == null) { return; }
 
     for (const key in caseValues) {
       if (key !== "__id__") {
-        const attributeID = attrNameMap[key],
-              attribute = attrIDMap[attributeID];
+        const attributeID = self.attrNameMap[key],
+              attribute = self.attrIDMap[attributeID];
         if (attribute) {
           const value = caseValues[key];
           attribute.setValue(index, value != null ? value : undefined);
@@ -170,13 +172,13 @@ export const DataSet = types.model("DataSet", {
   }
 
   function setCanonicalCaseValues(caseValues: ICase) {
-    const index = caseIDMap[caseValues.__id__];
+    const index = self.caseIDMap[caseValues.__id__];
     if (index == null) { return; }
 
     for (const key in caseValues) {
       if (key !== "__id__") {
         const attributeID = key,
-              attribute = attrIDMap[attributeID];
+              attribute = self.attrIDMap[attributeID];
         if (attribute) {
           const value = caseValues[key];
           attribute.setValue(index, value != null ? value : undefined);
@@ -197,34 +199,34 @@ export const DataSet = types.model("DataSet", {
   return {
     views: {
       attrFromID(id: string) {
-        return attrIDMap[id];
+        return self.attrIDMap[id];
       },
       attrFromName(name: string) {
-        const id = attrNameMap[name];
-        return id ? attrIDMap[id] : undefined;
+        const id = self.attrNameMap[name];
+        return id ? self.attrIDMap[id] : undefined;
       },
       attrIndexFromID(id: string) {
         return attrIndexFromID(id);
       },
       caseIndexFromID(id: string) {
-        return caseIDMap[id];
+        return self.caseIDMap[id];
       },
       caseIDFromIndex(index: number) {
         return getCaseAtIndex(index)?.__id__;
       },
       nextCaseID(id: string) {
-        const index = caseIDMap[id],
+        const index = self.caseIDMap[id],
               nextCase = (index != null) && (index < self.cases.length - 1)
                           ? self.cases[index + 1] : undefined;
         return nextCase ? nextCase.__id__ : undefined;
       },
       getValue(caseID: string, attributeID: string) {
-        const attr = attrIDMap[attributeID],
-              index = caseIDMap[caseID];
+        const attr = self.attrIDMap[attributeID],
+              index = self.caseIDMap[caseID];
         return attr && (index != null) ? attr.value(index) : undefined;
       },
       getValueAtIndex(index: number, attributeID: string) {
-        const attr = attrIDMap[attributeID];
+        const attr = self.attrIDMap[attributeID];
         return attr && (index != null) ? attr.value(index) : undefined;
       },
       getCase(caseID: string): ICase | undefined {
@@ -308,7 +310,7 @@ export const DataSet = types.model("DataSet", {
                           self.attributes.map(attr => attr.id),
               filter = derivationSpec && derivationSpec.filter;
         attrIDs.forEach((attrID) => {
-          const attribute = attrIDMap[attrID];
+          const attribute = self.attrIDMap[attrID];
           if (attribute) {
             addAttributeToDataSet(derived, attribute.derive());
           }
@@ -328,17 +330,6 @@ export const DataSet = types.model("DataSet", {
         const context: IEnvContext = getEnv(self),
               { srcDataSet, derivationSpec = {} } = context,
               { attributeIDs, filter, synchronize } = derivationSpec;
-
-        // build attrIDMap
-        self.attributes.forEach(attr => {
-          attrIDMap[attr.id] = attr;
-          attrNameMap[attr.name] = attr.id;
-        });
-
-        // build caseIDMap
-        self.cases.forEach((aCase, index) => {
-          caseIDMap[aCase.__id__] = index;
-        });
 
         // set up onAction handler to perform synchronization with source
         if (srcDataSet && synchronize) {
@@ -384,7 +375,7 @@ export const DataSet = types.model("DataSet", {
                   const srcCase = srcDataSet && caseID && srcDataSet.getCase(caseID);
                   if (caseID && srcCase) {
                     const filteredCase = filter ? filter(srcCase) : srcCase,
-                          doesInclude = caseIDMap[caseID] != null;
+                          doesInclude = self.caseIDMap[caseID] != null;
                     // identify cases that now pass the filter after change
                     if (filteredCase && !doesInclude) {
                       casesToAdd.push(filteredCase);
@@ -441,37 +432,33 @@ export const DataSet = types.model("DataSet", {
         self.name = name;
       },
       addAttributeWithID(snapshot: IAttributeCreation, beforeID?: string) {
+        const { formula, ...others } = snapshot;
+        const attrSnap = { formula: { display: formula }, ...others };
         const beforeIndex = beforeID ? attrIndexFromID(beforeID) : undefined;
         let newIndex = beforeIndex;
         if (beforeIndex != null) {
-          self.attributes.splice(beforeIndex, 0, snapshot as IAttribute);
+          self.attributes.splice(beforeIndex, 0, attrSnap as IAttribute);
         }
         else {
-          newIndex = self.attributes.push(snapshot as IAttribute) - 1;
+          newIndex = self.attributes.push(attrSnap as IAttribute) - 1;
         }
         const attribute = self.attributes[newIndex as number];
-        attrIDMap[attribute.id] = attribute;
-        attrNameMap[attribute.name] = attribute.id;
         for (let i = attribute.values.length; i < self.cases.length; ++i) {
           attribute.values.push("");
         }
       },
 
       setAttributeName(attributeID: string, name: string) {
-        const attribute = attributeID && attrIDMap[attributeID];
+        const attribute = attributeID && self.attrIDMap[attributeID];
         if (attribute) {
           attribute.setName(name);
         }
       },
 
       removeAttribute(attributeID: string) {
-        const attrIndex = attrIndexFromID(attributeID),
-              attribute = attributeID && attrIDMap[attributeID],
-              attrName = attribute && attribute.name;
+        const attrIndex = attrIndexFromID(attributeID);
         if (attrIndex != null) {
           self.attributes.splice(attrIndex, 1);
-          delete attrIDMap[attributeID];
-          delete attrNameMap[attrName];
         }
       },
 
@@ -488,7 +475,6 @@ export const DataSet = types.model("DataSet", {
             self.attributes.push(snapshot as IAttribute);
             dstAttrIndex = self.attributes.length - 1;
           }
-          attrIDMap[attributeID] = self.attributes[dstAttrIndex];
         }
       },
 
@@ -529,17 +515,12 @@ export const DataSet = types.model("DataSet", {
 
       removeCases(caseIDs: string[]) {
         caseIDs.forEach((caseID) => {
-          const index = caseIDMap[caseID];
+          const index = self.caseIDMap[caseID];
           if (index != null) {
             self.cases.splice(index, 1);
             self.attributes.forEach((attr) => {
               attr.removeValues(index);
             });
-            delete caseIDMap[caseID];
-            for (let i = index; i < self.cases.length; ++i) {
-              const id = self.cases[i].__id__;
-              caseIDMap[id] = i;
-            }
           }
         });
       },
@@ -589,7 +570,7 @@ export type IDataSetSnapshot = SnapshotOut<typeof DataSet>;
 
 export function addAttributeToDataSet(dataset: IDataSet, snapshot: IAttributeCreation, beforeID?: string) {
   if (!snapshot.id) {
-    snapshot.id = localId();
+    snapshot.id = uniqueId();
   }
   dataset.addAttributeWithID(snapshot, beforeID);
 }
@@ -598,7 +579,7 @@ export function addCasesToDataSet(dataset: IDataSet, cases: ICaseCreation[], bef
   const newCases = cloneDeep(cases) as ICase[];
   newCases.forEach((aCase) => {
     if (!aCase.__id__) {
-      aCase.__id__ = localId();
+      aCase.__id__ = newCaseId();
     }
   });
   dataset.addCasesWithIDs(newCases, beforeID);
@@ -609,7 +590,7 @@ export function addCanonicalCasesToDataSet(dataset: IDataSet, cases: ICaseCreati
   const newCases = cloneDeep(cases) as ICase[];
   newCases.forEach((aCase) => {
     if (!aCase.__id__) {
-      aCase.__id__ = localId();
+      aCase.__id__ = newCaseId();
     }
   });
   dataset.addCanonicalCasesWithIDs(newCases, beforeID);

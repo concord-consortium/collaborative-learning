@@ -5,6 +5,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { DocumentCaption } from "./document-caption";
 import { ThumbnailPlaceHolderIcon } from "./thumbnail-placeholder-icon";
 import { ThumbnailPrivateIcon } from "./thumbnail-private-icon";
+import { useAppMode } from "../../hooks/use-stores";
 
 interface IProps {
   dataTestName: string;
@@ -25,6 +26,7 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
           onDocumentClick, onDocumentDragStart, onDocumentStarClick,
           onDocumentDeleteClick } = props;
   const selectedClass = isSelected ? "selected" : "";
+  const appMode = useAppMode();
 
   const handleDocumentClick = (e: React.MouseEvent<HTMLDivElement>) => {
     onDocumentClick?.(document);
@@ -44,10 +46,12 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
   // TODO: add proper state of isPrivate based on document properties
   const isPrivate = false; // document.visibility === "private" && document.isRemote;
   const privateClass = isPrivate ? "private" : "";
+  const documentTitle = appMode !== "authed" && appMode !== "demo"
+                          ? `Firebase UID: ${document.key}` : undefined;
 
   return (
     <div className={`list-item ${selectedClass} ${privateClass}`} data-test={dataTestName} key={document.key}
-      onClick={isPrivate ? undefined : handleDocumentClick}>
+      title={documentTitle} onClick={isPrivate ? undefined : handleDocumentClick}>
       <div className="scaled-list-item-container" onDragStart={handleDocumentDragStart}
         draggable={!!onDocumentDragStart && !isPrivate}>
         { isPrivate

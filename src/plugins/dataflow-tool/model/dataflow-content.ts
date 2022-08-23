@@ -5,7 +5,7 @@ import { ToolContentModel, ToolMetadataModelType, toolContentModelHooks } from "
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
-import { setTileTitleFromContent } from "../../../models/tools/tool-tile";
+import { getToolTileModel, setTileTitleFromContent } from "../../../models/tools/tool-tile";
 
 export const kDataflowToolID = "Dataflow";
 
@@ -54,7 +54,7 @@ export const DataflowContentModel = ToolContentModel
   }))
   .views(self => ({
     get title() {
-      return self.metadata.title;
+      return getToolTileModel(self)?.title;
     },
     get isUserResizable() {
       return true;
