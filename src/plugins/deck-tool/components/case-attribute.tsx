@@ -1,6 +1,7 @@
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import React, { useEffect, useState } from "react";
+import { gImageMap } from "../../../models/image-map";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DeckContentModelType } from "../deck-content";
 import '../deck-tool.scss';
@@ -10,10 +11,13 @@ interface IProps {
   caseId: string;
   attrKey: string;
   readOnly: any;
+  imageUrlToAdd?: string;
   createEmptyAttr: () => void;
+  onSetSelectedCell: (caseId: string, attrKey: string) => void;
 }
 
-export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKey, readOnly, createEmptyAttr }) => {
+export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKey, readOnly,
+    imageUrlToAdd, onSetSelectedCell, createEmptyAttr }) => {
   const content = model.content as DeckContentModelType;
   const [labelCandidate, setLabelCandidate] = useState("");
   const [valueCandidate, setValueCandidate] = useState("");
@@ -21,6 +25,7 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
   const [hasBeenSaved, setHasBeenSaved] = useState(false);
   const [attrsCount, setAttrsCount] = useState(content.existingAttributes().length);
   const [labelN, setLabelN] = useState(`Label ${attrsCount}`);
+  const [imageUrl, setImageUrl] = useState("");
 
   useEffect(()=>{
     // if this attribute has neither name nor value (besides "") it has not been saved
@@ -51,6 +56,12 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
   };
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    console.log("imageUrlToAdd", imageUrlToAdd);
+    onSetSelectedCell(caseId, attrKey);
+    imageUrlToAdd && content.setAttValue(caseId, attrKey, imageUrlToAdd);
+  };
+
+  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const [facet] = event.currentTarget.classList;
     activateInput(facet);
   };
@@ -114,6 +125,13 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
     hasBeenSaved ? "saved" : "unsaved"
   );
 
+  const attrKeyValue = content.dataSet.getValue(caseId, attrKey);
+  (attrKeyValue && typeof(attrKeyValue) === "string"  && attrKeyValue?.includes("ccimg"))
+     && gImageMap.getImage(attrKeyValue)
+        .then((image)=>{
+          setImageUrl(image.displayUrl || "");
+        });
+
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onClick={handleClick}>
@@ -130,7 +148,7 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
         }
       </div>
 
-      <div className={valueClassNames} onClick={handleClick}>
+      <div className={valueClassNames} onClick={handleClick} onDoubleClick={handleDoubleClick}>
         { isEditingFacet === "value" && !readOnly
           ? <input
               type="text"
@@ -139,7 +157,9 @@ export const CaseAttribute: React.FC<IProps> = observer(({ model, caseId, attrKe
               onKeyDown={handleKeyDown}
               onBlur={saveClear}
             />
-          : <div className="cell-value">{content.dataSet.getValue(caseId, attrKey)}</div>
+          : attrKeyValue && typeof(attrKeyValue) === "string"  && attrKeyValue?.includes("ccimg")
+            ?  <img src={imageUrl} className="image-value"/>
+            : <div className="cell-value">{attrKeyValue}</div>
         }
       </div>
     </div>

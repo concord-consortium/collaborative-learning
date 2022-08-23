@@ -197,6 +197,14 @@ $default-button-border-color: #979797;
         .cell-value {
           padding:$cell-padding;
         }
+
+        .image-value {
+          width: 80px;
+          height: 80px;
+          object-fit: contain;
+          display: block;
+          margin: auto;
+        }
       }
 
       input {

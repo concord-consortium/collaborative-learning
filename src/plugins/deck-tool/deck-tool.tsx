@@ -19,13 +19,12 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const [caseIndex, setCaseIndex] = useState(0);
   const [totalCases, setTotalCases] = useState(content.totalCases());
   const [hideDelete, setHideDelete] = useState(false);
+  const [imageUrlToAdd, setImageUrlToAdd] = useState("");
+  const [selectedCell, setSelectedCell] = useState<{caseId: string, attrKey: string}>();
 
   useEffect(() => {
     setDefaultTitle();
   }, [content]);
-  const [canIncrement, setCanIncrement] = useState(true);
-  const [canDecrement, setCanDecrement] = useState(false);
-  const [imageUrlToAdd, setImageUrlToAdd] = useState("");
 
   useEffect(()=>{
     setHideDelete(shouldHideDelete() || false);
@@ -104,20 +103,21 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
     caseIndex < totalCases - 1 ? "active" : "disabled",
   );
 
-  const handleSetImageUrl = (url: string) => {
-    setImageUrlToAdd(url);
+  const handleSetSelectedCell = (caseId: string, attrKey: string) => {
+    setSelectedCell({caseId, attrKey});
   };
 
-  const handleSetActiveFacet = (facet: null | "name" | "value") => {
-    setActiveFacet(facet);
+  const handleSetImageUrl = (url: string ) => {
+    setImageUrlToAdd(url);
+    selectedCell && content.setAttValue(selectedCell.caseId, selectedCell.attrKey, url);
   };
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
 
   return (
     <div className="deck-tool">
-      <DeckToolToolBar documentContent={documentContent} toolTile={toolTile} activeFacet={activeFacet}
-          onSetImageUrl={(url)=>handleSetImageUrl(url)} {...toolbarProps} />
+      <DeckToolToolBar model={model} documentContent={documentContent} toolTile={toolTile}
+          selectedCell={selectedCell} onSetImageUrl={(url)=>handleSetImageUrl(url)} {...toolbarProps} />
       <div className="deck-toolbar">
         <div className="panel title">
           { isEditingTitle && !readOnly
@@ -165,10 +165,11 @@ export const DeckToolComponent: React.FC<IToolTileProps> = observer((props) => {
             model={model}
             totalCases={totalCases}
             readOnly={readOnly}
+            imageUrlToAdd={imageUrlToAdd}
+            onSetSelectedCell={handleSetSelectedCell}
           />
         }
       </div>
-      {/* <div>replace me with image toolbar component</div> */}
     </div>
   );
 });

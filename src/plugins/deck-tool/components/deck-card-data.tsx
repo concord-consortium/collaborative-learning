@@ -5,14 +5,16 @@ import { DeckContentModelType } from "../deck-content";
 import { CaseAttribute } from "./case-attribute";
 
 interface IProps {
-  activeFacet: null | "name" | "value";
   caseIndex: any;
   model: ToolTileModelType;
   totalCases: number;
   readOnly: any;
+  imageUrlToAdd?: string;
+  onSetSelectedCell: (caseId: string, attrKey: string) => void;
 }
 
-export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, readOnly }) => {
+export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, readOnly, imageUrlToAdd,
+    onSetSelectedCell }) => {
   const content = model.content as DeckContentModelType;
   const [currentCaseId, setCurrentCaseId] = useState("");
   const [attrKeys, setAttrKeys] = useState(content.existingAttributes());
@@ -35,11 +37,13 @@ export const DeckCardData: React.FC<IProps> = observer(({ caseIndex, model, read
           return (
             <CaseAttribute
               key={attrKey}
-              model={ model }
-              caseId={ currentCaseId }
+              model={model}
+              caseId={currentCaseId}
               attrKey={attrKey}
               readOnly={readOnly}
+              imageUrlToAdd={imageUrlToAdd}
               createEmptyAttr={createEmptyAttr}
+              onSetSelectedCell={onSetSelectedCell}
             />
           );
         })

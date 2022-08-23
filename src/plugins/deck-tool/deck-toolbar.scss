@@ -23,6 +23,11 @@
       height: $toolbar-button-height;
       background-color: $workspace-teal-light-9;
 
+      &.disabled {
+        opacity: 0.35;
+        pointer-events: none;
+      }
+
       &:hover {
         background-color: $workspace-teal-light-6;
       }

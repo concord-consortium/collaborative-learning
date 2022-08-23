@@ -7,16 +7,19 @@ import { IFloatingToolbarProps, useFloatingToolbarLocation }
 import { ImageUploadButton } from "../../components/tools/image/image-toolbar";
 
 import "./deck-toolbar.scss";
+import { DeckContentModelType } from "./deck-content";
+import { ToolTileModelType } from "../../models/tools/tool-tile";
 
 interface IProps extends IFloatingToolbarProps {
-  // onUploadImageFile: (file: File) => void;
-  activeFacet: null | "name" | "value";
+  model: ToolTileModelType;
+  selectedCell: {caseId: string, attrKey: string} | undefined;
   onSetImageUrl: (url: string) => void;
 }
 
 export const DeckToolToolBar: React.FC<IProps> = observer((
-              { documentContent, toolTile, activeFacet, onIsEnabled, onSetImageUrl, ...others }: IProps) => {
+  { model, documentContent, toolTile, selectedCell, onIsEnabled, onSetImageUrl, ...others }: IProps) => {
   // const enabled = onIsEnabled() && activeFacet === "value";
+  const content = model.content as DeckContentModelType;
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
                   documentContent,
@@ -26,11 +29,12 @@ export const DeckToolToolBar: React.FC<IProps> = observer((
                   enabled,
                   ...others
                 });
-  // const tooltipOffset = { x: -19, y: -32 };
   const uploadImage = (file: File) => {
     gImageMap.addFileImage(file)
       .then(image => {
-        onSetImageUrl(image.contentUrl || '');
+        onSetImageUrl(image.contentUrl || "");
+        (selectedCell && image.contentUrl)
+            && content.setAttValue(selectedCell.caseId, selectedCell.attrKey, image.contentUrl);
       });
   };
   return documentContent
