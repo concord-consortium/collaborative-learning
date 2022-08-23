@@ -111,34 +111,6 @@ let sInstanceId = 0;
 @inject("stores")
 @observer
 export class GeometryContentComponent extends BaseComponent<IProps, IState> {
-
-  // public static __getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
-  //   const { model: { content }, scale } = nextProps;
-  //   if (!prevState.board) { return null; }
-
-  //   const nextState: IState = {} as any;
-
-  //   const { size } = nextProps;
-  //   const geometryContent = content as GeometryContentModelType;
-  //   if (size && size.width && size.height && (!prevState.size ||
-  //       ((size.width !== prevState.size.width) || (size.height !== prevState.size.height)))) {
-  //         console.log(`prevSize`, prevState.size);
-  //         console.log(`new size`, size);
-  //     geometryContent.resizeBoard(prevState.board, size.width, size.height, scale);
-  //     nextState.size = size;
-  //   }
-
-  //   if (scale && (scale !== prevState.scale)) {
-  //     console.log(`old scale`, prevState.scale);
-  //     console.log(`new scale`, scale);
-  //     // let JSXGraph know about the scale change
-  //     geometryContent.updateScale(prevState.board, scale);
-  //     nextState.scale = scale;
-  //   }
-
-  //   return nextState;
-  // };
-
   public state: IState = {
           size: { width: null, height: null },
           disableRotate: false,
@@ -304,7 +276,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     this.disposers.push(onSnapshot(this.getContent(), () => {
       if (!this.suspendSnapshotResponse) {
-        console.log(`new content`, getSnapshot(this.getContent()));
         this.destroyBoard();
         this.setState({ board: undefined });
         this.initializeBoard();
@@ -329,23 +300,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
 
     // Handle resize
-    const { model: { content }, scale, size } = this.props;
-    const geometryContent = content as GeometryContentModelType;
-    if (this.state.board && size && size.width && size.height && (!prevProps.size ||
-        ((size.width !== prevProps.size.width) || (size.height !== prevProps.size.height)))) {
-          console.log(`prevSize`, prevProps.size);
-          console.log(`new size`, size);
-      geometryContent.resizeBoard(this.state.board, size.width, size.height, scale);
-      // nextState.size = size;
-    }
+    if (this.state.board) {
+      const { model: { content }, scale, size } = this.props;
+      const geometryContent = content as GeometryContentModelType;
+      if (size && size.width && size.height && (!prevProps.size ||
+          ((size.width !== prevProps.size.width) || (size.height !== prevProps.size.height)))) {
+        geometryContent.resizeBoard(this.state.board, size.width, size.height, scale);
+      }
 
-    // Handle new scale
-    if (this.state.board && scale && (scale !== prevProps.scale)) {
-      console.log(`old scale`, prevProps.scale);
-      console.log(`new scale`, scale);
-      // let JSXGraph know about the scale change
-      geometryContent.updateScale(this.state.board, scale);
-      // nextState.scale = scale;
+      // Handle new scale
+      if (scale && (scale !== prevProps.scale)) {
+        // let JSXGraph know about the scale change
+        geometryContent.updateScale(this.state.board, scale);
+      }
     }
   }
 
@@ -558,7 +525,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     content.metadata.setSharedSelection(this.stores.selection);
     const domElt = document.getElementById(this.elementId);
     const eltBounds = domElt && domElt.getBoundingClientRect();
-    console.log(`element bounds`, eltBounds);
     // JSXGraph fails hard if the DOM element doesn't exist or has zero extent
     if (eltBounds && (eltBounds.width > 0) && (eltBounds.height > 0)) {
       this.boardPromise = this.initializeBoard();
@@ -1285,7 +1251,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }));
 
     if (this.props.onSetBoard) {
-      console.log(`setting board`);
       this.props.onSetBoard(board);
     }
 
@@ -1296,7 +1261,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   private handleCreateAxis = (axis: JXG.Line) => {
     const handlePointerDown = (evt: any) => {
       const { readOnly, scale } = this.props;
-      console.log(`scale`, scale);
       const { board } = this.state;
       // Axis labels get the event preferentially even though we think of other potentially
       // overlapping objects (like movable line labels) as being on top. Therefore, we only
