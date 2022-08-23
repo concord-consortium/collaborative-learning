@@ -161,24 +161,27 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       }
     };
 
+    // Double the scale if the cell is focused
+    const cellScale =
+      (cell: FourUpGridCellModelType, corner: string) => (toggledContext === corner ? 2 : 1) * cell.scale;
     const nwCanvas = (
-      <CanvasComponent context="four-up-nw" scale={nwCell.scale}
+      <CanvasComponent context="four-up-nw" scale={cellScale(nwCell, "four-up-nw")}
                        readOnly={isGhostUser /* Ghost users do not own group documents and cannot edit others' */}
                        document={groupDoc(0)} overlayMessage={canvasMessage(groupDoc(0))}
                        showPlayback={toggledContext === "four-up-nw"} {...others} />
     );
     const neCanvas = (
-      <CanvasComponent context="four-up-ne" scale={neCell.scale}
+      <CanvasComponent context="four-up-ne" scale={cellScale(neCell, "four-up-ne")}
                        readOnly={true} document={groupDoc(1)} overlayMessage={canvasMessage(groupDoc(1))}
                        showPlayback={toggledContext === "four-up-ne"} {...others} />
     );
     const seCanvas = (
-      <CanvasComponent context="four-up-se" scale={seCell.scale}
+      <CanvasComponent context="four-up-se" scale={cellScale(seCell, "four-up-se")}
                        readOnly={true} document={groupDoc(2)} overlayMessage={canvasMessage(groupDoc(2))}
                        showPlayback={toggledContext === "four-up-se"} {...others}/>
     );
     const swCanvas = (
-      <CanvasComponent context="four-up-sw" scale={swCell.scale}
+      <CanvasComponent context="four-up-sw" scale={cellScale(swCell, "four-up-sw")}
                        readOnly={true} document={groupDoc(3)} overlayMessage={canvasMessage(groupDoc(3))}
                        showPlayback={toggledContext === "four-up-sw"} {...others}/>
     );
