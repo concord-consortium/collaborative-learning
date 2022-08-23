@@ -115,7 +115,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
               onBlur={handleCompleteTitle}
           />
           : <div className="editable-data-card-title-text" onClick={handleTitleClick}>
-              { content.metadata.title }
+              { content.title }
             </div>
           }
         </div>

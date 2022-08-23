@@ -82,7 +82,7 @@ describe("TableContent", () => {
     expect(table.dataSet.cases.length).toBe(3);
     expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: "x1", yCol: "y1" });
     expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: "x2", yCol: "y2" });
-    expect(getCaseNoId(table.dataSet, 2)).toEqual({ yCol: "y3" });
+    expect(getCaseNoId(table.dataSet, 2)).toEqual({ xCol: "", yCol: "y3" });
   });
 
   // Table Remodel 8/9/2022
