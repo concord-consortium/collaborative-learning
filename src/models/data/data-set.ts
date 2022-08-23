@@ -332,6 +332,7 @@ export const DataSet = types.model("DataSet", {
         // build attrIDMap
         self.attributes.forEach(attr => {
           attrIDMap[attr.id] = attr;
+          attrNameMap[attr.name] = attr.id;
         });
 
         // build caseIDMap
@@ -452,7 +453,7 @@ export const DataSet = types.model("DataSet", {
         attrIDMap[attribute.id] = attribute;
         attrNameMap[attribute.name] = attribute.id;
         for (let i = attribute.values.length; i < self.cases.length; ++i) {
-          attribute.values.push(undefined);
+          attribute.values.push("");
         }
       },
 
