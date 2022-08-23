@@ -4,22 +4,25 @@ import ReactDOM from "react-dom";
 import { gImageMap } from "../../models/image-map";
 import { IFloatingToolbarProps, useFloatingToolbarLocation }
   from "../../components/tools/hooks/use-floating-toolbar-location";
+import { DataCardContentModelType } from "./data-card-content";
+import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageUploadButton } from "../../components/tools/image/image-toolbar";
 
-import "./deck-toolbar.scss";
-import { DeckContentModelType } from "./deck-content";
-import { ToolTileModelType } from "../../models/tools/tool-tile";
+import "./data-card-toolbar.scss";
 
 interface IProps extends IFloatingToolbarProps {
   model: ToolTileModelType;
-  selectedCell: {caseId: string, attrKey: string} | undefined;
-  onSetImageUrl: (url: string) => void;
+  caseIndex: any;
+  currEditAttrId: string;
+  setImageUrlToAdd: (url: string) => void;
 }
 
-export const DeckToolToolBar: React.FC<IProps> = observer((
-  { model, documentContent, toolTile, selectedCell, onIsEnabled, onSetImageUrl, ...others }: IProps) => {
-  // const enabled = onIsEnabled() && activeFacet === "value";
-  const content = model.content as DeckContentModelType;
+export const DataCardPluginToolBar: React.FC<IProps> = observer((
+  { model, documentContent, toolTile, caseIndex, currEditAttrId, onIsEnabled,
+      setImageUrlToAdd, ...others }: IProps) => {
+    const buttonsEnabled = onIsEnabled() && !!currEditAttrId;
+  const content = model.content as DataCardContentModelType;
+  const currentCaseId = content.dataSet.caseIDFromIndex(caseIndex);
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
                   documentContent,
@@ -32,16 +35,16 @@ export const DeckToolToolBar: React.FC<IProps> = observer((
   const uploadImage = (file: File) => {
     gImageMap.addFileImage(file)
       .then(image => {
-        onSetImageUrl(image.contentUrl || "");
-        (selectedCell && image.contentUrl)
-            && content.setAttValue(selectedCell.caseId, selectedCell.attrKey, image.contentUrl);
+        setImageUrlToAdd(image.contentUrl || "");
+        (currentCaseId && currEditAttrId && image.contentUrl)
+            && content.setAttValue(currentCaseId, currEditAttrId, image.contentUrl);
       });
   };
   return documentContent
     ? ReactDOM.createPortal(
-      <div className={`deck-tool-toolbar ${enabled && location ? "enabled" : "disabled"}`}
+      <div className={`data-card-plugin-toolbar ${enabled && location ? "enabled" : "disabled"}`}
             style={location} onMouseDown={e => e.stopPropagation()}>
-        <div className="toolbar-buttons">
+        <div className={`toolbar-buttons ${buttonsEnabled ? "" : "disabled"}`} >
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
         </div>
       </div>, documentContent)

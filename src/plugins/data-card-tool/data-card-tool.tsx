@@ -5,18 +5,23 @@ import { IToolTileProps } from "../../components/tools/tool-tile";
 import { useUIStore } from "../../hooks/use-stores";
 import { DataCardContentModelType } from "./data-card-content";
 import { DataCardRows } from "./components/data-card-rows";
+import { DataCardPluginToolBar } from "./data-card-toolbar";
+import { useToolbarToolApi } from "../../components/tools/hooks/use-toolbar-tool-api";
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 
 import "./data-card-tool.scss";
 
 export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) => {
-  const { model, onRequestUniqueTitle, readOnly } = props;
+  const { model, onRequestUniqueTitle, readOnly, documentContent, toolTile, onRegisterToolApi,
+            onUnregisterToolApi } = props;
   const content = model.content as DataCardContentModelType;
   const ui = useUIStore();
   const isTileSelected = ui.selectedTileIds.findIndex(id => id === content.metadata.id) >= 0;
   const [titleValue, setTitleValue] = useState(content.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [caseIndex, setCaseIndex] = useState(0);
+  const [currEditAttrId, setCurrEditAttrId] = useState<string>("");
+  const [imageUrlToAdd, setImageUrlToAdd] = useState("");
   const shouldShowAddCase = !readOnly && isTileSelected;
   const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
   const shouldShowAddField = !readOnly && isTileSelected;
@@ -101,9 +106,14 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
 
   const addCardClasses = classNames("add-card", "teal-bg", { hidden: !shouldShowAddCase });
   const removeCardClasses = classNames("remove-card", { hidden: !shouldShowDeleteCase });
+  const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
 
   return (
     <div className="data-card-tool">
+      <DataCardPluginToolBar model={model} documentContent={documentContent} toolTile={toolTile}
+                      currEditAttrId={currEditAttrId} caseIndex={caseIndex}
+                      setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps} />
+
       <div className="data-card-toolbar">
         <div className="panel title">
           { isEditingTitle && !readOnly
@@ -144,6 +154,10 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
             model={model}
             totalCases={content.totalCases}
             readOnly={readOnly}
+            currEditAttrId={currEditAttrId}
+            setCurrEditAttrId={setCurrEditAttrId}
+            imageUrlToAdd={imageUrlToAdd}
+            setImageUrlToAdd={setImageUrlToAdd}
           />
         }
       </div>

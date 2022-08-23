@@ -1,10 +1,12 @@
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import React, { useEffect, useState } from "react";
+import { gImageMap } from "../../../models/image-map";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataCardContentModelType } from "../data-card-content";
-import '../data-card-tool.scss';
 import { looksLikeDefaultLabel } from "../data-card-types";
+
+import '../data-card-tool.scss';
 
 type EditFacet = "name" | "value" | ""
 
@@ -13,12 +15,14 @@ interface IProps {
   caseId?: string;
   attrKey: string;
   currEditAttrId: string;
-  setCurrEditAttrId: (attrId: string) => void;
   readOnly?: boolean;
+  imageUrlToAdd?: string;
+  setImageUrlToAdd: (url: string) => void;
+  setCurrEditAttrId: (attrId: string) => void;
 }
 
 export const CaseAttribute: React.FC<IProps> = observer(props => {
-  const { model, caseId, attrKey, currEditAttrId, setCurrEditAttrId, readOnly } = props;
+  const { model, caseId, attrKey, currEditAttrId, setCurrEditAttrId, readOnly} = props;
   const content = model.content as DataCardContentModelType;
   const getLabel = () => content.dataSet.attrFromID(attrKey).name;
   const getValue = () => {
@@ -28,6 +32,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [labelCandidate, setLabelCandidate] = useState(() => getLabel());
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
   const [editFacet, setEditFacet] = useState<EditFacet>("");
+  const [imageUrl, setImageUrl] = useState("");
+  const attrKeyValue = caseId && content.dataSet.getValue(caseId, attrKey);
 
   useEffect(() => {
     if (currEditAttrId !== attrKey) {
@@ -46,7 +52,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   };
 
-  const handleKeyDown = (event:  React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     const { key } = event;
     switch (key) {
       case "Enter":
@@ -65,7 +71,16 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   };
 
+  const handleDeleteImageData = (event: React.MouseEvent<HTMLDivElement>) => {
+    setCurrEditAttrId(attrKey);
+    caseId && content.setAttValue(caseId, attrKey, "");
+  };
+
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    setCurrEditAttrId(attrKey);
+  };
+
+  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const [facet] = event.currentTarget.classList;
     activateInput(facet as EditFacet);
   };
@@ -112,6 +127,13 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const isDefaultLabel = looksLikeDefaultLabel(getLabel());
   const cellLabelClasses = classNames("cell-value", { "default-label": isDefaultLabel });
+
+  (attrKeyValue && typeof(attrKeyValue) === "string"  && attrKeyValue?.includes("ccimg"))
+  && gImageMap.getImage(attrKeyValue)
+     .then((image)=>{
+       setImageUrl(image.displayUrl || "");
+     });
+
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onClick={handleClick}>
@@ -127,7 +149,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         }
       </div>
 
-      <div className={valueClassNames} onClick={handleClick}>
+      <div className={valueClassNames} onClick={handleClick} onDoubleClick={handleDoubleClick}>
         { editFacet === "value" && !readOnly
           ? <input
               type="text"
@@ -136,7 +158,12 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               onKeyDown={handleKeyDown}
               onBlur={handleCompleteValue}
             />
-          : <div className="cell-value">{getValue()}</div>
+          : attrKeyValue && typeof(attrKeyValue) === "string"  && attrKeyValue?.includes("ccimg")
+            ?   <div className="image-wrapper">
+                  <img src={imageUrl} className="image-value" />
+                  <div className="delete-image-button" onClick={handleDeleteImageData}>X</div>
+                </div>
+            : <div className="cell-value">{attrKeyValue}</div>
         }
       </div>
     </div>

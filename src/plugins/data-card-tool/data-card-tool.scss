@@ -190,12 +190,22 @@ $default-button-border-color: #979797;
           padding:$cell-padding;
         }
 
-        .image-value {
-          width: 80px;
-          height: 80px;
-          object-fit: contain;
-          display: block;
-          margin: auto;
+        .image-wrapper {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+
+          .image-value {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            display: block;
+            margin: auto;
+          }
+          .delete-image-button {
+            position: relative;
+            right: 5px;
+          }
         }
       }
 
