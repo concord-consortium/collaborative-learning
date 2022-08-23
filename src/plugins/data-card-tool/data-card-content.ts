@@ -1,27 +1,33 @@
 import { types, Instance } from "mobx-state-tree";
-import { uniqueId } from "../../utilities/js-utils";
+import { uniqueId, uniqueTitle } from "../../utilities/js-utils";
 import { ToolContentModel, ToolMetadataModelType, toolContentModelHooks } from "../../models/tools/tool-types";
-import { kDeckToolID } from "./deck-types";
-import { ITileExportOptions } from "../../models/tools/tool-content-info";
-import { setTileTitleFromContent } from "../../models/tools/tool-tile";
-import { DataSet, addCanonicalCasesToDataSet } from "../../models/data/data-set";
+import { kDataCardToolID, kDefaultLabel, kDefaultLabelPrefix } from "./data-card-types";
+import { IDefaultContentOptions, ITileExportOptions } from "../../models/tools/tool-content-info";
+import { getToolTileModel, setTileTitleFromContent } from "../../models/tools/tool-tile";
+import {
+  addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet, DataSet
+} from "../../models/data/data-set";
 
-export function defaultDeckContent(): DeckContentModelType {
-  return DeckContentModel.create();
+export function defaultDataCardContent(props?: IDefaultContentOptions): DataCardContentModelType {
+  // as per slack discussion, default attribute is added automatically
+  const dataSet = DataSet.create();
+  addAttributeToDataSet(dataSet, { name: kDefaultLabel });
+  addCasesToDataSet(dataSet, [{ [kDefaultLabel]: "" }]);
+  return DataCardContentModel.create({ dataSet });
 }
 
-export const DeckContentModel = ToolContentModel
-  .named("DeckTool")
+export const DataCardContentModel = ToolContentModel
+  .named("DataCardTool")
   .props({
-    type: types.optional(types.literal(kDeckToolID), kDeckToolID),
+    type: types.optional(types.literal(kDataCardToolID), kDataCardToolID),
     dataSet: types.optional(DataSet, () => DataSet.create())
   })
   .volatile(self => ({
     metadata: undefined as any as ToolMetadataModelType
   }))
   .views(self => ({
-    get title() {
-      return self.metadata.title;
+    get title(): string | undefined {
+      return getToolTileModel(self)?.title;
     },
     get isUserResizable() {
       return true;
@@ -35,7 +41,7 @@ export const DeckContentModel = ToolContentModel
     caseByIndex(index:number){
       return self.dataSet.getCanonicalCaseAtIndex(index);
     },
-    totalCases(){
+    get totalCases(){
       return self.dataSet.cases.length;
     },
     allCases(){
@@ -68,10 +74,7 @@ export const DeckContentModel = ToolContentModel
       this.allAttributesJsonString();
       return [
         `{`,
-        `  "type": "Deck",`,
-        `  "dataSet.name": "${self.dataSet.name}"`,
-        `  "dataSet.attributes": "${this.allAttributesJsonString()}`,
-        `  "dataSet.allCases": "${this.allCasesJsonString()}"`,
+        `  "type": "DataCard",`,
         `}`
       ].join("\n");
     }
@@ -82,17 +85,6 @@ export const DeckContentModel = ToolContentModel
     }
   }))
   .actions(self => ({
-    afterCreate(){
-      if (!self.dataSet.name){
-        self.dataSet.setName("Data Card Collection");
-        const firstAttrId = uniqueId();
-        self.dataSet.addAttributeWithID({
-          id: firstAttrId,
-          name: ""
-        });
-        addCanonicalCasesToDataSet(self.dataSet, [{ [firstAttrId]: "" }]);
-      }
-    },
     setTitle(title: string) {
       setTileTitleFromContent(self, title);
     },
@@ -109,10 +101,9 @@ export const DeckContentModel = ToolContentModel
       addCanonicalCasesToDataSet(self.dataSet, [obj]);
     },
     addNewAttr(){
-      const newAttrId = uniqueId();
       self.dataSet.addAttributeWithID({
-        id: newAttrId,
-        name: ""
+        id: uniqueId(),
+        name: uniqueTitle(kDefaultLabelPrefix, name => !self.dataSet.attrFromName(name))
       });
 
       const casesArr = self.allCases().map(c => c?.__id__);
@@ -131,4 +122,4 @@ export const DeckContentModel = ToolContentModel
     }
   }));
 
-export interface DeckContentModelType extends Instance<typeof DeckContentModel> {}
+export interface DataCardContentModelType extends Instance<typeof DataCardContentModel> {}
