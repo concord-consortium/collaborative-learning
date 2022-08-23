@@ -1,12 +1,12 @@
 import { types, Instance } from "mobx-state-tree";
-import { uniqueId, uniqueTitle } from "../../utilities/js-utils";
-import { ToolContentModel, ToolMetadataModelType, toolContentModelHooks } from "../../models/tools/tool-types";
 import { kDataCardToolID, kDefaultLabel, kDefaultLabelPrefix } from "./data-card-types";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tools/tool-content-info";
 import { getToolTileModel, setTileTitleFromContent } from "../../models/tools/tool-tile";
+import { ToolContentModel, ToolMetadataModelType, toolContentModelHooks } from "../../models/tools/tool-types";
 import {
   addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet, DataSet
 } from "../../models/data/data-set";
+import { uniqueId, uniqueTitle } from "../../utilities/js-utils";
 
 export function defaultDataCardContent(props?: IDefaultContentOptions): DataCardContentModelType {
   // as per slack discussion, default attribute is added automatically
@@ -28,6 +28,19 @@ export const DataCardContentModel = ToolContentModel
   .views(self => ({
     get title(): string | undefined {
       return getToolTileModel(self)?.title;
+    },
+    get sharedModel() {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
+      // just like findFirstSharedModelByType does
+      //
+      // For now we are checking the type ourselves, and we are assuming the shared model we want
+      // is the first one.
+      const firstSharedModel = sharedModelManager?.getTileSharedModels(self)?.[0];
+      if (!firstSharedModel || getType(firstSharedModel) !== SharedDataSet) {
+        return undefined;
+      }
+      return firstSharedModel as SharedDataSetType;
     },
     get isUserResizable() {
       return true;
