@@ -1,6 +1,7 @@
 import { reaction } from "mobx";
 import { addDisposer, getType, Instance, types } from "mobx-state-tree";
 import { kDataCardToolID, kDefaultLabel, kDefaultLabelPrefix } from "./data-card-types";
+import { withoutUndo } from "../../models/history/tree-monitor";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tools/tool-content-info";
 import { getToolTileModel, setTileTitleFromContent } from "../../models/tools/tool-tile";
 import { ToolContentModel, ToolMetadataModelType, toolContentModelHooks } from "../../models/tools/tool-types";
@@ -10,6 +11,7 @@ import {
 import { SharedDataSet, SharedDataSetType } from "../../models/tools/shared-data-set";
 import { SharedModelType } from "../../models/tools/shared-model";
 import { uniqueId, uniqueTitle } from "../../utilities/js-utils";
+import { ControlReteNodeFactory } from "../dataflow-tool/nodes/factories/control-rete-node-factory";
 
 export function defaultDataSet() {
   // as per slack discussion, default attribute is added automatically
@@ -28,7 +30,8 @@ export function defaultDataCardContent(props?: IDefaultContentOptions): DataCard
 export const DataCardContentModel = ToolContentModel
   .named("DataCardTool")
   .props({
-    type: types.optional(types.literal(kDataCardToolID), kDataCardToolID)
+    type: types.optional(types.literal(kDataCardToolID), kDataCardToolID),
+    caseIndex: 0
   })
   .volatile(self => ({
     metadata: undefined as any as ToolMetadataModelType,
@@ -159,10 +162,17 @@ export const DataCardContentModel = ToolContentModel
       {name: "sharedModelSetup", fireImmediately: true}));
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-      // TODO: respond to any remote shared model changes
+      if (self.caseIndex >= self.totalCases) {
+        this.setCaseIndex(self.totalCases - 1);
+      }
     },
     setTitle(title: string) {
       setTileTitleFromContent(self, title);
+    },
+    setCaseIndex(caseIndex: number) {
+      // current case is serialized, but navigation is not undoable
+      withoutUndo();
+      self.caseIndex = caseIndex;
     },
     setAttName(attrId: string, name: string){
      self.dataSet.setAttributeName(attrId, name);
