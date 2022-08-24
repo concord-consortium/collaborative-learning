@@ -199,7 +199,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
     );
   };
 
-  const showPlayback = user.isTeacher;
+  const showPlayback = user.type ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
   const [showPlaybackControls, setShowPlaybackControls] = useState(false);
   const [documentToShow, setDocumentToShow] = useState<DocumentModelType>();
 
