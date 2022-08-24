@@ -29,11 +29,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     const value = caseId && content.dataSet.getValue(caseId, attrKey) || "";
     return String(value);
   };
+  const valueStr = getValue();
   const [labelCandidate, setLabelCandidate] = useState(() => getLabel());
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
   const [editFacet, setEditFacet] = useState<EditFacet>("");
   const [imageUrl, setImageUrl] = useState("");
-  const attrKeyValue = caseId && content.dataSet.getValue(caseId, attrKey);
 
   useEffect(() => {
     if (currEditAttrId !== attrKey) {
@@ -128,8 +128,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const isDefaultLabel = looksLikeDefaultLabel(getLabel());
   const cellLabelClasses = classNames("cell-value", { "default-label": isDefaultLabel });
 
-  (attrKeyValue && typeof(attrKeyValue) === "string"  && attrKeyValue?.includes("ccimg"))
-  && gImageMap.getImage(attrKeyValue)
+  gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
      .then((image)=>{
        setImageUrl(image.displayUrl || "");
      });
@@ -158,12 +157,12 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               onKeyDown={handleKeyDown}
               onBlur={handleCompleteValue}
             />
-          : attrKeyValue && typeof(attrKeyValue) === "string"  && attrKeyValue?.includes("ccimg")
+          : gImageMap.isImageUrl(valueStr)
             ?   <div className="image-wrapper">
                   <img src={imageUrl} className="image-value" />
                   <div className="delete-image-button" onClick={handleDeleteImageData}>X</div>
                 </div>
-            : <div className="cell-value">{attrKeyValue}</div>
+            : <div className="cell-value">{valueStr}</div>
         }
       </div>
     </div>

@@ -5,7 +5,7 @@ import { IToolTileProps } from "../../components/tools/tool-tile";
 import { useUIStore } from "../../hooks/use-stores";
 import { DataCardContentModelType } from "./data-card-content";
 import { DataCardRows } from "./components/data-card-rows";
-import { DataCardPluginToolBar } from "./data-card-toolbar";
+import { DataCardToolbar } from "./data-card-toolbar";
 import { useToolbarToolApi } from "../../components/tools/hooks/use-toolbar-tool-api";
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 
@@ -19,7 +19,6 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   const isTileSelected = ui.selectedTileIds.findIndex(id => id === content.metadata.id) >= 0;
   const [titleValue, setTitleValue] = useState(content.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [caseIndex, setCaseIndex] = useState(0);
   const [currEditAttrId, setCurrEditAttrId] = useState<string>("");
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
   const shouldShowAddCase = !readOnly && isTileSelected;
@@ -110,11 +109,11 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
 
   return (
     <div className="data-card-tool">
-      <DataCardPluginToolBar model={model} documentContent={documentContent} toolTile={toolTile}
-                      currEditAttrId={currEditAttrId} caseIndex={caseIndex}
+      <DataCardToolbar model={model} documentContent={documentContent} toolTile={toolTile}
+                      currEditAttrId={currEditAttrId}
                       setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps} />
 
-      <div className="data-card-toolbar">
+      <div className="data-card-header-row">
         <div className="panel title">
           { isEditingTitle && !readOnly
           ? <input
