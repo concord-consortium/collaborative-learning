@@ -1,9 +1,9 @@
 import React, { useRef, useState } from "react";
 import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
+import { ITileLinkMetadata } from "../../../models/tools/table-link-types";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { ITileLinkMetadata } from "../../../models/tools/table/table-model-types";
 
 import "./link-geometry-dialog.scss";
 
@@ -59,7 +59,7 @@ export const useLinkGeometryDialog = ({ geometryTiles, model, onLinkGeometryTile
   const handleClick = () => {
     const tileInfo = geometryTiles.find(tile => tile.id === selectValue);
     if (tileInfo) {
-      if (content.metadata.linkedGeometries.indexOf(tileInfo.id) < 0) {
+      if (content.linkedGeometries.indexOf(tileInfo.id) < 0) {
         onLinkGeometryTile(tileInfo);
       } else {
         onUnlinkGeometryTile(tileInfo);
@@ -68,9 +68,9 @@ export const useLinkGeometryDialog = ({ geometryTiles, model, onLinkGeometryTile
   };
   const content = model.content as TableContentModelType;
   const unlinkedTiles = geometryTiles
-                                  .filter(tileInfo => content.metadata.linkedGeometries.indexOf(tileInfo.id) < 0);
+                                  .filter(tileInfo => content.linkedGeometries.indexOf(tileInfo.id) < 0);
   const linkedTiles = geometryTiles
-                                  .filter(tileInfo => content.metadata.linkedGeometries.indexOf(tileInfo.id) >= 0);
+                                  .filter(tileInfo => content.linkedGeometries.indexOf(tileInfo.id) >= 0);
   const [showModal, hideModal] = useCustomModal({
     className: "link-geometry",
     Icon: LinkGraphIcon,
@@ -79,7 +79,7 @@ export const useLinkGeometryDialog = ({ geometryTiles, model, onLinkGeometryTile
     contentProps: { unlinkedTiles, linkedTiles, selectValue, setSelectValue },
     buttons: [
       { label: "Cancel" },
-      { label: content.metadata.linkedGeometries.indexOf(selectValue) < 0 ? "Link" : "Unlink",
+      { label: content.linkedGeometries.indexOf(selectValue) < 0 ? "Link" : "Unlink",
         isDefault: true,
         isDisabled: !selectValue,
         onClick: handleClick

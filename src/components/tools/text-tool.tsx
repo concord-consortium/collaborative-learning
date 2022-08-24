@@ -79,6 +79,7 @@ import "./text-tool.sass";
 interface IState {
   value?: EditorValue;
   selectedButtons?: string[];
+  editing?: boolean;
 }
 
 @inject("stores")
@@ -118,15 +119,23 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     });
 
     this.disposers = [];
-    if (this.props.readOnly) {
-      this.disposers.push(autorun(() => {
-        const textContent = this.getContent();
-        if (this.prevText !== textContent.text) {
-          this.setState({ value: textContent.asSlate() });
-          this.prevText = textContent.text;
+    this.disposers.push(reaction(
+      () => {
+        const readOnly = this.props.readOnly;
+        const editing = this.state.editing;
+        const text = this.getContent().text;
+        return { readOnly, editing, text };
+      },
+      ({ readOnly, editing, text }) => {
+        if (readOnly || !editing) {
+          if (this.prevText !== text) {
+            const textContent = this.getContent();
+            this.setState({ value: textContent.asSlate() });
+            this.prevText = text;
+          }
         }
-      }));
-    }
+      }
+    ));
     // blur editor when tile is deselected
     this.disposers.push(reaction(
       () => {
@@ -202,7 +211,12 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
           placeholder={placeholderText}
           readOnly={readOnly}
           plugins={this.plugins}
-          onValueChange={this.handleChange} />
+          onValueChange={this.handleChange}
+          onFocus={ () => this.setState({ editing: true}) }
+          onBlur={ () => {
+            this.setState({ editing: false });
+          }}
+        />
       </div>
     );
   }
@@ -289,7 +303,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   }
 
   private handleEditorRef = (editor?: Editor) => {
-    this.editor = editor;    
-    this.getContent()?.setEditor(editor);
+    this.editor = editor;
+    editor && this.getContent()?.setEditor(editor);
   };
 }

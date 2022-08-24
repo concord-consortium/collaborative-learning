@@ -126,6 +126,7 @@
     "@types/is-hotkey": "^0.1.7",
     "@types/jest": "^28.1.4",
     "@types/lodash": "^4.14.182",
+    "@types/object-hash": "^2.2.1",
     "@types/react": "^17.0.47",
     "@types/react-dom": "^17.0.17",
     "@types/react-modal": "^3.13.1",
@@ -189,7 +190,6 @@
   },
   "dependencies": {
     "@concord-consortium/diagram-view": "^0.0.15",
-    "@concord-consortium/jsxgraph": "^0.99.8-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",
     "@concord-consortium/rete-react-render-plugin": "^0.2.1-cc.2",
@@ -205,12 +205,14 @@
     "immutable": "^3.8.2",
     "initials": "^3.1.2",
     "json-stringify-pretty-compact": "^4.0.0",
+    "jsxgraph": "^1.4.4",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
     "mobx": "^6.6.1",
     "mobx-react": "^7.5.2",
     "mobx-state-tree": "^5.1.5",
     "nanoid": "^4.0.0",
+    "object-hash": "^3.0.0",
     "query-string": "7.1.1",
     "rc-slider": "^10.0.0",
     "react": "^17.0.2",
@@ -234,6 +236,7 @@
     "superagent": "^8.0.0",
     "ts-polyfill": "^3.8.2",
     "tslib": "^2.4.0",
+    "ulid": "^2.3.0",
     "uuid": "^8.3.2",
     "whatwg-fetch": "^3.6.2"
   }

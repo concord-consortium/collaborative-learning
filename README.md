@@ -146,6 +146,9 @@ $ npm run deploy:firebase:rules     # deploys firebase (realtime database) rules
 To enable per component debugging set the "debug" localstorage key with one or more of the following:
 
 - `canvas` this will show the document key over the canvas, useful for looking up documents in Firebase
+- `document` this will add the active document as window.currentDocument, you can use MST's hidden toJSON() like currentDocument.toJSON() to views its content. 
+- `history` this will print some info the console as the history system records changes in the document.
+- `undo` this will print information about each action that is added to the undo stack.
 
 ## Testing
 

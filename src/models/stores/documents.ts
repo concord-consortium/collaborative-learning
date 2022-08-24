@@ -9,6 +9,7 @@ import {
 } from "../document/document-types";
 import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
+import { DEBUG_DOCUMENT } from "../../lib/debug";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
   const latestPublications: DocumentModelType[] = [];
@@ -161,32 +162,28 @@ export const DocumentsModel = types
   }))
   .actions((self) => {
     const add = (document: DocumentModelType) => {
+      if (DEBUG_DOCUMENT) {
+        // eslint-disable-next-line no-console        
+        console.log("adding document to DocumentsModel", {
+          key: document.key,
+          title: document.title,
+          uid: document.uid,
+          type: document.type
+        });
+      }
       if (!self.getDocument(document.key)) {
         self.all.push(document);
         const documentEnv = getEnv(document)?.documentEnv as IDocumentEnvironment | undefined;
         if (documentEnv) {
           documentEnv.appConfig = self.appConfig;
         }
+      } else {
+        console.warn("Document with the same key already exists");
       }
     };
 
     const remove = (document: DocumentModelType) => {
       self.all.remove(document);
-    };
-
-    const update = (document: DocumentModelType) => {
-      if (!self.getDocument(document.key)) {
-        add(document);
-      }
-      else {
-        const i = self.all.findIndex((currDoc) => currDoc.key === document.key);
-        if (i !== -1) {
-          const oldDoc = self.all[i];
-          if (oldDoc && oldDoc.changeCount > document.changeCount) return;
-
-          self.all[i] = document;
-        }
-      }
     };
 
     /*
@@ -254,7 +251,6 @@ export const DocumentsModel = types
     return {
       add,
       remove,
-      update,
       addRequiredDocumentPromises,
       resolveRequiredDocumentPromise,
       resolveRequiredDocumentPromiseWithNull,

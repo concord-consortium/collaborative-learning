@@ -54,22 +54,26 @@ export interface ITileCountsPerSection {
 
 // This intermediate type is added so we can store which tiles are using the
 // shared model. It is also necessary so the SharedModelUnion can be evaluated
-// late. If the sharedModelMap was a map directly to SharedModelUnion the late 
+// late. If the sharedModelMap was a map directly to SharedModelUnion the late
 // evaluation would happen immediately and not pick up the registered shared
 // model tiles. This issue with using late and maps is documented here:
 // `src/models/mst.test.ts`
 export const SharedModelEntry = types.model("SharedModelEntry", {
   sharedModel: SharedModelUnion,
+  provider: types.safeReference(ToolTileModel, {acceptsUndefined: true}),
   tiles: types.array(types.safeReference(ToolTileModel, {acceptsUndefined: false}))
 })
 .actions(self => ({
-  addTile(toolTile: ToolTileModelType) {
+  addTile(toolTile: ToolTileModelType, isProvider?: boolean) {
+    isProvider && (self.provider = toolTile);
     self.tiles.push(toolTile);
   },
   removeTile(toolTile: ToolTileModelType) {
+    (toolTile.id === self.provider?.id) && (self.provider = undefined);
     self.tiles.remove(toolTile);
   }
 }));
+export type SharedModelEntryType = Instance<typeof SharedModelEntry>;
 
 export const DocumentContentModel = types
   .model("DocumentContent", {
@@ -191,28 +195,38 @@ export const DocumentContentModel = types
       },
       snapshotWithUniqueIds(asTemplate = false) {
         const snapshot = cloneDeep(getSnapshot(self));
-        const idMap: { [id: string]: string } = {};
+        const tileIdMap: { [id: string]: string } = {};
 
         snapshot.tileMap = (tileMap => {
           const _tileMap: { [id: string]: ToolTileSnapshotOutType } = {};
           each(tileMap, (tile, id) => {
-            idMap[id] = tile.id = uniqueId();
+            tileIdMap[id] = tile.id = uniqueId();
             _tileMap[tile.id] = tile;
           });
           return _tileMap;
         })(snapshot.tileMap);
 
+        // Update the sharedModels with new tile ids
+        each(snapshot.sharedModelMap, (sharedModelEntry, id) => {
+          const _tiles = cloneDeep(sharedModelEntry.tiles);
+          sharedModelEntry.tiles = [];
+          _tiles.forEach(tile => {
+            sharedModelEntry.tiles.push(tileIdMap[tile]);
+          });
+        });
+        // TODO: Give the shared models new ids
+
         each(snapshot.tileMap, tile => {
           getToolContentInfoById(tile.content.type)
-            ?.snapshotPostProcessor?.(tile.content, idMap, asTemplate);
+            ?.snapshotPostProcessor?.(tile.content, tileIdMap, asTemplate);
         });
 
         snapshot.rowMap = (rowMap => {
           const _rowMap: { [id: string]: TileRowSnapshotOutType } = {};
           each(rowMap, (row, id) => {
-            idMap[id] = row.id = uniqueId();
+            tileIdMap[id] = row.id = uniqueId();
             row.tiles = row.tiles.map(tileLayout => {
-              tileLayout.tileId = idMap[tileLayout.tileId];
+              tileLayout.tileId = tileIdMap[tileLayout.tileId];
               return tileLayout;
             });
             _rowMap[row.id] = row;
@@ -220,16 +234,23 @@ export const DocumentContentModel = types
           return _rowMap;
         })(snapshot.rowMap);
 
-        snapshot.rowOrder = snapshot.rowOrder.map(rowId => idMap[rowId]);
+        snapshot.rowOrder = snapshot.rowOrder.map(rowId => tileIdMap[rowId]);
 
         return snapshot;
       },
-      getFirstSharedModelByType<IT extends typeof SharedModel>(modelType: IT ): IT["Type"] | undefined {
+      getFirstSharedModelByType<IT extends typeof SharedModel>(
+        modelType: IT, tileId?: string): IT["Type"] | undefined {
         const sharedModelEntries = Array.from(self.sharedModelMap.values());
-        // Even if we use a snapshotProcessor generated type, getType will return the original 
+        // Even if we use a snapshotProcessor generated type, getType will return the original
         // type. This is documented: src/models/mst.test.ts
-        const firstEntry = sharedModelEntries.find(entry => getType(entry.sharedModel) === modelType);
+        const firstEntry = sharedModelEntries.find(entry =>
+          (getType(entry.sharedModel) === modelType) &&
+          (!tileId || !!entry.tiles.find(tile => tileId === tile.id)));
         return firstEntry?.sharedModel;
+      },
+      getSharedModelsByType<IT extends typeof SharedModel>(type: string): IT["Type"][] {
+        const sharedModelEntries = Array.from(self.sharedModelMap.values());
+        return sharedModelEntries.map(entry => entry.sharedModel).filter(model => model.type === type);
       }
     };
   })
@@ -366,6 +387,14 @@ export const DocumentContentModel = types
       return builder.build();
     }
   }))
+  .views(self => ({
+    getNewTileTitle(tileContent: ToolContentModelType) {
+      const titleBase = getToolContentInfoById(tileContent.type)?.titleBase || tileContent.type;
+      const getTitle = (tileId: string) => (self.getTileContent(tileId) as any)?.title;
+      const newTitle = self.getUniqueTitle(tileContent.type, titleBase, getTitle);
+      return newTitle;
+    }
+  }))
   .actions(self => ({
     setImportContext(section: string) {
       self.importContextCurrentSection = section;
@@ -479,7 +508,8 @@ export const DocumentContentModel = types
   }))
   .actions(self => ({
     addTileContentInNewRow(content: ToolContentModelType, options?: INewTileOptions): INewRowTile {
-      return self.addTileInNewRow(ToolTileModel.create({ content }), options);
+      const title = self.getNewTileTitle(content);
+      return self.addTileInNewRow(ToolTileModel.create({ title, content }), options);
     },
     addTileSnapshotInNewRow(snapshot: ToolTileSnapshotInType, options?: INewTileOptions): INewRowTile {
       return self.addTileInNewRow(ToolTileModel.create(snapshot), options);

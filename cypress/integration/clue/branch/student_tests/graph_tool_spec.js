@@ -91,7 +91,7 @@ context('Graph Tool', function() {
                     // graphToolTile.getGraphPointCoordinates().should('contain', '(13.20, 5)');
                     graphToolTile.getGraphPointCoordinates().should('contain', '(10, 10)');
                 });
-                it('will drag a point to a new location', function(){
+                it.skip('will drag a point to a new location', function(){
                     const dataTransfer = new DataTransfer;
                     const graphUnit = 18.33;
                     let x= 15, y=2;
@@ -105,7 +105,7 @@ context('Graph Tool', function() {
                     // graphToolTile.getGraphPointCoordinates().should('contain', '('+x+', '+y+')');
                     graphToolTile.getGraphPointCoordinates().should('contain', '(18, 2)');
                 });
-                it('will copy and paste a point', function(){ //cannot send keyboard commands to non-text fields
+                it('will duplicate a point', function(){ //cannot send keyboard commands to non-text fields
 
                 });
                 it('will show and hide angles to a polygon', function(){
@@ -145,7 +145,7 @@ context('Graph Tool', function() {
                     graphToolTile.selectGraphPoint(4.2,2);
 
                 });
-                it('will drag a polygon to a new location', function(){
+                it.skip('will drag a polygon to a new location', function(){
                     const dataTransfer = new DataTransfer;
                     const graphUnit = 18.33;
                     let x= 18, y=5;
@@ -176,7 +176,7 @@ context('Graph Tool', function() {
                         .trigger('mouseup');
                     //TODO verify points are in new location
                 });
-                it('will copy and paste a polygon', function(){
+                it('will duplicate a polygon', function(){
                     graphToolTile.getGraphPolygon().click({force: true});
                     graphToolTile.copyGraphElement();
                     graphToolTile.getGraphPolygon().should('have.length',2);
@@ -253,4 +253,3 @@ context('Graph Tool', function() {
         });
     });
 });
-

@@ -19,6 +19,11 @@
     border-right: none;
     border-top-right-radius: 0px;
   }
+  &.disabled {
+    opacity: 35%;
+    cursor: auto;
+    pointer-events: none;
+  }
   &.my-work {
     border-color: $workspace-teal;
   }
@@ -26,7 +31,9 @@
     border-color: $classwork-purple
   }
   &.student-work {
-   border-color: $charcoal;
+    border-color: $charcoal;
+    bottom: -5px;
+    left: -2px;
   }
   &.learning-log {
     border-color: $learninglog-green;
@@ -144,7 +151,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    width: calc(100% - 15px);
+    width: calc(100% - 2px);
     height: 46px;
 
     &.my-work {

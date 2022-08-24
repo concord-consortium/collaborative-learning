@@ -46,8 +46,8 @@ export class MathReteNodeFactory extends DataflowReteNodeFactory {
       if (isNaN(n1) || isNaN(n2)) {
         result = NaN;
       } else {
-        // NaNs are for propogating lack of values. Actual math erros like
-        // divide-by-zero should output 0.
+        // NaNs are for propagating lack of values.
+        // Actual math errors like divide-by-zero should output 0.
         result = nodeOperationTypes.method(n1, n2) || 0;
       }
 

@@ -20,8 +20,8 @@ import MultiplyIcon from "../../assets/icons/math/multiply.svg";
 import DivideIcon from "../../assets/icons/math/divide.svg";
 
 import LightBulbIcon from "../../assets/icons/output/light-bulb.svg";
-import BackyardClawIcon from "../../assets/icons/output/backyard-claw.svg";
 import GrabberIcon from "../../assets/icons/output/grabber.svg";
+import AdvancedGrabberIcon from "../../assets/icons/output/advanced-grabber.svg";
 
 import TemperatureIcon from "../../assets/icons/sensor/temperature.svg";
 import CO2Icon from "../../assets/icons/sensor/co2.svg";
@@ -36,6 +36,10 @@ import PressureIcon from "../../assets/icons/sensor/pressure.svg";
 import AbsoluteValueIcon from "../../assets/icons/transform/absolute-value.svg";
 import NegationIcon from "../../assets/icons/transform/negation.svg";
 import NotIcon from "../../assets/icons/transform/not.svg";
+
+import CurrentValueIcon from "../../assets/icons/control/control-current-value.svg";
+import PreviousValueIcon from "../../assets/icons/control/control-previous-value.svg";
+import ZeroValueIcon from "../../assets/icons/control/control-zero-value.svg";
 
 import { demoStreams } from "./demo-data";
 
@@ -74,6 +78,10 @@ export const NodeTypes: NodeType[] = [
     displayName: "Transform",
   },
   {
+    name: "Control",
+    displayName: "Control",
+  },
+  {
     name: "Demo Output",
     displayName: "Demo Output",
   },
@@ -85,10 +93,10 @@ export const NodeTypes: NodeType[] = [
   {
     name: "Live Output",
     displayName: "Live Output",
-  },
-  {
-    name: "Relay",
-    displayName: "Relay"
+  // },
+  // {
+  //   name: "Relay",
+  //   displayName: "Relay"
   }
 ];
 
@@ -143,7 +151,6 @@ export const NodeOperationTypes = [
     numberSentence: (n1: string, n2: string) => `!${n1} ⇒ `,
     icon: NotIcon
   },
-
   {
     name: "Greater Than",
     type: "logic",
@@ -216,6 +223,24 @@ export const NodeOperationTypes = [
   }
 ];
 
+export const NodeControlTypes = [
+  {
+    name: "Hold Current",
+    type: "control",
+    icon: CurrentValueIcon
+  },
+  {
+    name: "Hold Prior",
+    type: "control",
+    icon: PreviousValueIcon
+  },
+  {
+    name: "Output Zero",
+    type: "control",
+    icon: ZeroValueIcon
+  }
+];
+
 export const NodeSensorTypes = [
   {
     name: "Temperature",
@@ -279,12 +304,12 @@ export const NodeDemoOutputTypes = [
     icon: LightBulbIcon
   },
   {
-    name: "Backyard Claw",
-    icon: BackyardClawIcon
-  },
-  {
     name: "Grabber",
     icon: GrabberIcon
+  },
+  {
+    name: "Advanced Grabber",
+    icon: AdvancedGrabberIcon
   }
 ];
 
@@ -294,8 +319,8 @@ export const NodeLiveOutputTypes = [
     icon: LightBulbIcon
   },
   {
-    name: "Backyard Claw",
-    icon: BackyardClawIcon
+    name: "Grabber",
+    icon: GrabberIcon
   }
 ];
 

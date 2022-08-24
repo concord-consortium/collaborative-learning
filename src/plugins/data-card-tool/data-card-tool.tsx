@@ -35,14 +35,14 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   }, [content, model.id, onRequestUniqueTitle]);
 
   function nextCase(){
-    if (caseIndex < content.totalCases - 1) {
-      setCaseIndex(currCaseIndex => ++currCaseIndex);
+    if (content.caseIndex < content.totalCases - 1) {
+      content.setCaseIndex(content.caseIndex + 1);
     }
   }
 
   function previousCase(){
-    if (caseIndex > 0){
-      setCaseIndex(currCaseIndex => --currCaseIndex);
+    if (content.caseIndex > 0){
+      content.setCaseIndex(content.caseIndex - 1);
     }
   }
 
@@ -78,12 +78,12 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
 
   function addNewCase(){
     content.addNewCaseFromAttrKeys(content.existingAttributes());
-    setCaseIndex(content.totalCases - 1);
+    content.setCaseIndex(content.totalCases - 1);
   }
 
   function deleteCase(){
     // TODO modal (see src/components/delete-button)
-    const thisCaseId = content.dataSet.caseIDFromIndex(caseIndex);
+    const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
     if (thisCaseId) {
       content.dataSet.removeCases([thisCaseId]);
     }
@@ -96,12 +96,12 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
 
   const previousButtonClasses = classNames(
     "card-nav", "previous",
-    caseIndex > 0 ? "active" : "disabled",
+    content.caseIndex > 0 ? "active" : "disabled",
   );
 
   const nextButtonClasses = classNames(
     "card-nav", "next",
-    caseIndex < content.totalCases - 1 ? "active" : "disabled",
+    content.caseIndex < content.totalCases - 1 ? "active" : "disabled",
   );
 
   const addCardClasses = classNames("add-card", "teal-bg", { hidden: !shouldShowAddCase });
@@ -125,7 +125,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
               onBlur={handleCompleteTitle}
           />
           : <div className="editable-data-card-title-text" onClick={handleTitleClick}>
-              { content.metadata.title }
+              { content.title }
             </div>
           }
         </div>
@@ -133,7 +133,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
           <div className="card-number-of-listing">
             <div className="cell-text">
               { content.totalCases > 0
-                  ? `Card ${caseIndex + 1} of ${content.totalCases}`
+                  ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
                   : "Add a card" }
             </div>
           </div>
@@ -150,7 +150,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
       <div className="data-area">
         { content.totalCases > 0 &&
           <DataCardRows
-            caseIndex={caseIndex}
+            caseIndex={content.caseIndex}
             model={model}
             totalCases={content.totalCases}
             readOnly={readOnly}

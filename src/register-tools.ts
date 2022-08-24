@@ -12,10 +12,16 @@ const gToolRegistration: Record<string, () => void> = {
     import(/* webpackChunkName: "SharedVariables" */"./plugins/shared-variables/shared-variables-registration");
   },
   "Drawing": () => import(/* webpackChunkName: "Drawing" */"./plugins/drawing-tool/drawing-registration"),
-  "Geometry": () => import(/* webpackChunkName: "Geometry" */"./models/tools/geometry/geometry-registration"),
+  "Geometry": () => {
+    import(/* webpackChunkName: "Geometry" */"./models/tools/geometry/geometry-registration");
+    import(/* webpackChunkName: "SharedDataSet" */"./models/tools/shared-data-set-registration");
+  },
   "Image": () => import(/* webpackChunkName: "Image" */"./models/tools/image/image-registration"),
-  "Starter": () => import(/* webpackChuckName: "Starter" */"./plugins/starter/starter-registration"),
-  "Table": () => import(/* webpackChunkName: "Table" */"./models/tools/table/table-registration"),
+  "Starter": () => import(/* webpackChunkName: "Starter" */"./plugins/starter/starter-registration"),
+  "Table": () => {
+    import(/* webpackChunkName: "Table" */"./models/tools/table/table-registration");
+    import(/* webpackChunkName: "SharedDataSet" */"./models/tools/shared-data-set-registration");
+  },
   "Text": () => import(/* webpackChunkName: "Text" */"./models/tools/text/text-registration")
 };
 

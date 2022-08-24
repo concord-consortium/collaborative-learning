@@ -1,4 +1,6 @@
 import { nanoid } from "nanoid";
+import { monotonicFactory } from "ulid";
+const ulid = monotonicFactory();
 
 /*
  * castArrayCopy()
@@ -51,6 +53,15 @@ export function safeJsonParse<T = any>(json?: string) {
 export function uniqueId(idLength = 16): string {
   // cf. https://zelark.github.io/nano-id-cc/
   return nanoid(idLength);
+}
+
+/*
+ * uniqueSortableId()
+ *
+ * returns a unique id string ordered by creation
+ */
+export function uniqueSortableId(): string {
+  return ulid();
 }
 
 /*

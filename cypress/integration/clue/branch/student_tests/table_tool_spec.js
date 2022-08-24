@@ -11,10 +11,10 @@ context('Table Tool Tile', function () {
   before(function () {
     const queryParams = `${Cypress.config("queryParams")}`;
     cy.clearQAData('all');
-  
+
     cy.visit(queryParams);
     cy.waitForLoad();
-  });  
+  });
 
   describe('Test table functions', function () {
     it('will add a table to canvas', function () {
@@ -77,7 +77,7 @@ context('Table Tool Tile', function () {
         tableToolTile.getColumnHeader().should('have.length', 2);
         tableToolTile.getColumnHeaderText().then((text) => {
           expect(text[0]).to.be.eq('pluto');
-          expect(text[1]).to.be.eq('y2');
+          expect(text[1]).to.be.eq('y');
         });
       });
     });
@@ -87,17 +87,11 @@ context('Table Tool Tile', function () {
     // TODO: Found 1, expected 3
     it('will add content to table', function () {
       cy.get(".primary-workspace").within((workspace) => {
-        tableToolTile.getTableCell().eq(1).click().type('3{enter}');
-        tableToolTile.getTableCell().eq(2).click();
-        // cy.wait(100);
+        tableToolTile.typeInTableCell(1, '3');
         tableToolTile.getTableCell().eq(1).should('contain', '3');
-        tableToolTile.getTableCell().eq(2).type('2.5{enter}');
-        tableToolTile.getTableCell().eq(5).click();
-        // cy.wait(100);
+        tableToolTile.typeInTableCell(2, '2.5');
         tableToolTile.getTableCell().eq(2).should('contain', '2.5');
-        tableToolTile.getTableCell().eq(1).click().type('5{enter}');
-        tableToolTile.getTableCell().eq(5).click();
-        // cy.wait(100);
+        tableToolTile.typeInTableCell(1, '5');
         tableToolTile.getTableCell().eq(1).should('contain', '5');
         tableToolTile.getTableRow().should('have.length', 2);
       });
@@ -123,7 +117,7 @@ context('Table Tool Tile', function () {
       });
       cy.get('.modal-title').should('contain', "Set Expression");
       cy.get('.modal-content .prompt select').should('not.exist');
-      cy.get('.modal-content .prompt').should('contain', "y2");
+      cy.get('.modal-content .prompt').should('contain', "y");
     });
     it('will enter a formula', function () {
       cy.get('#expression-input').click().type(formula + '{enter}');
@@ -131,7 +125,7 @@ context('Table Tool Tile', function () {
     });
     it('verify formula appears under correct column header', function () {
       cy.get('.editable-header-cell')
-        .contains('y2')
+        .contains('y')
         .first()
         .siblings('.expression-cell.has-expression')
         .should('contain', formula);
@@ -164,4 +158,3 @@ context('Table Tool Tile', function () {
     });
   });
 });
-

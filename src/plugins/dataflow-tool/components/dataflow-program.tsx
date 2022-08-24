@@ -17,6 +17,7 @@ import { DataflowReteNodeFactory } from "../nodes/factories/dataflow-rete-node-f
 import { NumberReteNodeFactory } from "../nodes/factories/number-rete-node-factory";
 import { MathReteNodeFactory } from "../nodes/factories/math-rete-node-factory";
 import { TransformReteNodeFactory } from "../nodes/factories/transform-rete-node-factory";
+import { ControlReteNodeFactory } from "../nodes/factories/control-rete-node-factory";
 import { LogicReteNodeFactory } from "../nodes/factories/logic-rete-node-factory";
 import { SensorReteNodeFactory } from "../nodes/factories/sensor-rete-node-factory";
 import { RelayReteNodeFactory } from "../nodes/factories/relay-rete-node-factory";
@@ -179,6 +180,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
+          showRecordUI={false}
         />}
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
@@ -310,6 +312,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.components = [new NumberReteNodeFactory(numSocket),
       new MathReteNodeFactory(numSocket),
       new TransformReteNodeFactory(numSocket),
+      new ControlReteNodeFactory(numSocket),
       new LogicReteNodeFactory(numSocket),
       new SensorReteNodeFactory(numSocket),
       new RelayReteNodeFactory(numSocket),
@@ -601,24 +604,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     const rect = this.getBoundingRectOfNodes();
+
     if (rect?.isValid) {
-      // Handle program too large for client
-      const newZoom = Math.min(k * clientWidth / (rect.right + margin),
-                               k * clientHeight / (rect.bottom + margin));
-      if (newZoom < k && rect.right > 0 && newZoom > 0) {
-        this.programEditor.view.area.transform = {k: newZoom, x: transform.x, y: transform.y};
+      const widthQ = k * clientWidth / (rect.right + margin);
+      const heightQ = k * clientHeight / (rect.bottom + margin);
+      const newZoom = Math.min(widthQ, heightQ);
+
+      const tooSmall = rect.width < (clientWidth * .25) || rect.height < (clientHeight * .25);
+      const tooBig = newZoom < k && rect.right > 0 && newZoom > 0;
+
+      if (tooSmall) {
+        this.programEditor.view.area.transform = {k: .9, x: transform.x, y: transform.y};
         this.programEditor.view.area.update();
         return;
       }
 
-      // Handle program too small for client
-      const targetPercentage = .9;
-      if (rect.width < clientWidth * targetPercentage
-        || rect.height < clientHeight * targetPercentage) {
-          const newerZoom = Math.min(k * clientWidth * targetPercentage / rect.width,
-            k * clientHeight * targetPercentage / rect.height);
-          this.programEditor.view.area.transform = {k: newerZoom, x: transform.x, y: transform.y};
-          this.programEditor.view.area.update();
+      if (tooBig) {
+        this.programEditor.view.area.transform = {k: newZoom, x: transform.x, y: transform.y};
+        this.programEditor.view.area.update();
       }
     }
   };

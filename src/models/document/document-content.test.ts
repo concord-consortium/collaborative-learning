@@ -25,7 +25,8 @@ jest.mock("../../utilities/js-utils", () => {
 
 jest.mock("../../utilities/mst-utils", () => {
   return {
-    getParentWithTypeName: () => null
+    ...jest.requireActual("../../utilities/mst-utils"),
+    getParentWithTypeName: () => null,
   };
 });
 
@@ -105,13 +106,13 @@ describe("DocumentContentModel", () => {
     expect(documentContent.tileMap.size).toBe(5);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
-          { content: { type: "Geometry", objects: [] } },
+          { title: "Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
-        { content: { type: "Table", columns: [{ name: "x" }, { name: "y" }] } },
-        { content: { type: "Drawing", objects: [] } }
+        { title: "Table 1", content: { type: "Table", columns: [{ name: "x" }, { name: "y" }] } },
+        { title: "Drawing 1", content: { type: "Drawing", objects: [] } }
       ]
     });
   });
@@ -163,10 +164,10 @@ describe("DocumentContentModel", () => {
 
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } },
-        { content: { type: "Image", url: placeholderImage } },
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } },
-        { content: { type: "Image", url: placeholderImage } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        { title: "Image 1", content: { type: "Image", url: placeholderImage } },
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        { title: "Image 2", content: { type: "Image", url: placeholderImage } }
       ]
     });
   });
@@ -202,10 +203,10 @@ describe("DocumentContentModel", () => {
 
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
-          { content: { type: "Image", url: placeholderImage } },
-          { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+          { title: "Image 1", content: { type: "Image", url: placeholderImage } },
+          { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ]
       ]
     });
@@ -244,12 +245,12 @@ describe("DocumentContentModel", () => {
     expect(textTile2RowIndex1).toBe(2);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
-          { content: { type: "Geometry", objects: [] } },
+          { title: "Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -287,11 +288,11 @@ describe("DocumentContentModel", () => {
     expect(textTile2RowIndex1).toBe(1);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
-          { content: { type: "Geometry", objects: [] } },
+          { title: "Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } },
-          { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+          { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ]
       ]
     });
@@ -337,6 +338,12 @@ describe("DocumentContentModel -- sectioned documents --", () => {
   //   console.log("***", label, "[end] ***");
   // }
 
+  /*
+   * Note that contrary to unit-testing best practices, the separate `it()` blocks here
+   * are inter-dependent -- each subsequent test relies on the document content to be in
+   * the state that the previous test should have left it.
+   */
+
   it("can create sectioned documents", () => {
     // []
     content.addSectionHeaderRow("A");
@@ -371,7 +378,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -386,8 +393,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } },
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p>foo</p>"] } },
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -403,10 +410,10 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
-});
+  });
 
   it("will restore placeholder tiles when deleting the last row in the last section", () => {
     // [Header:A, Placeholder, Header:B, Text]
@@ -434,7 +441,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(2);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -449,7 +456,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -465,7 +472,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(2);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -481,7 +488,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -497,7 +504,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(2);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -512,7 +519,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -537,7 +544,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -552,7 +559,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
 
@@ -563,7 +570,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
 
@@ -574,7 +581,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
 
@@ -585,7 +592,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
 
@@ -597,10 +604,10 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(parsedContentExport()).toEqual({
       tiles: [
         [
-          { content: { type: "Geometry", objects: [] } },
+          { title: "Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
 
@@ -614,8 +621,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       tiles: [
         { content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
-          { content: { type: "Geometry", objects: [] } },
-          { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+          { title: "Graph 1", content: { type: "Geometry", objects: [] } },
+          { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ]
       ]
     });
@@ -628,10 +635,10 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(parsedContentExport()).toEqual({
       tiles: [
         [
-          { content: { type: "Geometry", objects: [] } },
+          { title: "Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -648,9 +655,9 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       tiles: [
         [
           { content: { type: "Text", format: "html", text: ["<p></p>"] } },
-          { content: { type: "Geometry", objects: [] } }
+          { title: "Graph 1", content: { type: "Geometry", objects: [] } }
         ],
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -665,8 +672,8 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { content: { type: "Geometry", objects: [] } },
-        { content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Graph 1", content: { type: "Geometry", objects: [] } },
+        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
