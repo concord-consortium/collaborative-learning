@@ -187,8 +187,8 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     <div className={playbackControlsClass}>
       <div className={`control-separator ${activeNavTab}`}/>
       {renderPlayPauseButton()}
-      <PlaybackMarkerToolbar selectedMarkers={selectedMarkers} markerSelected={markerSelected}
-      addMarkerSelected={addMarkerButtonSelected} onAddMarkerSelected={handleAddMarkerButtonSelected}/>
+      {/* <PlaybackMarkerToolbar selectedMarkers={selectedMarkers} markerSelected={markerSelected}
+          addMarkerSelected={addMarkerButtonSelected} onAddMarkerSelected={handleAddMarkerButtonSelected}/> */}
       <div className={sliderComponentClass}>
         {renderMarkerComponent()}
         {renderSliderContainer()}
