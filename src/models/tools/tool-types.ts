@@ -1,4 +1,4 @@
-import { getEnv, Instance, ISerializedActionCall, types } from "mobx-state-tree";
+import { getEnv, getSnapshot, Instance, ISerializedActionCall, types } from "mobx-state-tree";
 import { ISharedModelManager, SharedModelType } from "./shared-model";
 import { getToolContentModels, getToolContentInfoById } from "./tool-content-info";
 
@@ -110,6 +110,10 @@ export const ToolContentModel = types.model("ToolContentModel", {
   .views(self => ({
     get tileEnv() {
       return getEnv(self) as ITileEnvironment | undefined;
+    },
+    // Override in specific tile content model when external data (like from SharedModels) is needed when copying
+    get tileSnapshotForCopy() {
+      return getSnapshot(self);
     }
   }))
   .actions(self => ({
