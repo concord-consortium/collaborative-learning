@@ -3,7 +3,10 @@
   "abbrevTitle": "CAS",
   "title": "Comparing and Scaling",
   "subtitle": "Developing Proportional Reasoning in the Context of Number (Quantities)",
-  "placeholderText": "Enter notes here",
+  "config": {
+    "enableHistoryRoles": ["teacher"],
+    "placeholderText": "Enter notes here"
+  },
   "sections": {
     "introduction": {
       "initials": "IN",
