@@ -25,6 +25,7 @@ describe("DataCardToolComponent", () => {
     docId: "",
     documentContent: null,
     isUserResizable: true,
+    readOnly: false,
     onResizeRow: (e: React.DragEvent<HTMLDivElement>): void => {
       throw new Error("Function not implemented.");
     },
@@ -41,7 +42,7 @@ describe("DataCardToolComponent", () => {
       throw new Error("Function not implemented.");
     },
     onRegisterToolApi: (toolApi: IToolApi, facet?: string): void => {
-      throw new Error("Function not implemented.");
+      // throw new Error("Function not implemented.");
     },
     onUnregisterToolApi: (facet?: string): void => {
       throw new Error("Function not implemented.");

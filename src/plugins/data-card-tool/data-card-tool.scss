@@ -25,7 +25,7 @@ $default-button-border-color: #979797;
   }
 
   /* Data Card Title and Card Navigation */
-  .data-card-toolbar {
+  .data-card-header-row {
     .panel {
       border: solid 1px $charcoal-light-1;
       width: $card-width;
@@ -188,6 +188,24 @@ $default-button-border-color: #979797;
         color:$cell-text-color;
         .cell-value {
           padding:$cell-padding;
+        }
+
+        .image-wrapper {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+
+          .image-value {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            display: block;
+            margin: auto;
+          }
+          .delete-image-button {
+            position: relative;
+            right: 5px;
+          }
         }
       }
 

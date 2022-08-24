@@ -10,11 +10,11 @@ export const kLocalAssetsHandlerName = "localAssets";
 export const kFirebaseStorageHandlerName = "firebaseStorage";
 export const kFirebaseRealTimeDBHandlerName = "firebaseRealTimeDB";
 
-export enum EntryStatus { 
+export enum EntryStatus {
   PendingStorage = "pendingStorage",
   PendingDimensions = "pendingDimensions",
-  Ready = "ready", 
-  Error = "error" 
+  Ready = "ready",
+  Error = "error"
 }
 
 export const ImageMapEntry = types
@@ -64,6 +64,9 @@ export const ImageMapModel = types
     storingPromises: {} as Record<string, Promise<ImageMapEntryType>>
   }))
   .views(self => ({
+    isImageUrl(url: string) {
+      return !!this.getHandler(url);
+    },
     hasImage(url: string) {
       return self.images.has(url);
     },
@@ -107,18 +110,18 @@ export const ImageMapModel = types
         else if (entry.status === EntryStatus.PendingDimensions) {
           // store or update the entry
           self.images.set(entry.contentUrl, getSnapshot(entry));
-          // copy the storing promise incase some code calls 
+          // copy the storing promise incase some code calls
           // getImage(entry.contentUrl)
           self.storingPromises[entry.contentUrl] = self.storingPromises[url];
         }
       }
 
-      if (existingEntry?.status === EntryStatus.PendingDimensions && 
-          (entry.status === EntryStatus.Error || entry.status === EntryStatus.Ready) && 
+      if (existingEntry?.status === EntryStatus.PendingDimensions &&
+          (entry.status === EntryStatus.Error || entry.status === EntryStatus.Ready) &&
           self.storingPromises[url] === self.storingPromises[entry.contentUrl]) {
         // If the existingEntry is "managed" by the same promise as the entry
         // we should updated it in some cases.
-        // See image-map.md "Updated Cache entry is in the Error state" and 
+        // See image-map.md "Updated Cache entry is in the Error state" and
         // "Updated cache entry is in Ready state"
         self.images.set(entry.contentUrl, getSnapshot(entry));
       }
@@ -127,10 +130,10 @@ export const ImageMapModel = types
   .actions(self => ({
     // Flows are the recommended way to deal with async actions in MobX and MobX State Tree.
     // However, typing them is difficult. If you leave them untyped like:
-    // `flow(function* addImage(url: string, snapshot: ImageMapEntrySnapshot) {` 
+    // `flow(function* addImage(url: string, snapshot: ImageMapEntrySnapshot) {`
     // The return value will be a Promise based on the actual return value of the generator
     // function. This means there is no enforcement of a particular return type.
-    // Also the value of all yield calls is any. 
+    // Also the value of all yield calls is any.
     //
     // The approach used below types the generator function with:
     //   Generator<PromiseLike<any>, ImageMapEntryType, unknown>
@@ -146,11 +149,11 @@ export const ImageMapModel = types
     // The first option looks nice because the arguments are typed as normal, however it means the actual
     // action will have un typed arguments
     // The second results in a weird signature where the argument names of addImage are just arg0, arg1
-    // In both of these cases the return value of yield is any so it is not as safe as the Generator 
+    // In both of these cases the return value of yield is any so it is not as safe as the Generator
     // approach being used.
     //
     // There is also the yield* toGenerator approach https://mobx-state-tree.js.org/API/#togenerator which
-    // provides a way to automatically type the return value of the yield. But that doesn't solve 
+    // provides a way to automatically type the return value of the yield. But that doesn't solve
     // the problem of typing the return value of the flow.
     _addImage: flow(function* _addImage(url: string, storeResult: IImageHandlerStoreResult)
                               : Generator<PromiseLike<any>, ImageMapEntryType, unknown> {
@@ -159,7 +162,7 @@ export const ImageMapModel = types
         // As far as I can tell it should be an error if the displayUrl
         // is not set. Even when there is an error the displayUrl should be
         // set to the placeholderImage.
-        console.error(`addImage called with a storeResult without an displayUrl. ` + 
+        console.error(`addImage called with a storeResult without an displayUrl. ` +
           `url: ${url}, contentUrl: ${storeResult.contentUrl}, success: ${storeResult.success}`);
 
         // We still store the entry but we update it to be errored.
@@ -175,7 +178,7 @@ export const ImageMapModel = types
       if (existingEntry) {
         retries = existingEntry.retries;
       }
-      const { success: successfulStore, ...otherProps} = storeResult; 
+      const { success: successfulStore, ...otherProps} = storeResult;
       const snapshot: ImageMapEntrySnapshot = {
         ...otherProps,
         status: successfulStore ? EntryStatus.PendingDimensions : EntryStatus.Error,
@@ -186,29 +189,29 @@ export const ImageMapModel = types
       const entry = self.images.get(url)!;
 
       if (entry.status === EntryStatus.Error) {
-        // This means the storage operation failed. 
+        // This means the storage operation failed.
 
         // We could clear the storingPromise here, but instead we just leave it and
         // rely on getImage to ignore the storingPromise when it sees there is
         // an entry with a status of error.
 
         // Even if this entry has a contentUrl that is different than its url
-        // we do not update the entry at the contentUrl. 
+        // we do not update the entry at the contentUrl.
         // See image-map.md "Updated cache entry is in the Error state"
         // Note: when there is an error at this point the promise that is managing
-        // this call to _addImage should not be responsible for the entry at 
-        // contentUrl. 
+        // this call to _addImage should not be responsible for the entry at
+        // contentUrl.
 
         // We return so we don't sync and don't try to get the dimensions
         // See image-map.md "Dimensions" for why we don't set the dimensions
-        return entry;  
-      } 
+        return entry;
+      }
 
       self._syncContentUrl(url, entry);
 
       try {
         // If the getImageDimension image element never loads or errors then we won't get
-        // past this line. However I'd hope that the browser will eventually trigger 
+        // past this line. However I'd hope that the browser will eventually trigger
         // one of those events.
         // In most cases _addImage is not called until the image has already been
         // downloaded and displayUrl is actually a blob url.
@@ -218,8 +221,8 @@ export const ImageMapModel = types
         // is defined above.
         const dimensions = (yield getImageDimensions(entry.displayUrl!)) as IImageDimensions;
         entry.width = dimensions.width;
-        entry.height = dimensions.height;  
-        entry.status = EntryStatus.Ready;  
+        entry.height = dimensions.height;
+        entry.status = EntryStatus.Ready;
       } catch (error) {
         entry.status = EntryStatus.Error;
         // If there is a contentUrl there could be a second entry that needs to be updated.
@@ -289,8 +292,8 @@ export const ImageMapModel = types
         return imageEntry;
       }
 
-      const existingStoringPromise = self.storingPromises[url];      
-      if ( existingStoringPromise && 
+      const existingStoringPromise = self.storingPromises[url];
+      if ( existingStoringPromise &&
            ( imageEntry?.status !== EntryStatus.Error || imageEntry?.retries >= 2 ) ) {
         // If the imageEntry is errored we ignore the existing promise
         // This way a second getImage request will try to store the image again
@@ -309,18 +312,18 @@ export const ImageMapModel = types
       // existingEntry could have a status of PendingStorage, PendingDimensions, or
       // Error. Because there is no existingStoringPromise the status should
       // really not be PendingStorage or PendingDimensions.
-      if (imageEntry?.status === EntryStatus.PendingStorage || 
+      if (imageEntry?.status === EntryStatus.PendingStorage ||
           imageEntry?.status === EntryStatus.PendingDimensions) {
         console.warn(`ImageMap.getImage found an entry with a status ${imageEntry.status} at ${url}`);
       }
-      
+
       let retries = 0;
       if (imageEntry) {
         // When we have an imageEntry at this point it means we are retrying
         retries = imageEntry.retries + 1;
       }
 
-      self.images.set(url, {status: EntryStatus.PendingStorage, displayUrl: placeholderImage, 
+      self.images.set(url, {status: EntryStatus.PendingStorage, displayUrl: placeholderImage,
         retries});
 
       const storingPromise = self._storeAndAddImage(url, handler, options);
@@ -328,7 +331,7 @@ export const ImageMapModel = types
       // keep track of the storingPromise
       self.storingPromises[url] = storingPromise;
 
-      return storingPromise;      
+      return storingPromise;
     })
   }));
 export type ImageMapModelType = Instance<typeof ImageMapModel>;
@@ -418,9 +421,9 @@ const kFirebaseStorageUrlPrefix = "https://firebasestorage.googleapis.com";
 // This means any content that is referencing an image that cannot be downloaded
 // will not be updated. Modifying content like this seems kind of dangerous because
 // this could be a temporary network error.
-// By not setting the contentUrl, it also means that the default placeholder image 
+// By not setting the contentUrl, it also means that the default placeholder image
 // entry will not be modified by syncContentUrl. That is a good thing.
-const kErrorStorageResult: IImageHandlerStoreResult = { 
+const kErrorStorageResult: IImageHandlerStoreResult = {
   displayUrl: placeholderImage, success: false
 };
 
