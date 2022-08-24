@@ -393,9 +393,6 @@ export const GeometryContentModel = GeometryBaseContentModel
     function initializeBoard(domElementID: string, onCreate?: onCreateCallback): JXG.Board | undefined {
       let board: JXG.Board | undefined;
       const changes = convertModelToChanges(self);
-      changes.forEach(change => {
-        console.log(`change`, change);
-      });
       applyChanges(domElementID, changes, getDispatcherContext())
         .filter(result => result != null)
         .forEach(changeResult => {

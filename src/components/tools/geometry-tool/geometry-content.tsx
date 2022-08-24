@@ -1389,8 +1389,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     };
 
     const handlePointerDown = (evt: any) => {
-      const { readOnly } = this.props;
-      const { board, scale } = this.state;
+      const { readOnly, scale } = this.props;
+      const { board } = this.state;
       if (!board || (line !== getClickableObjectUnderMouse(board, evt, !readOnly, scale))) return;
 
       const content = this.getContent();
@@ -1478,8 +1478,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     };
 
     const handlePointerDown = (evt: any) => {
-      const { readOnly } = this.props;
-      const { board, scale } = this.state;
+      const { readOnly, scale } = this.props;
+      const { board } = this.state;
       if (!board || (polygon !== getClickableObjectUnderMouse(board, evt, !readOnly, scale))) return;
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const inVertex = isInVertex(evt);
