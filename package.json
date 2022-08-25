@@ -209,7 +209,7 @@
     "lodash": "^4.17.21",
     "mobx": "^6.6.1",
     "mobx-react": "^7.5.2",
-    "mobx-state-tree": "^5.1.6",
+    "mobx-state-tree": "=5.1.5",
     "nanoid": "^4.0.0",
     "object-hash": "^3.0.0",
     "query-string": "7.1.1",
