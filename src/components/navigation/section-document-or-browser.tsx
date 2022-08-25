@@ -3,7 +3,7 @@ import { useQueryClient } from 'react-query';
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { Instance, getSnapshot } from "mobx-state-tree";
 import { CDocumentType, TreeManager } from "../../models/history/tree-manager";
-import { DocumentModel, DocumentModelType } from "../../models/document/document";
+import { createDocumentModel, DocumentModelType } from "../../models/document/document";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { ENavTabSectionType, NavTabSectionSpec, NavTabSpec } from "../../models/view/nav-tabs";
 import { EditableDocumentContent } from "../document/editable-document-content";
@@ -219,7 +219,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   const getDocumentToShow = () => {
     if (referenceDocument) {
       const origDocManager = referenceDocument.treeManagerAPI as Instance<typeof TreeManager>;
-      const docCopy = DocumentModel.create(getSnapshot(referenceDocument));
+      const docCopy = createDocumentModel(getSnapshot(referenceDocument));
       const historySnapshot = (getSnapshot(origDocManager.document)) as unknown as CDocumentType;
       const docCopyManager = docCopy.treeManagerAPI as Instance<typeof TreeManager>;
       docCopyManager.setChangeDocument(historySnapshot);
