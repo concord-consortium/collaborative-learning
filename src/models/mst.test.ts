@@ -2,7 +2,7 @@ import { action, autorun, makeObservable, observable } from "mobx";
 import { addDisposer, applySnapshot, getType, isAlive, types, getRoot, 
   isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
   getSnapshot, addMiddleware, getEnv,
-  createActionTrackingMiddleware2} from "mobx-state-tree";
+  createActionTrackingMiddleware2, resolvePath} from "mobx-state-tree";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
@@ -582,4 +582,81 @@ describe("mst", () => {
 
     disposer();
   });
+
+  // This is fixed in concord version of MST 5.1.5-cc.1
+  // And there is a PR to fix it in official MST
+  // https://github.com/mobxjs/mobx-state-tree/pull/1952
+  test("lifecycle hooks can access their children", () => {
+    const events: string[] = [];
+    function listener(e: string) {
+        events.push(e);
+    }
+
+    const Child = types
+        .model("Todo", {
+            title: ""
+        })
+        .actions((self) => ({
+            afterCreate() {
+                listener("new child: " + self.title);
+            },
+            afterAttach() {
+                listener("parent available: " + !!getParent(self));
+            }
+        }));
+
+    const Parent = types
+        .model("Parent", {
+            child: Child
+        })
+        .actions((self) => ({
+            afterCreate() {
+                // **This the key line**: it is trying to access the child
+                listener("new parent, child.title: " + self.child?.title);
+            }
+        }));
+
+    const Store = types.model("Store", {
+        parent: types.maybe(Parent)
+    });
+
+    const store = Store.create({
+        parent: {
+            child: { title: "Junior" }
+        }
+    });
+    // As expected no hooks are called.
+    // The `parent` is not accessed it is just loaded.
+    events.push("-");
+
+    // Simple access does a sensible thing
+    // eslint-disable-next-line no-unused-expressions
+    store.parent;
+    expect(events).toEqual([
+        "-",
+        "new child: Junior",
+        "new parent, child.title: Junior",
+        "parent available: true"
+    ]);
+
+    // Clear the events and make a new store
+    events.length = 0;
+    const store2 = Store.create({
+        parent: {
+            child: { title: "Junior" }
+        }
+    });
+    events.push("-");
+
+    // Previously resolvePath would cause problems because the parent hooks
+    // would be called before the child was fully created
+    resolvePath(store2, "/parent/child");
+    expect(events).toEqual([
+        "-",
+        "new child: Junior",
+        "new parent, child.title: Junior",
+        "parent available: true"
+    ]);
+  });
+
 });
