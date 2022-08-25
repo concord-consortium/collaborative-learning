@@ -666,17 +666,46 @@
                     "text": [
                       "<p><strong>My notes</strong></p>",
                       "<p><em>Here is a space for you to take notes. We have also suggested some of the variables for you. Create variables using the variable tool on text tiles or in the diagram tile.</em></p>",
-                      "<p>Some sample variables could be</p>",
-                      "<p>[initial number of cats]</p>",
-                      "<p>[litter size]</p>",
-                      "<p>[number of litters per year]</p>",
-                      "<p>[length of a cat pregnancy]</p>",
-                      "<p>[ratio of female to male kittens per litter]</p>",
-                      "<p>[age at which a cat is old enough to have kittens]</p>",
-                      "<p><u></u></p>",
-                      "<p><u></u></p>"
+                      "<p>Some sample variables could be:</p>",
+                      "<ul><li>[initial number of cats]</li><li>[litter size]</li><li>[length of a cat pregnancy]</li><li>[ratio of female to male kittens per litter]</li><li>[age at which a cat is old enough to have kittens]</li><p></p></ul>",
+                      "<p></p>"
                     ]
                   }
+                },
+                {
+                  "id": "Gy7Kn2FN_gcnIKE4",
+                  "title": "Text 1",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Diagram 1",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
                 }
               ]
             }
@@ -760,7 +789,7 @@
                       "format": "html",
                       "text": [
                         "<p>Answer the questions below using tiles in your workspace. Be sure to label each answer with the number of the question you are answering. </p>",
-                        "<p><strong>1. Create a text tile, describe how you interpret your client&#x27;s goal.</strong></p>",
+                        "<p><strong>1. Create a text tile.  In it, describe how you interpret your client&#x27;s goal.</strong></p>",
                         "<p><strong></strong></p>",
                         "<p><strong>2. Create another text tile, take notes on what might be important to consider as you complete your first task.</strong></p>",
                         "<p>Example from how someone might approach a modeling problem:</p>",
@@ -819,7 +848,7 @@
                       "format": "html",
                       "text": [
                         "<p>Answer the questions below using tiles in your workspace. Be sure to label each answer with the number of the question you are answering. </p>",
-                        "<p><strong>1. Create a text tile, describe how you interpret your client&#x27;s goal.</strong></p>",
+                        "<p><strong>1. Create a text tile.  In it, describe how you interpret your client&#x27;s goal.</strong></p>",
                         "<p><strong></strong></p>",
                         "<p><strong>2. Create another text tile, take notes on what might be important to consider as you complete your first task.</strong></p>",
                         "<p>Example from how someone might approach a modeling problem:</p>",
@@ -877,7 +906,7 @@
                       "format": "html",
                       "text": [
                         "<p>Answer the questions below using tiles in your workspace. Be sure to label each answer with the number of the question you are answering. </p>",
-                        "<p><strong>1. Create a text tile, describe how you interpret your client&#x27;s goal.</strong></p>",
+                        "<p><strong>1. Create a text tile.  In it, describe how you interpret your client&#x27;s goal.</strong></p>",
                         "<p><strong></strong></p>",
                         "<p><strong>2. Create another text tile, take notes on what might be important to consider as you complete your first task.</strong></p>",
                         "<p>Example from how someone might approach a modeling problem:</p>",
