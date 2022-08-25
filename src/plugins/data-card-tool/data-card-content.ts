@@ -11,7 +11,6 @@ import {
 import { SharedDataSet, SharedDataSetType } from "../../models/tools/shared-data-set";
 import { SharedModelType } from "../../models/tools/shared-model";
 import { uniqueId, uniqueTitle } from "../../utilities/js-utils";
-import { ControlReteNodeFactory } from "../dataflow-tool/nodes/factories/control-rete-node-factory";
 
 export function defaultDataSet() {
   // as per slack discussion, default attribute is added automatically

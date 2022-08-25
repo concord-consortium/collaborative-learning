@@ -1163,7 +1163,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       {name: "sharedModelSetup", fireImmediately: true}));
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-      console.warn("updateAfterSharedModelChanges hasn't been implemented for geometry content.");
+      // console.warn("updateAfterSharedModelChanges hasn't been implemented for geometry content.");
     },
     syncLinkedChange(dataSet: IDataSet, links: ITableLinkProperties) {
       // TODO: handle update

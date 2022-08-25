@@ -135,7 +135,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   return (
     <div className={pairClassNames}>
-      <div className={labelClassNames} onClick={handleClick}>
+      <div className={labelClassNames} onClick={handleClick} onDoubleClick={handleDoubleClick}>
         { !readOnly && editFacet === "name"
           ? <input
               type="text"
