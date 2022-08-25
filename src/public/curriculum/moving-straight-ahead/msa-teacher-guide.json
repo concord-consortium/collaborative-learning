@@ -165,7 +165,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Student predictions will likely be much higher  than their actual walking rates. They may have some knowledge about walking rates if they have used a treadmill. On a treadmill, a person might set the walking speed at 4 miles per hour. One interesting thing about treadmills is that the rate of 4 miles per hour may also be reported as 15 minutes per mile. You might discuss why both these rates are reported or why treadmills do not report the rate in miles per minute or meters per hour. </p>"
+                        "<p>Student predictions will likely be much higher than their actual walking rates. They may have some knowledge about walking rates if they have used a treadmill. On a treadmill, a person might set the walking speed at 4 miles per hour. One interesting thing about treadmills is that the rate of 4 miles per hour may also be reported as 15 minutes per mile. You might discuss why both these rates are reported or why treadmills do not report the rate in miles per minute or meters per hour. </p>"
                       ]
                     }
                   },
@@ -317,11 +317,11 @@
                       "text": [
                         "<p><em>What If Situation A</em></p>",
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>How do you find how long it takes to walk a given distance, in particular, asking about 500 meters in situation A? (Note that this is informally solving for T when D is given. Students will have informal ways to find the value, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li>How do you find how far you can walk in a given time?  Use the examples from What If Situation A for students to demonstrate their thinking.  (Note that this is informally solving for D when T is given. Students will have informal ways to find the values, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li>How does the equation show the relationship between the two variables? (The equation shows that the distance is the product of the walking rate and the time, or d = rt. The walking rate is the coefficient of the independent variable.)  </li><li>Explain what information the numbers and variables in your equation represent. (Take this opportunity to see how students interpret the expression 2t. They should say something like “If my walking rate is 2 meters per second, this is the distance that I walked after t seconds.” Emphasize that 2t means 2 times the value of t.) </li><li>Which variable in your equation is the independent variable, and which is the dependent variable? (Time is the independent variable, and distance is the dependent variable.)  </li></ul>",
-                        "<p>If some students made graphs during the Explore, display them for the class.  </p>",
-                        "<ul><li>How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.)  </li></ul>",
-                        "<p>Pick a typical equation from the class and ask students to use this equation to make a table.  </p>",
-                        "<ul><li>How does the walking rate show up in the table? (In the table, as the time increases by 1 second, the distance increases by a constant amount equal to the walking rate.)  </li></ul>"
+                        "<ul><li>How do you find how long it takes to walk a given distance, in particular, asking about 500 meters in situation A? (Note that this is informally solving for T when D is given. Students will have informal ways to find the value, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li>How do you find how far you can walk in a given time?  Use the examples from What If Situation A for students to demonstrate their thinking.  (Note that this is informally solving for D when T is given. Students will have informal ways to find the values, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li>How does the equation show the relationship between the two variables? (The equation shows that the distance is the product of the walkingrate and the time, or d = rt. The walking rate is the coefficient of the independent variable.) </li><li>Explain what information the numbers and variables in your equation represent. (Take this opportunity to see how students interpret the expression 2t. They should say something like “If my walking rate is 2 meters per second, this is the distance that I walked after t seconds.” Emphasize that 2t means 2 times the value of t.) </li><li>Which variable in your equation is the independent variable, and which is the dependent variable? (Time is the independent variable, and distance is the dependent variable.) </li></ul>",
+                        "<p>If some students made graphs during the Explore, display them for the class. </p>",
+                        "<ul><li>How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.) </li></ul>",
+                        "<p>Pick a typical equation from the class and ask students to use this equation to make a table. </p>",
+                        "<ul><li>How does the walking rate show up in the table? (In the table, as the time increases by 1 second, the distance increases by a constant amount equal to the walking rate.) </li></ul>"
                       ]
                     }
                   },
@@ -453,7 +453,7 @@
                       "text": [
                         "<strong>General Summary Questions</strong>",
                         "<p></p>",
-                        "<ul><li>Have students compare their equations. How do the equations compare? (Students should see that the equations are the same except for the walking rates.)</li><li>What information does the walking rate provide? (It gives the unit rate, or how far you can walk for every 1 second.)</li><li>What does it mean to walk at a constant rate? (It means that you always walk the same distance for a set amount of time.)  </li><li>Suppose you do not walk at a constant rate for the walkathon. Which of the questions in Problem 1.1 can you still answer? Why? (It would be difficult to answer any of the questions since they all assume a constant walking rate. For Question A, you can find the total time it took to walk 10 meters and then compute the average rate.) If some students made graphs during the Explore, display them for the class. </li><li>How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.) Pick a typical equation from the class and ask students to use this equation to make a table.  </li></ul>",
+                        "<ul><li>Have students compare their equations. How do the equations compare? (Students should see that the equations are the same except for the walking rates.)</li><li>What information does the walking rate provide? (It gives the unit rate, or how far you can walk for every 1 second.)</li><li>What does it mean to walk at a constant rate? (It means that you always walk the same distance for a set amount of time.) </li><li>Suppose you do not walk at a constant rate for the walkathon. Which of the questions in Problem 1.1 can you still answer? Why? (It would be difficult to answer any of the questions since they all assume a constant walking rate. For Question A, you can find the total time it took to walk 10 meters and then compute the average rate.) If some students made graphs during the Explore, display them for the class. </li><li>How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.) Pick a typical equation from the class and ask students to use this equation to make a table. </li></ul>",
                         "<p>The above questions on graphs and tables can be used to launch the next Problem. </p>",
                         "<p></p>"
                       ]
@@ -472,11 +472,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning</strong>  </p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<p><strong>Reflecting on Student Learning</strong> </p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson. </p>",
                         "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li></ul>",
                         "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
-                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
                       ]
                     }
                   }
@@ -878,11 +878,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning  </strong></p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<p><strong>Reflecting on Student Learning </strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson. </p>",
                         "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li></ul>",
                         "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
-                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
                       ]
                     }
                   }
@@ -992,7 +992,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions </strong></p>",
-                        "<ul><li>What variables can affect the amount of money that a student raises? (The variables are the pledge amount for each sponsor, the distance a student walks, and the number of sponsors.) </li><li>How can you use these variables to estimate the amount of money each student will collect? (If you know how much a sponsor pledges to donate and how far the student plans to walk, you can figure out how much each student might collect from each sponsor. For example, if the sponsor pledges to donate $4 for each kilometer walked, and the student plans to walk 5 kilometers, then you can estimate that the student will collect 4 * 5 = $20 from each sponsor.)  </li><li>Will the amount of money raised be the same for each walker? Explain. (No. The amount of money raised might depend on the distance that each student walks, as well as his or her pledge plan, so the amount of money raised may not be the same for each walker.)  </li><li>Which variable is the independent variable? Which is the dependent variable? (Distance walked is the independent variable, and the amount of money raised from each sponsor is the dependent variable.)  </li></ul>",
+                        "<ul><li>What variables can affect the amount of money that a student raises? (The variables are the pledge amount for each sponsor, the distance a student walks, and the number of sponsors.) </li><li>How can you use these variables to estimate the amount of money each student will collect? (If you know how much a sponsor pledges to donate and how far the student plans to walk, you can figure out how much each student might collect from each sponsor. For example, if the sponsor pledges to donate $4 for each kilometer walked, and the student plans to walk 5 kilometers, then you can estimate that the student will collect 4 * 5 = $20 from each sponsor.) </li><li>Will the amount of money raised be the same for each walker? Explain. (No. The amount of money raised might depend on the distance that each student walks, as well as his or her pledge plan, so the amount of money raised may not be the same for each walker.) </li><li>Which variable is the independent variable? Which is the dependent variable? (Distance walked is the independent variable, and the amount of money raised from each sponsor is the dependent variable.) </li></ul>",
                         "<p>Display the three pledge plans of Leanne, Alana, and Gilberto.</p>",
                         "<ul><li>How might you decide who is going to raise the most money? (Various answers. Do not have students go into detail. Asking the question is just to get a formative assessment of whether students may have solution strategies in mind.)</li></ul>",
                         "<p>If students hesitate, offer a solution strategy by asking questions.</p>",
@@ -1065,7 +1065,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Remind students that 2 * d is often written 2d, so the equation becomes A = 2d, where A is the amount the sponsor donates and d is the number of kilometers walked.  </p>"
+                      "<p>Remind students that 2 * d is often written 2d, so the equation becomes A = 2d, where A is the amount the sponsor donates and d is the number of kilometers walked. </p>"
                     ]
                   }
                 },
@@ -1157,7 +1157,7 @@
                       "text": [
                         "<ul><li>What does that tell us about the pledges? (Both Leanne and Gilberto walk 5 kilometers and will get $10 in pledges.) </li><li>What information does each intersection point represent in the situation? (Each intersection point is where two of the plans raise an equal amount of money for the same distance. The coordinates represent equal distances and equal amounts donated.) </li></ul>",
                         "<p>Direct students to the intersection of Alana’s and Gilberto’s lines. Pick two points to the left of the point of intersection, one on each line, with the same x-value. </p>",
-                        "<ul><li>How are the two points similar? How are they different? How can you show the difference in money raised? (The two points represent the same distance walked, but they represent different amounts of money raised. For distances to the left of the point of intersection, Alana’s graph is above Gilberto’s, so Alana raises more money than Gilberto. You can show the difference in money collected by drawing a vertical line between Alana’s and Gilberto’s lines and measuring the distance. You can also find the difference in the y-coordinates to find the difference in the amount of money raised for that distance.) </li></ul>",
+                        "<ul><li>How are the two points similar? How are they different? How can you show the difference in money raised? (The two points represent thesame distance walked, but they represent different amounts of money raised. For distances to the left of the point of intersection, Alana’s graph is above Gilberto’s, so Alana raises more money than Gilberto. You can show the difference in money collected by drawing a vertical line between Alana’s and Gilberto’s lines and measuring the distance. You can also find the difference in the y-coordinates to find the difference in the amount of money raised for that distance.) </li></ul>",
                         "<p>Then, repeat the process for two points to the right of the point of intersection. (Now Gilberto’s graph is above Alana’s, so he raises more money for a given distance.) </p>",
                         "<ul><li>In What If Situation A, you found the money raised for each pledge plan if the student walked 8 kilometers. How is this information represented on the graph? (The amount of money raised for each student is the vertical distance between the x-axis and the point on the student’s line with an x-coordinate of 8.) </li></ul>"
                       ]
@@ -1496,11 +1496,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning</strong>  </p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<p><strong>Reflecting on Student Learning</strong> </p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson. </p>",
                         "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li></ul>",
                         "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
-                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
                       ]
                     }
                   }
@@ -1774,7 +1774,7 @@
                     "format": "html",
                     "text": [
                       "<p><strong>Suggested Questions</strong></p>",
-                      "<ul><li>For each class, how much money is being spent or withdrawn each week? (Ms. Chang’s class: $12; Mr. Mamer’s class: $10. For both classes, it is the constant rate of change or the difference in the amount of money between two consecutive weeks.)</li><li>Compare the rates of change in this Problem with other rates that we have studied in this Unit. How do the rates in this Problem show up in a table? In a graph? In an equation? (These rates are negative, and the previous rates were positive [or zero]. These tables show a constant decrease in the dependent variable as the independent variable increases. The graphs show lines that decrease from left to right, which is the opposite of the previous rates we studied. The coefficient of the independent variable in these equations is negative, while it was positive in previous Problems.]</li><li>What are the y-intercepts? Chang: (0, 144) and Mamer: (0, 500)</li><li>What do they tell you about the money in each class’s account? (How much money is in the account at the start.)</li><li>What is the pattern of change for the relationship between the variables? (Chang: The amount in the account decreases by $12 each week. Mamer: The amount in the account decreases by $50 every 5 weeks or by $10 each week.)</li><li>How do we see the pattern of change in the table? (Chang: As the weeks increase by 1, the amount of money in the account subtracts $12. Mamer: As the weeks increase by 5, the amount of money in the account subtracts $50. Or, thinking proportionally, as the weeks increase by 1, the amount of money in the account subtracts $10.)</li></ul>"
+                      "<ul><li>For each class, how much money is being spent or withdrawn each week? (Ms. Chang’s class: $12; Mr. Mamer’s class: $10. For both classes, it isthe constant rate of change or the difference in the amount of money between two consecutive weeks.)</li><li>Compare the rates of change in this Problem with other rates that we have studied in this Unit. How do the rates in this Problem show up in a table? In a graph? In an equation? (These rates are negative, and the previous rates were positive [or zero]. These tables show a constant decrease in the dependent variable as the independent variable increases. The graphs show lines that decrease from left to right, which is the opposite of the previous rates we studied. The coefficient of the independent variable in these equations is negative, while it was positive in previous Problems.]</li><li>What are the y-intercepts? Chang: (0, 144) and Mamer: (0, 500)</li><li>What do they tell you about the money in each class’s account? (How much money is in the account at the start.)</li><li>What is the pattern of change for the relationship between the variables? (Chang: The amount in the account decreases by $12 each week. Mamer: The amount in the account decreases by $50 every 5 weeks or by $10 each week.)</li><li>How do we see the pattern of change in the table? (Chang: As the weeks increase by 1, the amount of money in the account subtracts $12. Mamer: As the weeks increase by 5, the amount of money in the account subtracts $50. Or, thinking proportionally, as the weeks increase by 1, the amount of money in the account subtracts $10.)</li></ul>"
                     ]
                   }
                 },
@@ -1889,11 +1889,11 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><strong>Reflecting on Student Learning  </strong></p>",
-                      "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                      "<p><strong>Reflecting on Student Learning </strong></p>",
+                      "<p>Use the following questions to assess student understanding at the end of the lesson. </p>",
                       "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li></ul>",
                       "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
-                      "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                      "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
                     ]
                   }
                 }
@@ -1927,7 +1927,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Students look at the context of a young boy challenging his older brother to a race. Students explore the question, “How long should the race be so that the younger brother wins in a close race?” This Problem introduces the idea of students finding the point of intersection of two linear relationships using a graph, a table, or numeric reasoning. The Problem also assesses what students have learned about linear relationships and their representations from Investigation 1. </p>",
+                      "<p>Students look at the context of a young boy challenging his older brother toa race. Students explore the question, “How long should the race be so thatthe younger brother wins in a close race?” This Problem introduces the idea of students finding the point of intersection of two linear relationships using a graph, a table, or numeric reasoning. The Problem also assesses what students have learned about linear relationships and their representations from Investigation 1. </p>",
                       "<p><strong>Implementation Note:</strong> You might have a short summary after the Initial Challenge. This will give students a chance to share their strategies and how they made sense of the race question before going on to answer more detailed questions. You may want to use the What If...? questions to push the conversation during the Summarize. Ask the questions and pause for students to think about and record their answers, then engage the class in a discussion of ideas.</p>"
                     ]
                   }
@@ -2019,7 +2019,7 @@
                     "format": "html",
                     "text": [
                       "<p><strong>Suggested Questions </strong></p>",
-                      "<ul><li>Which relationship has the greatest rate of change? (Answers will vary. Look for students to choose the relationship that when written in the form y = b + ax has the greatest value of a. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of a.)  </li><li>Which relationship(s) has a graph that crosses the y-axis at a point with a positive y-coordinate? With a y-coordinate of zero? With a negative y-coordinate? (Answers will vary. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of b. Positive y-coordinate: Look for students to choose the relationship(s) that when written in the form y = b + ax has a positive value of b. Sample: The line that represents Alana’s pledge plan. Zero y-coordinate: Look for students to choose a proportional relationship. Sample: Gilberto’s pledge plan can be modeled by a line that passes through the origin. Negative y-coordinate: Look for students to choose the relationship(s) that when written in the form y = b + mx has a negative value of b. Sample: The line that represents Gilberto’s pledge plan after purchasing a T-shirt for each sponsor.) You can tell students that they will continue to look at linear relationships in this Problem.  </li></ul>"
+                      "<ul><li>Which relationship has the greatest rate of change? (Answers will vary. Look for students to choose the relationship that when written in the form y = b + ax has the greatest value of a. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of a.) </li><li>Which relationship(s) has a graph that crosses the y-axis at a point witha positive y-coordinate? With a y-coordinate of zero? With a negative y-coordinate? (Answers will vary. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of b. Positive y-coordinate: Look for students to choose the relationship(s) that when written in the form y = b + axhas a positive value of b. Sample: The line that represents Alana’s pledge plan. Zero y-coordinate: Look for students to choose a proportional relationship. Sample: Gilberto’s pledge plan can be modeled by a line that passes through the origin. Negative y-coordinate: Look for students to choose the relationship(s) that when written in the form y = b + mx has a negative value of b. Sample: The line that represents Gilberto’s pledge plan after purchasing a T-shirt for each sponsor.) You can tell students that they will continue to look at linear relationships in this Problem. </li></ul>"
                     ]
                   }
                 },
@@ -2313,7 +2313,7 @@
                     "format": "html",
                     "text": [
                       "<p>Be sure to have the class verify the lengths (or times) of the race if different lengths (or times) are suggested. For each suggested answer, ask: </p>",
-                      "<ul><li>How did you determine what the length (or time) of the race should be? (Sample answers: We found the distance (or time) when the race would be a tie, and then we made the race 1 meter (or 1 second) shorter. Henri will win this race.)  </li><li>Why is that distance (or time) reasonable? (We wanted Henri to win the race and for the race to be close. If the race is 29 seconds long, Henri will be a greater distance from the starting point than Emile will be.) If no group comes up with the strategy of looking at the distance between the brothers decreasing over time, use the following question to wrap up your discussion. </li><li>One group of students looked at the distance between the brothers at the start of the race and every 5 seconds. How might this method help them find the answer? (Sample answer: The distance between them is less as time passes. If you can find the number of seconds it takes Emile to catch up to Henri, you can make the time of the race less than that time.) </li></ul>"
+                      "<ul><li>How did you determine what the length (or time) of the race should be? (Sample answers: We found the distance (or time) when the race would be a tie, and then we made the race 1 meter (or 1 second) shorter. Henri will win this race.) </li><li>Why is that distance (or time) reasonable? (We wanted Henri to win the race and for the race to be close. If the race is 29 seconds long, Henri will be a greater distance from the starting point than Emile will be.) If no group comes up with the strategy of looking at the distance between the brothers decreasing over time, use the following question to wrap up your discussion. </li><li>One group of students looked at the distance between the brothers at the start of the race and every 5 seconds. How might this method help them find the answer? (Sample answer: The distance between them is less as time passes. If you can find the number of seconds it takes Emile to catch up to Henri, you can make the time of the race less than that time.) </li></ul>"
                     ]
                   }
                 },
@@ -2423,7 +2423,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<ul><li>How does the starting point of each brother in the race show up in the graph? (It is the y-intercept. 45 for Henri and 0 for Emile.)</li><li>How does the starting point of each brother in the race show up in the graph? (It is the y-intercept. 45 for Henri and 0 for Emile.)</li><li>What expression represents Emile’s race? Henri’s? (Students may need to use words first, then move to symbols. For Emile: He walks 2.5 meters every second. 2.5 x t, 2.5t, or 2.5t + 0. For Henri: He gets a 45-meter head start and walks 1 meter every second. 45 + 1t, 1t + 45, or 45 + t.)</li><li>What does the vertical (up and down) difference between the two lines on the graph tell you? (The vertical difference tells you how far apart the brothers are at that moment in time. It shows that the difference is 45 meters at t = 0 and that the distance between them gets smaller as Emile catches up to Henri. At 20 seconds, they are 15 meters apart.)  </li></ul>"
+                      "<ul><li>How does the starting point of each brother in the race show up in the graph? (It is the y-intercept. 45 for Henri and 0 for Emile.)</li><li>How does the starting point of each brother in the race show up in the graph? (It is the y-intercept. 45 for Henri and 0 for Emile.)</li><li>What expression represents Emile’s race? Henri’s? (Students may need to use words first, then move to symbols. For Emile: He walks 2.5 meters every second. 2.5 x t, 2.5t, or 2.5t + 0. For Henri: He gets a 45-meter head start and walks 1 meter every second. 45 + 1t, 1t + 45, or 45 + t.)</li><li>What does the vertical (up and down) difference between the two lines on the graph tell you? (The vertical difference tells you how far apart the brothers are at that moment in time. It shows that the difference is 45 meters at t = 0 and that the distance between them gets smaller as Emile catches up to Henri. At 20 seconds, they are 15 meters apart.) </li></ul>"
                     ]
                   }
                 },
@@ -2852,11 +2852,11 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Reflecting on Student Learning  </p>",
-                      "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                      "<p>Reflecting on Student Learning </p>",
+                      "<p>Use the following questions to assess student understanding at the end of the lesson. </p>",
                       "<ul><li>What evidence do I have that students understand the Now What Do You Know questions?</li></ul>",
                       "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
-                      "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                      "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
                     ]
                   }
                 }
@@ -3195,8 +3195,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Suggested Questions  </strong></p>",
-                        "<ul><li>What is the amount raised per kilometer under each plan? (Plan 1: +5 dollars per kilometer; Plan 2: -1 dollar per kilometer; Plan 3: +0 dollars per kilometer)   </li><li>How does each rate appear in a table? In a graph? In an equation? (In a table, the rate is the constant change in the amount of money raised when the number of kilometers increases by 1. In a graph, the rate is the steepness of the line. In an equation, the rate is the coefficient of x.)  </li><li>What information does the y-intercept represent in each plan? (The y-intercept represents the amount of money a sponsor donates for 0 kilometers walked. If the person did not walk at all, he or she would still raise an amount of money equal to the y-intercept.)   </li><li>Do the plans make sense? Explain. (Answers may vary. Sample answers: Plan 1 makes sense because the walker is asking each sponsor to donate $5 per kilometer and then gives the sponsor something that costs $3, such as a T-shirt. Plan 2 does not make sense because the amount of money raised should not decrease as the number of kilometers walked increases. Plan 3 makes sense because the walker raises $2 from each sponsor regardless of the distance walked, which is similar to Leanne’s plan in Problem 1.3.)  </li></ul>"
+                        "<p><strong>Suggested Questions </strong></p>",
+                        "<ul><li>What is the amount raised per kilometer under each plan? (Plan 1: +5 dollars per kilometer; Plan 2: -1 dollar per kilometer; Plan 3: +0 dollars per kilometer)  </li><li>How does each rate appear in a table? In a graph? In an equation? (Ina table, the rate is the constant change in the amount of money raised when the number of kilometers increases by 1. In a graph, the rate is the steepness of the line. In an equation, the rate is the coefficient of x.) </li><li>What information does the y-intercept represent in each plan? (The y-intercept represents the amount of money a sponsor donates for0 kilometers walked. If the person did not walk at all, he or she would still raise an amount of money equal to the y-intercept.)  </li><li>Do the plans make sense? Explain. (Answers may vary. Sample answers: Plan 1 makes sense because the walker is asking each sponsor to donate $5 per kilometer and then gives the sponsor something that costs $3, such as a T-shirt. Plan 2 does not make sense because the amount of money raised should not decrease as the number of kilometers walked increases. Plan 3 makes sense because the walker raises $2 from each sponsor regardless of the distance walked, which is similar to Leanne’s plan in Problem 1.3.) </li></ul>"
                       ]
                     }
                   },
@@ -3220,9 +3220,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Students should be making the connection between a specific solution of an equation and the more general relationship between two variables for the related equation. They should see the relationship between equations, such as y = 5x - 3 and the following equations: 12 = 5x - 3, -8 = 5x - 3, and 27 = 5x - 3.   </p>",
-                        "<ul><li>How are the equations 12 = 5x - 3, -8 = 5x - 3, and 27 = 5x - 3 related to y = 5x - 3? (In each equation, you are given the value of y and are looking for the corresponding value of x for that solution.)   </li><li>How can you find the missing value of x? (You can use a table or a graph to find the y-value of that row of the table or the y-coordinate of that point on the line.)   </li></ul>",
-                        "<p>If needed, you can repeat some of the questions from the Explore that help students sort out the solutions of an equation.   </p>",
+                        "<p>Students should be making the connection between a specific solution of an equation and the more general relationship between two variables for the related equation. They should see the relationship between equations, such as y = 5x - 3 and the following equations: 12 = 5x - 3, -8 = 5x - 3, and 27 = 5x - 3.  </p>",
+                        "<ul><li>How are the equations 12 = 5x - 3, -8 = 5x - 3, and 27 = 5x - 3 related to y = 5x - 3? (In each equation, you are given the value of y and are looking for the corresponding value of x for that solution.)  </li><li>How can you find the missing value of x? (You can use a table or a graph to find the y-value of that row of the table or the y-coordinate of that point on the line.)  </li></ul>",
+                        "<p>If needed, you can repeat some of the questions from the Explore that help students sort out the solutions of an equation.  </p>",
                         "<p>You may want to draw the line and then label several points with their coordinates. Make a table of values. Display Teaching Aid 2.3C: Graph of y = 5x -3. Put the corresponding equation next to the coordinates to show that it is a true statement for these particular values of x and y. This will help students see the connection between finding solutions using a graph, table, and equation. </p>"
                       ]
                     }
@@ -3253,8 +3253,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Check for Understanding</strong></p>",
-                        "<p>Display Teaching Aid 2.3D: Troy’s Calculator. Troy is working with the equation y = 100 - 3x. He is trying to find a value of x that corresponds to y = 22. He writes the following question: “What is x if 100 - 3x = 22?”  </p>",
-                        "<ul><li>Explain how Troy can use the following table or graph to answer this question.   </li></ul>"
+                        "<p>Display Teaching Aid 2.3D: Troy’s Calculator. Troy is working with the equation y = 100 - 3x. He is trying to find a value of x that corresponds to y = 22. He writes the following question: “What is x if 100 - 3x = 22?” </p>",
+                        "<ul><li>Explain how Troy can use the following table or graph to answer this question.  </li></ul>"
                       ]
                     }
                   },
@@ -3289,11 +3289,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning  </strong></p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<p><strong>Reflecting on Student Learning </strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson. </p>",
                         "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li></ul>",
                         "<ol><li>Where did my students get stuck? </li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
-                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
                       ]
                     }
                   }
@@ -3395,7 +3395,7 @@
                       "text": [
                           "<p><strong>Launch (Getting Started)</strong></p>",
                           "Connecting to Prior Knowledge",
-                          "<p>Display <strong>Teaching Aid 3.1</strong>. Tell students that the graph and table are for Alana’s pledge plan, which is represented by the equation <em>A</em> = 5 + 0.5<em>d</em>, where <em>A</em> is the amount of money Alana collects from each sponsor for walking <em>d</em> kilometers</p>"
+                          "<p>Display <strong>Teaching Aid 3.1</strong>. Tell students that the graphand table are for Alana’s pledge plan, which is represented by the equation<em>A</em> = 5 + 0.5<em>d</em>, where <em>A</em> is the amount of money Alana collects from each sponsor for walking <em>d</em> kilometers</p>"
                         ]
                     }
                   },
@@ -3458,9 +3458,9 @@
                       "text": [
                         "A = 5 + 0.5d",
                         "<p><strong>Suggested Questions </strong> </p>",
-                        "<ul><li>How are the points (3, 6.5) and (30, 20) related to the equation A = 5 + 0.5d? (The point (3, 6.5) means that d = 3 and A = 6.5, so 6.5 = 5 + 0.5(3) is a true statement. Similarly, for (30, 20), 20 = 5 + 0.5(30) is also true.) </li><li>We say that (3, 6.5) and (30, 20) are solutions to the equation A = 5 + 0.5d. Find another point on the line whose coordinates are a solution to the equation. (Be sure students explain why they are solutions—substitute the values into the equation and check if the resulting equation is true. Students can find other solutions by choosing a value for d or A and finding the corresponding value of the other variable.) </li><li>Do you think every point on the line corresponds to a solution to the equation? (Yes, although some values may not be realistic. For example, (100, 55) is not realistic because 100 km is an unreasonable distance for a student to walk in a walkathon.)  </li></ul>",
+                        "<ul><li>How are the points (3, 6.5) and (30, 20) related to the equation A = 5 + 0.5d? (The point (3, 6.5) means that d = 3 and A = 6.5, so6.5 = 5 + 0.5(3) is a true statement. Similarly, for (30, 20), 20 = 5 + 0.5(30) is also true.) </li><li>We say that (3, 6.5) and (30, 20) are solutions to the equationA = 5 + 0.5d. Find another point on the line whose coordinates area solution to the equation. (Be sure students explain why they are solutions—substitute the values into the equation and check if the resulting equation is true. Students can find other solutions by choosing a value for d or A and finding the corresponding value of the other variable.) </li><li>Do you think every point on the line corresponds to a solution to the equation? (Yes, although some values may not be realistic. For example, (100, 55) is not realistic because 100 km is an unreasonable distance for a student to walk in a walkathon.)  </li></ul>",
                         "<p>Take one or two of the points suggested by students and ask:   </p>",
-                        "<ul><li>How can you locate this point on the line? (Draw the vertical and horizontal lines corresponding to the coordinates of the point.)  </li><li>Find a pair of corresponding values in the table that are solutions to the equation. (Students may have to extend the table.)   </li><li>Write two questions about Alana’s pledge plan that could be answered by the coordinates of the point (14, 12). (Students can say either “How far did Alana walk if a sponsor donates +12?” or “How much money would a sponsor donate if Alana walked 14 kilometers?”)   </li><li>How can you use the equation for Alana’s plan to check the answer to the question you made up? (You can substitute d = 14 and A = 12 into the equation A = 5 + 0.5d. If the resulting equation is true, then (14, 12) is a solution.)   </li><li>How can you use a graph to find the number of kilometers that Alana walked if a sponsor donated $17? (You go to 17 on the vertical axis and move straight across horizontally until you intersect the line. Then, move directly down until you intersect the horizontal axis. The value you hit on the horizontal axis is the number of kilometers walked.)   </li><li>How can you use a graph to solve 20 = 5 + 0.5d? What would the answer mean? (Go to 20 on the vertical axis and move horizontally until you intersect the line. Read the “d” value at that point. This gives the distance Alana must walk in order to raise $20 from each sponsor.)  </li><li>What happens if you choose a point that is not visible on this section of the graph, such as (70, 40)? Does this point lie on the line? Explain. (Students might suggest extending the line. Some might suggest checking to see if the coordinates of the point make the equation a true statement.)   </li></ul>"
+                        "<ul><li>How can you locate this point on the line? (Draw the vertical and horizontal lines corresponding to the coordinates of the point.) </li><li>Find a pair of corresponding values in the table that are solutions to the equation. (Students may have to extend the table.)  </li><li>Write two questions about Alana’s pledge plan that could be answered by the coordinates of the point (14, 12). (Students can say either “How far did Alana walk if a sponsor donates +12?” or “How much money would a sponsor donate if Alana walked 14 kilometers?”)  </li><li>How can you use the equation for Alana’s plan to check the answer to the question you made up? (You can substitute d = 14 and A = 12 into the equation A = 5 + 0.5d. If the resulting equation is true, then (14, 12) is a solution.)  </li><li>How can you use a graph to find the number of kilometers that Alana walked if a sponsor donated $17? (You go to 17 on the vertical axis and move straight across horizontally until you intersect the line. Then, move directly down until you intersect the horizontal axis. The value you hit on the horizontal axis is the number of kilometers walked.)  </li><li>How can you use a graph to solve 20 = 5 + 0.5d? What would the answer mean? (Go to 20 on the vertical axis and move horizontally until you intersect the line. Read the “d” value at that point. This gives the distance Alana must walk in order to raise $20 from each sponsor.) </li><li>What happens if you choose a point that is not visible on this sectionof the graph, such as (70, 40)? Does this point lie on the line? Explain. (Students might suggest extending the line. Some might suggest checking to see if the coordinates of the point make the equation a true statement.)  </li></ul>"
                       ]
                     }
                   },
@@ -3686,7 +3686,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Emphasize that, in a given equation, the value of x (or the number of coins in each pouch) is the same. Checking the answer provides an opportunity for students to practice work with parentheses and review the order of operations. In the preceding example, to check the answers, students could write 3(1) + 3 = 2(1) + 4 or 6 = 6. They could also write 1 + 1 + 1 + 3 = 1 + 1 + 4. Review the use of parentheses if necessary. </p>",
+                        "<p>Emphasize that, in a given equation, the value of x (or the number of coins in each pouch) is the same. Checking the answer provides an opportunity for studentsto practice work with parentheses and review the order of operations. In the preceding example, to check the answers, students could write 3(1) + 3 = 2(1) + 4 or 6 = 6. They could also write 1 + 1 + 1 + 3 = 1 + 1 + 4. Review the use of parentheses if necessary. </p>",
                         "<p>This context provides an opportunity to discuss a common misunderstanding. Ask students to consider the equality 3x = 12. Suppose a student proposes that subtracting 3 from both sides will produce x = 9. Ask students to use the idea of gold coins in pouches to investigate this strategy. Moving back to the visual makes it clear that dividing, not subtracting, is the logical operation.</p>"
                       ]
                     }
@@ -3710,11 +3710,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning  </strong></p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<p><strong>Reflecting on Student Learning </strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson. </p>",
                         "<ul><li>What evidence do I have that students understand the Now What Do You Know questions?</li></ul>",
                         "<ol><li>Where did my students get stuck?</li><li>What strategies did they use? </li><li>What breakthroughs did my students have today? </li></ol>",
-                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
                       ]
                     }
                   }
@@ -3865,7 +3865,7 @@
                       "text": [
                         "<p><strong>Suggested Questions</strong></p>",
                         "<p>For Equation 1, ask:</p>",
-                        "<ul><li>What is your equation? (4x + 2 = 18 or 2(2x + 1) = 18)</li><li>What was the first thing you did with the pictorial equation to begin solving it? (Using the first method above, the first step would be to take away 2 coins from each side.)</li><li>How can you show this with your equation? (Subtract 2 from each side. This results in 4x + 2 - 2 = 18 - 2 or 4x = 16.)</li><li>What did you do next? (Split the coins into four equal sets.)</li><li>How can you show this with your equation? (4x = 4(4))  </li><li>What was your next step? (Set each of the 4 pouches equal to one of the 4 sets of coins.)</li><li>How can you show this with your equation? (Divide by 4 on each side. So, x = 4.) </li><li>How can you check your answer? (Using the coins and pouches, you can add up all the coins inside and outside the pouches on the left side and then check to make sure your result equals the number of coins on the right side. On the left side, there are 4 pouches, each of which we think contains 4 coins. If we are correct, there are 16 coins in the pouches. If you add those 16 coins to the 2 coins outside the pouches, the result is 18 coins on the left side. There are also 18 coins on the right side, so the answer is correct.",
+                        "<ul><li>What is your equation? (4x + 2 = 18 or 2(2x + 1) = 18)</li><li>What was the first thing you did with the pictorial equation to begin solving it? (Using the first method above, the first step would be to take away 2 coins from each side.)</li><li>How can you show this with your equation? (Subtract 2 from each side. This results in 4x + 2 - 2 = 18 - 2 or 4x = 16.)</li><li>What did you do next? (Split the coins into four equal sets.)</li><li>How can you show this with your equation? (4x = 4(4)) </li><li>What was your next step? (Set each of the 4 pouches equal to one of the 4 sets of coins.)</li><li>How can you show this with your equation? (Divide by 4 on each side. So, x = 4.) </li><li>How can you check your answer? (Using the coins and pouches, you can add up all the coins inside and outside the pouches on the left side and then check to make sure your result equals the number of coins on the right side. On the left side, there are 4 pouches, each of which we think contains 4 coins. If we are correct, there are 16 coins in the pouches. If you add those 16 coins to the 2 coins outside the pouches, the result is 18 coins on the left side. There are also 18 coins on the right side, so the answer is correct.",
                         "Or, you can substitute 4 into the equation for x. The result shows that 4 is correct.</li>",
                         "     4(4) + 2 = 18",
                         "       16 + 2 = 18",
@@ -3931,7 +3931,7 @@
                     "text": [
                       "<p>Making the Mathematics Explicit</p>",
                       "<p>To move from pouches and coins to solving equations symbolically, discuss the What If...? Situations.</p>",
-                      "<ul><li>In Situation A, what equation can we write to represent the pouches and coins code? (Various answers. The most common might be: 6x + 27 = 105.)</li><li>Using the thinking that you were using with the visual equations, how do we find the value of x. (The first step is to take away 27 coins from each side. That leaves 6 pouches on the left side and 78 coins on the right side. The second step is to divide the  coins and pouches into 6 equal groups. So, the number of coins in each pouch is 13.)</li><li>Next to your work, write down a similar method using the equation that represents this situation. (LANGUAGE)</li></ul>",
+                      "<ul><li>In Situation A, what equation can we write to represent the pouches and coins code? (Various answers. The most common might be: 6x + 27 = 105.)</li><li>Using the thinking that you were using with the visual equations, how do we find the value of x. (The first step is to take away 27 coins from each side. That leaves 6 pouches on theleft side and 78 coins on the right side. The second step is to divide the  coins and pouches into 6 equal groups. So, the number of coins in each pouch is 13.)</li><li>Next to your work, write down a similar method using the equation that represents this situation. (LANGUAGE)</li></ul>",
                       "Step 1: Subtract 27 from each side of the equation:\n                                   6<em>x</em> + 27 -27 = 205 -27\n                                                       6<em>x</em> = 78",
                       "Step 2: Divide by 6 on each side:\n                                                   6<em>x</em> = 78\n                                                      6    6\n                                                      <em>x</em> = 13",
                       "<p>As students move away from the pouches and toward symbolic statements, they may find that their experience with pouches and coins is useful for recalling strategies.</p>"
@@ -3946,9 +3946,9 @@
                     "text": [
                       "<p>In Situation B, did you draw visual equations to help you solve any of them? (Answers will vary. Some students need to think about or see the visual equations when the pouches are on both sides of the equal sign, like in #2 and #3. Other students will need to think about or see the visual equations when there is a grouping symbol [parentheses].)</p>",
                       "<p><strong>Suggested Questions</strong></p>",
-                      "<ul><li>Describe a general method for solving equations. (Generally, you want to isolate the variable [pouch] on one side of the equation and a number [coins] on the other side. To do this, you can use properties of equality or “undo” the operations until you have the variable alone on one side of the equality and a number on the other side. You use the number that the variable equals to check your solution. You substitute the number  for the value of the variable in the original equation to see if you have a true statement.)</li></ul>",
+                      "<ul><li>Describe a general method for solving equations. (Generally, you want to isolate the variable [pouch] on one side of the equation and a number [coins] on the other side. To do this, you can use properties of equality or “undo” the operations until you have the variable alone on one side of the equality and a number on the other side. You use the number that the variable equals to check your solution. You substitute the number for the value of the variable in the original equation to see if you have a true statement.)</li></ul>",
                       "<p>Students should be able to generalize that adding, subtracting, multiplying, and dividing by the same number maintains equality. Be sure to stress that they cannot multiply or divide by 0. Dividing by 0 has no meaning and multiplying by 0 would make any statement always true, so it is not a helpful strategy in finding a specific solution. For example, suppose we start with 3b = 27, which we know is true only when b = 9. Multiplying each side by 0 gives 3b * 0 = 9 * 0, or 0 * 0. This statement is true for all values of the variable, not just 9. So multiplying both sides by 0 gives an equality that is not equivalent to the original equation because it has different solutions. If you have not already addressed the common error of subtracting when dividing is needed, do so now.</p>",
-                      "<p>Review that, in a given equation, the value of <em>x</em> (or the number of coins in each pouch) is the same. Checking the answer provides an opportunity for students to practice work with parentheses and review the order of operations.</p>"
+                      "<p>Review that, in a given equation, the value of <em>x</em> (or the number of coins in each pouch) is the same. Checking the answer provides an opportunity for studentsto practice work with parentheses and review the order of operations.</p>"
                     ]
                   }
                 },
@@ -4399,7 +4399,7 @@
                         "<p>If students are puzzled as to how to proceed, ask:</p>",
                         "<ul><li>What would a visual equation with pouches and coins look like for the equation? (Answers will vary. For example, with 5x – 10 = 20, students might say that this would be 5 pouches with 10 coins, like the chips in Completely Rational, and is equal to 20 coins.)</li></ul>",
                         "Note:  Some students will need to draw pouches and coins to help solidify this connection to symbols.  Continue to allow them to do this and use them in parts of the summary to help all make connections. ",
-                        "<ul><li>What operations on x have been used to create the expressions on each side? (Addition and subtraction are used on the terms 5x and 10. Multiplication is used on 5 and x.)  </li><li>Look at the equation. What is a good starting step? (Answers will vary. Some students may divide each side of the equation by 5. Others may add or subtract 10 or 5x to each side.)  </li><li>How can you get rid of, or “undo,” each operation, but still maintain equality? (You can use the opposite, or inverse, operation. To “undo” subtraction, you add.) </li></ul>"
+                        "<ul><li>What operations on x have been used to create the expressions on each side? (Addition and subtraction are used on the terms 5x and 10. Multiplication is used on 5 and x.) </li><li>Look at the equation. What is a good starting step? (Answers will vary. Some students may divide each side of the equation by 5. Others may add or subtract 10 or 5x to each side.) </li><li>How can you get rid of, or “undo,” each operation, but still maintain equality? (You can use the opposite, or inverse, operation. To “undo” subtraction, you add.) </li></ul>"
                       ]
                     }
                   },
@@ -4446,7 +4446,7 @@
                         "<ul><li>Why did you do this at step 2?</li><li>Why did you not consider starting with a different step?</li><li>Was there a shorter way of getting to the answer? </li></ul>",
                         "<p>In the Initial Challenge Set 1, the same set of numbers is used; only the signs change (addition, subtraction, negative, and positive). This is a good opportunity to observe if students are making sense of the operations.</p>",
                         "<p><strong>Suggested Questions </strong></p>",
-                        "<ul><li>What do the equations in Initial Challenge Set 1, parts a and c have in common? (They can be associated with the same two-variable equation, 5<em>x</em> + 10 = y. The solutions (2, 20) and (-6, -20) could be found on the same line. In the first equation, <em>y</em> = 20, and we are trying to find the corresponding value of <em>x</em>. In the second equation, <em>y</em> = -20, and we are trying to find the corresponding value of <em>x</em>.)</li><li>How else could you find the corresponding values for <em>x</em>? (You could use a table or a graph.) </li><li>What about the equations in Initial Challenge Set 1, parts b and d? What do they have in common? (They can be associated with the same two-variable equation, 5<em>x</em> - 10 = <em>y</em>. In the first equation, <em>y</em> = 20, and we are trying to find the corresponding value of <em>x</em>. In the second equation, <em>y</em> = -20, and we are trying to find the corresponding value of <em>x</em>. The solutions (6, 20) and (-2, -20) could be found on the same line.)</li></ul>"
+                        "<ul><li>What do the equations in Initial Challenge Set 1, parts a and c have in common? (They can be associated with the same two-variable equation, 5<em>x</em> + 10 = y. The solutions (2, 20) and (-6, -20) could be found on the same line. In the first equation, <em>y</em> = 20, and we are trying to find the corresponding value of <em>x</em>. In the second equation, <em>y</em> = -20, and we are trying to find the corresponding value of <em>x</em>.)</li><li>How else could you find the corresponding values for <em>x</em>? (You could use a table or a graph.) </li><li>What about the equations in Initial Challenge Set 1, parts b and d? Whatdo they have in common? (They can be associated with the same two-variable equation, 5<em>x</em> - 10 = <em>y</em>. In the first equation, <em>y</em> = 20, and we are trying to find the corresponding value of <em>x</em>. In the second equation, <em>y</em> = -20, and we are trying to find the corresponding value of <em>x</em>. The solutions (6, 20) and (-2, -20) could be found on the same line.)</li></ul>"
                       ]
                     }
                   },
@@ -4487,7 +4487,7 @@
                         "<pre>          23.5 = 5<em>x</em> + -11</pre>",
                         "<pre>          34.5 = 5<em>x</em> </pre>",
                         "<pre>           6.9 = <em>x</em></pre>",
-                        "<ul><li>Describe how you could use a graph or a table to find the solutions. (To use a graph, you could find the given y‐value on the vertical axis. Move horizontally until you reach the line, and then move vertically until you reach the horizontal axis. The value you hit on the horizontal axis will be the value of x. To use a table, find the given y‐value in the column for the dependent variable. Then find the corresponding value in the independent variable column. This value will be the value of <em>x</em>.) </li><li>Consider the equations <em>y<sub>1</sub></em> = 5<em>x</em> + 11 and <em>y<sub>2</sub></em> = 2<em>x</em>.  Use a symbolic method to find <em>x</em> when <em>y<sub>1</sub></em> = <em>y<sub>2</sub></em>/li></ul>",
+                        "<ul><li>Describe how you could use a graph or a table to find the solutions.(To use a graph, you could find the given y‐value on the vertical axis. Move horizontally until you reach the line, and then move vertically until you reach the horizontal axis. The value you hit on the horizontal axis will be the value of x. To use a table, find the given y‐value in the column for the dependent variable. Then find the corresponding value in the independent variable column. This value will be the value of <em>x</em>.) </li><li>Consider the equations <em>y<sub>1</sub></em> = 5<em>x</em> + 11 and <em>y<sub>2</sub></em> = 2<em>x</em>.  Use a symbolic method to find <em>x</em> when <em>y<sub>1</sub></em> = <em>y<sub>2</sub></em>/li></ul>",
                         "<pre>                  <em>y<sub>1</sub></em> = <em>y<sub>2</sub></em> </pre>",
                         "<pre>             5<em>x</em> + 11 = 2<em>x</em> </pre>",
                         "<pre>                    11 = -3<em>x</em> </pre>",
@@ -4520,7 +4520,7 @@
                         "<p>Ask students to reflect on the discussion and answer the Now What Do You Know?</p>",
                         "<p><strong>Describe the strategies you can use to solve linear equations using the properties of operations and equality. </strong></p>",
                         "<p>For symbolic methods, students’ explanations should include keeping expressions equivalent on both sides of the equal sign (e.g., adding 2 to each side, dividing each side by 3, etc.). Students should also include something about using order of operations correctly, although there are some exceptions (e.g., factoring as a first step). Students should also notice that if applying the Distributive Property is possible, then it may simplify the process.</p>",
-                        "<p>Tables and graphs can also be used to solve linear equations. For example, the equation 2x – 5 = x + 7 can be solved by finding the point of intersection of y1 = 2x – 5 and y2 = x + 7 on a graphing calculator. Sometimes it is quicker to use symbolic methods rather than spend time entering equations into a calculator. However, if calculators are already being used, and if several questions of this type are being asked, then tables or graphs might be more efficient.",
+                        "<p>Tables and graphs can also be used to solvelinear equations. For example, the equation2x – 5 = x + 7 can be solved by findingthe point of intersection of y1 = 2x – 5and y2 = x + 7 on a graphing calculator. Sometimes it is quicker to use symbolicmethods rather than spend time enteringequations into a calculator. However, ifcalculators are already being used, and ifseveral questions of this type are being asked,then tables or graphs might be more efficient.",
                         "See answers to the Problem for more information about the strategies and embedded mathematics. ",
                         "<p>Note:  Students might want to discuss the Did You Know in the student edition.  They looked at a situation in Grade 7 in the unit Stretching and Shrinking where they found the height of a mystery teacher.  This will add to their thinking about that situation</p>"
                       ]
@@ -5152,11 +5152,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning  </strong></p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<p><strong>Reflecting on Student Learning </strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson. </p>",
                         "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li></ul>",
                         "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
-                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
                       ]
                     }
                   }
@@ -5510,11 +5510,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Reflecting on Student Learning  </strong></p>",
-                        "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+                        "<p><strong>Reflecting on Student Learning </strong></p>",
+                        "<p>Use the following questions to assess student understanding at the end of the lesson. </p>",
                         "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li></ul>",
                         "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
-                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?  </li></ul>"
+                        "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
                       ]
                     }
                   }

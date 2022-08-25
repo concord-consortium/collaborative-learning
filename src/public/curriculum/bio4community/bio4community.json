@@ -12,6 +12,7 @@
   "config": {
     "placeholderText": "Document your thoughts",
     "autoSectionProblemDocuments": false,
+    "defaultDocumentTitle": "MyEvidence",
     "defaultDocumentTemplate": {
       "tiles": [
         {
