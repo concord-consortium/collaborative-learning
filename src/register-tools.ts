@@ -3,11 +3,12 @@ import "./models/tools/unknown-content";
 import "./models/tools/placeholder/placeholder-registration";
 
 const gToolRegistration: Record<string, () => void> = {
+  "DataCard": () => import(/* webpackChunkName: "DataCard" */"./plugins/data-card-tool/data-card-registration"),
+  "Dataflow": () => import(/* webpackChunkName: "Dataflow" */"./plugins/dataflow-tool/dataflow-registration"),
   "Diagram": () => Promise.all([
     import(/* webpackChunkName: "Diagram" */"./plugins/diagram-viewer/diagram-registration"),
     import(/* webpackChunkName: "SharedVariables" */"./plugins/shared-variables/shared-variables-registration")
   ]),
-  "Dataflow": () => import(/* webpackChunkName: "Dataflow" */"./plugins/dataflow-tool/dataflow-registration"),
   "Drawing": () => import(/* webpackChunkName: "Drawing" */"./plugins/drawing-tool/drawing-registration"),
   "Geometry": () => Promise.all([
     import(/* webpackChunkName: "Geometry" */"./models/tools/geometry/geometry-registration"),

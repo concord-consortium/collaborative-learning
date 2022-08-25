@@ -444,7 +444,7 @@ export const DataSet = types.model("DataSet", {
         }
         const attribute = self.attributes[newIndex as number];
         for (let i = attribute.values.length; i < self.cases.length; ++i) {
-          attribute.values.push(undefined);
+          attribute.values.push("");
         }
       },
 

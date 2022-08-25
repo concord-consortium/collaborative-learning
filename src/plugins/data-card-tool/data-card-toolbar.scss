@@ -1,0 +1,61 @@
+@import "../../components/vars.sass";
+
+.data-card-toolbar {
+  position: absolute;
+  border: $toolbar-border;
+  border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
+  z-index: $toolbar-z-index;
+
+  &.disabled {
+    display: none;
+  }
+
+  .toolbar-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: $toolbar-button-height;
+    background-color: $workspace-teal-light-9;
+
+    &.disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .toolbar-button {
+      position: relative;
+      width: $toolbar-button-width;
+      height: $toolbar-button-height;
+      background-color: $workspace-teal-light-9;
+
+      &:first-child {
+        border-bottom-left-radius: $toolbar-border-radius;
+      }
+
+      &:last-child {
+        border-bottom-right-radius: $toolbar-border-radius;
+      }
+
+      &:hover {
+        background-color: $workspace-teal-light-6;
+      }
+
+      &:active {
+        background-color: $workspace-teal-light-4;
+
+        svg path {
+          fill: $workspace-teal-dark-1;
+        }
+      }
+
+      input {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: $toolbar-button-width;
+        height: $toolbar-button-height;
+      }
+    }
+  }
+}
