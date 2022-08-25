@@ -29,6 +29,7 @@ interface IUseDataSet {
   readOnly: boolean;
   inputRowId: React.MutableRefObject<string>;
   selectedCell: React.MutableRefObject<TPosition>;
+  rows: TRow[];
   RowLabelHeader: React.FC<any>;
   RowLabelFormatter: React.FC<any>;
   changeHandlers: IContentChangeHandlers;
@@ -37,7 +38,8 @@ interface IUseDataSet {
 }
 export const useDataSet = ({
   gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, readOnly,
-  inputRowId, selectedCell, RowLabelHeader, RowLabelFormatter, changeHandlers, measureText, onShowExpressionsDialog
+  inputRowId, selectedCell, rows, RowLabelHeader, RowLabelFormatter,
+  changeHandlers, measureText, onShowExpressionsDialog
 }: IUseDataSet) => {
   const { onAddRows, onUpdateRow } = changeHandlers;
   const modelRef = useCurrent(model);
@@ -92,9 +94,6 @@ export const useDataSet = ({
 
   const hasLinkableRows = getContent().hasLinkableCases(dataSet);
 
-  const { rows, rowKeyGetter, rowClass } = useRowsFromDataSet({
-                                            dataSet, readOnly, inputRowId: inputRowId.current,
-                                            rowChanges, context: gridContext});
   const formatter = useNumberFormat();
   const onRowsChange = (_rows: TRow[]) => {
     // for now, assume that all changes are single cell edits
@@ -128,6 +127,6 @@ export const useDataSet = ({
     onColumnResize(idx, width);
     triggerColumnChange();
   }, [onColumnResize, triggerColumnChange]);
-  return { hasLinkableRows, columns, rows, rowKeyGetter, rowClass,
+  return { hasLinkableRows, columns,
             onColumnResize: handleColumnResize, onRowsChange, onSelectedCellChange};
 };

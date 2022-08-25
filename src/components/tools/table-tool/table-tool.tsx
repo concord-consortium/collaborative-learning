@@ -18,6 +18,7 @@ import { useModelDataSet } from "./use-model-data-set";
 import { useRowLabelColumn } from "./use-row-label-column";
 import { useTableTitle } from "./use-table-title";
 import { useToolApi } from "./use-tool-api";
+import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { useMeasureText } from "../hooks/use-measure-text";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
@@ -42,17 +43,25 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     return onRequestUniqueTitle(modelRef.current.id);
   }, [modelRef, onRequestUniqueTitle]);
 
+  const [showRowLabels, setShowRowLabels] = useState(false);
+  const {
+    ref: gridRef, gridContext, inputRowId, selectedCell, getSelectedRows, ...gridProps
+  } = useGridContext({ modelId: model.id, showRowLabels, triggerColumnChange });
+
+  const { rows, ...rowProps } = useRowsFromDataSet({
+    dataSet: dataSet.current, readOnly: readOnly || false, inputRowId: inputRowId.current,
+    rowChanges, context: gridContext});
+
   const getContentHeight = useCallback(() => {
     return getTableContentHeight({
       readOnly,
-      dataSet: dataSet.current,
+      rows,
       rowHeight,
       // dataRows: dataSet.current.cases.length,
       hasExpressions: getContent().hasExpressions,
       padding: 10 + (modelRef.current.display === "teacher" ? 20 : 0)
     });
-  // }, [dataSet, getContent, modelRef, readOnly]);
-  }, [dataSet, rowHeight, getContent, modelRef, readOnly]);
+  }, [rows, rowHeight, getContent, modelRef, readOnly]);
 
   const heightRef = useCurrent(height);
   const handleRequestRowHeight = useCallback((options: { height?: number, deltaHeight?: number }) => {
@@ -65,15 +74,11 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   }, [heightRef, modelRef, onRequestRowHeight]);
 
   const changeHandlers = useContentChangeHandlers({
-    model, dataSet: dataSet.current, rowHeight,
+    model, dataSet: dataSet.current, rows, rowHeight,
     onRequestRowHeight: handleRequestRowHeight, triggerColumnChange, triggerRowChange
   });
   const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile, onUnlinkGeometryTile } = changeHandlers;
 
-  const [showRowLabels, setShowRowLabels] = useState(false);
-  const {
-    ref: gridRef, gridContext, inputRowId, selectedCell, getSelectedRows, ...gridProps
-  } = useGridContext({ modelId: model.id, showRowLabels, triggerColumnChange });
   const measureHeaderText = useMeasureText(defaultBoldFont);
   const { getTitle, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, dataSet: dataSet.current, readOnly,
@@ -104,7 +109,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     showExpressionsDialog();
   };
   const { hasLinkableRows, ...dataGridProps } = useDataSet({
-    gridRef, gridContext, model, dataSet: dataSet.current, columnChanges, triggerColumnChange,
+    gridRef, gridContext, model, dataSet: dataSet.current, columnChanges, triggerColumnChange, rows,
     rowChanges, triggerRowChange, readOnly: !!readOnly, changeHandlers, measureText: measureHeaderText,
     selectedCell, inputRowId, ...rowLabelProps, onShowExpressionsDialog: handleShowExpressionsDialog });
 
@@ -147,8 +152,8 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
           isLinkEnabled={isLinkEnabled} getLinkIndex={getLinkIndex} onLinkGeometryClick={showLinkGeometryDialog}
           getTitle={getTitle} titleCellWidth={titleCellWidth}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
-        <ReactDataGrid ref={gridRef} selectedRows={getSelectedRows()} rowHeight={rowHeight}
-          {...gridProps} {...gridModelProps} {...dataGridProps} />
+        <ReactDataGrid ref={gridRef} selectedRows={getSelectedRows()} rows={rows} rowHeight={rowHeight}
+          {...gridProps} {...gridModelProps} {...dataGridProps} {...rowProps} />
       </div>
     </div>
   );

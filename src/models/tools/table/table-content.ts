@@ -14,6 +14,7 @@ import { SharedModelType } from "../shared-model";
 import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import { uniqueId } from "../../../utilities/js-utils";
+import { TRow } from "src/components/tools/table-tool/table-types";
 
 export const kTableToolID = "Table";
 export const kCaseIdName = "__id__";
@@ -35,17 +36,14 @@ export function defaultTableContent(props?: IDefaultContentOptions) {
 }
 
 interface IGetTableContentHeight {
-  // dataRows: number;
-  // rowHeight?: number;
-  dataSet: IDataSet;
+  rows: TRow[];
   rowHeight: (args: any) => number;
   readOnly?: boolean;
   hasExpressions?: boolean;
   padding?: number;
 }
 export const getTableContentHeight = ({
-  dataSet, rowHeight, readOnly, hasExpressions, padding
-  // dataRows, rowHeight, readOnly, hasExpressions, padding
+  rows, rowHeight, readOnly, hasExpressions, padding
 }: IGetTableContentHeight) => {
   const kDefaultRowHeight = 34;
   const kDefaultPadding = 10;
@@ -53,12 +51,8 @@ export const getTableContentHeight = ({
   const inputRows = readOnly ? 0 : 1;
   const kBorders = 2 * 2;
   const _padding = 2 * (padding || kDefaultPadding);
-  console.log(`rows`, dataSet.simpleRows);
-  // const rowHeights = dataSet.cases.length * kDefaultRowHeight;
-  // const rowHeights = dataRows * kDefaultRowHeight;
-  // sum of row height
   let rowHeights = 0;
-  dataSet.simpleRows.forEach(row => {
+  rows.forEach(row => {
     rowHeights += rowHeight({row});
   });
   return (headerRows + inputRows) * kDefaultRowHeight + rowHeights + kBorders + _padding;

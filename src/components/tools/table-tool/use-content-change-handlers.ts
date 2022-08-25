@@ -7,7 +7,7 @@ import { getTableContentHeight, TableContentModelType } from "../../../models/to
 import { isLinkableValue } from "../../../models/tools/table/table-model-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { uniqueId, uniqueName } from "../../../utilities/js-utils";
-import { TColumn } from "./table-types";
+import { TColumn, TRow } from "./table-types";
 
 export interface IContentChangeHandlers {
   onSetTableTitle: (title: string) => void;
@@ -25,6 +25,7 @@ export interface IContentChangeHandlers {
 interface IProps {
   model: ToolTileModelType;
   dataSet: IDataSet;
+  rows: TRow[];
   readOnly?: boolean;
   rowHeight: (args: any) => number;
   onRequestRowHeight: (options: { height?: number, deltaHeight?: number }) => void;
@@ -32,7 +33,7 @@ interface IProps {
   triggerRowChange: () => void;
 }
 export const useContentChangeHandlers = ({
-  model, dataSet, readOnly, rowHeight, onRequestRowHeight, triggerColumnChange, triggerRowChange
+  model, dataSet, rows, readOnly, rowHeight, onRequestRowHeight, triggerColumnChange, triggerRowChange
   // model, dataSet, readOnly, onRequestRowHeight, triggerColumnChange, triggerRowChange
 }: IProps): IContentChangeHandlers => {
   const modelRef = useCurrent(model);
@@ -56,12 +57,10 @@ export const useContentChangeHandlers = ({
 
   const requestRowHeight = useCallback(() => {
     const height = getTableContentHeight({
-                    // dataRows: dataSet.cases.length, readOnly, hasExpressions: getContent().hasExpressions
-                    dataSet, readOnly, rowHeight, hasExpressions: getContent().hasExpressions
+                    rows, readOnly, rowHeight, hasExpressions: getContent().hasExpressions
                   });
     onRequestRowHeight({ height });
-  }, [dataSet, getContent, rowHeight, onRequestRowHeight, readOnly]);
-// }, [dataSet.cases.length, getContent, onRequestRowHeight, readOnly]);
+  }, [rows, getContent, rowHeight, onRequestRowHeight, readOnly]);
 
   /*
    * content change functions
