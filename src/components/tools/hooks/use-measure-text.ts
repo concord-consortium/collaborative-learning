@@ -17,3 +17,44 @@ export const useMeasureText = (font = defaultFont) => {
     return measureText(text, font);
   }, [font]);
 };
+
+export const measureTextLines = (text: string, width: number, font = defaultFont) => {
+  const context = canvas.getContext("2d");
+  if (!context) { return 1; }
+  context && font && (context.font = font);
+  let lines = 1;
+  let startOfLine = 0;
+  let startOfWord = 0;
+  let currentIndex = 0;
+  while (currentIndex < text.length) {
+    // We haven't hit a line break yet
+    if (context.measureText(text.slice(startOfLine, currentIndex)).width < width) {
+      if (text[currentIndex] === " ") {
+        startOfWord = currentIndex + 1;
+      }
+      currentIndex++;
+    // We hit the edge of the line
+    } else {
+      // The line is one big word so we can't break it
+      if (startOfWord === startOfLine) {
+        while (currentIndex < text.length) {
+          // We found a new word, so start a new line with it
+          if (text[currentIndex] === " ") {
+            startOfLine = startOfWord = ++currentIndex;
+            break;
+          // We haven't found the end of the long word, keep looking
+          } else {
+            currentIndex++;
+          }
+        }
+      // We've encountered other words on this line, start the next line at the beginning of the last word
+      } else {
+        startOfLine = startOfWord;
+      }
+      if (currentIndex < text.length) {
+        lines++;
+      }
+    }
+  }
+  return lines;
+};

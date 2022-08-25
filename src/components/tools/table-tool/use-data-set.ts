@@ -10,7 +10,6 @@ import { IGridContext, TColumn, TPosition, TRow } from "./table-types";
 import { useColumnsFromDataSet } from "./use-columns-from-data-set";
 import { IContentChangeHandlers } from "./use-content-change-handlers";
 import { useNumberFormat } from "./use-number-format";
-import { useRowsFromDataSet } from "./use-rows-from-data-set";
 
 const isCellSelectable = (position: TPosition, columns: TColumn[], readOnly: boolean) => {
   return (position.idx !== 0) &&
@@ -37,7 +36,7 @@ interface IUseDataSet {
   onShowExpressionsDialog?: (attrId?: string) => void;
 }
 export const useDataSet = ({
-  gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, readOnly,
+  gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, triggerRowChange, readOnly,
   inputRowId, selectedCell, rows, RowLabelHeader, RowLabelFormatter,
   changeHandlers, measureText, onShowExpressionsDialog
 }: IUseDataSet) => {

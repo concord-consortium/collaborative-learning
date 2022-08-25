@@ -1,5 +1,6 @@
 import classNames from "classnames";
 import { useCallback, useState } from "react";
+import { measureTextLines } from "../hooks/use-measure-text";
 import { useCurrent } from "../../../hooks/use-current";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
@@ -21,16 +22,15 @@ export const useModelDataSet = (model: ToolTileModelType) => {
 
   const content = getContent();
   const className = classNames("rdg-light", { "show-expressions": content.hasExpressions });
-  // const rowHeight = kRowHeight;
+
   const textHeight = (cellId: string, text: string) => {
     if (text) {
-      const height = Math.ceil(text.length / 8) * kRowHeight;
+      const height = measureTextLines(text, 80) * kRowHeight;
       return height;
     }
     return kRowHeight;
   };
   const rowHeight = (args: any) => {
-    console.log(`rowHeight args`, args);
     let height = kRowHeight;
     if (args.row) {
       for (const [cellId, text] of Object.entries(args.row)) {
@@ -41,6 +41,7 @@ export const useModelDataSet = (model: ToolTileModelType) => {
     }
     return height;
   };
+
   const headerRowHeight = content.hasExpressions ? 2 * kRowHeight : kRowHeight;
   return { dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange,
             className, rowHeight, headerRowHeight, onSetTableTitle: setTableTitle };

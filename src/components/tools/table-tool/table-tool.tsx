@@ -49,7 +49,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   } = useGridContext({ modelId: model.id, showRowLabels, triggerColumnChange });
 
   const { rows, ...rowProps } = useRowsFromDataSet({
-    dataSet: dataSet.current, readOnly: readOnly || false, inputRowId: inputRowId.current,
+    dataSet: dataSet.current, readOnly: !!readOnly, inputRowId: inputRowId.current,
     rowChanges, context: gridContext});
 
   const getContentHeight = useCallback(() => {
@@ -57,7 +57,6 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
       readOnly,
       rows,
       rowHeight,
-      // dataRows: dataSet.current.cases.length,
       hasExpressions: getContent().hasExpressions,
       padding: 10 + (modelRef.current.display === "teacher" ? 20 : 0)
     });
