@@ -26,12 +26,14 @@ interface IProps {
   model: ToolTileModelType;
   dataSet: IDataSet;
   readOnly?: boolean;
+  rowHeight: (args: any) => number;
   onRequestRowHeight: (options: { height?: number, deltaHeight?: number }) => void;
   triggerColumnChange: () => void;
   triggerRowChange: () => void;
 }
 export const useContentChangeHandlers = ({
-  model, dataSet, readOnly, onRequestRowHeight, triggerColumnChange, triggerRowChange
+  model, dataSet, readOnly, rowHeight, onRequestRowHeight, triggerColumnChange, triggerRowChange
+  // model, dataSet, readOnly, onRequestRowHeight, triggerColumnChange, triggerRowChange
 }: IProps): IContentChangeHandlers => {
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
@@ -54,10 +56,12 @@ export const useContentChangeHandlers = ({
 
   const requestRowHeight = useCallback(() => {
     const height = getTableContentHeight({
-                    dataRows: dataSet.cases.length, readOnly, hasExpressions: getContent().hasExpressions
+                    // dataRows: dataSet.cases.length, readOnly, hasExpressions: getContent().hasExpressions
+                    dataSet, readOnly, rowHeight, hasExpressions: getContent().hasExpressions
                   });
     onRequestRowHeight({ height });
-  }, [dataSet.cases.length, getContent, onRequestRowHeight, readOnly]);
+  }, [dataSet, getContent, rowHeight, onRequestRowHeight, readOnly]);
+// }, [dataSet.cases.length, getContent, onRequestRowHeight, readOnly]);
 
   /*
    * content change functions

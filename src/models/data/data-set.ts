@@ -3,6 +3,7 @@ import { applyAction, getEnv, Instance, ISerializedActionCall,
           onAction, types, getSnapshot, SnapshotOut } from "mobx-state-tree";
 import { Attribute, IAttribute, IAttributeCreation, IValueType } from "./attribute";
 import { uniqueId, uniqueSortableId } from "../../utilities/js-utils";
+import { useRowsFromDataSet } from "src/components/tools/table-tool/use-rows-from-data-set";
 
 export const newCaseId = uniqueSortableId;
 
@@ -68,6 +69,22 @@ export const DataSet = types.model("DataSet", {
       caseIDMap[aCase.__id__] = index;
     });
     return caseIDMap;
+  },
+  // Returns a list of row objects like what is expected by react-data-grid's rowHeight function
+  // Each row is a dictionary like { cellId: cellValue }
+  get simpleRows() {
+    const rows = [];
+    for (let i = 0; i < self.cases.length; i++) {
+      rows.push({} as { [id: string]: any });
+    }
+    for (let ai = 0; ai < self.attributes.length; ai++) {
+      const attribute = self.attributes[ai];
+      for (let ci = 0; ci < self.cases.length; ci++) {
+        // const thisCase = self.cases[ci];
+        rows[ci][attribute.id] = attribute.values[ci];
+      }
+    }
+    return rows;
   }
 }))
 .extend(self => {

@@ -35,14 +35,17 @@ export function defaultTableContent(props?: IDefaultContentOptions) {
 }
 
 interface IGetTableContentHeight {
-  dataRows: number;
-  rowHeight?: number;
+  // dataRows: number;
+  // rowHeight?: number;
+  dataSet: IDataSet;
+  rowHeight: (args: any) => number;
   readOnly?: boolean;
   hasExpressions?: boolean;
   padding?: number;
 }
 export const getTableContentHeight = ({
-  dataRows, rowHeight, readOnly, hasExpressions, padding
+  dataSet, rowHeight, readOnly, hasExpressions, padding
+  // dataRows, rowHeight, readOnly, hasExpressions, padding
 }: IGetTableContentHeight) => {
   const kDefaultRowHeight = 34;
   const kDefaultPadding = 10;
@@ -50,7 +53,15 @@ export const getTableContentHeight = ({
   const inputRows = readOnly ? 0 : 1;
   const kBorders = 2 * 2;
   const _padding = 2 * (padding || kDefaultPadding);
-  return (headerRows + dataRows + inputRows) * (rowHeight || kDefaultRowHeight) + kBorders + _padding;
+  console.log(`rows`, dataSet.simpleRows);
+  // const rowHeights = dataSet.cases.length * kDefaultRowHeight;
+  // const rowHeights = dataRows * kDefaultRowHeight;
+  // sum of row height
+  let rowHeights = 0;
+  dataSet.simpleRows.forEach(row => {
+    rowHeights += rowHeight({row});
+  });
+  return (headerRows + inputRows) * kDefaultRowHeight + rowHeights + kBorders + _padding;
 };
 
 export const TableMetadataModel = ToolMetadataModel

@@ -35,7 +35,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   const metadata = getContent().metadata;
 
   const {
-    dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, ...gridModelProps
+    dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, rowHeight, ...gridModelProps
   } = useModelDataSet(model);
 
   const handleRequestUniqueTitle = useCallback(() => {
@@ -45,11 +45,14 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   const getContentHeight = useCallback(() => {
     return getTableContentHeight({
       readOnly,
-      dataRows: dataSet.current.cases.length,
+      dataSet: dataSet.current,
+      rowHeight,
+      // dataRows: dataSet.current.cases.length,
       hasExpressions: getContent().hasExpressions,
       padding: 10 + (modelRef.current.display === "teacher" ? 20 : 0)
     });
-  }, [dataSet, getContent, modelRef, readOnly]);
+  // }, [dataSet, getContent, modelRef, readOnly]);
+  }, [dataSet, rowHeight, getContent, modelRef, readOnly]);
 
   const heightRef = useCurrent(height);
   const handleRequestRowHeight = useCallback((options: { height?: number, deltaHeight?: number }) => {
@@ -62,7 +65,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   }, [heightRef, modelRef, onRequestRowHeight]);
 
   const changeHandlers = useContentChangeHandlers({
-    model, dataSet: dataSet.current,
+    model, dataSet: dataSet.current, rowHeight,
     onRequestRowHeight: handleRequestRowHeight, triggerColumnChange, triggerRowChange
   });
   const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile, onUnlinkGeometryTile } = changeHandlers;
@@ -144,7 +147,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
           isLinkEnabled={isLinkEnabled} getLinkIndex={getLinkIndex} onLinkGeometryClick={showLinkGeometryDialog}
           getTitle={getTitle} titleCellWidth={titleCellWidth}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
-        <ReactDataGrid ref={gridRef} selectedRows={getSelectedRows()}
+        <ReactDataGrid ref={gridRef} selectedRows={getSelectedRows()} rowHeight={rowHeight}
           {...gridProps} {...gridModelProps} {...dataGridProps} />
       </div>
     </div>
