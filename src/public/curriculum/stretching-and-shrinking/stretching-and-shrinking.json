@@ -3,7 +3,32 @@
   "abbrevTitle": "SAS",
   "title": "Stretching and Shrinking",
   "subtitle": "Understanding Similarity",
-  "placeholderText": "Enter notes here",
+  "config": {
+    "enableHistoryRoles": ["teacher"],
+    "placeholderText": "Enter notes here",
+    "stamps": [
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/plus.png",
+        "width": 25,
+        "height": 25
+      },
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/equals.png",
+        "width": 25,
+        "height": 25
+      },
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/lparen.png",
+        "width": 25,
+        "height": 25
+      },
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/rparen.png",
+        "width": 25,
+        "height": 25
+      }
+    ]
+  },
   "sections": {
     "introduction": {
       "initials": "IN",
@@ -46,28 +71,6 @@
       "placeholder": "Work area for\nMathematical Reflection 4 section"
     }
   },
-  "defaultStamps": [
-    {
-      "url": "curriculum/moving-straight-ahead/stamps/plus.png",
-      "width": 25,
-      "height": 25
-    },
-    {
-      "url": "curriculum/moving-straight-ahead/stamps/equals.png",
-      "width": 25,
-      "height": 25
-    },
-    {
-      "url": "curriculum/moving-straight-ahead/stamps/lparen.png",
-      "width": 25,
-      "height": 25
-    },
-    {
-      "url": "curriculum/moving-straight-ahead/stamps/rparen.png",
-      "width": 25,
-      "height": 25
-    }
-  ],
   "planningDocument": {
     "enable": "teacher",
     "default": true,
@@ -5044,7 +5047,7 @@
                         "We can enhance a report or story by adding photographs, drawings, or diagrams. If we place a graphic in an electronic document, we can enlarge, reduce, or move it. When we click on the graphic, it appears inside a frame with handles along the sides, such as the figure shown below."
                       ]
                     }
-                  }, 
+                  },
                   {
                     "id": "-6wzAUG202201df4at43q56pM",
                     "title": "Original image",
@@ -5052,7 +5055,7 @@
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_In_28_fish_350w.png"
                     }
-                  }, 
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -5061,7 +5064,7 @@
                         "We can change the size and shape of the image by dragging the handles."
                       ]
                     }
-                  }, 
+                  },
                   {
                     "id": "-6wzAUG202201df47pM",
                     "title": "Stretched images",
@@ -5069,7 +5072,7 @@
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_In_29_fish_resized_350w.png"
                     }
-                  }, 
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -5078,7 +5081,7 @@
                         "<em>How did this technique produce these variations of the original shape? Which of these images appears to be similar to the original? Why?</em>"
                       ]
                     }
-                  }, 
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -5095,7 +5098,7 @@
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SS_4_1_In_30_image_table_350w.png"
                     }
-                  }, 
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -5104,7 +5107,7 @@
                         "The comparisons “10 to 8” and “5 to 4” are equivalent ratios. We can scale the ratio 10 to 8 down by multiplying each quantity by 1/2. Or we could scale the ratio 5 to 4 up by multiplying each quantity by 2. \n\nEquivalent ratios are like equivalent fractions. In fact, ratios are often written in fraction form. You can express equivalent ratios with equations. A proportion is an equation stating that two ratios are equal. \n\n10 to 8 equals 5 to 4   8 to 10 equals 4 to 5"
                       ]
                     }
-                  }, 
+                  },
                   {
                     "id": "-6wzAUG202201df48pM",
                     "title": "Equivalent ratios",

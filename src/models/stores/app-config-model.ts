@@ -75,6 +75,7 @@ export const AppConfigModel = types
     get documentLabelProperties() { return self.configMgr.documentLabelProperties; },
     get documentLabels() { return self.configMgr.documentLabels; },
     get disablePublish() { return self.configMgr.disablePublish; },
+    get enableHistoryRoles() { return self.configMgr.enableHistoryRoles; },
     get copyPreferOriginTitle() { return self.configMgr.copyPreferOriginTitle; },
     get disableTileDrags() { return self.configMgr.disableTileDrags; },
     get showClassSwitcher() { return self.configMgr.showClassSwitcher; },

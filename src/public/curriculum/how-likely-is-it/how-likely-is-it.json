@@ -3,10 +3,15 @@
   "abbrevTitle": "HL",
   "title": "How Likely Is It?",
   "subtitle": "Proportional Relationships in the Context of Probability",
-  "placeholderText": "Enter notes here",
-  "settings": {
-    "table": {
-      "numFormat": ".2~f"
+  "config": {
+    "enableHistoryRoles": ["teacher"],
+    "placeholderText": "Enter notes here",
+    "stamps": [
+    ],
+    "settings": {
+      "table": {
+        "numFormat": ".2~f"
+      }
     }
   },
   "sections": {
@@ -88,8 +93,6 @@
       { "type": "summarize" }
     ]
   },
-  "defaultStamps": [
-  ],
   "investigations": [
     {
       "description": "Investigation 1",

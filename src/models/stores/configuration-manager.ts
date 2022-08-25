@@ -91,6 +91,10 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["disablePublish"]>("disablePublish");
   }
 
+  get enableHistoryRoles() {
+    return this.getProp<UC["enableHistoryRoles"]>("enableHistoryRoles");
+  }
+
   get copyPreferOriginTitle() {
     return this.getProp<UC["copyPreferOriginTitle"]>("copyPreferOriginTitle");
   }

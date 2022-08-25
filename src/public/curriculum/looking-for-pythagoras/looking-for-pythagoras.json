@@ -3,7 +3,10 @@
   "abbrevTitle": "LFP",
   "title": "Looking for Pythagoras",
   "subtitle": "The Pythagorean Theorem",
-  "placeholderText": "Enter notes here",
+  "config": {
+    "enableHistoryRoles": ["teacher"],
+    "placeholderText": "Enter notes here"
+  },
   "sections": {
     "introduction": {
       "initials": "IN",

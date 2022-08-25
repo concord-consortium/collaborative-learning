@@ -45,11 +45,6 @@
         "isTileTool": true
       },
       {
-        "id": "DataCard",
-        "title": "Data Card",
-        "isTileTool": true
-      },
-      {
         "id": "Image",
         "title": "Image",
         "isTileTool": true
