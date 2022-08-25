@@ -32,8 +32,9 @@ export function cloneTileSnapshotWithoutId(tile: ToolTileModelType) {
 }
 
 export function cloneTileSnapshotWithNewId(tile: ToolTileModelType, newId?: string) {
+  const content = tile.content.tileSnapshotForCopy;
   const { id, display, ...copy } = cloneDeep(getSnapshot(tile));
-  return { id: newId || uniqueId(), ...copy };
+  return { id: newId || uniqueId(), ...copy, content };
 }
 
 export function getToolTileModel(toolContentModel: ToolContentModelType) {
