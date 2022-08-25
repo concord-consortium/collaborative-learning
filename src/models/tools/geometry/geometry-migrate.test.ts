@@ -1196,7 +1196,7 @@ describe("Geometry migration", () => {
       type: "Geometry",
       board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
       objects: [
-        { type: "image", parents: { url: kLocalImageUrl, coords: [0, 0], size: [183, 183] }, properties: { id: "i1" } }
+        { type: "image", parents: { url: kLocalImageUrl, coords: [0, 0], size: [10, 10] }, properties: { id: "i1" } }
       ]
     });
     const [received, expected] = testRoundTrip(changes);
@@ -1204,7 +1204,7 @@ describe("Geometry migration", () => {
 
     expect(convertChangesToModelSnapshot(changes)).toEqual({
       ...kDefaultModelProps,
-      bgImage: { type: "image", id: "i1", url: "assets/logo_tw.png", x: 0, y: 0, width: 183, height: 183 },
+      bgImage: { type: "image", id: "i1", url: "assets/logo_tw.png", x: 0, y: 0, width: 10, height: 10 },
       objects: {}
     });
   });

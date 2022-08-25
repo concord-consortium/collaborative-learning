@@ -381,18 +381,19 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
     if (others.id !== id) others.id = id;
     const x = position?.[0] ?? coords?.[0];
     const y = position?.[1] ?? coords?.[1];
-    const pxSize = size.map(s => Math.round(s * kGeometryDefaultPixelsPerUnit));
 
     if (outputJson) {
-      const sizeValue = `[${pxSize[0]}, ${pxSize[1]}]`;
+      const sizeValue = `[${size[0]}, ${size[1]}]`;
       const parents = `"parents": { "url": "${transformedUrl}", "coords": [${x}, ${y}], "size": ${sizeValue} }`;
       const otherProps = Object.keys(others).length > 0
                           ? ` "properties": ${JSON.stringify(others)}`
                           : "";
-      return `{ "type": "image", ${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+      const json = `{ "type": "image", ${parents}${comma(!!otherProps)}${otherProps} }${comma(!isLast)}`;
+      return json;
     }
 
-    bgImage = ImageModel.create({ x, y, url, filename, width: pxSize[0], height: pxSize[1], ...others });
+    const imageModelSnapshot = { x, y, url, filename, width: size[0], height: size[1], ...others };
+    bgImage = ImageModel.create(imageModelSnapshot);
     return "";
   };
 

@@ -110,7 +110,7 @@ export const DocumentCollectionByType = observer(({ topTab, tab, section, index,
     <div className={tabPanelDocumentSectionClass}
           key={`${tab}-${section.type}`}
           data-test={`${section.dataTestHeader}-documents`}>
-      {(classStore.isTeacher(sectionDocs[0]?.uid) && topTab === ENavTab.kClassWork)
+      {(classStore.isTeacher(sectionDocs[0]?.uid) && topTab === ENavTab.kClassWork && !isBottomPanel)
         && <div className="document-divider">
               <div className="document-divider-label">Teacher Documents</div>
            </div>

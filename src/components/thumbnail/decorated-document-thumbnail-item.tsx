@@ -30,10 +30,10 @@ function useDocumentCaption(document: DocumentModelType) {
   const classStore = useClassStore();
   const user = useUserStore();
   const { type, uid } = document;
+  const pubVersion = document.pubVersion;
   const teacher = useFirestoreTeacher(uid, user.network || "");
   if (type === SupportPublication) {
     const caption = document.getProperty("caption") || "Support";
-    const pubVersion = document.pubVersion;
     return pubVersion ? `${caption} v${pubVersion}` : `${caption}`;
   }
   const userName = classStore.getUserById(uid)?.displayName || teacher?.name ||
@@ -41,8 +41,8 @@ function useDocumentCaption(document: DocumentModelType) {
   const namePrefix = document.isRemote || isPublishedType(type) ? `${userName}: ` : "";
   const dateSuffix = document.isRemote && document.createdAt
                       ? ` (${new Date(document.createdAt).toLocaleDateString()})`
-                      : isPublishedType(type)
-                          ? ` v${document.pubVersion}`
+                      : isPublishedType(type) && pubVersion
+                          ? ` v${pubVersion}`
                           : "";
   const title = getDocumentDisplayTitle(document, appConfig, problem);
   return `${namePrefix}${title}${dateSuffix}`;

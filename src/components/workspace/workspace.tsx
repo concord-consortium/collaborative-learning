@@ -50,8 +50,8 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
     setShowExpanders(!showExpanders);
   };
 
-  const toggleShowExpanders = (show?:boolean) => {
-    setShowExpanders(show || !showExpanders);
+  const toggleShowExpanders = (show:boolean) => {
+    setShowExpanders(show);
   };
 
   const renderNavTabPanel = () => {

@@ -39,18 +39,15 @@ const ModernProblemModel = types
 interface LegacySnapshot extends SnapshotIn<typeof LegacyProblemModel> {}
 interface ModernSnapshot extends SnapshotIn<typeof ModernProblemModel> {}
 
-const isLegacySnapshot = (sn: ModernSnapshot | LegacySnapshot): sn is LegacySnapshot => {
-  const s = sn as LegacySnapshot;
-  return !!s.disabled || !!s.settings;
-};
-
 export const ProblemModel = types.snapshotProcessor(ModernProblemModel, {
-  preProcessor(sn: ModernSnapshot | LegacySnapshot) {
-    if (isLegacySnapshot(sn)) {
-      const { disabled: disabledFeatures, settings, ...others } = sn;
-      return { ...others, config: { disabledFeatures, settings } };
-    }
-    return sn;
+  preProcessor(sn: ModernSnapshot & LegacySnapshot) {
+    const { disabled: _disabled, settings: _settings, config: _config, ...others } = sn;
+    const disabledFeatures = _disabled ? { disabledFeatures: _disabled } : undefined;
+    const settings = _settings ? { settings: _settings } : undefined;
+    const config = _config || disabledFeatures || settings
+                    ? { config: { ...disabledFeatures, ...settings, ..._config } }
+                    : undefined;
+    return { ...others, ...config };
   }
 });
 export interface ProblemModelType extends Instance<typeof ModernProblemModel> {}

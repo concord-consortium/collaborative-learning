@@ -111,30 +111,6 @@ let sInstanceId = 0;
 @inject("stores")
 @observer
 export class GeometryContentComponent extends BaseComponent<IProps, IState> {
-
-  public static getDerivedStateFromProps: any = (nextProps: IProps, prevState: IState) => {
-    const { model: { content }, scale } = nextProps;
-    if (!prevState.board) { return null; }
-
-    const nextState: IState = {} as any;
-
-    const { size } = nextProps;
-    const geometryContent = content as GeometryContentModelType;
-    if (size && size.width && size.height && (!prevState.size ||
-        ((size.width !== prevState.size.width) || (size.height !== prevState.size.height)))) {
-      geometryContent.resizeBoard(prevState.board, size.width, size.height, scale);
-      nextState.size = size;
-    }
-
-    if (scale && (scale !== prevState.scale)) {
-      // let JSXGraph know about the scale change
-      geometryContent.updateScale(prevState.board, scale);
-      nextState.scale = scale;
-    }
-
-    return nextState;
-  };
-
   public state: IState = {
           size: { width: null, height: null },
           disableRotate: false,
@@ -307,7 +283,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }));
   }
 
-  public componentDidUpdate() {
+  public componentDidUpdate(prevProps: IProps) {
     // if we didn't initialize before now, try again
     if (!this.state.board && !this.boardPromise) {
       this.initializeContent();
@@ -321,6 +297,22 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     if (this.state.imageContentUrl) {
       this.updateImageUrl(this.state.imageContentUrl);
+    }
+
+    // Handle resize
+    if (this.state.board) {
+      const { model: { content }, scale, size } = this.props;
+      const geometryContent = content as GeometryContentModelType;
+      if (size && size.width && size.height && (!prevProps.size ||
+          ((size.width !== prevProps.size.width) || (size.height !== prevProps.size.height)))) {
+        geometryContent.resizeBoard(this.state.board, size.width, size.height, scale);
+      }
+
+      // Handle new scale
+      if (scale && (scale !== prevProps.scale)) {
+        // let JSXGraph know about the scale change
+        geometryContent.updateScale(this.state.board, scale);
+      }
     }
   }
 
@@ -1397,8 +1389,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     };
 
     const handlePointerDown = (evt: any) => {
-      const { readOnly } = this.props;
-      const { board, scale } = this.state;
+      const { readOnly, scale } = this.props;
+      const { board } = this.state;
       if (!board || (line !== getClickableObjectUnderMouse(board, evt, !readOnly, scale))) return;
 
       const content = this.getContent();
@@ -1486,8 +1478,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     };
 
     const handlePointerDown = (evt: any) => {
-      const { readOnly } = this.props;
-      const { board, scale } = this.state;
+      const { readOnly, scale } = this.props;
+      const { board } = this.state;
       if (!board || (polygon !== getClickableObjectUnderMouse(board, evt, !readOnly, scale))) return;
       const geometryContent = this.props.model.content as GeometryContentModelType;
       const inVertex = isInVertex(evt);

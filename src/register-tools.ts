@@ -5,23 +5,21 @@ import "./models/tools/placeholder/placeholder-registration";
 const gToolRegistration: Record<string, () => void> = {
   "DataCard": () => import(/* webpackChunkName: "DataCard" */"./plugins/data-card-tool/data-card-registration"),
   "Dataflow": () => import(/* webpackChunkName: "Dataflow" */"./plugins/dataflow-tool/dataflow-registration"),
-  "Diagram": () => {
-    // Currently the Diagram Tool is the only tool using SharedVariables, so we register
-    // SharedVariables whenever a there is a Diagram tool in the configuration
-    import(/* webpackChunkName: "Diagram" */"./plugins/diagram-viewer/diagram-registration");
-    import(/* webpackChunkName: "SharedVariables" */"./plugins/shared-variables/shared-variables-registration");
-  },
+  "Diagram": () => Promise.all([
+    import(/* webpackChunkName: "Diagram" */"./plugins/diagram-viewer/diagram-registration"),
+    import(/* webpackChunkName: "SharedVariables" */"./plugins/shared-variables/shared-variables-registration")
+  ]),
   "Drawing": () => import(/* webpackChunkName: "Drawing" */"./plugins/drawing-tool/drawing-registration"),
-  "Geometry": () => {
-    import(/* webpackChunkName: "Geometry" */"./models/tools/geometry/geometry-registration");
-    import(/* webpackChunkName: "SharedDataSet" */"./models/tools/shared-data-set-registration");
-  },
+  "Geometry": () => Promise.all([
+    import(/* webpackChunkName: "Geometry" */"./models/tools/geometry/geometry-registration"),
+    import(/* webpackChunkName: "SharedDataSet" */"./models/tools/shared-data-set-registration")
+  ]),
   "Image": () => import(/* webpackChunkName: "Image" */"./models/tools/image/image-registration"),
   "Starter": () => import(/* webpackChunkName: "Starter" */"./plugins/starter/starter-registration"),
-  "Table": () => {
-    import(/* webpackChunkName: "Table" */"./models/tools/table/table-registration");
-    import(/* webpackChunkName: "SharedDataSet" */"./models/tools/shared-data-set-registration");
-  },
+  "Table": () => Promise.all([
+    import(/* webpackChunkName: "Table" */"./models/tools/table/table-registration"),
+    import(/* webpackChunkName: "SharedDataSet" */"./models/tools/shared-data-set-registration")
+  ]),
   "Text": () => import(/* webpackChunkName: "Text" */"./models/tools/text/text-registration")
 };
 
