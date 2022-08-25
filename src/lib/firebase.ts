@@ -1,7 +1,6 @@
 import firebase from "firebase/app";
 import {
-  LearningLogDocument, LearningLogPublication, OtherDocumentType, PersonalDocument,
-  PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
+  LearningLogDocument, OtherDocumentType, PersonalDocument, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../models/document/document-types";
 import { AudienceModelType, SectionTarget } from "../models/stores/supports";
 import { UserModelType } from "../models/stores/user";
@@ -87,7 +86,7 @@ export class Firebase {
 
     return `/${parts.join("/")}/`;
   }
-  
+
   //
   // Paths
   //

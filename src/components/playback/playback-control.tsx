@@ -5,7 +5,7 @@ import { Instance } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { useUIStore } from "../../hooks/use-stores";
 import { TreeManager } from "../../models/history/tree-manager";
-import { PlaybackMarkerToolbar } from "./marker-toolbar";
+// import { PlaybackMarkerToolbar } from "./marker-toolbar";
 import Marker from "../../clue/assets/icons/playback/marker.svg";
 import PlayButton from "../../clue/assets/icons/playback/play-button.svg";
 import PauseButton from "../../clue/assets/icons/playback/pause-button.svg";
@@ -28,9 +28,9 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const sliderContainerRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
   const [markerSelected, setMarkerSelected] = useState(false);
-  const [addMarkerButtonSelected, setAddMarkerButtonSelected] = useState(false);
+  const [addMarkerButtonSelected, /* setAddMarkerButtonSelected */] = useState(false);
   const [markers, setMarkers] = useState<IMarkerProps[]>([]);
-  const [selectedMarkers, ] = useState<IMarkerProps[]>([]);
+  // const [selectedMarkers, ] = useState<IMarkerProps[]>([]);
   const history = treeManager.document.history;
   const [sliderValue, setSliderValue] = useState(history.length);
   const eventAtCurrentIndex = treeManager.currentHistoryIndex === 0
@@ -88,9 +88,9 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     setMarkerSelected(!markerSelected);
   };
 
-  const handleAddMarkerButtonSelected = () => {
-    setAddMarkerButtonSelected(!addMarkerButtonSelected);
-  };
+  // const handleAddMarkerButtonSelected = () => {
+  //   setAddMarkerButtonSelected(!addMarkerButtonSelected);
+  // };
 
   const handleSliderValueChange = (value: any) => {
     setSliderValue(value);
@@ -198,5 +198,3 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   );
 });
 PlaybackControlComponent.displayName = "PlaybackControlComponent";
-
-
