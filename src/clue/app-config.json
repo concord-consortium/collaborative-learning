@@ -35,6 +35,7 @@
       }
     },
     "disablePublish": [],
+    "enableHistoryRoles": [],
     "copyPreferOriginTitle": false,
     "disableTileDrags": false,
     "showClassSwitcher": true,
