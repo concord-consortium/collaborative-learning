@@ -241,7 +241,7 @@ export const DrawingContentModel = ToolContentModel
   })
   .actions(self => ({
     updateAfterSharedModelChanges() {
-      console.warn("TODO: need to implement yet");
+      // console.warn("TODO: need to implement yet");
     }
   }));
 
@@ -270,4 +270,3 @@ export function defaultDrawingContent(options?: IDefaultContentOptions) {
   }
   return createDrawingContent({ stamps });
 }
-

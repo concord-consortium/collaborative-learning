@@ -305,7 +305,7 @@ export const TableContentModel = ToolContentModel
       {name: "sharedModelSetup", fireImmediately: true}));
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
-      console.warn("updateAfterSharedModelChanges hasn't been implemented for table content.");
+      // console.warn("updateAfterSharedModelChanges hasn't been implemented for table content.");
 
       // TODO This was moved from doPostCreate and might need to be rethought.
       // if (self.dataSet.attributes.length >= 2) {
