@@ -1,5 +1,5 @@
 import React from "react";
-import { autorun, IReactionDisposer, reaction } from "mobx";
+import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
   Editor, EditorRange, EditorValue, HtmlSerializablePlugin, SlateEditor

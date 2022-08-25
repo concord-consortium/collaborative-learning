@@ -11,9 +11,7 @@ import {
 import {
   ESegmentLabelOption, JXGChange, JXGCoordPair, JXGImageParents, JXGObjectType, JXGProperties
 } from "./jxg-changes";
-import {
-  getMovableLinePointIds, kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth
-} from "./jxg-types";
+import { getMovableLinePointIds, kGeometryDefaultHeight, kGeometryDefaultWidth } from "./jxg-types";
 import { kDefaultBoardModelOutputProps, kGeometryToolID } from "./geometry-types";
 import { defaultGeometryBoardChange } from "./geometry-import";
 
