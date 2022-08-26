@@ -25,6 +25,7 @@ Notes on dependencies, particularly reasons for not updating to their latest ver
 |chart.js            |2.9.4          |3.9.1         |Major version not attempted; only used by Dataflow tile, which doesn't really use it.|
 |firebase            |8.10.1         |9.9.3         |Version 9 requires substantial migration; attempted update with `compat` imports failed.|
 |immutable           |3.8.2          |4.1.0         |Major version update not attempted; only required by legacy slate versions.          |
+|jsxgraph            |1.4.4          |1.4.5         |1.4.5 broke scaled rendering, e.g. in 4-up views                                     |
 |mob-state-tree      |5.1.5          |5.1.6         |Latest version changes TS types for arrays which broke a number of our models.       |
 |react               |17.0.2         |18.2.0        |React 18                                                                             |
 |react-chartjs-2     |2.11.2         |4.3.1         |Major version update not attempted; may not be used any more (was used by Dataflow)  |
