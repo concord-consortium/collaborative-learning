@@ -1,9 +1,11 @@
 import { UIModel, UIModelType, UIDialogModelType } from "./ui";
 import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
 import { ToolTileModel } from "../tools/tool-tile";
+import { TextContentModel } from "../tools/text/text-content";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import "../../register-tools";
+import { registerTools } from "../../register-tools";
+registerTools(["Text"]);
 
 describe("ui model", () => {
   let ui: UIModelType;
@@ -64,12 +66,10 @@ describe("ui model", () => {
 
   it("allows selected tile to be set", () => {
     expect(ui.selectedTileIds).toStrictEqual([]);
+    const content = TextContentModel.create({text: "test"});
     const tile = ToolTileModel.create({
       id: "1",
-      content: {
-        type: "Text",
-        text: "test"
-      }
+      content
     });
     ui.setSelectedTile(tile);
     expect(ui.selectedTileIds).toStrictEqual(["1"]);

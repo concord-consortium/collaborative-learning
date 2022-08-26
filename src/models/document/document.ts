@@ -1,11 +1,11 @@
-import { applySnapshot, types, Instance, SnapshotIn } from "mobx-state-tree";
+import { applySnapshot, types, Instance, SnapshotIn, getEnv, onAction, addDisposer } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
 import {
-  DocumentType, DocumentTypeEnum, IDocumentContext, ISetProperties, LearningLogDocument, LearningLogPublication,
-  PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication,
-  SupportPublication
+  DocumentType, DocumentTypeEnum, IDocumentAddTileOptions, IDocumentContext, ISetProperties,
+  LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
+  PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
@@ -15,19 +15,19 @@ import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
+import { Tree } from "../history/tree";
+import { TreeMonitor } from "../history/tree-monitor";
+import { ISharedModelDocumentManager, SharedModelDocumentManager } from "../tools/shared-model-document-manager";
+import { ITileEnvironment } from "../tools/tool-types";
+import { TreeManager } from "../history/tree-manager";
+import { ESupportType } from "../curriculum/support";
 
-export interface IDocumentAddTileOptions {
-  title?: string;
-  addSidecarNotes?: boolean;
-  url?: string;
+interface IMatchPropertiesOptions {
+  isTeacherDocument?: boolean;
 }
 
-export const DocumentToolEnum = types.enumeration("tool",
-                                ["delete", "drawing", "geometry", "image", "select", "table", "text", "placeholder"]);
-export type DocumentTool = typeof DocumentToolEnum.Type;
-
-export const DocumentModel = types
-  .model("Document", {
+export const DocumentModel = Tree.named("Document")
+  .props({
     uid: types.string,
     type: DocumentTypeEnum,
     key: types.string,
@@ -42,12 +42,18 @@ export const DocumentModel = types
     visibility: types.maybe(types.enumeration("VisibilityType", ["public", "private"])),
     groupUserConnections: types.map(types.boolean),
     originDoc: types.maybe(types.string),
-    changeCount: types.optional(types.number, 0)
+    changeCount: types.optional(types.number, 0),
+    pubVersion: types.maybe(types.number),
+    supportContentType: types.maybe(types.enumeration<ESupportType>("SupportType", Object.values(ESupportType)))
   })
   .volatile(self => ({
-    queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined
+    queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined,
   }))
   .views(self => ({
+    // This is needed for the tree monitor and manager
+    get treeId() {
+      return self.key;
+    },
     get isProblem() {
       return (self.type === ProblemDocument) || (self.type === ProblemPublication);
     },
@@ -87,6 +93,10 @@ export const DocumentModel = types
     getProperty(key: string) {
       return self.properties.get(key);
     },
+    getNumericProperty(key: string) {
+      const val = self.properties.get(key);
+      return val != null ? Number(val) : 0;
+    },
     copyProperties(): IDocumentProperties {
       return self.properties.toJSON();
     },
@@ -101,8 +111,10 @@ export const DocumentModel = types
     }
   }))
   .views(self => ({
-    matchProperties(properties: string[]) {
-      return properties.every(p => {
+    matchProperties(properties?: string[], options?: IMatchPropertiesOptions) {
+      // if no properties specified then consider it a match
+      if (!properties?.length) return true;
+      return properties?.every(p => {
         const match = /(!)?(.*)/.exec(p);
         const property = match && match[2];
         const wantsProperty = !(match && match[1]); // not negated => has property
@@ -110,8 +122,11 @@ export const DocumentModel = types
         if (property === "starred") {
           return self.isStarred === wantsProperty;
         }
+        if (property === "isTeacherDocument") {
+          return !!options?.isTeacherDocument === wantsProperty;
+        }
         if (property) {
-          return !!self.getProperty(property) === wantsProperty;
+            return !!self.getProperty(property) === wantsProperty;
         }
         // ignore empty strings, etc.
         return true;
@@ -168,6 +183,9 @@ export const DocumentModel = types
         self.properties.set(key, value);
       }
     },
+    setNumericProperty(key: string, value?: number) {
+      this.setProperty(key, value == null ? value : `${value}`);
+    },
 
     setContent(snapshot: DocumentContentSnapshotType) {
       if (self.content) {
@@ -175,6 +193,8 @@ export const DocumentModel = types
       }
       else {
         self.content = DocumentContentModel.create(snapshot);
+        const sharedModelManager = (getEnv(self) as ITileEnvironment).sharedModelManager;
+        (sharedModelManager as ISharedModelDocumentManager).setDocument(self.content);
       }
     },
 
@@ -188,8 +208,8 @@ export const DocumentModel = types
       self.visibility = visibility;
     },
 
-    addTile(tool: DocumentTool, options?: IDocumentAddTileOptions) {
-      return self.content?.userAddTile(tool, options);
+    addTile(toolId: string, options?: IDocumentAddTileOptions) {
+      return self.content?.userAddTile(toolId, options);
     },
 
     deleteTile(tileId: string) {
@@ -260,6 +280,21 @@ export const DocumentModel = types
     setProperties(properties: ISetProperties) {
       forEach(properties, (value, key) => self.setProperty(key, value));
     }
+  }))
+  .actions(self => ({
+    afterCreate() {
+      // TODO: it would be nice to unify this with the code in createDocumentModel
+      const manager = TreeManager.create({document: {}, undoStore: {}});
+      self.treeManagerAPI = manager;
+      self.treeMonitor = new TreeMonitor(self, manager, false);
+      manager.putTree(self.treeId, self);
+    },
+    undoLastAction() {
+      self.treeManagerAPI?.undoManager.undo();
+    },
+    redoLastAction() {
+      self.treeManagerAPI?.undoManager.redo();
+    },
   }));
 
 export type DocumentModelType = Instance<typeof DocumentModel>;
@@ -272,4 +307,37 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
     getProperty: (prop: string) => document.properties.get(prop),
     setProperties: (properties: ISetProperties) => document.setProperties(properties)
   };
+};
+
+export interface IDocumentEnvironment {
+  appConfig?: AppConfigModelType;
+}
+
+/**
+ * Create a DocumentModel and add a new sharedModelManager into its environment
+ *
+ * @param snapshot
+ * @returns
+ */
+export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
+  const sharedModelManager = new SharedModelDocumentManager();
+  const fullEnvironment: ITileEnvironment & {documentEnv: IDocumentEnvironment} = {
+    sharedModelManager,
+    documentEnv: {}
+  };
+  const document = DocumentModel.create(snapshot, fullEnvironment);
+  addDisposer(document, onAction(document, (call) => {
+    if (!document.content || !call.path?.match(/\/content\/tileMap\//)) {
+      return;
+    }
+    const toolTileId = call.path?.match(/\/content\/tileMap\/([^/]*)/)?.[1];
+    if (toolTileId) {
+      const toolTile = document.content.tileMap.get(toolTileId);
+      toolTile?.onTileAction(call);
+    }
+  }));
+  if (document.content) {
+    sharedModelManager.setDocument(document.content);
+  }
+  return document;
 };

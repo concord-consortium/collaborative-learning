@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { useSyncMstNodeToFirebase } from "./use-sync-mst-node-to-firebase";
 import { useSyncMstPropToFirebase } from "./use-sync-mst-prop-to-firebase";
-import { DEBUG_SAVE } from "../lib/debug";
+import { DEBUG_DOCUMENT, DEBUG_SAVE } from "../lib/debug";
 import { Firebase } from "../lib/firebase";
 import { DocumentModelType } from "../models/document/document";
-import {
-  isPublishedType, LearningLogDocument, PersonalDocument, ProblemDocument
-} from "../models/document/document-types";
+import { isPublishedType, LearningLogDocument, LearningLogPublication, PersonalDocument,
+         PersonalPublication, ProblemDocument, ProblemPublication, SupportPublication
+        } from "../models/document/document-types";
 import { UserModelType } from "../models/stores/user";
 
 function debugLog(...args: any[]) {
@@ -27,8 +27,33 @@ function debugLog(...args: any[]) {
 export function useDocumentSyncToFirebase(
                   user: UserModelType, firebase: Firebase, document: DocumentModelType, readOnly = false) {
   const { key, type, uid } = document;
-  const { content: contentPath, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
+  const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
   !readOnly && (user.id !== uid) && console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
+
+  useEffect(() => {
+    if (!readOnly) {
+      // enable history tracking on this document
+      if (document.treeMonitor) {
+        document.treeMonitor.enabled = true;
+      }
+      return () => {
+        // disable history tracking on this document
+        if (document.treeMonitor) {
+          document.treeMonitor.enabled = false;
+        }
+      };
+    }
+  }, [readOnly, document.treeMonitor]);
+
+  if (!readOnly && DEBUG_DOCUMENT) {
+    // provide the document to the console so developers can inspect its content
+    // and history. Only !readOnly documents are made available, this way it is obvious
+    // which document currentDocument is pointing to.
+    // useDocumentSyncToFirebase is called with readOnly documents too
+    (window as any).currentDocument = document;
+  }
+  
+
 
   // sync visibility (public/private) for problem documents
   useSyncMstPropToFirebase<typeof document.visibility>({
@@ -58,10 +83,10 @@ export function useDocumentSyncToFirebase(
     }
   });
 
-  // sync properties for personal and learning log documents
+  // sync properties for problem, personal, and learning log documents
   useSyncMstNodeToFirebase({
-    firebase, model: document.properties, path: typedMetadata,
-    enabled: !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
+    firebase, model: document.properties, path: `${metadata}/properties`,
+    enabled: !readOnly && [ProblemDocument, PersonalDocument, LearningLogDocument].includes(type),
     options: {
       onSuccess: (data, properties) => {
         debugLog(`DEBUG: Updated document properties for ${type} document ${key}:`, JSON.stringify(properties));
@@ -72,6 +97,22 @@ export function useDocumentSyncToFirebase(
       }
     }
   });
+
+    // sync properties for published documents
+    useSyncMstNodeToFirebase({
+      firebase, model: document.properties, path: `${metadata}/properties`,
+      enabled: readOnly && (user.id === uid) && document.supportContentType !== "multiclass" &&
+        [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication ].includes(type),
+      options: {
+        onSuccess: (data, properties) => {
+          debugLog(`DEBUG: Updated document properties for ${type} document ${key}:`, JSON.stringify(properties));
+        },
+        onError: (err, properties) => {
+          console.warn(`ERROR: Failed to update document properties for ${type} document ${key}:`,
+                      JSON.stringify(properties));
+        }
+      }
+    });
 
   // sync content for editable document types
   useSyncMstNodeToFirebase({

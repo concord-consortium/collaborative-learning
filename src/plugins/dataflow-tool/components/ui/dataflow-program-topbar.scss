@@ -1,0 +1,317 @@
+@import "../../../../components/vars";
+@import "../dataflow-vars";
+
+$topbar-height: 44px;
+$topbar-color: $gray-light;
+$duration-label-back: $gray-mid;
+
+.program-editor-topbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  flex: 0 0 $topbar-height;
+  background-color: $topbar-color;
+  border: solid 2px #ffffff;
+
+  .topbar-left {
+    width: 20%;
+    display: flex;
+
+    .icon-refresh {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: white;
+      width: 28px;
+      height: 28px;
+      margin: 0;
+      margin-right: 5px;
+      padding: 0px 15px;
+      border: 2px solid #bcbcbc;
+      &:hover:not([disabled]) {
+        background-color: $gray-light-hover;
+        cursor: pointer;
+      }
+      &:active:not([disabled]) {
+        background-color: $gray-light-click;
+      }
+      &:disabled {
+        opacity: 0.6;
+      }
+      .refresh {
+        width: 16px;
+        height: 16px;
+        background-repeat: no-repeat;
+        background-image: url("../../assets/icons/refresh/refresh.svg");
+        &:hover {
+          background-image: url("../../assets/icons/refresh/refresh-hover.svg");
+        }
+        &:active {
+          background-image: url("../../assets/icons/refresh/refresh-active.svg");
+        }
+      }
+      .serial {
+        width: 16px;
+        height: 16px;
+        background-repeat: no-repeat;
+        background-image: url("../../assets/icons/serialconnection/serial.svg");
+        &:hover {
+          background-image: url("../../assets/icons/serialconnection/serial.svg");
+        }
+        &:active {
+          background-image: url("../../assets/icons/serialconnection/serial.svg");
+        }
+      }
+    }
+
+    .icon-serial {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      margin: 0;
+      margin-left: 5px;
+      padding: 0;
+      border: 2px solid #bcbcbc;
+      &:hover:not([disabled]) {
+        background-color: $gray-light-hover;
+        cursor: pointer;
+      }
+      &:active:not([disabled]) {
+        background-color: $gray-light-click;
+      }
+      &:disabled {
+        opacity: 0.6;
+      }
+      &.physical-connection.no-port.nodes-in-need {
+        background-color: $star-yellow;
+        animation: slowpulse 1.5s linear infinite;
+
+        @keyframes slowpulse {
+          50% {
+            background-color: #eee;
+          }
+        }
+      }
+      &.has-port {
+        background-color: #82f982; //lightened "online button" green
+      }
+      &.nodes-in-need.no-physical-connection {
+        background-color: $problem-orange-light-2;
+        animation: slowpulse 1.5s linear infinite;
+      }
+      &.has-port.no-physical-connection { //occurs if wire yanked out
+        background-color: $problem-orange-light-2;
+        animation: slowpulse 1.5s linear infinite;
+      }
+
+      .serial {
+        width: 10px;
+        height: 16px;
+        background-repeat: no-repeat;
+        background-image: url("../../assets/icons/serialconnection/serial.svg");
+        &:hover {
+          background-image: url("../../assets/icons/serialconnection/serial.svg");
+        }
+        &:active {
+          background-image: url("../../assets/icons/serialconnection/serial.svg");
+        }
+      }
+    }
+
+    .serial-message {
+      position: absolute;
+      left: 42px;
+      margin-top: 4px;
+      color:#444343;
+    }
+  }
+
+  .topbar-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60%;
+
+    .running-container {
+      &.countdown {
+        position: relative;
+        width: 208px;
+      }
+      .total {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        background-color: #bcbcbc;
+        width: 130px;
+        height: 28px;
+        border-radius: 3px;
+        font-size: 14px;
+        padding-left: 5px;
+        color: white;
+      }
+      .remaining {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        left: 118px;
+        width: 84px;
+        height: 28px;
+        border-radius: 3px;
+        color: black;
+        background-color: white;
+        border: solid 2px #bcbcbc;
+        .progress-bar {
+          position: absolute;
+          left: 2px;
+          height: 20px;
+          background-color: #fde5c1;
+          border-radius: 2px;
+        }
+        .progress-time {
+          position: absolute;
+        }
+      }
+    }
+
+    .datarate {
+      position: relative;
+      width: 185px;
+
+      .label-back {
+        width: 157px;
+        height: 28px;
+        border-radius: 3px;
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px;
+        background-color: $duration-label-back;
+        padding: 6px 3px 5px 9px;
+        text-align: left;
+        .label {
+          width: 145px;
+          height: 17px;
+          font-size: 14px;
+          font-weight: 500;
+          font-style: normal;
+          font-stretch: normal;
+          line-height: normal;
+          letter-spacing: normal;
+          color: white;
+        }
+      }
+
+      .datarate-options-back {
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        padding: 2px;
+        width: 84px;
+        height: 28px;
+        border-radius: 14px;
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+        background-color: $duration-label-back;
+
+        .datarate-options select {
+          position: relative;
+          width: 80px;
+          height: 24px;
+          border-radius: 12px;
+          background-color: #ffffff;
+          font-size: 11px;
+          outline: 0;
+          &:disabled {
+            cursor: default;
+          }
+        }
+
+        .datarate-options span {
+          top: 9px;
+          width: 0;
+          height: 0;
+          border-left: 4px solid transparent;
+          border-right: 4px solid transparent;
+          border-top: 6px solid $duration-label-back;
+          svg {
+            display: none;
+          }
+        }
+
+        .datarate-options option {
+          &:disabled {
+            color: $gray-disabled;
+          }
+        }
+      }
+    }
+
+    .program-state-button {
+      position: relative;
+      width: 75px;
+      height: 28px;
+      border-radius: 3px;
+      border: solid 2px $gray-mid;
+      background-color: #ffffff;
+      margin: 0px 0px 0px 8px;
+      outline: 0;
+      &:hover:not([disabled]) {
+        cursor: pointer;
+        background-color: $gray-light-hover;
+      }
+      &:active:not([disabled]) {
+        background-color: $gray-light-click;
+      }
+      &:disabled {
+        opacity: 0.6;
+      }
+
+      .icon {
+        position: absolute;
+        left: 4px;
+        top: 3px;
+        width: 18px;
+        height: 18px;
+        &.run {
+          background-image: url("../../assets/run.svg");
+        }
+        &.stop {
+          background-image: url("../../assets/stop.svg");
+        }
+      }
+
+      .text {
+        position: absolute;
+        right: 0;
+        top: 3px;
+        width: 48px;
+        height: 16px;
+        font-size: 14px;
+        text-align: center;
+        color: $gray-text;
+      }
+    }
+  }
+
+  .topbar-right {
+    display: flex;
+    justify-content: right;
+    width: 20%;
+
+    .rate-ui {
+      display: flex;
+      align-items: center;
+      background-color: white;
+      color: black;
+      height: 28px;
+      margin-right: 5px;
+      padding: 2px;
+      border: 2px solid #bcbcbc;
+      width:80px;
+    }
+  }
+}

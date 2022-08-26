@@ -50,7 +50,7 @@ class Canvas {
   }
 
   getPersonalPublishIcon() {
-    return cy.get('[data-test=other-doc-publish-icon]');
+    return cy.get('[data-test=publish-icon]');
   }
 
   getEditTitleIcon() {
@@ -67,6 +67,15 @@ class Canvas {
     dialog.getDialogOKButton().click();
   }
 
+  createNewExtraDocumentFromFileMenuWithoutTabs(title, type) {
+    this.openFileMenu();
+    cy.get('[data-test=list-item-icon-open-workspace]').click();
+    cy.get('[data-test=' + type + '-section-workspaces-documents] [data-test=my-work-new-document]').click();
+    dialog.getDialogTitle().should('exist').contains('Create Document');
+    dialog.getDialogTextInput().click().clear().type(title);
+    dialog.getDialogOKButton().click();
+  }
+
   openDocumentWithTitle(subTab, title) {
     const subTabSelector = '.primary-workspace .doc-tab.my-work.' + subTab;
     const panelSelector = '.primary-workspace .tab-panel-documents-section.' + subTab;
@@ -75,6 +84,15 @@ class Canvas {
     this.openFileMenu();
     cy.get('[data-test=list-item-icon-open-workspace]').click();
     cy.get(subTabSelector).click();
+    cy.get(titlesSelector).contains(title).click();
+  }
+
+  openDocumentWithTitleWithoutTabs(title) {
+    const panelSelector = '.primary-workspace .tab-panel-documents-section';
+    const titlesSelector = panelSelector + ' .list-item .footer';
+
+    this.openFileMenu();
+    cy.get('[data-test=list-item-icon-open-workspace]').click();
     cy.get(titlesSelector).contains(title).click();
   }
 
@@ -117,8 +135,8 @@ class Canvas {
     } else {
       this.getPersonalPublishIcon().click({force:true});
     }
-    dialog.getDialogTitle().should('exist').contains('Publish ');
-    dialog.getDialogOKButton().click();
+    dialog.getModalTitle().should('exist').contains('Publish ');
+    dialog.getModalButton().contains("OK").click();
     dialog.getDialogTitle().should('exist').contains('Published');
     dialog.getDialogOKButton().click();
     dialog.getDialogTitle().should('not.exist');

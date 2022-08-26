@@ -1,0 +1,256 @@
+@import "../../components/vars.sass";
+
+$card-width: 359px;
+$field-width-pct: 35%;
+$data-row-min-height: 24px;
+$charcoal-light-border: rgb(206, 206, 206);
+$cell-padding: 0px 8px;
+$cell-text-color: #3f3f3f;
+$default-button-border-color: #979797;
+
+.data-card-tool {
+  width: 100%;
+  height: 100%;
+  text-align: left;
+  overflow: auto;
+  margin:30px;
+
+  &.editable {
+    border: 1px solid #cccccc;
+  }
+
+  textarea {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Data Card Title and Card Navigation */
+  .data-card-header-row {
+    .panel {
+      border: solid 1px $charcoal-light-1;
+      width: $card-width;
+      height: 34px;
+      font-family: Lato;
+      font-size: 14px;
+      font-weight: bold;
+      color: $cell-text-color;
+      line-height: normal;
+      letter-spacing: normal;
+      display:flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .panel.title {
+      background-color: $workspace-teal-light-7;
+      border-radius: 3px 3px 0px 0px;
+      font-style: italic;
+      border-bottom-width: 0px;
+
+      .data-card-title-input-editing {
+        width: 100%;
+        height: 100%;
+        font-style: normal;
+        font-weight: 300;
+        text-align: center;
+      }
+    }
+    .panel.nav {
+      background-color: $workspace-teal-light-5;
+      display: flex;
+      justify-content: space-between;
+
+      .card-number-of-listing {
+        width: $field-width-pct;
+        text-align: right;
+        justify-content: flex-start;
+
+        .cell-text {
+          padding: $cell-padding;
+        }
+      }
+
+      .card-nav-buttons {
+        flex-grow: 1;
+        padding-left: 5px;
+        .card-nav {
+          color:$workspace-teal;
+          width:26px;
+          height:26px;
+          border: 1.5px solid $default-button-border-color;
+          background-color: $workspace-teal-light-9;
+          margin:3px;
+          padding:$quarter-padding;
+          border-radius: 5px;
+        }
+        .previous {
+          background-image: url('./assets/arrow-back-icon.svg');
+          background-position-x: -1px;
+        }
+        .next {
+          background-image: url('./assets/arrow-back-icon.svg');
+          transform: rotateY(180deg);
+          background-position-x: -1px;
+        }
+        .active {
+          border-color:$default-button-border-color;
+          &:hover {
+            background-color: $workspace-teal-light-4;
+            cursor:pointer;
+          }
+          &:active {
+            background-color: $workspace-teal-light-3;
+          }
+        }
+
+        .next.disabled, .previous.disabled {
+          border-color:#d8d8d8;
+          color:$workspace-teal-light-4;
+          background-image: url('./assets/arrow-back-faded.svg');
+        }
+      }
+    }
+
+    .add-remove-card-buttons {
+      width: 30%;
+      display: flex;
+      justify-content: flex-end;
+      padding-right: 5px;
+      text-align: end;
+
+      button {
+        background-color: transparent;
+        height:26px;
+        width:26px;
+        cursor:pointer;
+        border:none;
+        margin-top:1px;
+        padding:0px;
+        // position: relative;
+        left:9px;
+        top:1px;
+
+        svg {
+          fill:$workspace-teal;
+          height:24px;
+          width:24px;
+          // transform: translateX(-6px);
+          // border-radius:26px;
+          &:hover {
+            background-color: $workspace-teal-light-3;
+          }
+          &:active {
+            background-color: $workspace-teal;
+            fill: $workspace-teal;
+            border-color:white;
+          }
+        }
+      }
+    }
+  }
+
+  /* attributes and their values */
+  .data-area {
+    width: $card-width;
+
+    /* saved state attributes */
+    .attribute-name-value-pair {
+      display:flex;
+      min-height: $data-row-min-height;
+      line-height: $data-row-min-height;
+      border: 1px solid $charcoal-light-1;
+      border-top-width: 0px;
+
+      .name {
+        background-color: $workspace-teal-light-5;
+        width: $field-width-pct;
+        border-right: 1px solid $charcoal-light-1;
+        font-weight: bold;
+        text-align: right;
+        color: $cell-text-color;
+        box-sizing: border-box;
+        &.editing {
+          border-left:1px solid #7f7f7f;
+          .cell-value {
+            border:1px solid #7f7f7f;
+          }
+        }
+        .cell-value {
+          padding:$cell-padding;
+          &.default-label {
+            font-style: italic;
+          }
+        }
+      }
+
+      .value {
+        flex-grow: 1;
+        font-weight: normal;
+        color:$cell-text-color;
+        .cell-value {
+          padding:$cell-padding;
+        }
+
+        .image-wrapper {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+
+          .image-value {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            display: block;
+            margin: auto;
+          }
+          .delete-image-button {
+            position: relative;
+            right: 5px;
+          }
+        }
+      }
+
+      input {
+        width: 100%;
+        height: 100%;
+        padding: $cell-padding;
+        font-style: normal;
+        font-weight: 300;
+        border: none;
+        background-color: $workspace-teal-light-8;
+        font-family: Lato;
+        &:focus {
+          outline: 1px solid blue;
+        }
+      }
+      .name input {
+        text-align: right;
+      }
+    }
+
+    /* when attribute is in "about to be created" state */
+    .attribute-name-value-pair.not-saved {
+      border-color: $charcoal-light-border;
+      .name {
+        background-color: $workspace-teal-light-7;
+        border-color: $charcoal-light-border;
+      }
+      input::placeholder {
+        font-style: italic;
+        color: transparent;
+        font-weight: bold;
+      }
+    }
+    .attribute-name-value-pair.not-saved:hover {
+      input::placeholder {
+        padding-right:4px;
+        color:#7b7b7b;
+      }
+    }
+  }
+
+  .add-field {
+    margin-top: 5px;
+    // half of 35% minus half the width of the icon
+    margin-left: ($card-width * 0.175) - 12px;
+  }
+}

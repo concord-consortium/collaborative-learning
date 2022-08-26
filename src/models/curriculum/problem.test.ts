@@ -14,7 +14,6 @@ describe("problem model", () => {
       ordinal: 1,
       title: "test",
       subtitle: "",
-      disabled: [],
       sections: [],
       supports: []
     });
@@ -40,7 +39,6 @@ describe("problem model", () => {
       ordinal: 1,
       title: "test",
       subtitle: "sub",
-      disabled: [],
       sections: [
         {
           type: "introduction",
@@ -104,5 +102,71 @@ describe("problem model", () => {
     const lastSection = problem.getSectionById("initialChallenge") as SectionModelType;
     expect(lastSection.type).toBe("initialChallenge");
 
+  });
+
+  it("can import legacy snapshots", () => {
+    const problem = ProblemModel.create({
+      ordinal: 1,
+      title: "Test",
+      disabled: ["foo"],
+      settings: { foo: "bar" }
+    });
+    expect(problem).toEqual({
+      ordinal: 1,
+      title: "Test",
+      subtitle: "",
+      sections: [],
+      supports: [],
+      config: {
+        disabledFeatures: ["foo"],
+        settings: { foo: "bar" }
+      }
+    });
+  });
+
+  it("can import mixed legacy/modern snapshots", () => {
+    const problem = ProblemModel.create({
+      ordinal: 1,
+      title: "Test",
+      disabled: ["foo"],
+      config: {
+        settings: { foo: "bar" }
+      }
+    });
+    expect(problem).toEqual({
+      ordinal: 1,
+      title: "Test",
+      subtitle: "",
+      sections: [],
+      supports: [],
+      config: {
+        disabledFeatures: ["foo"],
+        settings: { foo: "bar" }
+      }
+    });
+  });
+
+  it("prioritizes modern config when importing mixed legacy/modern snapshots", () => {
+    const problem = ProblemModel.create({
+      ordinal: 1,
+      title: "Test",
+      disabled: ["roo"],
+      settings: { roo: "baz"},
+      config: {
+        disabledFeatures: ["foo"],
+        settings: { foo: "bar" }
+      }
+    });
+    expect(problem).toEqual({
+      ordinal: 1,
+      title: "Test",
+      subtitle: "",
+      sections: [],
+      supports: [],
+      config: {
+        disabledFeatures: ["foo"],
+        settings: { foo: "bar" }
+      }
+    });
   });
 });

@@ -1,23 +1,25 @@
 import { DB } from "./db";
 import { createDocumentsModelWithRequiredDocuments, DocumentsModel } from "../models/stores/documents";
-import { IStores, createStores } from "../models/stores/stores";
-import { UserModel } from "../models/stores/user";
 import { DBDocument } from "./db-types";
-import { DocumentModel } from "../models/document/document";
+import { createDocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
 import { PersonalDocument, PlanningDocument, ProblemDocument } from "../models/document/document-types";
+import { specStores } from "../models/stores/spec-stores";
+import { IStores } from "../models/stores/stores";
+import { UserModel } from "../models/stores/user";
 import { TextContentModelType } from "../models/tools/text/text-content";
 import { ToolTileModelType } from "../models/tools/tool-tile";
 import { createSingleTileContent } from "../utilities/test-utils";
 import * as UrlParams from "../utilities/url-params";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import "../register-tools";
+import { registerTools } from "../register-tools";
+registerTools(["Text"]);
 
-var mockDatabase = jest.fn();
-var mockFirestore = jest.fn();
-var mockFunctions = jest.fn();
-var mockAuthStateUnsubscribe = jest.fn();
+const mockDatabase = jest.fn();
+const mockFirestore = jest.fn();
+const mockFunctions = jest.fn();
+const mockAuthStateUnsubscribe = jest.fn();
 
 jest.mock("firebase/app", () => {
   return {
@@ -48,7 +50,7 @@ describe("db", () => {
 
   beforeEach(() => {
     setUrlParams(originalUrlParams);
-    stores = createStores({
+    stores = specStores({
       appMode: "test",
       documents: DocumentsModel.create(),
       user: UserModel.create({id: "1", portal: "example.com"})
@@ -154,7 +156,7 @@ describe("db", () => {
 
   it("creates required problem document", async () => {
     expect.assertions(3);
-    const newDocument = DocumentModel.create({ uid: "1", type: ProblemDocument, key: "doc-1" });
+    const newDocument = createDocumentModel({ uid: "1", type: ProblemDocument, key: "doc-1" });
     mockDatabase.mockImplementation(() => ({
       ref: () => ({
         once: () => ({
@@ -175,7 +177,7 @@ describe("db", () => {
       })
     }));
     stores.documents = createDocumentsModelWithRequiredDocuments([ProblemDocument, PlanningDocument]);
-    stores.documents.resolveAllRequiredDocumentPromisesWithNull();
+    stores.documents.resolveRequiredDocumentPromisesWithNull();
     await db.connect({appMode: "test", stores, dontStartListeners: true});
     expect((await db.guaranteeOpenDefaultDocument(ProblemDocument))?.type).toBe(ProblemDocument);
     expect(await stores.documents.requiredDocuments[ProblemDocument].promise).toEqual(newDocument);
@@ -184,7 +186,7 @@ describe("db", () => {
 
   it("creates required planning document", async () => {
     expect.assertions(3);
-    const newDocument = DocumentModel.create({ uid: "1", type: PlanningDocument, key: "doc-1" });
+    const newDocument = createDocumentModel({ uid: "1", type: PlanningDocument, key: "doc-1" });
     mockDatabase.mockImplementation(() => ({
       ref: () => ({
         once: () => ({
@@ -205,7 +207,7 @@ describe("db", () => {
       })
     }));
     stores.documents = createDocumentsModelWithRequiredDocuments([ProblemDocument, PlanningDocument]);
-    stores.documents.resolveAllRequiredDocumentPromisesWithNull();
+    stores.documents.resolveRequiredDocumentPromisesWithNull();
     await db.connect({appMode: "test", stores, dontStartListeners: true});
     expect((await db.guaranteePlanningDocument([]))?.type).toBe(PlanningDocument);
     expect(await stores.documents.requiredDocuments[PlanningDocument].promise).toEqual(newDocument);
@@ -213,7 +215,7 @@ describe("db", () => {
   });
 
   it("creates required personal document from existing promise", async () => {
-    const personalDocument = DocumentModel.create({ uid: "1", type: PersonalDocument, key: "doc-1" });
+    const personalDocument = createDocumentModel({ uid: "1", type: PersonalDocument, key: "doc-1" });
     stores.documents = createDocumentsModelWithRequiredDocuments([PersonalDocument]);
     stores.documents.resolveRequiredDocumentPromise(personalDocument);
     await db.connect({appMode: "test", stores, dontStartListeners: true});

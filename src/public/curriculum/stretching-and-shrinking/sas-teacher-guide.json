@@ -530,6 +530,8 @@
                     }
                   },
                   {
+                    "id": "21AUG20220839AM",
+                    "title": "Rubber band stretcher to produce overlapping and non-overlapping figures.",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_presenting_the_challenge.png"
@@ -558,12 +560,16 @@
                     }
                   },
                   {
+                    "id": "21AUG20220840AM",
+                    "title": "Right-handed and left-handed setup for using a rubber band stretcher",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_presenting_the_challenge_2.png"
                     }
                   },
                   {
+                    "id": "21AUG20220841AM",
+                    "title": "Similar figures produced by a two rubber band stretcher",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_presenting_the_challenge_3.png"
@@ -687,6 +693,7 @@
                     }
                   },
                   {
+                    "title": "Similar figures produced by a three rubber band stretcher",
                     "id": "24hCGEXVpFNUQjwi",
                     "content": {
                       "type": "Image",
@@ -704,6 +711,7 @@
                     }
                   },
                   {
+                    "title": "Similar figures showing an increase of 25%",
                     "id": "ol68q8QVoeVFICU2",
                     "content": {
                       "type": "Image",
@@ -721,6 +729,7 @@
                     }
                   },
                   {
+                    "title": "Similar figures showing an decrease of 25%",
                     "id": "YLidaiv0RWNbLk7h",
                     "content": {
                       "type": "Image",
@@ -1028,6 +1037,7 @@
                     }
                   },
                   {
+                    "title": "Similar figures showing an increase of 25%",
                     "id": "m0aG_wNWHybXqdg2",
                     "content": {
                       "type": "Image",
@@ -1045,29 +1055,33 @@
                     }
                   },
                   {
-                    "type": "Geometry",
+                    "id": "y8UrLmBSdgLHGATV",
                     "title": "Enlarging a shape",
-                    "board": {
-                      "properties": {
-                        "axisMin": [-2.186, -1.093],
-                        "axisRange": [26.23, 17.486]
-                      }
-                    },
-                    "objects": [
-                      { "type": "point", "parents": [1, 1], "properties": {"id":"zxnw1S3P_6RRxSJ9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                      { "type": "point", "parents": [1, 1], "properties": {"id":"jm-9QT1wWia976W_","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                      { "type": "point", "parents": [1, 5], "properties": {"id":"3fqjb2eArXfmU2WX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                      { "type": "point", "parents": [1, 5], "properties": {"id":"qv9KBFiipADCs3tZ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                      { "type": "polygon", "parents": ["zxnw1S3P_6RRxSJ9", "jm-9QT1wWia976W_", "3fqjb2eArXfmU2WX", "qv9KBFiipADCs3tZ"],"properties": {"id":"XrAtOscgQutMyDnx"} },
-                      { "type": "point", "parents": [1, 7], "properties": {"id":"V_CLC7VUpqVQNaxx","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                      { "type": "point", "parents": [1, 7], "properties": {"id":"RPlssU7812RDrI3i","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                      { "type": "point", "parents": [1, 12], "properties": {"id":"KnuZnKztH3bj5OgH","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                      { "type": "point", "parents": [1, 12], "properties": {"id":"K4IpL6Wqs7weDEdt","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                      { "type": "polygon", "parents": ["V_CLC7VUpqVQNaxx", "RPlssU7812RDrI3i", "KnuZnKztH3bj5OgH", "K4IpL6Wqs7weDEdt"],"properties": {"id":"tE4SBJpvY9LAPTAs"} },
-                      { "type": "comment", "parents": [2.3900158999945216, -8.81967213114754], "properties": {"id":"y0EYZP0gMnaqBU-5","anchor":"tE4SBJpvY9LAPTAs","text":"x 1.25 of the original box"} }
-                    ]
+                    "content": {
+                      "type": "Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-4.372, -2.186],
+                          "axisRange": [26.23, 17.486]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [5, 1], "properties": {"id":"zxnw1S3P_6RRxSJ9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [1, 1], "properties": {"id":"jm-9QT1wWia976W_","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [1, 5], "properties": {"id":"3fqjb2eArXfmU2WX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [5, 5], "properties": {"id":"qv9KBFiipADCs3tZ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["zxnw1S3P_6RRxSJ9", "jm-9QT1wWia976W_", "3fqjb2eArXfmU2WX", "qv9KBFiipADCs3tZ"],"properties": {"id":"XrAtOscgQutMyDnx"} },
+                        { "type": "point", "parents": [6.1000000000000005, 7.000000000000001], "properties": {"id":"V_CLC7VUpqVQNaxx","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [1, 7.000000000000001], "properties": {"id":"RPlssU7812RDrI3i","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [1, 12], "properties": {"id":"KnuZnKztH3bj5OgH","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [6.1000000000000005, 12], "properties": {"id":"K4IpL6Wqs7weDEdt","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["V_CLC7VUpqVQNaxx", "RPlssU7812RDrI3i", "KnuZnKztH3bj5OgH", "K4IpL6Wqs7weDEdt"],"properties": {"id":"tE4SBJpvY9LAPTAs"} },
+                        { "type": "comment", "parents": [5.320825633067438, -0.31061568583503885], "properties": {"id":"y0EYZP0gMnaqBU-5","text":"x 1.25 of the original box","anchor":"tE4SBJpvY9LAPTAs"} }
+                      ]
+                    }
                   },
                   {
+                    "title": "Similar figures showing an decrease of 25%",
                     "id": "jzlo4jLJau1YBtvV",
                     "content": {
                       "type": "Image",
@@ -1246,6 +1260,7 @@
                   },
                   {
                     "id": "jbsxKuJ1lnKPvbYR",
+                    "title": "4-by-4 board",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_2-1_Launch_1.png"
@@ -1287,6 +1302,8 @@
                     }
                   },
                   {
+                    "id": "-6wz0rFv0G6WKAUG2022",
+                    "title": "4-by-4 board centered at the origin",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/TG_8.jpg"
@@ -1366,6 +1383,7 @@
                   },
                   {
                     "id": "K5tNdvYdQcLKJ41x",
+                    "title": "Similar rectangles with a scale factor of 1/2",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/TG_9.jpg"
@@ -2067,6 +2085,7 @@
                   },
                   {
                     "id": "KVr12DYAKUFgPcFs",
+                    "title": "",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_2-3_making_mathematics_explicit_1.png"
@@ -2314,6 +2333,7 @@
                   },
                   {
                     "id": "_Vs89RdradVhHR7E",
+                    "title": "Example of flipped parallelograms",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_2-1_providing_for_individual_needs_1.png"
@@ -2364,6 +2384,7 @@
                   },
                   {
                     "id": "iWBy06QHYNEakMFl",
+                    "title": "Non-similar parallelogram made by tiling",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_3-1_providing_for_individual_needs_2.png"
@@ -2505,6 +2526,7 @@
                   },
                   {
                     "id": "JYGjynwmL1tZB17j",
+                    "title": "Geometric interpretation of adding consecutive odd numbers",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_3-1_making_mathematics_explicit_1.png"
@@ -2835,6 +2857,7 @@
                   },
                   {
                     "id": "0VqM0_xYDymLs8-4",
+                    "title": "New rectangle",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_3-2_check_for_understanding_1.png"
@@ -2986,6 +3009,7 @@
                   },
                   {
                     "id": "XaQzwanwb_Qorb9z",
+                    "title": "Nonsimilar parallelograph with similar triangles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_3-3_connecting_to_prioir_knowledge_1.png"
@@ -3293,6 +3317,7 @@
                   },
                   {
                     "id": "LSR6qAJi5tWiVaI0",
+                    "title": "Comparing all image measurements",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_4-1_connecting_to_prioir_knowledge_1.png"
@@ -3440,6 +3465,8 @@
                   },
                   {
                    "display": "teacher",
+                   "id": "21AUG20220212pm",
+                   "title": "Comparing all image measurements",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_4-1_making_mathematics_explicit_1.png"
@@ -3656,6 +3683,7 @@
                   },
                   {
                     "id": "-MCSc0um2sM2EPaJ",
+                    "title": "Example of non-similar parallelograms with congruent angles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_4-2_connecting_to_prior_knowledge_1.png"
@@ -3697,6 +3725,7 @@
                   },
                   {
                     "id": "7OfGeizw49Hhehpn",
+                    "title": "Sample sketch of object’s shadow",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_4-2_presenting_the_challenge_1.png"
@@ -4070,6 +4099,7 @@
                   },
                   {
                     "id": "avp1BcVKybx8Y-Q2",
+                    "title": "Sample reasoning for non-similar rectangles",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_4-3_making_mathematics_explicit_1.png"

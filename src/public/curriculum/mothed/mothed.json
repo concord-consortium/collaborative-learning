@@ -1,29 +1,201 @@
 {
   "code": "moth",
   "abbrevTitle": "MothEd",
+  "appName": "MothEd",
   "title": "MothEd Identifying Moths",
   "subtitle": "Wings, Spots, and Legs",
-  "placeholderText": "Type in me!",
-  "settings": {
-    "table": {
-      "numFormat": ".2~f"
-    }
+  "config": {
+    "placeholderText": "Document your thoughts",
+    "autoSectionProblemDocuments": true,
+    "defaultDocumentTemplate": {
+      "tiles": [
+        {
+          "id": "document_Text_1",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>Welcome to MothEd CLUE!</strong></p>",
+              "<p>To get started, click the My Resources bar at extreme left, and then click the tab labeled <strong>Activity.</strong></p>"
+            ]
+          }
+        }
+      ]
+    },
+    "defaultDocumentType": "problem",
+    "settings": {
+      "table": { "numFormat": ".2~f" }
+    },
+    "toolbar": [
+      {
+        "id": "select",
+        "title": "Select",
+        "iconId": "icon-select-tool",
+        "isTileTool": false,
+        "isDefault": true
+      },
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "Table",
+        "title": "Table",
+        "isTileTool": true
+      },
+      {
+        "id": "Image",
+        "title": "Image",
+        "isTileTool": true
+      },
+      {
+        "id": "Drawing",
+        "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "Geometry",
+        "title": "Graph",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
+    ],
+    "navTabs": {
+      "showNavPanel": true,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "tab": "problems",
+          "label": "Activity",
+          "sections": [
+            {
+              "initials": "GS",
+              "title": "Get Started",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "TB",
+              "title": "Trap Building",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "PIN",
+              "title": "Pinning",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "ID",
+              "title": "Identifying",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "SUM",
+              "title": "Summary",
+              "type": "problem-documents"
+            }
+          ]
+        },
+        {
+          "tab": "teacher-guide",
+          "label": "Teacher Guide",
+          "teacherOnly": true,
+          "sections": []
+        },
+        {
+          "tab": "student-work",
+          "label": "Student Work",
+          "teacherOnly": true,
+          "sections": []
+        },
+        {
+          "tab": "class-work",
+          "label": "Class Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "published-problem-documents",
+              "dataTestHeader": "class-work-section-published",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["publication"],
+              "showStars": [],
+              "properties": ["!isDeleted"]
+            },
+            {
+              "title": "Workspaces",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["supportPublication"],
+              "properties": ["teacherSupport", "!isDeleted"]
+            }
+          ]
+        }
+      ]
+    },
+    "stamps": [
+      {
+        "url": "curriculum/mothed/stamps/acorn.png",
+        "width": 35,
+        "height": 35
+      },
+      {
+        "url": "curriculum/mothed/stamps/firneedles.png",
+        "width": 35,
+        "height": 29
+      },
+      {
+        "url": "curriculum/mothed/stamps/mapleleaf.png",
+        "width": 35,
+        "height": 38
+      },
+      {
+        "url": "curriculum/mothed/stamps/tree.png",
+        "width": 37,
+        "height": 35
+      },
+      {
+        "url": "curriculum/mothed/stamps/pine.png",
+        "width": 23,
+        "height": 40
+      },
+      {
+        "url": "curriculum/mothed/stamps/greenleaf.png",
+        "width": 35,
+        "height": 34
+      }
+    ]
   },
   "sections": {
     "getStarted": {
       "initials": "GS",
       "title": "Get Started",
-      "placeholder": "Add tiles here to get started on your Activity."
+      "placeholder": "Record your ideas"
     },
-    "fieldNotes": {
-      "initials": "FN",
-      "title": "Field Notes",
-      "placeholder": "Describe your explorations in the field."
+    "trapBuilding": {
+      "initials": "TB",
+      "title": "Trap Building",
+      "placeholder": "Document your moth traps"
     },
-    "share": {
-      "initials": "SH",
-      "title": "Share",
-      "placeholder": "Discuss your Findings with your class."
+    "pinning": {
+      "initials": "PIN",
+      "title": "Pinning",
+      "placeholder": "Assemble your moth collection"
+    },
+    "id": {
+      "initials": "ID",
+      "title": "Identifying",
+      "placeholder": "Document your collected moths"
+    },
+    "summary": {
+      "initials": "SUM",
+      "title": "Summary",
+      "placeholder": "Discuss your findings"
     }
   },
   "planningDocument": {
@@ -31,102 +203,594 @@
     "default": true,
     "sectionInfo": {
       "overview": {
-        "initials": "OV",
+        "initials": "GS",
         "title": "Overview",
         "placeholder": "Add some tiles here"
       },
-      "launch": {
-        "initials": "LC",
-        "title": "Launch",
-        "placeholder": "Add some tiles here"
-      },
-      "explore": {
-        "initials": "EX",
-        "title": "Explore",
-        "placeholder": "Add some tiles here"
-      },
-      "summarize": {
-        "initials": "SM",
-        "title": "Summarize",
+      "teach": {
+        "initials": "TC",
+        "title": "Teaching Tips",
         "placeholder": "Add some tiles here"
       }
     },
     "sections": [
-      { "type": "overview" },
-      { "type": "launch" },
-      { "type": "explore" },
-      { "type": "summarize" }
+      { "type": "getStarted" },
+      { "type": "fieldNotes" },
+      { "type": "share" }
     ]
   },
-  "defaultStamps": [
-    {
-      "url": "curriculum/mothed/stamps/acorn.png",
-      "width": 35,
-      "height": 35
-    },
-    {
-      "url": "curriculum/mothed/stamps/firneedles.png",
-      "width": 35,
-      "height": 29
-    },
-    {
-      "url": "curriculum/mothed/stamps/mapleleaf.png",
-      "width": 35,
-      "height": 38
-    },
-    {
-      "url": "curriculum/mothed/stamps/tree.png",
-      "width": 37,
-      "height": 35
-    },
-    {
-      "url": "curriculum/mothed/stamps/pine.png",
-      "width": 23,
-      "height": 40
-    },
-    {
-      "url": "curriculum/mothed/stamps/greenleaf.png",
-      "width": 35,
-      "height": 34
-    }
-  ],
   "investigations": [
     {
       "description": "Investigation 1",
       "ordinal": 1,
-      "title": "MothEd Warmups",
+      "title": "MothEd Curriculum",
       "problems": [
         {
           "description": "Activity 1.1",
           "ordinal": 1,
-          "title": "What lives in our schoolyard? ",
-          "subtitle": "Making Observations",
+          "title": "Welcome to MothEd CLUE PD",
+          "subtitle": "Application and Collaboration",
           "disabled": [],
           "sections":
           [
             {
             "type": "getStarted",
             "content": {
-              "tiles": 
+              "tiles":
+                [
+                  {
+                    "id": "D-ugOewQGtaRzAEb",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Introduction to working and collaborating in CLUE</h2>",
+                        "<p><strong>1. Orientation - who am I here?</strong></p>",
+                        "<p>During the first session with CLUE, please <strong>use this time to start learning about moths </strong><strong><em>as an adult learner, without thinking about your students</em></strong><em>.</em> Allow yourself time to learn and think, to experience the material as a learner, not as a middle or primary school student or a teacher.  During subsequent sessions, we will vary the role you play.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "2RlvDLXdo1r8marQ",
+                    "title": "Group work is a key to CLUE",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/classroom.png"
+                    }
+                  },
+                  {
+                    "id": "VcE8xbkZ9mOCVAsw",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>2. Groups in CLUE</strong></p>",
+                        "<p>In CLUE, everyone works in a group with up to four people. When you start an activity, CLUE suggests a group randomly or asks you to start a new group.  You can do either: then, <strong>change groups by clicking on the group number in the upper right corner.</strong>  Join your table&#x27;s group. When you change groups, your work moves with you.</p>",
+                        "<p><strong>Groups are important in CLUE.</strong> You can learn from table-mates in your group and they can learn from you. Many features of CLUE are designed to help you share information and learn from others in your group and in your class.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "EBCpyeDU_FkLtXq8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>3. You in CLUE</strong></p>",
+                        "<p>On the right is <strong>your</strong> workspace. To edit your workspace, you must first add a <strong>tile</strong>. You get a tile in your workspace by either</p>",
+                        "<ul><li><strong>Dragging a tile from the content (left side) in CLUE into your workspace</strong></li><li><strong>Dragging a new  tile from the menu on the left of your workspace</strong></li><li><strong>Click a button on the menu to add a new tile to the bottom of your workspace</strong></li></ul>",
+                        "<p>All tiles have a <strong>waffle</strong> (gray box with six dots) in the upper right corner if you hover over it. To drag the tile, click the waffle and hold it down as you drag it to your workspace. As you drag the tile into the workspace, a blue line shows where the tile will go when you let go.</p>",
+                        "<p>OK, get ready... Here we go!</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_rU9plvleix0FlBS",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>4. Group work - discussion</strong></p>",
+                        "<p><em>First, check that all the members of your group have the same group number at the top right of your screen. </em></p>",
+                        "<p>Talk about moths with your group.  What do you know about moths? </p>",
+                        "<p>Take some notes on your discussion in CLUE. Open a text tile on the right in your <strong>Workspace</strong> (click the menu button with the letter A on it). </p>",
+                        "<p>Take notes and make a list of what your group knows. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "uotBFbYpZfaMbTBf",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>5. Brainstorm some research questions</strong></p>",
+                        "<p>What do you want to know more about? Take time to think about it and write potential questions in a new tile.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_aucv3h3VrZ_VNPK",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>6. When ready, share with the group</strong></p>",
+                        "<p>Use the group controls so that you can see and share each others&#x27; notes. See the image below for how to do that.  (Ignore the &quot;Publish&quot; feature for now).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "lJEIgDWNRXk02nZi",
+                    "title": "CLUE Interfaces for Sharing",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/share.jpg"
+                    }
+                  },
+                  {
+                    "id": "eGVyLGBx1SzYZJYh",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>7. Discuss the research questions</strong></p>",
+                        "<p>Work with the members of your group to explore each other&#x27;s questions and ideas. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "sA84OvZZVt-8LVM3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>8. Publish (see image above) your work to the class</strong></p>",
+                        "<p>You can choose one member of your group to publish a summary of the group&#x27;s work, or you may each publish.  When you publish, your workspace will appear under the pink &quot;Class Work&quot; tab (right-hand side of CLUE).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "K3Rf_sGYF6qq41qE",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>---------------------------- BIODIVERSITY ------------------------------</h3>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "EvTt2Ui0YeSiM8NV",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>1. In a text tile, answer the following questions. <em>[Hint: drag </em><strong><em>this</em></strong><em> tile into your workspace, then type your answers into it.]</em></p>",
+                        "<ol><li>How many different species (or types) of insects are there in the entire world?</li><li>How many different species of insects are there in Michigan?</li><li>How many different species (or types) of moths are there in the entire world?</li><li>How many different species of moths are there in Michigan?</li><li>How many different species (or types) of birds are there in the entire world?</li><li>How many different species of birds are there in Michigan?</li><p></p></ol>",
+                        "<p>2.  Share with your group and come to a consensus answer for each question.</p>",
+                        "<p></p>",
+                        "<p>3.  Open a Table tile and enter your numbers from above in a table format.  (Text in tables does not wrap yet, so shorten and abbreviate the questions!)</p>",
+                        "<p></p>",
+                        "<p>4. Decide as a group on a table format, and choose one person to publish the group&#x27;s table.</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "trapBuilding",
+              "content": {
+                "tiles":
+                [
+                  {
+                    "id": "WgvCVh_rfY1KzMVH",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Trap Tutorial Video</strong></p>",
+                        "<p>Watch the video showing how to <a href='https://drive.google.com/file/d/135oeHF8WYpVd8iXIYk9Zaoyn-rQx7efG/view'>build a moth trap</a> using (mostly) stuff you&#x27;ve already got!</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "-i5DaNf-CUUJSvUO",
+                    "title": "Diagram of the Trap You'll Build!",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/mothTrapAssembly.png"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "pinning",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "ToVynRaDMqiF10Ld",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Moth Pinning Video</strong></p>",
+                        "<p>Learn how to pin moths for studying, comparing, and identifying them.</p>",
+                        "<p>Oregon State <a href='https://extension.oregonstate.edu/video/pinning-butterflies-moths'>Pinning Tutorial</a></p>",
+                        "<p>https://extension.oregonstate.edu/video/pinning-butterflies-moths</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "hpfMKRZ9QlXXhhIm",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>---------------------------- MOTH IDENTIFICATION ------------------------------</h3>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "MxDhzaHuPDlBA3OD",
+                    "title": "MOTH ID GUIDE: Features",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/MothIDGuide.png"
+                    }
+                  },
+                  {
+                    "id": "1DIc3Wvt5-5sunQE",
+                    "title": "Moth Ed ID Guide Flowchart",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/MothIDFlowchart.png"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "summary",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "ry2oPXRB52CSmKsa",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Use this space to document your research. You might want to start by including the information below, but you may find other ways and additional ways to show and explain your findings. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "SeyU5L21NqaZmcKt",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Your research question:</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "y2JkyqQpwe0XEulq",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Your experimental design:</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "8gCr3R4Zkm21DQrC",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Your findings:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Show students each others documents from the Class Work tab or ask them to look at particular docs in that tab. Discuss the class findings.</p>",
+                        "<p>Ask closing question for students to consider while we are gone:  What is one thing you found interesting today? What is one thing you wonder about?</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Activity 1.2",
+          "ordinal": 2,
+          "title": "MothEd Middle School Activity",
+          "subtitle": "",
+          "disabled": [],
+          "sections":
+          [
+            {
+            "type": "getStarted",
+            "content": {
+              "tiles":
+                [
+                  {
+                    "id": "f2UciJMofvDMe-G0",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Introduction to working and collaborating in CLUE</h2>",
+                        "<p><strong><a href='https://docs.google.com/document/d/1Tlm7RbE74KZSGqvoRSA8qW9mA-VKOptbLVfbNdlOxuM/edit?usp=sharing'>How to Navigate CLUE</a></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "EsfV7Bh-9uvCvyDZ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>On the right is <strong>your</strong> workspace. To edit your workspace, you must first add a <strong>tile</strong>. You get a tile in your workspace by either</p>",
+                        "<ul><li><strong>Dragging a tile from the content (left side) in CLUE into your workspace</strong></li><li><strong>Dragging a new  tile from the menu on the left of your workspace</strong></li><li><strong>Click a button on the menu to add a new tile to the bottom of your workspace</strong></li></ul>",
+                        "<p>All tiles have a <strong>waffle</strong> (gray box with six dots) in the upper right corner if you hover over it. To drag the tile, click the waffle and hold it down as you drag it to your workspace. As you drag the tile into the workspace, a blue line shows where the tile will go when you let go (next to, above, below).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "mHSYqqY7mN0IxRRt",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Sharing Ideas</strong></p>",
+                        "<p>In CLUE, everyone works in a group with up to four people. When you start an activity, CLUE suggests a group randomly or asks you to start a new group.  You can do either: then, <strong>change groups by clicking on the group number in the upper right corner.</strong>  Join your table&#x27;s group. </p>",
+                        "<p><strong>Groups are important in CLUE.</strong> You can learn from table-mates in your group and they can learn from you. Many features of CLUE are designed to help you share information and learn from others in your group and in your class.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Y4VN9wbXco1h1xAo",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Question: What would happen if all of the moths disappeared? </strong></p>",
+                        "<p>Drag this tile to your workspace and write down potential ideas to answer the question above. If you think of more questions as you are answering this question, record them in the next text tile. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "HNKpKdZE9ruF0EQp",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Brainstorm some research questions</strong></p>",
+                        "<p>What do you want to know more about? Take time to think about it and write potential questions in a new tile.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "i9HvFETZSIBEzeRF",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>When ready, share with the group</strong></p>",
+                        "<p>Use the group controls so that you can see and share each others&#x27; notes. See the image for how to do that.  (Ignore the &quot;Publish&quot; feature for now). Discuss with each other, and when you are done, you can publish your answers to the class as shown in the picture below. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "3TmzXshehO5DzR5R",
+                    "title": "Sharing and Publishing",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/share.jpg",
+                      "filename": "curriculum/mothed/images/share.jpg"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "trapBuilding",
+              "content": {
+                "tiles":
+                [
+                  {
+                    "id": "WgvCVh_rfY1KzMVH",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Trap Tutorial Video</strong></p>",
+                        "<p>Watch the video showing how to <a href='https://drive.google.com/file/d/135oeHF8WYpVd8iXIYk9Zaoyn-rQx7efG/view'>build a moth trap</a> using (mostly) stuff you&#x27;ve already got!</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "-i5DaNf-CUUJSvUO2022",
+                    "title": "Diagram of the Trap You'll Build!",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/mothTrapAssembly.png"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "pinning",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "R9NR96j-7MyF-Z2y",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Moth Pinning Video</strong></p>",
+                        "<p>Learn how to pin moths for studying, comparing, and identifying them.</p>",
+                        "<p>MSU Team Moth <a href='https://drive.google.com/file/d/1sVzZNz_2TR9jvpveACbKpBR6M7JA4IhH/view?usp=drivesdk'>Pinning Tutorial</a></p>",
+                        "<p>Oregon State <a href='https://extension.oregonstate.edu/video/pinning-butterflies-moths'>Pinning Tutorial</a></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "id",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "MxDhzaHuPDlBA3OD2022",
+                    "title": "MOTH ID GUIDE: Features",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/MothIDGuide.png"
+                    }
+                  },
+                  {
+                    "id": "1DIc3Wvt5-5sunQE2022",
+                    "title": "Moth Ed ID Guide Flowchart",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/MothIDFlowchart.png"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "summary",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "Fy1q3E87LcaOpGRS",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Use this space to document your research. You might want to start by including the information below, but you may find other ways and additional ways to show and explain your findings. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "872VzfBW_srkyhNJ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Your research question: (What do you want know?)</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "EbVqlxtSAD_WUg9V",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Your experimental design: (How are you going to answer your question?)</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ruesvDn5NpUxwfPN",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Your findings: (What did you learn?)</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Activity 1.5",
+          "ordinal": 5,
+          "title": "Moth Investigation",
+          "subtitle": "Study and Share",
+          "disabled": [],
+          "sections":
+          [
+            {
+            "type": "getStarted",
+            "content": {
+              "tiles":
                 [
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Our town is part of the <strong>US Eastern deciduous forest </strong>region. What evidence of that can we observe outside? </p>",
-                        "<p><strong>Get Started: </strong>Divide your team  into roles: Recorder;  (2-3)Researchers; Presenter</p>",
-                        "<p>Work with your group to draw and/or make a list of what you expect to find when you go outside to look. </p>",
-                        "<p>To gather ideas, <strong>Researchers  </strong>might...</p>",
-                        "<ul><li>look out the window, </li><li>look around your classroom/home for books  or magazines,</li><li>find images or take photos.</li></ul>",
-                        "<p>Your <strong>Recorder </strong>can record everyone&#x27;s ideas  in  their CLUE workspace.</p>"
+                        "<p><strong>Welcome to MothEd! </strong>Together over the next few weeks we&#x27;re going to get to research moths.  Here in CLUE, we&#x27;ll record our work and we can choose to share it with our group and the class.</p>"
                       ]
                     }
                   },
                   {
+                    "id": "abc12307212022",
+                    "title": "",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/mothed/images/fieldwork.jpg"
+                      "url": "curriculum/mothed/images/Day1.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Drawing</strong></p>",
+                        "<p><em>What are moths?  </em>They are a type of insect, and we will learn more about them as we go along. But first... please <strong>make a drawing of a moth</strong> using a card and markers.  Then,</p>",
+                        "<ol><li>On the back of your drawing, write some words that describe the moth.</li><li>Take a picture of your drawing, and a picture of the words you wrote on the back.</li><li>Put your name on the back of the drawing and hand it in to your teacher.</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>To add your drawing to CLUE, </strong></p>",
+                        "<ol><li>Click the image button in your workspace to create a tile that can hold an image </li><li>Drag the image of your drawing to the image tile</li><li>Create another image tile for the image of the back of the card, and drag the image onto the tile.</li></ol>",
+                        "<p>That&#x27;s it! You&#x27;ve added your drawings to CLUE.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Group work</strong></p>",
+                        "<p><em>First, make sure all the members of your group have the same group number at the top right of your screen. </em></p>",
+                        "<p>We’re here to learn about moths together. What do you know about moths?</p>",
+                        "<p>Talk about what you know about moths with your group. Take notes and make a list in your workspace. </p>",
+                        "<p>Next, find some photos of moths online. Save them to your desktop and drag them into image tiles. </p>"
+                      ]
                     }
                   },
                   {
@@ -135,37 +799,20 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to CLUE</strong>! Clue is short for <em>Collaborative Learning User Environment. </em>This environment is designed to make it easy for groups of up to four students to share their work and learn from each other. </p>",
-                        "<p>When the class starts an activity, CLUE drops students into groups randomly. If you prefer to assign students to groups, have them switch groups by clicking on the group number at upper right. </p>"
-                      ]
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "type": "fieldNotes",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Let&#x27;s go outside! Bring your science notebook to make notes and drawings of what you find.</p>",
-                        "<p>When you come back  inside, add  your top three observations to the <strong>Field Notes</strong> Workspace in CLUE.</p>",
-                        "<p>If you counted the number of certain items you discovered, create a table to share. </p>"
+                        "<p>Have each person quickly introduces themself with their first name (“I’m Amanda or Miss Amanda, and I teach about bugs”)</p>",
+                        "<p>We will tell also introduce the camera equipment.</p>",
+                        "<p>The first task asks students to draw moths. If they ask, “What is a moth?” we can tell them a moth is a type of insect. They should draw what they think a moth might be. </p>",
+                        "<p>Students should each do their own drawing without looking at other folks’ drawings and without talking.</p>"
                       ]
                     }
                   },
                   {
                     "content": {
-                      "type": "Table",
-                      "name": "What lives in our schoolyard",
-                      "columns": [
-                        {"name":"Flora","values":["🌲","🌿","🍁"]},
-                        {"name":"Count","values":["3","5","100"]},
-                        {"name":"location","values":["edge of schoolyard","on trees","on ground"]}
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Share</strong></p>",
+                        "<p>Use the group controls so that you can see and share each others&#x27; notes and images. See the image below for how to do that. </p>"
                       ]
                     }
                   },
@@ -175,24 +822,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Encourage your students to try making drawings of the leaves and plants they find. See if they can make a table with the kinds of data they take - sizes and types of leaves or trees, counts of different species, etc.</p>"
-                      ]
-                    }
-                  }
-                ]
-              }
-            },
-            {
-              "type": "share",
-              "content": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p> Share to compare notes with your teammates! </p>",
-                        "<p><strong>1. </strong>As your group compares observations, the <strong>Presenter</strong> can combine everyone&#x27;s findings on their <strong>Share</strong> Workspace to present or publish to the Class Work.</p>"
+                        "<p>Divide class into small groups of 4 or less. Make sure each group is in the same Group shown in the top right of the screen. If they aren&#x27;t, have them click the group number, leave, and join whichever group number they are assigned. </p>",
+                        "<p>It&#x27;s important that students record their own and each others exact words, not an interpretation from an adult.</p>"
                       ]
                     }
                   },
@@ -207,10 +838,111 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>2. </strong>After you have agreed on your summary findings, refine your work by thinking about different types of evidence of <strong>Eastern deciduous forests:</strong></p>",
-                        "<ul><li>What did you expect to find that you did not see?</li><li>What did you see that you didn’t list in <strong>Get Started</strong>?</li><li>What did you observe that isn&#x27;t actually part of a forest ecosystem?</li></ul>",
-                        "<p>Is there anything you want to add to your final presentation to the class?</p>",
-                        "<p><strong>3. </strong>If you still have more time, discuss and list what you might expect to see looking different four weeks from now. What will cause these changes? Your <strong>Recorder</strong> can list all your ideas to  share with the class. </p>"
+                        "<p><strong>Discuss</strong> what you see in the images with your group. Add anything you&#x27;d like to your notes.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Watch <strong><a href='https://www.youtube.com/watch?v=JQL25_hoQ1k'>Seven Spectacular Moths</a></strong> and write down what you notice in a text tile (letter <strong>A</strong> at right). Please note, this is a placeholder video only. If your school does not allow access to YouTube, it will not load.  We will place videos on accessible servers for the actual curricular materials .] </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/Day2.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Explore moth diversity and morphology</strong></p>",
+                        "<p>Take a careful look at the <em>Types Of Moths</em> display below. Enter your notes into a text tile (letter <strong>A</strong> at right). <strong><em>Make as MANY observations as you can</em></strong>:</p>",
+                        "<ul><li>What do you notice?  (Wing size, wing shape, wing color(s), body size, body texture, antenna size, antenna type, etc.)</li><li>How do you know you are looking at moths? </li><li>What are some things that all the moths have in common? </li><li>What are differences or variations?</li><li>It is important to know how many kinds of moths live in an area, since different kinds of moths do different things -- how do we tell the different kinds of moths apart?</li></ul>",
+                        "<p>When you and your group mates are done, click the &quot;Share&quot; button (upper right) so the group can see your list and you can see theirs. </p>",
+                        "<p>With your group, review each list. Select one of you to be the Recorder and build a group list of all the observations (drag and drop) to share with the class.  Recorders can publish the group list when ready. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/mothtypes.jpg"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Virtual Gallery Walk </strong>- did any group notice anything your group missed? Add anything you like to your own list by dragging the tile from other groups' content in Class Work. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Exit ticket</strong> </p>",
+                        "<p>Go to <a href='https://forms.gle/knzrmTp2rUTGLDz17'>this page</a> and fill out the survey.</p>"
+                      ]
+                    }
+                  }
+
+
+                ]
+              }
+            },
+            {
+              "type": "trapBuilding",
+              "content": {
+                "tiles":
+                [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>This section will document how to build moth traps.</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "pinning",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>This section will document how to pin moths, and allow students to display, annotate, and discuss images of their pinned moths.</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "summary",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>This section will scaffold student documentation  and discussion of their experimental findings.</p>"
                       ]
                     }
                   },
@@ -220,7 +952,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Encourage your students to work together using the Group View (upper right) and Share switch. They can copy items from each others documents by dragging. Then have them try publishing to the Class Work tab to share their posters.</p>"
+                        "<p>Show students each others documents from the Class Work tab or ask them to look at particular docs in that tab. Discuss the class findings.</p>",
+                        "<p>Ask closing question for students to consider while we are gone:  What is one thing you found interesting today? What is one thing you wonder about?</p>"
                       ]
                     }
                   }

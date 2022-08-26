@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "outDir": "dist",
     "sourceMap": true,
     "target": "ES2015",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "module": "ESNext",
     "esModuleInterop": true,
-    "importHelpers": false,
+    "importHelpers": true,
     "moduleResolution": "node",
     "allowJs": true,
     "resolveJsonModule": true,
@@ -16,7 +17,12 @@
     "experimentalDecorators": true,
     "skipLibCheck": true,
     "jsx": "react",
-    "useDefineForClassFields": true
+    "useDefineForClassFields": true,
+    "paths": {
+      "react-modal-hook": ["node_modules/@concord-consortium/react-modal-hook/dist"],
+      "mobx-state-tree": ["node_modules/@concord-consortium/mobx-state-tree/dist"]
+    },
+    "types": ["w3c-web-serial"]
   },
   "include": ["src/**/*"],
   "exclude": ["**/node_modules", "**/.*/"]

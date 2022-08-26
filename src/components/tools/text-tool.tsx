@@ -1,9 +1,10 @@
 import React from "react";
-import { autorun, IReactionDisposer, reaction } from "mobx";
+import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
-  Editor, EditorRange, EditorValue, EFormat, handleToggleSuperSubscript, SlateEditor
+  Editor, EditorRange, EditorValue, HtmlSerializablePlugin, SlateEditor
 } from "@concord-consortium/slate-editor";
+import "@concord-consortium/slate-editor/dist/index.css";
 
 import { BaseComponent } from "../base";
 import { debouncedSelectTile } from "../../models/stores/ui";
@@ -12,6 +13,7 @@ import { hasSelectionModifier } from "../../utilities/event-utils";
 import { TextToolbarComponent } from "./text-toolbar";
 import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
+import { getTextPluginInstances, getTextPluginIds } from "../../models/tools/text/text-plugin-info";
 
 import "./text-tool.sass";
 
@@ -69,8 +71,7 @@ import "./text-tool.sass";
     | image           | `![]` syntax  | <img>        |           | broken
     | link            | `[]()` syntax | <a>          |           | broken
 
-  * The name in the Tool Bar column matches the Font Awesome icon name used in
-  the TextToolBarComponent. This name is used to both render the button and to
+  * The name in the Tool Bar column is used to both render the button and to
   identify the button's action.
 
 */
@@ -78,6 +79,7 @@ import "./text-tool.sass";
 interface IState {
   value?: EditorValue;
   selectedButtons?: string[];
+  editing?: boolean;
 }
 
 @inject("stores")
@@ -90,6 +92,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarToolApi: IToolApi | undefined;
+  private plugins: HtmlSerializablePlugin[] | undefined;
 
   // map from slate type string to button icon name
   private slateMap: Record<string, string> = {
@@ -102,7 +105,9 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     "superscript": "superscript",
     "subscript": "subscript",
     "bulleted-list": "list-ul",
-    "ordered-list": "list-ol"
+    "ordered-list": "list-ol",
+    // include the plugin ids here
+    ...getTextPluginIds().reduce((idMap, id) => ({...idMap, [id]: id}), {})
   };
 
   public componentDidMount() {
@@ -114,15 +119,23 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     });
 
     this.disposers = [];
-    if (this.props.readOnly) {
-      this.disposers.push(autorun(() => {
-        const textContent = this.getContent();
-        if (this.prevText !== textContent.text) {
-          this.setState({ value: textContent.asSlate() });
-          this.prevText = textContent.text;
+    this.disposers.push(reaction(
+      () => {
+        const readOnly = this.props.readOnly;
+        const editing = this.state.editing;
+        const text = this.getContent().text;
+        return { readOnly, editing, text };
+      },
+      ({ readOnly, editing, text }) => {
+        if (readOnly || !editing) {
+          if (this.prevText !== text) {
+            const textContent = this.getContent();
+            this.setState({ value: textContent.asSlate() });
+            this.prevText = text;
+          }
         }
-      }));
-    }
+      }
+    ));
     // blur editor when tile is deselected
     this.disposers.push(reaction(
       () => {
@@ -152,6 +165,9 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
         this.toolbarToolApi?.handleTileResize?.(entry);
       }
     });
+
+
+    this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
   }
 
   public componentWillUnmount() {
@@ -161,7 +177,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   public render() {
     const { documentContent, toolTile, readOnly, scale } = this.props;
     const { value: editorValue, selectedButtons } = this.state;
-    const { unit: { placeholderText } } = this.stores;
+    const { appConfig: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
     // used here for a while now and cypress tests depend on it. Should transition
@@ -169,39 +185,6 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     const classes = `text-tool text-tool-editor ${editableClass}`;
 
     if (!editorValue) return null;
-
-    const handleToolBarButtonClick = (buttonIconName: string, editor: Editor, event: React.MouseEvent) => {
-      if (buttonIconName === "undo") {
-        editor.undo();
-        event.preventDefault();
-      }
-      else {
-        switch (buttonIconName) {
-          case "bold":
-            editor.command("toggleMark", EFormat.bold);
-            break;
-          case "italic":
-            editor.command("toggleMark", EFormat.italic);
-            break;
-          case "underline":
-            editor.command("toggleMark", EFormat.underlined);
-            break;
-          case "subscript":
-            handleToggleSuperSubscript(EFormat.subscript, editor);
-            break;
-          case "superscript":
-            handleToggleSuperSubscript(EFormat.superscript, editor);
-            break;
-          case "list-ol":
-            editor.command("toggleBlock", EFormat.numberedList);
-            break;
-          case "list-ul":
-            editor.command("toggleBlock", EFormat.bulletedList);
-            break;
-        }
-        event.preventDefault();
-      }
-    };
 
     return (
       // Ideally, this would just be 'text-tool' for consistency with other tools,
@@ -216,7 +199,6 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
           toolTile={toolTile}
           scale={scale}
           selectedButtons={selectedButtons || []}
-          onButtonClick={handleToolBarButtonClick}
           editor={this.editor}
           onIsEnabled={this.handleIsEnabled}
           onRegisterToolApi={this.handleRegisterToolApi}
@@ -224,11 +206,17 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
         />
         <SlateEditor
           className={classes}
-          onEditorRef={editorRef => this.editor = editorRef}
+          onEditorRef={this.handleEditorRef}
           value={editorValue}
           placeholder={placeholderText}
           readOnly={readOnly}
-          onValueChange={this.handleChange} />
+          plugins={this.plugins}
+          onValueChange={this.handleChange}
+          onFocus={ () => this.setState({ editing: true}) }
+          onBlur={ () => {
+            this.setState({ editing: false });
+          }}
+        />
       </div>
     );
   }
@@ -314,4 +302,8 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     return this.props.model.content as TextContentModelType;
   }
 
+  private handleEditorRef = (editor?: Editor) => {
+    this.editor = editor;
+    editor && this.getContent()?.setEditor(editor);
+  };
 }

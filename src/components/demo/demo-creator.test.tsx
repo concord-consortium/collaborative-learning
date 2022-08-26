@@ -2,9 +2,10 @@ import { act, configure, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { DemoCreatorComponent, passThroughQueryItemsFromUrl } from "./demo-creator";
-import { createStores, IStores } from "../../models/stores/stores";
-import { DemoModel } from "../../models/stores/demo";
 import { UnitModel } from "../../models/curriculum/unit";
+import { specStores } from "../../models/stores/spec-stores";
+import { IStores } from "../../models/stores/stores";
+import { DemoModel } from "../../models/stores/demo";
 
 const demoUnitJson = {
   code: "test",
@@ -82,7 +83,7 @@ describe("DemoCreator Component", () => {
   let stores: IStores;
 
   beforeEach(() => {
-    stores = createStores({
+    stores = specStores({
       demo: DemoModel.create({
         class: {
           id: "1",

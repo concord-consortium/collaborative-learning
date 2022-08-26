@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Modal from "react-modal";
 import { useModal } from "react-modal-hook";
 import CloseIconSvg from "../assets/icons/close/close.svg";
@@ -38,32 +38,35 @@ export const useCustomModal = <IContentProps,>({
   className, Icon, title, Content, contentProps, focusElement, canCancel, buttons, onClose
 }: IProps<IContentProps>, dependencies?: any[]) => {
 
-  const contentElt = useRef<HTMLDivElement>();
+  const [contentElt, setContentElt] = useState<HTMLDivElement>();
   const hideModalRef = useRef<() => void>();
   const handleCloseRef = useRef<() => void>(() => hideModalRef.current?.());
 
   const blurModal = useCallback(() => {
     // focusing the content element blurs any input control
-    contentElt.current?.focus();
-  }, []);
+    contentElt?.focus();
+  }, [contentElt]);
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === "Enter") {
-      const defaultButton = buttons.find(b => b.isDefault);
-      if (defaultButton && !defaultButton.isDisabled) {
-        blurModal();
-        // useRef to avoid circular dependencies
-        invokeButton(defaultButton, handleCloseRef.current);
-        e.stopPropagation();
-        e.preventDefault();
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        const defaultButton = buttons.find(b => b.isDefault);
+        if (defaultButton && !defaultButton.isDisabled) {
+          blurModal();
+          // useRef to avoid circular dependencies
+          invokeButton(defaultButton, handleCloseRef.current);
+          e.stopPropagation();
+          e.preventDefault();
+        }
       }
-    }
-  }, [blurModal, buttons, handleCloseRef]);
+    };
+
+    contentElt?.addEventListener("keydown", handleKeyDown, true);
+    return () => contentElt?.removeEventListener("keydown", handleKeyDown, true);
+  }, [blurModal, buttons, contentElt]);
 
   const handleAfterOpen = ({overlayEl, contentEl}: { overlayEl: Element, contentEl: HTMLDivElement }) => {
-    contentElt.current = contentEl;
-
-    contentEl.addEventListener("keydown", handleKeyDown, true);
+    setContentElt(contentEl);
 
     const element = focusElement && contentEl.querySelector(focusElement) as HTMLElement || contentEl;
     element && setTimeout(() => {
@@ -73,9 +76,8 @@ export const useCustomModal = <IContentProps,>({
   };
 
   const handleClose = useCallback(() => {
-    contentElt.current?.removeEventListener("keydown", handleKeyDown, true);
     hideModalRef.current?.();
-  }, [handleKeyDown]);
+  }, []);
   handleCloseRef.current = handleClose;
 
   const [showModal, hideModal] = useModal(() => {

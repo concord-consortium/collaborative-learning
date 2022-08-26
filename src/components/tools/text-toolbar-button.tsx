@@ -1,27 +1,29 @@
 import React from "react";
 import classNames from "classnames";
+import { Tooltip } from "react-tippy";
+import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 
 interface IProps {
   iconName: string;
+  Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>;
   tooltip: string;
   enabled: boolean;
   isSelected: boolean;
   onClick: (e: React.MouseEvent) => void;
 }
 
-const iconClasses = (iconName: string, enabled: boolean, isSelected: boolean) => {
-  return classNames("button-icon", "fa", "fa-fw", `fa-${iconName}`, isSelected ? "on" : "off", { enabled });
-};
+const kTooltipYDistance = 2;
 
 export const TextToolbarButton: React.FC<IProps> = ({
-              iconName, tooltip, enabled, isSelected, onClick
+              iconName, Icon, tooltip, enabled, isSelected, onClick
             }: IProps) => {
+  const tooltipOptions = useTooltipOptions({ distance: kTooltipYDistance });
+
   return (
-    <div className={classNames("button-with-tool-tip", { enabled })} key={iconName}>
-      <i className={iconClasses(iconName, enabled, isSelected)} onClick={onClick} />
-      <span className={classNames("tool-tip-text", { enabled })}>
-        {tooltip}
-      </span>
-    </div>
+    <Tooltip title={tooltip} {...tooltipOptions}>
+      <div className={classNames("button-with-tool-tip", isSelected ? "on" : "off", { enabled })} key={iconName}>
+        <Icon className={classNames("button-icon", isSelected ? "on" : "off", { enabled })} onClick={onClick} />
+      </div>
+    </Tooltip>
   );
 };

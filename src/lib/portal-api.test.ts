@@ -2,7 +2,8 @@ import nock from "nock";
 import { getPortalClassOfferings, getPortalOfferings, PortalOfferingParser } from "./portal-api";
 import { IPortalOffering } from "./portal-types";
 import { TeacherMineClasses, TeacherOfferings } from "../test-fixtures/sample-portal-offerings";
-import { AppConfigModel, AppConfigModelType } from "../models/stores/app-config-model";
+import { AppConfigModelType } from "../models/stores/app-config-model";
+import { specAppConfig } from "../models/stores/spec-app-config";
 
 const userType = "teacher";
 const userID = 22;
@@ -40,7 +41,7 @@ describe("Portal Offerings", () => {
   describe("PortalOfferingParser", () => {
     const { getProblemOrdinal, getUnitCode } = PortalOfferingParser;
 
-    const appConfig = AppConfigModel.create();
+    const appConfig = specAppConfig();
     const samplePortalOffering = {
       id: 1190,
       teacher: "Dave Love",
@@ -64,7 +65,7 @@ describe("Portal Offerings", () => {
       });
 
       it("should return a mapped unit code for legacy units", () => {
-        const barAppConfig = AppConfigModel.create({ unitCodeMap: { foo: "bar" }});
+        const barAppConfig = specAppConfig({ unitCodeMap: { foo: "bar" } as any });
         const unitCode = getUnitCode(samplePortalOffering.activity_url, barAppConfig);
         expect(unitCode).toEqual("bar");
       });
@@ -91,7 +92,7 @@ describe("Portal Offerings", () => {
     });
 
     describe("getUnitCode", () => {
-      const appConfig = AppConfigModel.create();
+      const appConfig = specAppConfig();
       it(`should default to 'undefined'`, () => {
         const unitCode = getUnitCode(samplePortalOffering.activity_url, appConfig);
         expect(unitCode).toBeUndefined();
@@ -99,7 +100,9 @@ describe("Portal Offerings", () => {
     });
 
     describe("getPortalClassOfferings", () => {
-      const mockAppConfig = { defaultProblemOrdinal: "1.1", defaultUnit: "sas", unitCodeMap: {} } as AppConfigModelType;
+      const mockAppConfig = {
+        defaultUnit: "sas", unitCodeMap: {}, config: { defaultProblemOrdinal: "1.1" }
+      } as AppConfigModelType;
       const mockUrlParams = {
               class: "https://learn.staging.concord.org/api/v1/classes/242",
               offering: "https://collaborative-learning.concord.org/branch/master/?problem=1.2",

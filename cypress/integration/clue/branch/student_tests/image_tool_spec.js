@@ -13,15 +13,15 @@ const resourcesPanel = new ResourcesPanel;
 
 let userCanvas = 'Uploaded Images';
 
-before(function(){
-    const queryParams = `${Cypress.config("queryParams")}`;
-    cy.clearQAData('all');
-
-    cy.visit(queryParams);
-    cy.waitForLoad();
-});
-
 context('Test image functionalities', function(){
+    before(function(){
+        const queryParams = `${Cypress.config("queryParams")}`;
+        cy.clearQAData('all');
+    
+        cy.visit(queryParams);
+        cy.waitForLoad();
+    });
+    
     describe('upload image from user computer',()=>{
         before(()=>{ //create a new doc so that save and restore can be tested
             canvas.createNewExtraDocumentFromFileMenu(userCanvas, "my-work");
@@ -86,6 +86,3 @@ context('Test image functionalities', function(){
     });
 });
 
-after(function(){
-  cy.clearQAData('all');
-});

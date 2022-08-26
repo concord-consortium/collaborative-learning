@@ -1,50 +1,40 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
-import { createChange, ImageToolChange } from "./image-change";
-import { exportImageTileSpec, importImageTileSpec, isImageTileImportSpec } from "./image-import-export";
+import { exportImageTileSpec, isLegacyImageTileImport, convertLegacyImageTile } from "./image-import-export";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
-import { ToolContentModel } from "../tool-types";
+import { getToolTileModel, setTileTitleFromContent } from "../tool-tile";
+import { toolContentModelHooks, ToolContentModel, ToolMetadataModelType } from "../tool-types";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
-import { safeJsonParse } from "../../../utilities/js-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
 export const kImageToolID = "Image";
 
 // This is only used directly by tests
 export function defaultImageContent(options?: IDefaultContentOptions) {
-  const change = createChange(options?.url || placeholderImage);
-  return ImageContentModel.create({ changes: [change] });
+  return ImageContentModel.create({url: options?.url || placeholderImage});
 }
 
 export const ImageContentModel = ToolContentModel
   .named("ImageTool")
   .props({
     type: types.optional(types.literal(kImageToolID), kImageToolID),
-    changes: types.array(types.string)
+    url: types.maybe(types.string),
+    filename: types.maybe(types.string),
   })
+  .volatile(self => ({
+    metadata: undefined as any as ToolMetadataModelType
+  }))
   .preProcessSnapshot(snapshot => {
-    return isImageTileImportSpec(snapshot)
-            ? importImageTileSpec(snapshot)
+    return isLegacyImageTileImport(snapshot)
+            ? convertLegacyImageTile(snapshot)
             : snapshot;
   })
   .views(self => ({
+    get title() {
+      return getToolTileModel(self)?.title;
+    },
     get isUserResizable() {
       return true;
     },
-    get changeCount() {
-      return self.changes.length;
-    },
-    get filename() {
-      if (!self.changes.length) return;
-      const lastChangeJson = self.changes[self.changes.length - 1];
-      const lastChange = safeJsonParse<ImageToolChange>(lastChangeJson);
-      return lastChange?.filename;
-    },
-    get url() {
-      if (!self.changes.length) return;
-      const lastChangeJson = self.changes[self.changes.length - 1];
-      const lastChange = safeJsonParse<ImageToolChange>(lastChangeJson);
-      return lastChange?.url;
-    }
   }))
   .views(self => ({
     get hasValidImage() {
@@ -52,32 +42,25 @@ export const ImageContentModel = ToolContentModel
       return !!url && !isPlaceholderImage(url);
     },
     exportJson(options?: ITileExportOptions) {
-      return exportImageTileSpec(self.changes, options);
+      return exportImageTileSpec(self.url, self.filename, options);
     }
+  }))
+  .actions(self => toolContentModelHooks({
+      doPostCreate(metadata: ToolMetadataModelType) {
+        self.metadata = metadata;
+      },
   }))
   .actions(self => ({
     setUrl(url: string, filename?: string) {
-      self.changes.push(createChange(url, filename));
+      self.url = url;
+      self.filename = filename;
     },
     updateImageUrl(oldUrl: string, newUrl: string) {
       if (!oldUrl || !newUrl || (oldUrl === newUrl)) return;
-      // identify change entries to be modified
-      const updates: Array<{ index: number, change: string }> = [];
-      self.changes.forEach((changeJson, index) => {
-        const change = safeJsonParse<ImageToolChange>(changeJson);
-        switch (change?.operation) {
-          case "update":
-            if (change.url && (change.url === oldUrl)) {
-              change.url = newUrl;
-              updates.push({ index, change: JSON.stringify(change) });
-            }
-            break;
-        }
-      });
-      // make the corresponding changes
-      updates.forEach(update => {
-        self.changes[update.index] = update.change;
-      });
+      if (self.url === oldUrl) self.url = newUrl;
+    },
+    setTitle(title: string) {
+      setTileTitleFromContent(self, title);
     }
   }));
 

@@ -3,7 +3,7 @@ import React from "react";
 import { ClueAppHeaderComponent } from "./clue-app-header";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
 import { BaseComponent, IBaseProps } from "../../components/base";
-import { DocumentWorkspaceComponent } from "../../components/document/document-workspace";
+import { WorkspaceComponent } from "../../components/workspace/workspace";
 import { DialogComponent } from "../../components/utilities/dialog";
 import { TeacherDashboardComponent } from "./teacher/teacher-dashboard";
 import { Logger, LogEventName } from "../../lib/logger";
@@ -20,13 +20,12 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { user, ui } = this.stores;
-    const isTeacher = user && user.isTeacher;
+    const { appConfig: {autoAssignStudentsToIndividualGroups}, user, ui } = this.stores;
 
     const panels: IPanelGroupSpec = [{
                     panelId: EPanelId.workspace,
                     label: "Workspace & Resources",
-                    content: <DocumentWorkspaceComponent />
+                    content: <WorkspaceComponent />
                   }];
     if (user && user.isTeacher) {
       panels.unshift({
@@ -37,7 +36,7 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
     }
     const teacherPanelKey = ui.teacherPanelKey
       ? ui.teacherPanelKey
-      : isTeacher ? EPanelId.dashboard : EPanelId.workspace;
+      : EPanelId.workspace;
 
     const currentPanelSpec = panels.find(spec => spec.panelId === teacherPanelKey);
     const currentPanelContent = currentPanelSpec && currentPanelSpec.content;
@@ -46,9 +45,11 @@ export class ClueAppContentComponent extends BaseComponent<IProps> {
       <div className="clue-app-content">
         <ClueAppHeaderComponent panels={panels}
                             current={teacherPanelKey} onPanelChange={this.handlePanelChange}
-                            showGroup={true} />
+                            // This assumes that when we auto-assign students to groups,
+                            // we don't want to see the Groups in the header
+                            showGroup={!autoAssignStudentsToIndividualGroups} />
         {currentPanelContent}
-        <DialogComponent dialog={this.stores.ui.dialog} />
+        <DialogComponent dialog={ui.dialog} />
       </div>
     );
   }

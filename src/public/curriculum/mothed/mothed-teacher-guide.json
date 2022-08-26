@@ -1,0 +1,117 @@
+{
+  "code": "moth",
+  "abbrevTitle": "MOTHED",
+  "title": "MothEd Teacher Guide",
+  "subtitle": "",
+  "placeholderText": "Enter notes here",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "sections": {
+    "overview": {
+      "initials": "OV",
+      "title": "Overview",
+      "placeholder": "Work area for\nOverview section"
+    },
+    "teach": {
+      "initials": "LC",
+      "title": "Teach",
+      "placeholder": "Work area for\nLaunch section"
+    }
+  },
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "Introduction to MothEd",
+      "overview": {
+        "tiles": [ ]
+      },
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "Welcome to MothEd CLUE PD",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "overview",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "rogiegnxN_BUxgaD",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Middle School MothEd Digital Teacher binder</h3>",
+                        "<p><a href='https://docs.google.com/presentation/d/1z6gWEzq8Phtq2bRj7XaOEeSs0L6Bup1ti7QVGvedNu8/edit?usp=sharing'>Digital Teacher Binder</a></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            }
+          ]
+        },
+        {
+          "description": "Problem 1.2",
+          "ordinal": 2,
+          "title": "MothEd Middle School Activity",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "overview",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "rogiegnxN_BUxgaD",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Middle School MothEd Digital Teacher binder</h3>",
+                        "<p><a href='https://docs.google.com/presentation/d/1z6gWEzq8Phtq2bRj7XaOEeSs0L6Bup1ti7QVGvedNu8/edit?usp=sharing'>Digital Teacher Binder</a></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            }
+          ]
+        },
+        {
+          "description": "Problem 1.3",
+          "ordinal": 3,
+          "title": "MothEd Original Sample",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "overview",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "rogiegnxN_asdfBUxgaD",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>Middle School MothEd Digital Teacher binder</h3>",
+                        "<p><a href='https://docs.google.com/presentation/d/1z6gWEzq8Phtq2bRj7XaOEeSs0L6Bup1ti7QVGvedNu8/edit?usp=sharing'>Digital Teacher Binder</a></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

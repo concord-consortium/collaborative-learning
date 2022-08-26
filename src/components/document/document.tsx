@@ -2,15 +2,16 @@ import { inject, observer } from "mobx-react";
 import { autorun, IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import FileSaver from "file-saver";
-
+import { usePublishDialog } from "./use-publish-dialog";
 import { DocumentFileMenu } from "./document-file-menu";
 import { MyWorkDocumentOrBrowser } from "./document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
-import { ToolbarModelType } from "../../models/stores/app-config-model";
 import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
+import { ToolbarModelType } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
+import { ENavTab } from "../../models/view/nav-tabs";
 import { IconButton } from "../utilities/icon-button";
 import ToggleControl from "../utilities/toggle-control";
 import { Logger, LogEventName } from "../../lib/logger";
@@ -30,8 +31,7 @@ interface IProps extends IBaseProps {
   onNewDocument?: (type: string) => void;
   onCopyDocument?: (document: DocumentModelType) => void;
   onDeleteDocument?: (document: DocumentModelType) => void;
-  onPublishSupport?: (document: DocumentModelType) => void;
-  onPublishDocument?: (document: DocumentModelType) => void;
+  onAdminDestroyDocument?: (document: DocumentModelType) => void;
   toolbar?: ToolbarModelType;
   side: WorkspaceSide;
   readOnly?: boolean;
@@ -52,20 +52,14 @@ const DownloadButton = ({ onClick }: { onClick: SVGClickHandler }) => {
   );
 };
 
-const PublishButton = ({ onClick, dataTestName }: { onClick: () => void, dataTestName?: string }) => {
+const PublishButton = ({ document }: { document: DocumentModelType }) => {
+  const [showPublishDialog] = usePublishDialog(document);
+  const handlePublishButtonClick = () => {
+    showPublishDialog();
+  };
   return (
-    <IconButton icon="publish" key="publish" className="action icon-publish" dataTestName={dataTestName}
-                onClickButton={onClick} title="Publish Workspace" />
-  );
-};
-
-const PublishSupportButton = ({ onClick }: { onClick: () => void }) => {
-  return (
-    <>
-      <IconButton icon="publish-support" key="support" className="action icon-support"
-                  onClickButton={onClick} title="publish to supports" />
-      <div className="support-badge"/>
-    </>
+    <IconButton icon="publish" key="publish" className="action icon-publish" dataTestName="publish-icon"
+                onClickButton={handlePublishButtonClick} title="Publish Workspace" />
   );
 };
 
@@ -199,6 +193,12 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  private showFileMenu() {
+    const { appConfig: { navTabs } } = this.stores;
+    // show the File menu if my work navigation is enabled
+    return !!navTabs.getNavTabSpec(ENavTab.kMyWork);
+  }
+
   private renderTitleBar(type: string) {
     const { document, side } = this.props;
     const hideButtons = (side === "comparison") || document.isPublished;
@@ -216,8 +216,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderProblemTitleBar(type: string, hideButtons?: boolean) {
     const {problem, appMode, clipboard, user: { isTeacher }} = this.stores;
     const problemTitle = problem.title;
-    const {document, workspace} = this.props;
+    const { document, workspace } = this.props;
     const isShared = document.visibility === "public";
+    const showFileMenu = this.showFileMenu();
     const show4up = !workspace.comparisonVisible && !isTeacher;
     const downloadButton = (appMode !== "authed") && clipboard.hasJsonTileContent()
                             ? <DownloadButton key="download" onClick={this.handleDownloadTileJson} />
@@ -226,12 +227,14 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
           <div className="actions left">
-            <DocumentFileMenu document={document}
-              onOpenDocument={this.handleOpenDocumentClick}
-              onCopyDocument={this.handleCopyDocumentClick}
-              isDeleteDisabled={true} />
+            {showFileMenu &&
+              <DocumentFileMenu document={document}
+                onOpenDocument={this.handleOpenDocumentClick}
+                onCopyDocument={this.handleCopyDocumentClick}
+                isDeleteDisabled={true}
+                onAdminDestroyDocument={this.handleAdminDestroyDocument} />}
             {this.showPublishButton(document) &&
-              <PublishButton key="publish" onClick={this.handlePublishDocument} />}
+              <PublishButton document={document} />}
           </div>
         }
         <div className="title" data-test="document-title">
@@ -240,8 +243,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         {!hideButtons &&
           <div className="actions right" data-test="document-titlebar-actions">
             {downloadButton}
-            {(isTeacher && type !== "planning") &&
-              <PublishSupportButton onClick={this.handlePublishSupport} />}
             {show4up && this.renderMode()}
             {!isTeacher &&
               <ShareButton isShared={isShared} onClick={this.handleToggleVisibility} />}
@@ -254,7 +255,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private showPublishButton(document: DocumentModelType) {
     const { appConfig } = this.stores;
     if (!appConfig.disablePublish) return true;
-    if (document.type === "planning") return false;
+    // When we disable publishing by setting disablePublish=true,
+    // we set showPublishButton to false to hide the Publish button
+    if (document.type === "planning" || appConfig.disablePublish === true) return false;
     return appConfig.disablePublish
             .findIndex(spec => {
               return (document.type === spec.documentType) &&
@@ -347,7 +350,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
   private renderOtherDocumentTitleBar(type: string, hideButtons?: boolean) {
     const { document, workspace } = this.props;
-    const { appConfig, user: { isTeacher }, documents, user } = this.stores;
+    const { appConfig, user, documents } = this.stores;
     const otherDocuments = documents.byTypeForUser(document.type, user.id);
     const countNotDeleted = otherDocuments.reduce((prev, doc) => doc.getProperty("isDeleted") ? prev : prev + 1, 0);
     const { supportStackedTwoUpView } = appConfig;
@@ -362,9 +365,10 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
               onOpenDocument={this.handleOpenDocumentClick}
               onCopyDocument={this.handleCopyDocumentClick}
               isDeleteDisabled={countNotDeleted < 1}
-              onDeleteDocument={this.handleDeleteDocumentClick}/>
-            {!hideButtons && this.showPublishButton(document) &&
-              <PublishButton dataTestName="other-doc-publish-icon" onClick={this.handlePublishDocument} />}
+              onDeleteDocument={this.handleDeleteDocumentClick}
+              onAdminDestroyDocument={this.handleAdminDestroyDocument} />
+            {this.showPublishButton(document) &&
+              <PublishButton document={document} />}
           </div>
         }
         {hasDisplayId && <div className="display-id" style={{opacity: 0}}>{displayId}</div>}
@@ -381,7 +385,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
         }
         {hasDisplayId && <div className="display-id">{displayId}</div>}
         <div className="actions">
-          {!hideButtons && isTeacher && <PublishSupportButton key="otherDocPub" onClick={this.handlePublishSupport} />}
           {(!hideButtons || supportStackedTwoUpView) &&
             <div className="actions">
               {supportStackedTwoUpView && isPrimary &&
@@ -452,6 +455,11 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     onDeleteDocument?.(document);
   };
 
+  private handleAdminDestroyDocument = () => {
+    const { document, onAdminDestroyDocument } = this.props;
+    onAdminDestroyDocument?.(document);
+  };
+
   private handleSelectDocument = (document: DocumentModelType) => {
     const { appConfig, ui } = this.stores;
     ui.rightNavDocumentSelected(appConfig, document);
@@ -469,16 +477,6 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
           document.setTitle(title);
         }
       });
-  };
-
-  private handlePublishSupport = () => {
-    const { document, onPublishSupport } = this.props;
-    onPublishSupport && onPublishSupport(document);
-  };
-
-  private handlePublishDocument = () => {
-    const { document, onPublishDocument } = this.props;
-    onPublishDocument && onPublishDocument(document);
   };
 
   private isPrimary() {

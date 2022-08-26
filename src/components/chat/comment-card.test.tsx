@@ -23,7 +23,7 @@ describe("CommentCard", () => {
       <ModalProvider>
         <CommentCard activeNavTab={activeNavTab} />
       </ModalProvider>
-));
+    ));
     expect(screen.getByTestId("comment-card")).toBeInTheDocument();
     expect(screen.getByTestId("comment-card-content")).toBeInTheDocument();
     expect(screen.getByTestId("comment-card-content")).toHaveClass("selected");

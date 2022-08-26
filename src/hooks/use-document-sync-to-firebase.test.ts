@@ -3,7 +3,7 @@ import { observable, reaction, runInAction } from "mobx";
 import { SnapshotIn } from "mobx-state-tree";
 import { UseMutationOptions } from "react-query";
 import { Firebase } from "../lib/firebase";
-import { DocumentModel } from "../models/document/document";
+import { DocumentModel, createDocumentModel } from "../models/document/document";
 import {
   LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../models/document/document-types";
@@ -13,7 +13,7 @@ const libDebug = require("../lib/debug");
 
 import "../models/tools/text/text-registration";
 
-var mockUseMutation = jest.fn((callback: (vars: any) => Promise<any>, options?: UseMutationOptions) => {
+const mockUseMutation = jest.fn((callback: (vars: any) => Promise<any>, options?: UseMutationOptions) => {
   return {
     mutate: (vars: any) => {
       callback(vars)
@@ -42,8 +42,8 @@ jest.mock("react-query", () => ({
   useMutation: (callback: (vars: any) => Promise<any>, options?: any) => mockUseMutation(callback, options)
 }));
 
-var mockUpdate = jest.fn();
-var mockRef = jest.fn();
+const mockUpdate = jest.fn();
+const mockRef = jest.fn();
 
 const specUser = (overrides?: Partial<SnapshotIn<typeof UserModel>>) => {
   return UserModel.create({ id: "1", ...overrides });
@@ -65,7 +65,7 @@ const specFirebase = (type: string, key: string) => {
 const specDocument = (overrides?: Partial<SnapshotIn<typeof DocumentModel>>) => {
   const props: SnapshotIn<typeof DocumentModel> = {
     type: "problem", key: "doc-key", uid: "1", content: {}, ...overrides };
-  return DocumentModel.create(props);
+  return createDocumentModel(props);
 };
 
 const specArgs = (type: string, key: string,
@@ -190,8 +190,8 @@ describe("useDocumentSyncToFirebase hook", () => {
 
     // doesn't respond to properties change (problem documents don't have user-settable properties)
     document.setProperty("foo", "bar");
-    expect(mockRef).toHaveBeenCalledTimes(2);
-    expect(mockUpdate).toHaveBeenCalledTimes(2);
+    expect(mockRef).toHaveBeenCalledTimes(3);
+    expect(mockUpdate).toHaveBeenCalledTimes(3);
   });
 
   it("monitors planning documents", () => {
@@ -322,13 +322,13 @@ describe("useDocumentSyncToFirebase hook", () => {
       expect(spy).not.toBeCalled();
     });
 
-    // doesn't respond to properties change
+    // responds to properties change when we publish problem documents (pubCount)
     mockRef.mockClear();
     mockUpdate.mockClear();
     await jestSpyConsole("log", spy => {
       document.setProperty("foo", "bar");
-      expect(mockRef).toHaveBeenCalledTimes(0);
-      expect(mockUpdate).toHaveBeenCalledTimes(0);
+      expect(mockRef).toHaveBeenCalledTimes(1);
+      expect(mockUpdate).toHaveBeenCalledTimes(1);
       expect(spy).not.toBeCalled();
     });
 
@@ -395,7 +395,7 @@ describe("useDocumentSyncToFirebase hook", () => {
     await jestSpyConsole("log", async spy => {
       document.setProperty("foo", "bar");
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
       await waitFor(() => expect(spy).toBeCalledTimes(1));
     });
@@ -526,13 +526,13 @@ describe("useDocumentSyncToFirebase hook", () => {
       document.setProperty("foo", "bar");
       // assert initial (failed) attempt
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
       await waitFor(() => expect(spy).toBeCalledTimes(1));
       // trigger retry (successful) attempt
       jest.runAllTimers();
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
     });
 
@@ -552,5 +552,17 @@ describe("useDocumentSyncToFirebase hook", () => {
       expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
     });
+  });
+
+  it("sets window.currentDocument when DOCUMENT_DEBUG is true", () => {
+    libDebug.DEBUG_DOCUMENT = true;
+    const { user, firebase, document } = specArgs(ProblemDocument, "xyz");
+    renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    expect((window as any).currentDocument).toBe(document);
+
+    (window as any).currentDocument = undefined;
+    libDebug.DEBUG_DOCUMENT = false;
+    renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    expect((window as any).currentDocument).toBeUndefined();
   });
 });

@@ -5,13 +5,14 @@ const queryParams = `${Cypress.config("queryParams")}`;
 let clueCanvas = new ClueCanvas,
     textToolTile = new TextToolTile;
 
-before(function () {
-  cy.clearQAData('all');
-
-  cy.visit(queryParams);
-  cy.waitForLoad();
-});
 context('Test the overall workspace', function () {
+  before(function () {
+    cy.clearQAData('all');
+
+    cy.visit(queryParams);
+    cy.waitForLoad();
+  });
+
   describe('Desktop functionalities', function () {
     it('will verify that clicking on collapsed resource tab opens the nav area', function () {
       cy.get(".collapsed-resources-tab.my-work").click();
@@ -34,11 +35,12 @@ context('Test the overall workspace', function () {
       cy.get('.primary-workspace [data-test=learning-log-title]').should('contain', "Learning Log: My First Learning Log");
     });
     it('verify close of nav tabs', function () {
-      cy.closeTabs();
-      cy.get('.nav-tab-panel').should('not.be.visible');
+      cy.closeResourceTabs();
+      cy.get('.nav-tab-panel').should('not.exist');
       cy.get('.primary-workspace').should('be.visible');
     });
     it('verify collapse workspace', function () {
+      cy.get('.collapsed-resources-tab').click();
       cy.collapseWorkspace();
       cy.get('.primary-workspace').should('not.exist');
       cy.get('.collapsed-workspace-tab').should('exist');
@@ -78,8 +80,4 @@ context('Test the overall workspace', function () {
     });
 
   });
-});
-
-after(function () {
-  cy.clearQAData('all');
 });

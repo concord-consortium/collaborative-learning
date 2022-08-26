@@ -23,6 +23,7 @@
 //
 // -- This is will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+import '@testing-library/cypress/add-commands';
 import ClueHeader from './elements/clue/cHeader';
 import PrimaryWorkspace from './elements/common/PrimaryWorkspace';
 import Canvas from './elements/common/Canvas';
@@ -74,15 +75,17 @@ Cypress.Commands.add("uploadFile",(selector, filename, type="")=>{
 });
 Cypress.Commands.add("clearQAData", (data)=>{ //clears data from Firebase (currently data='all' is the only one supported)
     if (data==='all') {
+
         cy.visit('?appMode=qa&qaClear=' + data + '&fakeClass=5&fakeUser=student:5');
-        cy.get('span', {timeout: 60000}).should('contain','QA Cleared: OK');
-        // According to the firebase documentation and our implementation we shouldn't be showing
-        // QA Cleared: OK until the removal of the node in firebase is complete.
-        // However there are some randomly failing tests which could be explained if this
-        // removal on the firebase server happens later and triggers an event after the next
-        // visit command.
-        // So to be safe there is a wait here to give firebase more of a chance to process.
-        cy.wait(1000);
+        // For some reason when using
+        //   cy.get('span', {timeout: 60000}).should('contain','QA Cleared: OK');
+        // If there is a test failure then a weird
+        // error is shown:
+        //   object tested must be an array, a map, an object, a set, a string,
+        //   or a weakset, but undefined given
+        // The log shows the assertion passing and then shows it failing right after
+        // using contains fixes this problem.
+        cy.contains('span', 'QA Cleared: OK', {timeout: 60000});
     }
 });
 
@@ -202,12 +205,13 @@ Cypress.Commands.add("clickDocumentResourceTile", (tileIndex = 0) => {
 Cypress.Commands.add("getDocumentToolTile", (tileIndex = 0) => {
   cy.get('.documents-panel .editable-document-content .tile-row tool-tile').eq(tileIndex).click();
 });
-Cypress.Commands.add('closeTabs', () => {
-  cy.get('.drag-left-handle').click();
+Cypress.Commands.add('closeResourceTabs', () => {
+  cy.get('.nav-tab-panel .close-button').click();
 });
 Cypress.Commands.add('collapseWorkspace', () => {
-  cy.get('.drag-right-handle').click();
-  cy.get('.drag-right-handle').click(); // to ensure workspace is collapsed regardless of initial position
+  cy.get('.divider').click({force:true});
+  cy.get('.divider-container .expand-handle.right').click();
+  // cy.get('.divider-container .expand-handle.right').click(); // to ensure workspace is collapsed regardless of initial position
 });
 Cypress.Commands.add('linkTableToGraph', (table, graph) => {
   cy.get('.primary-workspace .table-title').contains(table).within(() => {

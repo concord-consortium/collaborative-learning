@@ -7,6 +7,7 @@ import { DocumentContentComponent } from "./document-content";
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
+import { PlaybackComponent } from "../playback/playback";
 import {
   IToolApi, IToolApiInterface, IToolApiMap, ToolApiInterfaceContext, EditableToolApiInterfaceRefContext
 } from "../tools/tool-api";
@@ -15,18 +16,18 @@ import { DEBUG_CANVAS } from "../../lib/debug";
 
 import "./canvas.sass";
 
-export type EditabilityLocation = "north east" | "north west" | "south east" | "south west";
-
 interface IProps {
   context: string;
   scale?: number;
   readOnly?: boolean;
   document?: DocumentModelType;
   content?: DocumentContentModelType;
-  editabilityLocation?: EditabilityLocation;
+  showPlayback?: boolean;
+  showPlaybackControls?: boolean;
   overlayMessage?: string;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
+  onTogglePlaybackControls?: () => void;
 }
 
 @inject("stores")
@@ -59,7 +60,9 @@ export class CanvasComponent extends BaseComponent<IProps> {
     };
 
     this.hotKeys.register({
-      "cmd-shift-s": this.handleCopyDocumentJson
+      "cmd-shift-s": this.handleCopyDocumentJson,
+      "cmd-z": this.handleDocumentUndo,
+      "cmd-shift-z": this.handleDocumentRedo
     });
   }
 
@@ -72,7 +75,6 @@ export class CanvasComponent extends BaseComponent<IProps> {
       <ToolApiInterfaceContext.Provider value={this.toolApiInterface}>
         <div key="canvas" className="canvas" data-test="canvas" onKeyDown={this.handleKeyDown}>
           {this.renderContent()}
-          {this.renderEditability()}
           {this.renderDebugInfo()}
           {this.renderOverlayMessage()}
         </div>
@@ -80,31 +82,23 @@ export class CanvasComponent extends BaseComponent<IProps> {
     );
   }
 
-  private renderEditability() {
-    const {editabilityLocation, readOnly} = this.props;
-    if (editabilityLocation) {
-      const iconName = readOnly ? "icon-copy-only" : "icon-edit";
-      return (
-        <svg key="edit" className={`icon editability ${iconName} ${editabilityLocation}`}>
-          <use xlinkHref={`#${iconName}`} />
-        </svg>
-      );
-    }
-    return null;
-  }
-
   private renderContent() {
-    const {content, document, ...others} = this.props;
-    const documentContent = document ? document.content : content;
-    const documentId = document?.key;
+    const {content, document, showPlayback, showPlaybackControls, onTogglePlaybackControls, ...others} = this.props;
+    const documentContent = content || document?.content; // we only pass in content if it is a problem panel
     const typeClass = document?.type === "planning" ? "planning-doc" : "";
 
     if (documentContent) {
       return (
-        <DocumentContentComponent content={documentContent}
-                                  documentId={documentId}
-                                  typeClass={typeClass}
-                                  {...others} />
+        <>
+          <DocumentContentComponent content={documentContent}
+                                    documentId={document?.key}
+                                    typeClass={typeClass}
+                                    {...others} />
+          {showPlayback && <PlaybackComponent document={document}
+                                              showPlaybackControls={showPlaybackControls}
+                                              onTogglePlaybackControls={onTogglePlaybackControls} />
+          }
+        </>
       );
     }
     else {
@@ -143,10 +137,20 @@ export class CanvasComponent extends BaseComponent<IProps> {
     const { appConfig, unit } = this.stores;
     const unitBasePath = appConfig.getUnitBasePath(unit.code);
     const documentContent = document?.content ?? content;
-    const transformImageUrl = (url: string, filename?: string) => {
+    const transformImageUrl = (url?: string, filename?: string) => {
       return transformCurriculumImageUrl(url, unitBasePath, filename);
     };
     const json = documentContent?.exportAsJson({ includeTileIds: true, transformImageUrl });
     json && navigator.clipboard.writeText(json);
+  };
+
+  private handleDocumentUndo = () => {
+    const { document } = this.props;
+    document?.undoLastAction();
+  };
+
+  private handleDocumentRedo = () => {
+    const { document } = this.props;
+    document?.redoLastAction();
   };
 }

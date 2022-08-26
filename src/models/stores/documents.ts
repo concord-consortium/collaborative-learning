@@ -1,13 +1,15 @@
 import { forEach } from "lodash";
-import { types } from "mobx-state-tree";
-import { DocumentModel, DocumentModelType } from "../document/document";
+import { getEnv, types } from "mobx-state-tree";
+import { observable } from "mobx";
+import { AppConfigModelType } from "./app-config-model";
+import { DocumentModelType, IDocumentEnvironment } from "../document/document";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../document/document-types";
-import { UnitModel, UnitModelType } from "../curriculum/unit";
 import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
+import { DEBUG_DOCUMENT } from "../../lib/debug";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
   const latestPublications: DocumentModelType[] = [];
@@ -31,11 +33,11 @@ export interface IRequiredDocumentPromise {
 
 export const DocumentsModel = types
   .model("Documents", {
-    all: types.array(DocumentModel),
-    unit: types.maybe(UnitModel)
   })
   .volatile(self => ({
-    requiredDocuments: {} as Record<string, IRequiredDocumentPromise>
+    appConfig: undefined as AppConfigModelType | undefined,
+    requiredDocuments: {} as Record<string, IRequiredDocumentPromise>,
+    all: observable<DocumentModelType>([])
   }))
   .views(self => ({
     getDocument(documentKey: string) {
@@ -160,8 +162,23 @@ export const DocumentsModel = types
   }))
   .actions((self) => {
     const add = (document: DocumentModelType) => {
+      if (DEBUG_DOCUMENT) {
+        // eslint-disable-next-line no-console        
+        console.log("adding document to DocumentsModel", {
+          key: document.key,
+          title: document.title,
+          uid: document.uid,
+          type: document.type
+        });
+      }
       if (!self.getDocument(document.key)) {
         self.all.push(document);
+        const documentEnv = getEnv(document)?.documentEnv as IDocumentEnvironment | undefined;
+        if (documentEnv) {
+          documentEnv.appConfig = self.appConfig;
+        }
+      } else {
+        console.warn("Document with the same key already exists");
       }
     };
 
@@ -169,21 +186,23 @@ export const DocumentsModel = types
       self.all.remove(document);
     };
 
-    const update = (document: DocumentModelType) => {
-      if (!self.getDocument(document.key)) {
-        add(document);
-      }
-      else {
-        const i = self.all.findIndex((currDoc) => currDoc.key === document.key);
-        if (i !== -1) {
-          const oldDoc = self.all[i];
-          if (oldDoc && oldDoc.changeCount > document.changeCount) return;
-
-          self.all[i] = document;
-        }
-      }
-    };
-
+    /*
+     * The required document promises are used to facilitate the creation of required documents
+     * while preventing the creation of redundant documents. Depending on the configuration, any
+     * of problem, planning, personal, and/or learning log documents may be required. Required
+     * documents are created automatically when the user enters the workspace if there is not
+     * already a document of the corresponding type. Prior to the introduction of these promises,
+     * we were assuming that the code for reading a user's documents would complete before the
+     * code for generating required documents ran, i.e. whether or not required documents were
+     * created was dependent on the outcome of a race condition. As a result, under some
+     * circumstances we would create a redundant required document simply because at that point
+     * in time the code hadn't yet determined whether the user already had any documents of the
+     * appropriate type. We now maintain a promise for each type of potentially required document
+     * which is resolved to the first document of that type encountered or to null if we determine
+     * that there are no documents of the appropriate type. Code that creates required documents
+     * now awaits these promises and only proceeds with the creation of default documents if the
+     * corresponding promise is resolved with null.
+     */
     const addRequiredDocumentPromises = (requiredTypes: string[]) => {
       requiredTypes.forEach(type => {
         const wrapper: Partial<IRequiredDocumentPromise> = { isResolved: false };
@@ -197,18 +216,27 @@ export const DocumentsModel = types
       });
     };
 
-    const resolveRequiredDocumentPromise = (document: DocumentModelType | null, typeToNull?: string) => {
-      const type = document?.type || typeToNull;
-      if (type) {
-        const promise = self.requiredDocuments[type];
-        !promise.isResolved && promise.resolve(document);
-      }
+    // resolve the promise corresponding to this document's type with this document
+    const resolveRequiredDocumentPromise = (document: DocumentModelType) => {
+      const promise = self.requiredDocuments[document.type];
+      !promise?.isResolved && promise?.resolve(document);
     };
 
-    const resolveAllRequiredDocumentPromisesWithNull = () => {
-      forEach(self.requiredDocuments, (wrapper, type) => {
-        resolveRequiredDocumentPromise(null, type);
-      });
+    // resolve the specified promise with null, i.e. the user has no documents of this type
+    const resolveRequiredDocumentPromiseWithNull = (type: string) => {
+      const promise = self.requiredDocuments[type];
+      !promise.isResolved && promise.resolve(null);
+    };
+
+    // convenience function for nulling multiple promises
+    // if `requiredTypes` is empty then all promises are nulled (mainly useful for testing)
+    const resolveRequiredDocumentPromisesWithNull = (requiredTypes?: string[]) => {
+      if (requiredTypes) {
+        requiredTypes.forEach(type => resolveRequiredDocumentPromiseWithNull(type));
+      }
+      else {
+        forEach(self.requiredDocuments, (p, type) => resolveRequiredDocumentPromiseWithNull(type));
+      }
     };
 
     const findDocumentOfTile = (tileId: string): DocumentModelType | null => {
@@ -216,19 +244,19 @@ export const DocumentsModel = types
       return parentDocument || null;
     };
 
-    const setUnit = (unit: UnitModelType) => {
-      self.unit = unit;
+    const setAppConfig = (appConfig: AppConfigModelType) => {
+      self.appConfig = appConfig;
     };
 
     return {
       add,
       remove,
-      update,
       addRequiredDocumentPromises,
       resolveRequiredDocumentPromise,
-      resolveAllRequiredDocumentPromisesWithNull,
+      resolveRequiredDocumentPromiseWithNull,
+      resolveRequiredDocumentPromisesWithNull,
       findDocumentOfTile,
-      setUnit
+      setAppConfig
     };
   });
 

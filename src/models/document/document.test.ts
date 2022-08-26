@@ -1,19 +1,20 @@
 import { getSnapshot } from "mobx-state-tree";
-import { DocumentModel, DocumentModelType } from "./document";
+import { createDocumentModel, DocumentModelType } from "./document";
 import { PersonalDocument, ProblemDocument } from "./document-types";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { TextContentModelType } from "../tools/text/text-content";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import "../../register-tools";
+import { registerTools } from "../../register-tools";
+registerTools(["Geometry", "Text"]);
 
-var mockUserContext = { appMode: "authed", classHash: "class-1" };
-var mockQueryData = { content: {}, metadata: { createdAt: 10 } };
+const mockUserContext = { appMode: "authed", classHash: "class-1" };
+const mockQueryData = { content: {}, metadata: { createdAt: 10 } };
 
-var mockGetNetworkDocument = jest.fn(() => {
+const mockGetNetworkDocument = jest.fn(() => {
   return Promise.resolve({ data: { version: "1.0", ...mockQueryData } });
 });
-var mockHttpsCallable = jest.fn((fn: string) => {
+const mockHttpsCallable = jest.fn((fn: string) => {
   switch(fn) {
     case "getNetworkDocument_v1":
       return mockGetNetworkDocument;
@@ -25,12 +26,12 @@ jest.mock("firebase/app", () => ({
   })
 }));
 
-var mockFetchQuery = jest.fn((queryKey: any, queryFn: () => Promise<any>) => {
+const mockFetchQuery = jest.fn((queryKey: any, queryFn: () => Promise<any>) => {
   queryFn();
   return Promise.resolve({ isLoading: false, isError: false, data: mockQueryData });
 });
-var mockInvalidateQueries = jest.fn();
-var mockQueryClient = {
+const mockInvalidateQueries = jest.fn();
+const mockQueryClient = {
   fetchQuery: mockFetchQuery,
   invalidateQueries: mockInvalidateQueries
 } as any;
@@ -40,7 +41,7 @@ describe("document model", () => {
   let documentWithoutContent: DocumentModelType;
 
   beforeEach(() => {
-    document = DocumentModel.create({
+    document = createDocumentModel({
       type: ProblemDocument,
       uid: "1",
       key: "test",
@@ -48,7 +49,7 @@ describe("document model", () => {
       content: {},
       visibility: "public"
     });
-    documentWithoutContent = DocumentModel.create({
+    documentWithoutContent = createDocumentModel({
       type: ProblemDocument,
       uid: "1",
       key: "test",
@@ -70,7 +71,7 @@ describe("document model", () => {
   });
 
   it("should handle accessors for remote documents", () => {
-    document = DocumentModel.create({
+    document = createDocumentModel({
                 type: PersonalDocument, remoteContext: "remote-class", uid: "user-1", key: "doc-1" });
     expect(document.isProblem).toBe(false);
     expect(document.isPlanning).toBe(false);
@@ -100,6 +101,7 @@ describe("document model", () => {
       content: {
         rowMap: {},
         rowOrder: [],
+        sharedModelMap: {},
         tileMap: {}
       },
       changeCount: 0
@@ -203,7 +205,7 @@ describe("document model", () => {
   });
 
   it("can fetch and refresh remote content for remote documents", async () => {
-    document = DocumentModel.create({
+    document = createDocumentModel({
                 type: PersonalDocument, remoteContext: "remote-class", uid: "user-1", key: "doc-1" });
     const result = await document.fetchRemoteContent(mockQueryClient, mockUserContext);
     expect(result?.data).toEqual(mockQueryData);

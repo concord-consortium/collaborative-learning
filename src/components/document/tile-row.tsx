@@ -135,7 +135,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
       // otherwise, use the default height for this type of tile
       const tile = this.getTile(tileId);
       const tileType = tile?.content.type;
-      const contentInfo = tileType && getToolContentInfoById(tileType);
+      const contentInfo = getToolContentInfoById(tileType);
       if (contentInfo?.defaultHeight) return contentInfo.defaultHeight;
     });
   }
@@ -187,13 +187,13 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleRequestRowHeight = (tileId: string, height?: number, deltaHeight?: number) => {
-    const { height: rowHeight, tileCount, setRowHeight } = this.props.model;
+    const { height: rowHeight, tileCount, setRowHeightWithoutUndo } = this.props.model;
     const newHeight = rowHeight != null && deltaHeight != null
                         ? rowHeight + deltaHeight
                         : height;
     // don't shrink the height of a multi-tile row based on a request from a single tile
     if ((tileCount > 1) && (rowHeight != null) && (newHeight != null) && (newHeight < rowHeight)) return;
-    (newHeight != null) && setRowHeight(newHeight);
+    (newHeight != null) && setRowHeightWithoutUndo(newHeight);
   };
 
   private handleStartResizeRow = (e: React.DragEvent<HTMLDivElement>) => {

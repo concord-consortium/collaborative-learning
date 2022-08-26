@@ -2,18 +2,18 @@ import firebase from "firebase/app";
 import { renderHook } from "@testing-library/react-hooks";
 import { useCollectionOrderedRealTimeQuery, useDeleteDocument, useFirestoreTeacher } from "./firestore-hooks";
 
-var mockData = [
+const mockData = [
   { id: 1, value: "foo" },
   { id: 2, value: "bar" }
 ];
-var mockSetQueryData = jest.fn();
-var mockUseQuery = jest.fn((...args) => ({
+const mockSetQueryData = jest.fn();
+const mockUseQuery = jest.fn((...args) => ({
   isLoading: false,
   isError: false,
   data: mockData,
   error: undefined
 }));
-var mockUseMutation = jest.fn((callback: (...args: any[]) => void) => {
+const mockUseMutation = jest.fn((callback: (...args: any[]) => void) => {
   return { mutate: (...args: any[]) => callback(...args) };
 });
 jest.mock("react-query", () => ({
@@ -24,8 +24,8 @@ jest.mock("react-query", () => ({
   useMutation: (callback: () => void) => mockUseMutation(callback),
 }));
 
-var mockRootCounter = 0;
-var mockOnSnapshot = (callback: (snap: any) => void) => {
+let mockRootCounter = 0;
+const mockOnSnapshot = (callback: (snap: any) => void) => {
   callback(({
     docs: [
       { id: 1, data: () => ({ value: "foo" }) },
@@ -33,9 +33,9 @@ var mockOnSnapshot = (callback: (snap: any) => void) => {
     ]
   }));
 };
-var mockDelete = jest.fn();
-var mockGet = jest.fn();
-var mockDoc = jest.fn((path: string) => ({
+const mockDelete = jest.fn();
+const mockGet = jest.fn();
+const mockDoc = jest.fn((path: string) => ({
   delete: mockDelete,
   get: mockGet
 }));

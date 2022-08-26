@@ -12,7 +12,6 @@ import { CustomSelect } from "./custom-select";
 // cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
 import styles from "./toggle-buttons.scss";
 
-import "../../components/utilities/blueprint.sass";
 import "./clue-app-header.sass";
 
 interface IProps extends IBaseProps {
@@ -49,7 +48,7 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
           </div>
           <div className="separator"/>
           <CustomSelect
-            items={[{text: `${problem.title}: ${problem.subtitle}`}]}
+            items={[{text: `${problem.title}${problem.subtitle ? `: ${problem.subtitle}`: ""}`}]}
             isDisabled={true}
           />
         </div>

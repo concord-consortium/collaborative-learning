@@ -3,7 +3,7 @@ import "ts-polyfill";
 import { Provider } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
-import { appConfigSpec, appIcons, createStores } from "./app-config";
+import { appConfigSnapshot, appIcons, createStores } from "./app-config";
 import { AppConfigContext } from "./app-config-context";
 import { AppComponent } from "./components/app";
 import { AppConfigModel } from "./models/stores/app-config-model";
@@ -19,10 +19,10 @@ import { setLivelinessChecking } from "mobx-state-tree";
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
 
-import "./components/utilities/blueprint";
-import "./index.sass";
+import "./index.scss";
+import { QAClear } from "./components/qa-clear";
 
-const appConfig = AppConfigModel.create(appConfigSpec);
+const appConfig = AppConfigModel.create(appConfigSnapshot);
 
 const initializeApp = async () => {
   const host = window.location.host.split(":")[0];
@@ -31,13 +31,21 @@ const initializeApp = async () => {
 
   const user = UserModel.create();
 
-  const unitId = urlParams.unit || appConfigSpec.defaultUnit;
-  const problemOrdinal = urlParams.problem || appConfigSpec.defaultProblemOrdinal;
+  const unitId = urlParams.unit || appConfigSnapshot.defaultUnit;
+  const problemOrdinal = urlParams.problem || appConfigSnapshot.config.defaultProblemOrdinal;
   const showDemoCreator = urlParams.demo;
   const demoName = urlParams.demoName;
 
   const isPreviewing = !!(urlParams.domain && urlParams.domain_uid && !urlParams.token);
   const stores = createStores({ appMode, appVersion, appConfig, user, showDemoCreator, demoName, isPreviewing });
+
+  if (appMode === "qa" && urlParams.qaClear === "all") {
+    ReactDOM.render(
+      <QAClear />,
+      document.getElementById("app")
+    );
+    return;
+  }
 
   await setUnitAndProblem(stores, unitId, problemOrdinal);
 

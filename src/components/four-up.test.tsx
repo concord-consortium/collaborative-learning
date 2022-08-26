@@ -3,15 +3,15 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { FourUpComponent } from "./four-up";
 import { GroupsModel, GroupModel, GroupUserModel } from "../models/stores/groups";
-import { DocumentModel, DocumentModelType } from "../models/document/document";
+import { createDocumentModel, DocumentModelType } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
-import { createStores } from "../models/stores/stores";
-import { UserModel } from "../models/stores/user";
 import { DocumentsModelType, DocumentsModel } from "../models/stores/documents";
+import { specStores } from "../models/stores/spec-stores";
+import { UserModel } from "../models/stores/user";
 
 configure({testIdAttribute: "data-test"});
 
-var mockGetQueryState = jest.fn();
+const mockGetQueryState = jest.fn();
 jest.mock("react-query", () => ({
   useQueryClient: () => ({
     getQueryState: mockGetQueryState
@@ -23,7 +23,7 @@ describe("Four Up Component", () => {
   let document: DocumentModelType;
 
   beforeEach(() => {
-    document = DocumentModel.create({
+    document = createDocumentModel({
       type: ProblemDocument,
       title: "test",
       uid: "1",
@@ -52,7 +52,7 @@ describe("Four Up Component", () => {
       allGroups: [group]
     });
 
-    const stores = createStores({ groups, documents });
+    const stores = specStores({ groups, documents });
     const { container } = render(<FourUpComponent userId={document.uid} groupId={document.groupId} stores={stores}/>);
     expect(screen.queryAllByTestId("canvas")).toHaveLength(4);
     expect(container.querySelectorAll(".member")).toHaveLength(1);
@@ -93,11 +93,7 @@ describe("Four Up Component", () => {
       allGroups: [group]
     });
 
-    const stores = createStores({
-      user,
-      groups,
-      documents
-    });
+    const stores = specStores({ user, groups, documents });
 
     const { container } = render(<FourUpComponent userId={user.id} groupId={group.id} stores={stores}/>);
     // A canvas will be rendered unless an "unshared document" message is displayed.

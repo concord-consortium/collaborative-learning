@@ -16,6 +16,8 @@ import { isDifferentUnitAndProblem } from "../models/curriculum/unit";
 import { updateProblem } from "../lib/misc";
 import ErrorAlert from "./utilities/error-alert";
 
+// used for tooltips in various parts of the application
+import "react-tippy/dist/tippy.css";
 import "./app.sass";
 
 interface IProps extends IBaseProps {}

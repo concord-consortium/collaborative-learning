@@ -13,7 +13,7 @@ import { HotKeys } from "../../../utilities/hot-keys";
 
 import "./geometry-tool.sass";
 
-const GeometryToolComponent: React.FC<IGeometryProps> = ({
+const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   model, readOnly, ...others
 }) => {
   const { documentId, documentContent, toolTile, scale, onRequestTilesOfType,
@@ -73,4 +73,5 @@ const GeometryToolComponent: React.FC<IGeometryProps> = ({
     </div>
   );
 };
+const GeometryToolComponent = React.memo(_GeometryToolComponent);
 export default GeometryToolComponent;

@@ -9,9 +9,9 @@ import { authenticate,
         getFirebaseJWTParams,
         generateDevAuthentication} from "./auth";
 import { IPortalClassInfo, IPortalClassUser, PortalStudentJWT, PortalTeacherJWT } from "./portal-types";
-import { AppConfigModel } from "../models/stores/app-config-model";
 import nock from "nock";
 import { NUM_FAKE_STUDENTS, NUM_FAKE_TEACHERS } from "../components/demo/demo-creator";
+import { specAppConfig } from "../models/stores/spec-app-config";
 import * as UrlParams from "../utilities/url-params";
 type QueryParams = UrlParams.QueryParams;
 
@@ -173,7 +173,7 @@ describe("demo mode", () => {
     fakeUser: "student:2",
     problem: "3.1",
   };
-  let appConfig = AppConfigModel.create();
+  let appConfig = specAppConfig();
 
   beforeEach(() => {
     urlParams = {
@@ -181,7 +181,7 @@ describe("demo mode", () => {
       fakeUser: "student:2",
       problem: "3.1",
     };
-    appConfig = AppConfigModel.create();
+    appConfig = specAppConfig();
   });
 
   it("should be valid", () => {
@@ -245,7 +245,7 @@ describe("demo mode", () => {
 
 describe("student authentication", () => {
 
-  const appConfig = AppConfigModel.create();
+  const appConfig = specAppConfig();
 
   beforeEach(() => {
     nock(BASE_PORTAL_HOST, {
@@ -451,7 +451,7 @@ describe("teacher authentication", () => {
     class: CLASS_INFO_URL,
     offering: OFFERING_INFO_URL
   };
-  const appConfig = AppConfigModel.create();
+  const appConfig = specAppConfig();
 
   beforeEach(() => {
     urlParams = {token: GOOD_TEACHER_TOKEN, reportType: "offering", class: CLASS_INFO_URL, offering: OFFERING_INFO_URL};

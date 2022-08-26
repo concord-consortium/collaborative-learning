@@ -1,138 +1,48 @@
-import { safeJsonParse } from "../../../utilities/js-utils";
-import { ITileExportOptions } from "../tool-content-info";
-import { ImageToolChange } from "./image-change";
 import {
-  exportImageTileSpec, IImageTileImportSpec, importImageTileSpec, isImageTileImportSpec, transformCurriculumImageUrl
+  exportImageTileSpec, convertLegacyImageTile, isLegacyImageTileImport,
 } from "./image-import-export";
 
-const isImageToolChangeArray = (changes: ImageToolChange[] | string[]): changes is ImageToolChange[] =>
-        (changes.length > 0) && (typeof changes[0] === "object");
-
-const exportImageToolJson = (changes: ImageToolChange[] | string[], options?: ITileExportOptions) => {
-  const changesJson = isImageToolChangeArray(changes)
-                        ? changes.map(change => JSON.stringify(change))
-                        : changes;
-  const exportJson = exportImageTileSpec(changesJson, options);
-  // console.log("exportJson:", exportJson);
-  const exportJs = safeJsonParse(exportJson);
-  // log the JSON on error for debugging
-  // !exportJs && console.log("JSON PARSE ERROR\n----------------\n", exportJson);
-  return exportJs;
-};
-
-describe("isImageTileImportSpec", () => {
+describe("isLegacyImageTileImport", () => {
   it("should work as expected", () => {
-    expect(isImageTileImportSpec(null)).toBe(false);
-    expect(isImageTileImportSpec({})).toBe(false);
-    expect(isImageTileImportSpec({ type: "Image" })).toBe(false);
-    expect(isImageTileImportSpec({ type: "Image", url: "foo" })).toBe(true);
-    expect(isImageTileImportSpec({ type: "Image", url: "foo", changes: [] })).toBe(false);
+    expect(isLegacyImageTileImport(null)).toBe(false);
+    expect(isLegacyImageTileImport({})).toBe(false);
+    expect(isLegacyImageTileImport({ type: "Image" })).toBe(false);
+    expect(isLegacyImageTileImport({ type: "Image", url: "foo" })).toBe(false);
+    expect(isLegacyImageTileImport({ type: "Image", url: "foo", changes: [] })).toBe(true);
   });
 });
 
-describe("Image import", () => {
-  it("should import correctly", () => {
+describe("convertImageTile", () => {
+  it("should convert legacy image tile correctly", () => {
     const input = {
       type: "Image" as const,
-      url: "my/image/url"
+      url: "my/image/url",
+      changes: [
+        "{\"operation\":\"update\",\"url\":\"https://collaborative-learning.concord.org/branch/master/assets/images/image_placeholder.png\"}",
+        "{\"operation\":\"update\",\"url\":\"ccimg://myLegacyUrl\",\"filename\":\"img2.jpg\"}"
+      ]
+
     };
-    const result = importImageTileSpec(input);
+    const result = convertLegacyImageTile(input);
     expect(result.type).toBe("Image");
-    expect(result.changes.length).toBe(1);
-    expect(safeJsonParse<IImageTileImportSpec>(result.changes[0]))
-            .toEqual({ operation: "update", url: "my/image/url" });
+    expect(result.url).toBe("ccimg://myLegacyUrl");
+    expect(result.fileName).toBe("img2.jpg");
   });
 });
 
 describe("Image export with default options", () => {
-  it("should export empty changes", () => {
-    const changes: ImageToolChange[] = [];
-    expect(exportImageToolJson(changes))
-            .toEqual({ type: "Image", url: "" });
-  });
-
-  it("should ignore invalid changes", () => {
-    const changes: string[] = [
-      "{ INVALID }"
-    ];
-    expect(exportImageToolJson(changes))
-            .toEqual({ type: "Image", url: "" });
-  });
-
-  it("should ignore incomplete changes", () => {
-    const changes: ImageToolChange[] = [
-      { operation: "update" } as any
-    ];
-    expect(exportImageToolJson(changes))
-            .toEqual({ type: "Image", url: "" });
-  });
-
-  it("should export tiles created without filename", () => {
-    const changes: ImageToolChange[] = [
-      { operation: "update", url: "my/img/url" }
-    ];
-    expect(exportImageToolJson(changes))
-            .toEqual({ type: "Image", url: "my/img/url" });
-  });
-
-  it("should export tiles created with filename", () => {
-    const changes: ImageToolChange[] = [
-      { operation: "update", url: "my/img/url", filename: "my/filename" }
-    ];
-    expect(exportImageToolJson(changes))
-            .toEqual({ type: "Image", url: "my/img/url" });
-  });
-
-  it("should export updated tiles", () => {
-    const changes: ImageToolChange[] = [
-      { operation: "update", url: "my/img/url" },
-      { operation: "update", url: "my/updated/img/url" }
-    ];
-    expect(exportImageToolJson(changes))
-            .toEqual({ type: "Image", url: "my/updated/img/url" });
-  });
-
-  it("should export updated tiles with filenames", () => {
-    const changes: ImageToolChange[] = [
-      { operation: "update", url: "my/img/url" },
-      { operation: "update", url: "my/updated/img/url", filename: "my/updated/filename" }
-    ];
-    expect(exportImageToolJson(changes))
-            .toEqual({ type: "Image", url: "my/updated/img/url" });
-  });
-
-  it("should export updated tiles with filenames", () => {
-    const changes: ImageToolChange[] = [
-      { operation: "update", url: "my/img/url" },
-      { operation: "update", url: "my/updated/img/url", filename: "my/updated/filename" },
-      { operation: "update", url: "my/final/url" }
-    ];
-    expect(exportImageToolJson(changes))
-            .toEqual({ type: "Image", url: "my/final/url" });
+  it("should export placeholder image when no image has been uploaded", () => {
+    const url = "assets/images/image_placeholder.png";
+        expect(exportImageTileSpec(url))
+            .toEqual(`{\n  "type": "Image",\n  "url": "${url}"\n}`);
   });
 });
 
-describe('Image export with transformUrl option', () => {
-  const unitBasePath = "curriculum";
-
-  const transformImageUrl = (url: string, filename?: string) => {
-    return transformCurriculumImageUrl(url, unitBasePath, filename);
-  };
-
-  it("should export tiles created without filename", () => {
-    const changes: ImageToolChange[] = [
-      { operation: "update", url: "my/img/url" }
-    ];
-    expect(exportImageToolJson(changes, { transformImageUrl }))
-            .toEqual({ type: "Image", url: "my/img/url" });
+describe("Image export with uploaded image", () => {
+  it("should export uploaded image", () => {
+    const url = "https://collaborative-learning.concord.org/uploaded-image.jpg";
+    const filename = "https://collaborative-learning.concord.org/uploaded-image.jpg";
+        expect(exportImageTileSpec(url, filename))
+            .toEqual(`{\n  "type": "Image",\n  "url": "${url}",\n  "filename": "${filename}"\n}`);
   });
-
-  it("should export tiles created with filename", () => {
-    const changes: ImageToolChange[] = [
-      { operation: "update", url: "my/img/url", filename: "my/filename" }
-    ];
-    expect(exportImageToolJson(changes, { transformImageUrl }))
-            .toEqual({ type: "Image", url: "curriculum/images/my/filename" });
-  });
-
 });

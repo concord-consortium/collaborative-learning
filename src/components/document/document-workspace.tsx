@@ -4,21 +4,17 @@ import { DocumentComponent, WorkspaceSide } from "../../components/document/docu
 import { GroupVirtualDocumentComponent } from "../../components/document/group-virtual-document";
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentModelType } from "../../models/document/document";
-import { createDefaultSectionedContent } from "../../models/document/document-content";
+import { DocumentContentModelType } from "../../models/document/document-content";
+import { createDefaultSectionedContent } from "../../models/document/document-content-import";
 import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
-import { kDividerHalf, kDividerMax, kDividerMin } from "../../models/stores/ui-types";
-import { getNavTabConfigFromStores } from "../../models/stores/stores";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
-import { NavTabPanel } from "../navigation/nav-tab-panel";
-import { CollapsedResourcesTab } from "../navigation/collapsed-resources-tab";
-import { CollapsedWorkspaceTab } from "./collapsed-workspace-tab";
-import { ResizePanelDivider } from "./resize-panel-divider";
 
 import "./document-workspace.sass";
 
 interface IProps extends IBaseProps {
+  isExpanderShown: boolean;
 }
 
 @inject("stores")
@@ -39,68 +35,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { ui: { problemWorkspace: {type},
-                  workspaceShown
-                }
-          } = this.stores;
-    const showNavPanel = getNavTabConfigFromStores(this.stores)?.showNavPanel;
-    // NOTE: the drag handlers are in three different divs because we cannot overlay
-    // the renderDocuments() div otherwise the Cypress tests will fail because none
-    // of the html elements in the documents will be visible to it.  The first div acts
-    // as a handler for the background and the left and right nav then delegate dragging
-    // and dropping to the same functions
-    return (
-      <div className="document-workspace">
-        <div
-          className="drag-handler"
-          onDragOver={this.handleDragOverWorkspace}
-          onDrop={this.handleImageDrop}
-        />
-        {showNavPanel && this.renderNavTabPanel()}
-        {workspaceShown ? this.renderDocuments()
-                        : <CollapsedWorkspaceTab
-                            onExpandWorkspace={this.toggleExpandWorkspace}
-                            workspaceType={type}
-                          />
-        }
-      </div>
-    );
-  }
-
-  private getDefaultDocumentContent() {
-    const { appConfig: { autoSectionProblemDocuments, defaultDocumentType, defaultDocumentContent },
-            problem } = this.stores;
-    if ((defaultDocumentType === ProblemDocument) && autoSectionProblemDocuments) {
-      // for problem documents, default content is a section header row and a placeholder tile
-      // for each section that is present in the corresponding problem content
-      return createDefaultSectionedContent(problem.sections);
-    }
-    else if (defaultDocumentContent) {
-      return defaultDocumentContent;
-    }
-  }
-
-  private async guaranteeInitialDocuments() {
-    const { appConfig: {
-              defaultDocumentType, defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
-            db, ui: { problemWorkspace }, unit: { planningDocument }, user: { type: role } } = this.stores;
-    if (!problemWorkspace.primaryDocumentKey) {
-      const documentContent = this.getDefaultDocumentContent();
-      const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultDocumentType, documentContent);
-      if (defaultDocument) {
-        problemWorkspace.setPrimaryDocument(defaultDocument);
-      }
-    }
-    // Guarantee the user starts with one learning log
-    defaultLearningLogDocument && await db.guaranteeLearningLog(initialLearningLogTitle || defaultLearningLogTitle);
-    planningDocument?.isEnabledForRole(role) && planningDocument.default &&
-      await db.guaranteePlanningDocument(planningDocument.sections);
-  }
-
-  private renderDocuments() {
-    const {appConfig, documents, ui, groups} = this.stores;
+    const { appMode, appConfig: { toolbar }, documents, ui, groups } = this.stores;
     const { problemWorkspace } = ui;
-    const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible} = problemWorkspace;
+    const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible } = problemWorkspace;
     const showPrimary = !hidePrimaryForCompare;
     const primaryDocument = this.getPrimaryDocument(problemWorkspace.primaryDocumentKey);
     const comparisonDocument = comparisonDocumentKey
@@ -108,8 +45,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
     const groupVirtualDocument = comparisonDocumentKey
       && groups.virtualDocumentForGroup(comparisonDocumentKey);
-
-    const toolbar = appConfig.toolbar;
 
     if (!primaryDocument) {
       return this.renderDocument("single-workspace", "primary");
@@ -128,8 +63,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
             onNewDocument={this.handleNewDocument}
             onCopyDocument={this.handleCopyDocument}
             onDeleteDocument={this.handleDeleteDocument}
-            onPublishSupport={this.handlePublishSupport}
-            onPublishDocument={this.handlePublishDocument}
             toolbar={toolbar}
             side="comparison"
             readOnly={true}
@@ -143,8 +76,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
         onNewDocument={this.handleNewDocument}
         onCopyDocument={this.handleCopyDocument}
         onDeleteDocument={this.handleDeleteDocument}
-        onPublishSupport={this.handlePublishSupport}
-        onPublishDocument={this.handlePublishDocument}
+        onAdminDestroyDocument={appMode === "dev" ? this.handleAdminDestroyDocument : undefined}
         toolbar={toolbar}
         side="primary"
       />;
@@ -168,10 +100,40 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     }
   }
 
+  private getDefaultDocumentContent(defaultType: string, defaultContent?: DocumentContentModelType) {
+    const { appConfig: { autoSectionProblemDocuments }, problem } = this.stores;
+    if ((defaultType === ProblemDocument) && autoSectionProblemDocuments) {
+      // for problem documents, default content is a section header row and a placeholder tile
+      // for each section that is present in the corresponding problem content
+      return createDefaultSectionedContent(problem.sections);
+    }
+    return defaultContent;
+  }
+
+  private async guaranteeInitialDocuments() {
+    const { appConfig: { defaultDocumentSpec: { type: defaultType, content: defaultContent },
+            defaultLearningLogDocument, defaultLearningLogTitle, initialLearningLogTitle },
+            db, ui: { problemWorkspace }, unit: { planningDocument }, user: { type: role } } = this.stores;
+    if (!problemWorkspace.primaryDocumentKey) {
+      const documentContent = this.getDefaultDocumentContent(defaultType, defaultContent);
+      const defaultDocument = await db.guaranteeOpenDefaultDocument(defaultType, documentContent);
+      if (defaultDocument) {
+        problemWorkspace.setPrimaryDocument(defaultDocument);
+      }
+    }
+    // Guarantee the user starts with one learning log
+    defaultLearningLogDocument && await db.guaranteeLearningLog(initialLearningLogTitle || defaultLearningLogTitle);
+    planningDocument?.isEnabledForRole(role) && planningDocument.default &&
+      await db.guaranteePlanningDocument(planningDocument.sections);
+  }
+
   private renderDocument(className: string, side: WorkspaceSide, child?: JSX.Element) {
-    const { ui,  } = this.stores;
-    const showNavPanel = getNavTabConfigFromStores(this.stores)?.showNavPanel;
-    const workspaceLeft = !showNavPanel? 0 : ui.navTabContentShown ? "50%" : 42;
+    const { appConfig: { navTabs: { showNavPanel } }, ui } = this.stores;
+    const workspaceLeft = !showNavPanel
+                            ? 0
+                            : ui.navTabContentShown && !this.props.isExpanderShown
+                              ? "50%"
+                              : this.props.isExpanderShown ? "calc(50% + 35px)" : 38;
     const style = { left: workspaceLeft };
     const roleClassName = side === "primary" ? "primary-workspace" : "reference-workspace";
     return (
@@ -204,49 +166,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     );
   }
 
-  private renderNavTabPanel() {
-    const { teacherGuide,
-            user: { isTeacher },
-            ui: { activeNavTab,
-                  navTabContentShown,
-                  dividerPosition,
-                }
-          } = this.stores;
-    const navTabSpecs = getNavTabConfigFromStores(this.stores);
-    const studentTabs = navTabSpecs?.tabSpecs.filter((t) => !t.teacherOnly);
-    const teacherTabs = navTabSpecs?.tabSpecs.filter(t => (t.tab !== "teacher-guide") || teacherGuide);
-    const tabsToDisplay = isTeacher ? teacherTabs : studentTabs;
-
-    return (
-      <>
-        <ResizePanelDivider
-          isResourceExpanded={navTabContentShown}
-          dividerPosition={dividerPosition}
-          onExpandWorkspace={this.toggleExpandWorkspace}
-          onExpandResources={this.toggleExpandResources}
-        />
-        <NavTabPanel
-          tabs={tabsToDisplay}
-          onDragOver={this.handleDragOverWorkspace}
-          onDrop={this.handleImageDrop}
-          isResourceExpanded={navTabContentShown}
-        />
-        <CollapsedResourcesTab
-          onExpandResources={this.toggleExpandResources}
-          resourceType={activeNavTab}
-          isResourceExpanded={!navTabContentShown}
-        />
-      </>
-    );
-  }
-
   private isAcceptableImageDrag = (e: React.DragEvent<HTMLDivElement>) => {
     // make sure we have a primary document to drop onto
     return !!this.getPrimaryDocument(this.stores.ui.problemWorkspace.primaryDocumentKey);
-  };
-
-  private handleDragOverWorkspace = (e: React.DragEvent<HTMLDivElement>) => {
-    this.imageDragDrop.dragOver(e);
   };
 
   private handleDragOverSide = (e: React.DragEvent<HTMLDivElement>) => {
@@ -333,7 +255,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
 
   private handleNewDocumentOpen = async (type: OtherDocumentType, title: string) => {
     const { appConfig, db, ui: { problemWorkspace } } = this.stores;
-    const content = (type === PersonalDocument) && appConfig.defaultDocumentTemplate
+    const content = (type === PersonalDocument) && appConfig.hasDefaultDocumentTemplate
                       ? appConfig.defaultDocumentContent : undefined;
     const newDocument = await db.createOtherDocument(type, {title, content});
     if (newDocument) {
@@ -378,6 +300,21 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     });
   };
 
+  private handleAdminDestroyDocument = (document: DocumentModelType) => {
+    const { appConfig, db, ui } = this.stores;
+    const docTypeString = document.getLabel(appConfig, 1);
+    const docTypeStringL = document.getLabel(appConfig, 1, true);
+    const documentString = `${document.type} ${docTypeStringL} (${document.title || ""})`;
+    ui.confirm(`Destroy this ${documentString} from the database and reload the page?`,
+                `Destroy ${docTypeString}`)
+    .then((confirmDelete: boolean) => {
+      if (confirmDelete) {
+        db.destroyFirebaseDocument(document);
+        window.location.reload();
+      }
+    });
+  };
+
   private handleDeleteOpenPrimaryDocument = async () => {
     const { appConfig: { defaultDocumentType, defaultDocumentContent },
             db, ui: { problemWorkspace } } = this.stores;
@@ -387,68 +324,9 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     }
   };
 
-  private getProblemBaseTitle(title: string) {
-    const match = /[\d.]*[\s]*(.+)/.exec(title);
-    return match && match[1] ? match[1] : title;
-  }
-
-  private getSupportDocumentBaseCaption(document: DocumentModelType) {
-    return document.type === ProblemDocument
-            ? this.getProblemBaseTitle(this.stores.problem.title)
-            : document.title;
-  }
-
-  private handlePublishSupport = (document: DocumentModelType) => {
-    const { db, problemPath, ui, user } = this.stores;
-    const caption = this.getSupportDocumentBaseCaption(document) || "Untitled";
-    // TODO: Disable publish button while publishing
-    db.publishDocumentAsSupport(document, caption)
-      .then(() => {
-        const classes = user.classHashesForProblemPath(problemPath);
-        const classWord = classes.length === 1 ? "class" : "classes";
-        ui.alert(`Your support was published to ${classes.length} ${classWord}.`, "Support Published");
-      })
-      .catch((reason) => ui.alert(`Your support failed to publish: ${reason}`, "Error"));
-  };
-
-  private handlePublishDocument = (document: DocumentModelType) => {
-    const { appConfig, db, ui } = this.stores;
-    const docTypeString = document.getLabel(appConfig, 1);
-    const docTypeStringL = document.getLabel(appConfig, 1, true);
-    ui.confirm(`Do you want to publish your ${docTypeStringL}?`, `Publish ${docTypeString}`)
-      .then((confirm: boolean) => {
-        if (confirm) {
-          const dbPublishDocumentFunc = document.type === ProblemDocument
-                                          ? () => db.publishProblemDocument(document)
-                                          : () => db.publishOtherDocument(document);
-          dbPublishDocumentFunc()
-            .then(() => ui.alert(`Your ${docTypeStringL} was published.`, `${docTypeString} Published`))
-            .catch((reason) => ui.alert(`Your document failed to publish: ${reason}`, "Error"));
-        }
-      });
-  };
-
   private getPrimaryDocument(documentKey?: string) {
     if (documentKey) {
       return this.stores.documents.getDocument(documentKey);
     }
   }
-
-  private toggleExpandWorkspace = () => {
-    const { ui } = this.stores;
-    if (ui.dividerPosition === kDividerMax) {
-      ui.setDividerPosition(kDividerHalf);
-    } else if (ui.dividerPosition === kDividerHalf) {
-      ui.setDividerPosition(kDividerMin);
-    }
-  };
-
-  private toggleExpandResources = () => {
-    const { ui } = this.stores;
-    if (ui.dividerPosition === kDividerMin) {
-      ui.setDividerPosition(kDividerHalf);
-    } else if (ui.dividerPosition === kDividerHalf) {
-      ui.setDividerPosition(kDividerMax);
-    }
-  };
 }

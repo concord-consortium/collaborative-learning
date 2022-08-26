@@ -3,6 +3,7 @@ import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
 
+context('Teacher Support', function() {
     let dashboard = new TeacherDashboard();
     // let primaryWorkspace = new PrimaryWorkspace();
     let resourcesPanel = new ResourcesPanel();
@@ -20,35 +21,28 @@ import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
         cy.wait(2000);
     });
 
-    describe('verify supports functionality', function() {
-        it('will verify publish of support appears in Support>Teacher Workspace',function(){
+    describe.skip('verify supports functionality', function() {
+        it('will verify publish of support appears in Class Work>Workspaces',function(){
             clueCanvas.addTile('table');
-            clueCanvas.publishSupportDoc();
+            clueCanvas.publishTeacherDoc();
             cy.get(".collapsed-resources-tab.my-work").click();
-            cy.openTopTab("supports");
-            cy.openSection('supports','teacher-supports');
-            resourcesPanel.getCanvasItemTitle('supports','teacher-supports').should('contain',title);
+            cy.openTopTab("class-work");
+            cy.openSection('class-work','workspaces');
+            resourcesPanel.getCanvasItemTitle('class-work','workspaces').should('contain',title);
         });
     });
 
-    describe("test visibility of teacher supports in student's workspace", function() {
+    describe.skip("test visibility of teacher supports in student's workspace", function() {
             it('verify teacher support is visible in student nav', function() {
               const queryParams = `${Cypress.config("queryParams")}`;
 
               cy.visit(queryParams);
               cy.waitForLoad();
               cy.openResourceTabs();
-              cy.openTopTab("supports");
-              cy.get('.support-badge').should('be.visible');
-              cy.openSection('supports', 'teacher-supports');
-              cy.getCanvasItemTitle('teacher-supports', title).should('be.visible');
+              cy.openTopTab("class-work");
+              cy.openSection('class-work', 'workspaces');
+              cy.getCanvasItemTitle('workspaces', title).should('be.visible');
             });
     });
 
-after(function(){
-        const queryParams = `${Cypress.config("teacherQueryParams")}`;
-
-        cy.visit(queryParams);
-        cy.waitForLoad();
-        cy.clearQAData('all');
 });

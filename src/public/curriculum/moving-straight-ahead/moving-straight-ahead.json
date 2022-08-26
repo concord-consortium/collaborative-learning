@@ -3,10 +3,45 @@
   "abbrevTitle": "MSA",
   "title": "Moving Straight Ahead",
   "subtitle": "Linear Expressions, Equations, and Relationships",
-  "placeholderText": "Enter notes here",
-  "settings": {
-    "table": {
-      "numFormat": ".2~f"
+  "config": {
+    "enableHistoryRoles": ["teacher"],
+    "placeholderText": "Enter notes here",
+    "stamps": [
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/coin.png",
+        "width": 25,
+        "height": 25
+      },
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/pouch.png",
+        "width": 30,
+        "height": 37
+      },
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/plus.png",
+        "width": 25,
+        "height": 25
+      },
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/equals.png",
+        "width": 25,
+        "height": 25
+      },
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/lparen.png",
+        "width": 25,
+        "height": 25
+      },
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/rparen.png",
+        "width": 25,
+        "height": 25
+      }
+    ],
+    "settings": {
+      "table": {
+        "numFormat": ".2~f"
+      }
     }
   },
   "sections": {
@@ -88,38 +123,6 @@
       { "type": "summarize" }
     ]
   },
-  "defaultStamps": [
-    {
-      "url": "curriculum/moving-straight-ahead/stamps/coin.png",
-      "width": 25,
-      "height": 25
-    },
-    {
-      "url": "curriculum/moving-straight-ahead/stamps/pouch.png",
-      "width": 30,
-      "height": 37
-    },
-    {
-      "url": "curriculum/moving-straight-ahead/stamps/plus.png",
-      "width": 25,
-      "height": 25
-    },
-    {
-      "url": "curriculum/moving-straight-ahead/stamps/equals.png",
-      "width": 25,
-      "height": 25
-    },
-    {
-      "url": "curriculum/moving-straight-ahead/stamps/lparen.png",
-      "width": 25,
-      "height": 25
-    },
-    {
-      "url": "curriculum/moving-straight-ahead/stamps/rparen.png",
-      "width": 25,
-      "height": 25
-    }
-  ],
   "investigations": [
     {
       "description": "Investigation 1",
@@ -769,7 +772,7 @@
             {
               "type": "whatIf",
               "content": {
-                "tiles": [ 
+                "tiles": [
                 {
                   "id": "67o7QVG-81zbYNqn",
                   "content": {
@@ -2153,7 +2156,7 @@
                       "text": [
                         "<p><em>Situation B. What’s the Question?</em></p>",
                         "<p>One of Mr. Mamer’s students wrote the following two statements to help her answer questions about their account.</p>",
-                        "    500 - 10t = 100",  
+                        "    500 - 10t = 100",
                         "    500 - 10t < 100 "
                       ]
                     }
@@ -2867,15 +2870,15 @@
             {
               "type": "initialChallenge",
               "content": {
-                "tiles": [ 
+                "tiles": [
                   {
                     "id": "TE7Uy_8lncvMZAoB",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Ms. Chang’s class decides to give T-shirts to each person who participates in the walkathon. They obtain the cost of the T-shirts from two different companies. Mighty Tee charges $49 plus $1 per T-shirt. No-Shrink Tee charges $4.50 per T-shirt. Ms. Chang writes the following equations to represent the relationships relating cost to the number of T-shirts: </p>", 
-                        "<p>C<sub>Mighty</sub> = 49 + n C<sub>No-Shrink</sub> = 4.5n</p>", 
+                        "<p>Ms. Chang’s class decides to give T-shirts to each person who participates in the walkathon. They obtain the cost of the T-shirts from two different companies. Mighty Tee charges $49 plus $1 per T-shirt. No-Shrink Tee charges $4.50 per T-shirt. Ms. Chang writes the following equations to represent the relationships relating cost to the number of T-shirts: </p>",
+                        "<p>C<sub>Mighty</sub> = 49 + n C<sub>No-Shrink</sub> = 4.5n</p>",
                         "<p>The number of T-shirts is <em>n</em>. C<sub>Mighty</sub> is the cost in dollars for Mighty Tee. C<sub>No-Shrink</sub> is the cost in dollars for No-Shrink Tee. </p>"
                       ]
                     }
@@ -3781,7 +3784,7 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": 
+                "tiles":
                 [
                   {
                     "id": "klqRY7yH_mUTz6M4",
@@ -4588,7 +4591,7 @@
                       "text": [
                         "<p>The equation 85 = 70 + 15 states that the quantities 85 and 70 + 15 are equal. </p>",
                         "<p><em>What do we have to do to maintain equality if we:</em></p>",
-                        "<ul><li><em>subtract 15 from the left-hand side of the original equation?</em></li><li><em>add 10 to the right-hand side of the original equation? </em></li><li><em>divide the left-hand side of the original equation by 5? </em></li><li><em>multiply the right-hand side of the original equation by 4?</em></li></ul>"
+                        "<ul><li><em>subtract 15 from the left-hand side of the original equation?</em></li><li><em>add 10 to the right-hand side of the original equation?</em></li><li><em>divide the left-hand side of the original equation by 5?</em></li><li><em>multiply the right-hand side of the original equation by 4?</em></li></ul>"
                       ]
                     }
                   },
@@ -5195,7 +5198,7 @@
                       ]
                     }
                   },
-                  { 
+                  {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
@@ -5291,8 +5294,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>For symbolic methods, students’ explanations should include keeping expressions equivalent on both sides of the equal sign (e.g., adding 2 to each side, dividing each side by 3, etc.). Students should also include something about using order of operations correctly, although there are some exceptions (e.g., factoring as a first step). Students should also notice that if applying the Distributive Property is possible, then it may simplify the process.</p>",
-                        "<p>Tables and graphs can also be used to solve linear equations. For example, the equation  2x – 5 = x + 7 can be solved by finding the point of intersection of y1 = 2x – 5  and y2 = x + 7 on a graphing calculator. Sometimes it is quicker to use symbolic methods. However, if  students are experienced with using technology to create tables and graphs, and if  several questions of this type are being asked, then tables or graphs might be more efficient.</p>"
+                        "<p>For symbolic methods, students’ explanations should include keeping expressions equivalent on both sides of the equal sign (e.g., adding 2 to each side, dividing each side by 3, etc.). Students should also include something about using order of operations correctly, although there are some exceptions (e.g., factoring as a first step). Students should also notice that if applying the Distributive Property is possible, then it may simplify the process.</p>",
+                        "<p>Tables and graphs can also be used to solve linear equations. For example, the equation 2x – 5 = x + 7 can be solved by finding the point of intersection of y1 = 2x – 5 and y2 = x + 7 on a graphing calculator. Sometimes it is quicker to use symbolic methods. However, if students are experienced with using technology to create tables and graphs, and if several questions of this type are being asked, then tables or graphs might be more efficient.</p>"
                       ]
                     }
                   },
@@ -5627,7 +5630,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Fabian’s Representation</p>", 
+                          "<p>Fabian’s Representation</p>",
                           "<p>Inequality Statement</p>"
                         ]
                       }
@@ -5638,7 +5641,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Billie’s Representation</p>", 
+                          "<p>Billie’s Representation</p>",
                           "<p>Number Line</p>"
                         ]
                       }
@@ -5757,7 +5760,7 @@
             {
               "type": "initialChallenge",
               "content": {
-                "tiles": [  
+                "tiles": [
                     {
                     "id": "z2jvVtxah7s9Oz-r",
                     "content": {

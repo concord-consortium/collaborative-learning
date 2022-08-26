@@ -3,139 +3,1006 @@
   "abbrevTitle": "M2S",
   "title": "M2Studio",
   "subtitle": "Multiple Representations",
-  "placeholderText": "Enter notes here",
-  "settings": {
-    "table": {
-      "numFormat": ".2~f"
-    }
-  },
-  "sections": {
-    "introduction": {
-      "initials": "IN",
-      "title": "Introduction",
-      "placeholder": "Work area for\nIntroduction section"
-    },
-    "initialChallenge": {
-      "initials": "IC",
-      "title": "Initial Challenge",
-      "placeholder": "Work area for\nInitial Challenge section"
-    },
-    "whatIf": {
-      "initials": "WI",
-      "title": "What If...?",
-      "placeholder": "Work area for\nWhat If...? section"
-    },
-    "nowWhatDoYouKnow": {
-      "initials": "NW",
-      "title": "Now What Do You Know?",
-      "placeholder": "Work area for\nNow What Do You Know? section"
-    },
-    "didYouKnow": {
-      "initials": "DY",
-      "title": "Did You Know?",
-      "placeholder": "Work area for\nDid You Know? section"
-    },
-    "MathReflection1": {
-      "initials": "R1",
-      "title": "Math Reflection 1",
-      "placeholder": "Work area for\nMathematical Reflection 1 section"
-    },
-     "MathReflection2": {
-      "initials": "R2",
-      "title": "Math Reflection 2",
-      "placeholder": "Work area for\nMathematical Reflection 2 section"
-    },
-     "MathReflection3": {
-      "initials": "R3",
-      "title": "Math Reflection 3",
-      "placeholder": "Work area for\nMathematical Reflection 3 section"
-    },
-     "MathReflection4": {
-      "initials": "R4",
-      "title": "Math Reflection 4",
-      "placeholder": "Work area for\nMathematical Reflection 4 section"
-    }
-  },
-  "planningDocument": {
-    "enable": "teacher",
-    "default": true,
-    "sectionInfo": {
-      "overview": {
-        "initials": "OV",
-        "title": "Overview",
-        "placeholder": "Work area for\nOverview section"
+  "config": {
+    "autoAssignStudentsToIndividualGroups": false,
+    "autoSectionProblemDocuments": false,
+    "disablePublish": [
+      { "documentType": "learningLog" }
+    ],
+    "placeholderText": "Enter notes here",
+    "defaultDocumentType": "problem",
+    "defaultDocumentTitle": "Untitled",
+    "documentLabels": {
+      "personal": {
+        "labels": {
+          "1": "Document",
+          "n": "Documents"
+        }
       },
-      "launch": {
-        "initials": "LC",
-        "title": "Launch",
-        "placeholder": "Work area for\nLaunch section"
-      },
-      "explore": {
-        "initials": "EX",
-        "title": "Explore",
-        "placeholder": "Work area for\nExplore section"
-      },
-      "summarize": {
-        "initials": "SM",
-        "title": "Summarize",
-        "placeholder": "Work area for\nSummarize section"
+      "problem": {
+        "labels": {
+          "1": "Document",
+          "n": "Documents"
+        }
       }
     },
-    "sections": [
-      { "type": "overview" },
-      { "type": "launch" },
-      { "type": "explore" },
-      { "type": "summarize" }
+    "settings": {
+      "table": {
+        "numFormat": ".3~f"
+      },
+      "text": {
+        "tools": ["bold", "italic", "list-ul", "subscript", "superscript", "m2s-variables"]
+      },
+      "drawing": {"tools": ["select", "line", "vector", "rectangle", "ellipse", "stamp", "stroke-color", "fill-color", "image-upload", "variable", "delete"]}
+    },
+    "defaultStamps": [],
+    "navTabs": {
+      "showNavPanel": true,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "tab": "problems",
+          "label": "Activities",
+          "sections": [
+            {
+              "initials": "help",
+              "title": "Get Started",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "TSK",
+              "title": "Task",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "A",
+              "title": "Task A",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "B",
+              "title": "Task B",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "C",
+              "title": "Task C",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "D",
+              "title": "Task D",
+              "type": "problem-documents"
+            }
+          ]
+        },
+        {
+          "tab": "student-work",
+          "label": "Student Workspaces",
+          "teacherOnly": true,
+          "groupsDisplay": true,
+          "sections": [
+            {
+              "title": "Group Workspaces",
+              "type": "problem-documents",
+              "dataTestHeader": "group-workspaces",
+              "dataTestItem": "group-list-items",
+              "showGroupWorkspaces": true
+            }
+          ]
+        },
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Documents",
+              "type": "problem-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["problem"],
+              "properties": ["!isDeleted"],
+              "addDocument": true
+            },
+            {
+              "title": "Documents",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["personal"],
+              "properties": ["!isDeleted"],
+              "addDocument": true
+            }
+          ]
+        },
+        {
+          "tab": "class-work",
+          "label": "Class Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "published-problem-documents",
+              "dataTestHeader": "class-work-section-published",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["publication"],
+              "showStars": ["teacher"],
+              "properties": ["!isTeacherDocument"]
+            },
+            {
+              "title": "Workspaces",
+              "type": "published-personal-documents",
+              "dataTestHeader": "class-work-section-personal",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["personalPublication"],
+              "properties": ["!isTeacherDocument"]
+            },
+            {
+              "className": "section teacher published-documents",
+              "title": "Workspaces",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["publication", "personalPublication"],
+              "properties": ["isTeacherDocument", "!isDeleted"]
+            },
+            {
+              "title": "Workspaces",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["supportPublication"],
+              "properties": ["teacherSupport", "!isDeleted"]
+            }
+          ]
+        }
+      ]
+    },
+    "toolbar": [
+      {
+        "id": "Diagram",
+        "title": "Diagram",
+        "isTileTool": true
+      },
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "Drawing",
+        "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "Image",
+        "title": "Image",
+        "isTileTool": true
+      },
+      {
+        "id": "Table",
+        "title": "Table",
+        "isTileTool": true
+      },
+      {
+        "id": "Geometry",
+        "title": "Geometry",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
     ]
   },
-  "defaultStamps": [
-  ],
+  "sections": {
+    "help": {
+      "initials": "DOC",
+      "title": "Get Started",
+      "placeholder": "Notes on Help"
+    },
+    "task": {
+      "initials": "TSK",
+      "title": "Task",
+      "placeholder": "Work on the task here"
+    },
+    "taska": {
+      "initials": "A",
+      "title": "Board",
+      "placeholder": "Work on the task here"
+    },
+    "taskb": {
+      "initials": "B",
+      "title": "Council",
+      "placeholder": "Work on the task here"
+    },
+    "taskc": {
+      "initials": "C",
+      "title": "Researcher",
+      "placeholder": "Work on the task here"
+    },
+    "taskd": {
+      "initials": "D",
+      "title": "Task D",
+      "placeholder": "Work on the task here"
+    }
+  },
   "investigations": [
     {
-      "description": "Investigation 1",
+      "description": "M2Studio Investigation Description",
       "ordinal": 1,
-      "title": "Units",
+      "title": "M2Studio Examples",
       "problems": [
         {
-          "description": "Problem 1.1",
+          "description": "M2S Problem 1.1 Description",
           "ordinal": 1,
-          "title": "M2S 1.1 Converting Units",
+          "title": "Getting Started in M2Studio",
           "subtitle": "",
           "disabled": [],
           "sections": [
-                        {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
-                        "supports": []
-                        },
-                        {
-                          "type": "initialChallenge",
-                          "content": {
-                            "tiles": []
-                          },
-                          "supports": []
-                        },
-                        {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        }
-                      ],
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to your work space! In here, you will find information and questions. You will work both individually and in groups, so be sure to listen to your teacher about what to do when. </strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>Some tips for this workspace:</strong></p>",
+                        "<p>To the right, you can see 7 buttons. These will add tiles to your workspace:</p>",
+                        "<ul><li>The top button will create a space for you to create a diagram</li><li>The next button (with the A) will create a space for you to write down your thoughts</li><li>The button with the pencil will create a space where you can draw</li><li>The button with the mountain allows you to import images</li><li>The button with the table lets you build a table</li><li>The button with the graph lets you plot points</li><li>The X will delete a tile (this cannot be undone!)</li></ul>",
+                        "<p>You can rearrange your spaces by clicking on the top right-hand corner of the tile (where you will see 6 dots). This will allow you drag and move the tiles. </p>",
+                        "<p>You can click on the bottom right corner of any tile and then drag it up or down to make it smaller or bigger. </p>",
+                        "<p>You can share your work with your group-mates by using the Share slider on the top right corner, or publish your work to the whole class by clicking the button with the up-arrow next to the File menu.</p>",
+                        "<p>You can also look at the work of your group-mates by clicking the Group View icon on the top bar (it looks like a window). </p>",
+                        "<p></p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to teacher solutions</strong></p>",
+                        "<p><strong>Some tips for this workspace:</strong></p>",
+                        "<p>If your students are having trouble, consider putting some tips in a document of your own and publishing it with the uparrow button near the File menu. This will appear in Class Work and students can see the examples you post. They can publish too and the class can share ideas.</p>",
+                        "<p>All content from the left hand panels can be dragged into working documents on the right. Some curriculum pieces are intended to be dragged in as starting places for student work.</p>",
+                        "<p></p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "taska",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>The school board wonders how long the school building should be open every day. If they close the building they can save money on operating costs, but then students might not have a place to study. The school board hires you to figure out how long each day the school should be open. Your first task is to determine what percentage of the day students typically spend at school. </strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answer the questions below using the tiles in your workspace. Be sure to label each answer with the question number you are answering! You can also create additional tiles.</p>",
+                        "<p></p>",
+                        "<p><strong>1. Describe your first task in your own words.</strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>2. What do you need to know about the school in order to complete your first task? </strong></p>",
+                        "<p>a. List as many factors (key quantities and variables) as you can:</p>",
+                        "<p>b. Next to each factor, write where you can find out the information or what you would need to do to figure it out. <br/>Examples:</p>",
+                        "<p>- I need to know how many pets the students have. --&gt; I will conduct a survey to collect this information. </p>",
+                        "<p>- I wonder how many books are at the library. --&gt; Ask the librarian if they have this on record. </p>",
+                        "<p>c. Turn your factors into “variable chips” by clicking on the [v=] button in your text tile.</p>",
+                        "<p></p>",
+                        "<p><strong>3. What assumptions can you make about the context or factors to help you complete this task?</strong></p>",
+                        "<p><em>Hint: Use the [v=] and  go to &quot;Reference existing variable&quot; to select the chips you created in Q2. If you come up with a new variable now, you can also turn it into a chip here.</em></p>",
+                        "<p>Example: By saying &#x27;typical day&#x27;, the school board likely means to consider only days that school is in session. </p>",
+                        "<p>Example: We probably only care about the [pets] owned by the students on the soccer team. </p>",
+                        "<p></p>",
+                        "<p><strong>4. Share your variables/factors and assumptions with your group. Together, sort them to indicate how important you think they are to completing the task. </strong></p>",
+                        "<p>Note: Your teacher may ask you to sort them in class, or ask you to arrange the orange boxes in your workspace. </p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>5. Select 2 of the factors and explain how/why they are important for helping you to complete the task. </strong></p>",
+                        "<p><em>Hint: You can use the [v=] button to get a list and then select from &#x27;Reference existing variable&#x27; to get you started!</em></p>",
+                        "<p>Example: We need to know the number of [pets] so that we buy enough [pet food].</p>",
+                        "<p></p>",
+                        "<p><strong>6. Describe in words how some of these factors are related.</strong></p>",
+                        "<p>Example: The more [pets] we have, the more [pet food] we need.</p>",
+                        "<p></p>",
+                        "<p><strong>7. Use mathematical language or symbols to describe the relationship between those variables. </strong></p>",
+                        "<p><em>Note: If you want to sketch the relationship, click on the pencil icon to create a drawing tile!</em></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "taskb",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>The student council at your school has decided to create a template to help students and parents figure out if a student has enough time to take on an after-school job. The student council wants your help! Your first assignment is to figure out what percentage of the day students spend at school. </strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answer the questions below using the tiles in your workspace. Be sure to label each answer with the question number you are answering! You can also create additional tiles.</p>",
+                        "<p></p>",
+                        "<p><strong>1. Describe your first task in your own words.</strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>2. What do you need to know about the school in order to complete your first task? </strong></p>",
+                        "<p>a. List as many factors (key quantities and variables) as you can:</p>",
+                        "<p>b. Next to each factor, write where you can find out the information or what you would need to do to figure it out. <br/>Examples:</p>",
+                        "<p>- I need to know how many pets the students have. --&gt; I will conduct a survey to collect this information. </p>",
+                        "<p>- I wonder how many books are at the library. --&gt; Ask the librarian if they have this on record. </p>",
+                        "<p>c. Turn your factors into “variable chips” by clicking on the [v=] button in your text tile.</p>",
+                        "<p></p>",
+                        "<p><strong>3. What assumptions can you make about the context or factors to help you complete this task?</strong></p>",
+                        "<p><em>Hint: Use the [v=] and  go to &quot;Reference existing variable&quot; to select the chips you created in Q2. If you come up with a new variable now, you can also turn it into a chip here.</em></p>",
+                        "<p>Example: By saying &#x27;typical day&#x27;, the school board likely means to consider only days that school is in session. </p>",
+                        "<p>Example: We probably only care about the [pets] owned by the students on the soccer team. </p>",
+                        "<p></p>",
+                        "<p><strong>4. Share your variables/factors and assumptions with your group. Together, sort them to indicate how important you think they are to completing the task. </strong></p>",
+                        "<p>Note: Your teacher may ask you to sort them in class, or ask you to arrange the orange boxes in your workspace. </p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>5. Select 2 of the factors and explain how/why they are important for helping you to complete the task. </strong></p>",
+                        "<p><em>Hint: You can use the [v=] button to get a list and then select from &#x27;Reference existing variable&#x27; to get you started!</em></p>",
+                        "<p>Example: We need to know the number of [pets] so that we buy enough [pet food].</p>",
+                        "<p></p>",
+                        "<p><strong>6. Describe in words how some of these factors are related.</strong></p>",
+                        "<p>Example: The more [pets] we have, the more [pet food] we need.</p>",
+                        "<p></p>",
+                        "<p><strong>7. Use mathematical language or symbols to describe the relationship between those variables. </strong></p>",
+                        "<p><em>Note: If you want to sketch the relationship, click on the pencil icon to create a drawing tile!</em></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "taskc",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>A researcher wants to compare the school time spent by students in different countries of the world. They read that in South Korea, students spend about 12 hours per day in school because most students spend their daytime in school, and spend their evenings at a learning academy. They also discover that in the United States, every state has its own requirements for how much time students must spend learning (being taught by a teacher or doing other learning activities supervised by a teacher) each year. The researcher hires you to determine what percentage of the day students spend in school in your state. </strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answer the questions below using the tiles in your workspace. Be sure to label each answer with the question number you are answering! You can also create additional tiles.</p>",
+                        "<p></p>",
+                        "<p><strong>1. Describe your first task in your own words.</strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>2. What do you need to know about the school in order to complete your first task? </strong></p>",
+                        "<p>a. List as many factors (key quantities and variables) as you can:</p>",
+                        "<p>b. Next to each factor, write where you can find out the information or what you would need to do to figure it out. <br/>Examples:</p>",
+                        "<p>- I need to know how many pets the students have. --&gt; I will conduct a survey to collect this information. </p>",
+                        "<p>- I wonder how many books are at the library. --&gt; Ask the librarian if they have this on record. </p>",
+                        "<p>c. Turn your factors into “variable chips” by clicking on the [v=] button in your text tile.</p>",
+                        "<p></p>",
+                        "<p><strong>3. What assumptions can you make about the context or factors to help you complete this task?</strong></p>",
+                        "<p><em>Hint: Use the [v=] and  go to &quot;Reference existing variable&quot; to select the chips you created in Q2. If you come up with a new variable now, you can also turn it into a chip here.</em></p>",
+                        "<p>Example: By saying &#x27;typical day&#x27;, the school board likely means to consider only days that school is in session. </p>",
+                        "<p>Example: We probably only care about the [pets] owned by the students on the soccer team. </p>",
+                        "<p></p>",
+                        "<p><strong>4. Share your variables/factors and assumptions with your group. Together, sort them to indicate how important you think they are to completing the task. </strong></p>",
+                        "<p>Note: Your teacher may ask you to sort them in class, or ask you to arrange the orange boxes in your workspace. </p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>5. Select 2 of the factors and explain how/why they are important for helping you to complete the task. </strong></p>",
+                        "<p><em>Hint: You can use the [v=] button to get a list and then select from &#x27;Reference existing variable&#x27; to get you started!</em></p>",
+                        "<p>Example: We need to know the number of [pets] so that we buy enough [pet food].</p>",
+                        "<p></p>",
+                        "<p><strong>6. Describe in words how some of these factors are related.</strong></p>",
+                        "<p>Example: The more [pets] we have, the more [pet food] we need.</p>",
+                        "<p></p>",
+                        "<p><strong>7. Use mathematical language or symbols to describe the relationship between those variables. </strong></p>",
+                        "<p><em>Note: If you want to sketch the relationship, click on the pencil icon to create a drawing tile!</em></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "taskd",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>A new school is opening and is trying to put together its calendar. The school knows that they must make sure that there is enough time for students to learn and take all their classes, but how much time is that? The new school hires you to first figure what percentage of their day students typically spend at school. They will then use this information to help them plan their daily calendar. </strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answer the questions below using the tiles in your workspace. Be sure to label each answer with the question number you are answering! You can also create additional tiles.</p>",
+                        "<p></p>",
+                        "<p><strong>1. Describe your first task in your own words.</strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>2. What do you need to know about the school in order to complete your first task? </strong></p>",
+                        "<p>a. List as many factors (key quantities and variables) as you can:</p>",
+                        "<p>b. Next to each factor, write where you can find out the information or what you would need to do to figure it out. <br/>Examples:</p>",
+                        "<p>- I need to know how many pets the students have. --&gt; I will conduct a survey to collect this information. </p>",
+                        "<p>- I wonder how many books are at the library. --&gt; Ask the librarian if they have this on record. </p>",
+                        "<p>c. Turn your factors into “variable chips” by clicking on the [v=] button in your text tile.</p>",
+                        "<p></p>",
+                        "<p><strong>3. What assumptions can you make about the context or factors to help you complete this task?</strong></p>",
+                        "<p><em>Hint: Use the [v=] and  go to &quot;Reference existing variable&quot; to select the chips you created in Q2. If you come up with a new variable now, you can also turn it into a chip here.</em></p>",
+                        "<p>Example: By saying &#x27;typical day&#x27;, the school board likely means to consider only days that school is in session. </p>",
+                        "<p>Example: We probably only care about the [pets] owned by the students on the soccer team. </p>",
+                        "<p></p>",
+                        "<p><strong>4. Share your variables/factors and assumptions with your group. Together, sort them to indicate how important you think they are to completing the task. </strong></p>",
+                        "<p>Note: Your teacher may ask you to sort them in class, or ask you to arrange the orange boxes in your workspace. </p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>5. Select 2 of the factors and explain how/why they are important for helping you to complete the task. </strong></p>",
+                        "<p><em>Hint: You can use the [v=] button to get a list and then select from &#x27;Reference existing variable&#x27; to get you started!</em></p>",
+                        "<p>Example: We need to know the number of [pets] so that we buy enough [pet food].</p>",
+                        "<p></p>",
+                        "<p><strong>6. Describe in words how some of these factors are related.</strong></p>",
+                        "<p>Example: The more [pets] we have, the more [pet food] we need.</p>",
+                        "<p></p>",
+                        "<p><strong>7. Use mathematical language or symbols to describe the relationship between those variables. </strong></p>",
+                        "<p><em>Note: If you want to sketch the relationship, click on the pencil icon to create a drawing tile!</em></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "M2S Problem 1.2 Description",
+          "ordinal": 2,
+          "title": "Dashboard Document",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "taskc",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Situation C</strong></p>",
+                        "<p></p>",
+                        "<p><strong>The foo in the blah.... </strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>1. Describe your first task in your own words:</p>",
+                        "<p></p>",
+                        "<p><em>{Write you answer here}  </em></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "config": {
+            "toolbar": []
+          },
+          "supports": []
+        }
+      ]
+    },
+    {
+      "description": "M2Studio Fall 2022",
+      "ordinal": 2,
+      "title": "M2Studio Exercises Fall 2022",
+      "problems": [
+        {
+          "description": "Cats 2022",
+          "ordinal": 1,
+          "title": "Cats 2022",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to your work space! In here, you will find information and questions. You will work both individually and in groups, so be sure to listen to your teacher about what to do when. </strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>Some tips for this workspace:</strong></p>",
+                        "<p>To the right, you can see 7 buttons. These will add tiles to your workspace:</p>",
+                        "<ul><li>The top button will create a space for you to create a diagram</li><li>The next button (with the A) will create a space for you to write down your thoughts</li><li>The button with the pencil will create a space where you can draw</li><li>The button with the mountain allows you to import images</li><li>The button with the table lets you build a table</li><li>The button with the graph lets you plot points</li><li>The X will delete a tile (this cannot be undone!)</li></ul>",
+                        "<p>You can rearrange your spaces by clicking on the top right-hand corner of the tile (where you will see 6 dots). This will allow you drag and move the tiles. </p>",
+                        "<p>You can click on the bottom right corner of any tile and then drag it up or down to make it smaller or bigger. </p>",
+                        "<p>You can share your work with your group-mates by using the Share slider on the top right corner, or publish your work to the whole class by clicking the button with the up-arrow next to the File menu.</p>",
+                        "<p>You can also look at the work of your group-mates by clicking the Group View icon on the top bar (it looks like a window). </p>",
+                        "<p></p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to teacher solutions</strong></p>",
+                        "<p><strong>Some tips for this workspace:</strong></p>",
+                        "<p>If your students are having trouble, consider putting some tips in a document of your own and publishing it with the uparrow button near the File menu. This will appear in Class Work and students can see the examples you post. They can publish too and the class can share ideas.</p>",
+                        "<p>All content from the left hand panels can be dragged into working documents on the right. Some curriculum pieces are intended to be dragged in as starting places for student work.</p>",
+                        "<p></p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "task",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "blahblah2022",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Instructions and Tips: </strong></p>",
+                        "<p>* Use the workspace at right to answer your question about cats. </p>",
+                        "<p>* You can use any of the tile types (diagram, text, drawing, image, table, graph) to help you with your assignment.  </p>",
+                        "<p>* Make sure you label your drawings. </p>",
+                        "<p>* Variables can be created in the drawing, text, and diagram tiles. Once a variable has been created, you can reuse it in any of your other tiles.</p>",
+                        "<p>* Double click on an existing variable chip to edit it.</p>",
+                        "<p>* When you create a new variable, it will also appear in your diagram tile. The variables might stack, so move them around to see what is behind them.</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "psjUt4noZJyaf7C9",
+                    "title": "Cats and kittens",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/cats_420kgraphic2.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to teacher solutions</strong></p>",
+                        "<p><strong>Some tips for this workspace:</strong></p>",
+                        "<p>If your students are having trouble, consider putting some tips in a document of your own and publishing it with the uparrow button near the File menu. This will appear in Class Work and students can see the examples you post. They can publish too and the class can share ideas.</p>",
+                        "<p>All content from the left hand panels can be dragged into working documents on the right. Some curriculum pieces are intended to be dragged in as starting places for student work.</p>",
+                        "<p></p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "ldfL_iJ2D20LPrIW",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>The question my group wants to answer is: _________________________________</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "document_Text_20",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>My notes</strong></p>",
+                      "<p><em>Here is a space for you to take notes. We have also suggested some of the variables for you. Create variables using the variable tool on text tiles or in the diagram tile.</em></p>",
+                      "<p>Some sample variables could be:</p>",
+                      "<ul><li>[initial number of cats]</li><li>[litter size]</li><li>[length of a cat pregnancy]</li><li>[ratio of female to male kittens per litter]</li><li>[age at which a cat is old enough to have kittens]</li><p></p></ul>",
+                      "<p></p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Gy7Kn2FN_gcnIKE4",
+                  "title": "Text 1",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Diagram 1",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                }
+              ]
+            }
+          },
+          "supports": []
+        },
+        {
+          "description": "schools 2022",
+          "ordinal": 2,
+          "title": "Schools 2022",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to your work space! In here, you will find information and questions. You will work both individually and in groups, so be sure to listen to your teacher about what to do when. </strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>Some tips for this workspace:</strong></p>",
+                        "<p>To the right, you can see 7 buttons. These will add tiles to your workspace:</p>",
+                        "<ul><li>The top button will create a space for you to create a diagram</li><li>The next button (with the A) will create a space for you to write down your thoughts</li><li>The button with the pencil will create a space where you can draw</li><li>The button with the mountain allows you to import images</li><li>The button with the table lets you build a table</li><li>The button with the graph lets you plot points</li><li>The X will delete a tile (this cannot be undone!)</li></ul>",
+                        "<p>You can rearrange your spaces by clicking on the top right-hand corner of the tile (where you will see 6 dots). This will allow you drag and move the tiles. </p>",
+                        "<p>You can click on the bottom right corner of any tile and then drag it up or down to make it smaller or bigger. </p>",
+                        "<p>You can share your work with your group-mates by using the Share slider on the top right corner, or publish your work to the whole class by clicking the button with the up-arrow next to the File menu.</p>",
+                        "<p>You can also look at the work of your group-mates by clicking the Group View icon on the top bar (it looks like a window). </p>",
+                        "<p></p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to teacher solutions</strong></p>",
+                        "<p><strong>Some tips for this workspace:</strong></p>",
+                        "<p>If your students are having trouble, consider putting some tips in a document of your own and publishing it with the uparrow button near the File menu. This will appear in Class Work and students can see the examples you post. They can publish too and the class can share ideas.</p>",
+                        "<p>All content from the left hand panels can be dragged into working documents on the right. Some curriculum pieces are intended to be dragged in as starting places for student work.</p>",
+                        "<p></p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "taska",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Your client: </strong>The School Board</p>",
+                        "<p><strong>Their goal:</strong> Determine how long the school should be open each day. They want the school open as a place for study and learning when needed, but it can also be expensive to keep open so would like to close it when it is not being used.</p>",
+                        "<p><strong>Your first task: </strong>Help the school board by determining how much time <em>students</em> typically spend at school.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "23AUG20220546pm",
+                    "title": "Employment Form",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/MS2_EmploymentForm.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answer the questions below using tiles in your workspace. Be sure to label each answer with the number of the question you are answering. </p>",
+                        "<p><strong>1. Create a text tile.  In it, describe how you interpret your client&#x27;s goal.</strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>2. Create another text tile, take notes on what might be important to consider as you complete your first task.</strong></p>",
+                        "<p>Example from how someone might approach a modeling problem:</p>",
+                        "<p>…The public library is wondering if they should allow dogs in the building. Because dogs need lots of space to run around, they first might want to know how much space there is for dogs to run around in the library. Dogs might also chew on the books, so they might also want to know how many books each dog might chew up…</p>",
+                        "<p></p>",
+                        "<p><strong>3. Decide what in your notes counts as &quot;assumptions&quot; and what are variables. </strong></p>",
+                        "<p>Option 1: Copy and paste your text into a fresh tile where you italicize the assumptions and convert the variables into variable chips.</p>",
+                        "<p>Example of how they could convert their text into assumptions and variables:</p>",
+                        "<p>…The public library is wondering if they should allow dogs in the building. Because <em>dogs need lots of space to run around,</em> they first might want to know [amount of open space in the library]  for dogs to run around in the library. <em>Dogs might also chew on the books</em>, so they might also want to know [number of books dogs destroy each day]…</p>",
+                        "<p></p>",
+                        "<p>Option 2: Create a table tile where you list your assumptions, variables, and suggested starting values (with units). Then create the variable chips in a fresh text tile.</p>",
+                        "<p></p>",
+                        "<p><strong>4. Share your ideas with your group mates.</strong> </p>",
+                        "<p>Did your group mates include anything you didn’t? Did you include something that you now want to change? After you discuss, in a new text tile, <strong>describe</strong> what you will add or change to your own work.</p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>5. Arrange your variable cards in your diagram tile.</strong> Look at the diagram tile in your workspace. All the variable chips you made have become cards (they might be stacked, so look behind them!). Move your cards around. If you think that variable is very important to include, move it to the left side of the tile. If you think maybe it is not as important, move it to the right side of the tile. </p>",
+                        "<p></p>",
+                        "<p><strong>6. Create one more text tile. In it, choose two of your variables and describe in words how they are related. </strong>Why is it important to consider these two variables together?</p>",
+                        "<p> </p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }                                                      
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "taskb",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "23AUG20220547pm",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Your client:</strong> The Student Council</p>",
+                        "<p><strong>Their goal: </strong>Create a template to help students and their families figure out if a student has enough time to also have an after-school job and still be successful at their other obligations and activities.</p>",
+                        "<p><strong>Your first task: </strong> Help the student council by determining how much time students typically spend <em>at school</em>.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "23AUG20220548pm",
+                    "title": "School Building",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/MS2_SchoolBuilding.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answer the questions below using tiles in your workspace. Be sure to label each answer with the number of the question you are answering. </p>",
+                        "<p><strong>1. Create a text tile.  In it, describe how you interpret your client&#x27;s goal.</strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>2. Create another text tile, take notes on what might be important to consider as you complete your first task.</strong></p>",
+                        "<p>Example from how someone might approach a modeling problem:</p>",
+                        "<p>…The public library is wondering if they should allow dogs in the building. Because dogs need lots of space to run around, they first might want to know how much space there is for dogs to run around in the library. Dogs might also chew on the books, so they might also want to know how many books each dog might chew up…</p>",
+                        "<p></p>",
+                        "<p><strong>3. Decide what in your notes counts as &quot;assumptions&quot; and what are variables. </strong></p>",
+                        "<p>Option 1: Copy and paste your text into a fresh tile where you italicize the assumptions and convert the variables into variable chips.</p>",
+                        "<p>Example of how they could convert their text into assumptions and variables:</p>",
+                        "<p>…The public library is wondering if they should allow dogs in the building. Because <em>dogs need lots of space to run around,</em> they first might want to know [amount of open space in the library]  for dogs to run around in the library. <em>Dogs might also chew on the books</em>, so they might also want to know [number of books dogs destroy each day]…</p>",
+                        "<p></p>",
+                        "<p>Option 2: Create a table tile where you list your assumptions, variables, and suggested starting values (with units). Then create the variable chips in a fresh text tile.</p>",
+                        "<p></p>",
+                        "<p><strong>4. Share your ideas with your group mates.</strong> </p>",
+                        "<p>Did your group mates include anything you didn’t? Did you include something that you now want to change? After you discuss, in a new text tile, <strong>describe</strong> what you will add or change to your own work.</p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>5. Arrange your variable cards in your diagram tile.</strong> Look at the diagram tile in your workspace. All the variable chips you made have become cards (they might be stacked, so look behind them!). Move your cards around. If you think that variable is very important to include, move it to the left side of the tile. If you think maybe it is not as important, move it to the right side of the tile. </p>",
+                        "<p></p>",
+                        "<p><strong>6. Create one more text tile. In it, choose two of your variables and describe in words how they are related. </strong>Why is it important to consider these two variables together?</p>",
+                        "<p> </p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }                                                                       
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "taskc",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Your client: </strong>The Researcher</p>",
+                        "<p><strong>Their goal:</strong> Compare the length of time students spend at school in different countries of the world. They read that in South Korea, students spend about 12 hours per day in school! Korean students attend both a day school and a night academy. They next want to know how much time students spend learning (being taught by a teacher or doing other activities supervised by a teacher) in your state.</p>",
+                        "<p><strong>Your first task:</strong> Help the researcher by determining how much time students <em>typically</em> spend at school in your state.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "23AUG20220554pm",
+                    "title": "Schedule",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/MS2_BellSchedule.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Answer the questions below using tiles in your workspace. Be sure to label each answer with the number of the question you are answering. </p>",
+                        "<p><strong>1. Create a text tile.  In it, describe how you interpret your client&#x27;s goal.</strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>2. Create another text tile, take notes on what might be important to consider as you complete your first task.</strong></p>",
+                        "<p>Example from how someone might approach a modeling problem:</p>",
+                        "<p>…The public library is wondering if they should allow dogs in the building. Because dogs need lots of space to run around, they first might want to know how much space there is for dogs to run around in the library. Dogs might also chew on the books, so they might also want to know how many books each dog might chew up…</p>",
+                        "<p></p>",
+                        "<p><strong>3. Decide what in your notes counts as &quot;assumptions&quot; and what are variables. </strong></p>",
+                        "<p>Option 1: Copy and paste your text into a fresh tile where you italicize the assumptions and convert the variables into variable chips.</p>",
+                        "<p>Example of how they could convert their text into assumptions and variables:</p>",
+                        "<p>…The public library is wondering if they should allow dogs in the building. Because <em>dogs need lots of space to run around,</em> they first might want to know [amount of open space in the library]  for dogs to run around in the library. <em>Dogs might also chew on the books</em>, so they might also want to know [number of books dogs destroy each day]…</p>",
+                        "<p></p>",
+                        "<p>Option 2: Create a table tile where you list your assumptions, variables, and suggested starting values (with units). Then create the variable chips in a fresh text tile.</p>",
+                        "<p></p>",
+                        "<p><strong>4. Share your ideas with your group mates.</strong> </p>",
+                        "<p>Did your group mates include anything you didn’t? Did you include something that you now want to change? After you discuss, in a new text tile, <strong>describe</strong> what you will add or change to your own work.</p>",
+                        "<p><strong></strong></p>",
+                        "<p><strong>5. Arrange your variable cards in your diagram tile.</strong> Look at the diagram tile in your workspace. All the variable chips you made have become cards (they might be stacked, so look behind them!). Move your cards around. If you think that variable is very important to include, move it to the left side of the tile. If you think maybe it is not as important, move it to the right side of the tile. </p>",
+                        "<p></p>",
+                        "<p><strong>6. Create one more text tile. In it, choose two of your variables and describe in words how they are related. </strong>Why is it important to consider these two variables together?</p>",
+                        "<p> </p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }                                                 
+                ]
+              },
+              "supports": []
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Instructions and Tips: </strong></p>",
+                      "<p>* Use the space below to consider how you would approach your first task. </p>",
+                      "<p>        &lt;&gt; First, drag the prompt from your task into this workspace using the 6 dots in the corner of that tile. </p>",
+                      "<p>        &lt;&gt;Then use the prompt questions at left to help you organize your thoughts. </p>",
+                      "<p>* You can use any of the tile types (diagram, text, drawing, image, table, graph) to help you with your task.  </p>",
+                      "<p>* Make sure you label your answers with the number of the question you are answering. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "23AUG20220941PM",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>",
+                      "<p></p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "ipE-87D-pNEE-QWr",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}
+                  }
+                }        
+              ]
+            }
+          },
           "supports": []
         }
       ]
     }
-  ],
-  "supports": []
+  ]
 }

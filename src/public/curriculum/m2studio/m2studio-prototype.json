@@ -1,0 +1,171 @@
+{
+  "code": "m2s-proto",
+  "abbrevTitle": "M2S-P",
+  "title": "M2Studio Prototype",
+  "subtitle": "",
+  "config": {
+    "placeholderText": "Enter notes here",
+    "autoSectionProblemDocuments": false,
+    "defaultDocumentType": "problem",
+    "defaultDocumentTitle": "Untitled",
+    "documentLabels": {
+      "personal": {
+        "labels": {
+          "1": "Document",
+          "n": "Documents"
+        }
+      },
+      "problem": {
+        "labels": {
+          "1": "Document",
+          "n": "Documents"
+        }
+      }
+    },
+    "settings": {
+      "table": {
+        "numFormat": ".2~f"
+      },
+      "text": {
+        "tools": ["bold", "subscript", "superscript", "m2s-variables"]
+      }
+    },
+    "defaultStamps": [],
+    "navTabs": {
+      "showNavPanel": true,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "tab": "my-work",
+          "label": "My Documents",
+          "sections": [
+            {
+              "title": "Documents",
+              "type": "problem-documents",
+              "dataTestHeader": "my-work-section-investigations",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["problem"],
+              "order": "original"
+            },
+            {
+              "title": "Documents",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["personal"],
+              "properties": ["!isDeleted"],
+              "addDocument": true
+            }
+          ]
+        }
+      ]
+    },
+    "toolbar": [
+      {
+        "id": "Diagram",
+        "title": "Diagram",
+        "isTileTool": true
+      },
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "Drawing",
+        "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
+    ]
+  },
+  "sections": {
+    "content": {
+      "initials": "",
+      "title": "Content",
+      "placeholder": ""
+    }
+  },
+  "investigations": [
+    {
+      "description": "M2Studio Investigation Description",
+      "ordinal": 1,
+      "title": "M2Studio Prototype Examples",
+      "problems": [
+        {
+          "description": "M2S Problem 1.1 Description",
+          "ordinal": 1,
+          "title": "Standard Document",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "content",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            }
+          ],
+          "supports": []
+        },
+        {
+          "description": "M2S Problem 1.2 Description",
+          "ordinal": 2,
+          "title": "Dashboard Document",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "content",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                { "content": { "type": "Diagram" } },
+                [
+                  { "content": { "type": "Text", "text": "You can have any text you want here!" } },
+                  { "content": { "type": "Drawing" } }
+                ]
+              ]
+            },
+            "toolbar": [],
+            "tools": ["Diagram", "Drawing", "Text"]
+          },
+          "supports": []
+        },
+        {
+          "description": "M2S Problem 1.3 Description",
+          "ordinal": 3,
+          "title": "Diagram-only Document",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "content",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [{ "content": { "type": "Diagram" } }]
+            },
+            "toolbar": [],
+            "tools": ["Diagram"]
+          },
+          "supports": []
+        }
+      ]
+    }
+  ]
+}

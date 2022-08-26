@@ -87,8 +87,8 @@ context('Test Canvas', function () {
       it('verify publish document', function () {
         canvas.publishCanvas("personal");
         resourcesPanel.openTopTab('class-work');
-        cy.openSection('class-work', "extra-workspaces");
-        resourcesPanel.getCanvasItemTitle('class-work', 'extra-workspaces').should('contain', renameTitlePencil);
+        cy.openSection('class-work', "workspaces");
+        resourcesPanel.getCanvasItemTitle('class-work', 'workspaces').should('contain', renameTitlePencil);
       });
     });
 
@@ -143,8 +143,8 @@ context('Test Canvas', function () {
       it('verifies publish of investigation', function () {
         canvas.publishCanvas("investigation");
         resourcesPanel.openTopTab('class-work');
-        cy.openSection('class-work', "problem-workspaces");
-        resourcesPanel.getCanvasItemTitle('class-work', 'problem-workspaces').should('contain', "Student 5: "+this.title);
+        cy.openSection('class-work', "workspaces");
+        resourcesPanel.getCanvasItemTitle('class-work', 'workspaces').should('contain', "Student 5: "+this.title);
       });
       it('verifies copy of investigation', function () {
         let investigationTitle = 'Investigation Copy';
@@ -367,7 +367,7 @@ context('Test Canvas', function () {
       canvas.deleteDocument();
       resourcesPanel.openTopTab("my-work");
       cy.openSection("my-work", "workspaces");
-      resourcesPanel.getCanvasItemTitle("my-work","workspaces").contains(renameTitlePencil).should('not.exist');
+      resourcesPanel.getCanvasItemTitle("my-work","workspaces").contains(renameTitlePencil).should('not.be.visible');
 
     });
     it('verify delete of personal workspace', function () {
@@ -385,6 +385,16 @@ context('Test Canvas', function () {
   });
 });
 
-after(function () {
-  cy.clearQAData('all');
+describe("Canvas unit config test", function () {
+  before(function () {
+    cy.visit("??appMode=qa&fakeClass=5&fakeUser=student:5&fakeOffering=5&problem=3.3&qaGroup=5&unit=example-no-group-share");
+    cy.waitForLoad();
+  });
+
+  it("verify group section in header is not visible when unit is configured to auto assign students to groups", function () {
+    cy.get(".app-header .right .group").should("not.exist");
+  });
+  it("verify publish button is not visible when publish is disabled", function () {
+    cy.get(".icon-button.icon-publish").should("not.exist");
+  });
 });

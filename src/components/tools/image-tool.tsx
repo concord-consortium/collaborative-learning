@@ -9,11 +9,14 @@ import { ImageToolbar } from "./image/image-toolbar";
 import { ImageComponent } from "./image-component";
 import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
+import { measureText } from "./hooks/use-measure-text";
 import { IDocumentContext } from "../../models/document/document-types";
 import { debouncedSelectTile } from "../../models/stores/ui";
 import { gImageMap, ImageMapEntryType } from "../../models/image-map";
 import { ImageContentModelType } from "../../models/tools/image/image-content";
 import { ITileExportOptions } from "../../models/tools/tool-content-info";
+import { EditableTileTitle } from "./editable-tile-title";
+import { defaultTileTitleFont } from "../constants";
 import { hasSelectionModifier } from "../../utilities/event-utils";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { isPlaceholderImage } from "../../utilities/image-utils";
@@ -32,6 +35,7 @@ interface IState {
   imageEltWidth?: number;
   imageEltHeight?: number;
   requestedHeight?: number;
+  isEditingTitle?: boolean;
 }
 
 const defaultImagePlaceholderSize = { width: 100, height: 100 };
@@ -41,30 +45,18 @@ let nextImageToolId = 0;
 @inject("stores")
 @observer
 export default class ImageToolComponent extends BaseComponent<IProps, IState> {
-  public state: IState = { isLoading: true };
-
+  public state: IState = { isLoading: true,
+                           imageContentUrl: this.getContent().url,
+                           isEditingTitle: false
+                         };
   // give each component instance a unique id
   private imageToolId = ++nextImageToolId;
   private _isMounted = false;
   private toolbarToolApi: IToolApi | undefined;
   private resizeObserver: ResizeObserver;
   private imageElt: HTMLDivElement | null;
-  private listenerDisposer: (() => void) | undefined;
-  private debouncedUpdateImage = debounce((url: string, filename?: string) => {
-    // Under some circumstances, notably when the image being requested has been copied from a multi-class support,
-    // the call to getImage() below will fail initially, but the url being requested will later be cached by the
-    // gImageMap once the multi-class support is loaded. To account for this, we register a listener which will be
-    // called when the requested image is loaded into the cache. If we succeed in retrieving the image directly,
-    // then we remove the listener ourselves.
-    this.listenerDisposer?.();
-    this.listenerDisposer = gImageMap.registerListener(
-                              url, `${this.imageToolId}`, () => {
-                                if (this._isMounted) {
-                                  this.forceUpdate();
-                                  this.listenerDisposer?.();
-                                  this.listenerDisposer = undefined;
-                                }
-                              });
+  private updateImage = (url: string, filename?: string) => {
+
     gImageMap.getImage(url, { filename })
       .then(image => {
         if (!this._isMounted) return;
@@ -79,9 +71,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         if (image.contentUrl && (url !== image.contentUrl)) {
           this.getContent().updateImageUrl(url, image.contentUrl);
         }
-        // We've successfully loaded the image. No need to continue listening.
-        this.listenerDisposer?.();
-        this.listenerDisposer = undefined;
       })
       .catch(() => {
         this.setState({
@@ -91,7 +80,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
           imageEntry: undefined
         });
       });
-  }, 100);
+  };
   private imageDragDrop: ImageDragDrop;
 
   constructor(props: IProps) {
@@ -119,6 +108,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.imageElt && this.resizeObserver.observe(this.imageElt);
 
     this.props.onRegisterToolApi({
+      getTitle: () => {
+        return this.getTitle();
+      },
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return this.getContent().exportJson(options);
       },
@@ -132,7 +124,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentWillUnmount() {
-    this.listenerDisposer?.();
     this.resizeObserver.disconnect();
     this._isMounted = false;
   }
@@ -181,6 +172,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             onIsEnabled={this.handleIsEnabled}
             onUploadImageFile={this.handleUploadImageFile}
           />
+          {this.renderTitleArea()}
           <ImageComponent
             ref={elt => this.imageElt = elt}
             content={this.getContent()}
@@ -218,6 +210,39 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             : naturalHeight + kMarginsAndBorders;
   }
 
+  private handleBeginEditTitle = () => {
+    this.setState({ isEditingTitle: true });
+  };
+
+  private handleTitleChange = (title?: string) => {
+    title && this.getContent().setTitle(title);
+    this.setState({ isEditingTitle: false });
+  };
+
+  private renderTitleArea() {
+    return (
+      <div className="title-area-wrapper" key="title-area">
+        <div className="title-area">
+          {this.renderTitle()}
+        </div>
+      </div>
+    );
+  }
+
+  private getTitle() {
+    return this.getContent().title || "";
+  }
+
+  private renderTitle() {
+    const { readOnly, scale } = this.props;
+    const size = {width: this.state.imageEltWidth || null , height: this.state.imageEltHeight || null};
+    return (
+      <EditableTileTitle key="geometry-title" size={size} scale={scale} getTitle={() => this.getTitle()}
+                              readOnly={readOnly} measureText={(text) => measureText(text, defaultTileTitleFont)}
+                              onBeginEdit={this.handleBeginEditTitle} onEndEdit={this.handleTitleChange} />
+    );
+  }
+
   private getContent() {
     return this.props.model.content as ImageContentModelType;
   }
@@ -226,7 +251,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     if (!this.state.isLoading) {
       this.setState({ isLoading: true });
     }
-    this.debouncedUpdateImage(url, filename);
+    this.updateImage(url, filename);
   }
 
   private handleUploadImageFile = (file: File) => {

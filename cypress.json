@@ -4,5 +4,12 @@
   "viewportWidth": 1400,
   "viewportHeight": 1000,
   "projectId": "3pbqac",
-  "chromeWebSecurity": false
+  "chromeWebSecurity": false,
+  "retries": {
+    "runMode": 2,
+    "openMode": 0
+  },
+  "env": {
+    "coverage": false
+  }
 }

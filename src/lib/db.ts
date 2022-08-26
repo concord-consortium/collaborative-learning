@@ -10,7 +10,7 @@ import {
   DBGroupUserConnections, DBPublication, DBPublicationDocumentMetadata, DBDocumentType, DBImage, DBTileComment,
   DBUserStar, DBOfferingUserProblemDocument, DBOtherDocument, IDocumentProperties, DBOtherPublication, DBSupport
 } from "./db-types";
-import { DocumentModelType, DocumentModel } from "../models/document/document";
+import { DocumentModelType, createDocumentModel } from "../models/document/document";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemOrPlanningDocumentType,
@@ -19,8 +19,10 @@ import {
 import { SectionModelType } from "../models/curriculum/section";
 import { SupportModelType } from "../models/curriculum/support";
 import { ImageModelType } from "../models/image";
-import { DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds, createDefaultSectionedContent
-       } from "../models/document/document-content";
+import {
+  DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds
+} from "../models/document/document-content";
+import { createDefaultSectionedContent } from "../models/document/document-content-import";
 import { Firebase } from "./firebase";
 import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
@@ -32,6 +34,7 @@ import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
 import { urlParams } from "../utilities/url-params";
+import { firebaseConfig } from "./firebase-config";
 
 export enum Monitor {
   None = "None",
@@ -85,6 +88,7 @@ export interface OpenDocumentOptions {
   properties?: IDocumentProperties;
   groupUserConnections?: Record<string, unknown>;
   originDoc?: string;
+  pubVersion?: number;
 }
 
 export class DB {
@@ -115,17 +119,7 @@ export class DB {
 
       // check for already being initialized for tests
       if (firebase.apps.length === 0) {
-        const key = atob("QUl6YVN5QVV6T2JMblZESURYYTB4ZUxmSVpLV3BiLTJZSWpYSXBJ");
-        firebase.initializeApp({
-          apiKey: key,
-          authDomain: "collaborative-learning-ec215.firebaseapp.com",
-          databaseURL: "https://collaborative-learning-ec215.firebaseio.com",
-          projectId: "collaborative-learning-ec215",
-          storageBucket: "collaborative-learning-ec215.appspot.com",
-          messagingSenderId: "112537088884",
-          appId: "1:112537088884:web:c51b1b8432fff36faff221",
-          measurementId: "G-XP472LRY18"
-        });
+        firebase.initializeApp(firebaseConfig());
       }
 
       if (urlParams.firebase) {
@@ -439,6 +433,8 @@ export class DB {
     if (!content) {
       throw new Error("Could not publish the specified document because its content is not available.");
     }
+    let pubCount = documentModel.getNumericProperty("pubCount");
+    documentModel.setNumericProperty("pubCount", ++pubCount);
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getProblemPublicationsPath(user)).push();
@@ -458,6 +454,7 @@ export class DB {
           },
           documentKey: document.self.documentKey,
           userId: user.id,
+          pubVersion: pubCount,
           ...groupProps
         };
 
@@ -478,6 +475,8 @@ export class DB {
       throw new Error("Could not publish the specified document because its content is not available.");
     }
     const publicationType = documentModel.type + "Publication" as DBDocumentType;
+    let pubCount = documentModel.getNumericProperty("pubCount");
+    documentModel.setNumericProperty("pubCount", ++pubCount);
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: publicationType, content }).then(({document, metadata}) => {
         const publicationPath = publicationType === "personalPublication"
@@ -493,9 +492,9 @@ export class DB {
           uid: user.id,
           title: documentModel.title || "",
           properties: documentModel.copyProperties(),
-          originDoc: documentModel.key
+          originDoc: documentModel.key,
+          pubVersion: pubCount,
         };
-
         publicationRef.set(publication)
           .then(() => {
             Logger.logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, documentModel);
@@ -511,6 +510,8 @@ export class DB {
     const { problemPath, user } = this.stores;
     const { offeringId: resource_link_id, activityUrl: resource_url = "" } = user;
     const content = documentModel.content?.publish();
+    let pubCount = documentModel.getNumericProperty("pubCount");
+    documentModel.setNumericProperty("pubCount", ++pubCount);
     if (!content) {
       throw new Error("Could not publish the specified document because its content is not available.");
     }
@@ -524,13 +525,14 @@ export class DB {
       originDocType: documentModel.type,
       content,
       resource_link_id,
-      resource_url
+      resource_url,
+      pubVersion: pubCount,
     });
   }
 
   public openDocument(options: OpenDocumentOptions) {
     const { documents } = this.stores;
-    const {documentKey, type, title, properties, userId, groupId, visibility, originDoc} = options;
+    const {documentKey, type, title, properties, userId, groupId, visibility, originDoc, pubVersion} = options;
     return new Promise<DocumentModelType>((resolve, reject) => {
       const {user} = this.stores;
       const documentPath = this.firebase.getUserDocumentPath(user, documentKey, userId);
@@ -554,25 +556,34 @@ export class DB {
             const msg = "Warning: Reconstituting empty contents for " +
                         `document '${documentKey}' of type '${type}' for user '${userId}'`;
             console.warn(msg);
-            return DocumentModel.create({
-                                  type, title, properties, groupId, visibility, uid: userId, originDoc,
+            return createDocumentModel({
+                                  type, title, properties, groupId, visibility, uid: userId, originDoc, pubVersion,
                                   key: documentKey, createdAt: metadata.createdAt, content: {}, changeCount: 0 });
           }
 
           const content = this.parseDocumentContent(document);
-          return DocumentModel.create({
-            type,
-            title,
-            properties,
-            groupId,
-            visibility,
-            uid: userId,
-            originDoc,
-            key: document.self.documentKey,
-            createdAt: metadata.createdAt,
-            content: content ? content : {},
-            changeCount: document.changeCount
-          });
+          try {
+            return createDocumentModel({
+              type,
+              title,
+              properties: { ...properties, ...metadata.properties },
+              groupId,
+              visibility,
+              uid: userId,
+              originDoc,
+              key: document.self.documentKey,
+              createdAt: metadata.createdAt,
+              content: content ? content : {},
+              changeCount: document.changeCount,
+              pubVersion
+            });
+          } catch (e) {
+            const msg = "Could not open " +
+                        `document '${documentKey}' of type '${type}' for user '${userId}'.` +
+                        "This is because DocumentModel.create failed.\n";
+            console.error(msg, e);
+            throw e;
+          }
         })
         .then((document) => {
           documents.add(document);
@@ -664,10 +675,20 @@ export class DB {
     });
   }
 
+  public async destroyFirebaseDocument(document: DocumentModelType) {
+    const { content, metadata, typedMetadata } =
+      this.firebase.getUserDocumentPaths(this.stores.user, document.type, document.key);
+    await Promise.all([
+      this.firebase.ref(content).set(null),
+      this.firebase.ref(metadata).set(null),
+      this.firebase.ref(typedMetadata).set(null)
+    ]);
+    this.stores.documents.resolveRequiredDocumentPromiseWithNull(document.type);
+  }
+
   public clear(level: DBClearLevel) {
     return new Promise<void>((resolve, reject) => {
       const {user} = this.stores;
-      let qaUser;
       const clearPath = (path?: string) => {
         this.firebase.ref(path).remove().then(resolve).catch(reject);
       };
@@ -675,14 +696,12 @@ export class DB {
       if (this.stores.appMode !== "qa") {
         return reject("db#clear is only available in qa mode");
       }
-      
+
+      if (level === "all") {
+        return reject("clearing 'all' is handled by clearFirebaseAnonQAUser");
+      }
+
       switch (level) {
-        case "all":
-          qaUser = this.firebase.getQAUserRoot();
-          if (qaUser) {
-            qaUser.remove().then(resolve).catch(reject);
-          }
-          break;
         case "class":
           clearPath(this.firebase.getClassPath(user));
           break;
@@ -735,15 +754,15 @@ export class DB {
 
   // handles published personal documents and published learning logs
   public createDocumentModelFromOtherPublication(publication: DBOtherPublication, type: OtherPublicationType) {
-    const {title, properties, uid, originDoc, self: {documentKey}} = publication;
+    const {title, properties, uid, originDoc, self: {documentKey}, pubVersion} = publication;
+
     const group = this.stores.groups.groupForUser(uid);
     const groupId = group && group.id;
-    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties, originDoc});
+    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties, originDoc, pubVersion});
   }
 
   public createDocumentFromPublication(publication: DBPublication) {
-    const {groupId, groupUserConnections, userId, documentKey} = publication;
-
+    const {groupId, groupUserConnections, userId, documentKey, pubVersion} = publication;
     // groupUserConnections returns as an array and must be converted back to a map
     const groupUserConnectionsMap = Object.keys(groupUserConnections || [])
       .reduce((allUsers, groupUserId) => {
@@ -760,6 +779,7 @@ export class DB {
       groupId,
       visibility: "public",
       groupUserConnections: groupUserConnectionsMap,
+      pubVersion
     });
   }
 

@@ -1,5 +1,115 @@
 # Changelog
 
+## Version 3.0.0 - August 26, 2022
+
+### Features/Improvements
+
+Version 3.0.0 includes some major internal architecture changes to support some major new features like improved sharing of data between tiles, document-wide undo/redo and the ability to navigate the complete history of a user document. All of the new features aren't available in all contexts just yet, but they're on their way. In addition to these major architectural improvements, there are also some new tiles and a smattering of other new features and bug fixes.
+
+Shared models and Undo/Redo/History Infrastructure
+([#181033824] [#181745054] [#182203554] [#182203557] [#182346146] [#182402361] [#182551006] [#182459997] [#182460044] [#182326302] [#182326341] [#182941998])
+(#1225 #1246 #1255 #1259 #1263 #1285 #1299 #1308 #1309 #1338 #1350 #1352 #1353 #1354 #1356 #1362 #1365 #1367 #1368 #1376)
+- Drawing tile [#181207721] [#182203548] [#182237673] [#182460256] #1271 #1275 #1282 #1306 #1311 #1312
+- Geometry tile [#182203544] [#182203548] [#182460232] #1291 #1319 #1340 #1358 #1370
+- Image tile [#182460260] #1274 #1291 #1346
+- Image map #1292 #1297 #1304
+- Table tile [#182203552] #1319 #1340 #1357 #1364 #1377
+- Text tile [#182028466] [#182460254] #1359
+
+New Data Card tile #1361 #1380
+([#182799755] [#182799758] [#182799768] [#182799773] [#182799754] [#182799764])
+
+New Dataflow tile with grabber support
+([#182197258] [#182265390] [#182459969] [#182460058] [#182460089] [#182488560] [#182835713] [#182773371])
+(#1296 #1298 #1301 #1302 #1305 #1310 #1316 #1322 #1323 #1324 #1325 #1326 #1329 #1335 #1337 #1339 #1342 #1343 #1344 #1345 #1351)
+
+Diagram View tile #1252 #1258 #1261 #1264 #1265 #1287
+([#181214875] [#181611282] [#181616180] [#181628131] [#181645369] [#181671155])
+Variable chips in text tiles [#181159095]  [#181315816] [#181611112] [#181671784] #1257
+Variable chips in drawing tiles [#182054852] [#182055451] [#182054713] [#182056140] #1262 #1266 #1267 #1270 #1272 #1273
+
+Enhanced unit/problem configuration options [#182942119] #1280 #1363 #1372
+Allow hiding of My Work panel/browser [#182402091] #1281
+Tile title improvements [#182589896] #1291 #1314
+Logging improvements #1284
+Improved teacher view of student groups work [#182429861] #1328
+Teachers default view is workspace rather than references [#182812862] #1332
+Improved workspace/reference divider [#182567472] #1331 #1373
+Show multiple versions of published documents [#181363573] #1334 #1374
+Upload image to drawing tile [#182774303] #1336
+
+Curriculum Enhancements
+- Bio4Community #1327 #1375
+- Brainwaves #1320 #1341 #1347
+- M2Studio #1294 #1375
+- MothEd #1231 #1286 #1295 #1330 #1347 #1355
+- Stretching and Shrinking #1366
+
+### Known Issues
+
+Table/geometry linking is not fully functional (yet)
+Table expressions are not fully functional (yet)
+
+### Bugs Fixed
+
+Fix duplicate keys warning from redundant publication thumbnails (#1293)
+Copy/paste/delete selection of images in text tile [#181315816]
+
+### Asset Sizes
+
+|        File                   |    Size   | % Change from Previous Release |
+|-------------------------------|-----------|--------------------------------|
+| cc.diagram-view.css           |     8,572 | +63.8%                         |
+| cc.diagram-view.js            |   477,836 | - 3.0%                         |
+| cc.react-components.js        |    58,847 | + 0.3%                         |
+| cc.slate-editor.css           |     3,545 |                                |
+| cc.slate-editor.js            |   437,392 | + 2.0%                         |
+| main.css                      |   233,752 | +34.6%                         |
+| main.js                       | 2,405,729 | +97.6%                         |
+| vendor-main.css               |    16,584 | -93.6%                         |
+| vendor-main.js                | 1,735,978 | + 3.1%                         |
+| total .css w/o diagram view   |   253,881 | -41.4%                         |
+| total .js w/o diagram view    | 4,647,805 | +17.0%                         |
+
+## Version 2.2.0 (Internal Release) - April 3, 2022
+
+### Features/Improvements
+- Set Tiles/Plugins by Unit [#180424338](https://www.pivotaltracker.com/story/show/180424338)
+- Refactor app, unit, investigation, problem configuration [#181034371](https://www.pivotaltracker.com/story/show/181034371) #1199
+- Configurable Problem Tab [#181190677](https://www.pivotaltracker.com/story/show/181190677)
+- Updated text tile icons [#181363539](https://www.pivotaltracker.com/story/show/181363539) #1223
+- Teacher support docs and regular published docs moved to "Teacher Documents" section in My Class tab. [#180635406](https://www.pivotaltracker.com/story/show/180635406) [#181364663](https://www.pivotaltracker.com/story/show/181364663)
+- Teachers choose where to publish supports "just this class" or "all my classes" [#181364692](https://www.pivotaltracker.com/story/show/181364692) #1233
+- Each publish shows a new document and users can "soft" delete their own published documents [#181363573](https://www.pivotaltracker.com/story/show/181363573)
+- Text Toolbar can be customized by the author: [#181345429](https://www.pivotaltracker.com/story/show/181345429)
+- New Diagram tool, only loaded when configured [#181175873](https://www.pivotaltracker.com/story/show/181175873) [#181214875](https://www.pivotaltracker.com/story/show/181214875)
+- Dynamic Tile loading, javascript is now broken up into several files [#181214875](https://www.pivotaltracker.com/story/show/181214875)
+- M2Studio configurations [#181193209](https://www.pivotaltracker.com/story/show/181193209)
+- Remove 'editability' icon/badge from document canvas
+- Add "destroy..." option to the file menu when the appMode is "dev"
+- Ability to automatically assign students to groups
+- Simplify the `tile` and `id` properties of tile info to just an `id`
+- Improved typescript typing of ToolContentModel
+
+### Bugs Fixed
+- Table expression parse errors [#181360571](https://www.pivotaltracker.com/story/show/181360571)
+
+### Asset Sizes
+
+|        File                     |    Size   | % Change from Previous Release |
+|---------------------------------|-----------|--------------------------------|
+| cc.diagram-view.a1906313.css    |     5,233 |                                |
+| cc.diagram-view.a1906313.js     |   492,381 |                                |
+| cc.jsxgraph.70963f6e.js         |   583,971 |                                |
+| cc.react-components.c414cd1e.js |    58,695 |                                |
+| cc.slate-editor.c2cc7fb9.js     |   428,891 |                                |
+| main.c0daccfe.css               |   173,696 | -60% compared to index.css     |
+| main.c0daccfe.js                | 1,217,226 | -70% compared to index.js      |
+| vendor-main.544d75c3.css        |   259,910 |                                |
+| vendor-main.544d75c3.js         | 1,683,173 |                                |
+| total .js w/o diagram view      | 3,971,956 | -1.7% compared to index.hs     |
+| total .css w/o diagram view     |   433,606 | 0.1% compared to index.css     |
+
 ## Version 2.1.3 - released February 22, 2022
 
 ### Features/Improvements

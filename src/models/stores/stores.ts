@@ -1,5 +1,5 @@
 import { AppConfigModelType, AppConfigModel } from "./app-config-model";
-import { getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
+import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType, InvestigationModel } from "../curriculum/investigation";
 import { ProblemModel, ProblemModelType } from "../curriculum/problem";
 import { UIModel, UIModelType } from "./ui";
@@ -7,6 +7,7 @@ import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";
 import { DB } from "../../lib/db";
+import { registerTools } from "../../register-tools";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
 import { DocumentsModelType, DocumentsModel, createDocumentsModelWithRequiredDocuments } from "./documents";
@@ -14,8 +15,8 @@ import { LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocumen
 import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
-import { getSetting } from "./settings";
 import { AppMode } from "./store-types";
+import { SerialDevice } from "./serial";
 
 export interface IBaseStores {
   appMode: AppMode;
@@ -38,13 +39,14 @@ export interface IBaseStores {
   supports: SupportsModelType;
   clipboard: ClipboardModelType;
   selection: SelectionStoreModelType;
+  serialDevice: SerialDevice;
 }
 
 export interface IStores extends IBaseStores {
   problemPath: string;
 }
 
-interface ICreateStores extends Partial<IStores> {
+export interface ICreateStores extends Partial<IStores> {
   demoName?: string;
 }
 
@@ -84,7 +86,8 @@ export function createStores(params?: ICreateStores): IStores {
     showDemoCreator: params?.showDemoCreator || false,
     supports: params?.supports || SupportsModel.create({}),
     clipboard: ClipboardModel.create(),
-    selection: SelectionStoreModel.create()
+    selection: SelectionStoreModel.create(),
+    serialDevice: new SerialDevice()
   };
   return {
     ...stores,
@@ -107,11 +110,25 @@ export function getProblemPath(stores: IBaseStores) {
 
 export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
   const unitJson = await getUnitJson(unitId, stores.appConfig);
-  const unit = UnitModel.create(unitJson);
-  const {investigation, problem} = unit.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal);
 
-  stores.unit = unit;
-  stores.documents.setUnit(stores.unit);
+  // read the unit content, but don't instantiate section contents (DocumentModels) yet
+  const unit = createUnitWithoutContent(unitJson);
+
+  const _problemOrdinal = problemOrdinal || stores.appConfig.defaultProblemOrdinal;
+  const { investigation: _investigation, problem: _problem } = unit.getProblem(_problemOrdinal);
+
+  stores.appConfig.setConfigs([unit.config || {}, _investigation?.config || {}, _problem?.config || {}]);
+
+  // load/initialize the necessary tools
+  const { toolbar = [], tools = [] } = stores.appConfig;
+  const unitToolIds = new Set([...toolbar.map(tool => tool.id), ...tools]);
+  await registerTools([...unitToolIds]);
+
+  // read the unit content with full contents now that we have tools
+  stores.unit = UnitModel.create(unitJson);
+  const {investigation, problem} = stores.unit.getProblem(_problemOrdinal);
+
+  stores.documents.setAppConfig(stores.appConfig);
   if (investigation && problem) {
     stores.investigation = investigation;
     stores.problem = problem;
@@ -133,47 +150,4 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
 export function isShowingTeacherContent(stores: IStores) {
   const { ui: { showTeacherContent }, user: { isTeacher } } = stores;
   return isTeacher && showTeacherContent;
-}
-
-export function isFeatureSupported(stores: IStores, feature: string, sectionId?: string) {
-  const { unit, investigation, problem } = stores;
-  const section = sectionId && problem.getSectionById(sectionId);
-  return [unit, investigation, problem, section].reduce((prev, level) => {
-    const featureIndex = level ? level.disabled.findIndex(f => f === feature || f === `!${feature}`) : -1;
-    const isEnabledAtLevel = featureIndex >= 0 && level ? level.disabled[featureIndex][0] === "!" : true;
-    return featureIndex >= 0 ? isEnabledAtLevel : prev;
-  }, true);
-}
-
-export function getDisabledFeaturesOfTile(stores: IStores, tile: string, sectionId?: string) {
-  const { unit, investigation, problem } = stores;
-  const section = sectionId && problem.getSectionById(sectionId);
-  const disabledMap: { [feature: string]: boolean } = {};
-  [unit, investigation, problem, section]
-    .forEach((level, index) => {
-      level && level.disabled.forEach(feature => {
-        const regex = new RegExp(`(!)?(${tile}.+)`);
-        const match = regex.exec(feature);
-        if (match && match[2]) {
-          disabledMap[match[2]] = !match[1];
-        }
-      });
-    });
-  return Object.keys(disabledMap).reduce<string[]>((prev, feature) => {
-    disabledMap[feature] && prev.push(feature);
-    return prev;
-  }, []);
-}
-
-export function getNavTabConfigFromStores(stores: IStores) {
-  for (const level of [stores.unit, stores.appConfig]) {
-    if (level.navTabs) return level.navTabs;
-  }
-}
-
-export function getSettingFromStores(stores: IStores, key: string, group?: string) {
-  for (const level of [stores.problem, stores.investigation, stores.unit, stores.appConfig]) {
-    const value = level.settings && getSetting(level.settings, key, group);
-    if (value != null) return value;
-  }
 }

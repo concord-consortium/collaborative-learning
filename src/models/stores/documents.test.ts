@@ -1,4 +1,4 @@
-import { DocumentModel, DocumentModelType } from "../document/document";
+import { createDocumentModel, DocumentModelType } from "../document/document";
 import {
   DocumentType, LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument
 } from "../document/document-types";
@@ -15,14 +15,14 @@ describe("documents model", () => {
   let learningLog: DocumentModelType;
 
   beforeEach(() => {
-    document = DocumentModel.create({
+    document = createDocumentModel({
       type: ProblemDocument,
       uid: kUserId,
       key: "test",
       createdAt: 1,
       content: {}
     });
-    personalDocument = DocumentModel.create({
+    personalDocument = createDocumentModel({
       type: PersonalDocument,
       title: "Personal",
       uid: kUserId,
@@ -30,14 +30,14 @@ describe("documents model", () => {
       createdAt: 1,
       content: {}
     });
-    planningDocument = DocumentModel.create({
+    planningDocument = createDocumentModel({
       type: PlanningDocument,
       uid: kUserId,
       key: "test-planning",
       createdAt: 1,
       content: {}
     });
-    learningLog = DocumentModel.create({
+    learningLog = createDocumentModel({
       type: LearningLogDocument,
       title: "LearningLog",
       uid: kUserId,
@@ -139,7 +139,7 @@ describe("documents model", () => {
     });
 
     const getPublishedDocument = (createdAt: number, uid: string) => {
-      return DocumentModel.create({
+      return createDocumentModel({
         uid,
         type: "publication",
         key: `pubDoc-${uid}-${createdAt}`,
@@ -223,7 +223,7 @@ describe("documents model", () => {
 
   describe("getLatestLogPublications", () => {
     const getPublishedDocument = (createdAt: number, uid: string, type?: DocumentType, title?: string) => {
-      return DocumentModel.create({
+      return createDocumentModel({
         uid,
         type: type || "learningLogPublication",
         key: `llDoc-${uid}-${title}-${createdAt}`,

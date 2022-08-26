@@ -22,9 +22,9 @@ describe("DeleteButton", () => {
   });
 
   const buttonConfig = {
-          "name": "delete",
-          "title": "Delete",
-          "iconId": "icon-delete-tool",
+          id: "delete",
+          title: "Delete",
+          iconId: "icon-delete-tool",
           isDefault: false,
           isTileTool: false
         };

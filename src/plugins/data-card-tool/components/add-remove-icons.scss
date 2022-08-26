@@ -1,0 +1,46 @@
+@import "../../../components/vars.sass";
+
+.icon-button-back {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  opacity: 35%;
+  background-color: transparent !important;
+  margin-left: 12px;
+
+  &.hidden {
+    visibility: hidden;
+  };
+
+  svg {
+    fill: white;
+    stroke: $workspace-teal-dark-1;
+  }
+
+  &.teal-bg {
+    svg {
+      fill: $workspace-teal-light-5 !important;
+    }
+  }
+
+  &:hover {
+    opacity: 100%;
+    &.teal-bg {
+      svg {
+        fill: #c0dfe7;
+      }
+    }
+  }
+
+  &:active {
+    opacity: 100%;
+    svg {
+      fill: $workspace-teal-dark-1 !important;
+      stroke: white;
+    }
+  }
+
+  &.remove-card {
+    margin-right: -35px;
+  }
+}

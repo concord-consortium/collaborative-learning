@@ -1,7 +1,6 @@
 import firebase from "firebase/app";
 import {
-  LearningLogDocument, LearningLogPublication, OtherDocumentType, PersonalDocument,
-  PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
+  LearningLogDocument, OtherDocumentType, PersonalDocument, PlanningDocument, ProblemDocument, ProblemPublication
 } from "../models/document/document-types";
 import { AudienceModelType, SectionTarget } from "../models/stores/supports";
 import { UserModelType } from "../models/stores/user";
@@ -87,11 +86,6 @@ export class Firebase {
 
     return `/${parts.join("/")}/`;
   }
-  
-  public getQAUserRoot() {
-    // get the current QA user's folder
-    return firebase.database().ref(`/qa/${this.userId}`);
-  }
 
   //
   // Paths
@@ -139,8 +133,7 @@ export class Firebase {
       [PersonalDocument]: () => this.getOtherDocumentPath(user, PersonalDocument, documentKey),
       [LearningLogDocument]: () => this.getOtherDocumentPath(user, LearningLogDocument, documentKey),
       [ProblemPublication]: () => `${this.getProblemPublicationsPath(user)}/${documentKey}`,
-      [PersonalPublication]: () => `${this.getPersonalPublicationsPath(user)}/${documentKey}`,
-      [LearningLogPublication]: () => `${this.getLearningLogPublicationsPath(user)}/${documentKey}`
+       // typed metadata for published personal documents and learning logs is stored under a different key
     };
     const typedMetadata = typedMetadataMap[documentType]?.() || "";
     return { content, metadata, typedMetadata };

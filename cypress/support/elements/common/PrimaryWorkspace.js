@@ -37,19 +37,23 @@ class PrimaryWorkspace{
     }
 
     getResizePanelDivider(){
-       return cy.get('.resize-panel-divider .drag-handles svg g');
+       return cy.get('.resize-panel-divider .drag-thumbnail');
     }
 
     getResizeLeftPanelHandle(){
-        return cy.get('.resize-panel-divider .drag-handles svg.drag-left-handle g');
+        return cy.get('.divider-container .expand-handle.left');
     }
 
     getResizeRightPanelHandle(){
-        return cy.get('.resize-panel-divider .drag-handles svg.drag-right-handle g');
+        return cy.get('.divider-container .expand-handle.right');
     }
 
     getSectionTitle(tab, section){
         return cy.get('[data-test='+tab+'-section-'+section+'] .title');
+    }
+
+    openResourceTab(){
+      cy.get('.collapsed-resources-tab').click();
     }
 
     openSection(tab, section) {

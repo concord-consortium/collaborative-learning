@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { EditorProps } from "react-data-grid";
 import { TColumn } from "./table-types";
 
@@ -37,25 +37,51 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
   row, column, onRowChange, onClose
 }: EditorProps<TRow, TSummaryRow>) {
   const _column: TColumn = column as unknown as TColumn;
+  const origValueRef = useRef(row[column.key as keyof TRow] as unknown as string);
+  const valueRef = useRef(origValueRef.current);
+  const [value, setValue] = useState(origValueRef.current);
+
+  const updateValue = (val: string) => {
+    valueRef.current = val;
+    setValue(val);
+  };
+
+  const saveChange = (newValue: string) => {
+    onClose(true);
+    _column.appData?.onEndBodyCellEdit?.(newValue);
+  };
+
+  const finishAndSave = () => {
+    const endValue = valueRef.current;
+    if (endValue !== origValueRef.current) {
+      onRowChange({ ...row, [column.key]: endValue }, true);
+    }
+    saveChange(endValue);
+  };
 
   useEffect(() => {
     _column.appData?.onBeginBodyCellEdit?.();
+    return () => {
+      finishAndSave();
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    onClose(true);
-    _column.appData?.onEndBodyCellEdit?.(e.target.value);
-  };
-
-  const raw = row[column.key as keyof TRow];
-  const value = raw == null ? "" : raw;
   return (
     <input
       className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS}`}
       ref={autoFocusAndSelect}
-      value={value as unknown as string}
-      onChange={event => onRowChange({ ...row, [column.key]: event.target.value })}
-      onBlur={handleBlur}
+      value={value}
+      onChange={event => {
+        updateValue(event.target.value);
+      }}
+      onBlur={event => {
+        saveChange(event.target.value);
+      }}
+      onKeyDown={(event: any) => {
+        if (event.key === 'Tab') {
+          finishAndSave();
+        }
+      }}
     />
   );
 }

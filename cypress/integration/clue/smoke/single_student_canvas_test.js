@@ -44,8 +44,8 @@ context('single student functional test',()=>{
         cy.get('.primary-workspace [data-test=learning-log-title]').should('contain', "Learning Log: My First Learning Log");
       });
       it('verify close of nav tabs', function () {
-        cy.closeTabs();
-        cy.get('.nav-tab-panel').should('not.be.visible');
+        cy.closeResourceTabs();
+        cy.get('.nav-tab-panel').should('not.exist');
       });
     });
 
@@ -143,30 +143,36 @@ context('single student functional test',()=>{
         });
         // TODO: Class Work changed with new feature changes.
         describe('publish canvas', ()=>{
+            it('verify published canvas thumbnail', () => {
+              cy.openTopTab('class-work');
+              cy.openSection('class-work','workspaces');
+              cy.getCanvasItemTitle('workspaces').should('have.length',1);
+            });
             it('verify publish canvas thumbnail appears in Class Work Published List',()=>{
                 canvas.publishCanvas("investigation");
                 cy.openTopTab('class-work');
-                cy.openSection('class-work','problem-workspaces');
-                cy.getCanvasItemTitle('problem-workspaces').should('have.length',1);
+                cy.openSection('class-work','workspaces');
+                cy.getCanvasItemTitle('workspaces').should('have.length',2);
+                cy.getCanvasItemTitle('workspaces').first().should('contain', 'v2');
             });
             it('verify student name appears under thumbnail',()=>{
                 cy.get('[data-test=user-name]').then(($el)=>{
                     const user = $el.text();
-                    cy.getCanvasItemTitle('problem-workspaces').first().find('.info div').should('contain',user);
+                    cy.getCanvasItemTitle('workspaces').first().find('.info div').should('contain',user);
                 });
             } );
             it('verify restore of published canvas', ()=>{
               cy.openTopTab("class-work");
-              cy.openSection("class-work", "problem-workspaces");
+              cy.openSection("class-work", "workspaces");
                 cy.get('[data-test=user-name]').then(($el)=>{
                     const user = $el.text();
-                    cy.getCanvasItemTitle('problem-workspaces', user).click();
+                    cy.getCanvasItemTitle('workspaces', user).first().click();
                 });
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.text-tool').should('exist').and('contain','This is a smoke test');
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.geometry-content').should('exist');
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.drawing-tool').should('exist');
                 cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.image-tool').should('exist');
-                // cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.neo-codap-case-table').should('exist');
+                cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.table-tool-tile').should('exist');
             });
         });
     });

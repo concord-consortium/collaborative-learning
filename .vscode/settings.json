@@ -9,12 +9,22 @@
     "**/dist/**": true
   },
   "cSpell.words": [
+    "autorun",
+    "boundingbox",
     "ccimg",
     "democlass",
+    "elems",
     "fbrtdb",
+    "iframes",
+    "jsxgraph",
     "mcimage",
     "mcimages",
     "mcsupports",
-    "towle"
+    "tablelink",
+    "todos",
+    "towle",
+    "ulid",
+    "undoable",
+    "wumps"
   ]
 }

@@ -2,7 +2,7 @@ import { getObjectById } from "./jxg-board";
 import { JXGChangeAgent } from "./jxg-changes";
 import { objectChangeAgent } from "./jxg-object";
 import { isImage } from "./jxg-types";
-import { gImageMap } from "../../image-map";
+import { EntryStatus, gImageMap } from "../../image-map";
 import { uniqueId } from "../../../utilities/js-utils";
 
 export const imageChangeAgent: JXGChangeAgent = {
@@ -10,9 +10,9 @@ export const imageChangeAgent: JXGChangeAgent = {
     const _board = board as JXG.Board;
     const parents = (change.parents || []).slice();
     const url = parents && parents[0] as string || "";
-    const imageEntry = url && gImageMap.getCachedImage(url);
-    const displayUrl = imageEntry && imageEntry.displayUrl || "";
-    parents[0] = displayUrl;
+    const imageEntry = gImageMap.getCachedImage(url);
+    const displayUrl = imageEntry?.status === EntryStatus.Ready && imageEntry?.displayUrl || "";
+    if (displayUrl) parents[0] = displayUrl;
     const props = { id: uniqueId(), fixed: true, ...change.properties };
     return parents && parents.length >= 3
             ? _board.create("image", parents, props)
@@ -30,7 +30,7 @@ export const imageChangeAgent: JXGChangeAgent = {
       if (image && objProps) {
         const { url, size } = objProps;
         const imageEntry = gImageMap.getCachedImage(url);
-        const displayUrl = imageEntry && imageEntry.displayUrl || "";
+        const displayUrl = imageEntry?.status === EntryStatus.Ready && imageEntry?.displayUrl || "";
         if (displayUrl) {
           image.url = displayUrl;
         }

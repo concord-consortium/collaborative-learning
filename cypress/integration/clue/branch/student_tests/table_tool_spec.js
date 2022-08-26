@@ -7,15 +7,15 @@ let clueCanvas = new ClueCanvas,
 let headerX = 'pluto';
 let headerY = 'mars';
 
-before(function () {
-  const queryParams = `${Cypress.config("queryParams")}`;
-  cy.clearQAData('all');
-
-  cy.visit(queryParams);
-  cy.waitForLoad();
-});
-
 context('Table Tool Tile', function () {
+  before(function () {
+    const queryParams = `${Cypress.config("queryParams")}`;
+    cy.clearQAData('all');
+
+    cy.visit(queryParams);
+    cy.waitForLoad();
+  });
+
   describe('Test table functions', function () {
     it('will add a table to canvas', function () {
       clueCanvas.addTile('table');
@@ -77,93 +77,84 @@ context('Table Tool Tile', function () {
         tableToolTile.getColumnHeader().should('have.length', 2);
         tableToolTile.getColumnHeaderText().then((text) => {
           expect(text[0]).to.be.eq('pluto');
-          expect(text[1]).to.be.eq('y2');
+          expect(text[1]).to.be.eq('y');
         });
       });
     });
   });
-});
-describe('edit table entries', function () {
-  // TODO: Found 1, expected 3
-  it('will add content to table', function () {
-    cy.get(".primary-workspace").within((workspace) => {
-      tableToolTile.getTableCell().eq(1).click().type('3{enter}');
-      tableToolTile.getTableCell().eq(2).click();
-      // cy.wait(100);
-      tableToolTile.getTableCell().eq(1).should('contain', '3');
-      tableToolTile.getTableCell().eq(2).type('2.5{enter}');
-      tableToolTile.getTableCell().eq(5).click();
-      // cy.wait(100);
-      tableToolTile.getTableCell().eq(2).should('contain', '2.5');
-      tableToolTile.getTableCell().eq(1).click().type('5{enter}');
-      tableToolTile.getTableCell().eq(5).click();
-      // cy.wait(100);
-      tableToolTile.getTableCell().eq(1).should('contain', '5');
-      tableToolTile.getTableRow().should('have.length', 2);
-    });
-  });
-  it('will toggle index numbers', function () {
-    tableToolTile.getIndexNumberToggle().click();
-    cy.get(".primary-workspace").within(() => {
-      cy.get(".index-cell-contents").eq(0).should('contain', 1);
-      cy.get(".index-cell-contents").eq(1).should('contain', "");
-    });
-  });
-  it('will remove a row', function () {
-    tableToolTile.removeRow("0");
-    tableToolTile.getTableRow().should('have.length', 1);
-    cy.get(".index-cell-contents").eq(0).should('contain', "");
-  });
-});
-describe("formulas", function () {
-  let formula = "3*pluto+2";
-  it('will verify formula modal', function () {
-    cy.get(".primary-workspace").within((workspace) => {
-      tableToolTile.getTableToolbarButton('set-expression').click();
-    });
-    cy.get('.modal-title').should('contain', "Set Expression");
-    cy.get('.modal-content .prompt select').should('not.exist');
-    cy.get('.modal-content .prompt').should('contain', "y2");
-  });
-  it('will enter a formula', function () {
-    cy.get('#expression-input').click().type(formula + '{enter}');
-    cy.get('.ReactModalPortal').should('not.exist');
-  });
-  it('verify formula appears under correct column header', function () {
-    cy.get('.editable-header-cell')
-      .contains('y2')
-      .first()
-      .siblings('.expression-cell.has-expression')
-      .should('contain', formula);
-  });
-  it('verify selection of y axis when there is more than one',function(){
-    cy.get(".primary-workspace").within((workspace) => {
-      tableToolTile.getAddColumnButton().click();
-      tableToolTile.renameColumn('y', headerY); //makes it easier to find the correct column header
-      tableToolTile.getTableToolbarButton('set-expression').click();
-    });
-    cy.get('.modal-title').should('contain', "Set Expression");
-    cy.get('.modal-content .prompt select').should('exist');
-    cy.get('.modal-content .prompt select').select(headerY);
-    cy.get('.expression label').should('contain', headerY);
-  });
-  it('verify cancel does not enter in a formula', function(){
-    cy.get('#expression-input').click().type(formula );
-    cy.get('.modal-button').contains('Cancel').click();
-    cy.get('.editable-header-cell')
-      .contains('y')
-      .first()
-      .siblings('.expression-cell.has-expression')
-      .should('not.exist');
-    });
-});
-describe('delete table', function () {
-  it('verify delete table', function () {
-    tableToolTile.getTableTile().click();
-    clueCanvas.deleteTile('table');
-  });
-});
 
-after(function () {
-  cy.clearQAData('all');
+  describe('edit table entries', function () {
+    // TODO: Found 1, expected 3
+    it('will add content to table', function () {
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.typeInTableCell(1, '3');
+        tableToolTile.getTableCell().eq(1).should('contain', '3');
+        tableToolTile.typeInTableCell(2, '2.5');
+        tableToolTile.getTableCell().eq(2).should('contain', '2.5');
+        tableToolTile.typeInTableCell(1, '5');
+        tableToolTile.getTableCell().eq(1).should('contain', '5');
+        tableToolTile.getTableRow().should('have.length', 2);
+      });
+    });
+    it('will toggle index numbers', function () {
+      tableToolTile.getIndexNumberToggle().click();
+      cy.get(".primary-workspace").within(() => {
+        cy.get(".index-cell-contents").eq(0).should('contain', 1);
+        cy.get(".index-cell-contents").eq(1).should('contain', "");
+      });
+    });
+    it('will remove a row', function () {
+      tableToolTile.removeRow("0");
+      tableToolTile.getTableRow().should('have.length', 1);
+      cy.get(".index-cell-contents").eq(0).should('contain', "");
+    });
+  });
+  describe("formulas", function () {
+    let formula = "3*pluto+2";
+    it('will verify formula modal', function () {
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.getTableToolbarButton('set-expression').click();
+      });
+      cy.get('.modal-title').should('contain', "Set Expression");
+      cy.get('.modal-content .prompt select').should('not.exist');
+      cy.get('.modal-content .prompt').should('contain', "y");
+    });
+    it('will enter a formula', function () {
+      cy.get('#expression-input').click().type(formula + '{enter}');
+      cy.get('.ReactModalPortal').should('not.exist');
+    });
+    it('verify formula appears under correct column header', function () {
+      cy.get('.editable-header-cell')
+        .contains('y')
+        .first()
+        .siblings('.expression-cell.has-expression')
+        .should('contain', formula);
+    });
+    it('verify selection of y axis when there is more than one',function(){
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.getAddColumnButton().click();
+        tableToolTile.renameColumn('y', headerY); //makes it easier to find the correct column header
+        tableToolTile.getTableToolbarButton('set-expression').click();
+      });
+      cy.get('.modal-title').should('contain', "Set Expression");
+      cy.get('.modal-content .prompt select').should('exist');
+      cy.get('.modal-content .prompt select').select(headerY);
+      cy.get('.expression label').should('contain', headerY);
+    });
+    it('verify cancel does not enter in a formula', function(){
+      cy.get('#expression-input').click().type(formula );
+      cy.get('.modal-button').contains('Cancel').click();
+      cy.get('.editable-header-cell')
+        .contains('y')
+        .first()
+        .siblings('.expression-cell.has-expression')
+        .should('not.exist');
+      });
+  });
+  describe('delete table', function () {
+    it('verify delete table', function () {
+      tableToolTile.getTableTile().click();
+      clueCanvas.deleteTile('table');
+    });
+  });
 });

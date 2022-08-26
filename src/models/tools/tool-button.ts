@@ -1,24 +1,29 @@
 import { getEnv, Instance, SnapshotOut, types } from "mobx-state-tree";
-import { getToolContentInfoByTool } from "./tool-content-info";
+import { getToolContentInfoById } from "./tool-content-info";
 
 const BaseToolButtonModel = types.model("BaseToolButton", {
-  name: types.string,
+  id: types.string, // toolId in the case of tool buttons
   title: types.string,
   isDefault: false,
-});
+})
+.volatile(self => ({
+  Icon: undefined as any
+}));
 
 const AppToolButtonModel = BaseToolButtonModel.named("AppToolButtonModel")
   .props({
     iconId: types.string,
     isTileTool: types.literal(false)
   })
-  .views(self => ({
-    get Icon() {
-      // Get the appConfig from the environment
-      // Unfortunately the environment cannot be typed very well
-      //   https://github.com/mobxjs/mobx-state-tree/issues/431
-      const appIcons = getEnv(self).appIcons;
-      return appIcons?.[self.iconId];
+  .actions(self => ({
+    initialize() {
+      if (!self.Icon) {
+        // Get the appConfig from the environment
+        // Unfortunately the environment cannot be typed very well
+        //   https://github.com/mobxjs/mobx-state-tree/issues/431
+        const appIcons = getEnv(self).appIcons;
+        self.Icon = appIcons?.[self.iconId];
+      }
     }
   }));
 
@@ -26,9 +31,12 @@ const TileToolButtonModel = BaseToolButtonModel.named("TileToolButtonModel")
   .props({
     isTileTool: types.literal(true)
   })
-  .views(self => ({
-    get Icon() {
-      return  getToolContentInfoByTool(self.name).Icon;
+  .actions(self => ({
+    initialize() {
+      if (!self.Icon) {
+        const info = getToolContentInfoById(self.id);
+        info?.Icon && (self.Icon = info.Icon);
+      }
     }
   }));
 
