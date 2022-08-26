@@ -66,7 +66,6 @@
     "lint:unused": "tsc --noUnusedLocals --project .",
     "migrate": "node ./migrations/migrate",
     "migrate:debug": "node --inspect-brk ./migrations/migrate",
-    "postinstall": "patch-package",
     "start": "webpack-dev-server --hot",
     "start:secure": "webpack-dev-server --https --hot --cert ~/.localhost-ssl/localhost.pem --key ~/.localhost-ssl/localhost.key",
     "stats": "webpack --profile --json --mode production > stats.json",
@@ -100,6 +99,7 @@
   },
   "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
   "overrides": {
+    "mobx-state-tree": "@concord-consortium/mobx-state-tree",
     "nanoid@<4.0.0": "^4.0.0",
     "slate-react": "@concord-consortium/slate-react",
     "slate-react-placeholder": "@concord-consortium/slate-react-placeholder"
@@ -171,7 +171,6 @@
     "mini-css-extract-plugin": "^2.6.1",
     "nock": "^13.2.9",
     "npm-run-all": "^4.1.5",
-    "patch-package": "^6.4.7",
     "postcss-loader": "^7.0.1",
     "rimraf": "^3.0.2",
     "sass": "^1.54.5",
