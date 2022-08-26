@@ -352,6 +352,10 @@ export const GeometryBaseContentModel = ToolContentModel
     links: types.array(types.string)  // table tile ids
   })
   .preProcessSnapshot(snapshot => {
+    // fix null table links ¯\_(ツ)_/¯
+    if (snapshot.links?.some(link => link == null)) {
+      snapshot = { ...snapshot, links: snapshot.links.filter(link => link != null) };
+    }
     if (!snapshot.board) {
       return { ...snapshot, board: defaultBoard() };
     }
