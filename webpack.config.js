@@ -11,8 +11,6 @@ const path = require('path');
 const rollbarSnippetPath = './node_modules/rollbar/dist/rollbar.snippet.js';
 const rollbarSnippet = fs.readFileSync(path.join(__dirname, rollbarSnippetPath), { encoding: 'utf8' }).trim();
 
-const cacheGroupOptions = { minSize:0, minChunks: 1, reuseExistingChunk: true };
-
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
 
@@ -24,7 +22,8 @@ module.exports = (env, argv) => {
     mode: devMode ? 'development' : 'production',
     output: {
       clean: true,
-      filename: 'index.[contenthash].js'
+      filename: 'index.[contenthash].js',
+      chunkFilename: '[name].[contenthash].js'
     },
     performance: { hints: false },
     externals: {
@@ -173,35 +172,14 @@ module.exports = (env, argv) => {
       moduleIds: "deterministic",
       splitChunks: {
         chunks: 'all',
-        name : false,
-        filename: "[name].[chunkhash:8].js",
-        // patterned after https://github.com/webpack/webpack/issues/6916#issuecomment-378171500
-        cacheGroups:{
-          // @concord-consortium modules
-          concord: {
-            test: /@concord-consortium/,
-            name(module) {
-              // e.g. node_modules/@concord-consortium/package-name
-              const ccRegEx = /[\\/]@concord-consortium[\\/](.*?)([\\/]|$)/;
-              const packageName = module.identifier().match(ccRegEx)?.[1] || "";
-
-              // npm package names are URL-safe, but some servers don't like @ symbols
-              return `cc.${packageName.replace('@', '')}`;
-            },
-            priority: 10,
-            enforce: true,
-            ...cacheGroupOptions
-          },
-          // node_modules
-          vendor: {
-            test: /node_modules/,
-            name: (module, chunks, cacheGroupKey) => `vendor-${chunks[0].name}`,
-            priority: 0,
-            ...cacheGroupOptions
-          },
-          // local modules
-          default: { name: "main", ...cacheGroupOptions }
-        }
+        minChunks: 2,
+        filename: (pathData) => {
+          // console.log("vendor filename", pathData.chunk.id, 
+          //   [...pathData.chunk._groups].map(group => group.options?.name), 
+          //   [...pathData.chunk._groups].map(group => group.chunks));
+          const groupsNames = [...pathData.chunk._groups].map(group => group.options?.name);
+          return `common-${groupsNames.join('-')}-[name].[chunkhash:8].js`;
+        },
       }
     },
     resolve: {
