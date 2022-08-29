@@ -108,7 +108,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     showExpressionsDialog();
   };
   const { hasLinkableRows, ...dataGridProps } = useDataSet({
-    gridRef, gridContext, model, dataSet: dataSet.current, columnChanges, triggerColumnChange, rows,
+    gridRef, gridContext, model, dataSet: dataSet.current, columnChanges, triggerColumnChange, rows, rowHeight,
     rowChanges, triggerRowChange, readOnly: !!readOnly, changeHandlers, measureText: measureHeaderText,
     selectedCell, inputRowId, ...rowLabelProps, onShowExpressionsDialog: handleShowExpressionsDialog });
 

@@ -29,6 +29,7 @@ interface IUseDataSet {
   inputRowId: React.MutableRefObject<string>;
   selectedCell: React.MutableRefObject<TPosition>;
   rows: TRow[];
+  rowHeight: (args: any) => number;
   RowLabelHeader: React.FC<any>;
   RowLabelFormatter: React.FC<any>;
   changeHandlers: IContentChangeHandlers;
@@ -37,7 +38,7 @@ interface IUseDataSet {
 }
 export const useDataSet = ({
   gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, triggerRowChange, readOnly,
-  inputRowId, selectedCell, rows, RowLabelHeader, RowLabelFormatter,
+  inputRowId, selectedCell, rows, rowHeight, RowLabelHeader, RowLabelFormatter,
   changeHandlers, measureText, onShowExpressionsDialog
 }: IUseDataSet) => {
   const { onAddRows, onUpdateRow } = changeHandlers;
@@ -45,7 +46,7 @@ export const useDataSet = ({
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const metadata = getContent().metadata;
   const { columns, onColumnResize } = useColumnsFromDataSet({
-    gridContext, dataSet, metadata, readOnly, columnChanges, RowLabelHeader, RowLabelFormatter,
+    gridContext, dataSet, metadata, readOnly, columnChanges, rowHeight, RowLabelHeader, RowLabelFormatter,
     measureText, onShowExpressionsDialog, changeHandlers });
   const onSelectedCellChange = (position: TPosition) => {
     const forward = (selectedCell.current.rowIdx < position.rowIdx) ||

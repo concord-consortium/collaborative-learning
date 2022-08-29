@@ -4,7 +4,7 @@ import { IAttribute } from "../../../models/data/attribute";
 import { IDataSet } from "../../../models/data/data-set";
 import { prettifyExpression } from "../../../models/data/expression-utils";
 import { TableMetadataModelType } from "../../../models/tools/table/table-content";
-import { CellFormatter } from "./cell-formatter";
+import { getCellFormatter } from "./cell-formatter";
 import CellTextEditor from "./cell-text-editor";
 import { ColumnHeaderCell } from "./column-header-cell";
 import {
@@ -21,6 +21,7 @@ interface IUseColumnsFromDataSet {
   metadata: TableMetadataModelType;
   readOnly?: boolean;
   columnChanges: number;
+  rowHeight: (args: any) => number;
   RowLabelHeader: React.FC<any>;
   RowLabelFormatter: React.FC<any>;
   measureText: (text: string) => number;
@@ -28,7 +29,7 @@ interface IUseColumnsFromDataSet {
   changeHandlers: IContentChangeHandlers;
 }
 export const useColumnsFromDataSet = ({
-  gridContext, dataSet, metadata, readOnly, columnChanges, RowLabelHeader, RowLabelFormatter,
+  gridContext, dataSet, metadata, readOnly, columnChanges, rowHeight, RowLabelHeader, RowLabelFormatter,
   measureText, onShowExpressionsDialog, changeHandlers
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
@@ -70,19 +71,23 @@ export const useColumnsFromDataSet = ({
   }, [dataSet.attributes, measureText, metadata.expressions, metadata.rawExpressions]);
 
   const columns = useMemo(() => {
-    const cols: TColumn[] = attributes.map(attr => ({
-      ...cellClasses(attr.id),
-      name: attr.name,
-      key: attr.id,
-      width: measureColumnWidth(attr),
-      resizable: true,
-      headerRenderer: ColumnHeaderCell,
-      formatter: CellFormatter,
-      editor: !readOnly && !metadata.hasExpression(attr.id) ? CellTextEditor : undefined,
-      editorOptions: {
-        editOnClick: !readOnly
-      }
-    }));
+    const cols: TColumn[] = attributes.map(attr => {
+      const width = measureColumnWidth(attr);
+      return {
+        ...cellClasses(attr.id),
+        name: attr.name,
+        key: attr.id,
+        width,
+        resizable: true,
+        headerRenderer: ColumnHeaderCell,
+        // formatter: CellFormatter,
+        formatter: getCellFormatter(width, rowHeight),
+        editor: !readOnly && !metadata.hasExpression(attr.id) ? CellTextEditor : undefined,
+        editorOptions: {
+          editOnClick: !readOnly
+        }
+      };
+    });
     cols.unshift({
       cellClass: "index-column",
       headerCellClass: "index-column-header",
