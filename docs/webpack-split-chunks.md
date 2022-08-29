@@ -75,7 +75,7 @@ The filename function currently being used is
 ```
 filename: (pathData) => {
   const groupsNames = [...pathData.chunk._groups].map(group => group.options?.name);
-  return `common-${groupsNames.join('-')}-[name].[chunkhash:8].js`;
+  return `common-${groupsNames.join('-')}.[chunkhash:8].js`;
 },
 ```
 
