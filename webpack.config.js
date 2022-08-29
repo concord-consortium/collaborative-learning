@@ -23,7 +23,7 @@ module.exports = (env, argv) => {
     output: {
       clean: true,
       filename: 'index.[contenthash].js',
-      chunkFilename: '[name].[contenthash].js'
+      chunkFilename: '[name].[contenthash:8].js'
     },
     performance: { hints: false },
     externals: {
@@ -172,14 +172,28 @@ module.exports = (env, argv) => {
       moduleIds: "deterministic",
       splitChunks: {
         chunks: 'all',
+        // In general only split modules out of chunks when the module is used
+        // in 2 or more chunks
         minChunks: 2,
         filename: (pathData) => {
           // console.log("vendor filename", pathData.chunk.id, 
           //   [...pathData.chunk._groups].map(group => group.options?.name), 
           //   [...pathData.chunk._groups].map(group => group.chunks));
           const groupsNames = [...pathData.chunk._groups].map(group => group.options?.name);
-          return `common-${groupsNames.join('-')}-[name].[chunkhash:8].js`;
+          return `common-${groupsNames.join('-')}.[chunkhash:8].js`;
         },
+        cacheGroups: {
+          // For the initial chunk, split modules from node_modules out even if
+          // they are only used by the 1 initial chunk. This results in a single
+          // extra chunk that contains all of the 3rd party dependencies.
+          initialVendors: {
+            chunks: 'initial',
+            test: /[\\/]node_modules[\\/]/,
+            minChunks: 1,
+            reuseExistingChunk: true,
+            filename: 'vendor-main.[chunkhash:8].js',
+          },
+        }
       }
     },
     resolve: {
