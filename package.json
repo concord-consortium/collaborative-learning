@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "config": {
@@ -99,6 +99,7 @@
   },
   "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
   "overrides": {
+    "mobx-state-tree": "@concord-consortium/mobx-state-tree",
     "nanoid@<4.0.0": "^4.0.0",
     "slate-react": "@concord-consortium/slate-react",
     "slate-react-placeholder": "@concord-consortium/slate-react-placeholder"
@@ -206,7 +207,7 @@
     "immutable": "^3.8.2",
     "initials": "^3.1.2",
     "json-stringify-pretty-compact": "^4.0.0",
-    "jsxgraph": "^1.4.5",
+    "jsxgraph": "1.4.4",
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
     "mobx": "^6.6.1",
