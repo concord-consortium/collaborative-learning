@@ -4,16 +4,18 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { getTableContentHeight, TableContentModelType } from "../../../models/tools/table/table-content";
 import { exportTableContentAsJson } from "../../../models/tools/table/table-export";
-import { defaultBoldFont } from "../../constants";
+import { defaultFont, defaultBoldFont } from "../../constants";
 import { IToolTileProps } from "../tool-tile";
 import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
+import { useColumnsFromDataSet } from "./use-columns-from-data-set";
 import { useColumnWidths } from "./use-column-widths";
 import { useContentChangeHandlers } from "./use-content-change-handlers";
 import { useDataSet } from "./use-data-set";
 import { useExpressionsDialog } from "./use-expressions-dialog";
 import { useGeometryLinking } from "./use-geometry-linking";
 import { useGridContext } from "./use-grid-context";
+import { useMeasureColumnWidth } from "./use-measure-column-width";
 import { useModelDataSet } from "./use-model-data-set";
 import { useRowLabelColumn } from "./use-row-label-column";
 import { useTableTitle } from "./use-table-title";
@@ -38,6 +40,10 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   const {
     dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, rowHeight, ...gridModelProps
   } = useModelDataSet(model);
+
+  const measureDefaultText = useMeasureText(defaultFont);
+  const { userColumnWidths, measureColumnWidth } =
+    useMeasureColumnWidth({ dataSet: dataSet.current, metadata, measureText: measureDefaultText });
 
   const handleRequestUniqueTitle = useCallback(() => {
     return onRequestUniqueTitle(modelRef.current.id);
@@ -107,17 +113,23 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     attrId && setCurrYAttrId(attrId);
     showExpressionsDialog();
   };
+
+  const { columns, onColumnResize } = useColumnsFromDataSet({
+    gridContext, dataSet: dataSet.current, metadata, readOnly: !!readOnly, columnChanges, rowHeight,
+    ...rowLabelProps, measureColumnWidth, onShowExpressionsDialog: handleShowExpressionsDialog,
+    changeHandlers, userColumnWidths });
+
   const { hasLinkableRows, ...dataGridProps } = useDataSet({
-    gridRef, gridContext, model, dataSet: dataSet.current, columnChanges, triggerColumnChange, rows, rowHeight,
-    rowChanges, triggerRowChange, readOnly: !!readOnly, changeHandlers, measureText: measureHeaderText,
-    selectedCell, inputRowId, ...rowLabelProps, onShowExpressionsDialog: handleShowExpressionsDialog });
+    gridRef, model, dataSet: dataSet.current, triggerColumnChange, rows,
+    rowChanges, triggerRowChange, readOnly: !!readOnly, changeHandlers, columns, onColumnResize,
+    selectedCell, inputRowId });
 
   const { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkGeometryDialog } =
     useGeometryLinking({ documentId, model, hasLinkableRows,
                           onRequestTilesOfType, onLinkGeometryTile, onUnlinkGeometryTile });
 
   const { titleCellWidth } =
-    useColumnWidths({ readOnly, getTitle, columns: dataGridProps.columns, measureText: measureHeaderText });
+    useColumnWidths({ readOnly, getTitle, columns, measureText: measureHeaderText });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -152,7 +164,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
           getTitle={getTitle} titleCellWidth={titleCellWidth}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
         <ReactDataGrid ref={gridRef} selectedRows={getSelectedRows()} rows={rows} rowHeight={rowHeight}
-          {...gridProps} {...gridModelProps} {...dataGridProps} {...rowProps} />
+          columns={columns} {...gridProps} {...gridModelProps} {...dataGridProps} {...rowProps} />
       </div>
     </div>
   );

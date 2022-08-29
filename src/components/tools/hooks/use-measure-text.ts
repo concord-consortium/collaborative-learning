@@ -35,24 +35,25 @@ export const measureTextLines = (text: string, width: number, font = defaultFont
       currentIndex++;
     // We hit the edge of the line
     } else {
-      // The line is one big word so we can't break it
+      lines++;
+
+      // The line is one big word so we have to break in the middle of it
       if (startOfWord === startOfLine) {
-        while (currentIndex < text.length) {
-          // We found a new word, so start a new line with it
-          if (text[currentIndex] === " ") {
-            startOfLine = startOfWord = ++currentIndex;
-            break;
-          // We haven't found the end of the long word, keep looking
-          } else {
-            currentIndex++;
-          }
-        }
-      // We've encountered other words on this line, start the next line at the beginning of the last word
+        startOfLine = startOfWord = currentIndex;
+        // This code keeps oversized words on a single line
+        // while (currentIndex < text.length) {
+        //   // We found a new word, so start a new line with it
+        //   if (text[currentIndex] === " ") {
+        //     startOfLine = startOfWord = ++currentIndex;
+        //     break;
+        //   // We haven't found the end of the long word, keep looking
+        //   } else {
+        //     currentIndex++;
+        //   }
+        // }
+      // We've encountered other words on this line, so start the next line at the beginning of the last word
       } else {
         startOfLine = startOfWord;
-      }
-      if (currentIndex < text.length) {
-        lines++;
       }
     }
   }

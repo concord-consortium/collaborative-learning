@@ -6,8 +6,7 @@ import { TableContentModelType } from "../../../models/tools/table/table-content
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { uniqueId } from "../../../utilities/js-utils";
 import { formatValue } from "./cell-formatter";
-import { IGridContext, TColumn, TPosition, TRow } from "./table-types";
-import { useColumnsFromDataSet } from "./use-columns-from-data-set";
+import { TColumn, TPosition, TRow } from "./table-types";
 import { IContentChangeHandlers } from "./use-content-change-handlers";
 import { useNumberFormat } from "./use-number-format";
 
@@ -18,10 +17,8 @@ const isCellSelectable = (position: TPosition, columns: TColumn[], readOnly: boo
 
 interface IUseDataSet {
   gridRef: React.RefObject<DataGridHandle>;
-  gridContext: IGridContext;
   model: ToolTileModelType;
   dataSet: IDataSet;
-  columnChanges: number;
   triggerColumnChange: () => void;
   rowChanges: number;
   triggerRowChange: () => void;
@@ -29,25 +26,17 @@ interface IUseDataSet {
   inputRowId: React.MutableRefObject<string>;
   selectedCell: React.MutableRefObject<TPosition>;
   rows: TRow[];
-  rowHeight: (args: any) => number;
-  RowLabelHeader: React.FC<any>;
-  RowLabelFormatter: React.FC<any>;
   changeHandlers: IContentChangeHandlers;
-  measureText: (text: string) => number;
-  onShowExpressionsDialog?: (attrId?: string) => void;
+  columns: TColumn[];
+  onColumnResize: (idx: number, width: number) => void;
 }
 export const useDataSet = ({
-  gridRef, gridContext, model, dataSet, columnChanges, triggerColumnChange, triggerRowChange, readOnly,
-  inputRowId, selectedCell, rows, rowHeight, RowLabelHeader, RowLabelFormatter,
-  changeHandlers, measureText, onShowExpressionsDialog
+  gridRef, model, dataSet, triggerColumnChange, triggerRowChange, readOnly, inputRowId, selectedCell, rows,
+  changeHandlers, columns, onColumnResize
 }: IUseDataSet) => {
   const { onAddRows, onUpdateRow } = changeHandlers;
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
-  const metadata = getContent().metadata;
-  const { columns, onColumnResize } = useColumnsFromDataSet({
-    gridContext, dataSet, metadata, readOnly, columnChanges, rowHeight, RowLabelHeader, RowLabelFormatter,
-    measureText, onShowExpressionsDialog, changeHandlers });
   const onSelectedCellChange = (position: TPosition) => {
     const forward = (selectedCell.current.rowIdx < position.rowIdx) ||
                     ((selectedCell.current.rowIdx === position.rowIdx) &&
@@ -127,6 +116,5 @@ export const useDataSet = ({
     onColumnResize(idx, width);
     triggerColumnChange();
   }, [onColumnResize, triggerColumnChange]);
-  return { hasLinkableRows, columns,
-            onColumnResize: handleColumnResize, onRowsChange, onSelectedCellChange};
+  return { hasLinkableRows, onColumnResize: handleColumnResize, onRowsChange, onSelectedCellChange};
 };
