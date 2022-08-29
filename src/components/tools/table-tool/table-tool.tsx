@@ -20,6 +20,7 @@ import { useModelDataSet } from "./use-model-data-set";
 import { useRowLabelColumn } from "./use-row-label-column";
 import { useTableTitle } from "./use-table-title";
 import { useToolApi } from "./use-tool-api";
+import { useRowHeight } from "./use-row-height";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { useMeasureText } from "../hooks/use-measure-text";
@@ -38,12 +39,14 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   const metadata = getContent().metadata;
 
   const {
-    dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, rowHeight, ...gridModelProps
+    dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, ...gridModelProps
   } = useModelDataSet(model);
 
   const measureDefaultText = useMeasureText(defaultFont);
   const { userColumnWidths, measureColumnWidth } =
     useMeasureColumnWidth({ dataSet: dataSet.current, metadata, measureText: measureDefaultText });
+
+  const { rowHeight } = useRowHeight({ dataSet: dataSet.current, measureColumnWidth });
 
   const handleRequestUniqueTitle = useCallback(() => {
     return onRequestUniqueTitle(modelRef.current.id);
@@ -113,16 +116,13 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     attrId && setCurrYAttrId(attrId);
     showExpressionsDialog();
   };
-
   const { columns, onColumnResize } = useColumnsFromDataSet({
-    gridContext, dataSet: dataSet.current, metadata, readOnly: !!readOnly, columnChanges, rowHeight,
-    ...rowLabelProps, measureColumnWidth, onShowExpressionsDialog: handleShowExpressionsDialog,
-    changeHandlers, userColumnWidths });
+    gridContext, dataSet: dataSet.current, metadata, readOnly: !!readOnly, columnChanges, rowHeight, ...rowLabelProps,
+    measureColumnWidth, onShowExpressionsDialog: handleShowExpressionsDialog, changeHandlers, userColumnWidths });
 
   const { hasLinkableRows, ...dataGridProps } = useDataSet({
-    gridRef, model, dataSet: dataSet.current, triggerColumnChange, rows,
-    rowChanges, triggerRowChange, readOnly: !!readOnly, changeHandlers, columns, onColumnResize,
-    selectedCell, inputRowId });
+    gridRef, model, dataSet: dataSet.current, triggerColumnChange, rows, rowChanges, triggerRowChange,
+    readOnly: !!readOnly, changeHandlers, columns, onColumnResize, selectedCell, inputRowId });
 
   const { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkGeometryDialog } =
     useGeometryLinking({ documentId, model, hasLinkableRows,
