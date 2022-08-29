@@ -1,5 +1,5 @@
 import React from "react";
-import { kCellHorizontalPadding, kDefaultColumnWidth, kRowHeight, TRow } from "./table-types";
+import { kCellHorizontalPadding, kCellLineHeight, kDefaultColumnWidth, kRowHeight, TRow } from "./table-types";
 import { useNumberFormat } from "./use-number-format";
 
 export const formatValue = (
@@ -12,7 +12,8 @@ export const formatValue = (
     const cellWidth = (width || kDefaultColumnWidth) - kCellHorizontalPadding;
     const height = rowHeight && row ? rowHeight({ row }) : kRowHeight;
     return (
-      <div style={{height, width: cellWidth, whiteSpace: 'normal',
+      <div style={{height, width: cellWidth, whiteSpace: 'normal', lineHeight: `${kCellLineHeight}px`,
+      paddingTop: '8px', paddingBottom: '8px',
       overflowWrap: 'break-word', textAlign: 'left'}}>
         {value}
       </div>

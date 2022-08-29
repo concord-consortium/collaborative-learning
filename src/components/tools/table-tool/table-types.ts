@@ -5,6 +5,8 @@ export const kIndexColumnWidth = 34;
 export const kDefaultColumnWidth = 80;
 export const kControlsColumnWidth = 36;
 export const kCellHorizontalPadding = 16;
+export const kCellVerticalPadding = 8;
+export const kCellLineHeight = 18;
 export const kHeaderCellPadding = 72; // half on either side of text
 export const kExpressionCellPadding = 20;
 export interface IGridContext {

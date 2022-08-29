@@ -4,7 +4,8 @@ import { measureTextLines } from "../hooks/use-measure-text";
 import { useCurrent } from "../../../hooks/use-current";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
-import { kRowHeight } from "./table-types";
+import { kCellHorizontalPadding, kCellLineHeight, kCellVerticalPadding,
+  kDefaultColumnWidth, kRowHeight } from "./table-types";
 
 export const useModelDataSet = (model: ToolTileModelType) => {
   const modelRef = useCurrent(model);
@@ -25,7 +26,8 @@ export const useModelDataSet = (model: ToolTileModelType) => {
 
   const textHeight = (cellId: string, text: string) => {
     if (text) {
-      const height = measureTextLines(text, 80) * kRowHeight;
+      const height = measureTextLines(text, kDefaultColumnWidth - kCellHorizontalPadding) * kCellLineHeight
+        + 2 * kCellVerticalPadding;
       return height;
     }
     return kRowHeight;
