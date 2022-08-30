@@ -26,10 +26,12 @@ interface IUseColumnsFromDataSet {
   onShowExpressionsDialog?: (attrId?: string) => void;
   changeHandlers: IContentChangeHandlers;
   userColumnWidths: React.MutableRefObject<Record<string, number>>;
+  requestRowHeight: () => void;
+  triggerRowChange: () => void;
 }
 export const useColumnsFromDataSet = ({
   gridContext, dataSet, metadata, readOnly, columnChanges, rowHeight, RowLabelHeader, RowLabelFormatter,
-  measureColumnWidth, onShowExpressionsDialog, changeHandlers, userColumnWidths
+  measureColumnWidth, onShowExpressionsDialog, changeHandlers, userColumnWidths, requestRowHeight, triggerRowChange
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
   const { onAddColumn, onRemoveRows } = changeHandlers;
@@ -107,7 +109,9 @@ export const useColumnsFromDataSet = ({
 
   const onColumnResize = useCallback((idx: number, width: number) => {
     userColumnWidths.current[columns[idx].key] = width;
-  }, [columns, userColumnWidths]);
+    requestRowHeight();
+    triggerRowChange(); // triggerRowChange is used because triggerColumnChange doesn't force a rerender
+  }, [columns, userColumnWidths, requestRowHeight, triggerRowChange]);
 
   return { columns, onColumnResize };
 };

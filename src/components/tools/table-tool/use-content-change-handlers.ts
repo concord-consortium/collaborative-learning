@@ -15,6 +15,7 @@ export interface IContentChangeHandlers {
   onSetColumnExpressions: (rawExpressions: Map<string, string>, xName: string) => void;
   onAddColumn: () => void;
   onRemoveColumn: (colId: string) => void;
+  requestRowHeight: () => void;
   onAddRows: (newCases: ICaseCreation[]) => void;
   onUpdateRow: (caseValues: ICase) => void;
   onRemoveRows: (rowIds: string[]) => void;
@@ -121,7 +122,7 @@ export const useContentChangeHandlers = ({
   }, [getContent, readOnly]);
 
   return { onSetTableTitle: setTableTitle, onSetColumnName: setColumnName, onSetColumnExpressions: setColumnExpressions,
-          onAddColumn: addColumn, onRemoveColumn: removeColumn,
+          onAddColumn: addColumn, onRemoveColumn: removeColumn, requestRowHeight,
           onAddRows: addRows, onUpdateRow: updateRow, onRemoveRows: removeRows,
           onLinkGeometryTile: linkGeometryTile, onUnlinkGeometryTile: unlinkGeometryTile };
 };

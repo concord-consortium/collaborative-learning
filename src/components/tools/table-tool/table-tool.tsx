@@ -85,7 +85,8 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     model, dataSet: dataSet.current, rows, rowHeight,
     onRequestRowHeight: handleRequestRowHeight, triggerColumnChange, triggerRowChange
   });
-  const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile, onUnlinkGeometryTile } = changeHandlers;
+  const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile, onUnlinkGeometryTile,
+    requestRowHeight } = changeHandlers;
 
   const measureHeaderText = useMeasureText(defaultBoldFont);
   const { getTitle, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
@@ -118,7 +119,8 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   };
   const { columns, onColumnResize } = useColumnsFromDataSet({
     gridContext, dataSet: dataSet.current, metadata, readOnly: !!readOnly, columnChanges, rowHeight, ...rowLabelProps,
-    measureColumnWidth, onShowExpressionsDialog: handleShowExpressionsDialog, changeHandlers, userColumnWidths });
+    measureColumnWidth, onShowExpressionsDialog: handleShowExpressionsDialog, changeHandlers, userColumnWidths,
+    requestRowHeight, triggerRowChange });
 
   const { hasLinkableRows, ...dataGridProps } = useDataSet({
     gridRef, model, dataSet: dataSet.current, triggerColumnChange, rows, rowChanges, triggerRowChange,
