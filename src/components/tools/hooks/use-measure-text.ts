@@ -18,7 +18,7 @@ export const useMeasureText = (font = defaultFont) => {
   }, [font]);
 };
 
-export const measureTextLines = (text: string, width: number, font = defaultFont) => {
+export const measureTextLines = (text: string, width: number, font = defaultFont, maxLines = 100) => {
   const context = canvas.getContext("2d");
   if (!context) { return 1; }
   context && font && (context.font = font);
@@ -36,6 +36,7 @@ export const measureTextLines = (text: string, width: number, font = defaultFont
     // We hit the edge of the line
     } else {
       lines++;
+      if (lines >= maxLines) return maxLines;
 
       // The line is one big word so we have to break in the middle of it
       if (startOfWord === startOfLine) {

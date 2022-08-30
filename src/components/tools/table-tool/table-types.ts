@@ -3,6 +3,7 @@ import { Column, FormatterProps, HeaderRendererProps } from "react-data-grid";
 export const kRowHeight = 34;
 export const kIndexColumnWidth = 34;
 export const kDefaultColumnWidth = 80;
+export const kMinColumnWidth = kDefaultColumnWidth;
 export const kControlsColumnWidth = 36;
 export const kCellHorizontalPadding = 16;
 export const kCellVerticalPadding = 8;

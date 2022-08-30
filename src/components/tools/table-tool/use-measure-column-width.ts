@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import { kExpressionCellPadding, kHeaderCellPadding } from "./table-types";
+import { kExpressionCellPadding, kHeaderCellPadding, kMinColumnWidth } from "./table-types";
 import { IAttribute } from "../../../models/data/attribute";
 import { IDataSet } from "../../../models/data/data-set";
 import { prettifyExpression } from "../../../models/data/expression-utils";
@@ -31,7 +31,7 @@ export const useMeasureColumnWidth = ({
       nameColumnWidths.current[attr.id] = nameCellWidth;
       exprColumnWidths.current[attr.id] = exprCellWidth;
     }
-    return userColumnWidths.current[attr.id] || Math.max(nameCellWidth, exprCellWidth);
+    return Math.max(kMinColumnWidth, userColumnWidths.current[attr.id] || Math.max(nameCellWidth, exprCellWidth));
   }, [dataSet.attributes, measureText, metadata.expressions, metadata.rawExpressions]);
 
   return { userColumnWidths, nameColumnWidths, exprColumnWidths, measureColumnWidth };
