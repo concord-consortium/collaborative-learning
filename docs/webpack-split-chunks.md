@@ -62,7 +62,7 @@ The CSS files are not split. There is one css file for each top level hunk. They
 | 696B | SharedVariables.b0ce62b2.css |
 | 207B | Starter.fdf39778.css |
 
-The SplitChunksPlugin configuration is not doing any special to make this happen. Their filename format is coming from the `MiniCssExtractPlugin`.
+The SplitChunksPlugin configuration is not doing anything special to make this happen. Their filename format is coming from the `MiniCssExtractPlugin`.
 
 ## Inspecting the chunks
 
