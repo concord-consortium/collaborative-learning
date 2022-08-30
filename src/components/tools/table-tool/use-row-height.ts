@@ -13,8 +13,8 @@ export const useRowHeight = ({ dataSet, measureColumnWidth }: IUseRowHeight) => 
   const rowHeight = useCallback((args: any) => {
     const textHeight = (text: string, width?: number) => {
       if (text) {
-        const cellHeight = measureTextLines(text, (width || kDefaultColumnWidth) - kCellHorizontalPadding)
-          * kCellLineHeight + 2 * kCellVerticalPadding;
+        const containerWidth = (width || kDefaultColumnWidth) - kCellHorizontalPadding;
+        const cellHeight = measureTextLines(text, containerWidth) * kCellLineHeight + 2 * kCellVerticalPadding;
         return cellHeight;
       }
       return kRowHeight;
@@ -23,7 +23,10 @@ export const useRowHeight = ({ dataSet, measureColumnWidth }: IUseRowHeight) => 
     if (args.row) {
       for (const [attrId, text] of Object.entries(args.row)) {
         if (attrId !== '__context__' && attrId !== '__id__' && attrId !== '__index__') {
-          height = Math.max(height, textHeight(text as string, measureColumnWidth(dataSet.attrFromID(attrId))));
+          height = Math.max(height, textHeight(
+            (text as string).trim().replace(/\s\s+/g, ' '), // Replace all whitespace with single spaces
+            measureColumnWidth(dataSet.attrFromID(attrId))
+          ));
         }
       }
     }
