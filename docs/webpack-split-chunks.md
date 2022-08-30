@@ -6,7 +6,7 @@ However with splitChunks disabled (`splitChunks: false`), these resulting chunks
 
 The [Webpack: An in-depth introduction to SplitChunksPlugin](https://indepth.dev/posts/1490/webpack-an-in-depth-introduction-to-splitchunksplugin) article is a very good place to learn about the details of using SplitChunksPlugin. It is very detailed, but it has to be in order to explain this. Unless you are changing the configuration you might not need to read it.
 
-Without any configuration, webpack has splitChunks enabled with a default configuration. This default configuration is documentated in the [SplitChunks Plugin official page](https://webpack.js.org/plugins/split-chunks-plugin/). This official documentation is very confusing. The article above is much better.
+Without any configuration, webpack has splitChunks enabled with a default configuration. This default configuration is documented in the [SplitChunks Plugin official page](https://webpack.js.org/plugins/split-chunks-plugin/). This official documentation is very confusing. The article above is much better.
 
 We customize this default configuration to change the file names and reduce the number of files to make them easier to track. The list of output javascript files currently looks like:
 | size | name    |
@@ -45,6 +45,24 @@ This output is the result of several things in different places:
     },
     ```
     This is where the `vendor-main.0d5d7291.js` comes from. It says: for any module from the initial chunk, that is in node_modules, put it in a new chunk.
+
+### CSS
+The CSS files are not split. There is one css file for each top level hunk. They currently look like:
+| size | name |
+| ---- | ---- |
+| 161K | main.248731f6.css |
+|  44K | Dataflow.2561d50e.css |
+|  10K | Table.1c1ff3a6.css |
+|  10K | Geometry.4df8daa2.css |
+| 8.8K | DataCard.3c12d9a8.css |
+| 8.7K | Diagram.c4a51990.css |
+| 6.3K | Image.f79c4f48.css |
+| 4.7K | Drawing.c8722e28.css |
+| 4.5K | Text.543aaecc.css |
+| 696B | SharedVariables.b0ce62b2.css |
+| 207B | Starter.fdf39778.css |
+
+The SplitChunksPlugin configuration is not doing any special to make this happen. Their filename format is coming from the `MiniCssExtractPlugin`.
 
 ## Inspecting the chunks
 
