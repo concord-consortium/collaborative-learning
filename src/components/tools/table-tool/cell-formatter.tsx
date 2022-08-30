@@ -2,6 +2,8 @@ import React from "react";
 import { kCellHorizontalPadding, kCellLineHeight, kDefaultColumnWidth, kRowHeight, TRow } from "./table-types";
 import { useNumberFormat } from "./use-number-format";
 
+import './cell-formatter.scss';
+
 export const formatValue = (
     formatter: (n: number | { valueOf(): number }) => string, value: any,
     width?: number, row?: TRow, rowHeight?: (args: any) => number
@@ -12,9 +14,7 @@ export const formatValue = (
     const cellWidth = (width || kDefaultColumnWidth) - kCellHorizontalPadding;
     const height = rowHeight && row ? rowHeight({ row }) : kRowHeight;
     return (
-      <div style={{height, width: cellWidth, whiteSpace: 'normal', lineHeight: `${kCellLineHeight}px`,
-      paddingTop: '8px', paddingBottom: '8px',
-      overflowWrap: 'break-word', textAlign: 'left'}}>
+      <div className="text-cell" style={{ height, width: cellWidth, lineHeight: `${kCellLineHeight}px` }}>
         {value}
       </div>
     );

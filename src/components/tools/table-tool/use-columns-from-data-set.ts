@@ -107,6 +107,8 @@ export const useColumnsFromDataSet = ({
     setColumnEditingName: handleSetColumnEditingName, onShowExpressionsDialog
   });
 
+  // This is called constantly as the user resizes the column. When we start saving the width to the model,
+  // we'll only want to do so when the user ends adjusting the width.
   const onColumnResize = useCallback((idx: number, width: number) => {
     userColumnWidths.current[columns[idx].key] = width;
     requestRowHeight();
