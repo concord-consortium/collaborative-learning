@@ -22,9 +22,10 @@ $column-header-padding: 10px;
     .editable-header-cell {
       width: 100%;
       height: var(--header-row-height);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       white-space: normal;
-      padding-top: 8px;
-      padding-bottom: 8px;
       overflow-wrap: break-word;
       text-align: center;
 
