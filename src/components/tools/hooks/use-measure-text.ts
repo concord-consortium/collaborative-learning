@@ -33,6 +33,13 @@ export const measureTextLines = (text: string, width: number, font = defaultFont
   let startOfWord = 0;
   let currentIndex = 0;
   while (currentIndex < trimmedText.length) {
+    // Lines should never start with a space
+    if (trimmedText[startOfLine] === " ") {
+      startOfLine++;
+      currentIndex++;
+      startOfWord++;
+    }
+
     if (context.measureText(trimmedText.slice(startOfLine, currentIndex)).width < width) {
       // We haven't hit a line break yet
       if (trimmedText[currentIndex] === " ") {

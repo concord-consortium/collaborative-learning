@@ -1,7 +1,5 @@
 @import "../../vars.sass";
 
-$column-header-padding: 10px;
-
 .column-header-cell {
   position: relative;
   width: 100%;
@@ -21,12 +19,14 @@ $column-header-padding: 10px;
 
     .editable-header-cell {
       width: 100%;
+      padding-left: 16px;
+      padding-right: 16px;
       height: var(--header-row-height);
       display: flex;
       align-items: center;
       justify-content: center;
       white-space: normal;
-      overflow-wrap: break-word;
+      word-break: break-word;
       text-align: center;
 
       &.table-title-editing {
@@ -60,7 +60,7 @@ $column-header-padding: 10px;
 
   .remove-column-button {
     position: absolute;
-    left: -$column-header-padding;
+    left: -4px;
     top: 0;
     width: 36px;
     height: 34px;

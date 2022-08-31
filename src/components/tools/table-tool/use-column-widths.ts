@@ -1,4 +1,5 @@
-import { isDataColumn, kControlsColumnWidth, kDefaultColumnWidth, kHeaderCellPadding, TColumn } from "./table-types";
+import { isDataColumn, kControlsColumnWidth, kDefaultColumnWidth, kHeaderCellHorizontalPadding,
+  TColumn } from "./table-types";
 
 interface IProps {
   readOnly?: boolean;
@@ -8,7 +9,7 @@ interface IProps {
 }
 export const useColumnWidths = ({ readOnly, getTitle, columns, measureText }: IProps) => {
 
-  const desiredTitleCellWidth = measureText(getTitle() || "Table 8") + kHeaderCellPadding;
+  const desiredTitleCellWidth = measureText(getTitle() || "Table 8") + kHeaderCellHorizontalPadding;
 
   const columnWidth = (column: TColumn) => {
     return Math.max(+(column.width || kDefaultColumnWidth), column.maxWidth || kDefaultColumnWidth);

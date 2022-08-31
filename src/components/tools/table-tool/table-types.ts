@@ -1,14 +1,16 @@
 import { Column, FormatterProps, HeaderRendererProps } from "react-data-grid";
 
-export const kRowHeight = 34;
 export const kIndexColumnWidth = 34;
 export const kDefaultColumnWidth = 80;
 export const kMinColumnWidth = kDefaultColumnWidth;
 export const kControlsColumnWidth = 36;
-export const kCellHorizontalPadding = 16;
-export const kCellVerticalPadding = 8;
+export const kCellHorizontalPadding = 8; // includes both sides
+export const kCellVerticalPadding = 2; // only includes a single side
 export const kCellLineHeight = 18;
-export const kHeaderCellPadding = 72; // half on either side of text
+export const kRowHeight = kCellLineHeight + 2 * kCellVerticalPadding;
+export const kHeaderRowHeight = 34;
+// export const kHeaderCellHorizontalPadding = 72; // half on either side of text
+export const kHeaderCellHorizontalPadding = 32; // half on either side of text
 export const kExpressionCellPadding = 20;
 export interface IGridContext {
   showRowLabels: boolean;

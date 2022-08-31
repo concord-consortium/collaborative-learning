@@ -1,5 +1,5 @@
 import { useCallback, useRef } from "react";
-import { kExpressionCellPadding, kHeaderCellPadding, kMinColumnWidth } from "./table-types";
+import { kExpressionCellPadding, kHeaderCellHorizontalPadding, kMinColumnWidth } from "./table-types";
 import { IAttribute } from "../../../models/data/attribute";
 import { IDataSet } from "../../../models/data/data-set";
 import { prettifyExpression } from "../../../models/data/expression-utils";
@@ -19,7 +19,7 @@ export const useMeasureColumnWidth = ({
   const exprColumnWidths = useRef<Record<string, number>>({});
 
   const measureColumnWidth = useCallback((attr: IAttribute) => {
-    const nameCellWidth = measureText(attr.name) + kHeaderCellPadding;
+    const nameCellWidth = measureText(attr.name) + kHeaderCellHorizontalPadding;
     const xName = dataSet.attributes[0]?.name || "x";
     const expr = metadata.rawExpressions.get(attr.id) ||
                   prettifyExpression(metadata.expressions.get(attr.id) || "", xName);

@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { kCellHorizontalPadding, kCellLineHeight, kCellVerticalPadding, kDefaultColumnWidth,
-  kRowHeight } from "./table-types";
+  kHeaderCellHorizontalPadding, kHeaderRowHeight, kRowHeight } from "./table-types";
 import { useCurrent } from "../../../hooks/use-current";
 import { measureTextLines } from "../hooks/use-measure-text";
 import { defaultFont, defaultBoldFont } from "../../constants";
@@ -19,10 +19,9 @@ export const useRowHeight = ({ dataSet, measureColumnWidth, model }: IUseRowHeig
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const content = getContent();
 
-  const textHeight = (text: string, width?: number, font = defaultFont) => {
+  const textHeight = (text: string, width: number, font = defaultFont) => {
     if (text) {
-      const containerWidth = (width || kDefaultColumnWidth) - kCellHorizontalPadding;
-      const cellHeight = measureTextLines(text.toString(), containerWidth, font) * kCellLineHeight
+      const cellHeight = measureTextLines(text.toString(), width, font) * kCellLineHeight
         + 2 * kCellVerticalPadding;
       return cellHeight;
     }
@@ -37,7 +36,7 @@ export const useRowHeight = ({ dataSet, measureColumnWidth, model }: IUseRowHeig
         if (attrId !== '__context__' && attrId !== '__id__' && attrId !== '__index__') {
           height = Math.max(height, textHeight(
             text as string,
-            measureColumnWidth(dataSet.attrFromID(attrId)),
+            measureColumnWidth(dataSet.attrFromID(attrId)) - kCellHorizontalPadding,
             defaultFont
           ));
         }
@@ -47,18 +46,18 @@ export const useRowHeight = ({ dataSet, measureColumnWidth, model }: IUseRowHeig
   }, [measureColumnWidth, dataSet]);
 
   const headerHeight = useCallback(() => {
-    let height = kRowHeight;
+    let height = kHeaderRowHeight;
     dataSet.attributes.forEach(attribute => {
       height = Math.max(height, textHeight(
         attribute.name,
-        measureColumnWidth(attribute),
+        measureColumnWidth(attribute) - kHeaderCellHorizontalPadding,
         defaultBoldFont
       ));
     });
     return height;
   }, [measureColumnWidth, dataSet]);
 
-  const headerRowHeight = useCallback(() => headerHeight() + (content.hasExpressions ? kRowHeight : 0),
+  const headerRowHeight = useCallback(() => headerHeight() + (content.hasExpressions ? kHeaderRowHeight : 0),
     [headerHeight, content]);
 
   return { rowHeight, headerHeight, headerRowHeight };

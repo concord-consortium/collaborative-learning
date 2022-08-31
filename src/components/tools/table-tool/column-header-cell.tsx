@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import React from "react";
 import { EditableHeaderCell } from "./editable-header-cell";
-import { kCellLineHeight, kRowHeight, THeaderRendererProps, TColumn } from "./table-types";
+import { kCellLineHeight, kHeaderRowHeight, THeaderRendererProps, TColumn } from "./table-types";
 import { useCautionAlert } from "../../utilities/use-caution-alert";
 import RemoveColumnSvg from "../../../assets/icons/remove/remove.nosvgo.svg";
 
@@ -61,7 +61,8 @@ export const ExpressionCell: React.FC<IExpressionCellProps> = ({ readOnly, colum
   const classes = classNames("expression-cell", { "has-expression": !!expression });
   const handleClick = () => !readOnly && expression && onShowExpressionsDialog?.(column.key);
   return (
-    <div className={classes} onClick={handleClick} style={{ height: kRowHeight, lineHeight: `${kCellLineHeight}px` }}>
+    <div className={classes} onClick={handleClick}
+      style={{ height: kHeaderRowHeight, lineHeight: `${kCellLineHeight}px` }}>
       {expressionStr}
     </div>
   );

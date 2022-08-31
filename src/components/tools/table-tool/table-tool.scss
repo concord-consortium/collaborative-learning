@@ -255,6 +255,7 @@ $controls-hover-background: #c0dfe7;
       }
     }
     .rdg-cell {
+      padding: 0 4px;
       input {
         text-align: center;
       }
@@ -264,6 +265,9 @@ $controls-hover-background: #c0dfe7;
       }
       &.selected-column {
         background-color: var(--row-selected-background-color);
+      }
+      &.rdg-cell-resizable {
+        padding: 0;
       }
     }
   }
