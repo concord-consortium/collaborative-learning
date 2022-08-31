@@ -95,5 +95,7 @@ describe("measureTextLines", () => {
   it("handles multiple long words", () => {
     expect(mtl("a reallongword")).toEqual(3);
   });
-  // With the mock measureText(), it's not possible to test strings with extra whitespace
+  it("handles unusual whitespace", () => {
+    expect(mtl("       a   \t\t    lot    \n\n     \nof       \t\t\n whitespace\n\n\n\n   \n\n\t")).toEqual(2);
+  });
 });
