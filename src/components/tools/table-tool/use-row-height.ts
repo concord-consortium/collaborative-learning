@@ -1,9 +1,9 @@
 import { useCallback } from "react";
-import { kCellHorizontalPadding, kCellLineHeight, kCellVerticalPadding, kDefaultColumnWidth,
+import { kCellHorizontalPadding, kCellLineHeight, kCellVerticalPadding,
   kHeaderCellHorizontalPadding, kHeaderRowHeight, kRowHeight } from "./table-types";
 import { useCurrent } from "../../../hooks/use-current";
 import { measureTextLines } from "../hooks/use-measure-text";
-import { defaultFont, defaultBoldFont } from "../../constants";
+import { defaultFont } from "../../constants";
 import { IAttribute } from "../../../models/data/attribute";
 import { IDataSet } from "../../../models/data/data-set";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
@@ -47,11 +47,12 @@ export const useRowHeight = ({ dataSet, measureColumnWidth, model }: IUseRowHeig
 
   const headerHeight = useCallback(() => {
     let height = kHeaderRowHeight;
+    const font = `700 ${defaultFont}`;
     dataSet.attributes.forEach(attribute => {
       height = Math.max(height, textHeight(
         attribute.name,
         measureColumnWidth(attribute) - kHeaderCellHorizontalPadding,
-        defaultBoldFont
+        font
       ));
     });
     return height;
