@@ -11,7 +11,6 @@ $column-header-padding: 10px;
     .flex-container {
       .editable-header-cell {
         height: calc(var(--header-row-height) / 2);
-        line-height: calc(var(--header-row-height) / 2); // https://tutorialdeep.com/knowhow/align-text-vertically-center-css/
       }
     }
   }
@@ -23,7 +22,11 @@ $column-header-padding: 10px;
     .editable-header-cell {
       width: 100%;
       height: var(--header-row-height);
-      line-height: var(--header-row-height); // https://tutorialdeep.com/knowhow/align-text-vertically-center-css/
+      white-space: normal;
+      padding-top: 8px;
+      padding-bottom: 8px;
+      overflow-wrap: break-word;
+      text-align: center;
 
       &.table-title-editing {
         padding: 0 !important;
@@ -41,12 +44,16 @@ $column-header-padding: 10px;
 
     .expression-cell {
       width: 100%;
-      height: calc(var(--header-row-height) / 2);
-      line-height: calc(var(--header-row-height) / 2); // https://tutorialdeep.com/knowhow/align-text-vertically-center-css/
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-style: italic;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      &.has-expression {
+        border-top: 1px solid white;
+      }
     }
   }
 
@@ -75,15 +82,6 @@ $column-header-padding: 10px;
         stroke: var(--header-background-color);
       }
     }
-  }
-
-  .expression-divider {
-    position: absolute;
-    left: -$column-header-padding;
-    right: -$column-header-padding;
-    top: calc(var(--header-row-height) / 2);
-    height: 1px;
-    background-color: white;
   }
 }
 

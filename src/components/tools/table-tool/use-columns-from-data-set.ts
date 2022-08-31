@@ -5,7 +5,7 @@ import { IDataSet } from "../../../models/data/data-set";
 import { TableMetadataModelType } from "../../../models/tools/table/table-content";
 import { getCellFormatter } from "./cell-formatter";
 import CellTextEditor from "./cell-text-editor";
-import { ColumnHeaderCell } from "./column-header-cell";
+import { getColumnHeaderCell } from "./column-header-cell";
 import {
   IGridContext, kControlsColumnKey, kControlsColumnWidth, kIndexColumnKey, kIndexColumnWidth, TColumn
 } from "./table-types";
@@ -19,6 +19,7 @@ interface IUseColumnsFromDataSet {
   metadata: TableMetadataModelType;
   readOnly?: boolean;
   columnChanges: number;
+  headerHeight: () => number;
   rowHeight: (args: any) => number;
   RowLabelHeader: React.FC<any>;
   RowLabelFormatter: React.FC<any>;
@@ -30,7 +31,7 @@ interface IUseColumnsFromDataSet {
   triggerRowChange: () => void;
 }
 export const useColumnsFromDataSet = ({
-  gridContext, dataSet, metadata, readOnly, columnChanges, rowHeight, RowLabelHeader, RowLabelFormatter,
+  gridContext, dataSet, metadata, readOnly, columnChanges, headerHeight, rowHeight, RowLabelHeader, RowLabelFormatter,
   measureColumnWidth, onShowExpressionsDialog, changeHandlers, userColumnWidths, requestRowHeight, triggerRowChange
 }: IUseColumnsFromDataSet) => {
   const { attributes } = dataSet;
@@ -60,7 +61,7 @@ export const useColumnsFromDataSet = ({
         key: attr.id,
         width,
         resizable: true,
-        headerRenderer: ColumnHeaderCell,
+        headerRenderer: getColumnHeaderCell(headerHeight()),
         formatter: getCellFormatter(width, rowHeight),
         editor: !readOnly && !metadata.hasExpression(attr.id) ? CellTextEditor : undefined,
         editorOptions: {
@@ -98,7 +99,7 @@ export const useColumnsFromDataSet = ({
     }
     columnChanges;  // eslint-disable-line no-unused-expressions
     return cols;
-  }, [attributes, rowHeight, RowLabelHeader, RowLabelFormatter, readOnly, columnChanges,
+  }, [attributes, headerHeight, rowHeight, RowLabelHeader, RowLabelFormatter, readOnly, columnChanges,
       cellClasses, measureColumnWidth, metadata, ControlsHeaderRenderer, ControlsRowFormatter]);
 
   useColumnExtensions({

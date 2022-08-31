@@ -46,7 +46,8 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   const { userColumnWidths, measureColumnWidth } =
     useMeasureColumnWidth({ dataSet: dataSet.current, metadata, measureText: measureDefaultText });
 
-  const { rowHeight } = useRowHeight({ dataSet: dataSet.current, measureColumnWidth });
+  const { rowHeight, headerHeight, headerRowHeight } = useRowHeight({
+    dataSet: dataSet.current, measureColumnWidth, model });
 
   const handleRequestUniqueTitle = useCallback(() => {
     return onRequestUniqueTitle(modelRef.current.id);
@@ -118,9 +119,9 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     showExpressionsDialog();
   };
   const { columns, onColumnResize } = useColumnsFromDataSet({
-    gridContext, dataSet: dataSet.current, metadata, readOnly: !!readOnly, columnChanges, rowHeight, ...rowLabelProps,
-    measureColumnWidth, onShowExpressionsDialog: handleShowExpressionsDialog, changeHandlers, userColumnWidths,
-    requestRowHeight, triggerRowChange });
+    gridContext, dataSet: dataSet.current, metadata, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
+    ...rowLabelProps, measureColumnWidth, onShowExpressionsDialog: handleShowExpressionsDialog, changeHandlers,
+    userColumnWidths, requestRowHeight, triggerRowChange });
 
   const { hasLinkableRows, ...dataGridProps } = useDataSet({
     gridRef, model, dataSet: dataSet.current, triggerColumnChange, rows, rowChanges, triggerRowChange,
@@ -166,7 +167,8 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
           getTitle={getTitle} titleCellWidth={titleCellWidth}
           onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
         <ReactDataGrid ref={gridRef} selectedRows={getSelectedRows()} rows={rows} rowHeight={rowHeight}
-          columns={columns} {...gridProps} {...gridModelProps} {...dataGridProps} {...rowProps} />
+          headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
+          {...dataGridProps} {...rowProps} />
       </div>
     </div>
   );
