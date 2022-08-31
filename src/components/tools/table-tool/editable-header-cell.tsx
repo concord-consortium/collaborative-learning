@@ -14,7 +14,10 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column, height }
   } = appData || {};
   const [nameValue, setNameValue] = useState(editableName ? name as string : "");
   const handleClick = () => {
-    !isEditing && gridContext?.onSelectColumn(column.key);
+    // This setTimeout gives the element an opportunity to handle a double click
+    setTimeout(() => {
+      !isEditing && gridContext?.onSelectColumn(column.key);
+    }, 200);
   };
   const handleDoubleClick = () => {
     editableName && !isEditing && onBeginHeaderCellEdit?.();
