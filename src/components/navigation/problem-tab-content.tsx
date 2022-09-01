@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { useProblemPathWithFacet, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { getSectionTitle, SectionModelType } from "../../models/curriculum/section";
@@ -35,6 +35,10 @@ export const ProblemTabContent: React.FC<IProps>
                         : kHeaderHeight + + kNavTabHeight + (2 * (kWorkspaceContentMargin + kTabSectionBorderWidth));
   const problemsPanelHeight = vh - headerOffset;
   const problemsPanelStyle = { height: problemsPanelHeight };
+
+  if (ui.showChatPanel) {
+    ui.updateFocusDocument();
+  }
 
   const handleTabClick = (titleArgButReallyType: string, typeArgButReallyTitle: string) => {
     // TODO: this function has its argument names reversed (see caller for details.)

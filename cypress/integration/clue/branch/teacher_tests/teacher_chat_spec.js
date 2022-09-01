@@ -32,7 +32,7 @@ context('Chat Panel', () => {
       cy.waitForLoad();
       dashboard.switchView("Workspace & Resources");
       cy.wait(2000);
-      resourcesPanel.getCollapsedResourcesTab().click();
+      // resourcesPanel.getCollapsedResourcesTab().click();
       cy.openTopTab("problems");
       chatPanel.getChatPanelToggle().should('exist');
     });
@@ -271,7 +271,7 @@ context('Chat Panel', () => {
       cy.waitForLoad();
       dashboard.switchView("Workspace & Resources");
       cy.wait(2000);
-      resourcesPanel.getCollapsedResourcesTab().click();
+      // resourcesPanel.getCollapsedResourcesTab().click();
       cy.openTopTab("problems");
       chatPanel.getChatPanelToggle().click();
     });
@@ -291,7 +291,7 @@ context('Chat Panel', () => {
       cy.waitForLoad();
       dashboard.switchView("Workspace & Resources");
       cy.wait(2000);
-      resourcesPanel.getCollapsedResourcesTab().click();
+      // resourcesPanel.getCollapsedResourcesTab().click();
       cy.openTopTab("problems");
       chatPanel.getChatPanelToggle().click();
     });
