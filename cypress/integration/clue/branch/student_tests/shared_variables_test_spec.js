@@ -30,8 +30,7 @@ context('Shared Variables', function () {
       clueCanvas.addTile('text');
       clueCanvas.addTile('diagram');
 
-      textToolTile.deleteAllText();
-      textToolTile.enterText('H{rightarrow}ello World');
+      textToolTile.enterText('Hello World');
       textToolTile.getTextTile().last().should('contain', 'Hello World');
       textToolTile.clickToolbarTool("Variables");
       cy.get(".ReactModalPortal").within(() => {
@@ -51,7 +50,7 @@ context('Shared Variables', function () {
       // rightArrow to move off of the chip
       // We aren't using textToolTile.enterText because that calls focus() which seems
       // to mess up the cursor position in Electron
-      textToolTile.getTextEditor().last().type('S{rightarrow}Second Chip:');
+      textToolTile.getTextEditor().last().type('Second Chip:');
       textToolTile.getTextTile().last().should('contain', 'Second Chip');
       textToolTile.clickToolbarTool("Variables");
       cy.get(".ReactModalPortal").within(() => {
