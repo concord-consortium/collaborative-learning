@@ -5,6 +5,7 @@ import { gImageMap } from "../../../models/image-map";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultLabel } from "../data-card-types";
+import { RemoveIconButton } from "./add-remove-icons";
 
 import '../data-card-tool.scss';
 
@@ -110,6 +111,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setCurrEditAttrId(attrKey);
   };
 
+  const handleDeleteAttribute = () => {
+    alert('ask user for confirmation...');
+  };
+
   const pairClassNames = classNames(
     `attribute-name-value-pair ${attrKey}`,
     {"editing": editFacet === "name" || "value"}
@@ -123,6 +128,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const valueClassNames = classNames(
     `value ${attrKey}`,
     { "editing": editFacet === "value" }
+  );
+
+  const deleteAttrButtonClassNames = classNames(
+    `delete-attribute ${attrKey}`,
+    { "show": editFacet === "value" || editFacet === "name" }
   );
 
   const isDefaultLabel = looksLikeDefaultLabel(getLabel());
@@ -165,6 +175,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
             : <div className="cell-value">{valueStr}</div>
         }
       </div>
+        <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
     </div>
   );
 });
