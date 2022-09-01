@@ -1,18 +1,21 @@
-import { isDataColumn, kControlsColumnWidth, kDefaultColumnWidth, kHeaderCellHorizontalPadding,
-  TColumn } from "./table-types";
+import { isDataColumn, kControlsColumnWidth, kDefaultColumnWidth, TColumn } from "./table-types";
+import { IDataSet } from "../../../models/data/data-set";
+import { IAttribute } from "../../../models/data/attribute";
 
 interface IProps {
   readOnly?: boolean;
-  getTitle: () => string | undefined;
   columns: TColumn[];
-  measureText: (text: string) => number;
+  dataSet: IDataSet;
+  measureColumnWidth: (attr: IAttribute) => number;
 }
-export const useColumnWidths = ({ readOnly, getTitle, columns, measureText }: IProps) => {
-
-  const desiredTitleCellWidth = measureText(getTitle() || "Table 8") + kHeaderCellHorizontalPadding;
-
+export const useColumnWidths = ({ readOnly, columns, dataSet, measureColumnWidth }: IProps) => {
   const columnWidth = (column: TColumn) => {
-    return Math.max(+(column.width || kDefaultColumnWidth), column.maxWidth || kDefaultColumnWidth);
+    if (!isDataColumn(column)) {
+      return Math.max(+(column.width || kDefaultColumnWidth), column.maxWidth || kDefaultColumnWidth);
+    } else {
+      const attr = dataSet.attrFromID(column.key);
+      return measureColumnWidth(attr);
+    }
   };
   const getTitleCellWidthFromColumns = () => {
     return columns.reduce(
@@ -20,17 +23,7 @@ export const useColumnWidths = ({ readOnly, getTitle, columns, measureText }: IP
                     1 - (readOnly ? 0 : kControlsColumnWidth));
   };
 
-  const titleCellWidthFromColumns = getTitleCellWidthFromColumns();
-  let titleCellWidth = titleCellWidthFromColumns;
-  // if necessary, increase width of columns to accommodate longer titles
-  if (desiredTitleCellWidth > titleCellWidthFromColumns) {
-    // distribute the additional width equally among the data columns
-    const dataColumnCount = columns.reduce((count, col) => count + (isDataColumn(col) ? 1 : 0), 0);
-    const widthAdjustment = (desiredTitleCellWidth - titleCellWidthFromColumns) / dataColumnCount;
-    const roundedWidthAdjustment = Math.ceil(10 * widthAdjustment) / 10;
-    columns.forEach((col, i) => isDataColumn(col) && (col.width = columnWidth(col) + roundedWidthAdjustment));
-    titleCellWidth = getTitleCellWidthFromColumns();
-  }
+  const titleCellWidth = getTitleCellWidthFromColumns();
 
-  return { columns, titleCellWidth };
+  return { titleCellWidth };
 };

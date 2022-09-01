@@ -89,7 +89,6 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile, onUnlinkGeometryTile,
     requestRowHeight } = changeHandlers;
 
-  const measureHeaderText = useMeasureText(defaultBoldFont);
   const { getTitle, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, dataSet: dataSet.current, readOnly,
     onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle
@@ -132,7 +131,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
                           onRequestTilesOfType, onLinkGeometryTile, onUnlinkGeometryTile });
 
   const { titleCellWidth } =
-    useColumnWidths({ readOnly, getTitle, columns, measureText: measureHeaderText });
+    useColumnWidths({ readOnly, columns, measureColumnWidth, dataSet: dataSet.current });
 
   const containerRef = useRef<HTMLDivElement>(null);
   const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {

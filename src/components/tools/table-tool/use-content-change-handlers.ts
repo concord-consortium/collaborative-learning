@@ -35,7 +35,6 @@ interface IProps {
 }
 export const useContentChangeHandlers = ({
   model, dataSet, rows, readOnly, rowHeight, onRequestRowHeight, triggerColumnChange, triggerRowChange
-  // model, dataSet, readOnly, onRequestRowHeight, triggerColumnChange, triggerRowChange
 }: IProps): IContentChangeHandlers => {
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
