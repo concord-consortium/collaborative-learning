@@ -25,9 +25,10 @@ interface IProps {
 export const FocusDocumentTracker = observer(({ navTabPanelElt }: IProps) => {
   const ui = useUIStore();
   const prevUpdates = usePrevious(ui.focusDocUpdates);
-  useEffect(() => {
+  const prevTab = usePrevious(navTabPanelElt);
 
-    if (navTabPanelElt && (ui.focusDocUpdates !== prevUpdates)) {
+  useEffect(() => {
+    if (navTabPanelElt && ((prevTab !== navTabPanelElt) || (ui.focusDocUpdates !== prevUpdates))) {
       // set a timer to allow rendering to complete
       setTimeout(() => {
         let focusDocument: string | undefined;

@@ -70,7 +70,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
       <ChatPanelHeader activeNavTab={activeNavTab} newCommentCount={newCommentCount}
                        onCloseChatPanel={onCloseChatPanel} />
-      {focusDocument || focusTileId
+      {focusDocument
         ? <CommentCard
             user={user}
             activeNavTab={activeNavTab}
