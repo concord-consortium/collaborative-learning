@@ -98,4 +98,7 @@ describe("measureTextLines", () => {
   it("handles unusual whitespace", () => {
     expect(mtl("       a   \t\t    lot    \n\n     \nof       \t\t\n whitespace\n\n\n\n   \n\n\t")).toEqual(2);
   });
+  it("doesn't include trailing spaces on the next line", () => {
+    expect(mtl("tenletters tenletters")).toEqual(2);
+  });
 });
