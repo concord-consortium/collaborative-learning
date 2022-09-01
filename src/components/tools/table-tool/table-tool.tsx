@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { getTableContentHeight, TableContentModelType } from "../../../models/tools/table/table-content";
 import { exportTableContentAsJson } from "../../../models/tools/table/table-export";
-import { defaultFont, defaultBoldFont } from "../../constants";
 import { IToolTileProps } from "../tool-tile";
 import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
@@ -23,7 +22,6 @@ import { useToolApi } from "./use-tool-api";
 import { useRowHeight } from "./use-row-height";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
-import { useMeasureText } from "../hooks/use-measure-text";
 import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
 import { lightenColor } from "../../../utilities/color-utils";
 
@@ -42,9 +40,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, ...gridModelProps
   } = useModelDataSet(model);
 
-  const measureDefaultText = useMeasureText(defaultFont);
-  const { userColumnWidths, measureColumnWidth } =
-    useMeasureColumnWidth({ dataSet: dataSet.current, metadata, measureText: measureDefaultText });
+  const { userColumnWidths, measureColumnWidth } = useMeasureColumnWidth();
 
   const { rowHeight, headerHeight, headerRowHeight } = useRowHeight({
     dataSet: dataSet.current, measureColumnWidth, model });
