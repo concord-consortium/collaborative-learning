@@ -25,7 +25,6 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   const shouldShowAddCase = !readOnly && isTileSelected;
   const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
   const shouldShowAddField = !readOnly && isTileSelected;
-  // const shouldShowDeleteField = !readOnly && isTileSelected && content.dataSet.attributes.length > 1;
 
   useEffect(() => {
     if (!content.title) {
@@ -90,7 +89,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   }
 
   const AlertContent = () => {
-    return <p>Remove the current Data Card from the document? This action is not undoable.</p>;
+    return <p>Remove the current Data Card from the document?</p>;
   };
 
   const [showAlert] = useCautionAlert({
@@ -99,6 +98,17 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
     confirmLabel: "Delete Card",
     onConfirm: () => deleteCase()
   });
+
+  function handleDeleteCardClick(){
+    const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
+    if (thisCaseId){
+      if (content.isCaseWithNoValues(thisCaseId)){
+        deleteCase();
+      } else {
+        showAlert();
+      }
+    }
+  }
 
   const handleAddField = () => {
     content.addNewAttr();
@@ -153,7 +163,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
           </div>
           <div className="add-remove-card-buttons">
             <AddIconButton className={addCardClasses} onClick={addNewCase} />
-            <RemoveIconButton className={removeCardClasses} onClick={showAlert} />
+            <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
           </div>
         </div>
       </div>

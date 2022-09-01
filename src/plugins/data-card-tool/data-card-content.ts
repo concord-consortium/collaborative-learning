@@ -102,6 +102,15 @@ export const DataCardContentModel = ToolContentModel
     attrById(str: string){
       return self.dataSet.attrFromID(str);
     },
+    isCaseWithNoValues(caseId: string){
+      let empties = 0;
+      this.existingAttributes().forEach((attr) => {
+        if (self.dataSet.getValue(caseId, attr) === "" || undefined){
+          empties++;
+        }
+      });
+      return empties !== 0;
+    },
     exportJson(options?: ITileExportOptions){
       this.allAttributesJsonString();
       return [
