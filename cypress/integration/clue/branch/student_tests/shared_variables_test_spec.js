@@ -17,6 +17,7 @@ context('Shared Variables', function () {
     cy.clearQAData('all');
     cy.visit(queryParam);
     cy.waitForLoad();
+    // cy.closeResourceTabs();
     cy.get('.primary-workspace [data-test=personal-doc-title]')
     .then(($canvasTitle)=>{
         title = $canvasTitle.text().trim();
@@ -29,7 +30,8 @@ context('Shared Variables', function () {
       clueCanvas.addTile('text');
       clueCanvas.addTile('diagram');
 
-      textToolTile.enterText('Hello World');
+      textToolTile.deleteAllText();
+      textToolTile.enterText('H{rightarrow}ello World');
       textToolTile.getTextTile().last().should('contain', 'Hello World');
       textToolTile.clickToolbarTool("Variables");
       cy.get(".ReactModalPortal").within(() => {
@@ -49,7 +51,7 @@ context('Shared Variables', function () {
       // rightArrow to move off of the chip
       // We aren't using textToolTile.enterText because that calls focus() which seems
       // to mess up the cursor position in Electron
-      textToolTile.getTextEditor().last().type('{rightArrow}Second Chip:');
+      textToolTile.getTextEditor().last().type('S{rightarrow}Second Chip:');
       textToolTile.getTextTile().last().should('contain', 'Second Chip');
       textToolTile.clickToolbarTool("Variables");
       cy.get(".ReactModalPortal").within(() => {

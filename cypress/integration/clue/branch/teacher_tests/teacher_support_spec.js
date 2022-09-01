@@ -3,7 +3,7 @@ import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard
 import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
 
-context('Teacher Support', function() {
+context.skip('Teacher Support', function() {
     let dashboard = new TeacherDashboard();
     // let primaryWorkspace = new PrimaryWorkspace();
     let resourcesPanel = new ResourcesPanel();
@@ -19,6 +19,7 @@ context('Teacher Support', function() {
         cy.waitForLoad();
         dashboard.switchView("Workspace & Resources");
         cy.wait(2000);
+        cy.closeResourceTabs();
     });
 
     describe.skip('verify supports functionality', function() {

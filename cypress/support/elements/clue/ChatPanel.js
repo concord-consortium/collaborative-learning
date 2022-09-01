@@ -113,7 +113,7 @@ class ChatPanel{
       cy.launchReport(reportUrl);
       cy.waitForLoad();
       dashboard.switchView("Workspace & Resources");
-      resourcesPanel.getCollapsedResourcesTab().click();
+      // resourcesPanel.getCollapsedResourcesTab().click();
       this.getChatPanelToggle().click();
     }
 }
