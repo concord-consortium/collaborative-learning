@@ -212,9 +212,9 @@ $default-button-border-color: #979797;
       .delete-attribute {
         display:none;
         transform: translateX(30px);
-        &.show {
-          display: block;
-        }
+        // &.show {
+        //   display: block;
+        // }
       }
 
       input {
