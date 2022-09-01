@@ -102,7 +102,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   function handleDeleteCardClick(){
     const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
     if (thisCaseId){
-      if (content.isCaseWithNoValues(thisCaseId)){
+      if (content.isEmptyCase(thisCaseId)){
         deleteCase();
       } else {
         showAlert();
