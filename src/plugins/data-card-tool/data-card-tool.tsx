@@ -8,6 +8,7 @@ import { DataCardRows } from "./components/data-card-rows";
 import { DataCardToolbar } from "./data-card-toolbar";
 import { useToolbarToolApi } from "../../components/tools/hooks/use-toolbar-tool-api";
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
+import { useCautionAlert } from "../../components/utilities/use-caution-alert";
 
 import "./data-card-tool.scss";
 
@@ -81,13 +82,23 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   }
 
   function deleteCase(){
-    // TODO modal (see src/components/delete-button)
     const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
     if (thisCaseId) {
       content.dataSet.removeCases([thisCaseId]);
     }
     previousCase();
   }
+
+  const AlertContent = () => {
+    return <p>Remove the current Data Card from the document? This action is not undoable.</p>;
+  };
+
+  const [showAlert] = useCautionAlert({
+    title: "Delete Card",
+    content: AlertContent,
+    confirmLabel: "Delete Card",
+    onConfirm: () => deleteCase()
+  });
 
   const handleAddField = () => {
     content.addNewAttr();
@@ -142,7 +153,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
           </div>
           <div className="add-remove-card-buttons">
             <AddIconButton className={addCardClasses} onClick={addNewCase} />
-            <RemoveIconButton className={removeCardClasses} onClick={deleteCase} />
+            <RemoveIconButton className={removeCardClasses} onClick={showAlert} />
           </div>
         </div>
       </div>
