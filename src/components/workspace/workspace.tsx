@@ -82,7 +82,7 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
         onDragOver={handleDragOverWorkspace}
       />
       {navTabSpecs.showNavPanel && renderNavTabPanel()}
-      {navTabSpecs.showNavPanel  && <ResizePanelDivider
+      {navTabSpecs.showNavPanel && <ResizePanelDivider
         isResourceExpanded={navTabContentShown}
         dividerPosition={dividerPosition}
         showExpanders={showExpanders}
