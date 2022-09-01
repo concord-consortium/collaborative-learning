@@ -29,12 +29,13 @@ interface IProps {
   rows: TRow[];
   readOnly?: boolean;
   rowHeight: (args: any) => number;
+  headerHeight: () => number;
   onRequestRowHeight: (options: { height?: number, deltaHeight?: number }) => void;
   triggerColumnChange: () => void;
   triggerRowChange: () => void;
 }
 export const useContentChangeHandlers = ({
-  model, dataSet, rows, readOnly, rowHeight, onRequestRowHeight, triggerColumnChange, triggerRowChange
+  model, dataSet, rows, readOnly, rowHeight, headerHeight, onRequestRowHeight, triggerColumnChange, triggerRowChange
 }: IProps): IContentChangeHandlers => {
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
@@ -57,10 +58,10 @@ export const useContentChangeHandlers = ({
 
   const requestRowHeight = useCallback(() => {
     const height = getTableContentHeight({
-                    rows, readOnly, rowHeight, hasExpressions: getContent().hasExpressions
+                    rows, readOnly, rowHeight, headerHeight, hasExpressions: getContent().hasExpressions
                   });
     onRequestRowHeight({ height });
-  }, [rows, getContent, rowHeight, onRequestRowHeight, readOnly]);
+  }, [rows, getContent, rowHeight, headerHeight, onRequestRowHeight, readOnly]);
 
   /*
    * content change functions

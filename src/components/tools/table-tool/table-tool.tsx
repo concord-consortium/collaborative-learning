@@ -63,10 +63,11 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
       readOnly,
       rows,
       rowHeight,
+      headerHeight,
       hasExpressions: getContent().hasExpressions,
       padding: 10 + (modelRef.current.display === "teacher" ? 20 : 0)
     });
-  }, [rows, rowHeight, getContent, modelRef, readOnly]);
+  }, [rows, rowHeight, headerHeight, getContent, modelRef, readOnly]);
 
   const heightRef = useCurrent(height);
   const handleRequestRowHeight = useCallback((options: { height?: number, deltaHeight?: number }) => {
@@ -79,7 +80,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   }, [heightRef, modelRef, onRequestRowHeight]);
 
   const changeHandlers = useContentChangeHandlers({
-    model, dataSet: dataSet.current, rows, rowHeight,
+    model, dataSet: dataSet.current, rows, rowHeight, headerHeight,
     onRequestRowHeight: handleRequestRowHeight, triggerColumnChange, triggerRowChange
   });
   const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile, onUnlinkGeometryTile,
