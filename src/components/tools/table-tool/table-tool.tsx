@@ -35,43 +35,58 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   documentId, documentContent, toolTile, model, readOnly, height, scale,
   onRequestRowHeight, onRequestTilesOfType, onRequestUniqueTitle, onRegisterToolApi, onUnregisterToolApi
 }) => {
+  // Gather data from the model
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const metadata = getContent().metadata;
 
+  // Basic operations based on the model
   const {
     dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, ...gridModelProps
   } = useModelDataSet(model);
 
+  // Set up user specified columns and function to measure a column
+  // The user specified columns should be moved out of react and into MST
   const { userColumnWidths, measureColumnWidth } = useMeasureColumnWidth();
 
+  // Functions for determining the height of rows, including the header
+  // These require knowledge of the column widths
   const { rowHeight, headerHeight, headerRowHeight } = useRowHeight({
     dataSet: dataSet.current, measureColumnWidth, model });
 
+  // A function to generate a unique title for the tile
+  // The table tile should switch to the new CLUE wide method of determining titles, and this should be removed
   const handleRequestUniqueTitle = useCallback(() => {
     return onRequestUniqueTitle(modelRef.current.id);
   }, [modelRef, onRequestUniqueTitle]);
 
+  // Functions and variables to handle selecting and navigating the grid
   const [showRowLabels, setShowRowLabels] = useState(false);
   const {
     ref: gridRef, gridContext, inputRowId, selectedCell, getSelectedRows, ...gridProps
   } = useGridContext({ modelId: model.id, showRowLabels, triggerColumnChange });
 
+  // React components used for the index (left most) column
   const rowLabelProps = useRowLabelColumn({
     inputRowId: inputRowId.current, selectedCell, showRowLabels, setShowRowLabels
   });
 
+  // rows are required by ReactDataGrid and are used by other hooks as well
+  // rowProps are expanded and passed to ReactDataGrid
   const { rows, ...rowProps } = useRowsFromDataSet({
     dataSet: dataSet.current, readOnly: !!readOnly, inputRowId: inputRowId.current,
     rowChanges, context: gridContext});
 
+  // columns are required by ReactDataGrid and are used by other hooks as well
   const { columns, controlsColumn, columnEditingName, handleSetColumnEditingName } = useColumnsFromDataSet({
     gridContext, dataSet: dataSet.current, metadata, readOnly: !!readOnly, columnChanges, headerHeight, rowHeight,
     ...rowLabelProps, measureColumnWidth });
 
+  // The size of the title bar
   const { titleCellWidth, getTitleHeight } =
     useTitleSize({ readOnly, columns, measureColumnWidth, dataSet: dataSet.current });
 
+  // A function to update the height of the tile based on the content size
   const heightRef = useCurrent(height);
   const handleRequestRowHeight = useCallback((options: { height?: number, deltaHeight?: number }) => {
     // increase row height automatically but require manual shrinking
@@ -82,6 +97,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     }
   }, [heightRef, modelRef, onRequestRowHeight]);
 
+  // Various callbacks to use when the table needs to be modified
   const changeHandlers = useContentChangeHandlers({
     model, dataSet: dataSet.current, rows, rowHeight, headerHeight, getTitleHeight,
     onRequestRowHeight: handleRequestRowHeight, triggerColumnChange, triggerRowChange
@@ -89,17 +105,20 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   const { onSetTableTitle, onSetColumnExpressions, onLinkGeometryTile, onUnlinkGeometryTile,
     requestRowHeight, onAddColumn, onRemoveRows } = changeHandlers;
 
+  // A function to call when a column needs to change width
   const { onColumnResize } = useColumnResize({
     columns, userColumnWidths, requestRowHeight, triggerRowChange
   });
-  // Finishes setting up the controlsColumn with changeHandlers
+  // Finishes setting up the controlsColumn with changeHandlers (which weren't defined then controlColumn was created)
   useControlsColumn({ controlsColumn, readOnly: !!readOnly, onAddColumn, onRemoveRows });
 
+  // Functions for getting and modifying the title
   const { getTitle, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, dataSet: dataSet.current, readOnly,
     onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle, requestRowHeight
   });
 
+  // Functions for setting and displaying expressions
   const handleSubmitExpressions = (expressions: Map<string, string>) => {
     if (dataSet.current.attributes.length && expressions.size) {
       onSetColumnExpressions(expressions, dataSet.current.attributes[0].name);
@@ -108,20 +127,24 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   const [showExpressionsDialog, , setCurrYAttrId] = useExpressionsDialog({
     metadata, dataSet: dataSet.current, onSubmit: handleSubmitExpressions
   });
-
   const handleShowExpressionsDialog = (attrId?: string) => {
     attrId && setCurrYAttrId(attrId);
     showExpressionsDialog();
   };
+
+  // Expands the columns with additional data and callbacks
   useColumnExtensions({
     gridContext, metadata, readOnly, columns, columnEditingName, changeHandlers,
     setColumnEditingName: handleSetColumnEditingName, onShowExpressionsDialog: handleShowExpressionsDialog
   });
 
+  // dataGridProps contains callbacks to pass to ReactDataGrid
+  // hasLinkableRows is used to determine in the table can meaningfully be linked to a geometry tile
   const { hasLinkableRows, ...dataGridProps } = useDataSet({
     gridRef, model, dataSet: dataSet.current, triggerColumnChange, rows, rowChanges, triggerRowChange,
     readOnly: !!readOnly, changeHandlers, columns, onColumnResize, selectedCell, inputRowId });
 
+  // Variables for handling linking to geometry tiles
   const { showLinkButton, isLinkEnabled, linkColors, getLinkIndex, showLinkGeometryDialog } =
     useGeometryLinking({ documentId, model, hasLinkableRows,
                           onRequestTilesOfType, onLinkGeometryTile, onUnlinkGeometryTile });
@@ -132,6 +155,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     (e.target === containerRef.current) && gridContext.onClearSelection();
   };
 
+  // Define and submit functions for general tool tile API
   const getContentHeight = useCallback(() => {
     return getTableContentHeight({
       readOnly,
@@ -158,6 +182,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     }
   });
 
+  // Force a rerender whenever the model's attributes change (which contain the individual cells)
   useEffect(() => {
     const disposer = onSnapshot((model.content as any).dataSet.attributes, () => {
       triggerRowChange();
