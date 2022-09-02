@@ -210,11 +210,12 @@ $default-button-border-color: #979797;
       }
 
       .delete-attribute {
+        position: absolute;
         display:none;
-        transform: translateX(30px);
-        // &.show {
-        //   display: block;
-        // }
+        transform: translateX(351px);
+        &.show {
+          display: inherit;
+        }
       }
 
       input {

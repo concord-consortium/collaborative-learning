@@ -6,6 +6,7 @@ import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultLabel } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
+import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
 
 import '../data-card-tool.scss';
 
@@ -35,6 +36,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
   const [editFacet, setEditFacet] = useState<EditFacet>("");
   const [imageUrl, setImageUrl] = useState("");
+
+  console.log("rendering: ", attrKey)
 
   useEffect(() => {
     if (currEditAttrId !== attrKey) {
@@ -79,6 +82,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     setCurrEditAttrId(attrKey);
+    console.log("1 handleClick: attrKey:", attrKey);
   };
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -101,6 +105,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const activateInput = (facet: EditFacet) => {
+    console.log("2 start activateInput:", attrKey);
     setEditFacet(facet);
     if (facet === "name"){
       setLabelCandidate(getLabel());
@@ -109,10 +114,35 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       setValueCandidate(getValue());
     }
     setCurrEditAttrId(attrKey);
+    console.log("3 finish activateInput:", attrKey);
   };
 
+  function deleteAttribute(){
+    console.log("? deleteAttribute: ", attrKey)
+    if(attrKey){
+      content.dataSet.removeAttribute(attrKey);
+    }
+  }
+
+  const AlertContent = () => {
+    return (
+      <p>
+        Are you sure you want to remove this attribute from the Data Card?
+        If you remove it from this card it will also be removed from all the Cards in this collection.
+      </p>
+    );
+  };
+
+  const [showAlert] = useCautionAlert({
+    title: "Delete Attribute",
+    content: AlertContent,
+    confirmLabel: "Delete Attribute",
+    onConfirm: () => deleteAttribute()
+  });
+
+
   const handleDeleteAttribute = () => {
-    // confirmation dialog
+    showAlert();
   };
 
   const pairClassNames = classNames(
