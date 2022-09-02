@@ -105,7 +105,8 @@ export const DataCardContentModel = ToolContentModel
     isEmptyCase(caseId: string){
       let attributesWithValues = 0;
       this.existingAttributes().forEach((attr) => {
-        if (self.dataSet.getValue(caseId, attr) !== "" || undefined){
+        const value = self.dataSet.getValue(caseId, attr);
+        if (value !== "" && value != null) {
           attributesWithValues++;
         }
       });
