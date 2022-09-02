@@ -12,6 +12,7 @@ export const kHeaderRowHeight = 34;
 // export const kHeaderCellHorizontalPadding = 72; // half on either side of text
 export const kHeaderCellHorizontalPadding = 32; // half on either side of text
 export const kExpressionCellPadding = 20;
+export const kTitlePadding = 8;
 export interface IGridContext {
   showRowLabels: boolean;
   isColumnSelected: (columnId: string) => boolean;

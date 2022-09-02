@@ -39,16 +39,16 @@ interface IGetTableContentHeight {
   rows: TRow[];
   rowHeight: (args: any) => number;
   headerHeight: () => number;
+  getTitleHeight: () => number;
   readOnly?: boolean;
   hasExpressions?: boolean;
   padding?: number;
 }
 export const getTableContentHeight = ({
-  rows, rowHeight, headerHeight, readOnly, hasExpressions, padding
+  rows, rowHeight, headerHeight, getTitleHeight, readOnly, hasExpressions, padding
 }: IGetTableContentHeight) => {
   const kDefaultRowHeight = 34;
   const kDefaultPadding = 10;
-  const titleRows = 1;
   const expressionRows = hasExpressions ? 1 : 0;
   const inputRows = readOnly ? 0 : 1;
   const kBorders = 2 * 2;
@@ -57,7 +57,7 @@ export const getTableContentHeight = ({
   rows.forEach(row => {
     rowHeights += rowHeight({row});
   });
-  return headerHeight() + (titleRows + expressionRows + inputRows) * kDefaultRowHeight
+  return getTitleHeight() + headerHeight() + (expressionRows + inputRows) * kDefaultRowHeight
     + rowHeights + kBorders + _padding;
 };
 

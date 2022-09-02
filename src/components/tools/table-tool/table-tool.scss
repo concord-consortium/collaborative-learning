@@ -23,8 +23,7 @@ $controls-hover-background: #c0dfe7;
     height: 100%;
 
     .table-title {
-      position: absolute;
-      left: $index-column-width - 1px;
+      margin-left: $index-column-width - 1px;
       max-width: calc(100% - #{$index-column-width} + #{$table-padding});
       height: $row-height;
       color: $charcoal-dark-2;
@@ -89,8 +88,6 @@ $controls-hover-background: #c0dfe7;
     --row-selected-background-color: #{$highlight-blue-25};
     --selection-color: #{$highlight-blue};
 
-    position: absolute;
-    top: $row-height;
     width: calc(var(--row-width) + #{$platform-scrollbar-width});
     max-width: calc(100% + #{$table-padding});
     height: calc(100% - #{$row-height});
