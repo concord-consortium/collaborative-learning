@@ -58,6 +58,6 @@ export const FocusDocumentTracker = observer(({ navTabPanelElt }: IProps) => {
                               : focusDocument);
       }, 30);
     }
-  }, [navTabPanelElt, prevUpdates, ui, ui.focusDocUpdates]);
+  }, [navTabPanelElt, prevTab, prevUpdates, ui, ui.focusDocUpdates]);
   return null;
 });

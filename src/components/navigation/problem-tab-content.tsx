@@ -41,7 +41,7 @@ export const ProblemTabContent: React.FC<IProps>
     if (ui.activeNavTab === ENavTab.kProblems) {
       ui.updateFocusDocument();
     }
-  }, []);
+  }, [ui]);
 
   const handleTabClick = (titleArgButReallyType: string, typeArgButReallyTitle: string) => {
     // TODO: this function has its argument names reversed (see caller for details.)
