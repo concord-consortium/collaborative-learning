@@ -37,7 +37,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [editFacet, setEditFacet] = useState<EditFacet>("");
   const [imageUrl, setImageUrl] = useState("");
 
-  console.log("rendering: ", attrKey)
+  console.log("rendering: ", attrKey);
 
   useEffect(() => {
     if (currEditAttrId !== attrKey) {
@@ -118,7 +118,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   function deleteAttribute(){
-    console.log("? deleteAttribute: ", attrKey)
+    console.log("? deleteAttribute: ", attrKey);
     if(attrKey){
       content.dataSet.removeAttribute(attrKey);
     }
@@ -127,8 +127,9 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const AlertContent = () => {
     return (
       <p>
-        Are you sure you want to remove the (<b>"{ getLabel() }"</b>) attribute from the Data Card?
-        If you remove it from this card it will delete the data in the field and it will also be removed from all the Cards in this collection.
+        Are you sure you want to remove the (<b>{ getLabel() }</b>) attribute from the Data Card?
+        If you remove it from this card it will delete the data in the field,
+        and it will also be removed from all the Cards in this collection.
       </p>
     );
   };
