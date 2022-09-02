@@ -66,7 +66,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   }, [commentsPath, deleteCommentMutation, focusDocument, focusTileId]);
 
   const newCommentCount = unreadComments?.length || 0;
-
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
       <ChatPanelHeader activeNavTab={activeNavTab} newCommentCount={newCommentCount}

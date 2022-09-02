@@ -32,7 +32,7 @@ context('Teacher Workspace', () => {
 
   describe('teacher specific navigation tabs', () => {
     it('verify problem tab solution switch', () => {
-      cy.get('.collapsed-resources-tab').click();
+      // cy.get('.collapsed-resources-tab').click();
       cy.wait(500);
       cy.get('.top-tab.tab-problems').should('exist').click();
       cy.get('.prob-tab').contains('What If...?').click();

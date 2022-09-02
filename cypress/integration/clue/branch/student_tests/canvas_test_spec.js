@@ -81,7 +81,9 @@ context('Test Canvas', function () {
         canvas.getPersonalDocTitle().should("contain", renameTitlePencil);
       });
       it('verify title change in document thumbnail in nav panel', function () {
-        cy.get(".collapsed-resources-tab.my-work").click();
+        // cy.get(".collapsed-resources-tab.my-work").click();
+        cy.openTopTab("my-work");
+        cy.openSection("my-work", "workspaces");
         resourcesPanel.getCanvasItemTitle('my-work', 'workspaces').should('contain', renameTitlePencil);
       });
       it('verify publish document', function () {
