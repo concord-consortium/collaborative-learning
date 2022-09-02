@@ -1,10 +1,10 @@
-import { render } from "@testing-library/react";
 import React from "react";
+import { render } from "@testing-library/react";
+import { ModalProvider } from "@concord-consortium/react-modal-hook";
 import { IToolApi } from "../../components/tools/tool-api";
 import { ToolTileModel } from "../../models/tools/tool-tile";
 import { defaultDataCardContent } from "./data-card-content";
 import { DataCardToolComponent } from "./data-card-tool";
-import { ModalProvider } from "@concord-consortium/react-modal-hook";
 
 // The data card tile needs to be registered so the ToolTileModel.create
 // knows it is a supported tile type
