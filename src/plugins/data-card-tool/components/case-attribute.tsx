@@ -86,6 +86,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    console.log("? handleDoubleClick: ", event);
     const [facet] = event.currentTarget.classList;
     activateInput(facet as EditFacet);
   };
@@ -140,7 +141,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     confirmLabel: "Delete Attribute",
     onConfirm: () => deleteAttribute()
   });
-
 
   const handleDeleteAttribute = () => {
     showAlert();
