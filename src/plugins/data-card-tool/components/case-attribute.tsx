@@ -127,8 +127,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const AlertContent = () => {
     return (
       <p>
-        Are you sure you want to remove this attribute from the Data Card?
-        If you remove it from this card it will also be removed from all the Cards in this collection.
+        Are you sure you want to remove the (<b>"{ getLabel() }"</b>) attribute from the Data Card?
+        If you remove it from this card it will delete the data in the field and it will also be removed from all the Cards in this collection.
       </p>
     );
   };
