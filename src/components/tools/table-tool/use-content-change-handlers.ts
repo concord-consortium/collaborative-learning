@@ -77,7 +77,8 @@ export const useContentChangeHandlers = ({
   const setColumnName = useCallback((column: TColumn, columnName: string) => {
     if (readOnly) return;
     getContent().setAttributeName(column.key, columnName);
-  }, [readOnly, getContent]);
+    requestRowHeight();
+  }, [readOnly, getContent, requestRowHeight]);
 
   const setColumnExpressions = useCallback((rawExpressions: Map<string, string>, xName: string) => {
     if (readOnly) return;
@@ -108,7 +109,8 @@ export const useContentChangeHandlers = ({
     if (readOnly) return;
     getContent().setCanonicalCaseValues([caseValues]);
     triggerRowChange();
-  }, [readOnly, getContent, triggerRowChange]);
+    requestRowHeight();
+  }, [readOnly, getContent, triggerRowChange, requestRowHeight]);
 
   const removeRows = useCallback((rowIds: string[]) => {
     if (readOnly) return;

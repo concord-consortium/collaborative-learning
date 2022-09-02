@@ -97,7 +97,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
 
   const { getTitle, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, dataSet: dataSet.current, readOnly,
-    onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle
+    onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle, requestRowHeight
   });
 
   const handleSubmitExpressions = (expressions: Map<string, string>) => {
