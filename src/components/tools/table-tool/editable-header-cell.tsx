@@ -14,13 +14,11 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column, height }
   } = appData || {};
   const [nameValue, setNameValue] = useState(editableName ? name as string : "");
   const handleClick = () => {
-    // This setTimeout gives the element an opportunity to handle a double click
-    setTimeout(() => {
+    if (gridContext?.isColumnSelected(column.key)) {
+      editableName && !isEditing && onBeginHeaderCellEdit?.();
+    } else {
       !isEditing && gridContext?.onSelectColumn(column.key);
-    }, 200);
-  };
-  const handleDoubleClick = () => {
-    editableName && !isEditing && onBeginHeaderCellEdit?.();
+    }
   };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const { key } = e;
@@ -58,7 +56,7 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column, height }
   // ¯\_(ツ)_/¯ The fix is to force the <input> to be the height of the row with an inline style.
   const inputStyle: React.CSSProperties = { ...ehcStyle };
   return (
-    <div className={"editable-header-cell"} onClick={handleClick} onDoubleClick={handleDoubleClick} style={ehcStyle}>
+    <div className={"editable-header-cell"} onClick={handleClick} style={ehcStyle}>
       {isEditing
         ? <HeaderCellInput style={style} inputStyle={inputStyle} value={nameValue}
             onKeyDown={handleKeyDown} onChange={handleChange} onClose={handleClose} />
