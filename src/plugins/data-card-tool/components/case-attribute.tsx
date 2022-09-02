@@ -175,7 +175,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
             : <div className="cell-value">{valueStr}</div>
         }
       </div>
-        <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
+      <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
     </div>
   );
 });
