@@ -112,7 +112,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleDeleteAttribute = () => {
-    // confirmation dialogue
+    // confirmation dialog
   };
 
   const pairClassNames = classNames(
