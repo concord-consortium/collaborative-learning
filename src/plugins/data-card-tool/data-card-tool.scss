@@ -209,6 +209,14 @@ $default-button-border-color: #979797;
         }
       }
 
+      .delete-attribute {
+        display:none;
+        transform: translateX(30px);
+        // &.show {
+        //   display: block;
+        // }
+      }
+
       input {
         width: 100%;
         height: 100%;
