@@ -39,6 +39,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   console.log("rendering: ", attrKey);
 
+
   useEffect(() => {
     if (currEditAttrId !== attrKey) {
       setEditFacet("");
@@ -80,15 +81,24 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     caseId && content.setAttValue(caseId, attrKey, "");
   };
 
+  /**
+   *
+   * this is where you are right now...
+   * notice the second click event that "breaks" things is on the input
+   *
+   */
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    console.log("HANDLE CLICK EVENT: ", event.target, event.currentTarget);
     setCurrEditAttrId(attrKey);
     console.log("1 handleClick: attrKey:", attrKey);
+    const [facet] = event.currentTarget.classList;
+    activateInput(facet as EditFacet);
   };
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     console.log("? handleDoubleClick: ", event);
-    const [facet] = event.currentTarget.classList;
-    activateInput(facet as EditFacet);
+    // const [facet] = event.currentTarget.classList;
+    // activateInput(facet as EditFacet);
   };
 
   const handleNameBlur = () => {
@@ -174,6 +184,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
        setImageUrl(image.displayUrl || "");
      });
 
+  function focusOne(e: any){
+    console.log(e);
+  }
+
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onClick={handleClick} onDoubleClick={handleDoubleClick}>
@@ -207,6 +221,12 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         }
       </div>
       <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
+      {/* <button onClick={focusOne} >Focus 1</button> */}
     </div>
   );
 });
+
+/**
+ * When it goes to second stage of selection, delete it stops working
+ * Why - what is that second stage of selection?
+ */

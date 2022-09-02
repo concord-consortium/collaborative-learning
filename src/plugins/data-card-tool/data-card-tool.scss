@@ -224,11 +224,11 @@ $default-button-border-color: #979797;
         padding: $cell-padding;
         font-style: normal;
         font-weight: 300;
-        border: none;
+        border: 2px solid black;
         background-color: $workspace-teal-light-8;
         font-family: Lato;
         &:focus {
-          outline: 1px solid blue;
+          outline: 1px solid red;
         }
       }
       .name input {
