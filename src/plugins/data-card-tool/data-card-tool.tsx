@@ -89,7 +89,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   }
 
   const AlertContent = () => {
-    return <p>Remove the current Data Card?</p>;
+    return <p>Delete the current Data Card?</p>;
   };
 
   const [showAlert] = useCautionAlert({
