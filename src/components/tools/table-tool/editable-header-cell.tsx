@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { kCellLineHeight, TColumn, THeaderRendererProps } from "./table-types";
+import { TColumn, THeaderRendererProps } from "./table-types";
 import { HeaderCellInput } from "./header-cell-input";
 
 interface IProps extends THeaderRendererProps {
@@ -39,7 +39,7 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column, height }
   const handleClose = (accept: boolean) => {
     onEndHeaderCellEdit?.(accept ? nameValue : undefined);
   };
-  const ehcStyle: React.CSSProperties = { height, lineHeight: `${kCellLineHeight}px` };
+  const ehcStyle: React.CSSProperties = { height };
   const style: React.CSSProperties = { width: column.width, ...ehcStyle };
   // ReactDataGrid's styling of the cell editor relies on an interesting interplay between the container
   // (.rdg-editor-container), which has `{ display: "contents" }` in its CSS, which according to MDN means:

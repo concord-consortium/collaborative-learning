@@ -28,6 +28,7 @@
       white-space: normal;
       word-break: break-word;
       text-align: center;
+      line-height: 18px;
 
       &.table-title-editing {
         padding: 0 !important;
@@ -52,6 +53,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      line-height: 18px;
       &.has-expression {
         border-top: 1px solid white;
       }

@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import React from "react";
 import { EditableHeaderCell } from "./editable-header-cell";
-import { kCellLineHeight, kHeaderRowHeight, THeaderRendererProps, TColumn } from "./table-types";
+import { kHeaderRowHeight, THeaderRendererProps, TColumn } from "./table-types";
 import { useCautionAlert } from "../../utilities/use-caution-alert";
 import RemoveColumnSvg from "../../../assets/icons/remove/remove.nosvgo.svg";
 
@@ -62,7 +62,7 @@ export const ExpressionCell: React.FC<IExpressionCellProps> = ({ readOnly, colum
   const handleClick = () => !readOnly && expression && onShowExpressionsDialog?.(column.key);
   return (
     <div className={classes} onClick={handleClick}
-      style={{ height: kHeaderRowHeight, lineHeight: `${kCellLineHeight}px` }}>
+      style={{ height: kHeaderRowHeight }}>
       {expressionStr}
     </div>
   );
