@@ -133,8 +133,6 @@ $default-button-border-color: #979797;
           fill:$workspace-teal;
           height:24px;
           width:24px;
-          // transform: translateX(-6px);
-          // border-radius:26px;
           &:hover {
             background-color: $workspace-teal-light-3;
           }
@@ -224,15 +222,17 @@ $default-button-border-color: #979797;
         padding: $cell-padding;
         font-style: normal;
         font-weight: 300;
-        border: 2px solid black;
+        border: 0px;
         background-color: $workspace-teal-light-8;
         font-family: Lato;
-        &:focus {
-          outline: 1px solid red;
-        }
+        outline: 0;
       }
       .name input {
         text-align: right;
+      }
+
+      .editing input {
+        border: 2px solid $highlight-blue;
       }
     }
 

@@ -37,6 +37,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [editFacet, setEditFacet] = useState<EditFacet>("");
   const [imageUrl, setImageUrl] = useState("");
 
+  /** TODO
+   *  make title act the same way
+   */
+
   useEffect(() => {
     if (currEditAttrId !== attrKey) {
       setEditFacet("");
@@ -78,15 +82,26 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     caseId && content.setAttValue(caseId, attrKey, "");
   };
 
-  const handleClick = (event: any) => {
+  const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     setCurrEditAttrId(attrKey);
-    const [facet] = event.currentTarget.classList;
-    const isInput = event.target.className === "input";
-    activateInput(facet as EditFacet);
-    if (isInput){
-      event.target.select();
+    const [facet, id, editing] = event.currentTarget.classList;
+    activateInput(facet as EditFacet, editing === "editing");
+
+    // allow to toggle on and off highlight of all text
+    const childEl = event.currentTarget.children[0] as any;
+    if(childEl.tagName === "INPUT"){
+      const myInput = childEl as HTMLInputElement;
+      const isHighlighted = myInput.selectionStart === 0;
+      const valLength = myInput.value.length;
+      if (isHighlighted && valLength > 0){
+        myInput.setSelectionRange(valLength, valLength, "forward");
+      }
     }
   };
+
+  const handleInputDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
+    event.currentTarget.select();
+  }
 
   const handleNameBlur = () => {
     if (labelCandidate !== getLabel()) {
@@ -102,12 +117,12 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setEditFacet("");
   };
 
-  const activateInput = (facet: EditFacet) => {
+  const activateInput = (facet: EditFacet, editing: boolean) => {
     setEditFacet(facet);
-    if (facet === "name"){
+    if (facet === "name" && !editing){
       setLabelCandidate(getLabel());
     }
-    if (facet === "value"){
+    if (facet === "value" && !editing){
       setValueCandidate(getValue());
     }
     setCurrEditAttrId(attrKey);
@@ -180,6 +195,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               onBlur={handleNameBlur}
+              onDoubleClick={handleInputDoubleClick}
             />
           : <div className={cellLabelClasses}>{getLabel()}</div>
         }
@@ -194,6 +210,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               onBlur={handleCompleteValue}
+              onDoubleClick={handleInputDoubleClick}
             />
           : gImageMap.isImageUrl(valueStr)
             ?   <div className="image-wrapper">
