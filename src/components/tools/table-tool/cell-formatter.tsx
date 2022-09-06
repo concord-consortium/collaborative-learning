@@ -3,6 +3,7 @@ import { kCellHorizontalPadding, kCellLineHeight, kDefaultColumnWidth, kRowHeigh
 import { useNumberFormat } from "./use-number-format";
 
 import './cell-formatter.scss';
+import { CalculatedColumn } from "react-data-grid";
 
 export const formatValue = (
     formatter: (n: number | { valueOf(): number }) => string, value: any,
@@ -22,11 +23,12 @@ export const formatValue = (
   return <span>{formatter(num)}</span>;
 };
 
+interface CellFormatterProps {
+  row: TRow;
+  column: CalculatedColumn<TRow, any>;
+}
 export const getCellFormatter = (width: number, rowHeight: (args: any) => number) => {
-  // args.row: TRow
-  // args.column: CalculatedColumn<TRow, any>
-  return (args: any) => {
-    const { row, column } = args;
+  return ({ row, column }: CellFormatterProps) => {
     const formatter = useNumberFormat();
     return formatValue(formatter, row[column.key], width, row, rowHeight);
   };
