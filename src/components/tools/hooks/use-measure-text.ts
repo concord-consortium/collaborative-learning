@@ -23,15 +23,16 @@ const trimWhitespace = (text:string) => {
   return text.trim().replace(/\s\s+/g, ' ');
 };
 
-// Caches values for measuring lines. First key is font, second is text, third is width.
-const lineCache: Record<string, Record<string, Record<number, number>>> = {};
+// Caches values for measuring lines. First key is font, second is text, third is width, fourth is maxLines.
+const lineCache: Record<string, Record<string, Record<number, Record<number, number>>>> = {};
 
 // Approximates the number of lines a given string will take when rendered in a div of the given width
 export const measureTextLines = (text: string, width: number, font = defaultFont, maxLines = 100) => {
   lineCache[font] = lineCache[font] || {};
   lineCache[font][text] = lineCache[font][text] || {};
+  lineCache[font][text][width] = lineCache[font][text][width] || {};
   
-  if (!(width in lineCache[font][text])) {
+  if (!(maxLines in lineCache[font][text][width])) {
     const trimmedText = trimWhitespace(text);
     let lines = 1;
     let startOfLine = 0;
@@ -55,7 +56,7 @@ export const measureTextLines = (text: string, width: number, font = defaultFont
         // We hit the end of the line
         lines++;
         if (lines >= maxLines) {
-          lineCache[font][text][width] = maxLines;
+          lineCache[font][text][width][maxLines] = maxLines;
           return maxLines;
         }
 
@@ -79,8 +80,8 @@ export const measureTextLines = (text: string, width: number, font = defaultFont
         }
       }
     }
-    lineCache[font][text][width] = lines;
+    lineCache[font][text][width][maxLines] = lines;
   }
 
-  return lineCache[font][text][width];
+  return lineCache[font][text][width][maxLines];
 };

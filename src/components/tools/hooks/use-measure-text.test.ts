@@ -101,4 +101,7 @@ describe("measureTextLines", () => {
   it("doesn't include trailing spaces on the next line", () => {
     expect(mtl("tenletters tenletters")).toEqual(2);
   });
+  it("returns the maximum line count when appropriate", () => {
+    expect(measureTextLines("tenletters tenletters", lineWidth, defaultFont, 1)).toEqual(1);
+  });
 });
