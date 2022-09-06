@@ -19,8 +19,6 @@
 
     .editable-header-cell {
       width: 100%;
-      padding-left: 16px;
-      padding-right: 16px;
       height: var(--header-row-height);
       display: flex;
       align-items: center;
@@ -29,6 +27,10 @@
       word-break: break-word;
       text-align: center;
       line-height: 18px;
+
+      .header-name {
+        margin: 0 16px;
+      }
 
       &.table-title-editing {
         padding: 0 !important;
