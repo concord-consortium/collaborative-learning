@@ -37,9 +37,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [editFacet, setEditFacet] = useState<EditFacet>("");
   const [imageUrl, setImageUrl] = useState("");
 
-  console.log("rendering: ", attrKey);
-
-
   useEffect(() => {
     if (currEditAttrId !== attrKey) {
       setEditFacet("");
@@ -81,24 +78,14 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     caseId && content.setAttValue(caseId, attrKey, "");
   };
 
-  /**
-   *
-   * this is where you are right now...
-   * notice the second click event that "breaks" things is on the input
-   *
-   */
-  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    console.log("HANDLE CLICK EVENT: ", event.target, event.currentTarget);
+  const handleClick = (event: any) => {
     setCurrEditAttrId(attrKey);
-    console.log("1 handleClick: attrKey:", attrKey);
     const [facet] = event.currentTarget.classList;
+    const isInput = event.target.className === "input";
     activateInput(facet as EditFacet);
-  };
-
-  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    console.log("? handleDoubleClick: ", event);
-    // const [facet] = event.currentTarget.classList;
-    // activateInput(facet as EditFacet);
+    if (isInput){
+      event.target.select();
+    }
   };
 
   const handleNameBlur = () => {
@@ -116,7 +103,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const activateInput = (facet: EditFacet) => {
-    console.log("2 start activateInput:", attrKey);
     setEditFacet(facet);
     if (facet === "name"){
       setLabelCandidate(getLabel());
@@ -125,7 +111,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       setValueCandidate(getValue());
     }
     setCurrEditAttrId(attrKey);
-    console.log("3 finish activateInput:", attrKey);
   };
 
   function deleteAttribute(){
@@ -184,16 +169,13 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
        setImageUrl(image.displayUrl || "");
      });
 
-  function focusOne(e: any){
-    console.log(e);
-  }
-
   return (
     <div className={pairClassNames}>
-      <div className={labelClassNames} onClick={handleClick} onDoubleClick={handleDoubleClick}>
+      <div className={labelClassNames} onClick={handleClick}>
         { !readOnly && editFacet === "name"
           ? <input
               type="text"
+              className="input"
               value={labelCandidate}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
@@ -203,10 +185,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         }
       </div>
 
-      <div className={valueClassNames} onClick={handleClick} onDoubleClick={handleDoubleClick}>
+      <div className={valueClassNames} onClick={handleClick}>
         { editFacet === "value" && !readOnly
           ? <input
               type="text"
+              className="input"
               value={valueCandidate}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
@@ -221,12 +204,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         }
       </div>
       <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
-      {/* <button onClick={focusOne} >Focus 1</button> */}
     </div>
   );
 });
-
-/**
- * When it goes to second stage of selection, delete it stops working
- * Why - what is that second stage of selection?
- */
