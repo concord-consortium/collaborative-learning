@@ -216,7 +216,6 @@ $controls-hover-background: #c0dfe7;
         padding: 0;
         .remove-row-button {
           width: $controls-column-width;
-          height: $row-height;
           display: none;  // overridden when tile is selected
           justify-content: center;
           align-items: center;
