@@ -1,9 +1,9 @@
 import React from "react";
+import { CalculatedColumn, RowHeightArgs } from "react-data-grid";
 import { kCellHorizontalPadding, kDefaultColumnWidth, kRowHeight, TRow } from "./table-types";
 import { useNumberFormat } from "./use-number-format";
 
 import './cell-formatter.scss';
-import { CalculatedColumn } from "react-data-grid";
 
 export const formatValue = (
     formatter: (n: number | { valueOf(): number }) => string, value: any,
@@ -27,7 +27,7 @@ interface CellFormatterProps {
   row: TRow;
   column: CalculatedColumn<TRow, any>;
 }
-export const getCellFormatter = (width: number, rowHeight: (args: any) => number) => {
+export const getCellFormatter = (width: number, rowHeight: (args: RowHeightArgs<TRow>) => number) => {
   return ({ row, column }: CellFormatterProps) => {
     const formatter = useNumberFormat();
     return formatValue(formatter, row[column.key], width, row, rowHeight);

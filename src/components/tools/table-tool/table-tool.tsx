@@ -10,7 +10,9 @@ import { TableToolbar } from "./table-toolbar";
 import { useColumnsFromDataSet } from "./use-columns-from-data-set";
 import { useTitleSize } from "./use-title-size";
 import { useColumnExtensions } from "./use-column-extensions";
+import { useColumnResize } from "./use-column-resize";
 import { useContentChangeHandlers } from "./use-content-change-handlers";
+import { useControlsColumn } from "./use-controls-column";
 import { useDataSet } from "./use-data-set";
 import { useExpressionsDialog } from "./use-expressions-dialog";
 import { useGeometryLinking } from "./use-geometry-linking";
@@ -27,8 +29,6 @@ import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
 import { lightenColor } from "../../../utilities/color-utils";
 
 import "./table-tool.scss";
-import { useColumnResize } from "./use-column-resize";
-import { useControlsColumn } from "./use-controls-column";
 
 // observes row selection from shared selection store
 const TableToolComponent: React.FC<IToolTileProps> = observer(({
@@ -46,7 +46,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   } = useModelDataSet(model);
 
   // Set up user specified columns and function to measure a column
-  // The user specified columns should be moved out of react and into MST
+  // TODO The user specified columns should be moved out of react and into MST
   const { userColumnWidths, measureColumnWidth } = useMeasureColumnWidth();
 
   // Functions for determining the height of rows, including the header
@@ -55,7 +55,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     dataSet: dataSet.current, measureColumnWidth, model });
 
   // A function to generate a unique title for the tile
-  // The table tile should switch to the new CLUE wide method of determining titles, and this should be removed
+  // TODO The table tile should switch to the new CLUE wide method of determining titles, and this should be removed
   const handleRequestUniqueTitle = useCallback(() => {
     return onRequestUniqueTitle(modelRef.current.id);
   }, [modelRef, onRequestUniqueTitle]);
@@ -109,7 +109,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   const { onColumnResize } = useColumnResize({
     columns, userColumnWidths, requestRowHeight, triggerRowChange
   });
-  // Finishes setting up the controlsColumn with changeHandlers (which weren't defined then controlColumn was created)
+  // Finishes setting up the controlsColumn with changeHandlers (which weren't defined when controlColumn was created)
   useControlsColumn({ controlsColumn, readOnly: !!readOnly, onAddColumn, onRemoveRows });
 
   // Functions for getting and modifying the title
@@ -139,7 +139,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   });
 
   // dataGridProps contains callbacks to pass to ReactDataGrid
-  // hasLinkableRows is used to determine in the table can meaningfully be linked to a geometry tile
+  // hasLinkableRows is used to determine if the table can meaningfully be linked to a geometry tile
   const { hasLinkableRows, ...dataGridProps } = useDataSet({
     gridRef, model, dataSet: dataSet.current, triggerColumnChange, rows, rowChanges, triggerRowChange,
     readOnly: !!readOnly, changeHandlers, columns, onColumnResize, selectedCell, inputRowId });

@@ -1,6 +1,7 @@
 import { useCallback } from "react";
+import { RowHeightArgs } from "react-data-grid";
 import { kCellHorizontalPadding, kCellLineHeight, kCellVerticalPadding,
-  kHeaderCellHorizontalPadding, kHeaderRowHeight, kRowHeight } from "./table-types";
+  kHeaderCellHorizontalPadding, kHeaderRowHeight, kRowHeight, TRow } from "./table-types";
 import { useCurrent } from "../../../hooks/use-current";
 import { measureTextLines } from "../hooks/use-measure-text";
 import { defaultFont } from "../../constants";
@@ -28,8 +29,7 @@ export const useRowHeight = ({ dataSet, measureColumnWidth, model }: IUseRowHeig
     return kRowHeight;
   };
 
-  // args.row: TRow
-  const rowHeight = useCallback((args: any) => {
+  const rowHeight = useCallback((args: RowHeightArgs<TRow>) => {
     let height = kRowHeight;
     if (args.row) {
       for (const [attrId, text] of Object.entries(args.row)) {

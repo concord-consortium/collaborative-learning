@@ -1,6 +1,7 @@
 import { Expression, Parser } from "expr-eval";
 import { reaction } from "mobx";
 import { addDisposer, Instance, SnapshotIn, types, getType, getSnapshot } from "mobx-state-tree";
+import { RowHeightArgs } from "react-data-grid";
 import { ITableChange } from "./table-change";
 import { exportTableContentAsJson } from "./table-export";
 import {
@@ -14,7 +15,7 @@ import { SharedModelType } from "../shared-model";
 import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import { uniqueId } from "../../../utilities/js-utils";
-import { TRow } from "src/components/tools/table-tool/table-types";
+import { TRow } from "../../../components/tools/table-tool/table-types";
 
 export const kTableToolID = "Table";
 export const kCaseIdName = "__id__";
@@ -37,7 +38,7 @@ export function defaultTableContent(props?: IDefaultContentOptions) {
 
 interface IGetTableContentHeight {
   rows: TRow[];
-  rowHeight: (args: any) => number;
+  rowHeight: (args: RowHeightArgs<TRow>) => number;
   headerHeight: () => number;
   getTitleHeight: () => number;
   readOnly?: boolean;
@@ -55,7 +56,7 @@ export const getTableContentHeight = ({
   const _padding = 2 * (padding || kDefaultPadding);
   let rowHeights = 0;
   rows.forEach(row => {
-    rowHeights += rowHeight({row});
+    rowHeights += rowHeight({ row, type: 'ROW' });
   });
   return getTitleHeight() + headerHeight() + (expressionRows + inputRows) * kDefaultRowHeight
     + rowHeights + kBorders + _padding;
