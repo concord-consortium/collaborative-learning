@@ -29,24 +29,6 @@ export const useColumnHeaderCell = (height: number) => {
     return ColumnHeaderCell;
   }, [height]);
 };
-// export const getColumnHeaderCell = (height: number) => {
-//   const ColumnHeaderCell: React.FC<IProps> = (props: IProps) => {
-//     const column = props.column as unknown as TColumn;
-//     const { readOnly, isEditing, isRemovable, showExpressions, onRemoveColumn } = column.appData || {};
-//     const classes = classNames("column-header-cell", { "show-expression": showExpressions });
-//     return (
-//       <div className={classes}>
-//         <div className="flex-container">
-//           <EditableHeaderCell height={height} {...props} />
-//           {showExpressions && <ExpressionCell readOnly={readOnly} column={column} />}
-//         </div>
-//         {!isEditing && isRemovable &&
-//           <RemoveColumnButton colId={column.key} colName={column.name as string} onRemoveColumn={onRemoveColumn}/>}
-//       </div>
-//     );
-//   };
-//   return ColumnHeaderCell;
-// };
 
 interface IRemoveColumnButtonProps {
   colId: string;

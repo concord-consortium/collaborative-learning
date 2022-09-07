@@ -131,7 +131,6 @@ context('Table Tool Tile', function () {
       cy.get('.editable-header-cell')
         .contains('.header-name', 'y')
         .parent()
-        // .first()
         .siblings('.expression-cell.has-expression')
         .should('contain', formula);
     });
