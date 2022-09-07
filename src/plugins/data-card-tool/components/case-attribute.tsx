@@ -78,11 +78,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     caseId && content.setAttValue(caseId, attrKey, "");
   };
 
+
   const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     setCurrEditAttrId(attrKey);
     const [facet, id, editing] = event.currentTarget.classList;
     activateInput(facet as EditFacet, editing === "editing");
-
     // allow to toggle on and off highlight of all text
     const myInput = event.currentTarget.children[0] as HTMLInputElement;
     if(myInput.tagName === "INPUT"){
@@ -153,7 +153,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const pairClassNames = classNames(
     `attribute-name-value-pair ${attrKey}`,
-    {"editing": editFacet === "name" || "value"}
+    {"editing": editFacet === "name" || "value"},
+    {"has-image": gImageMap.isImageUrl(valueStr)}
   );
 
   const labelClassNames = classNames(
@@ -197,7 +198,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       <div className={valueClassNames} onClick={handleClick}>
-        { editFacet === "value" && !readOnly
+        {/* TODO - image delete */}
+        { editFacet === "value" && !readOnly // && !gImageMap.isImageUrl(valueStr)
           ? <input
               type="text"
               className="input"
