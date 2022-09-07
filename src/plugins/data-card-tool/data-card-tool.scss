@@ -234,6 +234,10 @@ $default-button-border-color: #979797;
       .editing input {
         border: 2px solid $highlight-blue;
       }
+
+      .value .cell-value:hover {
+        background:rgba(245, 245, 245);
+      }
     }
 
     /* when attribute is in "about to be created" state */

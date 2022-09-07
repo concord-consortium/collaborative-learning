@@ -59,6 +59,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     switch (key) {
       case "Enter":
         handleCompleteValue();
+        handleCompleteName();
         setEditFacet("");
         break;
       case "Escape":
@@ -83,6 +84,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setCurrEditAttrId(attrKey);
     const [facet, id, editing] = event.currentTarget.classList;
     activateInput(facet as EditFacet, editing === "editing");
+
     // allow to toggle on and off highlight of all text
     const myInput = event.currentTarget.children[0] as HTMLInputElement;
     if(myInput.tagName === "INPUT"){
@@ -98,9 +100,9 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     event.currentTarget.select();
   };
 
-  const handleNameBlur = () => {
+  const handleCompleteName = () => {
     if (labelCandidate !== getLabel()) {
-      content.setAttName(attrKey, labelCandidate);
+      caseId && content.setAttName(attrKey, labelCandidate);
     }
     setEditFacet("");
   };
@@ -124,7 +126,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   function deleteAttribute(){
-    console.log("? deleteAttribute: ", attrKey);
     if(attrKey){
       content.dataSet.removeAttribute(attrKey);
     }
@@ -153,7 +154,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const pairClassNames = classNames(
     `attribute-name-value-pair ${attrKey}`,
-    {"editing": editFacet === "name" || "value"},
+    {"editing": editFacet === "name" || editFacet === "value"},
     {"has-image": gImageMap.isImageUrl(valueStr)}
   );
 
@@ -190,7 +191,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
               value={labelCandidate}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
-              onBlur={handleNameBlur}
+              onBlur={handleCompleteName}
               onDoubleClick={handleInputDoubleClick}
             />
           : <div className={cellLabelClasses}>{getLabel()}</div>
