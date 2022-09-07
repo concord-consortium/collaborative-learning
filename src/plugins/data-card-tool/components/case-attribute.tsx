@@ -82,7 +82,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     setCurrEditAttrId(attrKey);
-    const [facet, id, editing] = event.currentTarget.classList;
+    const facet = event.currentTarget.classList[0];
+    const editing = event.currentTarget.classList[2];
     activateInput(facet as EditFacet, editing === "editing");
 
     // allow to toggle on and off highlight of all text
@@ -134,8 +135,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const AlertContent = () => {
     return (
       <p>
-        Are you sure you want to remove the <em style={{ fontWeight: "bold"}}>{ getLabel() }</em> attribute from the Data Card?
-        If you remove it from this card it will delete the data in the field,
+        Are you sure you want to remove the <em style={{ fontWeight: "bold"}}>{ getLabel() }</em>&nbsp;
+        attribute from the Data Card? If you remove it from this card it will delete the data in the field,
         and it will also be removed from all the Cards in this collection.
       </p>
     );
