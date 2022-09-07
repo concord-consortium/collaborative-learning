@@ -129,8 +129,9 @@ context('Table Tool Tile', function () {
     });
     it('verify formula appears under correct column header', function () {
       cy.get('.editable-header-cell')
-        .contains('y')
-        .first()
+        .contains('.header-name', 'y')
+        .parent()
+        // .first()
         .siblings('.expression-cell.has-expression')
         .should('contain', formula);
     });

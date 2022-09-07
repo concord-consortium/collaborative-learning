@@ -31,7 +31,7 @@ class TableToolTile{
       return cy.get('.canvas-area .rdg-row');
     }
     getColumnHeaderText(i){
-      return this.getColumnHeader().text();
+      return cy.get('.column-header-cell .editable-header-cell .header-name').text();
     }
     getTableCell(){
       return cy.get('.rdg-row .rdg-cell');
