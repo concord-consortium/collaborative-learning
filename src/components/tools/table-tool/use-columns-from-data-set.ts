@@ -5,7 +5,7 @@ import { IDataSet } from "../../../models/data/data-set";
 import { TableMetadataModelType } from "../../../models/tools/table/table-content";
 import { getCellFormatter } from "./cell-formatter";
 import CellTextEditor from "./cell-text-editor";
-import { getColumnHeaderCell } from "./column-header-cell";
+import { useColumnHeaderCell } from "./column-header-cell";
 import {
   IGridContext, kControlsColumnKey, kControlsColumnWidth, kIndexColumnKey, kIndexColumnWidth, TColumn
 } from "./table-types";
@@ -58,6 +58,8 @@ export const useColumnsFromDataSet = ({
     };
   }, [readOnly]);
 
+  const ColumnHeaderCell = useColumnHeaderCell(headerHeight());
+
   const columns = useMemo(() => {
     const cols: TColumn[] = attributes.map(attr => {
       const width = measureColumnWidth(attr);
@@ -67,7 +69,7 @@ export const useColumnsFromDataSet = ({
         key: attr.id,
         width,
         resizable: true,
-        headerRenderer: getColumnHeaderCell(headerHeight()),
+        headerRenderer: ColumnHeaderCell,
         formatter: getCellFormatter(width, rowHeight),
         editor: !readOnly && !metadata.hasExpression(attr.id) ? CellTextEditor : undefined,
         editorOptions: {
