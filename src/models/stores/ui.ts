@@ -1,7 +1,7 @@
 import { SnapshotIn, types } from "mobx-state-tree";
 import { debounce } from "lodash";
 import { AppConfigModelType } from "./app-config-model";
-import { kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-types";
+import { kDividerHalf, kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { LogEventName, Logger } from "../../lib/logger";
@@ -26,9 +26,9 @@ type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 
 export const UIModel = types
   .model("UI", {
-    dividerPosition: kDividerMin,
+    dividerPosition: kDividerHalf,
     error: types.maybeNull(types.string),
-    activeNavTab: ENavTab.kMyWork,
+    activeNavTab: ENavTab.kProblems,
     activeGroupId: "",
     selectedTileIds: types.array(types.string),
     selectedCommentId: types.maybe(types.string),

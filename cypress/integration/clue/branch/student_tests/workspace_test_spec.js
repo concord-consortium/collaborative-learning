@@ -15,7 +15,7 @@ context('Test the overall workspace', function () {
 
   describe('Desktop functionalities', function () {
     it('will verify that clicking on collapsed resource tab opens the nav area', function () {
-      cy.get(".collapsed-resources-tab.my-work").click();
+      // cy.get(".collapsed-resources-tab.my-work").click();
       cy.openTopTab("my-work");
       cy.get('[data-test=my-work-section-investigations-documents]').should('be.visible');
     });

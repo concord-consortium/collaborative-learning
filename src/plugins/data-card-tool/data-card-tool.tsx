@@ -8,6 +8,7 @@ import { DataCardRows } from "./components/data-card-rows";
 import { DataCardToolbar } from "./data-card-toolbar";
 import { useToolbarToolApi } from "../../components/tools/hooks/use-toolbar-tool-api";
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
+import { useCautionAlert } from "../../components/utilities/use-caution-alert";
 
 import "./data-card-tool.scss";
 
@@ -24,7 +25,6 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   const shouldShowAddCase = !readOnly && isTileSelected;
   const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
   const shouldShowAddField = !readOnly && isTileSelected;
-  // const shouldShowDeleteField = !readOnly && isTileSelected && content.dataSet.attributes.length > 1;
 
   useEffect(() => {
     if (!content.title) {
@@ -81,12 +81,33 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   }
 
   function deleteCase(){
-    // TODO modal (see src/components/delete-button)
     const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
     if (thisCaseId) {
       content.dataSet.removeCases([thisCaseId]);
     }
     previousCase();
+  }
+
+  const AlertContent = () => {
+    return <p>Delete the current Data Card?</p>;
+  };
+
+  const [showAlert] = useCautionAlert({
+    title: "Delete Card",
+    content: AlertContent,
+    confirmLabel: "Delete Card",
+    onConfirm: () => deleteCase()
+  });
+
+  function handleDeleteCardClick(){
+    const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
+    if (thisCaseId){
+      if (content.isEmptyCase(thisCaseId)){
+        deleteCase();
+      } else {
+        showAlert();
+      }
+    }
   }
 
   const handleAddField = () => {
@@ -142,7 +163,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
           </div>
           <div className="add-remove-card-buttons">
             <AddIconButton className={addCardClasses} onClick={addNewCase} />
-            <RemoveIconButton className={removeCardClasses} onClick={deleteCase} />
+            <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
           </div>
         </div>
       </div>

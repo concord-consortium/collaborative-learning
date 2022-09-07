@@ -11,8 +11,6 @@ const path = require('path');
 const rollbarSnippetPath = './node_modules/rollbar/dist/rollbar.snippet.js';
 const rollbarSnippet = fs.readFileSync(path.join(__dirname, rollbarSnippetPath), { encoding: 'utf8' }).trim();
 
-const cacheGroupOptions = { minSize:0, minChunks: 1, reuseExistingChunk: true };
-
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
 
@@ -24,7 +22,8 @@ module.exports = (env, argv) => {
     mode: devMode ? 'development' : 'production',
     output: {
       clean: true,
-      filename: 'index.[contenthash].js'
+      filename: 'index.[contenthash].js',
+      chunkFilename: '[name].[contenthash:8].js'
     },
     performance: { hints: false },
     externals: {
@@ -173,34 +172,27 @@ module.exports = (env, argv) => {
       moduleIds: "deterministic",
       splitChunks: {
         chunks: 'all',
-        name : false,
-        filename: "[name].[chunkhash:8].js",
-        // patterned after https://github.com/webpack/webpack/issues/6916#issuecomment-378171500
-        cacheGroups:{
-          // @concord-consortium modules
-          concord: {
-            test: /@concord-consortium/,
-            name(module) {
-              // e.g. node_modules/@concord-consortium/package-name
-              const ccRegEx = /[\\/]@concord-consortium[\\/](.*?)([\\/]|$)/;
-              const packageName = module.identifier().match(ccRegEx)?.[1] || "";
-
-              // npm package names are URL-safe, but some servers don't like @ symbols
-              return `cc.${packageName.replace('@', '')}`;
-            },
-            priority: 10,
-            enforce: true,
-            ...cacheGroupOptions
+        // In general only split modules out of chunks when the module is used
+        // in 2 or more chunks
+        minChunks: 2,
+        filename: (pathData) => {
+          // console.log("vendor filename", pathData.chunk.id, 
+          //   [...pathData.chunk._groups].map(group => group.options?.name), 
+          //   [...pathData.chunk._groups].map(group => group.chunks));
+          const groupsNames = [...pathData.chunk._groups].map(group => group.options?.name);
+          return `common-${groupsNames.join('-')}.[chunkhash:8].js`;
+        },
+        cacheGroups: {
+          // For the initial chunk, split modules from node_modules out even if
+          // they are only used by the 1 initial chunk. This results in a single
+          // extra chunk that contains all of the 3rd party dependencies.
+          initialVendors: {
+            chunks: 'initial',
+            test: /[\\/]node_modules[\\/]/,
+            minChunks: 1,
+            reuseExistingChunk: true,
+            filename: 'vendor-main.[chunkhash:8].js',
           },
-          // node_modules
-          vendor: {
-            test: /node_modules/,
-            name: (module, chunks, cacheGroupKey) => `vendor-${chunks[0].name}`,
-            priority: 0,
-            ...cacheGroupOptions
-          },
-          // local modules
-          default: { name: "main", ...cacheGroupOptions }
         }
       }
     },

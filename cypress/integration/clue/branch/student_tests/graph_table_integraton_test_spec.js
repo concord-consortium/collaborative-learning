@@ -15,6 +15,8 @@ context.skip('Graph Table Integration', function () {
 
     cy.visit(queryParams);
     cy.waitForLoad();
+    cy.closeResourceTabs();
+
     clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
   });
 

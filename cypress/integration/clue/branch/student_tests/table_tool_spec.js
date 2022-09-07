@@ -17,6 +17,7 @@ context('Table Tool Tile', function () {
 
     cy.visit(queryParams);
     cy.waitForLoad();
+    cy.closeResourceTabs();
   });
 
   describe('Test table functions', function () {
