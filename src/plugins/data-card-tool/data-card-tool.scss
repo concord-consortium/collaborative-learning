@@ -52,6 +52,7 @@ $default-button-border-color: #979797;
         font-style: normal;
         font-weight: 300;
         text-align: center;
+        outline:1px solid $highlight-blue;
       }
     }
     .panel.nav {
@@ -125,7 +126,6 @@ $default-button-border-color: #979797;
         border:none;
         margin-top:1px;
         padding:0px;
-        // position: relative;
         left:9px;
         top:1px;
 

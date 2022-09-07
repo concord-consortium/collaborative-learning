@@ -37,10 +37,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [editFacet, setEditFacet] = useState<EditFacet>("");
   const [imageUrl, setImageUrl] = useState("");
 
-  /** TODO
-   *  make title act the same way
-   */
-
   useEffect(() => {
     if (currEditAttrId !== attrKey) {
       setEditFacet("");
@@ -88,9 +84,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     activateInput(facet as EditFacet, editing === "editing");
 
     // allow to toggle on and off highlight of all text
-    const childEl = event.currentTarget.children[0] as any;
-    if(childEl.tagName === "INPUT"){
-      const myInput = childEl as HTMLInputElement;
+    const myInput = event.currentTarget.children[0] as HTMLInputElement;
+    if(myInput.tagName === "INPUT"){
       const isHighlighted = myInput.selectionStart === 0;
       const valLength = myInput.value.length;
       if (isHighlighted && valLength > 0){
@@ -101,7 +96,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const handleInputDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
     event.currentTarget.select();
-  }
+  };
 
   const handleNameBlur = () => {
     if (labelCandidate !== getLabel()) {
