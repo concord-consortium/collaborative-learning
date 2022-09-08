@@ -7,6 +7,7 @@ import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";
 import { DB } from "../../lib/db";
+import { getUserContext } from "../../hooks/use-user-context";
 import { registerTools } from "../../register-tools";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
@@ -128,7 +129,19 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   stores.unit = UnitModel.create(unitJson);
   const {investigation, problem} = stores.unit.getProblem(_problemOrdinal);
 
+  // TODO: add the userContext documentMetadata, and firestore instance The
+  // userContext should be easy. The documentMetadata will be hard. firestore
+  // should be easy???? We could pass the whole stores object here instead. But
+  // it is kind of nice to separate which parts of the stores is needed for each
+  // place that is using it that makes refactoring the code easier in the
+  // future. So we should just pass the parts of stores that is needed to construct
+  // the document meta data.
+  // The meta data just just built from the classHash and the document.getMetadata()
+  // so it should be easy for the documents model to set this when a new document is added.
   stores.documents.setAppConfig(stores.appConfig);
+  stores.documents.setFirestore(stores.db.firestore);
+  stores.documents.setUserContext(getUserContext(stores));
+
   if (investigation && problem) {
     stores.investigation = investigation;
     stores.problem = problem;
@@ -144,6 +157,7 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
       const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
       stores.teacherGuide = teacherGuide;
     }
+    stores.documents.setUserContext(getUserContext(stores));
   });
 };
 

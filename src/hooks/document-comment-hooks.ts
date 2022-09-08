@@ -89,6 +89,21 @@ export const useCommentableDocument = (documentKeyOrSectionPath?: string) => {
       error: readError => {
         unsubscribeDocListener?.();
         // an error presumably means that the document doesn't exist yet, so we create it
+        // WRONG!
+        //
+        // FIXME: this never really called. The onSnapshot will just sit there waiting for the 
+        // for the document to show up if it doesn't exist.
+        // The better approach for this is to use:
+        //       const documentRef = firestore.doc(documentPath);
+        // documentRef.get()
+        //   .then(docSnapshot => {
+        //     if (docSnapshot.exists) {
+        //        ...
+        // However, this is actually not necessary because the postDocument will create the
+        // Document in firestore if it doesn't exist.
+        // `useCommentableDocument` is only called by `useDocumentComments`, so it is OK for this
+        // to wait or the document to show up. If there are comments there will be a document.
+
         validateDocumentMutation.mutate({ document: documentMetadata! }, {  // ! since query won't run otherwise
           onSuccess: result => resolve(result.data),
           onError: createError => { throw createError; }
