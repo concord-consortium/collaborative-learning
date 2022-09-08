@@ -390,7 +390,7 @@ export const DocumentContentModel = types
   .views(self => ({
     getNewTileTitle(tileContent: ToolContentModelType) {
       const titleBase = getToolContentInfoById(tileContent.type)?.titleBase || tileContent.type;
-      const getTitle = (tileId: string) => (self.getTileContent(tileId) as any)?.title;
+      const getTitle = (tileId: string) => (self.getTile(tileId) as any)?.title;
       const newTitle = self.getUniqueTitle(tileContent.type, titleBase, getTitle);
       return newTitle;
     }

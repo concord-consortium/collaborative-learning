@@ -32,6 +32,7 @@ context('Draw Tool Tile', function () {
     it("renders draw tool tile", () => {
       clueCanvas.addTile("drawing");
       drawToolTile.getDrawTile().should("exist");
+      drawToolTile.getTileTitle().should("exist");
     });
     describe("Freehand", () => {
       it("verify draw a line", () => {
