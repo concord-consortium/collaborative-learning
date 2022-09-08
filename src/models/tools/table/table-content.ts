@@ -1,7 +1,6 @@
 import { Expression, Parser } from "expr-eval";
 import { reaction } from "mobx";
 import { addDisposer, Instance, SnapshotIn, types, getType, getSnapshot } from "mobx-state-tree";
-import { RowHeightArgs } from "react-data-grid";
 import { ITableChange } from "./table-change";
 import { exportTableContentAsJson } from "./table-export";
 import {
@@ -15,7 +14,6 @@ import { SharedModelType } from "../shared-model";
 import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import { uniqueId } from "../../../utilities/js-utils";
-import { TRow } from "../../../components/tools/table-tool/table-types";
 
 export const kTableToolID = "Table";
 export const kCaseIdName = "__id__";
@@ -35,32 +33,6 @@ export function defaultTableContent(props?: IDefaultContentOptions) {
                           // types.snapshotProcessor(TableContentModel, ...) was used
                           } as SnapshotIn<typeof TableContentModel>);
 }
-
-interface IGetTableContentHeight {
-  rows: TRow[];
-  rowHeight: (args: RowHeightArgs<TRow>) => number;
-  headerHeight: () => number;
-  getTitleHeight: () => number;
-  readOnly?: boolean;
-  hasExpressions?: boolean;
-  padding?: number;
-}
-export const getTableContentHeight = ({
-  rows, rowHeight, headerHeight, getTitleHeight, readOnly, hasExpressions, padding
-}: IGetTableContentHeight) => {
-  const kDefaultRowHeight = 34;
-  const kDefaultPadding = 10;
-  const expressionRows = hasExpressions ? 1 : 0;
-  const inputRows = readOnly ? 0 : 1;
-  const kBorders = 2 * 2;
-  const _padding = 2 * (padding || kDefaultPadding);
-  let rowHeights = 0;
-  rows.forEach(row => {
-    rowHeights += rowHeight({ row, type: 'ROW' });
-  });
-  return getTitleHeight() + headerHeight() + (expressionRows + inputRows) * kDefaultRowHeight
-    + rowHeights + kBorders + _padding;
-};
 
 export const TableMetadataModel = ToolMetadataModel
   .named("TableMetadata")

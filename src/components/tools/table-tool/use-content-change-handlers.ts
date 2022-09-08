@@ -1,9 +1,10 @@
 import { useCallback } from "react";
+import { getTableContentHeight } from "./table-utils";
 import { useCurrent } from "../../../hooks/use-current";
 import { ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
 import { ITileLinkMetadata } from "../../../models/tools/table-link-types";
 import { requestGeometryLinkToTable, requestGeometryUnlinkFromTable } from "../../../models/tools/table-links";
-import { getTableContentHeight, TableContentModelType } from "../../../models/tools/table/table-content";
+import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { isLinkableValue } from "../../../models/tools/table/table-model-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { uniqueId, uniqueName } from "../../../utilities/js-utils";
