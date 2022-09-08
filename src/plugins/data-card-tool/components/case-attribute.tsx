@@ -37,6 +37,15 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [editFacet, setEditFacet] = useState<EditFacet>("");
   const [imageUrl, setImageUrl] = useState("");
 
+  const imageUrlSync = () => {
+    gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
+    .then((image)=>{
+      setImageUrl(image.displayUrl || "");
+    });
+  }
+
+  imageUrlSync();
+
   useEffect(() => {
     if (currEditAttrId !== attrKey) {
       setEditFacet("");
@@ -78,7 +87,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setCurrEditAttrId(attrKey);
     caseId && content.setAttValue(caseId, attrKey, "");
   };
-
 
   const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     setCurrEditAttrId(attrKey);
@@ -187,13 +195,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     { "show": editFacet === "value" || editFacet === "name" }
   );
 
-  const isDefaultLabel = looksLikeDefaultLabel(getLabel());
-  const cellLabelClasses = classNames("cell-value", { "default-label": isDefaultLabel });
-
-  gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
-     .then((image)=>{
-       setImageUrl(image.displayUrl || "");
-     });
+  const cellLabelClasses = classNames(
+    "cell-value",
+    { "default-label": looksLikeDefaultLabel(getLabel()) }
+  );
 
   return (
     <div className={pairClassNames}>
@@ -214,7 +219,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       <div className={valueClassNames} onClick={handleClick}>
-        { editFacet === "value" && !readOnly && !gImageMap.isImageUrl(valueStr)
+        { editFacet === "value" && !readOnly //&& !gImageMap.isImageUrl(valueStr)
           ? <input
               type="text"
               className="input"
