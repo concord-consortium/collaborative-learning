@@ -21,7 +21,8 @@ class TableToolTile{
       return cy.get('.column-header-cell .editable-header-cell');
     }
     renameColumn(column, title){
-      this.getColumnHeader().contains(column).dblclick().type(title+'{enter}');
+      this.getColumnHeader().contains(column).dblclick();
+      cy.get('.column-header-cell .editable-header-cell input').type(title+'{enter}');
     }
     removeRow(i){
       this.getTableRow().eq(i).click();

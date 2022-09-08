@@ -4,11 +4,11 @@ import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 let clueCanvas = new ClueCanvas,
   tableToolTile = new TableToolTile;
 
-// let headerX = 'pluto';
-// let headerY = 'mars';
-let headerX = 'x';
-let headerY = 'y';
-let headerY2 = 'y2';
+let headerX = 'pluto';
+let headerY = 'mars';
+// let headerX = 'x';
+// let headerY = 'y';
+let headerY2 = 'y';
 
 context('Table Tool Tile', function () {
   before(function () {
@@ -41,7 +41,7 @@ context('Table Tool Tile', function () {
         });
       });
     });
-    it.skip('will change column x name', function () {
+    it('will change column x name', function () {
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.renameColumn('x', headerX);
         tableToolTile.getColumnHeaderText().then((text) => {
@@ -49,7 +49,7 @@ context('Table Tool Tile', function () {
         });
       });
     });
-    it.skip('will change column y name', function () {
+    it('will change column y name', function () {
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.renameColumn('y', headerY);
         tableToolTile.getColumnHeaderText().then((text) => {
@@ -71,7 +71,7 @@ context('Table Tool Tile', function () {
     });
     it('will remove a column', function () {
       cy.get('.primary-workspace').within(function () {
-        tableToolTile.getColumnHeader().contains(headerY).click().wait(500);
+        tableToolTile.getColumnHeader().contains(headerY).click();
         tableToolTile.getRemoveColumnButton().eq(0).should('be.visible').click();
       });
       cy.get('.modal-title').should('be.visible').and('contain', 'Remove Column');
@@ -137,7 +137,7 @@ context('Table Tool Tile', function () {
     it('verify selection of y axis when there is more than one',function(){
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.getAddColumnButton().click();
-        // tableToolTile.renameColumn('y', headerY); //makes it easier to find the correct column header
+        tableToolTile.renameColumn('y', headerY); //makes it easier to find the correct column header
         tableToolTile.getTableToolbarButton('set-expression').click();
       });
       cy.get('.modal-title').should('contain', "Set Expression");
@@ -149,9 +149,8 @@ context('Table Tool Tile', function () {
       cy.get('#expression-input').click().type(formula );
       cy.get('.modal-button').contains('Cancel').click();
       cy.get('.editable-header-cell')
-        // .contains(headerY) // y2 also contains "y" so this no longer works
-        // .first()
-        .last()
+        .contains(headerY) // y2 also contains "y" so this no longer works
+        .first()
         .siblings('.expression-cell.has-expression')
         .should('not.exist');
       });
