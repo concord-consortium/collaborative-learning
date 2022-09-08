@@ -1,4 +1,5 @@
 import { observer } from "mobx-react";
+import classNames from "classnames";
 import React from "react";
 import ReactDOM from "react-dom";
 import { gImageMap } from "../../models/image-map";
@@ -17,21 +18,22 @@ interface IProps extends IFloatingToolbarProps {
   setImageUrlToAdd: (url: string) => void;
 }
 
-export const DataCardToolbar: React.FC<IProps> = observer((
-  { model, documentContent, toolTile, currEditAttrId, onIsEnabled,
-      setImageUrlToAdd, ...others }: IProps) => {
+export const DataCardToolbar: React.FC<IProps> = observer(({
+  model, documentContent, toolTile, currEditAttrId, onIsEnabled, setImageUrlToAdd, ...others
+  }: IProps) => {
     const buttonsEnabled = onIsEnabled() && !!currEditAttrId;
-  const content = model.content as DataCardContentModelType;
-  const currentCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
-  const enabled = onIsEnabled();
-  const location = useFloatingToolbarLocation({
-                  documentContent,
-                  toolTile,
-                  toolbarHeight: 34,
-                  toolbarTopOffset: 2,
-                  enabled,
-                  ...others
-                });
+    const content = model.content as DataCardContentModelType;
+    const currentCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
+    const enabled = onIsEnabled();
+    const location = useFloatingToolbarLocation({
+      documentContent,
+      toolTile,
+      toolbarHeight: 34,
+      toolbarTopOffset: 2,
+       enabled,
+       ...others
+  });
+
   const uploadImage = (file: File) => {
     gImageMap.addFileImage(file)
       .then(image => {
@@ -40,11 +42,21 @@ export const DataCardToolbar: React.FC<IProps> = observer((
             && content.setAttValue(currentCaseId, currEditAttrId, image.contentUrl);
       });
   };
+
+  const toolbarClasses = classNames(
+    "data-card-toolbar",
+    enabled && location ? "enabled" : "disabled",
+  );
+
+  const toolbarButtonsClasses = classNames(
+    "toolbar-buttons",
+    buttonsEnabled ? "" : "disabled"
+  )
+
   return documentContent
     ? ReactDOM.createPortal(
-      <div className={`data-card-toolbar ${enabled && location ? "enabled" : "disabled"}`}
-            style={location} onMouseDown={e => e.stopPropagation()}>
-        <div className={`toolbar-buttons ${buttonsEnabled ? "" : "disabled"}`} >
+      <div className={toolbarClasses} style={location} onMouseDown={e => e.stopPropagation()}>
+        <div className={toolbarButtonsClasses} >
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
         </div>
       </div>, documentContent)

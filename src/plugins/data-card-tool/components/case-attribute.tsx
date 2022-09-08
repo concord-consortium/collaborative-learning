@@ -84,15 +84,28 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setCurrEditAttrId(attrKey);
     const facet = event.currentTarget.classList[0];
     const editing = event.currentTarget.classList[2];
-    activateInput(facet as EditFacet, editing === "editing");
 
-    // allow to toggle on and off highlight of all text
-    const myInput = event.currentTarget.children[0] as HTMLInputElement;
-    if(myInput.tagName === "INPUT"){
-      const isHighlighted = myInput.selectionStart === 0;
-      const valLength = myInput.value.length;
-      if (isHighlighted && valLength > 0){
-        myInput.setSelectionRange(valLength, valLength, "forward");
+    // if its an image in the value, we handle it specially
+    // if (facet === "value" && gImageMap.isImageUrl(valueStr)){
+    //   console.log("handle edit state of an image")
+    //   //activateInput(facet as EditFacet, editing === "editing");
+    //   //setEditFacet(facet);
+    // }
+    if (false){
+      console.log("the stuff above")
+    }
+
+    // otherwise handle editing text state as usual
+    else {
+      activateInput(facet as EditFacet, editing === "editing");
+      // allow to toggle on and off highlight of all text
+      const myInput = event.currentTarget.children[0] as HTMLInputElement;
+      if(myInput.tagName === "INPUT"){
+        const isHighlighted = myInput.selectionStart === 0;
+        const valLength = myInput.value.length;
+        if (isHighlighted && valLength > 0){
+          myInput.setSelectionRange(valLength, valLength, "forward");
+        }
       }
     }
   };
@@ -184,6 +197,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   return (
     <div className={pairClassNames}>
+
       <div className={labelClassNames} onClick={handleClick}>
         { !readOnly && editFacet === "name"
           ? <input
@@ -200,8 +214,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       <div className={valueClassNames} onClick={handleClick}>
-        {/* TODO - image delete */}
-        { editFacet === "value" && !readOnly // && !gImageMap.isImageUrl(valueStr)
+        { editFacet === "value" && !readOnly && !gImageMap.isImageUrl(valueStr)
           ? <input
               type="text"
               className="input"
