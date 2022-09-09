@@ -45,12 +45,6 @@ interface NodeValueMap {
 }
 type NodeValue = number | NodeValueMap;
 
-enum ProgramRunStates {
-  Ready,
-  Running,
-  Complete
-}
-
 export interface IStartProgramParams {
   runId: string;
   startTime: number;
@@ -73,7 +67,6 @@ interface IProps extends SizeMeProps {
 }
 
 interface IState {
-  programRunState: ProgramRunStates;
   editorContainerWidth: number;
   lastIntervalDuration: number;
 }
@@ -104,7 +97,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
-      programRunState: ProgramRunStates.Ready,
       editorContainerWidth: 0,
       lastIntervalDuration: 0,
     };
@@ -122,13 +114,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const showProgramToolbar = showZoomControl && !readOnly;
     return (
       <div className="dataflow-program-container">
-        {this.isRunning() && <div className="running-indicator" />}
         <DataflowProgramTopbar
           onSerialRefreshDevices={this.serialDeviceRefresh}
           programDataRates={ProgramDataRates}
           dataRate={this.props.programDataRate}
           onRateSelectClick={this.props.onProgramDataRateChange}
-          readOnly={readOnly || !this.isReady()}
+          readOnly={!!readOnly}
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
@@ -138,7 +129,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             onNodeCreateClick={this.addNode}
             onClearClick={this.clearProgram}
             isTesting={isTesting}
-            disabled={readOnly || !this.isReady()}
+            disabled={!!readOnly}
           /> }
           <div
             className="editor-graph-container"
@@ -164,7 +155,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                 <DataflowProgramZoom
                   onZoomInClick={this.zoomIn}
                   onZoomOutClick={this.zoomOut}
-                  disabled={!this.isReady()}
+                  disabled={false}
                 /> }
             </div>
           </div>
@@ -385,14 +376,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.channels = [];
     this.channels = [...virtualSensorChannels, ...serialSensorChannels];
     this.countSerialDataNodes(this.programEditor.nodes);
-  };
-
-  private isReady = () => {
-    return (this.state.programRunState === ProgramRunStates.Ready);
-  };
-
-  private isRunning = () => {
-    return (this.state.programRunState === ProgramRunStates.Running);
   };
 
   private shouldShowProgramCover() {
