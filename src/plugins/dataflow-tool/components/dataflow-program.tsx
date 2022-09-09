@@ -500,10 +500,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  private getNodeCount = (type?: string) => {
-    return (type ? this.programEditor.nodes.filter(n => (n.name === type)).length : this.programEditor.nodes.length);
-  };
-
   private tick = () => {
     // Update the sampling rate
     const now = Date.now();

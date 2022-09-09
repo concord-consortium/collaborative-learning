@@ -1,4 +1,3 @@
-// import NoiseIcon from "../../assets/icons/generator/noise.svg";
 import SineIcon from "../../assets/icons/generator/sine.svg";
 import SquareIcon from "../../assets/icons/generator/square.svg";
 import TriangleIcon from "../../assets/icons/generator/triangle.svg";
@@ -330,14 +329,7 @@ export const NodeGeneratorTypes = [
     name: "Triangle",
     method: (t: number, p: number, a: number) => (2 * a / p) * Math.abs(t % p - p / 2),
     icon: TriangleIcon
-  },
-  /*
-  {
-    name: "Noise",
-    method: (t: number, p: number, a: number) => Math.random() * a,
-    icon: NoiseIcon
-  },
-  */
+  }
 ];
 
 export const NodePeriodUnits = [
@@ -538,4 +530,3 @@ const fsrSensorChannel: NodeChannelInfo = {
 export const serialSensorChannels: NodeChannelInfo[] = [
   emgSensorChannel, fsrSensorChannel
 ];
-
