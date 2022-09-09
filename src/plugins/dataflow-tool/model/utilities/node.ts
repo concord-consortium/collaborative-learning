@@ -424,58 +424,6 @@ export const ProgramDataRates: ProgramDataRate[] = [
   }
 ];
 
-export interface ProgramRunTime {
-  text: string;
-  val: number;
-  disabled?: boolean;
-}
-export interface IntervalTime extends ProgramRunTime {
-  maxProgramRunTime: number;
-}
-
-export const IntervalTimes: IntervalTime[] = [
-  {
-    text: "1 second",
-    val: 1,
-    maxProgramRunTime: 3600
-  },
-  {
-    text: "5 seconds",
-    val: 5,
-    maxProgramRunTime: 21600
-  },
-  {
-    text: "10 seconds",
-    val: 10,
-    maxProgramRunTime: 21600
-  },
-  {
-    text: "15 seconds",
-    val: 15,
-    maxProgramRunTime: 86400
-  },
-  {
-    text: "1 minute",
-    val: 60,
-    maxProgramRunTime: 432000
-  },
-  {
-    text: "5 minutes",
-    val: 300,
-    maxProgramRunTime: 432000
-  },
-  {
-    text: "10 minutes",
-    val: 600,
-    maxProgramRunTime: 2592000
-  },
-  {
-    text: "1 hour",
-    val: 3600,
-    maxProgramRunTime: 2592000
-  }
-];
-
 export const kSensorSelectMessage = "Select a sensor";
 export const kSensorMissingMessage = "⚠️";
 

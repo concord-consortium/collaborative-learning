@@ -54,7 +54,6 @@ export interface IStartProgramParams {
 }
 
 interface IProps extends SizeMeProps {
-  modelId: string;
   readOnly?: boolean;
   documentProperties?: { [key: string]: string };
   program?: DataflowProgramModelType;
@@ -443,6 +442,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     n1.position = this.getNewNodePosition();
     this.programEditor.addNode(n1);
   };
+
   private getNewNodePosition = () => {
     const numNodes = this.programEditor.nodes.length;
     const kNodesPerColumn = 5;
@@ -511,16 +511,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.lastIntervalTime = now;
 
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
-            Generator: this.updateGeneratorNode,
-            Timer: this.updateTimerNode,
-            Sensor: (n: Node) => {
-                      this.updateNodeChannelInfo(n);
-                      this.updateNodeSensorValue(n);
-                    },
-            "Live Output": (n: Node) => {
-              this.sendDataToSerialDevice(n);
-            }
-          };
+      Generator: this.updateGeneratorNode,
+      Timer: this.updateTimerNode,
+      Sensor: (n: Node) => {
+        this.updateNodeChannelInfo(n);
+        this.updateNodeSensorValue(n);
+      },
+      "Live Output": (n: Node) => {
+        this.sendDataToSerialDevice(n);
+      }
+    };
 
     let processNeeded = false;
 

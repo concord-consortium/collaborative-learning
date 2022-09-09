@@ -27,7 +27,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   public static tileHandlesSelection = true;
 
   public render() {
-    const { model, readOnly, height } = this.props;
+    const { readOnly, height } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
@@ -39,7 +39,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
             {({ size }: SizeMeProps) => {
               return (
                 <DataflowProgram
-                  modelId={model.id}
                   readOnly={readOnly}
                   documentProperties={this.getDocumentProperties()}
                   program={program}
