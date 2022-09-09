@@ -52,6 +52,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   }, [attrKey, currEditAttrId]);
 
+  useEffect(() => {
+    setEditFacet("");
+  }, [valueStr])
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (editFacet === "name"){
       const inputVal = event.target.value;

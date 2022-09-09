@@ -127,6 +127,13 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
     content.addNewAttr();
   };
 
+  const deleteSelectedAttr = () => {
+    const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
+    if (thisCaseId){
+      content.setAttValue(thisCaseId, currEditAttrId, "");
+    }
+  }
+
   const previousButtonClasses = classNames(
     "card-nav", "previous",
     content.caseIndex > 0 ? "active" : "disabled",
@@ -143,10 +150,14 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
 
   return (
     <div className="data-card-tool">
-      <DataCardToolbar model={model} documentContent={documentContent} toolTile={toolTile}
-                      currEditAttrId={currEditAttrId}
-                      setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps} />
-
+      <DataCardToolbar
+        model={model}
+        documentContent={documentContent}
+        toolTile={toolTile}
+        currEditAttrId={currEditAttrId}
+        setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
+        handleDeleteValue={deleteSelectedAttr}
+      />
       <div className="data-card-header-row">
         <div className="panel title">
           { isEditingTitle && !readOnly

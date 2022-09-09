@@ -9,17 +9,18 @@ import {
 import { DataCardContentModelType } from "./data-card-content";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageUploadButton } from "../../components/tools/image/image-toolbar";
-
 import "./data-card-toolbar.scss";
 
 interface IProps extends IFloatingToolbarProps {
   model: ToolTileModelType;
   currEditAttrId: string;
   setImageUrlToAdd: (url: string) => void;
+  handleDeleteValue: () => void;
 }
 
 export const DataCardToolbar: React.FC<IProps> = observer(({
-  model, documentContent, toolTile, currEditAttrId, onIsEnabled, setImageUrlToAdd, ...others
+  model, documentContent, toolTile, currEditAttrId,
+  onIsEnabled, setImageUrlToAdd, handleDeleteValue, ...others
   }: IProps) => {
     const buttonsEnabled = onIsEnabled() && !!currEditAttrId;
     const content = model.content as DataCardContentModelType;
@@ -58,6 +59,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
       <div className={toolbarClasses} style={location} onMouseDown={e => e.stopPropagation()}>
         <div className={toolbarButtonsClasses} >
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
+          <button onClick={handleDeleteValue}>&times;</button>
         </div>
       </div>, documentContent)
   : null;
