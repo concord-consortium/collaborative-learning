@@ -75,7 +75,6 @@ interface IProps extends SizeMeProps {
 interface IState {
   programRunState: ProgramRunStates;
   editorContainerWidth: number;
-  remainingTimeInSeconds: number;
   lastIntervalDuration: number;
 }
 
@@ -107,7 +106,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.state = {
       programRunState: ProgramRunStates.Ready,
       editorContainerWidth: 0,
-      remainingTimeInSeconds: 0,
       lastIntervalDuration: 0,
     };
     this.lastIntervalTime = Date.now();
@@ -130,9 +128,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           programDataRates={ProgramDataRates}
           dataRate={this.props.programDataRate}
           onRateSelectClick={this.props.onProgramDataRateChange}
-          isRunEnabled={this.isReady()}
-          runningProgram={this.isRunning() && !readOnly}
-          remainingTimeInSeconds={this.state.remainingTimeInSeconds}
           readOnly={readOnly || !this.isReady()}
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}

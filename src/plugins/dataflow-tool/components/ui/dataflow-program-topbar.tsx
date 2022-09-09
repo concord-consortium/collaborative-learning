@@ -11,9 +11,8 @@ interface TopbarProps {
   dataRate: number;
   onRateSelectClick: (rate: number) => void;
   onSerialRefreshDevices: () => void;
-  isRunEnabled: boolean;
-  runningProgram: boolean;
-  remainingTimeInSeconds: number;
+  // isRunEnabled: boolean;
+  // runningProgram: boolean;
   readOnly: boolean;
   showRateUI: boolean;
   lastIntervalDuration: number;
@@ -32,25 +31,23 @@ const RateSelectorComponent = (props: RateSelectorProps) => {
     props.onRateSelectClick(Number(event.target.value));
   };
   return (
-    <div className="running-container">
-      <div className="datarate" title="Set Program Sampling Rate">
-        <div className="label-back">
-          <label className="label" htmlFor="rate-select">Sampling Rate</label>
-        </div>
-        <div className="datarate-options-back">
-          <div className="datarate-options">
-            <select onChange={handleSelectChange}
-              disabled={props.readOnly}
-              value={props.dataRate.toString()}
-              id="rate-select" // TODO: The id needs to be unique to the particular DF tile
-            >
-              { props.rateOptions.map((rate: ProgramDataRate) => (
-                <option key={rate.text} value={rate.val} disabled={rate.disabled}>
-                  {rate.text}
-                </option>
-              ))}
-            </select>
-          </div>
+    <div className="datarate" title="Set Program Sampling Rate">
+      <div className="label-back">
+        <label className="label" htmlFor="rate-select">Sampling Rate</label>
+      </div>
+      <div className="datarate-options-back">
+        <div className="datarate-options">
+          <select onChange={handleSelectChange}
+            disabled={props.readOnly}
+            value={props.dataRate.toString()}
+            id="rate-select" // TODO: The id needs to be unique to the particular DF tile
+          >
+            { props.rateOptions.map((rate: ProgramDataRate) => (
+              <option key={rate.text} value={rate.val} disabled={rate.disabled}>
+                {rate.text}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
     </div>
