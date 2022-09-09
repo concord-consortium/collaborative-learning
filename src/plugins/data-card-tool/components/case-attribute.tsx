@@ -54,7 +54,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   useEffect(() => {
     setEditFacet("");
-  }, [valueStr])
+  }, [valueStr]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (editFacet === "name"){
@@ -85,11 +85,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         setEditFacet("");
         break;
     }
-  };
-
-  const handleDeleteImageData = (event: React.MouseEvent<HTMLDivElement>) => {
-    setCurrEditAttrId(attrKey);
-    caseId && content.setAttValue(caseId, attrKey, "");
   };
 
   const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {

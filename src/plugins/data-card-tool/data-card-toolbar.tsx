@@ -9,6 +9,8 @@ import {
 import { DataCardContentModelType } from "./data-card-content";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageUploadButton } from "../../components/tools/image/image-toolbar";
+import { DeleteAttrIconButton } from "./components/add-remove-icons";
+
 import "./data-card-toolbar.scss";
 
 interface IProps extends IFloatingToolbarProps {
@@ -59,7 +61,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
       <div className={toolbarClasses} style={location} onMouseDown={e => e.stopPropagation()}>
         <div className={toolbarButtonsClasses} >
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
-          <button onClick={handleDeleteValue}>&times;</button>
+          <DeleteAttrIconButton onClick={handleDeleteValue} />
         </div>
       </div>, documentContent)
   : null;

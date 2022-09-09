@@ -57,5 +57,12 @@
         height: $toolbar-button-height;
       }
     }
+
+    .delete-value-button {
+      transform: translate(-13px, -5px);
+      svg path {
+        fill: black;
+      }
+    }
   }
 }

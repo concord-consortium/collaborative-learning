@@ -132,7 +132,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
     if (thisCaseId){
       content.setAttValue(thisCaseId, currEditAttrId, "");
     }
-  }
+  };
 
   const previousButtonClasses = classNames(
     "card-nav", "previous",
