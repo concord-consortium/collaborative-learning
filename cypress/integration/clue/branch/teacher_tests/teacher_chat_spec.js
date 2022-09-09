@@ -21,6 +21,22 @@ context('Chat Panel', () => {
     dashboard.switchView("Workspace & Resources");
     cy.wait(2000);
     clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
+
+    before(()=>{
+      it('should delete teacher7s comment', () => {
+        chatPanel.clearChat();
+      });
+      it('should delete teacher8 comments', () => {
+        cy.visit("/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:8&unit=msa&network=foo");
+        cy.waitForLoad();
+        dashboard.switchView("Workspace & Resources");
+        cy.wait(2000);
+        // resourcesPanel.getCollapsedResourcesTab().click();
+        cy.openTopTab("problems");
+        chatPanel.getChatPanelToggle().click();
+        chatPanel.clearChat();
+      });
+    });
   });
   beforeEach(() => {
     cy.fixture("teacher-dash-data-msa-test.json").as("clueData");
@@ -302,6 +318,21 @@ context('Chat Panel', () => {
       // Teacher 7 tile comment
       cy.clickProblemResourceTile('introduction');
       chatPanel.verifyCommentThreadContains("This is a teacher8 tile comment");
+    });
+  });
+  after(()=>{
+    it('should delete teacher7s comment', () => {
+      chatPanel.clearChat();
+    });
+    it('should delete teacher8 comments', () => {
+      cy.visit("/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:8&unit=msa&network=foo");
+      cy.waitForLoad();
+      dashboard.switchView("Workspace & Resources");
+      cy.wait(2000);
+      // resourcesPanel.getCollapsedResourcesTab().click();
+      cy.openTopTab("problems");
+      chatPanel.getChatPanelToggle().click();
+      chatPanel.clearChat();
     });
   });
 });

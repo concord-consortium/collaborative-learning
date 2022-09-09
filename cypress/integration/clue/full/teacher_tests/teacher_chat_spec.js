@@ -28,6 +28,24 @@ const clueTeacher2 = {
   password: "ccpassword"
 };
 
+describe('cleanup', ()=> {
+  it('clean up before test start', () => {
+    chatPanel.openTeacherChat(portalUrl, clueTeacher2, reportUrl2);
+    cy.openTopTab("problems");
+    cy.openProblemSection("Introduction");
+    chatPanel.clearChat();
+    cy.clickProblemResourceTile('introduction');
+    chatPanel.clearChat();
+
+    chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
+    cy.openTopTab("problems");
+    cy.openProblemSection("Introduction");
+    chatPanel.clearChat();
+    cy.clickProblemResourceTile('introduction');
+    chatPanel.clearChat();
+  });
+});
+
 describe('Teachers can communicate back and forth in chat panel', () => {
   it("login teacher1 and setup clue chat", () => {
     chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
@@ -69,5 +87,21 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     // Teacher 1 tile comment
     cy.clickProblemResourceTile('introduction');
     chatPanel.verifyCommentThreadContains("This is a teacher2 tile comment");
+  });
+  it.skip(("delete teacher1 comments"), () => {
+    cy.openTopTab("problems");
+    cy.openProblemSection("Introduction");
+    chatPanel.openTeacherChat();
+    chatPanel.clearChat();
+    cy.clickProblemResourceTile('introduction');
+    chatPanel.clearChat();
+  });
+  it.skip(("delete teacher2 comments"), () => {
+    chatPanel.openTeacherChat(portalUrl, clueTeacher2, reportUrl2);
+    cy.openTopTab("problems");
+    cy.openProblemSection("Introduction");
+    chatPanel.clearChat();
+    cy.clickProblemResourceTile('introduction');
+    chatPanel.clearChat();
   });
 });

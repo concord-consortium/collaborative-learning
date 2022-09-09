@@ -116,5 +116,21 @@ class ChatPanel{
       // resourcesPanel.getCollapsedResourcesTab().click();
       this.getChatPanelToggle().click();
     }
+
+    clearChat() {
+      this.getChatPanel().then(($panel) => {
+        // find all the delete chat icons
+        const chatsToDelete = $panel.find("[data-testid=delete-message-button]");
+        if (chatsToDelete.length) {
+          for (let i=0; i<chatsToDelete.length; i++) {
+            cy.get("[data-testid=delete-message-button]").last().click({force: true}).then(()=>{
+              cy.get(".confirm-delete-alert .modal-button").last().click();
+            });
+            cy.wait(1000);
+          }
+        }
+      });
+    }
 }
+
 export default ChatPanel;
