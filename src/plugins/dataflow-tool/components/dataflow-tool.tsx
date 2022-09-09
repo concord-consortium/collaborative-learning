@@ -3,7 +3,6 @@ import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
 import { DataflowProgram } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
-import { DocumentModelType } from "../../../models/document/document";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { IToolTileProps } from "../../../components/tools/tool-tile";
@@ -32,7 +31,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
-    const showOriginalProgramButton = !!this.getOriginalProgramDocument();
     return (
       <>
         <ToolTitleArea>{this.renderTitle()}</ToolTitleArea>
@@ -46,7 +44,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
                   documentProperties={this.getDocumentProperties()}
                   program={program}
                   onProgramChange={this.handleProgramChange}
-                  onShowOriginalProgram={showOriginalProgramButton ? this.handleShowOriginalProgram : undefined}
                   programDataRate={programDataRate}
                   onProgramDataRateChange={this.handleProgramDataRateChange}
                   programZoom={programZoom}
@@ -113,30 +110,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
     return this.getContent().title || "";
   }
 
-  private switchToDocument(document: DocumentModelType) {   // FIXME: This will be different in tile format
-    // if (document) {
-    //   const { ui } = this.stores;
-    //   ui.problemWorkspace.toggleComparisonVisible({ override: false });
-    //   ui.problemWorkspace.setPrimaryDocument(document);
-    //   ui.setActiveRightNavTab(ERightNavTab.kMyWork);
-    // }
-  }
-
   private handleProgramChange = (program: any) => {
     this.getContent().setProgram(program);
-  };
-
-  private getOriginalProgramDocument = () => {
-    const { documents } = this.stores;
-    const document = this.getDocument();
-    const originDocumentId = document && document.properties.get("dfProgramId");
-    const originDocument = originDocumentId ? documents.getDocument(originDocumentId) : undefined;
-    return originDocument?.getProperty("isDeleted") ? undefined : originDocument;
-  };
-
-  private handleShowOriginalProgram = () => {
-    const originDocument = this.getOriginalProgramDocument();
-    originDocument && this.switchToDocument(originDocument);
   };
 
   private handleProgramDataRateChange = (program: any) => {

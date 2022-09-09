@@ -27,7 +27,6 @@ import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
 import { DataStorageReteNodeFactory } from "../nodes/factories/data-storage-rete-node-factory";
 import { NumControl } from "../nodes/controls/num-control";
-import { DataflowOpenProgramButton } from "./ui/dataflow-open-program-button";
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
@@ -70,7 +69,6 @@ interface IProps extends SizeMeProps {
   documentProperties?: { [key: string]: string };
   program?: DataflowProgramModelType;
   onProgramChange: (program: any) => void;
-  onShowOriginalProgram?: () => void;
   programDataRate: number;
   onProgramDataRateChange: (dataRate: number) => void;
   programZoom?: ProgramZoomType;
@@ -122,7 +120,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { readOnly, documentProperties, onShowOriginalProgram } = this.props;
+    const { readOnly, documentProperties } = this.props;
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container`;
@@ -182,8 +180,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                   disabled={!this.isReady()}
                 /> }
             </div>
-            { onShowOriginalProgram &&
-              <DataflowOpenProgramButton className="program-editor" onClick={onShowOriginalProgram} /> }
           </div>
         </div>
       </div>
@@ -481,55 +477,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     });
     return bounds;
   }
-
-  private hasValidOutputNodes = () => {
-    const { ui } = this.stores;
-    const hasRelay = this.hasRelay();
-    const hasDataStorage = this.hasDataStorage();
-    const hasDemoOutput = this.hasDemoOutput();
-    const hasLiveOutput = this.hasLiveOutput();
-    let hasValidRelay = false;
-    let hasValidDataStorage = false;
-    if (hasRelay || hasDataStorage) {
-      this.programEditor.nodes.forEach((n: Node) => {
-        if (n.name === "Relay" && n.data.recentValues) {
-          const input = n.inputs.get(Array.from(n.inputs.keys())[0]);
-          const inputNode = input && input.connections[0] && input.connections[0].output.node;
-          const recentVals: any = inputNode && inputNode.data.recentValues;
-          if (recentVals && isFinite(recentVals[recentVals.length - 1].nodeValue.val) && n.data.relayList !== "none") {
-            hasValidRelay = true;
-          }
-        } else if (n.name === "Data Storage") {
-          if (n.inputs.size > 1) {
-            const recentValues: any = n.data.recentValues;
-            const lastValue = recentValues[recentValues.length - 1];
-            forEach(lastValue, (value: any) => {
-              if (isFinite(value.val)) {
-                hasValidDataStorage = true;
-              }
-            });
-          }
-        }
-      });
-    }
-    if (!hasRelay && !hasDataStorage && !hasDemoOutput && !hasLiveOutput) {
-      ui.alert(
-        "Program must contain a Relay, Demo Output, Live Output, \
-        or Data Storage block before it can be run.", "No Program Output"
-      );
-      return false;
-    } else if (!hasValidRelay && !hasValidDataStorage && !hasDemoOutput && !hasLiveOutput ) {
-      const relayMessage = hasRelay && !hasValidRelay
-                            ? "Relay blocks need a valid selected relay and valid input before the program can be run. "
-                            : "";
-      const dataStorageMessage = hasDataStorage && !hasValidDataStorage
-                            ? "Data Storage blocks need a valid data input before the program can be run. "
-                            : "";
-      ui.alert(relayMessage + dataStorageMessage, "Invalid Program Output");
-      return false;
-    }
-    return true;
-  };
 
   private addNode = async (nodeType: string) => {
     const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;
