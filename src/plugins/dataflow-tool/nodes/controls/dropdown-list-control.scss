@@ -58,7 +58,7 @@
         background-color: $transform-green-control;
       }
       &.interval {
-        background-color: $data-storage-orange-control;
+        background-color: $demo-output-orange-control;
       }
     }
     &.selectable {
@@ -85,7 +85,7 @@
           background-color: $transform-green-outline;
         }
         &.interval {
-          background-color: $data-storage-orange-outline;
+          background-color: $demo-output-orange-outline;
         }
       }
       &:hover .icon {

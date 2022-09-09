@@ -85,11 +85,6 @@ export const NodeTypes: NodeType[] = [
     name: "Demo Output",
     displayName: "Demo Output",
   },
-  // TODO Remove, along with all references to data storage, when dead code is cleaned
-  // {
-  //   name: "Data Storage",
-  //   displayName: "Data Storage",
-  // },
   {
     name: "Live Output",
     displayName: "Live Output",

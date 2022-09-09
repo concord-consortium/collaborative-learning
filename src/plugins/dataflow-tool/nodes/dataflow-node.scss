@@ -293,32 +293,6 @@ $node-inner-width: 140px;
         border-radius: 4px 10px 10px 4px;
       }
     }
-    &.data-storage {
-      background-color: $data-storage-orange;
-      border-color: $data-storage-orange-outline;
-      .main-color {
-        color: $data-storage-orange;
-        border: 2px solid $data-storage-orange;
-        &:hover {
-          background-color: $data-storage-orange-outline;
-        }
-      }
-      .control-color {
-        color: $data-storage-orange-control;
-      }
-      .control-color-hoverable:hover {
-        color: $data-storage-orange-node;
-      }
-      .active {
-        background-color: $data-storage-orange-control;
-      }
-      .type-options select {
-        background-color: $data-storage-orange-outline;
-      }
-      .type-options span {
-        border-top-color: $data-storage-orange;
-      }
-    }
 
     .top-bar {
       display: flex;
@@ -448,9 +422,9 @@ $node-inner-width: 140px;
             background-color: $light-bulb-orange-readout;
             margin-left: 0px;
           }
-          &.data-storage {
-            display: none;
-          }
+          // &.data-storage {
+          //   display: none;
+          // }
           &.demo-output {
             display: none;
           }

@@ -7,7 +7,6 @@ interface IProps {
   onNodeCreateClick: (type: string) => void;
   onClearClick: () => void;
   isTesting: boolean;
-  isDataStorageDisabled: boolean;
   disabled: boolean;
 }
 
@@ -63,7 +62,7 @@ export class DataflowProgramToolbar extends React.Component<IProps> {
     );
     return (
       <button
-        disabled={nodeType === "Data Storage" && this.props.isDataStorageDisabled || this.props.disabled}
+        disabled={this.props.disabled}
         key={i} title={`Add ${nodeType} Block`}
         onClick={handleAddNodeButtonClick}
       >

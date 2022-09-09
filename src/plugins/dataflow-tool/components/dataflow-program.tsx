@@ -23,7 +23,6 @@ import { DemoOutputReteNodeFactory } from "../nodes/factories/demo-output-rete-n
 import { LiveOutputReteNodeFactory } from "../nodes/factories/live-output-rete-node-factory";
 import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node-factory";
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
-import { DataStorageReteNodeFactory } from "../nodes/factories/data-storage-rete-node-factory";
 import { NumControl } from "../nodes/controls/num-control";
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
@@ -74,7 +73,6 @@ interface IProps extends SizeMeProps {
 }
 
 interface IState {
-  disableDataStorage: boolean;
   programRunState: ProgramRunStates;
   editorContainerWidth: number;
   remainingTimeInSeconds: number;
@@ -107,7 +105,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
-      disableDataStorage: false,
       programRunState: ProgramRunStates.Ready,
       editorContainerWidth: 0,
       remainingTimeInSeconds: 0,
@@ -146,7 +143,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             onNodeCreateClick={this.addNode}
             onClearClick={this.clearProgram}
             isTesting={isTesting}
-            isDataStorageDisabled={this.state.disableDataStorage}
             disabled={readOnly || !this.isReady()}
           /> }
           <div
@@ -252,8 +248,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       new DemoOutputReteNodeFactory(numSocket),
       new LiveOutputReteNodeFactory(numSocket),
       new GeneratorReteNodeFactory(numSocket),
-      new TimerReteNodeFactory(numSocket),
-      new DataStorageReteNodeFactory(numSocket)];
+      new TimerReteNodeFactory(numSocket)];
   };
 
   private initProgramEngine = () => {
@@ -290,9 +285,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
 
         await this.programEditor.fromJSON(program as any);
-        if (this.hasDataStorage()) {
-          this.setState({disableDataStorage: true});
-        }
       }
       const { area } = this.programEditor.view;
       const { programZoom } = this.props;
@@ -388,9 +380,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       await this.programEngine.abort();
       const programJSON = this.programEditor.toJSON();
       await this.programEngine.process(programJSON);
-      if (!this.hasDataStorage()) {
-        this.setState({disableDataStorage: false});
-      }
       this.props.onProgramChange(programJSON);
     } finally {
       this.processing = false;
@@ -475,9 +464,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const n1 = await nodeFactory!.createNode();
     n1.position = this.getNewNodePosition();
     this.programEditor.addNode(n1);
-    if (nodeType === "Data Storage") {
-      this.setState({disableDataStorage: true});
-    }
   };
   private getNewNodePosition = () => {
     const numNodes = this.programEditor.nodes.length;
@@ -534,20 +520,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private clearProgram = () => {
     this.programEditor.clear();
-    this.setState({disableDataStorage: false});
   };
-
-  private hasDataStorage() {
-    return this.getNodeCount("Data Storage") > 0;
-  }
-
-  private hasDemoOutput() {
-    return this.getNodeCount("Demo Output") > 0;
-  }
-
-  private hasLiveOutput(){
-    return this.getNodeCount("Live Output") > 0;
-  }
 
   private getNodeCount = (type?: string) => {
     return (type ? this.programEditor.nodes.filter(n => (n.name === type)).length : this.programEditor.nodes.length);
@@ -707,7 +680,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       let recentValue: NodeValue = {};
 
       // Store recentValue as object with unique keys for each value stored in node
-      // Needed for node types such as data storage that require more than a single value
+      // Needed for node types that require more than a single value
       if (value === "number") {
         recentValue[valueKey] = { name: n.name, val: value };
       } else {
