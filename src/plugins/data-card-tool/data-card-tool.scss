@@ -1,7 +1,8 @@
 @import "../../components/vars.sass";
 
 $card-width: 359px;
-$field-width-pct: 35%;
+$name-width: 34%;
+$value-width: 66%;
 $data-row-min-height: 24px;
 $charcoal-light-border: rgb(206, 206, 206);
 $cell-padding: 0px 8px;
@@ -61,7 +62,7 @@ $default-button-border-color: #979797;
       justify-content: space-between;
 
       .card-number-of-listing {
-        width: $field-width-pct;
+        width: $name-width;
         text-align: right;
         justify-content: flex-start;
 
@@ -159,11 +160,10 @@ $default-button-border-color: #979797;
       border-top-width: 0px;
 
       .name {
+        width: $name-width;
         background-color: $workspace-teal-light-5;
-        width: $field-width-pct;
         border-right: 1px solid $charcoal-light-1;
         font-weight: bold;
-        text-align: right;
         color: $cell-text-color;
         box-sizing: border-box;
         &.editing {
@@ -173,6 +173,10 @@ $default-button-border-color: #979797;
           }
         }
         .cell-value {
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: right;
           padding:$cell-padding;
           &.default-label {
             font-style: italic;
@@ -181,29 +185,11 @@ $default-button-border-color: #979797;
       }
 
       .value {
-        flex-grow: 1;
+        width: $value-width;
         font-weight: normal;
         color:$cell-text-color;
         .cell-value {
           padding:$cell-padding;
-        }
-
-        .image-wrapper {
-          display: flex;
-          flex-direction: row;
-          align-items: center;
-
-          .image-value {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-            display: block;
-            margin: auto;
-          }
-          .delete-image-button {
-            position: relative;
-            right: 5px;
-          }
         }
       }
 
@@ -237,6 +223,25 @@ $default-button-border-color: #979797;
 
       .value .cell-value:hover {
         background:rgba(245, 245, 245);
+      }
+
+      .value.has-image {
+        padding:6px;
+        display:flex;
+        align-items: center;
+        justify-content: center;
+        &:hover {
+          background:rgba(245, 245, 245);
+        }
+      }
+
+      .value.has-image img {
+        max-width: 95%;
+        max-height: 90%;
+      }
+      .value.has-image.editing {
+        // simulate highlight without using border, which distorts height
+        box-shadow: 0px 0px 0px 2px $highlight-blue inset;
       }
     }
 

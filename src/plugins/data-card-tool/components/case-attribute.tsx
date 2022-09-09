@@ -42,7 +42,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     .then((image)=>{
       setImageUrl(image.displayUrl || "");
     });
-  }
+  };
 
   imageUrlSync();
 
@@ -92,28 +92,14 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setCurrEditAttrId(attrKey);
     const facet = event.currentTarget.classList[0];
     const editing = event.currentTarget.classList[2];
-
-    // if its an image in the value, we handle it specially
-    // if (facet === "value" && gImageMap.isImageUrl(valueStr)){
-    //   console.log("handle edit state of an image")
-    //   //activateInput(facet as EditFacet, editing === "editing");
-    //   //setEditFacet(facet);
-    // }
-    if (false){
-      console.log("the stuff above")
-    }
-
-    // otherwise handle editing text state as usual
-    else {
-      activateInput(facet as EditFacet, editing === "editing");
-      // allow to toggle on and off highlight of all text
-      const myInput = event.currentTarget.children[0] as HTMLInputElement;
-      if(myInput.tagName === "INPUT"){
-        const isHighlighted = myInput.selectionStart === 0;
-        const valLength = myInput.value.length;
-        if (isHighlighted && valLength > 0){
-          myInput.setSelectionRange(valLength, valLength, "forward");
-        }
+    activateInput(facet as EditFacet, editing === "editing");
+    // allow to toggle on and off highlight of all text
+    const myInput = event.currentTarget.children[0] as HTMLInputElement;
+    if(myInput.tagName === "INPUT"){
+      const isHighlighted = myInput.selectionStart === 0;
+      const valLength = myInput.value.length;
+      if (isHighlighted && valLength > 0){
+        myInput.setSelectionRange(valLength, valLength, "forward");
       }
     }
   };
@@ -174,6 +160,18 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     showAlert();
   };
 
+  const showInput = () => {
+    return !gImageMap.isImageUrl(valueStr) && editFacet === "value" && !readOnly;
+  };
+
+  const showText = () => {
+    return !gImageMap.isImageUrl(valueStr) && editFacet !== "value";
+  };
+
+  const showImage = () => {
+    return gImageMap.isImageUrl(valueStr);
+  };
+
   const pairClassNames = classNames(
     `attribute-name-value-pair ${attrKey}`,
     {"editing": editFacet === "name" || editFacet === "value"},
@@ -187,7 +185,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const valueClassNames = classNames(
     `value ${attrKey}`,
-    { "editing": editFacet === "value" }
+    { "editing": editFacet === "value" },
+    {"has-image": gImageMap.isImageUrl(valueStr)}
   );
 
   const deleteAttrButtonClassNames = classNames(
@@ -219,22 +218,22 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       <div className={valueClassNames} onClick={handleClick}>
-        { editFacet === "value" && !readOnly //&& !gImageMap.isImageUrl(valueStr)
-          ? <input
-              type="text"
-              className="input"
-              value={valueCandidate}
-              onChange={handleChange}
-              onKeyDown={handleKeyDown}
-              onBlur={handleCompleteValue}
-              onDoubleClick={handleInputDoubleClick}
-            />
-          : gImageMap.isImageUrl(valueStr)
-            ?   <div className="image-wrapper">
-                  <img src={imageUrl} className="image-value" />
-                  <div className="delete-image-button" onClick={handleDeleteImageData}>X</div>
-                </div>
-            : <div className="cell-value">{valueStr}</div>
+        { showInput() &&
+          <input
+            type="text"
+            className="input"
+            value={valueCandidate}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            onBlur={handleCompleteValue}
+            onDoubleClick={handleInputDoubleClick}
+          />
+        }
+        { showText() &&
+          <div className="cell-value">{valueStr}</div>
+        }
+        { showImage() &&
+          <img src={imageUrl} className="image-value" />
         }
       </div>
       <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
