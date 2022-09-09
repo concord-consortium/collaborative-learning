@@ -10,7 +10,6 @@ interface TopbarProps {
   programDataRates: ProgramDataRate[];
   dataRate: number;
   onRateSelectClick: (rate: number) => void;
-  onRefreshDevices: () => void;
   onSerialRefreshDevices: () => void;
   isRunEnabled: boolean;
   runningProgram: boolean;

@@ -93,10 +93,6 @@ export const NodeTypes: NodeType[] = [
   {
     name: "Live Output",
     displayName: "Live Output",
-  // },
-  // {
-  //   name: "Relay",
-  //   displayName: "Relay"
   }
 ];
 
@@ -485,9 +481,7 @@ export const IntervalTimes: IntervalTime[] = [
   }
 ];
 
-export const kRelaySelectMessage = "Select a relay";
 export const kSensorSelectMessage = "Select a sensor";
-export const kRelayMissingMessage = "Finding";
 export const kSensorMissingMessage = "⚠️";
 
 const virtualTempChannel: NodeChannelInfo = {

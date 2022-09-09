@@ -199,31 +199,30 @@ $node-inner-width: 140px;
         border-top-color: $transform-green;
       }
     }
-    &.relay,
     &.live-output {
-      background-color: $relay-orange;
-      border-color: $relay-orange-outline;
+      background-color: $live-output-orange;
+      border-color: $live-output-orange-outline;
       .main-color {
-        color: $relay-orange;
-        border: 2px solid $relay-orange;
+        color: $live-output-orange;
+        border: 2px solid $live-output-orange;
         &:hover {
-          background-color: $relay-orange-outline;
+          background-color: $live-output-orange-outline;
         }
       }
       .control-color {
-        color: $relay-orange-control;
+        color: $live-output-orange-control;
       }
       .control-color-hoverable:hover {
-        color: $relay-orange-node;
+        color: $live-output-orange-node;
       }
       .active {
-        background-color: $relay-orange-control;
+        background-color: $live-output-orange-control;
       }
       .type-options select {
-        background-color: $relay-orange-outline;
+        background-color: $live-output-orange-outline;
       }
       .type-options span {
-        border-top-color: $relay-orange;
+        border-top-color: $live-output-orange;
       }
     }
     &.demo-output {
@@ -444,10 +443,6 @@ $node-inner-width: 140px;
           }
           &.transform {
             background-color: $transform-green-readout;
-          }
-          &.relay {
-            background-color: $relay-orange-readout;
-            margin-left: 0px;
           }
           &.light-bulb {
             background-color: $light-bulb-orange-readout;

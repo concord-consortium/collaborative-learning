@@ -12,7 +12,6 @@ import { forEach } from "lodash";
 import { ProgramZoomType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
-import { RelaySelectControl } from "../nodes/controls/relay-select-control";
 import { DataflowReteNodeFactory } from "../nodes/factories/dataflow-rete-node-factory";
 import { NumberReteNodeFactory } from "../nodes/factories/number-rete-node-factory";
 import { MathReteNodeFactory } from "../nodes/factories/math-rete-node-factory";
@@ -20,7 +19,6 @@ import { TransformReteNodeFactory } from "../nodes/factories/transform-rete-node
 import { ControlReteNodeFactory } from "../nodes/factories/control-rete-node-factory";
 import { LogicReteNodeFactory } from "../nodes/factories/logic-rete-node-factory";
 import { SensorReteNodeFactory } from "../nodes/factories/sensor-rete-node-factory";
-import { RelayReteNodeFactory } from "../nodes/factories/relay-rete-node-factory";
 import { DemoOutputReteNodeFactory } from "../nodes/factories/demo-output-rete-node-factory";
 import { LiveOutputReteNodeFactory } from "../nodes/factories/live-output-rete-node-factory";
 import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node-factory";
@@ -59,7 +57,6 @@ export interface IStartProgramParams {
   startTime: number;
   endTime: number;
   hasData: boolean;
-  hasRelay: boolean;
   title: string;
 }
 
@@ -126,13 +123,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const toolbarEditorContainerClass = `toolbar-editor-container`;
     const isTesting = ["qa", "test"].indexOf(this.stores.appMode) >= 0;
     const showRateUI = ["qa", "test", "dev"].indexOf(this.stores.appMode) >= 0;
-    const showZoomControl = !documentProperties?.dfHasData && !documentProperties?.dfHasRelay;
+    const showZoomControl = !documentProperties?.dfHasData;
     const showProgramToolbar = showZoomControl && !readOnly;
     return (
       <div className="dataflow-program-container">
         {this.isRunning() && <div className="running-indicator" />}
         <DataflowProgramTopbar
-          onRefreshDevices={this.deviceRefresh}
           onSerialRefreshDevices={this.serialDeviceRefresh}
           programDataRates={ProgramDataRates}
           dataRate={this.props.programDataRate}
@@ -253,7 +249,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       new ControlReteNodeFactory(numSocket),
       new LogicReteNodeFactory(numSocket),
       new SensorReteNodeFactory(numSocket),
-      new RelayReteNodeFactory(numSocket),
       new DemoOutputReteNodeFactory(numSocket),
       new LiveOutputReteNodeFactory(numSocket),
       new GeneratorReteNodeFactory(numSocket),
@@ -325,13 +320,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.programEditor.on("nodecreate", node => {
         // trigger after each of the first six events
-        // add the current set of sensors or relays to node controls
+        // add the current set of sensors node controls
         if (node.name === "Sensor") {
           const sensorSelect = node.controls.get("sensorSelect") as SensorSelectControl;
           sensorSelect.setChannels(this.channels);
-        } else if (node.name === "Relay") {
-          const relayList = node.controls.get("relayList") as RelaySelectControl;
-          relayList.setChannels(this.channels);
         }
         return true;
       });
@@ -526,21 +518,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     });
   };
 
-  private deviceRefresh = () => {   // FIXME
-    // const message =
-    //     "Refresh will update the list of sensor and relay devices that appear in the block selection menus. \
-    //      Please wait 5-10 seconds for refresh to complete. \
-    //      If your device does not appear in the block selection after refresh, \
-    //      check if the device is plugged in and the hub is turned on.";
-    // this.stores.ui.confirm(message, "Refresh Sensors and Relays?")
-    // .then(ok => {
-    //   if (ok) {
-    //     const { iot } = this.stores;
-    //     iot.refreshAllHubsChannelInfo();
-    //   }
-    // });
-  };
-
   private serialDeviceRefresh = () => {
     if (!this.stores.serialDevice.hasPort()){
       this.stores.serialDevice.requestAndSetPort()
@@ -562,10 +539,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private hasDataStorage() {
     return this.getNodeCount("Data Storage") > 0;
-  }
-
-  private hasRelay() {
-    return this.getNodeCount("Relay") > 0;
   }
 
   private hasDemoOutput() {
@@ -595,8 +568,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                     },
             "Live Output": (n: Node) => {
               this.sendDataToSerialDevice(n);
-            },
-            Relay: this.updateNodeChannelInfo
+            }
           };
 
     let processNeeded = false;
@@ -703,14 +675,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
-    const relayList = n.controls.get("relayList") as RelaySelectControl;
     if (sensorSelect) {
       sensorSelect.setChannels(this.channels);
       (sensorSelect as any).update();
-    }
-    if (relayList) {
-      relayList.setChannels(this.channels);
-      (relayList as any).update();
     }
   };
 
