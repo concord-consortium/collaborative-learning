@@ -6,19 +6,6 @@ import { SerialDevice } from "../../../../models/stores/serial";
 
 import "./dataflow-program-topbar.scss";
 
-interface TopbarProps {
-  programDataRates: ProgramDataRate[];
-  dataRate: number;
-  onRateSelectClick: (rate: number) => void;
-  onSerialRefreshDevices: () => void;
-  // isRunEnabled: boolean;
-  // runningProgram: boolean;
-  readOnly: boolean;
-  showRateUI: boolean;
-  lastIntervalDuration: number;
-  serialDevice: SerialDevice;
-}
-
 interface RateSelectorProps {
   rateOptions: ProgramDataRate[];
   dataRate: number;
@@ -53,6 +40,17 @@ const RateSelectorComponent = (props: RateSelectorProps) => {
     </div>
   );
 };
+
+interface TopbarProps {
+  programDataRates: ProgramDataRate[];
+  dataRate: number;
+  onRateSelectClick: (rate: number) => void;
+  onSerialRefreshDevices: () => void;
+  readOnly: boolean;
+  showRateUI: boolean;
+  lastIntervalDuration: number;
+  serialDevice: SerialDevice;
+}
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { serialDevice } = props;
