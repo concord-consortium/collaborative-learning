@@ -6,49 +6,6 @@ import { SerialDevice } from "../../../../models/stores/serial";
 
 import "./dataflow-program-topbar.scss";
 
-interface TopbarProps {
-  onRunProgramClick: () => void;
-  onStopProgramClick: () => void;
-  programDataRates: ProgramDataRate[];
-  dataRate: number;
-  onRateSelectClick: (rate: number) => void;
-  onRefreshDevices: () => void;
-  onSerialRefreshDevices: () => void;
-  isRunEnabled: boolean;
-  runningProgram: boolean;
-  remainingTimeInSeconds: number;
-  readOnly: boolean;
-  showRateUI: boolean;
-  lastIntervalDuration: number;
-  serialDevice: SerialDevice;
-  showRecordUI: boolean;
-}
-
-// const kProgressWidth = 76;
-
-// interface CountdownTimerProps {
-//   duration: string;
-//   width: number;
-//   hours: string;
-//   minutes: string;
-//   seconds: string;
-// }
-// const CountdownTimerComponent: React.SFC<CountdownTimerProps> = (props: CountdownTimerProps) => {
-//   return (
-//     <div className="running-container countdown">
-//       <div className="total">
-//         {`Duration: ${props.duration}`}
-//       </div>
-//       <div className="remaining">
-//         <div className="progress-bar" style={{width: props.width.toString() + "px"}}/>
-//         <div className="progress-time">
-//         {`${props.hours}:${props.minutes}:${props.seconds}`}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
 interface RateSelectorProps {
   rateOptions: ProgramDataRate[];
   dataRate: number;
@@ -61,48 +18,39 @@ const RateSelectorComponent = (props: RateSelectorProps) => {
     props.onRateSelectClick(Number(event.target.value));
   };
   return (
-    <div className="running-container">
-      <div className="datarate" title="Set Program Sampling Rate">
-        <div className="label-back">
-          <label className="label" htmlFor="rate-select">Sampling Rate</label>
-        </div>
-        <div className="datarate-options-back">
-          <div className="datarate-options">
-            <select onChange={handleSelectChange}
-              disabled={props.readOnly}
-              value={props.dataRate.toString()}
-              id="rate-select" // TODO: The id needs to be unique to the particular DF tile
-            >
-              { props.rateOptions.map((rate: ProgramDataRate) => (
-                <option key={rate.text} value={rate.val} disabled={rate.disabled}>
-                  {rate.text}
-                </option>
-              ))}
-            </select>
-          </div>
+    <div className="datarate" title="Set Program Sampling Rate">
+      <div className="label-back">
+        <label className="label" htmlFor="rate-select">Sampling Rate</label>
+      </div>
+      <div className="datarate-options-back">
+        <div className="datarate-options">
+          <select onChange={handleSelectChange}
+            disabled={props.readOnly}
+            value={props.dataRate.toString()}
+            id="rate-select" // TODO: The id needs to be unique to the particular DF tile
+          >
+            { props.rateOptions.map((rate: ProgramDataRate) => (
+              <option key={rate.text} value={rate.val} disabled={rate.disabled}>
+                {rate.text}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
     </div>
   );
 };
 
-interface RecordButtonProps {
+interface TopbarProps {
+  programDataRates: ProgramDataRate[];
+  dataRate: number;
+  onRateSelectClick: (rate: number) => void;
+  onSerialRefreshDevices: () => void;
   readOnly: boolean;
+  showRateUI: boolean;
+  lastIntervalDuration: number;
+  serialDevice: SerialDevice;
 }
-
-const RecordButton = (props: RecordButtonProps) => {
-  return (
-    <button
-      className="program-state-button"
-      title="Record"
-      onClick={() => null }
-      disabled={props.readOnly}
-    >
-      <div className="icon run" />
-      <div className="text">Record</div>
-    </button>
-  );
-};
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { serialDevice } = props;
@@ -145,29 +93,12 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         </div>
       </div>
       <div className="topbar-center">
-
         <RateSelectorComponent
           rateOptions={props.programDataRates}
           dataRate={props.dataRate}
           onRateSelectClick={props.onRateSelectClick}
           readOnly={props.readOnly}
         />
-
-        { props.showRecordUI &&
-          <>
-            <RecordButton readOnly={props.readOnly} />
-            <button
-              className="program-state-button"
-              title="Stop Program"
-              onClick={props.onStopProgramClick}
-              disabled={!props.runningProgram || !props.readOnly}
-            >
-              <div className="icon stop" />
-              <div className="text">Stop</div>
-            </button>
-          </>
-        }
-
       </div>
       <div className="topbar-right">
         {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
