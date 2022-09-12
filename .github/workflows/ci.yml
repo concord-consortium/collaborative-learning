@@ -36,7 +36,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - uses: cypress-io/github-action@v2
+      - uses: cypress-io/github-action@v4
         with:
           start: npm start
           wait-on: 'http://localhost:8080'
@@ -46,7 +46,7 @@ jobs:
           parallel: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           # upload videos for failing specs
           config: video=true,videoUploadOnPasses=false
-          browser: chrome
+          browser: electron
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

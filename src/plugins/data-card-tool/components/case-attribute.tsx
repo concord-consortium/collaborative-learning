@@ -6,6 +6,7 @@ import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultLabel } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
+import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
 
 import '../data-card-tool.scss';
 
@@ -58,6 +59,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     switch (key) {
       case "Enter":
         handleCompleteValue();
+        handleCompleteName();
         setEditFacet("");
         break;
       case "Escape":
@@ -77,18 +79,31 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     caseId && content.setAttValue(caseId, attrKey, "");
   };
 
-  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+
+  const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     setCurrEditAttrId(attrKey);
+    const facet = event.currentTarget.classList[0];
+    const editing = event.currentTarget.classList[2];
+    activateInput(facet as EditFacet, editing === "editing");
+
+    // allow to toggle on and off highlight of all text
+    const myInput = event.currentTarget.children[0] as HTMLInputElement;
+    if(myInput.tagName === "INPUT"){
+      const isHighlighted = myInput.selectionStart === 0;
+      const valLength = myInput.value.length;
+      if (isHighlighted && valLength > 0){
+        myInput.setSelectionRange(valLength, valLength, "forward");
+      }
+    }
   };
 
-  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    const [facet] = event.currentTarget.classList;
-    activateInput(facet as EditFacet);
+  const handleInputDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
+    event.currentTarget.select();
   };
 
-  const handleNameBlur = () => {
+  const handleCompleteName = () => {
     if (labelCandidate !== getLabel()) {
-      content.setAttName(attrKey, labelCandidate);
+      caseId && content.setAttName(attrKey, labelCandidate);
     }
     setEditFacet("");
   };
@@ -100,24 +115,48 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setEditFacet("");
   };
 
-  const activateInput = (facet: EditFacet) => {
+  const activateInput = (facet: EditFacet, editing: boolean) => {
     setEditFacet(facet);
-    if (facet === "name"){
+    if (facet === "name" && !editing){
       setLabelCandidate(getLabel());
     }
-    if (facet === "value"){
+    if (facet === "value" && !editing){
       setValueCandidate(getValue());
     }
     setCurrEditAttrId(attrKey);
   };
 
+  function deleteAttribute(){
+    if(attrKey){
+      content.dataSet.removeAttribute(attrKey);
+    }
+  }
+
+  const AlertContent = () => {
+    return (
+      <p>
+        Are you sure you want to remove the <em style={{ fontWeight: "bold"}}>{ getLabel() }</em>&nbsp;
+        attribute from the Data Card? If you remove it from this card it will delete the data in the field,
+        and it will also be removed from all the Cards in this collection.
+      </p>
+    );
+  };
+
+  const [showAlert] = useCautionAlert({
+    title: "Delete Attribute",
+    content: AlertContent,
+    confirmLabel: "Delete Attribute",
+    onConfirm: () => deleteAttribute()
+  });
+
   const handleDeleteAttribute = () => {
-    // confirmation dialog
+    showAlert();
   };
 
   const pairClassNames = classNames(
     `attribute-name-value-pair ${attrKey}`,
-    {"editing": editFacet === "name" || "value"}
+    {"editing": editFacet === "name" || editFacet === "value"},
+    {"has-image": gImageMap.isImageUrl(valueStr)}
   );
 
   const labelClassNames = classNames(
@@ -145,27 +184,32 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   return (
     <div className={pairClassNames}>
-      <div className={labelClassNames} onClick={handleClick} onDoubleClick={handleDoubleClick}>
+      <div className={labelClassNames} onClick={handleClick}>
         { !readOnly && editFacet === "name"
           ? <input
               type="text"
+              className="input"
               value={labelCandidate}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
-              onBlur={handleNameBlur}
+              onBlur={handleCompleteName}
+              onDoubleClick={handleInputDoubleClick}
             />
           : <div className={cellLabelClasses}>{getLabel()}</div>
         }
       </div>
 
-      <div className={valueClassNames} onClick={handleClick} onDoubleClick={handleDoubleClick}>
-        { editFacet === "value" && !readOnly
+      <div className={valueClassNames} onClick={handleClick}>
+        {/* TODO - image delete */}
+        { editFacet === "value" && !readOnly // && !gImageMap.isImageUrl(valueStr)
           ? <input
               type="text"
+              className="input"
               value={valueCandidate}
               onChange={handleChange}
               onKeyDown={handleKeyDown}
               onBlur={handleCompleteValue}
+              onDoubleClick={handleInputDoubleClick}
             />
           : gImageMap.isImageUrl(valueStr)
             ?   <div className="image-wrapper">
