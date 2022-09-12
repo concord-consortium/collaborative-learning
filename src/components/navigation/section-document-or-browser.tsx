@@ -16,6 +16,7 @@ import { NetworkDocumentsSection } from "./network-documents-section";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 
 import "./section-document-or-browser.sass";
+import { LoadDocumentHistory } from "./load-document-history";
 
 const kNavItemScale = 0.11;
 const kHeaderHeight = 55;
@@ -209,6 +210,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
 
   const handleTogglePlaybackControlComponent = () => {
     setShowPlaybackControls(showControls => !showControls);
+    // What is the referenceDocument?
     const newState = !showPlaybackControls;
     setDocumentToShow(newState
                         ? getDocumentToShow()
@@ -218,12 +220,19 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
 
   const getDocumentToShow = () => {
     if (referenceDocument) {
-      const origDocManager = referenceDocument.treeManagerAPI as Instance<typeof TreeManager>;
+      const origTreeManager = referenceDocument.treeManagerAPI as Instance<typeof TreeManager>;
       const docCopy = createDocumentModel(getSnapshot(referenceDocument));
-      const historySnapshot = (getSnapshot(origDocManager.document)) as unknown as CDocumentType;
+      const historySnapshot = (getSnapshot(origTreeManager.document)) as unknown as CDocumentType;
       const docCopyManager = docCopy.treeManagerAPI as Instance<typeof TreeManager>;
+      // TODO: rather than doing this we want to add our hidden component which is fetching the 
+      // history and then updating the change document when it is all there.
+      // At the same time we need to show some kind of progress information as it is loading this
+      // history.  
+      // I think all of this logic would make more sense if it was inside of the history component
+      // itself.
+      // If we don't put it there I think what we need to do is pass som
       docCopyManager.setChangeDocument(historySnapshot);
-      docCopyManager.setCurrentHistoryIndex(origDocManager.document.history.length);
+      docCopyManager.setCurrentHistoryIndex(origTreeManager.document.history.length);
       return docCopy;
     }
   };
@@ -246,6 +255,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
         showPlaybackControls={showPlaybackControls}
         onTogglePlaybackControls={handleTogglePlaybackControlComponent}
       />
+      { showPlaybackControls && <LoadDocumentHistory document={documentToShow} />}
     </div>;
 
   return (

@@ -11,6 +11,7 @@ import { useFirebaseFunction } from "./use-firebase-function";
 import { useDocumentOrCurriculumMetadata, useNetworkDocumentKey } from "./use-stores";
 import { useUserContext } from "./use-user-context";
 import { uniqueId } from "../utilities/js-utils";
+import { HistoryEntrySnapshot } from "../models/history/history";
 
 // documentKeyOrSectionPath => queryKey
 const commentsQueryKeyMap: Record<string, string> = {};
@@ -215,4 +216,24 @@ export const useDocumentComments = (documentKeyOrSectionPath?: string) => {
 export const useUnreadDocumentComments = (documentKeyOrSectionPath?: string) => {
   // TODO: figure this out; for now it's just a comment counter
   return useDocumentComments(documentKeyOrSectionPath);
+};
+
+const historyEntryConverter = {
+  toFirestore: (entry: HistoryEntrySnapshot) => {
+    throw new Error(
+      "We can't convert a raw HistoryEntry to firestore because we need the index from its parent collection");
+  },
+  fromFirestore: (doc: firebase.firestore.QueryDocumentSnapshot): HistoryEntrySnapshot => {
+    const { entry } = doc.data();
+    return JSON.parse(entry);
+  }
+};
+
+export const useDocumentHistory = (documentKeyOrSectionPath?: string) => {
+  const { isSuccess } = useCommentableDocument(documentKeyOrSectionPath);
+  const docPath = useCommentableDocumentPath(documentKeyOrSectionPath || "");
+  // docPath could in theory be an empty string which 
+  const queryPath = isSuccess && docPath ? `${docPath}/historyEntries` : "";
+  const converter = historyEntryConverter;
+  return useCollectionOrderedRealTimeQuery(queryPath, { converter, orderBy: "index" });
 };

@@ -96,7 +96,7 @@ export const TreeManager = types
       return;
     }
 
-    // Re-attach the entry to the history
+    // Re-attach the entry to the history 
     self.document.history.push(entry);
 
     // Add the entry to the undo stack if it is undoable.
@@ -173,22 +173,22 @@ export const TreeManager = types
     // })
     .then(document => {
       // add a new document for this history entry
-      // FIXME: this is trying to create a new document underneath a collection that we haven't created
-      // yet. It seems unlikely to succeed
       const historyEntryPath = firestore.getFullPath(`${documentPath}/historyEntries`);
       console.log("trying to make a docRef for the new history entry", historyEntryPath);
-      return firestore.newDocumentRef(historyEntryPath);
-    })
-    .then(docRef => {
-      // FIXME send the actual change document here
-      // FIXME need to figure out about the order here, when these are fetched we need them ordered
-      // correctly
+      // FIXME: this should use the id of the history entry, that way a specific entry can
+      // be found again quickly. We plan to support the idea of providing links to teachers
+      // to open specific spots in the history. It seems better to use these ids than indexes
+      // by maybe indexes are fine. If we use indexes we can probably do range queries around 
+      // that index so we don't have to load in the whole history. If we use ids then we might
+      // be able to support consolidation of entries in the future to save space.
+      const docRef = firestore.newDocumentRef(historyEntryPath);
       const snapshot = getSnapshot(entry);
       console.log("trying to write the history entry to the doc ref", documentPath, docRef.id, snapshot);
-      docRef.set({entry: JSON.stringify(snapshot)});
+      docRef.set({
+        index: firestore.timestamp(),
+        entry: JSON.stringify(snapshot)}
+      );
     });
-
-
   }
 }))
 .actions((self) => ({
