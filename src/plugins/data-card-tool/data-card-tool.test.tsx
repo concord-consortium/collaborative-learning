@@ -1,5 +1,6 @@
-import { render } from "@testing-library/react";
 import React from "react";
+import { render } from "@testing-library/react";
+import { ModalProvider } from "@concord-consortium/react-modal-hook";
 import { IToolApi } from "../../components/tools/tool-api";
 import { ToolTileModel } from "../../models/tools/tool-tile";
 import { defaultDataCardContent } from "./data-card-content";
@@ -51,7 +52,11 @@ describe("DataCardToolComponent", () => {
 
   it("renders successfully", () => {
     const {getByText} =
-      render(<DataCardToolComponent  {...defaultProps} {...{model}}></DataCardToolComponent>);
+      render(
+        <ModalProvider>
+          <DataCardToolComponent  {...defaultProps} {...{model}}></DataCardToolComponent>
+        </ModalProvider>
+      );
       expect(getByText("Data Card Collection 1")).toBeInTheDocument();
   });
 });

@@ -135,50 +135,6 @@ $duration-label-back: $gray-mid;
     justify-content: center;
     width: 60%;
 
-    .running-container {
-      &.countdown {
-        position: relative;
-        width: 208px;
-      }
-      .total {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: center;
-        background-color: #bcbcbc;
-        width: 130px;
-        height: 28px;
-        border-radius: 3px;
-        font-size: 14px;
-        padding-left: 5px;
-        color: white;
-      }
-      .remaining {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        position: absolute;
-        left: 118px;
-        width: 84px;
-        height: 28px;
-        border-radius: 3px;
-        color: black;
-        background-color: white;
-        border: solid 2px #bcbcbc;
-        .progress-bar {
-          position: absolute;
-          left: 2px;
-          height: 20px;
-          background-color: #fde5c1;
-          border-radius: 2px;
-        }
-        .progress-time {
-          position: absolute;
-        }
-      }
-    }
-
     .datarate {
       position: relative;
       width: 185px;
@@ -247,52 +203,6 @@ $duration-label-back: $gray-mid;
             color: $gray-disabled;
           }
         }
-      }
-    }
-
-    .program-state-button {
-      position: relative;
-      width: 75px;
-      height: 28px;
-      border-radius: 3px;
-      border: solid 2px $gray-mid;
-      background-color: #ffffff;
-      margin: 0px 0px 0px 8px;
-      outline: 0;
-      &:hover:not([disabled]) {
-        cursor: pointer;
-        background-color: $gray-light-hover;
-      }
-      &:active:not([disabled]) {
-        background-color: $gray-light-click;
-      }
-      &:disabled {
-        opacity: 0.6;
-      }
-
-      .icon {
-        position: absolute;
-        left: 4px;
-        top: 3px;
-        width: 18px;
-        height: 18px;
-        &.run {
-          background-image: url("../../assets/run.svg");
-        }
-        &.stop {
-          background-image: url("../../assets/stop.svg");
-        }
-      }
-
-      .text {
-        position: absolute;
-        right: 0;
-        top: 3px;
-        width: 48px;
-        height: 16px;
-        font-size: 14px;
-        text-align: center;
-        color: $gray-text;
       }
     }
   }

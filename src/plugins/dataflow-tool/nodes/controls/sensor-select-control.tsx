@@ -132,7 +132,7 @@ export class SensorSelectControl extends Rete.Control {
                                     });
 
       const channelsForType = channels.filter((ch: NodeChannelInfo) => {
-        return (ch.type === type) || (type === "none" && ch.type !== "relay");
+        return (ch.type === type) || (type === "none");
       });
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 

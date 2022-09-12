@@ -1,4 +1,3 @@
-// import NoiseIcon from "../../assets/icons/generator/noise.svg";
 import SineIcon from "../../assets/icons/generator/sine.svg";
 import SquareIcon from "../../assets/icons/generator/square.svg";
 import TriangleIcon from "../../assets/icons/generator/triangle.svg";
@@ -85,18 +84,9 @@ export const NodeTypes: NodeType[] = [
     name: "Demo Output",
     displayName: "Demo Output",
   },
-  // TODO Remove, along with all references to data storage, when dead code is cleaned
-  // {
-  //   name: "Data Storage",
-  //   displayName: "Data Storage",
-  // },
   {
     name: "Live Output",
     displayName: "Live Output",
-  // },
-  // {
-  //   name: "Relay",
-  //   displayName: "Relay"
   }
 ];
 
@@ -339,14 +329,7 @@ export const NodeGeneratorTypes = [
     name: "Triangle",
     method: (t: number, p: number, a: number) => (2 * a / p) * Math.abs(t % p - p / 2),
     icon: TriangleIcon
-  },
-  /*
-  {
-    name: "Noise",
-    method: (t: number, p: number, a: number) => Math.random() * a,
-    icon: NoiseIcon
-  },
-  */
+  }
 ];
 
 export const NodePeriodUnits = [
@@ -433,61 +416,7 @@ export const ProgramDataRates: ProgramDataRate[] = [
   }
 ];
 
-export interface ProgramRunTime {
-  text: string;
-  val: number;
-  disabled?: boolean;
-}
-export interface IntervalTime extends ProgramRunTime {
-  maxProgramRunTime: number;
-}
-
-export const IntervalTimes: IntervalTime[] = [
-  {
-    text: "1 second",
-    val: 1,
-    maxProgramRunTime: 3600
-  },
-  {
-    text: "5 seconds",
-    val: 5,
-    maxProgramRunTime: 21600
-  },
-  {
-    text: "10 seconds",
-    val: 10,
-    maxProgramRunTime: 21600
-  },
-  {
-    text: "15 seconds",
-    val: 15,
-    maxProgramRunTime: 86400
-  },
-  {
-    text: "1 minute",
-    val: 60,
-    maxProgramRunTime: 432000
-  },
-  {
-    text: "5 minutes",
-    val: 300,
-    maxProgramRunTime: 432000
-  },
-  {
-    text: "10 minutes",
-    val: 600,
-    maxProgramRunTime: 2592000
-  },
-  {
-    text: "1 hour",
-    val: 3600,
-    maxProgramRunTime: 2592000
-  }
-];
-
-export const kRelaySelectMessage = "Select a relay";
 export const kSensorSelectMessage = "Select a sensor";
-export const kRelayMissingMessage = "Finding";
 export const kSensorMissingMessage = "⚠️";
 
 const virtualTempChannel: NodeChannelInfo = {
@@ -601,4 +530,3 @@ const fsrSensorChannel: NodeChannelInfo = {
 export const serialSensorChannels: NodeChannelInfo[] = [
   emgSensorChannel, fsrSensorChannel
 ];
-

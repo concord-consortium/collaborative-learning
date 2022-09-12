@@ -57,7 +57,7 @@ export class DataflowNode extends Node {
         }
         <div className="inputs-outputs">
           <div className="inputs">
-            {!["Data Storage", "Demo Output"].includes(this.props.node.name) && undecoratedInputs.map((input: any) => (
+            {!["Demo Output"].includes(this.props.node.name) && undecoratedInputs.map((input: any) => (
               <div className="input" key={input.key}>
                 <Socket
                   type="input"
@@ -107,16 +107,6 @@ export class DataflowNode extends Node {
                 control={input.control}
                 key={input.control.key}
                 innerRef={bindControl}
-              />
-            </div>
-          ))}
-          {this.props.node.name === "Data Storage" && undecoratedInputs.map((input: any) => (
-            <div className="input" key={input.key}>
-              <Socket
-                type="input"
-                socket={input.socket}
-                io={input}
-                innerRef={bindSocket}
               />
             </div>
           ))}
