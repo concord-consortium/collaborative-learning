@@ -8,6 +8,11 @@ import { DrawingContentModelType } from "../model/drawing-content";
 import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
 import { DrawingContentModelContext } from "./drawing-content-context";
+import { ToolTitleArea } from "../../../components/tools/tool-title-area";
+import { EditableTileTitle } from "../../../components/tools/editable-tile-title";
+import { measureText } from "../../../components/tools/hooks/use-measure-text";
+import { defaultTileTitleFont } from "../../../components/constants";
+
 
 import "./drawing-tool.scss";
 
@@ -27,15 +32,36 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     onRegisterToolApi({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return contentRef.current.exportJson(options);
+      },
+      getTitle: () => {
+        return getTitle();
       }
     });
 
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
+  const getTitle  = () => {
+    return model.title || "";
+  };
+
+  const handleTitleChange = (title?: string) => {
+    title && model.setTitle(title);
+  };
 
   return (
     <DrawingContentModelContext.Provider value={contentRef.current} >
+      <ToolTitleArea>
+        <EditableTileTitle
+          key="drawing-title"
+          size={{width:null, height:null}}
+          scale={scale}
+          getTitle={getTitle} 
+          readOnly={readOnly}
+          measureText={(text) => measureText(text, defaultTileTitleFont)}
+          onEndEdit={handleTitleChange}
+       />
+      </ToolTitleArea>
       <div className={classNames("drawing-tool", { "read-only": readOnly })} data-testid="drawing-tool">
         <ToolbarView model={model}
                     documentContent={documentContent}

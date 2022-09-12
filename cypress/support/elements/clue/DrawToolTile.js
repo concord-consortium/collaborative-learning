@@ -2,6 +2,9 @@ class DrawToolTile{
     getDrawTile(workspaceClass){
       return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .drawing-tool-tile`);
     }
+    getTileTitle(workspaceClass){
+      return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title-text`);
+    }
     getDrawToolSelect(){
       return cy.get('.primary-workspace .drawing-tool-button.button-select');
     }
