@@ -28,7 +28,7 @@ context('Nav Panel', function () {
     describe("Investigation Tab tests", function () {
       describe("Problem tabs", function () {
         it('verify tab names are visible', () => {
-          cy.get(".collapsed-resources-tab.my-work").click();
+          // cy.get(".collapsed-resources-tab.my-work").click();
           cy.openTopTab("problems");
           cy.get(".problem-tabs .tab-list .prob-tab").each(($tab, index, $tabList) => {
             expect($tab.text()).to.contain(problemSubTabTitles[index]);
@@ -184,7 +184,7 @@ context('Nav Panel', function () {
     it('Single Top tab with visible resource tab panel', function () {
       cy.visit(`${baseQueryParam}&unit=example-show-nav-panel`);
       cy.waitForLoad();
-      cy.get(".collapsed-resources-tab.my-work").click();
+      // cy.get(".collapsed-resources-tab.my-work").click();
       cy.get(".top-tab").should("have.length", 1);
       cy.get(".document-tabs.my-work .tab-header-row").should("not.be.visible");
       canvas.openFileMenu();
@@ -194,7 +194,7 @@ context('Nav Panel', function () {
     it('Problem Tabs with no sub tabs', function () {
       cy.visit(`${baseQueryParam}&unit=example-no-section-problem-tab`);
       cy.waitForLoad();
-      cy.get(".collapsed-resources-tab.my-work").click();
+      // cy.get(".collapsed-resources-tab.my-work").click();
       cy.openTopTab("problems");
       cy.get(".problem-tabs .tab-header-row").should("not.be.visible");
     });
@@ -205,7 +205,7 @@ context('Nav Panel', function () {
 
       cy.visit(`${baseQueryParam}&unit=example-config-subtabs`);
       cy.waitForLoad();
-      cy.get(".collapsed-resources-tab.my-work").click();
+      // cy.get(".collapsed-resources-tab.my-work").click();
       cy.openTopTab("problems");
       cy.get(".problem-tabs .tab-list .prob-tab").each(($tab, index, $tabList) => {
         expect($tabList).to.have.lengthOf(3);

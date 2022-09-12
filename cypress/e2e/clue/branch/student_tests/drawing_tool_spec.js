@@ -27,6 +27,7 @@ context('Draw Tool Tile', function () {
 
     cy.visit(queryParams);
     cy.waitForLoad();
+    cy.closeResourceTabs();
   });
   describe("Draw Tool", () => {
     it("renders draw tool tile", () => {
@@ -129,7 +130,7 @@ context('Draw Tool Tile', function () {
           // Un-select the rectangle
           .trigger("mousedown", 500, 100)
           .trigger("mouseup", 500, 100);
-        
+
         drawToolTile.getRectangleDrawing().first()
           // Get the rectangle to be hovered. In the code we are listening to
           // `onMouseEnter` but in Cypress triggering a "mouseenter" event
@@ -137,12 +138,12 @@ context('Draw Tool Tile', function () {
           .trigger("mouseover", {scrollBehavior: false});
 
         // The hover box is rendered as a selection-box with a different color
-        drawToolTile.getSelectionBox().should("exist").should("have.attr", "stroke").and("eq", "#bbdd00");        
+        drawToolTile.getSelectionBox().should("exist").should("have.attr", "stroke").and("eq", "#bbdd00");
 
         // The best way I found to remove the hover was to delete the rectangle
         drawToolTile.getRectangleDrawing().first().click({force: true, scrollBehavior: false});
         drawToolTile.getDrawToolDelete().click();
-        drawToolTile.getSelectionBox().should("not.exist");        
+        drawToolTile.getSelectionBox().should("not.exist");
 
       });
       it("verify moving not selected object", () => {
@@ -170,7 +171,7 @@ context('Draw Tool Tile', function () {
         // The best way I found to remove the hover was to delete the rectangle
         drawToolTile.getRectangleDrawing().first().click({force: true, scrollBehavior: false});
         drawToolTile.getDrawToolDelete().click();
-        drawToolTile.getSelectionBox().should("not.exist");        
+        drawToolTile.getSelectionBox().should("not.exist");
       });
       it("verify draw squares", () => {
         drawToolTile.getDrawToolRectangle().click();
@@ -192,7 +193,7 @@ context('Draw Tool Tile', function () {
           .trigger("mouseup",   230, 50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 2);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "30");
-        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "30");  
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "30");
 
         // draw a square starting at the bottom edge
         drawToolTile.getDrawTile()
@@ -201,7 +202,7 @@ context('Draw Tool Tile', function () {
           .trigger("mouseup",   300, 50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 3);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "40");
-        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "40");  
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "40");
 
         // draw a square starting at the right edge
         drawToolTile.getDrawTile()
@@ -210,7 +211,7 @@ context('Draw Tool Tile', function () {
           .trigger("mouseup",   400, 50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 4);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "50");
-        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "50");        
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "50");
 
         // Diagonal from top right to bottom left with the width 60 and height 50
         drawToolTile.getDrawTile()
@@ -219,7 +220,7 @@ context('Draw Tool Tile', function () {
           .trigger("mouseup",   500, 100);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 5);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "60");
-        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "60");        
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "60");
 
         // Diagonal from bottom right to top left with the width 50 and the height 70
         drawToolTile.getDrawTile()
@@ -228,7 +229,7 @@ context('Draw Tool Tile', function () {
           .trigger("mouseup",   600, 50);
         drawToolTile.getRectangleDrawing().should("exist").and("have.length", 6);
         drawToolTile.getRectangleDrawing().last().should("have.attr", "width").and("eq", "70");
-        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "70");        
+        drawToolTile.getRectangleDrawing().last().should("have.attr", "height").and("eq", "70");
 
       });
       it("deletes rectangle drawings", () => {
@@ -236,7 +237,7 @@ context('Draw Tool Tile', function () {
         for (let i=0; i<6; i++) {
           drawToolTile.getDrawToolSelect().click();
           drawToolTile.getRectangleDrawing().first().click({force:true, scrollBehavior: false});
-          drawToolTile.getDrawToolDelete().click();  
+          drawToolTile.getDrawToolDelete().click();
         }
         drawToolTile.getRectangleDrawing().should("not.exist");
       });

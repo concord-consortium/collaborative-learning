@@ -17,11 +17,11 @@ context('Test image functionalities', function(){
     before(function(){
         const queryParams = `${Cypress.config("queryParams")}`;
         cy.clearQAData('all');
-    
         cy.visit(queryParams);
         cy.waitForLoad();
+        cy.closeResourceTabs();
     });
-    
+
     describe('upload image from user computer',()=>{
         before(()=>{ //create a new doc so that save and restore can be tested
             canvas.createNewExtraDocumentFromFileMenu(userCanvas, "my-work");

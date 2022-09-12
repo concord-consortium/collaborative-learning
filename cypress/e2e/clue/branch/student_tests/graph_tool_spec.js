@@ -21,6 +21,7 @@ context('Graph Tool', function() {
 
         cy.visit(queryParams);
         cy.waitForLoad();
+        cy.closeResourceTabs();
     });
 
     context('Test graph tool functionalities', function(){
