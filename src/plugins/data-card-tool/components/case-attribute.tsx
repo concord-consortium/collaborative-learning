@@ -108,6 +108,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleCompleteName = () => {
+    console.log("handleCompleteName")
     if (labelCandidate !== getLabel()) {
       caseId && content.setAttName(attrKey, labelCandidate);
     }
@@ -115,6 +116,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleCompleteValue = () => {
+    console.log("handleCompleteValue")
     if (valueCandidate !== getValue()) {
       caseId && content.setAttValue(caseId, attrKey, valueCandidate);
     }
@@ -130,6 +132,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       setValueCandidate(getValue());
     }
     setCurrEditAttrId(attrKey);
+    console.log("finish activateInput - here?")
   };
 
   function deleteAttribute(){
@@ -200,7 +203,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   return (
     <div className={pairClassNames}>
-
+      <div style={{ position: "absolute", right: "60px" }}><pre>editFacet: {editFacet}</pre></div>
       <div className={labelClassNames} onClick={handleClick}>
         { !readOnly && editFacet === "name"
           ? <input
