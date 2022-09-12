@@ -88,3 +88,16 @@ export const useDeleteDocument = () => {
   }, [firestore]);
   return useMutation(deleteDocument);
 };
+
+export const useDeleteCommentsCollection = () => {
+  const [firestore] = useFirestore();
+  const deleteCollection = useCallback((partialPath: string) => {
+    const query = firestore.collection(partialPath);
+    query.onSnapshot((snapshot) => {
+      snapshot.docs.forEach((doc)=>{
+        doc.ref.delete();
+      });
+    });
+  }, [firestore]);
+  return deleteCollection;
+};
