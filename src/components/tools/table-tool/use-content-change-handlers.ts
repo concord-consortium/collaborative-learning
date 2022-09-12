@@ -1,13 +1,14 @@
 import { useCallback } from "react";
+import { getTableContentHeight } from "./table-utils";
 import { useCurrent } from "../../../hooks/use-current";
 import { ICase, ICaseCreation, IDataSet } from "../../../models/data/data-set";
 import { ITileLinkMetadata } from "../../../models/tools/table-link-types";
 import { requestGeometryLinkToTable, requestGeometryUnlinkFromTable } from "../../../models/tools/table-links";
-import { getTableContentHeight, TableContentModelType } from "../../../models/tools/table/table-content";
+import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { isLinkableValue } from "../../../models/tools/table/table-model-types";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { uniqueId, uniqueName } from "../../../utilities/js-utils";
-import { TColumn } from "./table-types";
+import { TColumn, TRow } from "./table-types";
 
 export interface IContentChangeHandlers {
   onSetTableTitle: (title: string) => void;
@@ -15,6 +16,7 @@ export interface IContentChangeHandlers {
   onSetColumnExpressions: (rawExpressions: Map<string, string>, xName: string) => void;
   onAddColumn: () => void;
   onRemoveColumn: (colId: string) => void;
+  requestRowHeight: () => void;
   onAddRows: (newCases: ICaseCreation[]) => void;
   onUpdateRow: (caseValues: ICase) => void;
   onRemoveRows: (rowIds: string[]) => void;
@@ -25,13 +27,18 @@ export interface IContentChangeHandlers {
 interface IProps {
   model: ToolTileModelType;
   dataSet: IDataSet;
+  rows: TRow[];
   readOnly?: boolean;
+  rowHeight: (args: any) => number;
+  headerHeight: () => number;
+  getTitleHeight: () => number;
   onRequestRowHeight: (options: { height?: number, deltaHeight?: number }) => void;
   triggerColumnChange: () => void;
   triggerRowChange: () => void;
 }
 export const useContentChangeHandlers = ({
-  model, dataSet, readOnly, onRequestRowHeight, triggerColumnChange, triggerRowChange
+  model, dataSet, rows, readOnly, rowHeight, headerHeight, getTitleHeight, onRequestRowHeight, triggerColumnChange,
+  triggerRowChange
 }: IProps): IContentChangeHandlers => {
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
@@ -54,10 +61,10 @@ export const useContentChangeHandlers = ({
 
   const requestRowHeight = useCallback(() => {
     const height = getTableContentHeight({
-                    dataRows: dataSet.cases.length, readOnly, hasExpressions: getContent().hasExpressions
-                  });
+      rows, readOnly, rowHeight, headerHeight, getTitleHeight, hasExpressions: getContent().hasExpressions
+    });
     onRequestRowHeight({ height });
-  }, [dataSet.cases.length, getContent, onRequestRowHeight, readOnly]);
+  }, [rows, getContent, rowHeight, headerHeight, getTitleHeight, onRequestRowHeight, readOnly]);
 
   /*
    * content change functions
@@ -71,7 +78,8 @@ export const useContentChangeHandlers = ({
   const setColumnName = useCallback((column: TColumn, columnName: string) => {
     if (readOnly) return;
     getContent().setAttributeName(column.key, columnName);
-  }, [readOnly, getContent]);
+    requestRowHeight();
+  }, [readOnly, getContent, requestRowHeight]);
 
   const setColumnExpressions = useCallback((rawExpressions: Map<string, string>, xName: string) => {
     if (readOnly) return;
@@ -102,7 +110,8 @@ export const useContentChangeHandlers = ({
     if (readOnly) return;
     getContent().setCanonicalCaseValues([caseValues]);
     triggerRowChange();
-  }, [readOnly, getContent, triggerRowChange]);
+    requestRowHeight();
+  }, [readOnly, getContent, triggerRowChange, requestRowHeight]);
 
   const removeRows = useCallback((rowIds: string[]) => {
     if (readOnly) return;
@@ -118,7 +127,7 @@ export const useContentChangeHandlers = ({
   }, [getContent, readOnly]);
 
   return { onSetTableTitle: setTableTitle, onSetColumnName: setColumnName, onSetColumnExpressions: setColumnExpressions,
-          onAddColumn: addColumn, onRemoveColumn: removeColumn,
+          onAddColumn: addColumn, onRemoveColumn: removeColumn, requestRowHeight,
           onAddRows: addRows, onUpdateRow: updateRow, onRemoveRows: removeRows,
           onLinkGeometryTile: linkGeometryTile, onUnlinkGeometryTile: unlinkGeometryTile };
 };

@@ -34,25 +34,6 @@ export function defaultTableContent(props?: IDefaultContentOptions) {
                           } as SnapshotIn<typeof TableContentModel>);
 }
 
-interface IGetTableContentHeight {
-  dataRows: number;
-  rowHeight?: number;
-  readOnly?: boolean;
-  hasExpressions?: boolean;
-  padding?: number;
-}
-export const getTableContentHeight = ({
-  dataRows, rowHeight, readOnly, hasExpressions, padding
-}: IGetTableContentHeight) => {
-  const kDefaultRowHeight = 34;
-  const kDefaultPadding = 10;
-  const headerRows = 2 + (hasExpressions ? 1 : 0);
-  const inputRows = readOnly ? 0 : 1;
-  const kBorders = 2 * 2;
-  const _padding = 2 * (padding || kDefaultPadding);
-  return (headerRows + dataRows + inputRows) * (rowHeight || kDefaultRowHeight) + kBorders + _padding;
-};
-
 export const TableMetadataModel = ToolMetadataModel
   .named("TableMetadata")
   .props({

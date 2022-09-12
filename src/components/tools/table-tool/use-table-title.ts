@@ -9,9 +9,10 @@ interface IProps {
   readOnly?: boolean;
   onRequestUniqueTitle?: () => string | undefined;
   onSetTableTitle?: (title: string) => void;
+  requestRowHeight: () => void;
 }
 export const useTableTitle = ({
-  gridContext, dataSet, readOnly, onRequestUniqueTitle, onSetTableTitle
+  gridContext, dataSet, readOnly, onRequestUniqueTitle, onSetTableTitle, requestRowHeight
 }: IProps) => {
 
   const getTitle = useCallback(() => dataSet.name, [dataSet.name]);
@@ -25,6 +26,7 @@ export const useTableTitle = ({
   const onEndTitleEdit = (title?: string) => {
     if (!readOnly && (title != null) && (title !== editingTitle.current)) {
       onSetTableTitle?.(title);
+      requestRowHeight();
     }
   };
 

@@ -1,16 +1,18 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Tooltip } from "react-tippy";
 import AddColumnSvg from "../../../assets/icons/add/add.nosvgo.svg";
 import RemoveRowSvg from "../../../assets/icons/remove/remove.nosvgo.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
-import { TFormatterProps } from "./table-types";
+import { TColumn, TFormatterProps } from "./table-types";
 
 interface IUseControlsColumn {
+  controlsColumn?: TColumn;
   readOnly?: boolean;
   onAddColumn?: () => void;
-  onRemoveRow?: (rowId: string) => void;
+  onRemoveRows: (rowIds: string[]) => void;
 }
-export const useControlsColumn = ({ readOnly, onAddColumn, onRemoveRow }: IUseControlsColumn) => {
+export const useControlsColumn = ({ controlsColumn, readOnly, onAddColumn, onRemoveRows }: IUseControlsColumn) => {
+  const onRemoveRow = useCallback((rowId: string) => onRemoveRows([rowId]), [onRemoveRows]);
 
   const kTooltipDistance = -35; // required to get tooltip to line up just below the cell
   const addColumnTooltipOptions = useTooltipOptions({ title: "Add column", distance: kTooltipDistance });
@@ -33,7 +35,12 @@ export const useControlsColumn = ({ readOnly, onAddColumn, onRemoveRow }: IUseCo
   }, [onRemoveRow, readOnly, removeRowTooltipOptions]);
   ControlsRowFormatter.displayName = "ControlsRowFormatter";
 
-  return { ControlsHeaderRenderer, ControlsRowFormatter };
+  useEffect(() => {
+    if (controlsColumn) {
+      controlsColumn.headerRenderer = ControlsHeaderRenderer;
+      controlsColumn.formatter = ControlsRowFormatter;
+    }
+  }, [controlsColumn, ControlsHeaderRenderer, ControlsRowFormatter]);
 };
 
 interface IAddColumnButtonProps {

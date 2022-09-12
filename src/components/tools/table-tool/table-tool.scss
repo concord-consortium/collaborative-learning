@@ -23,8 +23,7 @@ $controls-hover-background: #c0dfe7;
     height: 100%;
 
     .table-title {
-      position: absolute;
-      left: $index-column-width - 1px;
+      margin-left: $index-column-width - 1px;
       max-width: calc(100% - #{$index-column-width} + #{$table-padding});
       height: $row-height;
       color: $charcoal-dark-2;
@@ -89,8 +88,6 @@ $controls-hover-background: #c0dfe7;
     --row-selected-background-color: #{$highlight-blue-25};
     --selection-color: #{$highlight-blue};
 
-    position: absolute;
-    top: $row-height;
     width: calc(var(--row-width) + #{$platform-scrollbar-width});
     max-width: calc(100% + #{$table-padding});
     height: calc(100% - #{$row-height});
@@ -219,7 +216,6 @@ $controls-hover-background: #c0dfe7;
         padding: 0;
         .remove-row-button {
           width: $controls-column-width;
-          height: $row-height;
           display: none;  // overridden when tile is selected
           justify-content: center;
           align-items: center;
@@ -255,6 +251,7 @@ $controls-hover-background: #c0dfe7;
       }
     }
     .rdg-cell {
+      padding: 0;
       input {
         text-align: center;
       }
@@ -264,6 +261,9 @@ $controls-hover-background: #c0dfe7;
       }
       &.selected-column {
         background-color: var(--row-selected-background-color);
+      }
+      &.rdg-cell-resizable {
+        padding: 0;
       }
     }
   }
