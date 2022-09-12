@@ -24,7 +24,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
   model, documentContent, toolTile, currEditAttrId,
   onIsEnabled, setImageUrlToAdd, handleDeleteValue, ...others
   }: IProps) => {
-    const buttonsEnabled = onIsEnabled() && !!currEditAttrId;
+
     const content = model.content as DataCardContentModelType;
     const currentCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
     const enabled = onIsEnabled();
@@ -36,6 +36,12 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
        enabled,
        ...others
   });
+
+  const readyForEdit = () => {
+   return !!currEditAttrId && content.getToolBarOn();
+  };
+
+  const buttonsEnabled = onIsEnabled() && readyForEdit();
 
   const uploadImage = (file: File) => {
     gImageMap.addFileImage(file)

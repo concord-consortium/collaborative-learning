@@ -46,13 +46,20 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   imageUrlSync();
 
+  useEffect(()=>{
+    setValueCandidate(valueStr);
+  },[caseId]);
+
   useEffect(() => {
+    //getValue();
     if (currEditAttrId !== attrKey) {
       setEditFacet("");
     }
   }, [attrKey, currEditAttrId]);
 
   useEffect(() => {
+    const advancedToNewCard = getValue() === "" && valueCandidate !== "";
+    advancedToNewCard && setValueCandidate("");
     setEditFacet("");
   }, [valueStr]);
 
@@ -84,22 +91,31 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         }
         setEditFacet("");
         break;
+      case "Tab":
+        handleCompleteValue();
+        handleCompleteName();
+        setEditFacet("");
+        break;
     }
   };
 
   const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
+    if (readOnly){
+      return;
+    }
     setCurrEditAttrId(attrKey);
-    const facet = event.currentTarget.classList[0];
-    const editing = event.currentTarget.classList[2];
-    activateInput(facet as EditFacet, editing === "editing");
-    // allow to toggle on and off highlight of all text
-    const myInput = event.currentTarget.children[0] as HTMLInputElement;
-    if(myInput.tagName === "INPUT"){
-      const isHighlighted = myInput.selectionStart === 0;
-      const valLength = myInput.value.length;
-      if (isHighlighted && valLength > 0){
-        myInput.setSelectionRange(valLength, valLength, "forward");
-      }
+    const facet = event.currentTarget.classList[0] as EditFacet;
+    const isEditing = event.currentTarget.classList[2] === "editing";
+    activateInput(facet as EditFacet, isEditing);
+  };
+
+  const activateInput = (facet: EditFacet, isEditing: boolean) => {
+    setEditFacet(facet);
+    if (facet === "name" && !isEditing){
+      setLabelCandidate(getLabel());
+    }
+    if (facet === "value" && !isEditing){
+      setValueCandidate(getValue());
     }
   };
 
@@ -119,17 +135,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       caseId && content.setAttValue(caseId, attrKey, valueCandidate);
     }
     setEditFacet("");
-  };
-
-  const activateInput = (facet: EditFacet, editing: boolean) => {
-    setEditFacet(facet);
-    if (facet === "name" && !editing){
-      setLabelCandidate(getLabel());
-    }
-    if (facet === "value" && !editing){
-      setValueCandidate(getValue());
-    }
-    setCurrEditAttrId(attrKey);
   };
 
   function deleteAttribute(){
@@ -159,16 +164,13 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     showAlert();
   };
 
-  const showInput = () => {
-    return !gImageMap.isImageUrl(valueStr) && editFacet === "value" && !readOnly;
-  };
-
-  const showText = () => {
-    return !gImageMap.isImageUrl(valueStr) && editFacet !== "value";
-  };
-
-  const showImage = () => {
+  const valueIsImage = () => {
     return gImageMap.isImageUrl(valueStr);
+  };
+
+  // this allows user to edit next field when arriving by tab
+  const handleValueInputFocus = () => {
+    activateInput("value", true);
   };
 
   const pairClassNames = classNames(
@@ -188,9 +190,13 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     {"has-image": gImageMap.isImageUrl(valueStr)}
   );
 
+  const valueInputClassNames = classNames(
+    `value-input ${attrKey}`,
+  );
+
   const deleteAttrButtonClassNames = classNames(
     `delete-attribute ${attrKey}`,
-    { "show": editFacet === "value" || editFacet === "name" }
+    { "show": currEditAttrId === attrKey }
   );
 
   const cellLabelClasses = classNames(
@@ -200,7 +206,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   return (
     <div className={pairClassNames}>
-
       <div className={labelClassNames} onClick={handleClick}>
         { !readOnly && editFacet === "name"
           ? <input
@@ -217,25 +222,34 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       <div className={valueClassNames} onClick={handleClick}>
-        { showInput() &&
+        {/* author view: text is in input, image is in a div */}
+        { !readOnly && !valueIsImage() &&
           <input
+            className={valueInputClassNames}
             type="text"
-            className="input"
             value={valueCandidate}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             onBlur={handleCompleteValue}
             onDoubleClick={handleInputDoubleClick}
+            onFocus={handleValueInputFocus}
           />
         }
-        { showText() &&
+        { !readOnly && valueIsImage() &&
+          <img src={imageUrl} className="image-value" />
+        }
+
+        {/* read-only view: text is in div, image is in a div */}
+        { !valueIsImage() && readOnly &&
           <div className="cell-value">{valueStr}</div>
         }
-        { showImage() &&
+        { valueIsImage() && readOnly &&
           <img src={imageUrl} className="image-value" />
         }
       </div>
-      <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
+      { !readOnly &&
+        <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
+      }
     </div>
   );
 });

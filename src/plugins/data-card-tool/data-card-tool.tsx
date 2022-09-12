@@ -33,6 +33,21 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
     }
   }, [content, model.id, onRequestUniqueTitle]);
 
+  const setToolBarAvailable = (e: any) => {
+    const clickedOn = e.target.classList[0];
+    if (!clickedOn){
+      return;
+    }
+    const editTargets = ["value-input", "image-value"];
+    const editable = editTargets.includes(clickedOn);
+    if (editable){
+      content.setToolBarOn(true);
+    }
+    if (clickedOn.length > 0 && !editable){
+      content.setToolBarOn(false);
+    }
+  };
+
   function nextCase(){
     if (content.caseIndex < content.totalCases - 1) {
       content.setCaseIndex(content.caseIndex + 1);
@@ -149,7 +164,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
 
   return (
-    <div className="data-card-tool">
+    <div className="data-card-tool" onClick={setToolBarAvailable}>
       <DataCardToolbar
         model={model}
         documentContent={documentContent}
@@ -187,10 +202,12 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
             <button className={ previousButtonClasses } onClick={previousCase}></button>
             <button className={ nextButtonClasses } onClick={nextCase}></button>
           </div>
-          <div className="add-remove-card-buttons">
-            <AddIconButton className={addCardClasses} onClick={addNewCase} />
-            <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
-          </div>
+          { !readOnly &&
+            <div className="add-remove-card-buttons">
+              <AddIconButton className={addCardClasses} onClick={addNewCase} />
+              <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
+            </div>
+          }
         </div>
       </div>
       <div className="data-area">
@@ -207,7 +224,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
           />
         }
       </div>
-      { shouldShowAddField &&
+      { shouldShowAddField && !readOnly &&
         <AddIconButton className="add-field" onClick={handleAddField} /> }
     </div>
   );
