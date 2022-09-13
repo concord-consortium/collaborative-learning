@@ -178,12 +178,13 @@
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
-                                  "<h2>CHAPTER I: DEAUNDRE</h2>"
+                                  "<h2>CHAPTER 1: DEAUNDRE</h2>"
                                 ]
                               }
                             },
                             {
-                              "id": "YucuBkFbAyZsHnnW",
+                              "id": "1ZEUeTdsUNuAcRx3",
+                              "title": "Text 1",
                               "content": {
                                 "type": "Text",
                                 "format": "html",
@@ -214,9 +215,28 @@
                                   "<p><strong>Nicole:</strong> &#x27;<em>Hey. Did you hear about Deaundre?</em>&#x27;</p>",
                                   "<p><strong>Rakesh: </strong>“<em>No. Is everything alright?</em>”</p>",
                                   "<p><strong>Nicole:</strong> “<em>He had a heart attack while he was here. He’s at the hospital right now.</em>” </p>",
-                                  "<p>Rakesh felt the concern take over him. He and Deaundre have a lot in common. They both were the same age, had two kids, and both loved baseball. Deaundre was one of those guys who worked just as hard as everyone else but did it with a smile on his face - he never let that smile drop. Knowing he, of all people, was at the hospital was really upsetting. </p>",
+                                  "<p>Rakesh felt the concern take over him. He and Deaundre have a lot in common. They both were the same age, had two kids, and both loved baseball. Deaundre was one of those guys who worked just as hard as everyone else but did it with a smile on his face - he never let that smile drop. Knowing he, of all people, was at the hospital was really upsetting. </p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "oxuSlTxkgkNJ5kIp",
+                              "title": "Deandre Recovering at the Hospital",
+                              "content": {
+                                "type": "Image",
+                                "url": "curriculum/bio4community/images/Rakesh_S1.jpg",
+                                "filename": "curriculum/bio4community/images/Rakesh_S1.jpg"
+                              }
+                            },
+                            {
+                              "id": "jOQmKJkzortkYWpb",
+                              "title": "Text 2",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
                                   "<p>Rakesh decided to visit Deaundre at the hospital before work the next day, stopping at a local bodega to grab him a smiling bear wearing a fedora that kind of looked like him. </p>",
-                                  "<p>       “<em>Knock knock,</em>” </p>",
+                                  "<p><em>Knock knock,</em> </p>",
                                   "<p>Rakesh entered with the bear held up to his face. Deaundre still had that smile plastered on. The two of them sat and talked for a while. Deaundre explained that the heart attack was due to a blockage in his blood vessels. </p>",
                                   "<p><strong>Deaundre:</strong> “<em>Yeah, the doc keeps saying I overworked myself and the stress of it all led to blockages or at least didn’t help ‘em.</em>” </p>",
                                   "<p>This caught Rakesh’s attention. </p>",
@@ -363,6 +383,15 @@
                                     "<p>Rakesh: “<em>Wait. I didn’t know you have a blog! That’s awesome!</em>”</p>",
                                     "<p>Meera: “<em>Well clearly you don’t check the family group text properly because I’ve sent many links from my blog for everyone to read!</em>&quot;</p>"
                                   ]
+                                }
+                              },
+                              {
+                                "id": "eaOhBP2AVpdYRElI",
+                                "title": "Rakesh and Meera at Nanni's Party",
+                                "content": {
+                                  "type": "Image",
+                                  "url": "curriculum/bio4community/images/Rakesh_S2.jpg",
+                                  "filename": "curriculum/bio4community/images/Rakesh_S2.jpg"
                                 }
                               },
                               {
@@ -570,11 +599,20 @@
                           "content": {
                             "tiles": [
                               {
+                                "id": "Fv46vapPHCmxA2GY",
+                                "title": "Rakesh in the Kitchen with Kabir and Ajay",
+                                "content": {
+                                  "type": "Image",
+                                  "url": "curriculum/bio4community/images/Rakesh_S3.jpg",
+                                  "filename": "curriculum/bio4community/images/Rakesh_S3.jpg"
+                                }
+                              },
+                              {
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<p><strong>Chapter 6: CHILDREN ARE THE FUTURE</strong></p>",
+                                    "<h2>Chapter 6: CHILDREN ARE THE FUTURE</h2>",
                                     "<p>A few minutes after finishing the zoom conversation with the scientist, Rakesh heard the front door opening. He could hear Ajay and Kabir throwing their backpacks onto the ground, taking off their shoes and running into the kitchen to make a snack for themselves. Rakesh went downstairs and joined them in the kitchen. </p>",
                                     "<p>Rakesh: “So, what’d you boys do at school today? </p>",
                                     "<p>Kabir: Nothing really. Senior year is kinda boring. </p>",
@@ -628,7 +666,7 @@
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
-                                  "<h2>CHAPTER I: MATH TEST</h2>",
+                                  "<h2>CHAPTER 1: MATH TEST</h2>",
                                   "<p>Estrella loved her family to bits and pieces. She would go to the ends of the earth for them. Her mom and step-dad worked hard every day to put a roof over their head. This often meant that they were at work for long hours and so Estrella’s abuela stayed home and watched over her and her 3 younger siblings. Abuela did a lot for them but sometimes it got hard to take care of so many things, so Estrella took it upon herself to help out around the house. She loved doing it because on top of getting to help her Abuela, it also meant that sometimes she got to be in charge of her siblings. </p>",
                                   "<p>Her younger brothers and sister could be so annoying sometimes and yet so cute at the same time. She often picked them up from their elementary school and they would tell her everything that happened during their day with bright eyes and wide smiles which warmed Estrella’s heart. Once they got home she walked their family dog, and then spent the afternoon making sure her siblings did their homework and daily chores before dinner. Their family tried to eat together every evening and Abuela’s cooking was the best. By the time Estrella finished eating dinner and doing the dishes, it was usually already 7pm. She would then often chat or play video games with her friends for a while. She loved hanging out with her two best friends. Needless to say, this meant Estrella stayed up until midnight most days to get her work done. Sometimes she was so tired she wished she could just go to sleep but her grades were important to her and she was doing well in school. </p>",
                                   "<p>However, when she was in school she often had trouble focusing. She really did want to focus in class, but sometimes the teacher’s voice became nothing but white noise and Estrella would zone out. She tried to make up for it by working hard on her homework, but homework alone does not prepare someone for tests. She needed to be able to pay attention in class if she wanted to keep her grades up. </p>"
@@ -640,11 +678,11 @@
                               "title": "Estrella in School",
                               "content": {
                                 "type": "Image",
-                                "url": "curriculum/bio4community/images/estrella_s1__1__720.jpg"
+                                "url": "curriculum/bio4community/images/Estrella_S1.jpg"
                               }
                             },
                             {
-                              "id": "A6NIkCpczknh4gHU",
+                              "id": "9u9n_OSFrp-ME0-_",
                               "content": {
                                 "type": "Text",
                                 "format": "html",
@@ -700,6 +738,15 @@
                               }
                             },
                             {
+                              "id": "csP7M5wzDeP4cvS-",
+                              "title": "Estrella Talks to Her Abuela",
+                              "content": {
+                                "type": "Image",
+                                "url": "curriculum/bio4community/images/Estrella_S3.jpg",
+                                "filename": "curriculum/bio4community/images/Estrella_S3.jpg"
+                              }
+                            },
+                            {
                               "id": "tdD-dZKGiJAFSXQt",
                               "content": {
                                 "type": "Text",
@@ -711,6 +758,29 @@
                                   "<p>Your answer:</p>",
                                   "<p></p>",
                                   "<p></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "VLdaLz9dZMeDBuu6",
+                              "title": "Text 3",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><em>— Drag the  EvidenceTable tile into your Learning Log to write your answers —</em></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "B6dGOGykU71wUydx",
+                              "content": {
+                                "type": "Table",
+                                "name": "Evidence Table",
+                                "columns": [
+                                  {"name":"Evidence","values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                                  {"name":"What did you learn from it?","values":["","","","",""]},
+                                  {"name":"Your questions now","values":["","","","",""]}
                                 ]
                               }
                             },
@@ -744,19 +814,41 @@
                           "content": {
                             "tiles": [
                               {
+                                "id": "Mc8a9uMzF02NItpi",
+                                "title": "Text 1",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<p>CHAPTER 2: LEARNING FROM MS. GUERRA</p>",
-                                    "<p>The next day after science class, María stayed behind and spoke with Ms. Guerra. She told her openly and honestly about how much she had been struggling to focus and how she wanted to be able to do better. In response, Ms. Guerra told María that high school could be tough and that she was glad that María was asking for help. She also had an interesting suggestion:</p>",
+                                    "<h2>CHAPTER 2: LEARNING FROM MS. GUERRA</h2>",
+                                    "<p>The next day after science class, María stayed behind and spoke with Ms. Guerra. She told her openly and honestly about how much she had been struggling to focus and how she wanted to be able to do better. </p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "FveUSbKnR7roxoCm",
+                                "title": "Estrella Talks to Ms. Guerra",
+                                "content": {
+                                  "type": "Image",
+                                  "url": "curriculum/bio4community/images/Estrella_S2.jpg",
+                                  "filename": "curriculum/bio4community/images/Estrella_S2.jpg"
+                                }
+                              },
+                              {
+                                "id": "m6WtnTcPHmKThpIa",
+                                "title": "Text 2",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>In response, Ms. Guerra told María that high school could be tough and that she was glad that María was asking for help. She also had an interesting suggestion:</p>",
                                     "<p>Ms. Guerra: If your issue is being able to focus, you need to work on growing more connections between the neurons in your brain! </p>",
                                     "<p>María didn’t really understand what that meant. Ms. Guerra could sense her confusion based on the blank stare María gave her. Figuring María needed more of an explanation, Ms. Guerra pulled out slide show that she had used when she taught college courses a few years ago. Crowding around the computer, the two of them clicked on the link for the: “How our Brains Think” </p>",
                                     "<p></p>",
-                                    "<p><strong>Watch the slide show- EVIDENCE 1-How our Brains Think - in your Resource Library. </strong></p>",
-                                    "<p><strong>Discuss the animation in your group and together, answer the questions in the Resource Library. </strong></p>",
+                                    "<p><strong>Watch the slide show - EVIDENCE 1 - How our Brains Think - in your Resource Library. </strong></p>",
+                                    "<p><strong>Discuss the animation in your group and together, then answer the questions below by dragging the question tile into your document.</strong></p>",
                                     "<p><strong>Write what you learned from this evidence in your table.</strong></p>",
-                                    "<p><strong></strong></p>"
+                                    "<p></p>"
                                   ]
                                 }
                               },
@@ -974,7 +1066,7 @@
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
-                                  "<h2>CHAPTER I: A NEW PHASE IN LIFE</h2>",
+                                  "<h2>CHAPTER 1: A NEW PHASE IN LIFE</h2>",
                                   "<p></p>",
                                   "<p>Being a law student is hard work, especially for Felix, who just started his final year of law school. He loved the independence that came with life in his mid 20s. He got to choose his own classes, meet new people who were also interested in law, and finally got to live with his boyfriend, Josue. Moving out of his parents’ home and into an apartment with Josue, was such an exciting step, something he had only seen in movies. But at the same time, law school life also meant that he had to pay for his college fees, course textbooks, and of course, rent and groceries! Moving away from home, living with his boyfriend, and starting this new phase in his life meant he had new responsibilities. </p>"
                                 ]
@@ -1290,7 +1382,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>CHAPTER 4: PROFESSOR SMITH</p>",
+                        "<h2>CHAPTER 4: PROFESSOR SMITH</h2>",
                         "<p></p>",
                         "<p>As he read the report, Felix’s heart was racing, how stressed was he? Is Josue right about him? The test showed that his cortisol levels were way too high. He was, in fact, very stressed.</p>",
                         "<p></p>",
@@ -1344,7 +1436,7 @@
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<p>CHAPTER 5: JOSUE’S SOLUTION</p>",
+                                    "<h2>CHAPTER 5: JOSUE’S SOLUTION</h2>",
                                     "<p>The report helped Felix piece the story together. He now understood what was happening to him. Josue was right all along, stress was making him sick. Now the question was what on Earth could he do about it?</p>",
                                     "<p>He told Josue everything he figured out. He expected him to be smug with satisfaction that he won this argument. Josue wasn’t. Instead, he handed him his phone. </p>"
                                   ]
