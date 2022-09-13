@@ -38,6 +38,14 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
     );
   };
 
+  // This should delay the showing the playback controls until the history is actually
+  // loaded into documentToShow
+  const historyLength = treeManager.document.history.length;
+
+  const actuallyShowPlaybackControls = showPlaybackControls && (historyLength !== undefined) && (historyLength > 0);
+
+  console.log("Rendering Playback", showPlaybackControls, historyLength, actuallyShowPlaybackControls);
+
   // const disablePlayback = history.length < 1;
   // FIXME: HACK for now always enable playback so we can use the opening of the playback to 
   // trigger the load of the history
@@ -48,7 +56,7 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
   return (
     <div className={playbackComponentClass} data-testid="playback-component">
       {renderPlaybackToolbarButton()}
-      {showPlaybackControls && <PlaybackControlComponent treeManager={treeManager} />}
+      {actuallyShowPlaybackControls && <PlaybackControlComponent treeManager={treeManager} />}
     </div>
   );
 });

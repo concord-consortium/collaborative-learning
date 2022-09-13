@@ -14,9 +14,10 @@ import { DocumentCollectionByType } from "../thumbnail/documents-type-collection
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { NetworkDocumentsSection } from "./network-documents-section";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
+import { LoadDocumentHistory } from "./load-document-history";
+import { DEBUG_HISTORY } from "../../lib/debug";
 
 import "./section-document-or-browser.sass";
-import { LoadDocumentHistory } from "./load-document-history";
 
 const kNavItemScale = 0.11;
 const kHeaderHeight = 55;
@@ -220,19 +221,15 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
 
   const getDocumentToShow = () => {
     if (referenceDocument) {
-      const origTreeManager = referenceDocument.treeManagerAPI as Instance<typeof TreeManager>;
       const docCopy = createDocumentModel(getSnapshot(referenceDocument));
-      const historySnapshot = (getSnapshot(origTreeManager.document)) as unknown as CDocumentType;
-      const docCopyManager = docCopy.treeManagerAPI as Instance<typeof TreeManager>;
-      // TODO: rather than doing this we want to add our hidden component which is fetching the 
-      // history and then updating the change document when it is all there.
-      // At the same time we need to show some kind of progress information as it is loading this
-      // history.  
-      // I think all of this logic would make more sense if it was inside of the history component
+      // TODO: I think all of this logic would make more sense if it was inside of the history component
       // itself.
       // If we don't put it there I think what we need to do is pass som
-      docCopyManager.setChangeDocument(historySnapshot);
-      docCopyManager.setCurrentHistoryIndex(origTreeManager.document.history.length);
+
+      // Make a variable available with the current history document
+      if (DEBUG_HISTORY) {
+        (window as any).currentHistoryDocument = docCopy;
+      }
       return docCopy;
     }
   };

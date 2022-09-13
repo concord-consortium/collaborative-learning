@@ -185,6 +185,12 @@ export const TreeManager = types
       const snapshot = getSnapshot(entry);
       console.log("trying to write the history entry to the doc ref", documentPath, docRef.id, snapshot);
       docRef.set({
+        // FIXME: this use of a timestamp isn't good. This is because there could be a delay here
+        // A concrete example is when the creation of the document in firestore takes a while
+        // The first entry will be delayed until this happens. And the later entries might sneak
+        // in ahead of the first entry.
+        // It seems the best option is an incrementing index in the document that is modified in a 
+        // transaction when each event is sent up.
         index: firestore.timestamp(),
         entry: JSON.stringify(snapshot)}
       );

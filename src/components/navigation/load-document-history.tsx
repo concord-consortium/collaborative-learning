@@ -39,6 +39,7 @@ export const LoadDocumentHistory: React.FC<IProps> = ({ document }) => {
       const treeManager = (document?.treeManagerAPI as TreeManagerType);
       const cDocument = CDocument.create({history: data});
       treeManager.setChangeDocument(cDocument);
+      treeManager.setCurrentHistoryIndex(cDocument.history.length);
     }
   });
 
