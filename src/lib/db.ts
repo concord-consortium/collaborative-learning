@@ -131,8 +131,6 @@ export class DB {
         }
       }
 
-      firebase.firestore().settings({ignoreUndefinedProperties: true});
-
       if (urlParams.firestore) {
         // pass `firestore=emulator` to test against firestore emulator instance
         const url = new URL(urlParams.firestore === "emulator"
