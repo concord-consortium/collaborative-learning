@@ -37,18 +37,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [editFacet, setEditFacet] = useState<EditFacet>("");
   const [imageUrl, setImageUrl] = useState("");
 
-  const barfState = () => {
-    //console.log("---")
-    //console.log("attrKey: ", attrKey)
-    //console.log("caseId: ", caseId)
-    //console.log("currEditAttrId: ", currEditAttrId);
-    //console.log("content: ", content);
-   // console.log("valueStr: ", valueStr);
-    console.log("editFacet: ", editFacet);
-    //console.log("labelCandidate: ", labelCandidate);
-    //console.log("valueCandidate: ", valueCandidate);
-    //console.log("---")
-  }
+
   const imageUrlSync = () => {
     gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
     .then((image)=>{
@@ -100,7 +89,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
-    console.log("HANDLE CLICK ON: ", event.currentTarget.classList)
+    //console.log("HANDLE CLICK ON: ", event.currentTarget.classList)
 
     setCurrEditAttrId(attrKey);
 
@@ -148,7 +137,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleCompleteValue = () => {
-    // console.log("handleCompleteValue")
+    console.log("handleCompleteValue")
     if (valueCandidate !== getValue()) {
       caseId && content.setAttValue(caseId, attrKey, valueCandidate);
     }
