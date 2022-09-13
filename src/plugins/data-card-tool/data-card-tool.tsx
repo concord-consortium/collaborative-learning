@@ -26,12 +26,12 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
   const shouldShowAddField = !readOnly && isTileSelected;
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === containerRef.current){
-      console.log("data-card-tool: set editFacet to empty string")
-    }
-  };
+  // const containerRef = useRef<HTMLDivElement>(null);
+  // const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  //   if (e.target === containerRef.current){
+  //     console.log("data-card-tool: set editFacet to empty string")
+  //   }
+  // };
 
   useEffect(() => {
     if (!content.title) {
@@ -156,7 +156,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
 
   return (
-    <div className="data-card-tool" ref={containerRef} onClick={handleBackgroundClick}>
+    <div className="data-card-tool" /* ref={containerRef} onClick={handleBackgroundClick} */>
       <DataCardToolbar
         model={model}
         documentContent={documentContent}
@@ -211,6 +211,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
             setCurrEditAttrId={setCurrEditAttrId}
             imageUrlToAdd={imageUrlToAdd}
             setImageUrlToAdd={setImageUrlToAdd}
+
           />
         }
       </div>

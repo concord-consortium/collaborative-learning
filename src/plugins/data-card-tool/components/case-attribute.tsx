@@ -37,6 +37,18 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [editFacet, setEditFacet] = useState<EditFacet>("");
   const [imageUrl, setImageUrl] = useState("");
 
+  const barfState = () => {
+    //console.log("---")
+    //console.log("attrKey: ", attrKey)
+    //console.log("caseId: ", caseId)
+    //console.log("currEditAttrId: ", currEditAttrId);
+    //console.log("content: ", content);
+   // console.log("valueStr: ", valueStr);
+    console.log("editFacet: ", editFacet);
+    //console.log("labelCandidate: ", labelCandidate);
+    //console.log("valueCandidate: ", valueCandidate);
+    //console.log("---")
+  }
   const imageUrlSync = () => {
     gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
     .then((image)=>{
@@ -88,10 +100,18 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
+    console.log("HANDLE CLICK ON: ", event.currentTarget.classList)
+
     setCurrEditAttrId(attrKey);
-    const facet = event.currentTarget.classList[0];
+
+    const facet = event.currentTarget.classList[0] as EditFacet;
+
     const editing = event.currentTarget.classList[2];
+    // console.log(facet);
+
+    //setEditFacet(facet as EditFacet)
     activateInput(facet as EditFacet, editing === "editing");
+
     // allow to toggle on and off highlight of all text
     const myInput = event.currentTarget.children[0] as HTMLInputElement;
     if(myInput.tagName === "INPUT"){
@@ -101,6 +121,18 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         myInput.setSelectionRange(valLength, valLength, "forward");
       }
     }
+  };
+
+  const activateInput = (facet: EditFacet, editing: boolean) => {
+
+    setEditFacet(facet);
+    if (facet === "name" && !editing){
+      setLabelCandidate(getLabel());
+    }
+    if (facet === "value" && !editing){
+      setValueCandidate(getValue());
+    }
+    setCurrEditAttrId(attrKey);
   };
 
   const handleInputDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
@@ -116,23 +148,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleCompleteValue = () => {
-    console.log("handleCompleteValue")
+    // console.log("handleCompleteValue")
     if (valueCandidate !== getValue()) {
       caseId && content.setAttValue(caseId, attrKey, valueCandidate);
     }
     setEditFacet("");
-  };
-
-  const activateInput = (facet: EditFacet, editing: boolean) => {
-    setEditFacet(facet);
-    if (facet === "name" && !editing){
-      setLabelCandidate(getLabel());
-    }
-    if (facet === "value" && !editing){
-      setValueCandidate(getValue());
-    }
-    setCurrEditAttrId(attrKey);
-    console.log("finish activateInput - here?")
   };
 
   function deleteAttribute(){
