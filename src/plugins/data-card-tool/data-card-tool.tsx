@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { useUIStore } from "../../hooks/use-stores";
 import { DataCardContentModelType } from "./data-card-content";
@@ -25,6 +25,13 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   const shouldShowAddCase = !readOnly && isTileSelected;
   const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
   const shouldShowAddField = !readOnly && isTileSelected;
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === containerRef.current){
+      console.log("data-card-tool: set editFacet to empty string")
+    }
+  };
 
   useEffect(() => {
     if (!content.title) {
@@ -149,7 +156,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
 
   return (
-    <div className="data-card-tool">
+    <div className="data-card-tool" ref={containerRef} onClick={handleBackgroundClick}>
       <DataCardToolbar
         model={model}
         documentContent={documentContent}
