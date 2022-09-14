@@ -666,7 +666,7 @@
         {
           "description": "Problem 2.1",
           "ordinal": 1,
-          "title": "Maria: Chapter 1",
+          "title": "Estrella: Chapter 1",
           "subtitle": "",
           "sections": [
             {
@@ -761,7 +761,7 @@
         {
           "description": "Problem 2.2",
           "ordinal": 2,
-          "title": "Maria: Chapter 2",
+          "title": "Estrella: Chapter 2",
           "subtitle": "",
           "sections": [
             {
@@ -990,6 +990,15 @@
                               "<p>Evidence 4: </p>"
                             ]
                           }
+                      },
+                      {
+                        "id": "m-F1uJTIfQlj-EET",
+                        "title": "Dr. Mackey's Email Response",
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/bio4community/images/DrMackeyEmail.png",
+                          "filename": "curriculum/bio4community/images/DrMackeyEmail.png"
+                        }
                       },
                       {
                         "id": "bio4TG02",

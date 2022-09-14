@@ -16,9 +16,9 @@
         "placeholder": "Work area for\nOverview section"
       },
       "teach": {
-        "initials": "LC",
+        "initials": "IS",
         "title": "Instructional Sequence",
-        "placeholder": "Work area for\nTeach section"
+        "placeholder": "Work area for\nInstructional Sequence section"
       }
     },
     "investigations": [
