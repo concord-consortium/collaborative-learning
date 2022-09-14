@@ -88,6 +88,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
+    setCurrEditAttrId(attrKey);
     const facet = event.currentTarget.classList[0] as EditFacet;
     const inputHere = event.currentTarget.classList[2] === "editing";
 
@@ -98,6 +99,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const activateInput = (facet: EditFacet, inputHere: boolean) => {
 
     setEditFacet(facet);
+
+    console.log(" 2 currEditAttrId: ", currEditAttrId)
     if (facet === "name" && !inputHere){
       setLabelCandidate(getLabel());
     } else {
@@ -108,7 +111,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     } else {
       console.log('what state is this? 2')
     }
-    setCurrEditAttrId(attrKey);
+
   };
 
   const handleInputDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
