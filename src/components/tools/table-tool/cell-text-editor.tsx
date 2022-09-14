@@ -67,6 +67,7 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
+    <> <div>input showing</div>
     <input
       className={`rdg-text-editor ${RDG_INTERNAL_TEXT_EDITOR_CLASS}`}
       ref={autoFocusAndSelect}
@@ -83,5 +84,6 @@ export default function CellTextEditor<TRow, TSummaryRow = unknown>({
         }
       }}
     />
+    </>
   );
 }

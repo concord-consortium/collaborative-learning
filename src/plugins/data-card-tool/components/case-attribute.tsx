@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { gImageMap } from "../../../models/image-map";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataCardContentModelType } from "../data-card-content";
@@ -38,6 +38,16 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [imageUrl, setImageUrl] = useState("");
 
 
+  const valInRef = useRef<HTMLInputElement>();
+  console.log('render, valInRef', valInRef)
+
+  function autoFocusAndSelect(input: HTMLInputElement | null) {
+    input?.focus();
+    input?.select();
+  }
+
+  console.log("valInRef: ", valInRef);
+  console.log("valInRef.current", valInRef.current);
   const imageUrlSync = () => {
     gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
     .then((image)=>{
@@ -89,17 +99,15 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
-    //console.log("HANDLE CLICK ON: ", event.currentTarget.classList)
-
-    setCurrEditAttrId(attrKey);
-
     const facet = event.currentTarget.classList[0] as EditFacet;
+    const inputHere = event.currentTarget.classList[2] === "editing";
 
-    const editing = event.currentTarget.classList[2];
-    // console.log(facet);
+    if (!inputHere){
+      console.log("we should activate the input on the next re render")
+      console.log("event.currentTarget.children[0]: ", event.currentTarget.children[0]);
+    }
 
-    //setEditFacet(facet as EditFacet)
-    activateInput(facet as EditFacet, editing === "editing");
+    activateInput(facet as EditFacet, inputHere);
 
     // allow to toggle on and off highlight of all text
     const myInput = event.currentTarget.children[0] as HTMLInputElement;
@@ -112,14 +120,18 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   };
 
-  const activateInput = (facet: EditFacet, editing: boolean) => {
+  const activateInput = (facet: EditFacet, inputHere: boolean) => {
 
     setEditFacet(facet);
-    if (facet === "name" && !editing){
+    if (facet === "name" && !inputHere){
       setLabelCandidate(getLabel());
+    } else {
+      console.log('what state is this?')
     }
-    if (facet === "value" && !editing){
+    if (facet === "value" && !inputHere){
       setValueCandidate(getValue());
+    } else {
+      console.log('what state is this? 2')
     }
     setCurrEditAttrId(attrKey);
   };
@@ -183,6 +195,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     return gImageMap.isImageUrl(valueStr);
   };
 
+  const inputDisplayClassNames = classNames(
+    "input",
+    { "visible" : showInput() }
+  )
+
   const pairClassNames = classNames(
     `attribute-name-value-pair ${attrKey}`,
     {"editing": editFacet === "name" || editFacet === "value"},
@@ -228,18 +245,24 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         }
       </div>
 
+      {/* what to try next
+        1 maybe use a class and try display none over straight up not renderning, then, you could find it and .focus on it
+        2 look at useLayoutEffect and useMemo and useRef and useCallback...input stuff is in documentation!
+      */}
+
       <div className={valueClassNames} onClick={handleClick}>
-        { showInput() &&
+
           <input
+            ref={valInRef as any}
+            className={inputDisplayClassNames}
             type="text"
-            className="input"
             value={valueCandidate}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             onBlur={handleCompleteValue}
             onDoubleClick={handleInputDoubleClick}
           />
-        }
+
         { showText() &&
           <div className="cell-value">{valueStr}</div>
         }
