@@ -13,12 +13,12 @@ interface IProps {
 
 const _ImageComponent =
   React.forwardRef<HTMLDivElement, IProps>(({ content, style, onMouseDown, onUrlChange }, forwardedRef) => {
-
     // calls onUrlChange when image url changes in content
     useImageContentUrl(content, onUrlChange);
 
     return (
       <div className="image-frame">
+        dennis
         <div
           className="image-tool-image"
           ref={forwardedRef}

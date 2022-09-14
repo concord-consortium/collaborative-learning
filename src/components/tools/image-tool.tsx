@@ -21,8 +21,11 @@ import { hasSelectionModifier } from "../../utilities/event-utils";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { isPlaceholderImage } from "../../utilities/image-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
+import { HotKeys } from "../../utilities/hot-keys";
 
 import "./image-tool.sass";
+import { IActionHandlers } from "./geometry-tool/geometry-shared";
+// import {HotKeys} from "../../utilities/hot-keys";
 
 type IProps = IToolTileProps;
 
@@ -82,6 +85,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       });
   };
   private imageDragDrop: ImageDragDrop;
+  private hotKeys = new HotKeys();
 
   constructor(props: IProps) {
     super(props);
@@ -122,12 +126,10 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       }
     });
   }
-
   public componentWillUnmount() {
     this.resizeObserver.disconnect();
     this._isMounted = false;
   }
-
   public componentDidUpdate(prevProps: IProps, prevState: IState) {
     if (this.state.imageContentUrl) {
       this.updateImageUrl(this.state.imageContentUrl, this.state.imageFilename);
@@ -139,6 +141,14 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       this.setState({ requestedHeight: desiredHeight });
     }
   }
+
+  handleSetHandlers = (handlers: IActionHandlers) =>{
+    this.hotKeys.register({
+      "cmd-c": handlers.handleCopy,
+    });
+  };
+
+
 
   public render() {
     const { documentContent, toolTile, readOnly, scale } = this.props;
@@ -155,13 +165,20 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       imageDisplayStyle.width = `${defaultImagePlaceholderSize.width}px`;
       imageDisplayStyle.height = `${defaultImagePlaceholderSize.height}px`;
     }
+
+    console.log("render <ImageToolComponent>");
     return (
       <>
         <div className={classNames("image-tool", readOnly ? "read-only" : "editable")}
           data-image-tool-id={this.imageToolId}
           onMouseDown={this.handleMouseDown}
           onDragOver={this.handleDragOver}
-          onDrop={this.handleDrop} >
+          onDrop={this.handleDrop}
+          tabIndex={0}
+          onKeyDown={(e) => this.hotKeys.dispatch(e)}
+        >
+          <button onClick={()=> this.pasteImage()}/>
+
           {isLoading && <div className="loading-spinner" />}
           <ImageToolbar
             onRegisterToolApi={(toolApi: IToolApi) => this.toolbarToolApi = toolApi}
@@ -173,6 +190,8 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             onUploadImageFile={this.handleUploadImageFile}
           />
           {this.renderTitleArea()}
+          <img src="https://s3-media0.fl.yelpcdn.com/bphoto/dVK5T0pSRUHAOGfKK1GH9g/o.jpg"></img>
+
           <ImageComponent
             ref={elt => this.imageElt = elt}
             content={this.getContent()}
@@ -181,10 +200,22 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             onUrlChange={this.handleUrlChange}
           />
         </div>
-        <EmptyImagePrompt show={showEmptyImagePrompt} />
+          <EmptyImagePrompt show={showEmptyImagePrompt} />
       </>
     );
   }
+
+  private async pasteImage(){
+    const clipboardContents = await navigator.clipboard.read();
+    console.log("clipboardContents in pasteImage is:", clipboardContents);
+  }
+
+  private pasteImage2(e: React.KeyboardEvent<HTMLDivElement>){
+    console.log("pasteImage2 clicked with event e", e);
+    // const clipboardContents = await navigator.clipboard.read();
+  }
+
+
 
   private handleIsEnabled = () => {
     const { model: { id }, readOnly } = this.props;

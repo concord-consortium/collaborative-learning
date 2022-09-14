@@ -798,6 +798,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   // copy to clipboard
   private handleCopy = () => {
+    console.log("handleCopy");
     const objects = this.copySelectedObjects();
     if (objects) {
       const content = this.getContent();
@@ -817,6 +818,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   // paste from clipboard
   private handlePaste = () => {
+    console.log("handlePaste");
     const content = this.getContent();
     const { clipboard } = this.stores;
     const objects = clipboard.getTileContent(content.type);
@@ -827,6 +829,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   // paste specified object content
   private pasteObjects = (pasteContent: IPasteContent) => {
+    console.log("pasteObjects");
+
     const content = this.getContent();
     const { readOnly } = this.props;
     const { board } = this.state;

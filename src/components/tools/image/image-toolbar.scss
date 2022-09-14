@@ -5,6 +5,7 @@
   border: $toolbar-border;
   border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
   z-index: $toolbar-z-index;
+  background-color: rgb(125, 125, 169);
 
   &.disabled {
     display: none;
