@@ -149,7 +149,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
 
   return (
-    <div className="data-card-tool" /* ref={containerRef} onClick={handleBackgroundClick} */>
+    <div className="data-card-tool">
       <DataCardToolbar
         model={model}
         documentContent={documentContent}

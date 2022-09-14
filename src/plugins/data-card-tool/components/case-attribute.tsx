@@ -53,6 +53,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   }, [attrKey, currEditAttrId]);
 
   useEffect(() => {
+    if (getValue() === "" && valueCandidate !== ""){
+      // when we use external delete tool, candidate will be out of date
+      setValueCandidate("")
+    }
     setEditFacet("");
   }, [valueStr]);
 
