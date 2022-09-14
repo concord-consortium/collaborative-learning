@@ -14,6 +14,7 @@ import { TextToolbarComponent } from "./text-toolbar";
 import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
 import { getTextPluginInstances, getTextPluginIds } from "../../models/tools/text/text-plugin-info";
+import { LogEventName, Logger } from "../../lib/logger";
 
 import "./text-tool.sass";
 
@@ -213,9 +214,8 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
           plugins={this.plugins}
           onValueChange={this.handleChange}
           onFocus={ () => this.setState({ editing: true}) }
-          onBlur={ () => {
-            this.setState({ editing: false });
-          }}
+          onBlur={this.handleOnBlur}
+
         />
       </div>
     );
@@ -301,6 +301,12 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   private getContent() {
     return this.props.model.content as TextContentModelType;
   }
+
+  private handleOnBlur = () => {
+    this.setState({ editing: false });
+    const change = {args:[{text: this.getContent().text}]};
+    Logger.logToolChange(LogEventName.TEXT_TOOL_CHANGE, 'update', change, this.props.model.id);
+  };
 
   private handleEditorRef = (editor?: Editor) => {
     this.editor = editor;
