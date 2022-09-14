@@ -55,7 +55,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   useEffect(() => {
     if (getValue() === "" && valueCandidate !== ""){
       // when we use external delete tool, candidate will be out of date
-      setValueCandidate("")
+      setValueCandidate("");
     }
     setEditFacet("");
   }, [valueStr]);
@@ -159,7 +159,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const inputDisplayClassNames = classNames(
     "input",
     { "in-use" : !gImageMap.isImageUrl(valueStr) && editFacet === "value" && !readOnly }
-  )
+  );
 
   const pairClassNames = classNames(
     `attribute-name-value-pair ${attrKey}`,
