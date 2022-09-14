@@ -46,8 +46,6 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p><strong>Lesson 0.1 - Teacher Guide</strong></p>",
-                          "<p><u><strong>Overview tab:</strong></u></p>",
                           "<p>As a Teacher, you have extra tabs in your CLUE Resources. One of them is this tab, entitled Teacher Guide. It contains content your students will not see. You may choose to copy tiles from this section or any other into your workspace by dragging them to the right. You may edit them or use them as they are, and of course you may add new content of your own.</p>",
                           "<p>Once your Workspace content is complete, you can publish it to the class. It will appear in the <strong>Extensions</strong> tab on the <strong>Custom Lessons</strong> section. Your students&#x27; published work will appear in the <strong>Class Models and Data</strong> section.</p>",
                           "<p>Lesson 0 is designed as a self-guided exploration of CLUE, a collaborative learning platform that we will use throughout the neural engineering unit. </p>",
@@ -68,11 +66,9 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p></p>",
-                          "<p><u><strong>Instructional Sequence tab:</strong></u></p>",
                           "<p>The proposed activities in the Lessons tab should take about 45-60 minutes for students to complete. </p>",
                           "<p>At the end of the proposed sequence of activities, you can ask some students to present their Dataflow programs.  As students share their work, introduce the term &quot;computational thinking&quot; and bring to mind when and how students used computational thinking. Inform students that they will continue to apply and develop their ability to use computational thinking as the unit unfolds. </p>",
-                          "<p>Make sure that students add their first KWL Journal entry (see instructions in the student-facing lesson).  The KWL is a resource that can be used as both formative assessment of students’ thinking,  as well as a document in which students can record their knowledge and wonderings over time. Let students know that this is where they will record their learning and wonderings over the course of the unit. </p>",
+                          "<p>Make sure that students add their first Learning Journal entry (see instructions in the student-facing lesson).  The Learning Journal is a resource that can be used as both formative assessment of students’ thinking,  as well as a document in which students can record their knowledge and wonderings over time. Let students know that this is where they will record their learning and wonderings over the course of the unit. </p>",
                           "<p><strong>Teacher Resources</strong></p>",
                           "<p><a href='https://docs.google.com/presentation/d/1-nJ9tyrOD-N2WNjea3segkPSMy9MxITv/edit?usp=sharing&amp;ouid=107168184189898639613&amp;rtpof=true&amp;sd=true'>Computational thinking</a></p>"
                         ]
@@ -112,13 +108,13 @@
                           "text": [
                             "<p>In this lesson, students will be introduced to emerging robotics technology that helps people with neurological conditions or missing limbs. </p>",
                             "<p><strong>Learning Objectives</strong></p>",
-                            "<p>The goal of this lesson is to activate students’ knowledge about electricity and elicit questions about bionic arms. </p>",
+                            "<p>The goal of this lesson is to introduce the anchoring phenomenon of the unit and elicit student questions about bionic arms. </p>",
                             "<p><strong>NGSS Alignment</strong></p>",
                             "<p>See <a href='https://www.nextgenscience.org/pe/hs-ls1-2-molecules-organisms-structures-and-processes'>NGSS HS-LS1-2</a></p>",
                             "<p><strong>Formative assessment</strong></p>",
-                            "<p>Listening to group conversations; reflecting on students’ questions; KWL journals (found in student-facing CLUE tab for lesson 1.1).</p>",
+                            "<p>Listening to group conversations; reflecting on students’ questions; Learning Journals (found in student-facing CLUE tab for lesson 1.1).</p>",
                             "<p><strong>Materials</strong></p>",
-                            "<p>Energy sticks (one for each group of 3-4 students) [<strong><a href='https://www.flinnsci.com/energy-stick/ap7598/'>LINK</a></strong>}</p>"
+                            "<p>Whiteboards and markers or chart paper (for each group of students)</p>"
                           ]
                         }
                       }    
@@ -131,39 +127,61 @@
                   "content": {
                     "tiles": [
                       {
-                        "id": "eq9RbeHMU2sEDZMY",
+                        "id": "PhU1sDCoX8LIu1Zm",
                         "content": {
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<p><em>10 minutes</em></p>",
-                            "<p>Students explore “energy sticks” to bring to mind that electricity flows through the human body. Ask students questions to provoke their thinking and observations. See suggested explorations in the student-facing lesson. </p>",
-                            "<p><em>10 minutes</em></p>",
-                            "<p>Facilitate a discussion about students’ shared experiences with the energy sticks. Ask students to try to explain what they have observed. </p>",
-                            "<p>Some guiding questions:</p>",
-                            "<ul><li>What conditions are necessary to make the light stick glow? </li><li>What conditions make the light stick not glow? </li><li>How can this be explained?</li></ul>",
-                            "<p>10 minutes</p>",
-                            "<p>Students use Dataflow to program a virtual light bulb to turn on and off (see student-facing lesson for instructions). </p>",
-                            "<p>The goal of this activity is to build student confidence in using Dataflow. </p>",
-                            "<p><em>5 minutes</em></p>",
-                            "<p>Present the &quot;Teen with Bionic Arms&quot; <a href='https://www.youtube.com/watch?v=q2MjTcmLuIQ'>video</a></p>",
-                            "<p><em>5 minutes</em></p>",
-                            "<p>In small groups, ask students to discuss how Tilly&#x27;s bionic arms might work. </p>",
-                            "<p><em>10 minutes</em></p>",
-                            "<p>Ask students to add an entry to their KWL journals where they reflect on what they know, wonder, and learn about how bionic arms work (see student-facing lesson for instructions). Encourage students to apply what they learned about electricity and bionic arms. </p>",
-                            "<p>The KWL is a resource that can be used as both formative assessment of students’ thinking,  as well as a document in which students can record their knowledge and wonderings over time. Let students know that this is where they will record their learning and wonderings over the course of the unit. If students haven&#x27;t created their journal in Lesson 0, they should do so today by navigating to <strong>My Work</strong> &gt;&gt; <strong>KWL Journals </strong>(the &quot;edit&quot; button will open the journal in students&#x27; workspace). </p>",
-                            "<p><em>1 minute</em></p>",
-                            "<p>After collecting students&#x27; responses, let them know that throughout the unit will further explore how bionic arms work and design a robotic gripper that opens and closes in response to their own muscle activity.  </p>",
-                            "<p><strong>Extensions</strong></p>",
-                            "<p>* If time permits (or as a homework assignment), ask students to watch the &quot;Beyong Bionics&quot; <a href='https://drive.google.com/file/d/1Frped4M9BUD-KCYwiucsM3Z7jasCNm8v/view?usp=sharing'>video</a> and develop additional questions on bionic arms.</p>",
-                            "<p>* Ask students to develop questions for a hypothetical interview with Tilly. </p>",
-                            "<p><strong>Teacher Resources</strong></p>",
-                            "<p>Facilitating student questions via the question formulation technique <strong><a href='https://www.teachingchannel.com/blog/5-tips-for-blending-the-question-formulation-technique-qft-with-ngss'>LINK</a></strong></p>",
-                            "<p>Introducing and establishing an anchoring phenomenon routine <strong><a href='https://ambitiousscienceteaching.org/presentations-on-anchoring-events-and-modeling/#1479473299605-ab2574f8-d6bab811-f21c'>LINK</a></strong></p>",
-                            "<p></p>"
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Solicit what students currently know about bionic arms via the following prompts. Ask students to individually record their answers in their CLUE workspace and then share their answers:</p>",
+                            "<p>1) What do you know about bionic arms? (e.g., what do they look like, why people might use them, in what ways are they connected to the person’s body, how do they work)</p>",
+                            "<p>2) If you were tasked to design a bionic arm, what do you think the people who use them would like in terms of appearance and function?</p>",
+                            "<p><strong><em>5 minutes</em></strong></p>",
+                            "<p>Inform students that throughout this unit we will explore how bionic arms work. Bionic arms are designed for people with congenital or acquired limb differences (e.g., people who lost a limb as a result of an accident). With recent developments in science and engineering, these individuals can now directly control a prosthetic arm as if it was their own biological arm.  Consider showing students <a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4128433/'>how hand replacements have changed over time</a>. For additional information on bionic arms <a href='https://openbionics.com/how-does-a-bionic-arm-work/'>click here</a>. Note: any content or links from this guide you find useful can be dragged into your teacher Workspace and published to the class. They will show under the <strong>Extensions</strong> tab.</p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Let students know that they will next watch a video clip of a young woman named Tilly who is the first teenager in the U.K. to use bionic arms. Direct students to observe Tilly’s use of the bionic arms and record their observations and thinking as to how it works in their CLUE workspace. Orient students to think about the following questions:</p>",
+                            "<p>- How does the bionic lower arm appear to be physically attached to Tilly’s upper arm?</p>",
+                            "<p>- How does Tilly control her bionic arm?</p>",
+                            "<p>Present the &quot;Teen with Bionic Arms Applies Flawless Makeup&quot; <a href='https://www.youtube.com/watch?v=q2MjTcmLuIQ'>video</a></p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Review students’ observations and thinking and bring to mind those that will be most useful for subsequent lessons. Potential student observations and thinking may include:</p>",
+                            "<p>“There appears to be an adjustable outer case that clamps the bionic arm to Tilly’s upper arm. I saw that someone adjusted the plastic exterior for her during the video clip.”</p>",
+                            "<p>“There is something that allows the residual muscles in Tilly’s upper arm to move the bionic arm.&quot;</p>",
+                            "<p>“Somehow Tilly’s brain sends the information to the bionic arm.&quot;</p>",
+                            "<p><strong><em>20 minutes</em></strong></p>",
+                            "<p>Direct students to individually, and then collectively (in teams of three to four) create an illustrated and annotated model that shows how Tilly’s bionic arm works. </p>",
+                            "<p>If students use chart paper or a whiteboard, ask them to take a picture of their model and upload it to their CLUE workspace. </p>"
                           ]
                         }
-                      } 
+                      },
+                      {
+                        "id": "5-_zIo7l3UatWgAD",
+                        "title": "A potential initial student illustrated and annotated model",
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/neural-engineering/images/sampleStudentAnnotatedTilly.png"
+                        }
+                      },
+                      {
+                        "id": "-PNMcqB80NiUVIy0",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>10 minutes</strong></p>",
+                            "<p>Ask students to add an entry to their learning journal where they record their current understanding of how Tilly’s bionic arm works. Encourage students to apply what they observed in the video and reference their model. </p>",
+                            "<p>The learning journal is a resource that can be used as a formative assessment of students’ thinking over time. Let students know that this is where they will record their learning and wonderings over the course of the unit. If students haven&#x27;t created their journal in Lesson 0, they should do so today by navigating to My Work &gt;&gt; Learning Journals (the &quot;edit&quot; button will open the journal in students&#x27; workspace).</p>",
+                            "<p><em><strong>1 minute</strong></em></p>",
+                            "<p>Let students know that throughout the unit will further explore how Tilly’s bionic arm works using a model of a bionic arm that they would be able to control with their own muscle activity. </p>",
+                            "<p><em><strong>Extensions</strong></em></p>",
+                            "<p>* If time permits (or as a homework assignment), ask students to watch the &quot;Beyond Bionics&quot; <a href='https://youtu.be/GgTwa3CPrIE'>video</a> and develop additional questions on bionic arms.</p>",
+                            "<p>* Ask students to develop questions for a hypothetical interview with Tilly.</p>",
+                            "<p><em><strong>Teacher Resources</strong></em></p>",
+                            "<p>Facilitating student questions via the <a href='https://www.teachingchannel.com/blog/5-tips-for-blending-the-question-formulation-technique-qft-with-ngss'>question formulation technique</a></p>",
+                            "<p>Introducing and establishing an <a href='https://ambitiousscienceteaching.org/presentations-on-anchoring-events-and-modeling/#1479473299605-ab2574f8-d6bab811-f21c'>anchoring phenomenon routine </a></p>"
+                          ]
+                        }
+                      }
                     ]
                   },
                   "supports": [ ]
@@ -186,15 +204,13 @@
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<p><strong>Lesson 1.2 - Teacher Guide</strong></p>",
-                            "<p><u><strong>Overview tab:</strong></u></p>",
-                            "<p>In this lesson, students will measure their reaction times and construct a model to communicate their current understanding of movement. </p>",
+                            "<p>In this lesson, students will be introduced to electrical signals in the human body, measure their reaction time, and construct a model of limb movement. </p>",
                             "<p><strong>Learning Objectives</strong></p>",
-                            "<p>Students will measure the time it takes for them to react (grab a dropped ruler) and collaboratively construct an illustrated and annotated model that captures the sequence of steps associated with this action. </p>",
+                            "<p>Students will measure the time it takes for them to react (grab a dropped ruler) and collaboratively construct an illustrated and annotated model that captures the sequence of steps associated with limb movement.</p>",
                             "<p><strong>NGSS alignment</strong></p>",
                             "<p><a href='https://www.nextgenscience.org/pe/hs-ls1-2-molecules-organisms-structures-and-processes'>NGSS HS-LS1-2.</a></p>",
                             "<p><strong>Formative Assessment</strong></p>",
-                            "<p>Students’ models and discussions; KWL Journals</p>",
+                            "<p>Students’ models and discussions; Learning Journals</p>",
                             "<p><strong>Materials</strong></p>",
                             "<p>A 30 cm ruler for every two students. </p>",
                             "<p>Optional: A whiteboard or chart paper and markers for every group of 3-4 students. </p>"
@@ -215,25 +231,27 @@
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<h3>Instructional Sequence</h3>",
-                            "<p><em>2 minutes</em></p>",
-                            "<p>Inform students that the first activity will help them begin to learn how different body systems contribute to limb movement. This will help them be able to explain how bionic arms work.</p>",
-                            "<p>Consider noting specific students’ questions recorded in their KWL journal if the questions are related to wondering about the body systems.</p>",
-                            "<p><em>10 minutes</em></p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Students explore “energy sticks” to bring to mind that electricity flows through the human body. Ask students questions to provoke their thinking and observations. See suggested explorations in the student-facing lesson. </p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Facilitate a discussion about how the energy sticks can help us understand how Tilly&#x27;s bionic arms work. The goal is to get students to think about how the human body (and specifically the nervous and muscular systems) uses electrical signals to control movement. In the discussion, ask students why electrical signals are an effective way to send messages throughout the body (fun fact: nerve impulses can propagate at a speed of up to 100 meters/300 feet per second. Source: Britanicca).</p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Students use Dataflow to program a virtual light bulb to turn on and off (see student-facing lesson for instructions). The goal of this activity is to build student confidence in Dataflow and encourage students to think about the speed at which the light bulb turns on and off. </p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
                             "<p>Ask students to think about how fast they react in day-to-day life (e.g., the time it takes them to start crossing the street once the light changes to green). What affects their reaction time? Why is reaction time important?</p>",
                             "<p>Present a short <a href='https://www.youtube.com/watch?v=gJEuT3aKcMI&amp;t=3s'>video</a> on reaction time measurement (3:36) </p>",
-                            "<p><em>15 minutes</em></p>",
+                            "<p><strong><em>15 minutes</em></strong></p>",
                             "<p>As described in the video, students will pair up and measure their reaction times using their dominant and non-dominant hands (see detailed instructions in the student-facing lesson). </p>",
                             "<p>Extension activity #1: After students to enter their results into a Google spreadsheet to compute the class average.</p>",
                             "<p>Extension activity #2: Ask students to take a video of themselves catching an object and play it in slow motion (like this <a href='https://www.youtube.com/watch?v=3XM-4Qavh5k'>video</a>) </p>",
-                            "<p><em>20 minutes</em></p>",
+                            "<p><strong><em>20 minutes</em></strong></p>",
                             "<p>Assign students to teams composed of 3-4 classmates. Optional: provide each team a whiteboard and dry erase markers or chart paper and markers.</p>",
                             "<p>Ask teams to list all body systems that affect our reaction time in the upper right corner of the whiteboard/chart paper. Then, ask teams to co-construct an illustrated and annotated model of the sequence of events associated with the reaction time activity. Students should then a picture of their model and upload it to their CLUE workspace. Alternatively, students can use a Drawing tile to make the model on their computers. </p>",
-                            "<p><em>15 minutes</em></p>",
+                            "<p><strong><em>15 minutes</em></strong></p>",
                             "<p>Ask one member from each team to share their model. Facilitate a whole-class conversation about what is similar and different about the models, and list these observations on the classroom board. </p>",
                             "<p>Collapse teams’ understandings into a class consensus model. Inform students that this model will be used as a reference and will be revised over the coming weeks as they continue their investigation.</p>",
-                            "<p><em>5 minutes</em></p>",
-                            "<p>Ask students to fill out their KWL journal. </p>",
+                            "<p><strong><em>5 minutes</em></strong></p>",
+                            "<p>Ask students to fill out their Learning Journal. </p>",
                             "<p><strong>Teacher Resources</strong></p>",
                             "<p>Facilitating class <a href='https://www.philasd.org/etvl/2022/02/22/consensus-model-discussion/'>consensus model</a></p>",
                             "<p><a href='https://stemteachingtools.org/brief/18'>Formative assessment</a> in NGSS congruent classrooms</p>"
@@ -270,7 +288,7 @@
                             "<p><a href='https://www.nextgenscience.org/pe/hs-ls1-2-molecules-organisms-structures-and-processes'>NGSS HS-LS1-2</a></p>",
                             "<p>This activity also supports Common Core English Language Arts Standards – <a href='http://www.corestandards.org/ELA-Literacy/RST/9-10/'>Disciplinary Literacy Science, 9-10.</a></p>",
                             "<p><strong>Formative Assessment</strong></p>",
-                            "<p>Students’ models and discussions; KWL Journals</p>"
+                            "<p>Students’ models and discussions; Learning Journals</p>"
                           ]
                         }
                       }
@@ -282,29 +300,34 @@
                   "content": {
                     "tiles": [
                       {
-                        "id": "hxGWd9O4U8XJq8EJ",
+                        "id": "vJcIDh3l1ocfQwNT",
                         "content": {
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<p><em>5 minutes</em></p>",
+                            "<p><strong><em>5 minutes</em></strong></p>",
+                            "<p>Do Now:  students are asked to activate prior knowledge they may have on the nervous system and how it controls limb movement. </p>",
+                            "<p><strong><em>5 minutes</em></strong></p>",
                             "<p>Ask students to annotate the nervous system diagram in the student-facing lesson based on the provided information. </p>",
-                            "<p><em>10 minutes</em></p>",
-                            "<p>Students will create a computerized model of limb movement using Dataflow. The program provided in the student-facing lesson is pre-populated with a simulated gripper that represents the arm. Students are challenged to make the gripper move by adding a &quot;brain&quot; to the program (e.g., a timer block) and connecting it to the gripper. Prompt students to think what each block in their program represents and how information flows between blocks in relation to how information spreads throughout the nervous system.  </p>",
-                            "<p><em>20 minutes</em></p>",
+                            "<p><strong><em>20 minutes</em></strong></p>",
                             "<p>Teams of students can either choose or be assigned to explore how movement is affected by injury to the (1) brain, (2) spinal cord, or (3) peripheral nerves. </p>",
-                            "<p>Students should first review the resources provided in the student-facing lesson. Then, they should load their reaction time model from the previous lesson, mark the location of the injury, and explain how reaction time would be affected.  </p>",
-                            "<p><em>10 minutes</em></p>",
-                            "<p> Coordinate opportunity for students to share their findings. Some potential cooperative learning strategies for sharing student findings include:</p>",
+                            "<p>Students should review the resources provided in the student-facing lesson and discuss how this injury might impact limb movement.   </p>",
+                            "<p><strong><em>15 minutes</em></strong></p>",
+                            "<p>Students will create a computerized model of limb movement using Dataflow. The program provided in the student-facing lesson is pre-populated with a simulated gripper that represents the arm. Students are challenged to make the gripper move by adding a &quot;brain&quot; to the program (e.g., a timer block) and connecting it to the gripper. Prompt students to think about what each block in their program represents and how information flows between blocks in relation to how information spreads throughout the nervous system.  </p>",
+                            "<p>Next, students should modify their Dataflow program to represent the injury that they read about. For example, a spinal injury can be represented by disconnecting the timer (&quot;the brain&quot;) from the gripper. </p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p> Coordinate opportunities for students to share their findings. Some potential cooperative learning strategies for sharing student findings include:</p>",
                             "<ul><li>Jigsaw: After students explored specific injuries in their &quot;home groups,&quot; mix the groups such that each new group will have an expert in one of the three types of nerve injury. Students are responsible for teaching each other about the injury that they explored. </li><li>Gallery walk: If students made their reaction time models on paper or whiteboards, ask students to present their models along the classroom wall.  Classmates view each other’s work by walking around the room and adding questions on sticky notes.</li></ul>",
                             "<p><em>5 minutes</em></p>",
-                            "<p>Instruct students to add an entry to their KWL journal based on the prompts in the &quot;Reflection&quot; tab. </p>",
+                            "<p>Instruct students to add an entry to their Learning journal based on the prompts in the &quot;Reflection&quot; tab. </p>",
                             "<p><em>If time allows</em></p>",
-                            "<p>Facilitate a discussion based on the last reflection prompt: Does Tilly&#x27;s nervous system work differently because of her condition?</p>",
+                            "<p>Facilitate a discussion based on the last reflection prompt: Of the three injury types that had been discussed (brain, spinal cord, peripheral nerve), which injury type best characterizes Tilly’s condition?  (answer: peripheral nerves in the missing limb)</p>",
                             "<p><strong>Teacher Resources</strong></p>",
                             "<p><a href='https://www.jigsaw.org'>Jigsaw</a></p>",
                             "<p><a href='https://www.theteachertoolkit.com/index.php/tool/gallery-walk'>Gallery walk</a></p>",
-                            "<p><a href='https://stemteachingtools.org/brief/18'>Formative assessment</a> in NGSS congruent classrooms</p>"
+                            "<p><a href='https://stemteachingtools.org/brief/18'>Formative assessment</a> in NGSS congruent classrooms</p>",
+                            "<p>Strategies to <a href='https://stemteachingtools.org/sp/talk-flowchart'>facilItate student discussions</a></p>",
+                            "<p></p>"
                           ]
                         }
                       }
@@ -336,7 +359,7 @@
                               "<p><strong>NGSS Alignment</strong></p>",
                               "<p><em>Under development</em></p>",
                               "<p><strong>Formative Assessment</strong></p>",
-                              "<p>EMG and KWL Journals</p>",
+                              "<p>EMG and Learning Journals</p>",
                               "<p><strong>Materials</strong></p>",
                               "<p>For each group of 3-4 students:</p>",
                               "<ul><li>EMG shield &amp; Arduino board, </li><li>EMG surface electrodes (each student will need 3; students should save these electrodes for subsequent activities)</li><li>Blue USB cable</li><li>Orange cable with alligator clips (all these materials are part of the <a href='https://backyardbrains.com/products/clawbundle'>Backyard Brains Claw Kit</a>)</li><li>Hand <a href='https://www.amazon.com/Edisalute-smartinlife-Strengthener-Gripper-Grippers/dp/B01MXHXSNP/ref=sr_1_5?crid=1U94UEC7O4HFK&keywords=hand+grip&qid=1660235040&s=sporting-goods&sprefix=hand+gri%2Csporting%2C222&sr=1-5'>gripper</a></li><li>A computer with the Backyard Brains <a href='https://backyardbrains.com/products/spikerecorder'>Spike Recorder App</a></li></ul>",
@@ -365,7 +388,7 @@
                                 "<p><strong>Instructional Sequence</strong></p>",
                                 "<p><em>2 minutes</em></p>",
                                 "<p>Inform students that today’s lesson will help them begin to learn how the activity of muscles is identified and measured. This will help them explain how bionic arms work and work with a simple robotic arm.</p>",
-                                "<p>Consider noting students’ questions recorded in their KWL journals, specifically questions related to the interactions between the nervous and muscular systems.</p>",
+                                "<p>Consider noting students’ questions recorded in their Learning Journals, specifically questions related to the interactions between the nervous and muscular systems.</p>",
                                 "<p><em>15 minutes</em></p>",
                                 "<p>Assign students to teams composed of 3-4 classmates. Ask teams to follow this <a href='https://docs.google.com/document/d/1pRFUK_wNgOSZEqxHKXHFzomQnq_QFvCEQxojGfLLAIo/edit'>step-by-step tutorial</a> to record and display EMG signals from their muscles</p>",
                                 "<p><em>10 minutes</em></p>",
@@ -384,7 +407,7 @@
                                 "<p>Why does this matter to scientists, physicians, physical therapists, athletic trainers, and/or biomedical engineers?</p>",
                                 "<p>How may gathering EMG data inform the design of a device that can help people with neurological conditions or missing limbs?</p>",
                                 "<p><em>10 minutes</em></p>",
-                                "<p>Using their KWL journals ask each student to revise what they know, wonder, and learned that may help explain how bionic arms work. Encourage students to apply what they noticed in the EMG activities, insights that were sparked by the discussion, and any new knowledge or wonderings they may have. Note that Students should open up the KWL Journal in their My Work tab to make summary notes that will be accessible from Lesson to Lesson.</p>",
+                                "<p>Using their Learning Journals ask each student to revise what they know, wonder, and learned that may help explain how bionic arms work. Encourage students to apply what they noticed in the EMG activities, insights that were sparked by the discussion, and any new knowledge or wonderings they may have. Note that Students should open up the Learning Journal in their My Work tab to make summary notes that will be accessible from Lesson to Lesson.</p>",
                                 "<p>Inform students that in the next activity they will apply and expand their knowledge of  EMG and begin to explore the use of a simple robotic arm. This will help them explain how bionic arms work.</p>",
                                 "<p></p>",
                                 "<p><strong>Lesson Resources</strong></p>"
@@ -439,7 +462,7 @@
                               "<p><strong>NGSS Alignment</strong></p>",
                               "<p><em>Under development</em></p>",
                               "<p><strong>Formative Assessment</strong></p>",
-                              "<p>Dataflow programs; KWL Journals</p>",
+                              "<p>Dataflow programs; Learning Journals</p>",
                               "<p><strong>Materials</strong></p>",
                               "<p>For each group of 3-4 students:</p>",
                               "<ul><li><a href='https://backyardbrains.com/products/clawbundle'>The Claw Kit</a> [<strong>LINK</strong>: ]</li><li>Hand <a href='https://www.amazon.com/Edisalute-smartinlife-Strengthener-Gripper-Grippers/dp/B01MXHXSNP/ref=sr_1_5?crid=1U94UEC7O4HFK&amp;keywords=hand+grip&amp;qid=1660235040&amp;s=sporting-goods&amp;sprefix=hand+gri%2Csporting%2C222&amp;sr=1-5'>gripper</a></li><li>A computer </li><li>6 plastic cups </li></ul>",
@@ -465,7 +488,7 @@
                               "<p><strong>Instructional Sequence</strong></p>",
                               "<p><em>5 minutes</em></p>",
                               "<p>Inform students that in today’s activity they will apply and expand their knowledge of EMG and begin to explore the use of a simple bionic arm. This will help them explain how bionic arms work, as well as inform their modification of the simple bionic arm.</p>",
-                              "<p>Consider noting specific students’ questions recorded in their KWL journals if the questions are related to wondering about the application of EMG in the design of bionic arms or biomedical devices.</p>",
+                              "<p>Consider noting specific students’ questions recorded in their Learning Journals if the questions are related to wondering about the application of EMG in the design of bionic arms or biomedical devices.</p>",
                               "<p><em>30 minutes</em></p>",
                               "<p>Assign students to teams composed of 3-4 classmates. Ask teams to follow the instructions in the student-facing lesson to aqcuire and display EMG signals from their muscles.</p>",
                               "<p>Once students have set up the claw, ask them to explore how they can make it work better by:</p>",
@@ -477,7 +500,7 @@
                               "<p><em>20 minutes</em></p>",
                               "<p>Facilitate a class discussion as to how the gripper could be improved or modified (e.g., adding touch receptors, using a stronger servomotor, reshaping the tips of the grabber). </p>",
                               "<p><em>5 minutes</em></p>",
-                              "<p>Using their KWL journals, ask each student to revise what they know, wonder, and learned about bionic arms. </p>",
+                              "<p>Using their Learning Journals, ask each student to revise what they know, wonder, and learned about bionic arms. </p>",
                               "<p><strong>Lesson Resources</strong></p>",
                               "<p><a href='https://www.twi-global.com/technical-knowledge/faqs/engineering-design-process'>Engineering design process</a></p>"
                             ]
@@ -548,7 +571,7 @@
                             "<p><em>10 minutes</em></p>",
                             "<p>In small groups, ask students to discuss how prosthetic arms can be improved by incorporating sensory information (similar to the prosthetic leg example from the video). Encourage students to sketch their ideas and consider how the motor command from the brain interacts with tactile information from objects.</p>",
                             "<p><em>5 minutes</em></p>",
-                            "<p>Using their KWL journals, ask each student to revise what they know, wonder, and learned the role of tactile information in movement. </p>"
+                            "<p>Using their Learning Journals, ask each student to revise what they know, wonder, and learned the role of tactile information in movement. </p>"
                           ]
                         }
                       }
@@ -605,7 +628,7 @@
                                   "<p><em>15 minutes</em></p>",
                                   "<p>Back in their groups, ask students to read this brief text on the neuroscience of touch.</p><p>Students should identify which body parts are involved in processing touch information and make an annotated model that shows how they are connected to each other. To do so, students will need to read online about:<ul><li>Touch receptors</li><li>Sensory nerves</li><li>Spinal cord</li><li>Thalamus</li><li>Somatosensory cortex.</li></ul></p><p><a href='https://https://www.brainfacts.org/'>Brainfacts.org</a> is a good source of information and has a <a href='https://www.brainfacts.org/3d-brain#intro=true'>3D model of the brain</a>.</p><p>Extension activity: Ask students to compare their model to the one created in the first module (control of movement).</p>",
                                   "<p><em>5 minutes</em></p>",
-                                  "<p>Using their KWL journals, ask each student to revise what they know, wonder, and learned the role of tactile information in movement. </p>"
+                                  "<p>Using their Learning Journals, ask each student to revise what they know, wonder, and learned the role of tactile information in movement. </p>"
                                 ]
                               }
                             }
@@ -664,7 +687,7 @@
                             "<p><em>10 min</em></p>",
                             "<p>Facilitate a class discussion as to how the device could be further improved or modified (e.g., using a stronger servomotor, reshaping the tips of the claw, making the touch sensors more reliable/sensitive). </p>",
                             "<p><em>5 min</em></p>",
-                            "<p>Using their KWL journals, ask each student to revise what they know, wonder, and learned about the design of bionic arms. Introduce students to temperature sensors and ask them to start thinking about how these sensors may help people with impaired senses (e.g. due to nerve damage). Students will develop these ideas in the next lesson (2.4). </p>"
+                            "<p>Using their Learning Journals, ask each student to revise what they know, wonder, and learned about the design of bionic arms. Introduce students to temperature sensors and ask them to start thinking about how these sensors may help people with impaired senses (e.g. due to nerve damage). Students will develop these ideas in the next lesson (2.4). </p>"
                           ]
                         }
                       }
