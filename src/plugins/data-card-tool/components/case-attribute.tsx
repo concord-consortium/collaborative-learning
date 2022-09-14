@@ -90,28 +90,17 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     setCurrEditAttrId(attrKey);
     const facet = event.currentTarget.classList[0] as EditFacet;
-    const inputHere = event.currentTarget.classList[2] === "editing";
-
-    activateInput(facet as EditFacet, inputHere);
-
+    activateInput(facet as EditFacet);
   };
 
-  const activateInput = (facet: EditFacet, inputHere: boolean) => {
-
+  const activateInput = (facet: EditFacet) => {
     setEditFacet(facet);
-
-    console.log(" 2 currEditAttrId: ", currEditAttrId)
-    if (facet === "name" && !inputHere){
+    if (facet === "name"){
       setLabelCandidate(getLabel());
-    } else {
-      console.log('what state is this?')
     }
-    if (facet === "value" && !inputHere){
+    if (facet === "value"){
       setValueCandidate(getValue());
-    } else {
-      console.log('what state is this? 2')
     }
-
   };
 
   const handleInputDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
@@ -119,7 +108,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleCompleteName = () => {
-    console.log("handleCompleteName")
     if (labelCandidate !== getLabel()) {
       caseId && content.setAttName(attrKey, labelCandidate);
     }
@@ -127,7 +115,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleCompleteValue = () => {
-    console.log("handleCompleteValue")
     if (valueCandidate !== getValue()) {
       caseId && content.setAttValue(caseId, attrKey, valueCandidate);
     }
@@ -167,7 +154,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const inputDisplayClassNames = classNames(
     "input",
-    { "visible" : !gImageMap.isImageUrl(valueStr) && editFacet === "value" && !readOnly }
+    { "in-use" : !gImageMap.isImageUrl(valueStr) && editFacet === "value" && !readOnly }
   )
 
   const pairClassNames = classNames(
@@ -199,7 +186,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   return (
     <div className={pairClassNames}>
-      <div style={{ position: "absolute", right: "60px" }}><pre>editFacet: {editFacet}</pre></div>
       <div className={labelClassNames} onClick={handleClick}>
         { !readOnly && editFacet === "name"
           ? <input
