@@ -205,6 +205,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         }
       </div>
 
+      {/* gpoing to need to deal with readonly
+      aksi tghe !eduing needs to ciome back */}
       <div className={valueClassNames} onClick={handleClick}>
         { !valueIsImage() &&
           <input

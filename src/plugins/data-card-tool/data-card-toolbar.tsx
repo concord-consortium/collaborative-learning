@@ -37,6 +37,9 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
        ...others
   });
 
+  // have a look at text toolbar
+  // or use the model (volatile state)
+  // a.k.a. state you care about accross components, but not serialized - it's watched/observed
   const enabledBecauseCardEditState = () => {
     console.log("should the buttons look enabled? Given:")
     console.log("currEditAttrId: ", currEditAttrId);
