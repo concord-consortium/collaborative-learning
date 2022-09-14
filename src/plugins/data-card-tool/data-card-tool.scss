@@ -271,18 +271,4 @@ $default-button-border-color: #979797;
     // half of 35% minus half the width of the icon
     margin-left: ($card-width * 0.175) - 12px;
   }
-
-  input {
-    color: green;
-  }
-
-  .cell-value {
-    background-color: silver;
-    max-height:100%;
-  }
-
-  .value {
-    height: $data-row-min-height;
-  }
-
 }
