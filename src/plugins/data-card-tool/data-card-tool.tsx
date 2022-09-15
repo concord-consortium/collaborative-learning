@@ -187,10 +187,12 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
             <button className={ previousButtonClasses } onClick={previousCase}></button>
             <button className={ nextButtonClasses } onClick={nextCase}></button>
           </div>
-          <div className="add-remove-card-buttons">
-            <AddIconButton className={addCardClasses} onClick={addNewCase} />
-            <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
-          </div>
+          { !readOnly &&
+            <div className="add-remove-card-buttons">
+              <AddIconButton className={addCardClasses} onClick={addNewCase} />
+              <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
+            </div>
+          }
         </div>
       </div>
       <div className="data-area">
@@ -204,11 +206,10 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
             setCurrEditAttrId={setCurrEditAttrId}
             imageUrlToAdd={imageUrlToAdd}
             setImageUrlToAdd={setImageUrlToAdd}
-
           />
         }
       </div>
-      { shouldShowAddField &&
+      { shouldShowAddField && !readOnly &&
         <AddIconButton className="add-field" onClick={handleAddField} /> }
     </div>
   );

@@ -54,7 +54,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   useEffect(() => {
     if (getValue() === "" && valueCandidate !== ""){
-      // when we use external delete tool, candidate will be out of date
       setValueCandidate("");
     }
     setEditFacet("");
@@ -92,6 +91,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
+    if (readOnly){
+      return;
+    }
+
     setCurrEditAttrId(attrKey);
     const facet = event.currentTarget.classList[0] as EditFacet;
     const isEditing = event.currentTarget.classList[2] === "editing";
@@ -99,6 +102,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const activateInput = (facet: EditFacet, isEditing: boolean) => {
+
     setEditFacet(facet);
     if (facet === "name" && !isEditing){
       setLabelCandidate(getLabel());
@@ -149,18 +153,13 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     onConfirm: () => deleteAttribute()
   });
 
-  const handleDeleteAttribute = () => {
+  const handleDeleteAttribute = (e: any) => {
     showAlert();
   };
 
   const valueIsImage = () => {
     return gImageMap.isImageUrl(valueStr);
   };
-
-  const inputDisplayClassNames = classNames(
-    "input",
-    { "in-use" : !gImageMap.isImageUrl(valueStr) && editFacet === "value" && !readOnly }
-  );
 
   const pairClassNames = classNames(
     `attribute-name-value-pair ${attrKey}`,
@@ -179,9 +178,14 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     {"has-image": gImageMap.isImageUrl(valueStr)}
   );
 
+  const valueInputClassNames = classNames(
+    `value-input ${attrKey}`,
+    { "in-use" : !gImageMap.isImageUrl(valueStr) && editFacet === "value" && !readOnly }
+  );
+
   const deleteAttrButtonClassNames = classNames(
     `delete-attribute ${attrKey}`,
-    { "show": editFacet === "value" || editFacet === "name" }
+    { "show": currEditAttrId === attrKey }
   );
 
   const cellLabelClasses = classNames(
@@ -207,9 +211,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       <div className={valueClassNames} onClick={handleClick}>
-        { !valueIsImage() &&
+        {/* author view: text is in input, image is in a div */}
+        { !readOnly && !valueIsImage() &&
           <input
-            className={inputDisplayClassNames}
+            className={valueInputClassNames}
             type="text"
             value={valueCandidate}
             onChange={handleChange}
@@ -218,11 +223,21 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
             onDoubleClick={handleInputDoubleClick}
           />
         }
-        { valueIsImage() &&
+        { !readOnly && valueIsImage() &&
+          <img src={imageUrl} className="image-value" />
+        }
+
+        {/* read-only view: text is in div, image is in a div */}
+        { !valueIsImage() && readOnly &&
+          <div className="cell-value">{valueStr}</div>
+        }
+        { valueIsImage() && readOnly &&
           <img src={imageUrl} className="image-value" />
         }
       </div>
-      <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
+      { !readOnly &&
+        <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
+      }
     </div>
   );
 });
