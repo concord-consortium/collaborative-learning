@@ -94,15 +94,16 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     setCurrEditAttrId(attrKey);
     const facet = event.currentTarget.classList[0] as EditFacet;
-    activateInput(facet as EditFacet);
+    const isEditing = event.currentTarget.classList[2] === "editing";
+    activateInput(facet as EditFacet, isEditing);
   };
 
-  const activateInput = (facet: EditFacet) => {
+  const activateInput = (facet: EditFacet, isEditing: boolean) => {
     setEditFacet(facet);
-    if (facet === "name"){
+    if (facet === "name" && !isEditing){
       setLabelCandidate(getLabel());
     }
-    if (facet === "value"){
+    if (facet === "value" && !isEditing){
       setValueCandidate(getValue());
     }
   };
@@ -205,8 +206,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         }
       </div>
 
-      {/* gpoing to need to deal with readonly
-      aksi tghe !eduing needs to ciome back */}
       <div className={valueClassNames} onClick={handleClick}>
         { !valueIsImage() &&
           <input
