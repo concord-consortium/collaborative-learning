@@ -38,10 +38,12 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
     if (!clickedOn){
       return;
     }
-    if (clickedOn === "value-input"){
+    const editTargets = ["value-input", "image-value"];
+    const editable = editTargets.includes(clickedOn);
+    if (editable){
       content.setToolBarOn(true);
     }
-    if (clickedOn.length > 0 && clickedOn !== "value-input"){
+    if (clickedOn.length > 0 && !editable){
       content.setToolBarOn(false)
     }
   }
