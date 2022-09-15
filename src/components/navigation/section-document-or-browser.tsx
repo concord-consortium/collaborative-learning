@@ -15,7 +15,7 @@ import { DocumentDragKey, SupportPublication } from "../../models/document/docum
 import { NetworkDocumentsSection } from "./network-documents-section";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 import { LoadDocumentHistory } from "./load-document-history";
-import { DEBUG_HISTORY } from "../../lib/debug";
+import { DEBUG_DOCUMENT } from "../../lib/debug";
 
 import "./section-document-or-browser.sass";
 
@@ -209,6 +209,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
     setDocumentToShow(referenceDocument);
   },[referenceDocument]);
 
+  // TODO: why did this have to moved all the way up here?
+  // If it could be put in the Canvas then it would work for 4-up too.
   const handleTogglePlaybackControlComponent = () => {
     setShowPlaybackControls(showControls => !showControls);
     // What is the referenceDocument?
@@ -227,7 +229,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
       // If we don't put it there I think what we need to do is pass som
 
       // Make a variable available with the current history document
-      if (DEBUG_HISTORY) {
+      if (DEBUG_DOCUMENT) {
         (window as any).currentHistoryDocument = docCopy;
       }
       return docCopy;

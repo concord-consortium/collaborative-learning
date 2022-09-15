@@ -4,7 +4,7 @@ import React from "react";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
-import { DocumentModelType } from "../../models/document/document";
+import { createDocumentModel, DocumentModelType } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
 import { PlaybackComponent } from "../playback/playback";
@@ -12,9 +12,11 @@ import {
   IToolApi, IToolApiInterface, IToolApiMap, ToolApiInterfaceContext, EditableToolApiInterfaceRefContext
 } from "../tools/tool-api";
 import { HotKeys } from "../../utilities/hot-keys";
-import { DEBUG_CANVAS } from "../../lib/debug";
+import { DEBUG_CANVAS, DEBUG_DOCUMENT } from "../../lib/debug";
 
 import "./canvas.sass";
+import { getSnapshot } from "@concord-consortium/mobx-state-tree";
+import { LoadDocumentHistory } from "../navigation/load-document-history";
 
 interface IProps {
   context: string;
@@ -30,9 +32,14 @@ interface IProps {
   onTogglePlaybackControls?: () => void;
 }
 
+interface IState {
+  documentToShow?: DocumentModelType;
+  showPlaybackControls: boolean;  
+}
+
 @inject("stores")
 @observer
-export class CanvasComponent extends BaseComponent<IProps> {
+export class CanvasComponent extends BaseComponent<IProps, IState> {
 
   private toolApiMap: IToolApiMap = {};
   private toolApiInterface: IToolApiInterface;
@@ -64,6 +71,11 @@ export class CanvasComponent extends BaseComponent<IProps> {
       "cmd-z": this.handleDocumentUndo,
       "cmd-shift-z": this.handleDocumentRedo
     });
+
+    this.state = {
+      showPlaybackControls: false,
+      documentToShow: props.document
+    };   
   }
 
   public render() {
@@ -83,21 +95,24 @@ export class CanvasComponent extends BaseComponent<IProps> {
   }
 
   private renderContent() {
-    const {content, document, showPlayback, showPlaybackControls, onTogglePlaybackControls, ...others} = this.props;
-    const documentContent = content || document?.content; // we only pass in content if it is a problem panel
+    // const {content, document, showPlayback, showPlaybackControls, onTogglePlaybackControls, ...others} = this.props;
+    const {content, document, showPlayback, ...others} = this.props;
+    const {showPlaybackControls, documentToShow} = this.state;
+    const documentContent = content || documentToShow?.content; // we only pass in content if it is a problem panel
     const typeClass = document?.type === "planning" ? "planning-doc" : "";
 
     if (documentContent) {
       return (
         <>
           <DocumentContentComponent content={documentContent}
-                                    documentId={document?.key}
+                                    documentId={documentToShow?.key}
                                     typeClass={typeClass}
                                     {...others} />
-          {showPlayback && <PlaybackComponent document={document}
+          {showPlayback && <PlaybackComponent document={documentToShow}
                                               showPlaybackControls={showPlaybackControls}
-                                              onTogglePlaybackControls={onTogglePlaybackControls} />
+                                              onTogglePlaybackControls={this.handleTogglePlaybackControlComponent} />
           }
+          { showPlaybackControls && <LoadDocumentHistory document={documentToShow} />}
         </>
       );
     }
@@ -152,5 +167,28 @@ export class CanvasComponent extends BaseComponent<IProps> {
   private handleDocumentRedo = () => {
     const { document } = this.props;
     document?.redoLastAction();
+  };
+
+  private handleTogglePlaybackControlComponent = () => {
+    this.setState((prevState, props) => {
+      const newShowPlaybackControls = !prevState.showPlaybackControls;
+
+      return {
+        showPlaybackControls: newShowPlaybackControls,
+        documentToShow: newShowPlaybackControls ? 
+          this.getDocumentToShow() : props.document
+      };
+    });    
+  };
+
+  private getDocumentToShow = () => {
+    if (this.props.document) {
+      const docCopy = createDocumentModel(getSnapshot(this.props.document));
+      // Make a variable available with the current history document
+      if (DEBUG_DOCUMENT) {
+        (window as any).currentHistoryDocument = docCopy;
+      }
+      return docCopy;
+    }
   };
 }

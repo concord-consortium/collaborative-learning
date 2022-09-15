@@ -18,6 +18,9 @@ import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
 import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
+import { addDisposer } from "@concord-consortium/mobx-state-tree";
+import { reaction } from "mobx";
+import { IUserContext } from "functions/src/shared";
 
 export interface IBaseStores {
   appMode: AppMode;
@@ -129,15 +132,10 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   stores.unit = UnitModel.create(unitJson);
   const {investigation, problem} = stores.unit.getProblem(_problemOrdinal);
 
-  // TODO: add the userContext documentMetadata, and firestore instance The
-  // userContext should be easy. The documentMetadata will be hard. firestore
-  // should be easy???? We could pass the whole stores object here instead. But
-  // it is kind of nice to separate which parts of the stores is needed for each
-  // place that is using it that makes refactoring the code easier in the
-  // future. So we should just pass the parts of stores that is needed to construct
-  // the document meta data.
-  // The meta data just just built from the classHash and the document.getMetadata()
-  // so it should be easy for the documents model to set this when a new document is added.
+  // TODO: make this dynamic like the way the components work. The components
+  // access these values from the stores when they need them. This way the values
+  // can be changed on the fly without having to track down each object that is
+  // using them.
   stores.documents.setAppConfig(stores.appConfig);
   stores.documents.setFirestore(stores.db.firestore);
   stores.documents.setUserContext(getUserContext(stores));
@@ -148,17 +146,34 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   }
   stores.problemPath = getProblemPath(stores);
 
-  // need to use a listener because user type can be determined after unit initialization
-  unit.installUserListener(() => stores.user.isTeacher, async (isTeacher: boolean) => {
-    // only load the teacher guide content for teachers
-    if (isTeacher) {
-      const guideJson = await getGuideJson(unitId, stores.appConfig);
-      const unitGuide = guideJson && UnitModel.create(guideJson);
-      const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
-      stores.teacherGuide = teacherGuide;
-    }
-    stores.documents.setUserContext(getUserContext(stores));
-  });
+  // need to use a listener because user type, id, name can be determined after unit initialization
+  addDisposer(unit, reaction(() => ({
+      isTeacher: stores.user.isTeacher,
+      userContext: getUserContext(stores)
+    }),
+    async ({isTeacher, userContext}: {isTeacher: boolean, userContext: IUserContext}) => {
+      // only load the teacher guide content for teachers
+      if (isTeacher) {
+        const guideJson = await getGuideJson(unitId, stores.appConfig);
+        const unitGuide = guideJson && UnitModel.create(guideJson);
+        const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
+        stores.teacherGuide = teacherGuide;
+      }
+      stores.documents.setUserContext(userContext);
+    },
+    { fireImmediately: true }
+  ));
+
+  // unit.installUserListener(() => stores.user.isTeacher, async (isTeacher: boolean) => {
+  //   // only load the teacher guide content for teachers
+  //   if (isTeacher) {
+  //     const guideJson = await getGuideJson(unitId, stores.appConfig);
+  //     const unitGuide = guideJson && UnitModel.create(guideJson);
+  //     const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
+  //     stores.teacherGuide = teacherGuide;
+  //   }
+  //   stores.documents.setUserContext(getUserContext(stores));
+  // });
 };
 
 export function isShowingTeacherContent(stores: IStores) {

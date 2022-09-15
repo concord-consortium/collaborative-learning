@@ -204,7 +204,7 @@ export const TreeManager = types
   },
 
   setPropsForFirestoreSaving({userContext, documentMetadata, firestore}: IFiresoreSavingProps) {
-    console.log("setPropsForFirestoreSaving", JSON.parse(JSON.stringify(userContext)));
+    console.log("setPropsForFirestoreSaving", {userContext: JSON.parse(JSON.stringify(userContext)), documentMetadata});
     self.userContext = userContext;
     self.documentMetadata = documentMetadata;
     self.firestore = firestore;  
