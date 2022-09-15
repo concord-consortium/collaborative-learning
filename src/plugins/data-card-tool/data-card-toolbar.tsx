@@ -39,8 +39,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
 
   const enabledBecauseCardEditState = () => {
    return !!currEditAttrId && content.getToolBarOn();
-   //return !!currEditAttrId;
-  }
+  };
 
   const buttonsEnabled = onIsEnabled() && enabledBecauseCardEditState();
 

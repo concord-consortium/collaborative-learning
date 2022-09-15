@@ -44,9 +44,9 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
       content.setToolBarOn(true);
     }
     if (clickedOn.length > 0 && !editable){
-      content.setToolBarOn(false)
+      content.setToolBarOn(false);
     }
-  }
+  };
 
   function nextCase(){
     if (content.caseIndex < content.totalCases - 1) {

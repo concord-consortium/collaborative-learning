@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { gImageMap } from "../../../models/image-map";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataCardContentModelType } from "../data-card-content";
@@ -46,25 +46,9 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   imageUrlSync();
 
-//   const valActive = useRef("value");
-//  // console.log("valActive: ", valActive);
-//  console.log("TOP:")
-//  console.log("editFacet: ", editFacet, "valActive: ", valActive, "uiEditFacet: ", content.getUiEditFacet());
-
-//   useEffect(()=> {
-
-//     console.log()
-//     content.setUiEditFacet(editFacet);
-//     //console.log("editFacet: ", editFacet, "valActive: ", valActive, "uiEditFacet: ", content.getUiEditFacet());
-//   }, [editFacet])
-
-  // const uploadable = useRef(true);
-
-
-
   useEffect(()=>{
-    setValueCandidate(valueStr)
-  },[caseId])
+    setValueCandidate(valueStr);
+  },[caseId]);
 
   useEffect(() => {
     getValue();
@@ -187,7 +171,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   // this allows user to edit next field when arriving by tab
   const handleValueInputFocus = () => {
     activateInput("value", true);
-  }
+  };
 
   const pairClassNames = classNames(
     `attribute-name-value-pair ${attrKey}`,

@@ -132,7 +132,7 @@ export const DataCardContentModel = ToolContentModel
   }))
   .actions(self => ({
     setToolBarOn(x: boolean){
-      self.toolBarOn = x
+      self.toolBarOn = x;
     },
     afterAttach() {
       // Monitor our parents and update our shared model when we have a document parent
