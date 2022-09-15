@@ -15,19 +15,6 @@
     "defaultDocumentTitle": "MyEvidence",
     "defaultDocumentTemplate": {
       "tiles": [
-        {
-          "id": "Zjeqn-ImDsaUDuLU",
-          "content": {
-            "type": "Text",
-            "format": "html",
-            "text": [
-              "<p></p>",
-              "<p><strong>Welcome! To get started, create your Learning Log:</strong></p>",
-              "<ol><li>Click the<strong> My Resources bar</strong> at extreme left to open the Resources.</li><li>Click on <strong>My First Learning Log</strong>. </li><li>Click the <strong>Edit</strong> button to move your log over where you can edit it. </li></ol>",
-              "<p>Then read the Story (click on the Story tab).</p>"
-            ]
-          }
-        }
       ]
     },
     "toolbar": [
@@ -419,23 +406,7 @@
                                     "<p><em>Continue reading to find out what happened next:</em></p>"
                                   ]
                                 }
-                              },
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p><strong>Questions About Evidence 2:</strong></p>",
-                                    "<p></p>",
-                                    "<p>1. Our body can make all the cholesterol we need.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
-                                    "<p></p>",
-                                    "<p>2. Cholesterol is needed to build cells, make vitamins, and make hormones.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
-                                    "<p></p>",
-                                    "<p>3. A cholesterol plaque can form in: (underline your choice)</p>",
-                                    "<p><strong>A.  The liver           B. Inside the blood vessel wall         C. The stomach</strong></p>"
-                                  ]
-                                }
-                              }                
+                              }             
                             ]
                           },
                           "supports": []
@@ -463,32 +434,12 @@
                                     "<p>Rakesh read the blog and realized he really did need to start paying more attention to the family group text. Meera was amazing at explaining stuff and her blog was really interesting! Based on her post he believed that his diet was mostly fine. He really did try to eat well balanced meals for dinner (at least on most nights) and his older son – Kabir – made sure that what he packed them for lunch was home-made food that even Naani would approve. There was almost always a piece of fruit or a vegetable curry in his lunch. </p>",
                                     "<p>Yet, he was still nervous about those blockages. If even babies have cholesterol, then was there was a chance that despite his healthy life habits he could still have too much cholesterol in his blood? The fear of his arteries getting clogged up was still not leaving him. He just couldn’t stop worrying about it no matter how hard he tried. </p>",
                                     "<p>That day at lunch, he felt like his taste buds could almost sense the cholesterol in his rice and beans. It was all feeling too stressful, so he decided to just get his blood checked and confirm whether he had high cholesterol or not. He called the doctor’s office and they ordered some tests and told him to go to the blood lab near his house. The next day he went to the lab right after work, did the blood test. Two days later he received an email from the lab, the results were attached. He clicked on the attachment: “Rakesh Sharma Blood Test Report”</p>",
-                                    "<p>Review the test results- EVIDENCE 3-Rakesh Sharma Blood Test Report - in the Resource Library. </p>",
+                                    "<p>Review the test results - EVIDENCE 3 - Rakesh Sharma Blood Test Report - in the Resource Library. </p>",
                                     "<p>Discuss the results with your group and together, answer the questions below by dragging them into your workspace. Write what you learned from this evidence in your table.</p>",
                                     "<p>Continue reading to find out what happened next:</p>"
                                   ]
                                 }
-                              },
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p><strong>Question About Evidence 3:</strong></p>",
-                                    "<p></p>",
-                                    "<p>1. Rakesh’s cholesterol levels are? (underline your choice)</p>",
-                                    "<p><strong>A.  Low       B. Normal      C. High</strong></p>"
-                                  ]
-                                }
-                              },
-                              {
-                                "id": "bio4TG01",
-                                "title": "R. Sharma Metabolic Panel",
-                                "content": {
-                                  "type": "Image",
-                                  "url": "curriculum/bio4community/images/MetabolicPanel.jpg"
-                                }
-                              }           
+                              }         
                             ],
                             "supports": []
                           }
@@ -525,7 +476,7 @@
                                     "<p>Rakesh still looked a bit worried but agreed and went to see the nurse. </p>",
                                     "<p>Once he got home, Rakesh was still feeling curious about stress tests and decided to research it more after dinner. He googled ‘how to test for stress’ and found that there were many ways to measure cortisol levels. He found a video explaining how saliva (spit) can be used to measure cortisol levels easily and quickly. The website also had a link to order the test and get results within 24 hours. Out of restlessness, and not wanting to wait a whole week for his results from Dr. Lee, Rakesh decided to order a saliva stress test as well. </p>",
                                     "<p>The test arrived the next day, he followed the directions and then mailed it back to the lab. As promised, within 24 hours, Rakesh got an email back from the lab with his results from the saliva test. His stomach tight with nervousness as he opened the email: “Saliva Stress Test”</p>",
-                                    "<p>Watch the video- Saliva Stress Test - in the Resource Library. Then review the test results -  EVIDENCE 4-Saliva Stress Test Results - in the Resource Library.</p>",
+                                    "<p>Watch the video - Saliva Stress Test - in the Resource Library. Then review the test results - EVIDENCE 4 - Saliva Stress Test Results - in the Resource Library.</p>",
                                     "<p>Discuss the video and test results with your group and together, answer the questions in the Resource Librarys. </p>",
                                     "<p>Write what you learned from this evidence in your table.</p>"
                                   ]
