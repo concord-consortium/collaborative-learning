@@ -96,9 +96,6 @@ export class HotKeys {
     }
 
     const handler = this.hotKeyMap[keys];
-    console.log("hot-keys.ts, keys are:", keys);
-    console.log("hot-keys.ts, handler are:", handler);
-
 
     if (handler) {
       const result = handler(e, keys);

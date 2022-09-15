@@ -24,8 +24,6 @@ import placeholderImage from "../../assets/image_placeholder.png";
 import { HotKeys } from "../../utilities/hot-keys";
 
 import "./image-tool.sass";
-import { IActionHandlers } from "./geometry-tool/geometry-shared";
-// import {HotKeys} from "../../utilities/hot-keys";
 
 type IProps = IToolTileProps;
 
@@ -125,6 +123,9 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         this.toolbarToolApi?.handleTileResize?.(entry);
       }
     });
+    this.hotKeys.register({
+      "cmd-v": this.handlePaste,
+    });
   }
   public componentWillUnmount() {
     this.resizeObserver.disconnect();
@@ -141,13 +142,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       this.setState({ requestedHeight: desiredHeight });
     }
   }
-
-  handleSetHandlers = (handlers: IActionHandlers) =>{
-    this.hotKeys.register({
-      "cmd-c": handlers.handleCopy,
-    });
-  };
-
 
 
   public render() {
@@ -166,7 +160,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       imageDisplayStyle.height = `${defaultImagePlaceholderSize.height}px`;
     }
 
-    console.log("render <ImageToolComponent>");
     return (
       <>
         <div className={classNames("image-tool", readOnly ? "read-only" : "editable")}
@@ -177,8 +170,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
           tabIndex={0}
           onKeyDown={(e) => this.hotKeys.dispatch(e)}
         >
-          <button onClick={()=> this.pasteImage()}/>
-
           {isLoading && <div className="loading-spinner" />}
           <ImageToolbar
             onRegisterToolApi={(toolApi: IToolApi) => this.toolbarToolApi = toolApi}
@@ -190,7 +181,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             onUploadImageFile={this.handleUploadImageFile}
           />
           {this.renderTitleArea()}
-          <img src="https://s3-media0.fl.yelpcdn.com/bphoto/dVK5T0pSRUHAOGfKK1GH9g/o.jpg"></img>
 
           <ImageComponent
             ref={elt => this.imageElt = elt}
@@ -205,17 +195,22 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     );
   }
 
+
+  private handlePaste = () => {
+    this.pasteImage();
+  };
+
   private async pasteImage(){
     const clipboardContents = await navigator.clipboard.read();
-    console.log("clipboardContents in pasteImage is:", clipboardContents);
+    if (clipboardContents.length > 0){
+      if (clipboardContents[0].types.includes("image/png")){
+        clipboardContents[0].getType("image/png").then(blob=>{
+          const blobToFile = new File([blob], "filename");
+          this.handleUploadImageFile(blobToFile);
+        });
+      }
+    }
   }
-
-  private pasteImage2(e: React.KeyboardEvent<HTMLDivElement>){
-    console.log("pasteImage2 clicked with event e", e);
-    // const clipboardContents = await navigator.clipboard.read();
-  }
-
-
 
   private handleIsEnabled = () => {
     const { model: { id }, readOnly } = this.props;

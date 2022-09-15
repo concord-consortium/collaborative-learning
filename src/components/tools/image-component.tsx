@@ -18,7 +18,6 @@ const _ImageComponent =
 
     return (
       <div className="image-frame">
-        dennis
         <div
           className="image-tool-image"
           ref={forwardedRef}
