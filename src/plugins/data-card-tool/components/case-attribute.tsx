@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { gImageMap } from "../../../models/image-map";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataCardContentModelType } from "../data-card-content";
@@ -49,6 +49,21 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   useEffect(()=>{
     setValueCandidate(valueStr)
   },[caseId])
+
+  //this should be value or nothing, delete button reserved for value
+  // useRef or useMemo here?
+  // NEXT: go into data-card-toolbar and condition appearance of the X on getUiEditFacet
+  useEffect(()=>{
+    if (content.getUiEditFacet() !== editFacet){
+      if (editFacet === "value"){
+        content.setUiEditFacet("value")
+        console.log("we are editing value")
+      } else {
+        content.setUiEditFacet("")
+        console.log("we are not editing value")
+      }
+    }
+  }, [editFacet])
 
   useEffect(() => {
     getValue();
