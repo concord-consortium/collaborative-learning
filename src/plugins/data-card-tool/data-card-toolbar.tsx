@@ -37,12 +37,9 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
        ...others
   });
 
-  // DO THIS NEXT:
-  // have a look at text toolbar
-  // or use the model (volatile state)
   const enabledBecauseCardEditState = () => {
-    // return boolean for enabled
-    return !!currEditAttrId;
+   return !!currEditAttrId && content.getToolBarOn();
+   //return !!currEditAttrId;
   }
 
   const buttonsEnabled = onIsEnabled() && enabledBecauseCardEditState();

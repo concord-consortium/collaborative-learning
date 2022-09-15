@@ -33,6 +33,19 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
     }
   }, [content, model.id, onRequestUniqueTitle]);
 
+  const setToolBarAvailable = (e: any) => {
+    const clickedOn = e.target.classList[0];
+    if (!clickedOn){
+      return;
+    }
+    if (clickedOn === "value-input"){
+      content.setToolBarOn(true);
+    }
+    if (clickedOn.length > 0 && clickedOn !== "value-input"){
+      content.setToolBarOn(false)
+    }
+  }
+
   function nextCase(){
     if (content.caseIndex < content.totalCases - 1) {
       content.setCaseIndex(content.caseIndex + 1);
@@ -149,7 +162,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
 
   return (
-    <div className="data-card-tool">
+    <div className="data-card-tool" onClick={setToolBarAvailable}>
       <DataCardToolbar
         model={model}
         documentContent={documentContent}

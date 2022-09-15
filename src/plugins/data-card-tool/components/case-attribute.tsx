@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import classNames from "classnames";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { gImageMap } from "../../../models/image-map";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataCardContentModelType } from "../data-card-content";
@@ -46,21 +46,25 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   imageUrlSync();
 
+//   const valActive = useRef("value");
+//  // console.log("valActive: ", valActive);
+//  console.log("TOP:")
+//  console.log("editFacet: ", editFacet, "valActive: ", valActive, "uiEditFacet: ", content.getUiEditFacet());
+
+//   useEffect(()=> {
+
+//     console.log()
+//     content.setUiEditFacet(editFacet);
+//     //console.log("editFacet: ", editFacet, "valActive: ", valActive, "uiEditFacet: ", content.getUiEditFacet());
+//   }, [editFacet])
+
+  // const uploadable = useRef(true);
+
+
+
   useEffect(()=>{
     setValueCandidate(valueStr)
   },[caseId])
-
-  // when editFacet is value, delete/image toolbar will need to be active
-  // we check for diff because editFacet goes from "name" => "" => "value"
-  useEffect(()=>{
-    if (content.getUiEditFacet() !== editFacet){
-      if (editFacet === "value"){
-        content.setUiEditFacet("value")
-      } else {
-        content.setUiEditFacet("")
-      }
-    }
-  }, [editFacet])
 
   useEffect(() => {
     getValue();
