@@ -15,19 +15,6 @@
     "defaultDocumentTitle": "MyEvidence",
     "defaultDocumentTemplate": {
       "tiles": [
-        {
-          "id": "Zjeqn-ImDsaUDuLU",
-          "content": {
-            "type": "Text",
-            "format": "html",
-            "text": [
-              "<p></p>",
-              "<p><strong>Welcome! To get started, create your Learning Log:</strong></p>",
-              "<ol><li>Click the<strong> My Resources bar</strong> at extreme left to open the Resources.</li><li>Click on <strong>My First Learning Log</strong>. </li><li>Click the <strong>Edit</strong> button to move your log over where you can edit it. </li></ol>",
-              "<p>Then read the Story (click on the Story tab).</p>"
-            ]
-          }
-        }
       ]
     },
     "toolbar": [
@@ -178,12 +165,13 @@
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
-                                  "<h2>CHAPTER I: DEAUNDRE</h2>"
+                                  "<h2>CHAPTER 1: DEAUNDRE</h2>"
                                 ]
                               }
                             },
                             {
-                              "id": "YucuBkFbAyZsHnnW",
+                              "id": "1ZEUeTdsUNuAcRx3",
+                              "title": "Text 1",
                               "content": {
                                 "type": "Text",
                                 "format": "html",
@@ -214,9 +202,28 @@
                                   "<p><strong>Nicole:</strong> &#x27;<em>Hey. Did you hear about Deaundre?</em>&#x27;</p>",
                                   "<p><strong>Rakesh: </strong>“<em>No. Is everything alright?</em>”</p>",
                                   "<p><strong>Nicole:</strong> “<em>He had a heart attack while he was here. He’s at the hospital right now.</em>” </p>",
-                                  "<p>Rakesh felt the concern take over him. He and Deaundre have a lot in common. They both were the same age, had two kids, and both loved baseball. Deaundre was one of those guys who worked just as hard as everyone else but did it with a smile on his face - he never let that smile drop. Knowing he, of all people, was at the hospital was really upsetting. </p>",
+                                  "<p>Rakesh felt the concern take over him. He and Deaundre have a lot in common. They both were the same age, had two kids, and both loved baseball. Deaundre was one of those guys who worked just as hard as everyone else but did it with a smile on his face - he never let that smile drop. Knowing he, of all people, was at the hospital was really upsetting. </p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "oxuSlTxkgkNJ5kIp",
+                              "title": "Deandre Recovering at the Hospital",
+                              "content": {
+                                "type": "Image",
+                                "url": "curriculum/bio4community/images/Rakesh_S1.jpg",
+                                "filename": "curriculum/bio4community/images/Rakesh_S1.jpg"
+                              }
+                            },
+                            {
+                              "id": "jOQmKJkzortkYWpb",
+                              "title": "Text 2",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
                                   "<p>Rakesh decided to visit Deaundre at the hospital before work the next day, stopping at a local bodega to grab him a smiling bear wearing a fedora that kind of looked like him. </p>",
-                                  "<p>       “<em>Knock knock,</em>” </p>",
+                                  "<p><em>Knock knock,</em> </p>",
                                   "<p>Rakesh entered with the bear held up to his face. Deaundre still had that smile plastered on. The two of them sat and talked for a while. Deaundre explained that the heart attack was due to a blockage in his blood vessels. </p>",
                                   "<p><strong>Deaundre:</strong> “<em>Yeah, the doc keeps saying I overworked myself and the stress of it all led to blockages or at least didn’t help ‘em.</em>” </p>",
                                   "<p>This caught Rakesh’s attention. </p>",
@@ -366,6 +373,15 @@
                                 }
                               },
                               {
+                                "id": "eaOhBP2AVpdYRElI",
+                                "title": "Rakesh and Meera at Nanni's Party",
+                                "content": {
+                                  "type": "Image",
+                                  "url": "curriculum/bio4community/images/Rakesh_S2.jpg",
+                                  "filename": "curriculum/bio4community/images/Rakesh_S2.jpg"
+                                }
+                              },
+                              {
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
@@ -390,23 +406,7 @@
                                     "<p><em>Continue reading to find out what happened next:</em></p>"
                                   ]
                                 }
-                              },
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p><strong>Questions About Evidence 2:</strong></p>",
-                                    "<p></p>",
-                                    "<p>1. Our body can make all the cholesterol we need.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
-                                    "<p></p>",
-                                    "<p>2. Cholesterol is needed to build cells, make vitamins, and make hormones.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
-                                    "<p></p>",
-                                    "<p>3. A cholesterol plaque can form in: (underline your choice)</p>",
-                                    "<p><strong>A.  The liver           B. Inside the blood vessel wall         C. The stomach</strong></p>"
-                                  ]
-                                }
-                              }                
+                              }             
                             ]
                           },
                           "supports": []
@@ -434,32 +434,12 @@
                                     "<p>Rakesh read the blog and realized he really did need to start paying more attention to the family group text. Meera was amazing at explaining stuff and her blog was really interesting! Based on her post he believed that his diet was mostly fine. He really did try to eat well balanced meals for dinner (at least on most nights) and his older son – Kabir – made sure that what he packed them for lunch was home-made food that even Naani would approve. There was almost always a piece of fruit or a vegetable curry in his lunch. </p>",
                                     "<p>Yet, he was still nervous about those blockages. If even babies have cholesterol, then was there was a chance that despite his healthy life habits he could still have too much cholesterol in his blood? The fear of his arteries getting clogged up was still not leaving him. He just couldn’t stop worrying about it no matter how hard he tried. </p>",
                                     "<p>That day at lunch, he felt like his taste buds could almost sense the cholesterol in his rice and beans. It was all feeling too stressful, so he decided to just get his blood checked and confirm whether he had high cholesterol or not. He called the doctor’s office and they ordered some tests and told him to go to the blood lab near his house. The next day he went to the lab right after work, did the blood test. Two days later he received an email from the lab, the results were attached. He clicked on the attachment: “Rakesh Sharma Blood Test Report”</p>",
-                                    "<p>Review the test results- EVIDENCE 3-Rakesh Sharma Blood Test Report - in the Resource Library. </p>",
+                                    "<p>Review the test results - EVIDENCE 3 - Rakesh Sharma Blood Test Report - in the Resource Library. </p>",
                                     "<p>Discuss the results with your group and together, answer the questions below by dragging them into your workspace. Write what you learned from this evidence in your table.</p>",
                                     "<p>Continue reading to find out what happened next:</p>"
                                   ]
                                 }
-                              },
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p><strong>Question About Evidence 3:</strong></p>",
-                                    "<p></p>",
-                                    "<p>1. Rakesh’s cholesterol levels are? (underline your choice)</p>",
-                                    "<p><strong>A.  Low       B. Normal      C. High</strong></p>"
-                                  ]
-                                }
-                              },
-                              {
-                                "id": "bio4TG01",
-                                "title": "R. Sharma Metabolic Panel",
-                                "content": {
-                                  "type": "Image",
-                                  "url": "curriculum/bio4community/images/MetabolicPanel.jpg"
-                                }
-                              }           
+                              }         
                             ],
                             "supports": []
                           }
@@ -496,7 +476,7 @@
                                     "<p>Rakesh still looked a bit worried but agreed and went to see the nurse. </p>",
                                     "<p>Once he got home, Rakesh was still feeling curious about stress tests and decided to research it more after dinner. He googled ‘how to test for stress’ and found that there were many ways to measure cortisol levels. He found a video explaining how saliva (spit) can be used to measure cortisol levels easily and quickly. The website also had a link to order the test and get results within 24 hours. Out of restlessness, and not wanting to wait a whole week for his results from Dr. Lee, Rakesh decided to order a saliva stress test as well. </p>",
                                     "<p>The test arrived the next day, he followed the directions and then mailed it back to the lab. As promised, within 24 hours, Rakesh got an email back from the lab with his results from the saliva test. His stomach tight with nervousness as he opened the email: “Saliva Stress Test”</p>",
-                                    "<p>Watch the video- Saliva Stress Test - in the Resource Library. Then review the test results -  EVIDENCE 4-Saliva Stress Test Results - in the Resource Library.</p>",
+                                    "<p>Watch the video - Saliva Stress Test - in the Resource Library. Then review the test results - EVIDENCE 4 - Saliva Stress Test Results - in the Resource Library.</p>",
                                     "<p>Discuss the video and test results with your group and together, answer the questions in the Resource Librarys. </p>",
                                     "<p>Write what you learned from this evidence in your table.</p>"
                                   ]
@@ -570,11 +550,20 @@
                           "content": {
                             "tiles": [
                               {
+                                "id": "Fv46vapPHCmxA2GY",
+                                "title": "Rakesh in the Kitchen with Kabir and Ajay",
+                                "content": {
+                                  "type": "Image",
+                                  "url": "curriculum/bio4community/images/Rakesh_S3.jpg",
+                                  "filename": "curriculum/bio4community/images/Rakesh_S3.jpg"
+                                }
+                              },
+                              {
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<p><strong>Chapter 6: CHILDREN ARE THE FUTURE</strong></p>",
+                                    "<h2>Chapter 6: CHILDREN ARE THE FUTURE</h2>",
                                     "<p>A few minutes after finishing the zoom conversation with the scientist, Rakesh heard the front door opening. He could hear Ajay and Kabir throwing their backpacks onto the ground, taking off their shoes and running into the kitchen to make a snack for themselves. Rakesh went downstairs and joined them in the kitchen. </p>",
                                     "<p>Rakesh: “So, what’d you boys do at school today? </p>",
                                     "<p>Kabir: Nothing really. Senior year is kinda boring. </p>",
@@ -628,7 +617,7 @@
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
-                                  "<h2>CHAPTER I: MATH TEST</h2>",
+                                  "<h2>CHAPTER 1: MATH TEST</h2>",
                                   "<p>Estrella loved her family to bits and pieces. She would go to the ends of the earth for them. Her mom and step-dad worked hard every day to put a roof over their head. This often meant that they were at work for long hours and so Estrella’s abuela stayed home and watched over her and her 3 younger siblings. Abuela did a lot for them but sometimes it got hard to take care of so many things, so Estrella took it upon herself to help out around the house. She loved doing it because on top of getting to help her Abuela, it also meant that sometimes she got to be in charge of her siblings. </p>",
                                   "<p>Her younger brothers and sister could be so annoying sometimes and yet so cute at the same time. She often picked them up from their elementary school and they would tell her everything that happened during their day with bright eyes and wide smiles which warmed Estrella’s heart. Once they got home she walked their family dog, and then spent the afternoon making sure her siblings did their homework and daily chores before dinner. Their family tried to eat together every evening and Abuela’s cooking was the best. By the time Estrella finished eating dinner and doing the dishes, it was usually already 7pm. She would then often chat or play video games with her friends for a while. She loved hanging out with her two best friends. Needless to say, this meant Estrella stayed up until midnight most days to get her work done. Sometimes she was so tired she wished she could just go to sleep but her grades were important to her and she was doing well in school. </p>",
                                   "<p>However, when she was in school she often had trouble focusing. She really did want to focus in class, but sometimes the teacher’s voice became nothing but white noise and Estrella would zone out. She tried to make up for it by working hard on her homework, but homework alone does not prepare someone for tests. She needed to be able to pay attention in class if she wanted to keep her grades up. </p>"
@@ -640,11 +629,11 @@
                               "title": "Estrella in School",
                               "content": {
                                 "type": "Image",
-                                "url": "curriculum/bio4community/images/estrella_s1__1__720.jpg"
+                                "url": "curriculum/bio4community/images/Estrella_S1.jpg"
                               }
                             },
                             {
-                              "id": "A6NIkCpczknh4gHU",
+                              "id": "9u9n_OSFrp-ME0-_",
                               "content": {
                                 "type": "Text",
                                 "format": "html",
@@ -700,6 +689,15 @@
                               }
                             },
                             {
+                              "id": "csP7M5wzDeP4cvS-",
+                              "title": "Estrella Talks to Her Abuela",
+                              "content": {
+                                "type": "Image",
+                                "url": "curriculum/bio4community/images/Estrella_S3.jpg",
+                                "filename": "curriculum/bio4community/images/Estrella_S3.jpg"
+                              }
+                            },
+                            {
                               "id": "tdD-dZKGiJAFSXQt",
                               "content": {
                                 "type": "Text",
@@ -711,6 +709,29 @@
                                   "<p>Your answer:</p>",
                                   "<p></p>",
                                   "<p></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "VLdaLz9dZMeDBuu6",
+                              "title": "Text 3",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><em>— Drag the  EvidenceTable tile into your Learning Log to write your answers —</em></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "B6dGOGykU71wUydx",
+                              "content": {
+                                "type": "Table",
+                                "name": "Evidence Table",
+                                "columns": [
+                                  {"name":"Evidence","values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                                  {"name":"What did you learn from it?","values":["","","","",""]},
+                                  {"name":"Your questions now","values":["","","","",""]}
                                 ]
                               }
                             },
@@ -744,19 +765,41 @@
                           "content": {
                             "tiles": [
                               {
+                                "id": "Mc8a9uMzF02NItpi",
+                                "title": "Text 1",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<p>CHAPTER 2: LEARNING FROM MS. GUERRA</p>",
-                                    "<p>The next day after science class, María stayed behind and spoke with Ms. Guerra. She told her openly and honestly about how much she had been struggling to focus and how she wanted to be able to do better. In response, Ms. Guerra told María that high school could be tough and that she was glad that María was asking for help. She also had an interesting suggestion:</p>",
+                                    "<h2>CHAPTER 2: LEARNING FROM MS. GUERRA</h2>",
+                                    "<p>The next day after science class, María stayed behind and spoke with Ms. Guerra. She told her openly and honestly about how much she had been struggling to focus and how she wanted to be able to do better. </p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "FveUSbKnR7roxoCm",
+                                "title": "Estrella Talks to Ms. Guerra",
+                                "content": {
+                                  "type": "Image",
+                                  "url": "curriculum/bio4community/images/Estrella_S2.jpg",
+                                  "filename": "curriculum/bio4community/images/Estrella_S2.jpg"
+                                }
+                              },
+                              {
+                                "id": "m6WtnTcPHmKThpIa",
+                                "title": "Text 2",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>In response, Ms. Guerra told María that high school could be tough and that she was glad that María was asking for help. She also had an interesting suggestion:</p>",
                                     "<p>Ms. Guerra: If your issue is being able to focus, you need to work on growing more connections between the neurons in your brain! </p>",
                                     "<p>María didn’t really understand what that meant. Ms. Guerra could sense her confusion based on the blank stare María gave her. Figuring María needed more of an explanation, Ms. Guerra pulled out slide show that she had used when she taught college courses a few years ago. Crowding around the computer, the two of them clicked on the link for the: “How our Brains Think” </p>",
                                     "<p></p>",
-                                    "<p><strong>Watch the slide show- EVIDENCE 1-How our Brains Think - in your Resource Library. </strong></p>",
-                                    "<p><strong>Discuss the animation in your group and together, answer the questions in the Resource Library. </strong></p>",
+                                    "<p><strong>Watch the slide show - EVIDENCE 1 - How our Brains Think - in your Resource Library. </strong></p>",
+                                    "<p><strong>Discuss the animation in your group and together, then answer the questions below by dragging the question tile into your document.</strong></p>",
                                     "<p><strong>Write what you learned from this evidence in your table.</strong></p>",
-                                    "<p><strong></strong></p>"
+                                    "<p></p>"
                                   ]
                                 }
                               },
@@ -952,14 +995,14 @@
       ]
     },
     {
-      "description": "Investigation 4",
-      "ordinal": 4,
+      "description": "Investigation 3",
+      "ordinal": 3,
       "title": "Bio4Community: The Biology of Stress",
       "problems": [
         {
           "description": "Story Ch1",
           "ordinal": 1,
-          "title": "Rakesh",
+          "title": "Felix",
           "subtitle": "Chapter 1",
           "disabled": [],
           "sections": [
@@ -968,185 +1011,115 @@
                         "content": {
                           "tiles": [
                             {
-                              "display": "teacher",
+                              "id": "OD0F9qGMjdy4f0OX",
+                              "title": "Text 1",
                               "content": {
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
-                                  "<p>Tell the students that we are trying something a bit different. Instead of just giving them evidence in a packet like we did for short term stress, we are giving them a story, different groups have different stories. The stories follow a main character as they try to figure out a health issue that is making them concerned.  The characters encounter evidence along the way and use it to figure out the issue.</p>",
-                                  "<p>They should work as a team and assign the cast. The narrator has  a lot to read. Other roles have much less.</p>",
-                                  "<p>They should answer the questions and fill in the table in their Workspace.</p>"
-                                ]
-                              }
-                            },
-                            {
-                              "id": "d3tBK1qdpQEqwI6U",
-                              "content": {
-                                "type": "Text",
-                                "format": "html",
-                                "text": [
-                                  "<h2>CHAPTER I: DEAUNDRE</h2>"
-                                ]
-                              }
-                            },
-                            [
-                              {
-                                "layout": {
-                                  "height": 300
-                                },
-                                "id": "JnxX0qRc7w60JXMO",
-                                "title": "Rakesh: Chapter 1 Cover Image",
-                                "content": {
-                                  "type": "Image",
-                                  "url": "curriculum/bio4community/images/thing.png"
-                                }
-                              },
-                              {
-                                "id": "BJEa1s4mUyjR4zSf",
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p>Rakesh sat in the small break room in the Amazon warehouse, fidgeting with his lunch. He smiled as he looked down at the small post-it note poking out from inside the crumpled brown bag that read 'Good luck at work today Dad!'  His kids always knew how to make him smile. It was hard being a single dad. Even though his kids were older and in 7th grade and high school, it still felt like all the world’s burdens were on his shoulders; but seeing them happy helped. He wanted to give his kids a stable life so he worked 10 hours a night and woke up early to make his kids breakfast before going to work.</p>"
-                                   ]
-                                }
-                              }
-                            ],
-                            {
-                              "id": "pIxUAKoEX8SkdvGF",
-                              "content": {
-                                "type": "Text",
-                                "format": "html",
-                                "text": [
-                                  "<p>Raising his kids on his own had been difficult ever since Seema, his wife or… well…ex-wife, and him split up. He loves his kids, more than anything in this world and they help him out a lot around the house. But he had a lot of responsibilities on a daily basis. That left little time for Rakesh to destress and have “me” time. But it was worth it if it meant he could eventually be promoted to manager where he would have higher pay and more stable hours which meant more time with his kids.</p>"
-                                ]
-                              }
-                            },
-                            {
-                              "id": "L3JQpbaEPpyRa5yS",
-                              "content": {
-                                "type": "Text",
-                                "format": "html",
-                                "text": [
-                                  "<p>He remembers the conversation he had with his kids this morning. </p>",
-                                  "<p><strong>Kabir:</strong> &quot;<em>Ugh. I just can’t study for this math test.</em>&quot;</p>",
-                                  "<p><strong>Ajay:</strong> Just do it</p>",
-                                  "<p><strong>Kabir:</strong> Gee thanks. (Said sarcastically)</p>",
-                                  "<p><strong>Ajay:</strong> &quot;<em>I know, I’m so helpful.</em>&quot;</p>",
-                                  "<p><strong>Rakesh:</strong> &quot;<em>What’s the issue?</em>&quot;</p>",
-                                  "<p><strong>Kareem:</strong> &quot;<em>I just don’t get it. I can’t focus in class. Ms. Ross will put the equations on the board and next thing I know she somehow got to the answer but I just don’t know how. I can’t focus no matter how hard I try.</em>&quot;</p>",
-                                  "<p><strong>Rakesh:</strong> &quot;<em>Math is important so you have to try harder. Your education is everything. You have opportunities that I never had.</em>&quot;</p>",
-                                  "<p><strong>Ajay:</strong> &quot;<em>What kind of opportunities?</em>&quot;</p>",
-                                  "<p><strong>Rakesh: </strong>&quot;<em>You have the chance to actually learn, earn a degree, and do what you want to do with your life. In India, to get a really good education, you have to pay for private boarding school. My family couldn’t afford that.</em>&quot;</p>",
-                                  "<p><strong>Ajay: </strong>&quot;<em>What did you want to be when you were younger?</em>&quot;</p>",
-                                  "<p><strong>Rakesh: </strong>&quot;<em>I wanted to be a pilot when I was really young.</em>&quot;</p>",
-                                  "<p><strong>Ajay: </strong>&quot;<em>Woah really? That’s so cool!</em>&quot;</p>",
-                                  "<p><strong>Rakesh:</strong> &quot;I<em> loved the idea of being in the sky forever. As I got older, that dream slowly turned into wanting to become an aerospace engineer and be the person that actually designed the planes.</em>&quot;</p>",
-                                  "<p><strong>Kareem:</strong> &quot;<em>So why not just become that now?</em>&quot;</p>",
-                                  "<p><strong>Rakesh:</strong> &quot;<em>It’s not that easy, behta (“son” in hindi). My education wasn’t as good as yours and college is expensive. I can’t afford it for myself and the both of you. You are my priority now.</em> &quot;</p>",
-                                  "<p><strong>Ajay:</strong> &quot;<em>I feel bad that you can’t achieve your dreams baba.</em>&quot;</p>",
-                                  "<p><strong>Rakesh: </strong>&quot;<em>I have a different dream now, meri bacha (my kids). I just want you two boys to do well in school and become successful. That will make me the happiest. Now make sure you study for that math test. </em>&quot;</p>",
-                                  "<p><strong>Kareem: &quot;</strong><em>Gee baba</em>&quot; (“yes, dad” in Hindi).  </p>"
-                                ]
-                              }
-                            },
-                            {
-                              "id": "VcCRhB5MfZtokcgd",
-                              "content": {
-                                "type": "Text",
-                                "format": "html",
-                                "text": [
-                                  "<p>Working for Amazon was never Rakesh’s first choice of career. Once Seema became pregnant, he became desperate to get a job that paid at least a little higher than busboying at Rasoi, the local indian restaurant, provided him. Being an immigrant without a degree posed difficulties finding a job so he needed to find places willing to hire him. Amazon offered that to him and is one of the few places that is close enough to where he lives and provides opportunities for him to get paid more. So while Amazon may not be his dream job, he found that his dreams changed to making sure his kids had a stable life and could one day afford a higher education. Back in the the lunchroom at work, Rakesh was zoning out, pushing the rice in his container around, when one of his co-workers, Nicole, came in. </p>",
-                                  "<p><strong>Nicole:</strong> '<em>Hey. Did you hear about Deaundre?</em>'</p>",
-                                  "<p><strong>Rakesh: </strong>“<em>No. Is everything alright?</em>”</p>",
-                                  "<p><strong>Nicole:</strong> “<em>He had a heart attack while he was here. He’s at the hospital right now.</em>” </p>",
-                                  "<p>Rakesh felt the concern take over him. He and Deaundre have a lot in common. They both were the same age, had two kids, and both loved baseball. Deaundre was one of those guys who worked just as hard as everyone else but did it with a smile on his face - he never let that smile drop. Knowing he, of all people, was at the hospital was really upsetting. </p>"
-                                ]
-                              }
-                            },
-                            {
-                              "id": "DUPpMGTEBqCiIfBY",
-                              "content": {
-                                "type": "Text",
-                                "format": "html",
-                                "text": [
-                                  "<p>Rakesh decided to visit Deaundre at the hospital before work the next day, stopping at a local bodega to grab him a smiling bear wearing a fedora that kind of looked like him. </p>",
-                                  "<p>       “<em>Knock knock,</em>” </p>",
-                                  "<p>Rakesh entered with the bear held up to his face. Deaundre still had that smile plastered on. The two of them sat and talked for a while. Deaundre explained that the heart attack was due to a blockage in his blood vessels. </p>",
-                                  "<p><strong>Deaundre:</strong> “<em>Yeah, the doc keeps saying I overworked myself and the stress of it all led to blockages or at least didn’t help ‘em.</em>” </p>"
-                                ]
-                              }
-                            },
-                            {
-                              "id": "jZEkPEQQQ2KtU3gP",
-                              "content": {
-                                "type": "Text",
-                                "format": "html",
-                                "text": [
-                                  "<p>This caught Rakesh’s attention. </p>",
-                                  "<p><strong>Rakesh:</strong> “<em>Wait. Your stress led to your heart attack?</em>” </p>",
-                                  "<p>To say Rakesh was shocked was an understatement. He thought back to his never-ending shifts at work that he and Deaundre did together. He admitted the stress sometimes got to his head, he felt jittery and anxious like there were butterflies in his stomach. But he didn’t understand how something in his mind could affect his body. Stress only had mental symptoms… right? He wondered, how could stress cause blocked blood vessels? </p>",
-                                  "<p><strong>Can you help him figure this out?</strong></p>",
-                                  "<p>Discuss with your group--What do you think is the connection between stress and blocked blood vessels?</p>",
-                                  "<p><em>Continue reading to find out what happened next:</em></p>"
-                                ]
-                              }
-                            },
-                            {
-                              "id": "ZfnvftDzo0pOHaik",
-                              "content": {
-                                "type": "Text",
-                                "format": "html",
-                                "text": [
-                                  "<p>Rakesh left the hospital shocked and even more stressed. When he got home he did his best not to show his sons how worried he was. His younger son, Ajay, was in a cheerful mood as he helped with dinner and that made Rakesh feel better. Ajay joked about his friends on the track team and how excited he was for the track meet he was going to have in two days. Ajay was fast and nimble, and great at sports. He could also eat his weight in food, and he did at dinner that evening. </p>",
-                                  "<p>After dinner, the boys were washing dishes. Rakesh decided to do some research on his own on the internet. He googled “heart attack and stress”. One of the links that came up caught his eye. It was a video of some monkeys and it showed a blocked blood vessel, he decided to check it out. He clicked on the link: “The Effects of Stress on the Heart”</p>"
-                                ]
-                              }
-                            },
-                            {
-                              "id": "fwCN89PBpbQoLHZ1",
-                              "content": {
-                                "type": "Text",
-                                "format": "html",
-                                "text": [
+                                  "<h2>CHAPTER 1: A NEW PHASE IN LIFE</h2>",
                                   "<p></p>",
-                                  "<p>Watch the video- EVIDENCE 1-The Effects of Stress on the Heart in your Resource Library. </p>",
-                                  "<p>Discuss the video with your group and together, answer the questions below by dragging them into your workspace. </p>",
-                                  "<p>Write what you learned from this evidence in your table.</p>"
+                                  "<p>Being a law student is hard work, especially for Felix, who just started his final year of law school. He loved the independence that came with life in his mid 20s. He got to choose his own classes, meet new people who were also interested in law, and finally got to live with his boyfriend, Josue. Moving out of his parents’ home and into an apartment with Josue, was such an exciting step, something he had only seen in movies. But at the same time, law school life also meant that he had to pay for his college fees, course textbooks, and of course, rent and groceries! Moving away from home, living with his boyfriend, and starting this new phase in his life meant he had new responsibilities. </p>"
                                 ]
                               }
                             },
                             {
+                              "id": "12SEP20220348PMKaweg8tl",
+                              "title": "Felix has a cold",
+                              "content": {
+                                "type": "Image",
+                                "url": "curriculum/bio4community/images/Felix_S1.jpg"
+                              }
+                            },
+                            {
+                              "id": "7Zsx_K833c0AOPhT",
+                              "title": "Text 1",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Balancing the pressures of hard courses with having to pay rent and his other expenses was not easy. He did love his demanding classes, but finding the time to study was getting more and more difficult. To pay his living expenses, Felix worked at the CTown close to his apartment. He would plan his shifts around his classes and try to get as many as he could. Each shift at CTown was only three hours long though, so he tried to pick up as many shifts as possible. Some days he will have a full day of classes and then pick up two shifts right after, then go home and stay up all night reading for his classes the next day. </p>",
+                                  "<p>Josue always worried about how hard Felix worked. One night, when Felix had just worked for six hours straight and was starting on his homework, Josue decided to say something about it. </p>",
+                                  "<p></p>",
+                                  "<p>Josue: Mi amor, it’s 1:00 am. You need to sleep or else you’re gonna collapse during class.</p>",
+                                  "<p>Felix: Yo se pero I have to finish this assignment. I’ll go to bed soon.</p>",
+                                  "<p>Josue: You say that every night. </p>",
+                                  "<p>Felix: Ya vengo. I promise. </p>",
+                                  "<p></p>",
+                                  "<p>Felix didn’t want to admit it, but he knew Josue was right. He did say that every night. But what was he supposed to do? How was he supposed to pay for rent if he didn’t work at CTown? After reading for another 30 minutes, Felix decided to listen to Josue and go to bed. </p>",
+                                  "<p>The next morning Felix woke up with a stuffy nose and a slight cough. He didn’t feel sick the night before, but these days, it seemed like he was waking up and feeling sick more and more often. He thought about maybe not going to his classes and resting. But then he remembered that he had to give a presentation that he couldn’t miss. And then he had another double shift at work. C Town didn’t offer sick days. Getting sick more often was really starting to make going to school and work so much harder.  Felix also still didn’t have health insurance which meant he couldn’t see a doctor to get medication. He decided to call his mom in hopes she would be able to provide him some tips and home remedies to help him get better. </p>",
+                                  "<p>Felix: Hola Mama. Esta bien?</p>",
+                                  "<p>Mama: Si Felix. Que te pasa?</p>",
+                                  "<p>Felix: I’m just feeling a little under the weather lately. What do I eat to stop coughing again?</p>",
+                                  "<p>Mama: I don’t think I can help you. You have to change if you want to stop being sick.</p>",
+                                  "<p>Felix: W-what do you mean?</p>",
+                                  "<p>Mama: Well, you choose to live that lifestyle. Of course you’re going to get sick and stressed. Leaving your family and living with another man, what did you think was going to happen?</p>",
+                                  "<p>Felix: You think I’m getting sick because I’m gay? I didn’t CHOOSE any lifestyle. I can’t help who I love. </p>",
+                                  "<p>Mama: Did you call me to argue?</p>",
+                                  "<p>Felix: I called you looking for some help and comfort while I was sick, like I did when I was little. Clearly that was a mistake. </p>",
+                                  "<p>Felix hangs up the phone without hearing his mom’s response. He doesn’t know why he tries when he knows how his family is. Ever since he came out to them, they have been the opposite of supportive. If Felix’s head didn’t already hurt before, it for sure hurt after that phone call. It left him with a bitter taste in his mouth and a heavy feeling in his chest. Felix shook his head. He had other things to worry about aside from his mom’s blatant homophobia.</p>",
+                                  "<p>Lying in bed, Felix realized there was no way he could take the day off to recover from this stuffy nose and cough. Instead, he just popped cough drops in his mouth and tried to deal with it. </p>",
+                                  "<p>Felix walked into the kitchen to find Josue had already made coffee for them, and was just starting to pack their lunches. Felix said good morning with a sad tone and then coughed. </p>",
+                                  "<p></p>",
+                                  "<p>Josue: Don’t tell me. You’re sick. Again?? Mi amor, c’mon now you know this isn’t right. I’m telling you, you’re stressing yourself to the point where you’re getting sick. </p>",
+                                  "<p>Felix: Ugh please don’t. Not so early in the morning. You’re overreacting. I’m fine. And don’t be ridiculous, stress doesn’t make you sick.</p>",
+                                  "<p></p>",
+                                  "<p>Josue knew he was right, but didn’t know how to make Felix hear him. As usual, Felix was just being so stubborn, and now Josue needed to find a way to get through to him. </p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "tdD-dZKGiJAFSXQt",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>Do you think Josue is right?</strong></p>",
+                                  "<p><strong>Discuss with your group--What do you think is the connection between stress and getting sick often? </strong></p>",
+                                  "<p><em>—— Drag this tile into your Learning Log to write your answer ——</em></p>",
+                                  "<p>Your answer:</p>",
+                                  "<p></p>",
+                                  "<p></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "IrOyOloyaw6UgROa",
+                              "title": "Text 1",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><em>Continue reading to find out what happened next:</em></p>",
+                                  "<p></p>",
+                                  "<p>     Josue: You seem down. What’s wrong?</p>",
+                                  "<p>     Felix: Oh nothing. I just called my mom asking her for some advice on how to feel better. </p>",
+                                  "<p>     Josue: Did she give you any advice?</p>",
+                                  "<p>     Felix: Nope. She essentially said I’m sick because I’m gay. </p>",
+                                  "<p>     Josue: That’s ridiculous</p>",
+                                  "<p>     Felix: I know. I just wanted some comfort from my mom, you know? I feel like I&#x27;m never gonna get that again. </p>",
+                                  "<p>     Josue: You need to give them time, my love. In time, they’ll see what they’re missing out on and maybe you can have an actual conversation with them. But until then, you have my parents. They love you. </p>",
+                                  "<p>     Felix: Thanks Josue.</p>",
+                                  "<p>     Josue: In fact, I think you should call my mom right now. She’s a doctor and a mom so she knows a lot about people getting sick. Call her just to prove that I’m right. </p>",
+                                  "<p></p>",
+                                  "<p>Felix reluctantly agreed. He was tired of Josue’s nagging and he was also starting to worry about why he got sick so often, so he figured a chat with Josue’s mom wasn’t too hard to do.  Josue, realizing he had a golden opportunity, pulled out his phone right away and rang his mother. </p>",
+                                  "<p></p>",
+                                  "<p>Josue’s mother picked up the phone and Josue loudly told her that Felix was sick again! Unfortunately, Josue’s mom was in the middle of seeing a patient and couldn’t talk. She told them that she would send them a link to a slide show that explains how and why you get sick. Later that day, Felix was in class when he saw an email from Josue’s mother with a link to the slide show. He couldn’t wait so he clicked on the link: “How Do You Get Sick?”</p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "12SEP20220555PM",
                               "content": {
                                 "type": "Table",
-                                "name": "Cast of Characters",
+                                "name": "Evidence Table",
                                 "columns": [
-                                  {"name":"Character name","values":["Narrator","Rakesh (main character)","Nicole (co-worker)","Deaundre (co-worker) ","Meera (cousin)","Dr. Lee (physician)","Dr. Zeiders (scientist)","Ajay (son)","Zainab (daughter)"]},
-                                  {"name":"Actor name","values":["","","","","","","","",""]}
+                                  {"name":"Evidence","values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                                  {"name":"What did you learn from it?","values":["","","","",""]},
+                                  {"name":"Your questions now","values":["","","","",""]}
                                 ]
                               }
-                            },           
-                            {
-                              "content": {
-                                "type": "Text",
-                                "format": "html",
-                                "text": [
-                                  "<p><strong>Questions About Evidence 1: </strong></p>",
-                                  "<p></p>",
-                                  "<p>1. The subordinate monkey has: </p>",
-                                  "<p><strong>Less control </strong>  OR    <strong>More control</strong></p>",
-                                  "<p>(underline your choice)</p>",
-                                  "<p></p>",
-                                  "<p>2. The subordinate monkey artery is:</p>",
-                                  "<p><strong>Less clogged</strong>   OR    <strong>More clogged</strong></p>",
-                                  "<p>(underline your choice)</p>",
-                                  "<p></p>",
-                                  "<p>3. Both monkeys had the same diet and health care, the difference in their blood vessels is only due to the stress from social subordination.  </p>",
-                                  "<p><strong>True</strong>   OR   <strong>False</strong> ?</p>",
-                                  "<p>(underline your choice)</p>"
-                                ]
-                              }
-                            }                    
+                            }
                           ]
                         },
                         "supports": []
@@ -1157,7 +1130,7 @@
         {
           "description": "Story Ch2",
           "ordinal": 2,
-          "title": "Rakesh",
+          "title": "Felix",
           "subtitle": "Chapter 2",
           "disabled": [],
           "sections": [
@@ -1166,95 +1139,60 @@
                           "content": {
                             "tiles": [
                               {
+                                "id": "7BD73skx3W8HrHhR",
+                                "title": "Text 1",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<h2>CHAPTER 2: NAANI’S BIRTHDAY</h2>"
-                                  ]
-                                }
-                              },
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p>The video that Rakesh watched stayed in his head for the next two days. It confirmed what Deaundre told him, but he just couldn’t get over the differences between the two monkey’s blood vessels! Through a little more googling, he discovered that it was cholesterol that was filling those blood vessels.</p>",
-                                    "<p>That puzzled him, he thought cholesterol was in food. How would it end up stuck in the middle of the blood vessel? He also thought of Deaundre, was his artery filled with that gross stuff?  What about his own blood vessels, did he also have cholesterol plugging up his arteries? That thought made his heart skip a beat and he could feel himself starting to sweat. Just thinking about all this stressed him out, and stress, as he now knew, was the reason Deaundre was in the hospital in the first place! He needed to stop these negative thoughts and get to work. He had a long day ahead, and he wanted to check in on Deaundre after work. But at least it was Friday and there would be time to destress on the weekend.</p>",
-                                    "<p>On Saturday evening he and the boys were going to their grandmother’s, or Naani as they called her, 80th birthday. His cousin Meera was hosting. She was one of his favorite people on this planet and one of the smartest he knew. They grew up together and had a close bond. Meera was a certified nutritionist and worked at a hospital. As they were driving to Meera’s house for the party, an idea popped into Rakesh’s head. Maybe he could ask her about cholesterol and how it was getting into  blood vessels?</p>",
-                                    "<p>At the party, Naani was so happy to see everyone. Rakesh’s sons – Ajay and Kabir – gave their grandmother a huge hug and her eyes beamed with joy. He loved seeing his family and how much they loved his kids. Rakesh was so happy to see his mother doing well. The birthday party was wonderful. The whole family was having a great time, the food was delicious, and you could feel the love surrounding Naani. While they were all eating, one of his cousin’s wife came up to him to talk. </p>",
-                                    "<p><strong>Mitali: &quot;</strong>Wow, look at how grown up your sons are.&quot;</p>",
-                                    "<p><strong>Rakesh: </strong>&quot;<em>Yeah they get bigger and bigger everyday.</em>&quot;</p>",
-                                    "<p><strong>Mitali:</strong> &quot;<em>Must be hard raising them all on your own. So irresponsible of their mother to just leave them alone for you to handle.</em>&quot;</p>",
-                                    "<p>Rakesh: &quot;Excuse me?&quot;</p>",
-                                    "<p><strong>Mitali:</strong> &quot;<em>I’m just saying. She dumped her kids on you and is having fun while you’re stuck raising them by yourself. It’s a mother’s job to raise her kids.</em> &quot;</p>",
-                                    "<p><strong>Rakesh: </strong>&quot;<em>They’re my kids too and she didn’t just &#x27;dump&#x27; our kids. She couldn’t get a visa to come over with us even though she wanted to! And even if she did come here she may not have had the same opportunities she has now. Now, Seema is getting a degree in something she enjoys.</em>&quot;</p>",
-                                    "<p><strong>Mitali:</strong> &quot;<em>Then why doesn’t she come over once she’s done?&quot;</em></p>",
-                                    "<p><strong>Rakesh:</strong> &quot;<em>Immigrating isn’t a piece of cake. It’s not like she can just finish college and hop on a plane without an approved visa. It could take years for her to get approved. Honestly, sometimes I think immigrating here might not have been the best thing. But. now Seema has met someone and they seem really happy. All any of us want is for her to be happy. So we both agreed splitting up was the best option for everyone. </em>&quot;</p>",
-                                    "<p><strong>Mitali: </strong>&quot;<em>Well what about the boys? Don’t they miss her?</em>&quot;</p>",
-                                    "<p><strong>Rakesh:</strong> &quot;<em>We talk to her everyday. We never miss a facetime. In fact, we talked to her just before coming tonight. She loves our boys more than anything; she’s still a mom and does everything she can to be a part of their lives. Things are actually going well for her and I want that for her just like she wants that for me. Naani: Mitali, leave him alone. Seema is a good mother. </em>&quot;</p>",
-                                    "<p><strong>Mitali:</strong> &quot;<em>I was just worried about the kids.</em>&quot;</p>",
-                                    "<p><strong>Naani:</strong> &quot;<em>If you cared about the kids, then you wouldn’t insult their mother. Now come along, I want to eat my cake.</em>&quot;</p>"
-                                  ]
-                                }
-                              },
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p>Naani led everyone to the cake, singing along happily to their joyous birthday song, and blowing out her candles. Rakesh watched as everyone enjoyed themselves, talking and smiling amongst themselves. He was lucky to have this opportunity and he felt grateful for the chance to give his sons a better life, but he would be lying if he said immigrating here wasn’t difficult. There was so much on his plate now and he was constantly homesick for the land he once knew like the back of his hand. His stray thoughts led him back to his questions about stress and cholesterol. Towards the end of the party, once Meera had finished eating her cake, Rakesh remembered to ask her about the cholesterol thing. </p>",
-                                    "<p><strong>Rakesh:</strong> “<em>Meera, that is delicious isn’t it</em>” he pointed at the crumbs on her plate. </p>",
-                                    "<p><strong>Meera:</strong> “<em>OMG, yes! I love chocolate cake with mocha frosting</em>.”</p>",
-                                    "<p><strong>Rakesh:</strong> “<em>Acha (‘ok’ in Hindi, their language) listen Meera I know we’re at a Naani’s birthday party, but I have a serious question I really need to ask you. My friend Deaundre almost had a heart attack this week and the doctor said it was due to blocked blood vessels. I checked google and saw this video about blocked blood vessels and it looked awful, gross and a bit scary. I think the blood vessels were blocked by cholesterol or something. Do you know anything about this?</em>” </p>",
-                                    "<p><strong>Meera: </strong>“<em>Of course, cholesterol is found in most foods. I actually wrote about cholesterol and health in my blog a few weeks ago.</em>”</p>",
-                                    "<p>Rakesh: “<em>Wait. I didn’t know you have a blog! That’s awesome!</em>”</p>",
-                                    "<p>Meera: “<em>Well clearly you don’t check the family group text properly because I’ve sent many links from my blog for everyone to read!</em>&quot;</p>"
-                                  ]
-                                }
-                              },
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p>Meera laughed while teasing Rakesh, who looked a bit sheepish and smiled. He definitely does not keep up with the family group chat and just got caught! Meera continued: </p>",
-                                    "<p><strong>Meera:</strong> “<em>Honestly, I mostly do it mostly for my clients. It saves so much time during our appointments if they do some background reading before we meet to discuss their diets. I’ll text you the link for the post about cholesterol. Read that and then tell me what you think?</em>&quot;</p>",
-                                    "<p><strong>Rakesh:</strong> “<em>Absolutely! And this time, I promise I’ll actually read the link you send!</em>”</p>",
-                                    "<p>Rakesh laughed and was about to ask Meera more questions, but Naani was ready for chai (Indian tea) and so Meera rushed to go get it ready for her. </p>",
-                                    "<p>Once he got home from the party, Rakesh checked his phone and found the text from Meera. He clicked on the link she sent: “All the Fuss About Cholesterol” </p>"
-                                  ]
-                                }
-                              },
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p><strong>Read the blog- EVIDENCE 2- All the Fuss About Cholesterol - in the Resource Library. </strong></p>",
-                                    "<p>Discuss the blog with your group and together, answer the questions below by dragging them into your workspace. </p>",
-                                    "<p>Write what you learned from this evidence in your table.</p>",
+                                    "<h2>CHAPTER 2: HEALTHY JOSUE</h2>",
                                     "<p></p>",
-                                    "<p><em>Continue reading to find out what happened next:</em></p>"
+                                    "<p>After watching the slide show, Felix realized that he was getting sick because his body was trying to fight germs. He was right after all! And Josue’s mother helped support Felix’s case! It was not because he was stressed at all! That night when he got home from work, Felix told Josue about what he had learned. </p>",
+                                    "<p></p>",
+                                    "<p>Felix: So, guess what I found out today? I looked at those slides your mom sent, and, I was RIGHT! I’m just fighting off germs that are trying to get into my body! Stress has nothing to do with this! </p>",
+                                    "<p>Josue: Oh yeah, really? That’s what my mom’s thing really said? </p>",
+                                    "<p>Felix nodded and Josue thought for moment…</p>",
+                                    "<p>Josue: But wait. One second. If it’s just germs and not stress, then why am I not getting sick? </p>",
+                                    "<p>Felix: Huh? What d’u mean?</p>",
+                                    "<p>Josue: We live together, you’d think I would be sick as often as you, si?</p>",
+                                    "<p></p>",
+                                    "<p>This made Felix pause. He thought about it and realized that his boyfriend might actually have a point. Germs do travel from one person to the other, especially when someone coughs or sneezes - which Felix does a lot.  And it’s true, Felix couldn’t even remember the last time Josue felt slightly sick. </p>",
+                                    "<p>While he was thinking about this, Josue had already pulled out his phone and was looking up “stress and being sick” on YouTube. After a bit of searching, Josue found a good video. He called Felix over and clicked on the video: “Stress and Sickness” </p>",
+                                    "<p></p>"
                                   ]
                                 }
                               },
                               {
+                                "id": "tNynMRy-exFUX0ef",
+                                "title": "Text 2",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><strong>Watch the video - EVIDENCE 2- Stress and Sickness- in the Resource Library</strong>.</p>",
+                                    "<p>Discuss the video with your group and together, answer the questions below by dragging them into your workspace.</p>",
+                                    "<p>Write what you learned from this evidence in your table.</p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "8yt7aebIbnBY_RMs",
+                                "title": "Text 3",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
                                     "<p><strong>Questions About Evidence 2:</strong></p>",
                                     "<p></p>",
-                                    "<p>1. Our body can make all the cholesterol we need.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
+                                    "<p>1. Being sick is... <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
                                     "<p></p>",
-                                    "<p>2. Cholesterol is needed to build cells, make vitamins, and make hormones.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
+                                    "<p>2. Stress does .... <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
                                     "<p></p>",
-                                    "<p>3. A cholesterol plaque can form in: (underline your choice)</p>",
-                                    "<p><strong>A.  The liver           B. Inside the blood vessel wall         C. The stomach</strong></p>"
+                                    "<p>3.  Being stressed (underline your choice)</p>",
+                                    "<p><strong>A.  The nose           B. The  Brain       C. The stomach</strong></p>"
                                   ]
                                 }
-                              }                
+                              }                          
                             ]
                           },
                           "supports": []
@@ -1265,49 +1203,111 @@
         {
           "description": "Story Ch3",
           "ordinal": 3,
-          "title": "Rakesh",
+          "title": "Felix",
           "subtitle": "Chapter 3",
           "disabled": [],
           "sections": [
                         {
                           "type": "chapter3",
                           "content": {
-                            "tiles": [
+                            "tiles": [  
                               {
+                                "id": "y8pTycYL3bq20JSd",
+                                "title": "Text 1",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<h2>CHAPTER 3: WHAT'S IN YOUR BLOOD</h2>",
-                                    "<p>Rakesh read the blog and realized he really did need to start paying more attention to the family group text. Meera was amazing at explaining stuff and her blog was really interesting! Based on her post he believed that his diet was mostly fine. He really did try to eat well balanced meals for dinner (at least on most nights) and his older son – Kabir – made sure that what he packed them for lunch was home-made food that even Naani would approve. There was almost always a piece of fruit or a vegetable curry in his lunch. </p>",
-                                    "<p>Yet, he was still nervous about those blockages. If even babies have cholesterol, then was there was a chance that despite his healthy life habits he could still have too much cholesterol in his blood? The fear of his arteries getting clogged up was still not leaving him. He just couldn’t stop worrying about it no matter how hard he tried. </p>",
-                                    "<p>That day at lunch, he felt like his taste buds could almost sense the cholesterol in his rice and beans. It was all feeling too stressful, so he decided to just get his blood checked and confirm whether he had high cholesterol or not. He called the doctor’s office and they ordered some tests and told him to go to the blood lab near his house. The next day he went to the lab right after work, did the blood test. Two days later he received an email from the lab, the results were attached. He clicked on the attachment: “Rakesh Sharma Blood Test Report”</p>",
-                                    "<p>Review the test results- EVIDENCE 3-Rakesh Sharma Blood Test Report - in the Resource Library. </p>",
-                                    "<p>Discuss the results with your group and together, answer the questions below by dragging them into your workspace. Write what you learned from this evidence in your table.</p>",
-                                    "<p>Continue reading to find out what happened next:</p>"
-                                  ]
-                                }
-                              },
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p><strong>Question About Evidence 3:</strong></p>",
+                                    "<h2>CHAPTER 3: MOVIE NIGHT</h2>",
+                                    "<p>Felix thought about the video. He had to admit it shook him. The video showed a connection between cortisol released during stress and feeling sick. The possibility that Josue was right both annoyed and worried him. Maybe he was getting sick because of stress. But how? And was he really stressed that much? Enough to make him sick?</p>",
+                                    "<p>Felix made his way over to the school library to study for an international relations exam that was coming up soon. This class was one of his pre-Law classes so it was important and the professor was known to not grade kindly. It was fair to say Felix was stressed about this exam and knew there were a lot of things he had to revise. But, no matter how hard he stared at the textbook, the words were blurring together and his thoughts were getting in the way.</p>",
                                     "<p></p>",
-                                    "<p>1. Rakesh’s cholesterol levels are? (underline your choice)</p>",
-                                    "<p><strong>A.  Low       B. Normal      C. High</strong></p>"
+                                    "<p><strong>Felix Internal monologue</strong></p>",
+                                    "<p><em>Okay so NATO had established laws regarding… all the words look the same. </em></p>",
+                                    "<p><em>I really want to do well on this exam. I only have three days to cover 7 chapters. If I get through the harder chapters today, maybe tomorrow can just be review. </em></p>",
+                                    "<p><em>Wait okay, stop. NATO. </em></p>",
+                                    "<p><em>I have to focus on NATO. I won’t be able to get through anything if I don’t focus. </em></p>",
+                                    "<p><em>But I can’t focus… My body feels so weak.</em></p>",
+                                    "<p><em></em></p>",
+                                    "<p>Amongst all the internal distress and the trying to read through the same paragraph over and over again, Felix must have fallen asleep. Next thing he knows, he’s waking up with the lines of the book imprinted onto his face. Well that’s one way of taking in the information. </p>",
+                                    "<p></p>",
+                                    "<p>Felix: Oh man I fell asleep! That means I have even less time to study. I have to stay up and focus. </p>",
+                                    "<p>By the time Felix got home from the library, Josue could practically see the stress rolling off him. </p>",
+                                    "<p>Josue: Felix. You look dead on your feet. </p>",
+                                    "<p>Felix: It’s fine, I got through the chapters I had to for the exam.</p>",
+                                    "<p>Josue: Your body is screaming from the stress, I can hear it. You watched the video about stress and getting sick. </p>",
+                                    "<p>Felix: I know, I know. I just really need to do well on this exam. </p>",
+                                    "<p>Josue: Okay but know that you studied a little, you need a break. I think we both do. </p>",
+                                    "<p>Felix: Maybe you’re right.</p>",
+                                    "<p></p>",
+                                    "<p>After all this stress and sickness talk, Felix and Josue realized that they both really deserved some fun and time to chill out. Being around their community and friends usually helped them feel better and so they decided to go to the movie night that the LGBTQ+ club on campus hosts every Friday. There they can hang out with their friends, eat tasty snacks, and watch a good movie. Today, they ran into their friend Camila, who they hadn’t seen for quite a while. </p>"
                                   ]
                                 }
                               },
                               {
-                                "id": "bio4TG01",
-                                "title": "R. Sharma Metabolic Panel",
+                                "id": "p-ntAzHuCqXjKq0g",
+                                "title": "Felix, Josue and Camila at Movie Night",
                                 "content": {
                                   "type": "Image",
-                                  "url": "curriculum/bio4community/images/MetabolicPanel.jpg"
+                                  "url": "curriculum/bio4community/images/Felix_S2.jpg",
+                                  "filename": "curriculum/bio4community/images/Felix_S2.jpg"
                                 }
-                              }           
+                              },
+                              {
+                                "id": "fd1TKQtHQ9OZgeor",
+                                "title": "Text 2",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>Camila: Felix! Josue! How are you! How has everything? It’s been so long. Where you two been hiding?</p>",
+                                    "<p>Felix: It’s good, I feel good! You look fantastic. </p>",
+                                    "<p></p>",
+                                    "<p>Camila was just about to hug Felix, when he sneezed. This earned him a disappointed look from Josue. Camila looked a bit confused at Josue, to which Josue said:</p>",
+                                    "<p>Josue: What he’s not mentioning is that he’s been working so hard his stress is making him sick. </p>",
+                                    "<p>Camila: What?</p>",
+                                    "<p>Felix: Is not. Camila. Josue is just being dramatic. </p>",
+                                    "<p></p>",
+                                    "<p>As if on cue, Felix sneezed again. </p>",
+                                    "<p></p>",
+                                    "<p>Josue: Ay Dios mio, yes it can! Stop fighting with me about this! </p>",
+                                    "<p>Camila: Okay, listen. Why don’t you first find out how stressed you really are Felix. Why don’t you just get a stress test?</p>",
+                                    "<p>Felix: A what?</p>",
+                                    "<p>Camila: A stress test! All you have to do is go to a clinic near you. They have a program for people who don’t have health insurance and you can tell them you need to get your stress levels tested.  </p>",
+                                    "<p>Felix: We don’t have a clinic near us. </p>",
+                                    "<p>Camila: Oh yeah, I forgot how unfortunate that part of town is. </p>",
+                                    "<p>Josue: Excuse me? Unfortunate?</p>",
+                                    "<p>Felix: Camila, you used to live there too. Don’t forget your roots. </p>",
+                                    "<p>Camila: Yeah but my parents got me out. Now we actually have access to things like health clinics. </p>",
+                                    "<p>Felix: (getting agitated) Hey, at least when we get home late at night, our neighbors don’t call the cops on us cause they think we don’t belong there!</p>",
+                                    "<p>Josue: Sure your parents got you out of our town and you might live in a more privileged area, but we still have the best taqueria and Senor Sanchez still lets us take the chili mango candies for free when we go to his bodega. We have a community of people that look out for each other. </p>",
+                                    "<p>Camila: You’re right I’m sorry. I didn’t mean to come off rude. I haven’t had a good birria taco in such a long time, I think it’s getting to my head. </p>",
+                                    "<p>Felix: Well come over and we can change that. </p>",
+                                    "<p></p>",
+                                    "<p>Felix playfully nudges Camila, allowing the tension to dissipate.</p>",
+                                    "<p></p>",
+                                    "<p>Camila: I’m sorry I was rude about our neighborhood... But Felix, you should still look for somewhere to get a stress test and then you can finally prove who is right.</p>",
+                                    "<p></p>",
+                                    "<p>Josue and Felix looked at each other briefly before nodding in agreement-- challenge accepted! </p>",
+                                    "<p>Before the test, Felix decided he needed to know more about what this stress test was going to involve. So, he searched and found a video on how stress test works. He clicked the link: “Saliva Stress Test” and watched the short video. The test seemed simple enough. He went to the community center the next day and did the test himself.</p>",
+                                    "<p>Both Felix and Josue expected that getting the test results might take a while, but within two days the results came in! Felix opened the email with baited breath, eager to see who was right. He clicked on the attachment: “Saliva Stress Test”, and he and Josue read the results.</p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "DzggcsxjHra_HrC9",
+                                "title": "Text 3",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><strong>Watch the video - Saliva Stress Test - in the Resource Library.</strong></p>",
+                                    "<p>Then review the test results -  EVIDENCE 3 - Saliva Stress Test Results - in the Resource Library.</p>",
+                                    "<p>Discuss the video and test results with your group and together, answer the questions below by dragging them into your Workspace.</p>",
+                                    "<p>Write what you learned from this evidence in your table.</p>"
+                                  ]
+                                }
+                              }
                             ],
                             "supports": []
                           }
@@ -1318,50 +1318,61 @@
         {
           "description": "Story Ch4",
           "ordinal": 4,
-          "title": "Rakesh",
+          "title": "Felix",
           "subtitle": "Chapter 4",
           "disabled": [],
           "sections": [
-                        {
-                          "type": "chapter3",
-                          "content": {
-                            "tiles": [
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<h2>CHAPTER 4: WHAT’S IN YOUR SALIVA</h2>",
-                                    "<p>A few days after doing his blood test, Rakesh got a call from his doctor to come in and discuss the results. Rakesh was not a fan of the doctor’s office. It always seemed so cold, and the waiting room was usually very crowded. Luckily today he didn’t have to wait too long after he got there. The nurse took him to the exam room inside and he waited for a few minutes for the doctor to see him.</p>",
-                                    "<p>Dr. Lee: “Nice to see you Mr. Sharma. I have the results of your test here (waves the lap report) they look fine to me. I know you were concerned about your cholesterol levels, but they are well within range. I don’t think you need to change your diet at all. </p>",
-                                    "<p>Rakesh: “Oh, thank you Dr. Lee. That is such a relief to hear!” </p>",
-                                    "<p>Dr Lee: “I’m glad! But Mr. Sharma, why were you concerned about your cholesterol in the first place?”</p>",
-                                    "<p>Rakesh: “Well doctor what happened was that a close friend of mine had a minor heart attack last week. His doctor said that his blood vessels were clogged, and I read that cholesterol can cause clogged arteries. So, I just wanted to make sure that my cholesterol levels are not something I need to worry about. </p>",
-                                    "<p>Dr. Lee: “Ah yes, that is true Mr. Sharma. High cholesterol can cause issues in your blood vessels, but stress has also been linked to heart attacks.”</p>",
-                                    "<p>Rakesh: “Right. I remember finding a video online that showed that stress can cause blocked blood vessels too. My friend and I have the same job and similar responsibilities and I am stressed a lot too….” </p>",
-                                    "<p>Rakesh didn’t finish his sentence and Dr. Lee could tell that Rakesh seemed to be getting worried again. </p>",
-                                    "<p>Dr. Lee: “Listen Mr. Sharma, why don’t we order a test to measure your stress hormone levels? I can ask the nurse to administer the blood test before you leave today, and you will get the results in a week.”</p>",
-                                    "<p>Rakesh still looked a bit worried but agreed and went to see the nurse. </p>",
-                                    "<p>Once he got home, Rakesh was still feeling curious about stress tests and decided to research it more after dinner. He googled ‘how to test for stress’ and found that there were many ways to measure cortisol levels. He found a video explaining how saliva (spit) can be used to measure cortisol levels easily and quickly. The website also had a link to order the test and get results within 24 hours. Out of restlessness, and not wanting to wait a whole week for his results from Dr. Lee, Rakesh decided to order a saliva stress test as well. </p>",
-                                    "<p>The test arrived the next day, he followed the directions and then mailed it back to the lab. As promised, within 24 hours, Rakesh got an email back from the lab with his results from the saliva test. His stomach tight with nervousness as he opened the email: “Saliva Stress Test”</p>",
-                                    "<p>Watch the video- Saliva Stress Test - in the Resource Library. Then review the test results -  EVIDENCE 4-Saliva Stress Test Results - in the Resource Library.</p>",
-                                    "<p>Discuss the video and test results with your group and together, answer the questions in the Resource Librarys. </p>",
-                                    "<p>Write what you learned from this evidence in your table.</p>"
-                                  ]
-                                }
-                              }
-                              
-                            ],
-                            "supports": []
-                          }
-                        }
+            {
+              "type": "chapter1",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "JzWS8mBr_iKFpVLy",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 4: PROFESSOR SMITH</h2>",
+                        "<p></p>",
+                        "<p>As he read the report, Felix’s heart was racing, how stressed was he? Is Josue right about him? The test showed that his cortisol levels were way too high. He was, in fact, very stressed.</p>",
+                        "<p></p>",
+                        "<p>Josue: Mi vida, I didn’t want to be right. I’m so worried. </p>",
+                        "<p>Felix: Yo se. I didn’t think I was that stressed and it could be making me sick.</p>",
+                        "<p></p>",
+                        "<p>Knowing about his cortisol levels made Felix feel even more anxious. Clearly he was stressed, but what could he do about it? He needed to work to live and couldn’t stop going to class. What could he do? He realized he could reach out to his immunology professor from undergrad. She would know how to interpret this.</p>",
+                        "<p>Professor Smith was one of the best professors Felix had in college. His office hours were every Thursday from 1:00 - 3:00 pm so he decided to vist then. At 2:30, Felix found Professor Smith getting ready to leave. He knocked on the office door:</p>",
+                        "<p></p>",
+                        "<p>Felix: Hi, Professor Smith, do you remember me?</p>",
+                        "<p>Prof. Smith: Hello Felix, of course I do. What brings you here today? Aren’t you in law school now?</p>",
+                        "<p>Felix: Yes, yes, I am. Sorry to surprise you like this, but I have a biology-related question I was hoping you may be able to help me figure out.</p>",
+                        "<p>Prof. Smith: Sure, of course, what is it?</p>",
+                        "<p>Felix: OK. I have been getting sick a lot lately and I think it may be because I am stressed. I took a stress test and found out my cortisol levels are too high. But I don’t understand how cortisol could make me sick, I just don’t get the connection.</p>",
+                        "<p>Prof. Smith: Oh Felix, I am sorry to hear about your stress levels. Balancing college, work, family, and friends is really difficult. You have always been such a good student so I know you must be working hard. </p>",
+                        "<p>Felix: Thank you, I am doing OK. It is super hard right now, I had several assignment due this week including a huge presentation that I gave the other day.</p>",
+                        "<p>Prof. Smith: That sounds like a lot, you really need to take time for yourself as well. I may have a report that can help you make sense of all this. </p>",
+                        "<p>Prof. Smith looked around on the desk and found the report.</p>",
+                        "<p>Prof. Smith: Here it is! This is a simulation about the effect of cortisol on the immune system. It may give you some answers. I have to get to another class now, but if you have any questions just email me.</p>",
+                        "<p>Felix: Oh wow, Prof. Smith, that will be really helpful, thank you. I will read the report. Have fun teaching.</p>",
+                        "<p></p>",
+                        "<p>Felix really liked  Prof. Smith, she cared about her students and how they were doing. He looked down at the report in his hand. He planned to read it after his double shift, when he got home.</p>",
+                        "<p></p>",
+                        "<p>Read the report - EVIDENCE 4- Effect of Cortisol on the Immune System - in the Resource Library.</p>",
+                        "<p>Discuss the report with your group and together, answer the questions below.</p>",
+                        "<p>Write what you learned from this evidence in your table.</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
                       ],
           "supports": []
         },
         {
           "description": "Story Ch5",
           "ordinal": 5,
-          "title": "Rakesh",
+          "title": "Felix",
           "subtitle": "Chapter 5",
           "disabled": [],
           "sections": [
@@ -1370,406 +1381,65 @@
                           "content": {
                             "tiles": [
                               {
+                                "id": "444OR8aFNRatXbRX",
+                                "title": "Text 1",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<h2>CHAPTER 5: DR. ZEIDERS</h2>",
-                                    "<p>Readings the test results and finding that his cortisol levels were too high, Rakesh could feel his chest tightening and hands sweating. He knew this was not good news, but he had no idea what to do about it. His thoughts raced and he started to feel dizzy. He closed his eyes and took several deep breaths to calm his body down. He decided that tomorrow he would call Dr. Lee and request a follow-up appointment. However, he knew the doctor was very busy and would not have any available appointments for the next two weeks. He thought about what he could do right now, and decided to also email the scientist in that video about saliva cortisol tests. Her name was Dr. Zeiders and her email was on the website. </p>"
+                                    "<h2>CHAPTER 5: JOSUE’S SOLUTION</h2>",
+                                    "<p>The report helped Felix piece the story together. He now understood what was happening to him. Josue was right all along, stress was making him sick. Now the question was what on Earth could he do about it?</p>",
+                                    "<p>He told Josue everything he figured out. He expected him to be smug with satisfaction that he won this argument. Josue wasn’t. Instead, he handed him his phone. </p>"
                                   ]
                                 }
                               },
                               {
-                                "id": "123324sdljfasdghhkq34",
-                                "title": "Email from Dr. Zeiders",
+                                "id": "zZEL3hhP1DVhc4xQ",
+                                "title": "Felix with Josue using a stress app",
                                 "content": {
                                   "type": "Image",
-                                  "url": "curriculum/bio4community/images/drZeiders.png"
+                                  "url": "curriculum/bio4community/images/Felix_S3.jpg",
+                                  "filename": "curriculum/bio4community/images/Felix_S3.jpg"
                                 }
                               },
                               {
+                                "id": "Q23fnRmSYk4ycm-j",
+                                "title": "Text 2",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<p>Surprisingly, Dr. Zeiders responded to Rakesh’s email by the next day. She said that she would be happy to meet with Rakesh online to chat about the test results and what her lab has discovered about the link between stress, cortisol, and clogged arteries. They set a time to meet over zoom. He was looking forward to his conversation with Dr. Zeiders.</p>",
-                                    "<p>Read - EVIDENCE 5-Conversation with Dr. Zeiders. </p>",
-                                    "<p>Discuss the conversation with your group and together, answer the questions on the Resource Library. </p>",
-                                    "<p>Write what you learned from this evidence in your table.</p>"
-                                  ]
-                                }
-                              }                             
-                            ],
-                            "supports": []
-                          }
-                        }
-                      ],
-          "supports": []
-        },
-        {
-          "description": "Story Ch6",
-          "ordinal": 6,
-          "title": "Rakesh",
-          "subtitle": "Chapter 6",
-          "disabled": [],
-          "sections": [
-                        {
-                          "type": "chapter3",
-                          "content": {
-                            "tiles": [
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p><strong>Chapter 6: CHILDREN ARE THE FUTURE</strong></p>",
-                                    "<p>A few minutes after finishing the zoom conversation with the scientist, Rakesh heard the front door opening. He could hear Ajay and Kabir throwing their backpacks onto the ground, taking off their shoes and running into the kitchen to make a snack for themselves. Rakesh went downstairs and joined them in the kitchen. </p>",
-                                    "<p>Rakesh: “So, what’d you boys do at school today? </p>",
-                                    "<p>Kabir: Nothing really. Senior year is kinda boring. </p>",
-                                    "<p>Rakesh: I’m sure there was at least one thing fun that happened at school today, no?  </p>",
-                                    "<p>Ajay: I learned something really cool in my science class!</p>",
-                                    "<p>Kabir: Of course you did Ajay. 7th grade is way more fun than senior year. You’re so lucky….I miss those good old days…</p>",
-                                    "<p>Ajay: Ugh why do you have to talk like some old uncle. You know you’re only 5 years older than me right? Jeez… </p>",
-                                    "<p>Rakesh: Okay now boys, be nice to each other! Ajay, what’d you learn in science today that was so cool?</p>",
+                                    "<p>Josue: Look I found this app called “InsightTimer” that can help you. It is a meditation app that can help you relax. I looked at a bunch of them and this is the best rated. I tried it too and it is really easy to use. Please, just try it. </p>",
+                                    "<p>Felix: You found this for me?</p>",
+                                    "<p>Josue: Mi amor, off course. I am not the one getting sick every other Tuesday.</p>",
                                     "<p></p>",
-                                    "<p>Ajay looked at Kabir with a proud smile as though he had won the fight and then said</p>",
-                                    "<p>Ajay: Okay. So. We were talking about exercise and why it’s good for you and we found out it can make you happier and actually, dad, it like lowers your stress and stuff too! </p>",
-                                    "<p>Rakesh: Wait. Really? Exercise can decrease stress? </p>",
-                                    "<p>Ajay: Yeah! I’m not kidding! The school counselor also came into science class today too. And she told our teacher about how recess is really important for us. Because like all day we’re sitting and stuff. And so in recess we get a chance to exercise and lower our stress. </p>",
-                                    "<p>Rakesh: Beta (son in Hindi), this is amazing! I had no idea! </p>",
-                                    "<p>Kabir: Really, dad? You’re not just making Ajay feel good right?</p>",
-                                    "<p>Rakesh: No, I’m being serious! You kids teach me things all the time! </p>",
-                                    "<p>Rakesh really did learn a lot from his kids. He decided to give what his son said a try and started to incorporate exercise into his daily routine. He may not have been lifting heavy weights, but even going for a jog in the morning before making the kids breakfast felt really good. After his jogs, he always felt a little lighter, like the weight on his shoulders had lifted a bit. The more he exercised, the better he started to feel. However, he was often still stressed by the end of the day.</p>",
+                                    "<p>Josue gave him one of his sarcastic half smiles, the one that was both sweet and annoying at the same time. It was good to know Josue always had his back. </p>",
+                                    "<p>Felix downloaded the app and tried it out. The app guided him through a series of meditations and breathing exercises. Every time he used it, he felt like he could breathe a little easier and the heavy feeling in his chest would go away for a bit. As he kept it up regularly, Felix began to notice himself sniffling a lot less. He still got sick more often than Josue, but not as often as before he started using the app. His health was better, but still not 100%. </p>",
                                     "<p></p>",
-                                    "<p>Use your evidence table to develop a model that shows how long-term stress can result in clogged blood vessels.</p>"
-                                  ]
-                                }
-                              }                              
-                            ],
-                            "supports": []
-                          }
-                        }
-                      ],
-          "supports": []
-        }
-      ]
-    },
-    {
-      "description": "Investigation 5",
-      "ordinal": 5,
-      "title": "Bio4Community: The Biology of Stress",
-      "problems": [
-        {
-          "description": "Story Ch1",
-          "ordinal": 1,
-          "title": "Maria",
-          "subtitle": "Chapter 1",
-          "disabled": [],
-          "sections": [
-                        {
-                        "type": "chapter1",
-                        "content": {
-                          "tiles": [
-                            {
-                              "content": {
-                                "type": "Text",
-                                "format": "html",
-                                "text": [
-                                  "<p>CHAPTER I: MATH TEST</p>",
-                                  "<p>María loved her family to bits and pieces. She would go to the ends of the earth for them. Her mom and step-dad worked hard every day to put a roof over their head. This often meant that they were at work for long hours and so María’s abuela stayed home and watched over her and her 3 younger siblings. Abuela did a lot for them but sometimes it got hard to take care of so many things, so María took it upon herself to help out around the house. She loved doing it because on top of getting to help her Abuela, it also meant that sometimes she got to be in charge of her siblings. </p>",
-                                  "<p>Her younger brothers and sister could be so annoying sometimes and yet so cute at the same time. She often picked them up from their elementary school and they would tell her everything that happened during their day with bright eyes and wide smiles which warmed María’s heart. Once they got home she walked their family dog, and then spent the afternoon making sure her siblings did their homework and daily chores before dinner. Their family tried to eat together every evening and Abuela’s cooking was the best. By the time María finished eating dinner and doing the dishes, it was usually already 7pm. She would then often chat or play video games with her friends for a while. She loved hanging out with her two best friends. Needless to say, this meant María stayed up until midnight most days to get her work done. Sometimes she was so tired she wished she could just go to sleep but her grades were important to her and she was doing well in school. </p>",
-                                  "<p>However, when she was in school she often had trouble focusing. She really did want to focus in class, but sometimes the teacher’s voice became nothing but white noise and María would zone out. She tried to make up for it by working hard on her homework, but homework alone does not prepare someone for tests. She needed to be able to pay attention in class if she wanted to keep her grades up. </p>",
-                                  "<p>One day after school, María felt like she was dragging her body home because she was so upset. That day she had taken a particularly hard math test and she had the sinking feeling that she didn’t do well on it. She tried, but just couldn’t focus.  She found herself staring at the paper and the numbers were glaring back at her making no sense. She couldn’t answer several of the questions at all. On top of that, her siblings just would not listen to her on their walk home. They were almost to the front of the house when they started fooling around.</p>",
-                                  "<p>Paco: Tito, watch me do a handstand.  </p>",
-                                  "<p>Tito: Lame. I bet you can’t run as fast as me</p>",
-                                  "<p>Paco: Bet I can!</p>",
-                                  "<p>Sandra: Hermana, I wanna run too!</p>",
-                                  "<p>Maria: No running, it’s the street. Come on chicos, we have to go home. </p>",
-                                  "<p>Tito: Catch me if you can!</p>",
-                                  "<p>Sandra: Me too! Me too!</p>",
-                                  "<p>Paco: Oh no you don’t!</p>",
-                                  "<p>Maria: Hey! Stop running! What are you doing?</p>",
-                                  "<p>Maria grabs her siblings by the back of their shirts to slow them down</p>",
-                                  "<p>Maria: Why do you never listen to me? Stop fooling around!</p>",
-                                  "<p>Her siblings were shocked by the snap in her tone. Sandra begins to cry at being yelled at, running into the house and straight to abuela. </p>",
-                                  "<p>Abuela: Nena, why are you crying?</p>",
-                                  "<p>Sandra: Mana screamed at me!</p>",
-                                  "<p>Maria: I did not! You weren’t listening to me cause all of you were screaming. </p>",
-                                  "<p>Tito: We were not! </p>",
-                                  "<p>Abuela: Maria, you have to go easy on them. They’re little. You’re older, you need to be patient with them.</p>",
-                                  "<p>Maria: You’re never on my side! You always choose them over me. </p>",
-                                  "<p>Abuela: Maria, Mija, that’s not true. I am on your side. What’s going on with you, Nena?</p>",
-                                  "<p>María: Es nada, Abuela. </p>",
-                                  "<p>Abuela: Ay. I know you too well for that. You can tell me if something is bothering you.</p>",
-                                  "<p>María: Well… I didn’t do well on my math test today. </p>",
-                                  "<p>Abuela: But you normally do so well. What happened?</p>",
-                                  "<p>María: I don’t know. Sometimes I can’t focus in class. I’m just so tired and I think of everything else in the world. I try to focus, I really do. But, I just can’t. </p>",
-                                  "<p>María choked back tears, trying to hide how upset she was. She felt as though no matter how hard she tried, her efforts were useless. </p>",
-                                  "<p>Abuela: Mi corazón, you’re tired. Of course you can’t focus. You’re stressed and sleep deprived. I’ve been telling you it’s not good to stay up till midnight so often. Why don’t you talk to your school counselor or one of your school teachers about how you feel? Aren’t you close with your science teacher? Talk to her. I’m sure they’ll understand and try to help you. You have to make this a priority and take care of yourself. </p>",
-                                  "<p>Maria: I just feel like I don’t even belong in these classes.</p>",
-                                  "<p>Abuela: Why would you say that? Of course you do.</p>",
-                                  "<p>Maria: It’s just… I remember Ms. Parker telling me that I don’t.</p>",
-                                  "<p>Abuela: What? When?</p>",
-                                  "<p></p>",
-                                  "<p>~flashback~ </p>",
-                                  "<p>Ms. Parker was handing back the math tests they had just taken. It was an AP math class and therefore the tests tend to be harder. This one was particularly hard and Maria knew she didn’t do as well as she would have liked. </p>",
-                                  "<p>Ms. Parker: Maria, can I talk to you for a second?</p>",
-                                  "<p>Maria: Y-yes, of course. </p>",
-                                  "<p>Ms. Parker: I noticed that you haven’t been doing well on your tests lately. I think it might be best if you dropped down from this class. </p>",
-                                  "<p>Maria: What?</p>",
-                                  "<p>Ms. Parker: I’m just saying it might be better for you if you take a step back. AP classes are difficult as it is and you don’t really need it if you don’t plan on going to college. I know your people normally don’t go to college so it may be best for you to just lighten the load.</p>",
-                                  "<p>Maria: O-oh.</p>",
-                                  "<p>~end flashback~ </p>",
-                                  "<p></p>",
-                                  "<p>Abuela: Maria. Do not listen to her.</p>",
-                                  "<p>Maria: What if she’s right, Abuela?</p>",
-                                  "<p>Abuela: She is not and you know it. You know you are going towards college. It is not that you are not meant for these classes. You are just stressed. </p>",
-                                  "<p>María knew her grandma was usually right about these things. She had never considered that maybe what she was feeling inside, the tense muscles and racing heartbeat, could be stress. Or that stress could be the reason she couldn’t focus. María decided to talk to her science teacher after school tomorrow. That decision made her feel a bit better.</p>",
-                                  "<p></p>",
-                                  "<p><strong>Do you think Abuela is right?</strong></p>",
-                                  "<p><strong>Discuss with your group--What do you think is the connection between stress and focus?</strong></p>"
-                                ]
-                              }
-                            },
-                            {
-                              "content": {
-                                "type": "Text",
-                                "format": "html",
-                                "text": [
-                                  "<p><strong>Questions About Evidence 1</strong></p>",
-                                  "<p><strong></strong></p>",
-                                  "<p>1. Neuron signaling results in:</p>",
-                                  "<p><strong>Less connections</strong>    OR    <strong>More connections</strong></p>",
-                                  "<p>(underline your choice)</p>",
-                                  "<p></p>",
-                                  "<p>2. Neurons can connect to each other and send signals to one another.  <strong>True</strong>    OR    <strong>False</strong>?</p>",
-                                  "<p>(underline your choice)</p>",
-                                  "<p></p>",
-                                  "<p></p>",
-                                  "<p>3. Connections that are not used:</p>",
-                                  "<p><strong>A. Get stronger    B. Fade away    C. Do not change </strong></p>",
-                                  "<p>(underline your choice)</p>",
-                                  "<p></p>"
-                                ]
-                              }
-                            }                                           
-                          ]
-                        },
-                        "supports": []
-                        }
-                      ],
-          "supports": []
-        },
-        {
-          "description": "Story Ch2",
-          "ordinal": 2,
-          "title": "Maria",
-          "subtitle": "Chapter 2",
-          "disabled": [],
-          "sections": [
-                        {
-                          "type": "chapter2",
-                          "content": {
-                            "tiles": [
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p>CHAPTER 2: LEARNING FROM MS. GUERRA</p>",
-                                    "<p>The next day after science class, María stayed behind and spoke with Ms. Guerra. She told her openly and honestly about how much she had been struggling to focus and how she wanted to be able to do better. In response, Ms. Guerra told María that high school could be tough and that she was glad that María was asking for help. She also had an interesting suggestion:</p>",
-                                    "<p>Ms. Guerra: If your issue is being able to focus, you need to work on growing more connections between the neurons in your brain! </p>",
-                                    "<p>María didn’t really understand what that meant. Ms. Guerra could sense her confusion based on the blank stare María gave her. Figuring María needed more of an explanation, Ms. Guerra pulled out slide show that she had used when she taught college courses a few years ago. Crowding around the computer, the two of them clicked on the link for the: “How our Brains Think” </p>",
-                                    "<p></p>",
-                                    "<p><strong>Watch the slide show- EVIDENCE 1-How our Brains Think - in your Resource Library. </strong></p>",
-                                    "<p><strong>Discuss the animation in your group and together, answer the questions in the Resource Library. </strong></p>",
-                                    "<p><strong>Write what you learned from this evidence in your table.</strong></p>",
-                                    "<p><strong></strong></p>"
+                                    "<p>Felix: Remember how I said I was going to make more time for myself to do some stuff that I love.</p>",
+                                    "<p>Josue: Yeah</p>",
+                                    "<p>Felix: Well, I haven’t played guitar in a while and I really used to love it.</p>",
+                                    "<p>Josue: Of course I remember. You serenaded me once. It was so cheesy. </p>",
+                                    "<p>Felix. Rude. (Josue laughs) Well anyway, I decided to join the guitar club.</p>",
+                                    "<p>Josue: Isn’t Camila in one of those?</p>",
+                                    "<p>Felix: Yeah! She’s actually the one that told me about it. It was established and run by people that are part of the LGBTQIA2S+ community, so it just feels like such a safe space.</p>",
+                                    "<p>Josue: That’s so great! You’re glowing just talking about it. </p>",
+                                    "<p>Felix: I think that’s just sweat. I ran home today excited to tell you the news.</p>",
+                                    "<p>They both laugh, enjoying the light heartedness they felt from knowing Felix was taking steps in the right direction towards a healthier lifestyle.  </p>"
                                   ]
                                 }
                               },
                               {
+                                "id": "jf1niIgNVMTnCr3J",
+                                "title": "Text 3",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<p><strong>Questions About Evidence 2</strong></p>",
-                                    "<p><strong></strong></p>",
-                                    "<p>1. Increased attention shifts means the person is getting distracted.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
-                                    "<p></p>",
-                                    "<p>2. Going for walks, exercising, and mediating can reduce stress.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
-                                    "<p></p>",
-                                    "<p>3. Stress hormones in the brain: (underline your choice)</p>",
-                                    "<p><strong>A.Increase focus     B. Reduce focus     C. Reduce distractions</strong></p>"
-                                  ]
-                                }
-                              }                              
-                            ]
-                          },
-                          "supports": []
-                        }
-                      ],
-          "supports": []
-        },
-        {
-          "description": "Story Ch3",
-          "ordinal": 3,
-          "title": "Maria",
-          "subtitle": "Chapter 3",
-          "disabled": [],
-          "sections": [
-                        {
-                          "type": "chapter3",
-                          "content": {
-                            "tiles": [
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<h2>CHAPTER 3: MAKING CONNECTIONS</h2>",
-                                    "<p>After watching the animation, María understood that in order to focus better, the signaling between neurons needed to get stronger. Her neurons simply needed to make more connections! It seemed stress had nothing to do with it after all. </p>",
-                                    "<p>The next week in school, María tried to practice focusing harder. Every time she was in class and caught herself feeling distracted she just thought about her neurons and concentrated as hard as she could to encourage them to make new connections. But despite her best efforts, it didn’t work. In fact, María felt like she was about to pop a blood vessel in her brain if she tried to focus any harder. No matter how hard she tried, she still caught herself daydreaming and texting even more. Resistance was futile. She also had so many things to do. </p>",
-                                    "<p>Mama: Mija, como estan sus hermanos? Ellos comiste?</p>",
-                                    "<p>Maria: Si, nosotros comimos.</p>",
-                                    "<p>Mama: Bien, ayudarles con sus tareas, ok?</p>",
-                                    "<p>Maria: Ok, Mama.</p>",
-                                    "<p>Papa: Paco y Tito tienen una conferencia con la maestra en una semana, verdad?</p>",
-                                    "<p>Maria: Si</p>",
-                                    "<p>Mama: Tú necesitas ir con nosotros para hablar con la maestra en inglés.</p>",
-                                    "<p>Maria: Pero, yo tengo una examen y necesito estudiar.</p>",
-                                    "<p>Papa: No podemos comprender sin ti. Es muy importante para ellos. </p>",
-                                    "<p>Maria: Okay…</p>",
-                                    "<p>Maria felt like she had so many things piling up on her plate, her shoulders felt heavier and heavier with each task. All this made focusing feel even more impossible. Feeling frustrated, María decided to look up “brain, stress, and neuron signaling” on Google. A few links down from the top, she came across a blog post: “Stress and the Brain”. </p>",
-                                    "<p></p>",
-                                    "<p><strong>Read the blog - EVIDENCE 2 - Stress and the Brain  - in the Resource Library. </strong></p>",
-                                    "<p><strong>Discuss the blog with your group and together, answer the questions below by dragging them into your workspace. </strong></p>",
-                                    "<p><strong>Write what you learned from this evidence in your table.</strong></p>"
-                                  ]
-                                }
-                              }       
-                            ],
-                            "supports": []
-                          }
-                        }
-                      ],
-          "supports": []
-        },
-        {
-          "description": "Story Ch4",
-          "ordinal": 4,
-          "title": "Maria",
-          "subtitle": "Chapter 4",
-          "disabled": [],
-          "sections": [
-                        {
-                          "type": "chapter3",
-                          "content": {
-                            "tiles": [
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<h2>CHAPTER 4: IT’S ALL ABOUT THE NETWORKS</h2>",
-                                    "<p>After going through the blog, María began to understand that stress hormones were blocking her ability to focus. Who knew something in your brain could stop you from focusing? If stress hormones were stopping her from focusing, what else could they do? What was happening to her neurons? Her mind seemed fixated on these scary thoughts and she had a hard time stopping them. She was feeling anxious and unsettled. She decided to visit Ms. Guerra again tomorrow.</p>",
-                                    "<p>María didn’t have science the next day, so she waited till the end of the day to walk over to Ms. Guerra’s room. When she got there, Ms. Guerra was cleaning the classroom so María helped with the cleaning while telling her everything she learned in the blog last night. Ms. Guerra listened carefully to María and was curious herself. She suggested that María do a project about stress and focus. It would count towards her overall science grade in the class, and both of them would learn more about the topic. She even offered to email the scientist who wrote the blog post and ask for more resources that might help them both understand why stress hormones were affecting María’s ability to focus. María thought that was super cool… kind of like talking to a celebrity. </p>",
-                                    "<p>A few days later Ms. Guerra told María to stay after school because the scientist, Dr. Mackey, had responded! María was excited as she walked into Ms. Guerra’s room. The email Dr. Mackey sent had a report attached to it. So, Ms. Guerra clicked on the attachment and they both read Dr. Mackey’s Report</p>",
-                                    "<p></p>",
-                                    "<p><strong>Review the report- EVIDENCE 3- Dr. Mackey’s Report - in the Resource Library. </strong></p>",
-                                    "<p><strong>Discuss the report with your group and together, answer the questions in the Resource Library. </strong></p>",
-                                    "<p><strong>Write what you learned from this evidence in your table.</strong></p>"
+                                    "<p>Use your evidence table to develop a model that shows how long-term stress can result in feeling sick more often.</p>"
                                   ]
                                 }
                               }
-                            ],
-                            "supports": []
-                          }
-                        }
-                      ],
-          "supports": []
-        },
-        {
-          "description": "Story Ch5",
-          "ordinal": 5,
-          "title": "Maria",
-          "subtitle": "Chapter 5",
-          "disabled": [],
-          "sections": [
-                        {
-                          "type": "chapter3",
-                          "content": {
-                            "tiles": [
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<h2>CHAPTER 5: SLEEP AND MOTIVATION </h2>",
-                                    "<p>The project and research helped María understand that the stress hormones caused her brain to think differently, with her fear neuron networks having stronger connections than the neuron networks that help her pay attention and focus. While interesting to learn, María was trying to figure out how to deal with these hormones so that she could build stronger attention networks. As she thought about all this, María had a realization. Her lack of focus seemed to happen only in the morning at school! She had no trouble focusing when she was talking to her siblings, helping them with their homework, playing video games with her friends, or even doing her homework at night! Why would the stress hormones only affect her at school and then stop affecting her when she got home? María decided these questions were worth one more trip to Ms. Guerra after school. She needed to solve this puzzle once and for all! </p>",
-                                    "<p>Ms. Guerra thought María’s question was a really good one. She herself did not have an answer so they decided to email Dr. Mackey again and ask. The following day Ms. Guerra found María as soon as school was over. She excitedly showed María the email and video that Dr. Mackey had sent. </p>",
-                                    "<p></p>",
-                                    "<p><strong>Read the email and watch the video- EVIDENCE 4- Dr. Mackey Email - in the Resource Library. </strong></p>",
-                                    "<p><strong>Discuss the email and video with your group and together, answer the questions in the  Resource Library. </strong></p>",
-                                    "<p><strong>Write what you learned from this evidence in your table.</strong></p>",
-                                    "<p><strong></strong></p>"
-                                  ]
-                                }
-                              }
-                              
-                            ],
-                            "supports": []
-                          }
-                        }
-                      ],
-          "supports": []
-        },
-        {
-          "description": "Story Ch6",
-          "ordinal": 6,
-          "title": "Maria",
-          "subtitle": "Chapter 6",
-          "disabled": [],
-          "sections": [
-                        {
-                          "type": "chapter3",
-                          "content": {
-                            "tiles": [
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<h2>CHAPTER 6: FINDING SOLUTIONS TOGETHER </h2>",
-                                    "<p>After reading the email, María smiled to herself. Abuela was right - she always was. María was so excited she had to share the news with Abuela. She thanked Ms. Guerra and rushed home. María didn’t have to pick up her siblings from school that day and got home quickly. She swung the front door open and called out to Abuela. </p>",
-                                    "<p>María: ¡Abuela! ¡Abuela! ¡Abuela! </p>",
-                                    "<p>Abuela: ¡Sí! ¡Sí! ¡Sí! </p>",
-                                    "<p>María: I have to tell you something. I learned some stuff about my focus problem.</p>",
-                                    "<p>María energetically filled her grandmother in on her breakthrough. She barely took breaths between sentences, her words running into each other. Her grandmother listened intently and when María was done she told her that this was important information that the whole family should hear and talk about at dinner. </p>",
-                                    "<p>That night, as María, Abuela, Papá, Mamá, and María’s younger siblings - Tito, Paco and Sandra - were sitting around the table, María carefully explained to them everything she learned about the way stress hormones reduce connections and make it hard to focus. She also explained that getting enough sleep and motivating work can help when the brain is trying to make new connections. They all listened and were amazed by what she figured out.</p>",
-                                    "<p>María: So that’s why I’m not focused during school. I’m not motivated by it even though I want to do well. </p>",
-                                    "<p>Mamá: Wow, you learned all that and you worked so hard to learn it. Good job, mija. </p>",
-                                    "<p>Tito: Wh-what’s motiwasion? </p>",
-                                    "<p>María giggled at her youngest brother’s pronunciation. </p>",
-                                    "<p>Papá: It’s like when you manage to somehow climb onto the cabinet when you want a cookie but can’t climb into bed when it’s bedtime. The cookie is your motivation. </p>",
-                                    "<p>Paco: So hermana just needs a cookie?</p>",
-                                    "<p>Mamá: A cookie helps, but maybe you should also talk to your teachers about making school more motivating to learn. </p>",
-                                    "<p>María: I like that idea Mamá. I’ll talk to them tomorrow. </p>",
-                                    "<p>Abuela: I think we all need to get to sleep earlier too. Pobrecitos are always dragging their heads in the morning going to school. </p>",
-                                    "<p>Papá: I wouldn’t mind a few extra minutes of shut eye. </p>",
-                                    "<p>Sandra: Papá, you fall asleep the fastest. </p>",
-                                    "<p>The whole family burst into laughter. </p>",
-                                    "<p>That night María went to bed an hour earlier. She did feel more rested the next day. She was also looking forward to talking with Ms. Guerra about stress, motivation, and school work. Ms. Guerra was a great teacher, she would probably have some good ideas to make science more interesting, relevant, and motivating to learn. </p>",
-                                    "<p></p>",
-                                    "<p><strong>The End!</strong></p>",
-                                    "<p><strong></strong></p>",
-                                    "<p><strong>Use your evidence table to develop a model that shows how long-term stress can result in difficulty in focusing.</strong></p>",
-                                    "<p> </p>",
-                                    "<p></p>"
-                                  ]
-                                }
-                              }
-                              
                             ],
                             "supports": []
                           }
