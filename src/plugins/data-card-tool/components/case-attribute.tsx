@@ -50,17 +50,14 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setValueCandidate(valueStr)
   },[caseId])
 
-  //this should be value or nothing, delete button reserved for value
-  // useRef or useMemo here?
-  // NEXT: go into data-card-toolbar and condition appearance of the X on getUiEditFacet
+  // when editFacet is value, delete/image toolbar will need to be active
+  // we check for diff because editFacet goes from "name" => "" => "value"
   useEffect(()=>{
     if (content.getUiEditFacet() !== editFacet){
       if (editFacet === "value"){
         content.setUiEditFacet("value")
-        console.log("we are editing value")
       } else {
         content.setUiEditFacet("")
-        console.log("we are not editing value")
       }
     }
   }, [editFacet])
@@ -73,9 +70,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   }, [attrKey, currEditAttrId]);
 
   useEffect(() => {
-    if (getValue() === "" && valueCandidate !== ""){
-      setValueCandidate("");
-    }
+    const advancedToNewCard = getValue() === "" && valueCandidate !== "";
+    advancedToNewCard && setValueCandidate("");
     setEditFacet("");
   }, [valueStr]);
 
