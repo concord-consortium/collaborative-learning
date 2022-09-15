@@ -46,7 +46,12 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   imageUrlSync();
 
+  useEffect(()=>{
+    setValueCandidate(valueStr)
+  },[caseId])
+
   useEffect(() => {
+    getValue();
     if (currEditAttrId !== attrKey) {
       setEditFacet("");
     }
@@ -87,6 +92,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         }
         setEditFacet("");
         break;
+      case "Tab":
+        handleCompleteValue();
+        handleCompleteName();
+        setEditFacet("");
+        break;
     }
   };
 
@@ -94,7 +104,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     if (readOnly){
       return;
     }
-
     setCurrEditAttrId(attrKey);
     const facet = event.currentTarget.classList[0] as EditFacet;
     const isEditing = event.currentTarget.classList[2] === "editing";
@@ -102,7 +111,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const activateInput = (facet: EditFacet, isEditing: boolean) => {
-
     setEditFacet(facet);
     if (facet === "name" && !isEditing){
       setLabelCandidate(getLabel());
@@ -153,13 +161,18 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     onConfirm: () => deleteAttribute()
   });
 
-  const handleDeleteAttribute = (e: any) => {
+  const handleDeleteAttribute = () => {
     showAlert();
   };
 
   const valueIsImage = () => {
     return gImageMap.isImageUrl(valueStr);
   };
+
+  // this allows user to edit next field when arriving by tab
+  const handleValueInputFocus = () => {
+    activateInput("value", true);
+  }
 
   const pairClassNames = classNames(
     `attribute-name-value-pair ${attrKey}`,
@@ -180,7 +193,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const valueInputClassNames = classNames(
     `value-input ${attrKey}`,
-    { "in-use" : !gImageMap.isImageUrl(valueStr) && editFacet === "value" && !readOnly }
   );
 
   const deleteAttrButtonClassNames = classNames(
@@ -221,6 +233,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
             onKeyDown={handleKeyDown}
             onBlur={handleCompleteValue}
             onDoubleClick={handleInputDoubleClick}
+            onFocus={handleValueInputFocus}
           />
         }
         { !readOnly && valueIsImage() &&
