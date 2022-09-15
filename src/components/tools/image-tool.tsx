@@ -205,7 +205,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     if (clipboardContents.length > 0){
       if (clipboardContents[0].types.includes("image/png")){
         clipboardContents[0].getType("image/png").then(blob=>{
-          const blobToFile = new File([blob], "filename");
+          const blobToFile = new File([blob], "clipboard-image");
           this.handleUploadImageFile(blobToFile);
         });
       }
