@@ -234,7 +234,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
           <img src={imageUrl} className="image-value" />
         }
 
-        {/* read-only view: text is in div, image is in a div */}
+        {/* read-only view: text is in div, image is in an img */}
         { !valueIsImage() && readOnly &&
           <div className="cell-value">{valueStr}</div>
         }
