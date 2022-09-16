@@ -230,7 +230,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const overlay = toggleable && 
         <FourUpOverlayComponent
           context={cornerLabel}
-          style={indexToStyle[groupIndex]}
+          style={{top: 0, left: 0, width: "100%", height: "100%"}}
           onClick={this.handleOverlayClicked}
           documentViewMode={documentViewMode}
           document={document}
