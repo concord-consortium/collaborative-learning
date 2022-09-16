@@ -217,7 +217,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       <div className={valueClassNames} onClick={handleClick}>
-        {/* author view: text is in input, image is in a div */}
+        {/* author view: text is in input, image is in an img */}
         { !readOnly && !valueIsImage() &&
           <input
             className={valueInputClassNames}
