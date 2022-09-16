@@ -47,7 +47,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   },[caseId]);
 
   useEffect(() => {
-    //getValue();
     if (currEditAttrId !== attrKey) {
       setEditFacet("");
     }
