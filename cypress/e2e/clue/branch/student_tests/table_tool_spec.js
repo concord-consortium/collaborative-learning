@@ -6,6 +6,9 @@ let clueCanvas = new ClueCanvas,
 
 let headerX = 'pluto';
 let headerY = 'mars';
+// let headerX = 'x';
+// let headerY = 'y';
+let headerY2 = 'y';
 
 context('Table Tool Tile', function () {
   before(function () {
@@ -77,8 +80,8 @@ context('Table Tool Tile', function () {
       cy.get('.primary-workspace').within(function () {
         tableToolTile.getColumnHeader().should('have.length', 2);
         tableToolTile.getColumnHeaderText().then((text) => {
-          expect(text[0]).to.be.eq('pluto');
-          expect(text[1]).to.be.eq('y');
+          expect(text[0]).to.be.eq(headerX);
+          expect(text[1]).to.be.eq(headerY2);
         });
       });
     });
@@ -111,7 +114,7 @@ context('Table Tool Tile', function () {
     });
   });
   describe("formulas", function () {
-    let formula = "3*pluto+2";
+    let formula = `3*${headerX}+2`;
     it('will verify formula modal', function () {
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.getTableToolbarButton('set-expression').click();
@@ -126,8 +129,8 @@ context('Table Tool Tile', function () {
     });
     it('verify formula appears under correct column header', function () {
       cy.get('.editable-header-cell')
-        .contains('y')
-        .first()
+        .contains('.header-name', 'y')
+        .parent()
         .siblings('.expression-cell.has-expression')
         .should('contain', formula);
     });
@@ -146,7 +149,7 @@ context('Table Tool Tile', function () {
       cy.get('#expression-input').click().type(formula );
       cy.get('.modal-button').contains('Cancel').click();
       cy.get('.editable-header-cell')
-        .contains('y')
+        .contains(headerY) // y2 also contains "y" so this no longer works
         .first()
         .siblings('.expression-cell.has-expression')
         .should('not.exist');
