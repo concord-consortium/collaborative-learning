@@ -37,14 +37,10 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const [editFacet, setEditFacet] = useState<EditFacet>("");
   const [imageUrl, setImageUrl] = useState("");
 
-  const imageUrlSync = () => {
-    gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
+  gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
     .then((image)=>{
       setImageUrl(image.displayUrl || "");
     });
-  };
-
-  imageUrlSync();
 
   useEffect(()=>{
     setValueCandidate(valueStr);
