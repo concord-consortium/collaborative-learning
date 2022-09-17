@@ -9,7 +9,7 @@ export const EmptyImagePrompt: React.FC<IProps> = ({ show }) => {
   return show
     ? <div className="image-prompt-container">
         <div className="image-prompt">
-          Upload or drag image here.
+          Upload, paste or drag image here.
         </div>
       </div>
     : null;

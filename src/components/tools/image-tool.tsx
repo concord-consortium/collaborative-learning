@@ -143,7 +143,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-
   public render() {
     const { documentContent, toolTile, readOnly, scale } = this.props;
     const { isLoading, imageEntry } = this.state;
@@ -190,11 +189,10 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             onUrlChange={this.handleUrlChange}
           />
         </div>
-          <EmptyImagePrompt show={showEmptyImagePrompt} />
+        <EmptyImagePrompt show={showEmptyImagePrompt} />
       </>
     );
   }
-
 
   private handlePaste = () => {
     this.pasteImage();
