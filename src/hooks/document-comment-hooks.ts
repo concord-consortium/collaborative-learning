@@ -16,14 +16,19 @@ import { HistoryEntrySnapshot } from "../models/history/history";
 // documentKeyOrSectionPath => queryKey
 const commentsQueryKeyMap: Record<string, string> = {};
 
-/*
+/**
  * useCommentableDocumentPath
  *
- * For now, parses the specified key to see if it looks like a curriculum document path,
- * otherwise assumes it's a document key.
+ * For now, parses the specified key to see if it looks like a curriculum
+ * document path, otherwise assumes it's a document key.
+ *
+ * @param documentKeyOrSectionPath
+ * @param userId optional param that overrides the current user and the network.
+ * This is used so teachers can find the path of student documents.
+ *
  */
-export const useCommentableDocumentPath = (documentKeyOrSectionPath: string) => {
-  const docKey = useNetworkDocumentKey(documentKeyOrSectionPath);
+export const useCommentableDocumentPath = (documentKeyOrSectionPath: string, userId?: string) => {
+  const docKey = useNetworkDocumentKey(documentKeyOrSectionPath, userId);
   if (!documentKeyOrSectionPath) return documentKeyOrSectionPath;
   // if it looks like a section path, assume it's a curriculum document reference
   return isSectionPath(documentKeyOrSectionPath)
@@ -68,16 +73,20 @@ export const useValidateCommentableDocument = (options?: ValidateDocumentUseMuta
   return useMutation(validateDocument, options);
 };
 
-/*
+/**
  * useCommentableDocument
  *
  * Checks whether the specified document exists and creates it if not.
  * Implemented via React Query's useQuery hook.
+ * 
+ * @param documentKeyOrSectionPath
+ * @param userId optional param that overrides the current user and the network.
+ * This is used so teachers can find the path of student documents.
  */
 export type DocumentQueryType = CurriculumDocument | DocumentDocument | undefined;
-export const useCommentableDocument = (documentKeyOrSectionPath?: string) => {
+export const useCommentableDocument = (documentKeyOrSectionPath?: string, userId?: string) => {
   const [firestore] = useFirestore();
-  const documentPath = useCommentableDocumentPath(documentKeyOrSectionPath || "");
+  const documentPath = useCommentableDocumentPath(documentKeyOrSectionPath || "", userId);
   const documentMetadata = useDocumentOrCurriculumMetadata(documentKeyOrSectionPath);
   const validateDocumentMutation = useValidateCommentableDocument();
   return useQuery(documentPath, () => new Promise<DocumentQueryType>((resolve, reject) => {
@@ -230,9 +239,16 @@ const historyEntryConverter = {
   }
 };
 
-export const useDocumentHistory = (documentKeyOrSectionPath?: string) => {
-  const { isSuccess } = useCommentableDocument(documentKeyOrSectionPath);
-  const docPath = useCommentableDocumentPath(documentKeyOrSectionPath || "");
+/**
+ * 
+ * @param documentKeyOrSectionPath 
+ * @param userId optional param that overrides the current user and the network.
+ * This is used so teachers can find the path of student documents.
+ * @returns 
+ */
+export const useDocumentHistory = (documentKeyOrSectionPath?: string, userId?: string) => {
+  const { isSuccess } = useCommentableDocument(documentKeyOrSectionPath, userId);
+  const docPath = useCommentableDocumentPath(documentKeyOrSectionPath || "", userId);
   // docPath could in theory be an empty string which 
   const queryPath = isSuccess && docPath ? `${docPath}/historyEntries` : "";
   const converter = historyEntryConverter;

@@ -8,7 +8,7 @@ interface IProps {
 }
 
 export const LoadDocumentHistory: React.FC<IProps> = ({ document }) => {
-  const { data, isLoading, isSuccess, isError, status} = useDocumentHistory(document?.key);
+  const { data, isLoading, isSuccess, isError, status} = useDocumentHistory(document?.key, document?.uid);
 
   // TODO: hacky style to make loading visible
   const style: any = { 
