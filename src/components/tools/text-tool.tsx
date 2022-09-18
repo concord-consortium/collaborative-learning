@@ -214,7 +214,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
           plugins={this.plugins}
           onValueChange={this.handleChange}
           onFocus={ () => this.setState({ editing: true}) }
-          onBlur={this.handleOnBlur}
+          onBlur={this.handleBlur}
 
         />
       </div>
@@ -302,7 +302,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     return this.props.model.content as TextContentModelType;
   }
 
-  private handleOnBlur = () => {
+  private handleBlur = () => {
     this.setState({ editing: false });
     const change = {args:[{text: this.getContent().text}]};
     Logger.logToolChange(LogEventName.TEXT_TOOL_CHANGE, 'update', change, this.props.model.id);

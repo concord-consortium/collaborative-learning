@@ -8,7 +8,7 @@ import { ModalProvider } from "react-modal-hook";
 import { defaultTextContent } from "../../models/tools/text/text-content";
 import TextToolComponent from "./text-tool";
 
-// The starter tile needs to be registered so the ToolTileModel.create
+// The text tile needs to be registered so the ToolTileModel.create
 // knows it is a supported tile type
 import "../../models/tools/text/text-registration";
 
