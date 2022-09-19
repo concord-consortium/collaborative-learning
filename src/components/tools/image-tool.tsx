@@ -21,6 +21,7 @@ import { hasSelectionModifier } from "../../utilities/event-utils";
 import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { isPlaceholderImage } from "../../utilities/image-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
+import { HotKeys } from "../../utilities/hot-keys";
 
 import "./image-tool.sass";
 
@@ -82,6 +83,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       });
   };
   private imageDragDrop: ImageDragDrop;
+  private hotKeys = new HotKeys();
 
   constructor(props: IProps) {
     super(props);
@@ -121,13 +123,14 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         this.toolbarToolApi?.handleTileResize?.(entry);
       }
     });
+    this.hotKeys.register({
+      "cmd-v": this.handlePaste,
+    });
   }
-
   public componentWillUnmount() {
     this.resizeObserver.disconnect();
     this._isMounted = false;
   }
-
   public componentDidUpdate(prevProps: IProps, prevState: IState) {
     if (this.state.imageContentUrl) {
       this.updateImageUrl(this.state.imageContentUrl, this.state.imageFilename);
@@ -155,13 +158,17 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
       imageDisplayStyle.width = `${defaultImagePlaceholderSize.width}px`;
       imageDisplayStyle.height = `${defaultImagePlaceholderSize.height}px`;
     }
+
     return (
       <>
         <div className={classNames("image-tool", readOnly ? "read-only" : "editable")}
           data-image-tool-id={this.imageToolId}
           onMouseDown={this.handleMouseDown}
           onDragOver={this.handleDragOver}
-          onDrop={this.handleDrop} >
+          onDrop={this.handleDrop}
+          tabIndex={0}
+          onKeyDown={(e) => this.hotKeys.dispatch(e)}
+        >
           {isLoading && <div className="loading-spinner" />}
           <ImageToolbar
             onRegisterToolApi={(toolApi: IToolApi) => this.toolbarToolApi = toolApi}
@@ -173,6 +180,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
             onUploadImageFile={this.handleUploadImageFile}
           />
           {this.renderTitleArea()}
+
           <ImageComponent
             ref={elt => this.imageElt = elt}
             content={this.getContent()}
@@ -184,6 +192,22 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         <EmptyImagePrompt show={showEmptyImagePrompt} />
       </>
     );
+  }
+
+  private handlePaste = () => {
+    this.pasteImage();
+  };
+
+  private async pasteImage(){
+    const clipboardContents = await navigator.clipboard.read();
+    if (clipboardContents.length > 0){
+      if (clipboardContents[0].types.includes("image/png")){
+        clipboardContents[0].getType("image/png").then(blob=>{
+          const blobToFile = new File([blob], "clipboard-image");
+          this.handleUploadImageFile(blobToFile);
+        });
+      }
+    }
   }
 
   private handleIsEnabled = () => {
