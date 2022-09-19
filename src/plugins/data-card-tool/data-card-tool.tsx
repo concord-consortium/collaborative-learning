@@ -33,17 +33,26 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
     }
   }, [content, model.id, onRequestUniqueTitle]);
 
-  const setToolBarAvailable = (e: any) => {
-    const clickedOn = e.target.classList[0];
-    if (!clickedOn){
-      return;
+  const setToolbarAvailable = (e: any) => {
+    // toolbar button click targets do not have individual classes set, nor a common identifying attribute
+    // we don't want to change (volatile) content.toolbarOn status until click has propagated to correct element
+    // so the below confirms that we have clicked on a button in toolbar and should not change its status here
+    const firstClass = e.target.classList[0];
+    if (!firstClass){
+      const isDeleteButton = e.target.tagName === "svg" || e.target.tagName === "path"
+      const isUploadButton = e.target.type === "file"
+      if (isDeleteButton || isUploadButton){
+        return
+      }
     }
+    // having confirmed that we did not click the toolbar
+    // we only need to determine if we clicked an editable target
     const editTargets = ["value-input", "image-value"];
-    const editable = editTargets.includes(clickedOn);
+    const editable = editTargets.includes(firstClass);
     if (editable){
       content.setToolBarOn(true);
     }
-    if (clickedOn.length > 0 && !editable){
+    if (firstClass.length > 0 && !editable){
       content.setToolBarOn(false);
     }
   };
@@ -142,7 +151,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
     content.addNewAttr();
   };
 
-  const deleteSelectedAttr = () => {
+  const deleteSelectedValue = () => {
     const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
     if (thisCaseId){
       content.setAttValue(thisCaseId, currEditAttrId, "");
@@ -164,14 +173,14 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
 
   return (
-    <div className="data-card-tool" onClick={setToolBarAvailable}>
+    <div className="data-card-tool" onClick={setToolbarAvailable}>
       <DataCardToolbar
         model={model}
         documentContent={documentContent}
         toolTile={toolTile}
         currEditAttrId={currEditAttrId}
         setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
-        handleDeleteValue={deleteSelectedAttr}
+        handleDeleteValue={deleteSelectedValue}
       />
       <div className="data-card-header-row">
         <div className="panel title">
