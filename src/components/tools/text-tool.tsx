@@ -306,7 +306,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   private handleBlur = () => {
     this.setState({ editing: false });
     // If the text has changed since the editor was focused, log the new text.
-    if (this.getContent().text != this.textOnFocus) {
+    if (this.getContent().text !== this.textOnFocus) {
       const change:SimpleToolLogEvent = {args:[{text: this.getContent().text}]};
       Logger.logToolChange(LogEventName.TEXT_TOOL_CHANGE, 'update', change, this.props.model.id);
     }
