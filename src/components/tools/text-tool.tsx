@@ -94,6 +94,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   private tileContentRect: DOMRectReadOnly;
   private toolbarToolApi: IToolApi | undefined;
   private plugins: HtmlSerializablePlugin[] | undefined;
+  private textOnFocus: any;
 
   // map from slate type string to button icon name
   private slateMap: Record<string, string> = {
@@ -213,7 +214,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
           readOnly={readOnly}
           plugins={this.plugins}
           onValueChange={this.handleChange}
-          onFocus={ () => this.setState({ editing: true}) }
+          onFocus={ this.handleFocus}
           onBlur={this.handleBlur}
 
         />
@@ -304,10 +305,17 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
 
   private handleBlur = () => {
     this.setState({ editing: false });
-    const change = {args:[{text: this.getContent().text}]};
-    Logger.logToolChange(LogEventName.TEXT_TOOL_CHANGE, 'update', change, this.props.model.id);
+    // If the text has changed since the editor was focused, log the new text.
+    if (this.getContent().text != this.textOnFocus) {
+      const change = {args:[{text: this.getContent().text}]};
+      Logger.logToolChange(LogEventName.TEXT_TOOL_CHANGE, 'update', change, this.props.model.id);
+    }
   };
 
+  private handleFocus = () => {
+    this.textOnFocus = this.getContent().text;
+    this.setState({ editing: true });
+  };
   private handleEditorRef = (editor?: Editor) => {
     this.editor = editor;
     editor && this.getContent()?.setEditor(editor);
