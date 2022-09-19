@@ -4,11 +4,13 @@ import { CDocument, TreeManagerType } from "../../models/history/tree-manager";
 import { DocumentModelType } from "../../models/document/document";
 
 interface IProps {
-  document?: DocumentModelType
+  document?: DocumentModelType,
+  viaTeacherDashboard?: boolean
 }
 
-export const LoadDocumentHistory: React.FC<IProps> = ({ document }) => {
-  const { data, isLoading, isSuccess, isError, status} = useDocumentHistory(document?.key, document?.uid);
+export const LoadDocumentHistory: React.FC<IProps> = ({ document, viaTeacherDashboard }) => {
+  const { data, isLoading, isSuccess, isError, status} = 
+    useDocumentHistory(document?.key, viaTeacherDashboard ? document?.uid : undefined);
 
   // TODO: hacky style to make loading visible
   const style: any = { 
@@ -36,6 +38,10 @@ export const LoadDocumentHistory: React.FC<IProps> = ({ document }) => {
       // never be done in the main render of the component.
       // FIXME: this approach probably does not handle paging well, 
       // and I'd suspect we'll have a lot of changes so we'll need to handle that.
+      // FIXME: we should protect active documents so that if they are accidentally
+      // passed to this component we don't replace their history. I think that means
+      // adding a prop to documents so we can identify documents that are for being
+      // used for history replaying
       const treeManager = (document?.treeManagerAPI as TreeManagerType);
       const cDocument = CDocument.create({history: data});
       treeManager.setChangeDocument(cDocument);

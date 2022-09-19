@@ -1,3 +1,5 @@
+import { addDisposer } from "mobx-state-tree";
+import { reaction } from "mobx";
 import { AppConfigModelType, AppConfigModel } from "./app-config-model";
 import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType, InvestigationModel } from "../curriculum/investigation";
@@ -18,8 +20,6 @@ import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
 import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
-import { addDisposer } from "@concord-consortium/mobx-state-tree";
-import { reaction } from "mobx";
 import { IUserContext } from "functions/src/shared";
 
 export interface IBaseStores {

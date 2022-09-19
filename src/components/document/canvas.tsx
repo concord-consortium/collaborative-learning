@@ -1,5 +1,6 @@
 import { each } from "lodash";
 import { inject, observer } from "mobx-react";
+import { getSnapshot, destroy } from "mobx-state-tree";
 import React from "react";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { BaseComponent } from "../base";
@@ -15,7 +16,6 @@ import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT } from "../../lib/debug";
 
 import "./canvas.sass";
-import { getSnapshot } from "@concord-consortium/mobx-state-tree";
 import { LoadDocumentHistory } from "../navigation/load-document-history";
 
 interface IProps {
@@ -37,7 +37,7 @@ interface IProps {
 }
 
 interface IState {
-  documentToShow?: DocumentModelType;
+  historyDocumentCopy?: DocumentModelType;
   showPlaybackControls: boolean;  
 }
 
@@ -78,7 +78,6 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
 
     this.state = {
       showPlaybackControls: false,
-      documentToShow: props.document
     };   
   }
 
@@ -100,8 +99,9 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
 
   private renderContent() {
     // const {content, document, showPlayback, showPlaybackControls, onTogglePlaybackControls, ...others} = this.props;
-    const {content, document, showPlayback, overlay, ...others} = this.props;
-    const {showPlaybackControls, documentToShow} = this.state;
+    const {content, document, showPlayback, overlay, viaTeacherDashboard, ...others} = this.props;
+    const {showPlaybackControls} = this.state;
+    const documentToShow = this.getDocumentToShow();
     const documentContent = content || documentToShow?.content; // we only pass in content if it is a problem panel
     const typeClass = document?.type === "planning" ? "planning-doc" : "";
 
@@ -110,14 +110,13 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
         <>
           <DocumentContentComponent content={documentContent}
                                     documentId={documentToShow?.key}
-                                    typeClass={typeClass}
-                                    {...others} />
+                                    {...{typeClass, viaTeacherDashboard, ...others}} />
           {overlay}
           {showPlayback && <PlaybackComponent document={documentToShow}
                                               showPlaybackControls={showPlaybackControls}
                                               onTogglePlaybackControls={this.handleTogglePlaybackControlComponent} />
           }
-          { showPlaybackControls && <LoadDocumentHistory document={documentToShow} />}
+          { showPlaybackControls && <LoadDocumentHistory document={documentToShow} {...{viaTeacherDashboard}}/>}
         </>
       );
     }
@@ -176,17 +175,22 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
 
   private handleTogglePlaybackControlComponent = () => {
     this.setState((prevState, props) => {
-      const newShowPlaybackControls = !prevState.showPlaybackControls;
+      const showPlaybackControls = !prevState.showPlaybackControls;
+      const historyDocumentCopy = showPlaybackControls ? 
+        this.createHistoryDocumentCopy() : undefined;
+
+      if (prevState.historyDocumentCopy) {
+        destroy(prevState.historyDocumentCopy);
+      }
 
       return {
-        showPlaybackControls: newShowPlaybackControls,
-        documentToShow: newShowPlaybackControls ? 
-          this.getDocumentToShow() : props.document
+        showPlaybackControls,
+        historyDocumentCopy
       };
     });    
   };
 
-  private getDocumentToShow = () => {
+  private createHistoryDocumentCopy = () => {
     if (this.props.document) {
       const docCopy = createDocumentModel(getSnapshot(this.props.document));
       // Make a variable available with the current history document
@@ -196,4 +200,13 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       return docCopy;
     }
   };
+
+  private getDocumentToShow = () => {
+    const {showPlaybackControls, historyDocumentCopy: documentToShow} = this.state;
+    if (showPlaybackControls && documentToShow) {
+      return documentToShow;
+    } else {
+      return this.props.document;
+    }
+  }
 }
