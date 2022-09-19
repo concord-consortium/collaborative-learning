@@ -39,10 +39,10 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
     // so the below confirms that we have clicked on a button in toolbar and should not change its status here
     const firstClass = e.target.classList[0];
     if (!firstClass){
-      const isDeleteButton = e.target.tagName === "svg" || e.target.tagName === "path"
-      const isUploadButton = e.target.type === "file"
+      const isDeleteButton = e.target.tagName === "svg" || e.target.tagName === "path";
+      const isUploadButton = e.target.type === "file";
       if (isDeleteButton || isUploadButton){
-        return
+        return;
       }
     }
     // having confirmed that we did not click the toolbar

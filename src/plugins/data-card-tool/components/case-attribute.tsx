@@ -100,7 +100,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
     setCurrEditAttrId(attrKey);
     const facet = event.currentTarget.classList.contains("name") ? "name" : "value";
-    const isEditing = event.currentTarget.classList.contains("editing")
+    const isEditing = event.currentTarget.classList.contains("editing");
     activateInput(facet as EditFacet, isEditing);
   };
 
