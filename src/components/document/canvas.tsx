@@ -208,5 +208,5 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     } else {
       return this.props.document;
     }
-  }
+  };
 }
