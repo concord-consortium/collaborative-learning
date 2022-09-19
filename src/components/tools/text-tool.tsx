@@ -14,7 +14,7 @@ import { TextToolbarComponent } from "./text-toolbar";
 import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
 import { getTextPluginInstances, getTextPluginIds } from "../../models/tools/text/text-plugin-info";
-import { LogEventName, Logger } from "../../lib/logger";
+import { LogEventName, Logger, SimpleToolLogEvent } from "../../lib/logger";
 
 import "./text-tool.sass";
 
@@ -307,7 +307,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     this.setState({ editing: false });
     // If the text has changed since the editor was focused, log the new text.
     if (this.getContent().text != this.textOnFocus) {
-      const change = {args:[{text: this.getContent().text}]};
+      const change:SimpleToolLogEvent = {args:[{text: this.getContent().text}]};
       Logger.logToolChange(LogEventName.TEXT_TOOL_CHANGE, 'update', change, this.props.model.id);
     }
   };
