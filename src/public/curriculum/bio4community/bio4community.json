@@ -13,8 +13,43 @@
     "placeholderText": "Document your thoughts",
     "autoSectionProblemDocuments": false,
     "defaultDocumentTitle": "MyEvidence",
+    "defaultDocumentType": "personal",
     "defaultDocumentTemplate": {
       "tiles": [
+        {
+          "id": "17SEP20221154AM",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+            ]
+          }
+        },
+        {
+          "id": "-GfoEDw3vaSKoAz4",
+          "content": {
+            "type": "Table",
+            "name": "Cast of Characters",
+            "columns": [
+              {"name":"Character name","values":["Narrator","Rakesh (main character)","Nicole (co-worker)","Deaundre (co-worker) ","Meera (cousin)","Dr. Lee (physician)","Dr. Zeiders (scientist)","Ajay (son)","Zainab (daughter)"]},
+              {"name":"Actor name","values":["","","","","","","","",""]}
+            ]
+          }
+        },
+        {
+          "id": "17SEP20221202pm",
+          "content": {
+            "type": "Table",
+            "name": "Evidence Table",
+            "columns": [
+              {"name":"Evidence","values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+              {"name":"What did you learn from it?","values":["","","","",""]},
+              {"name":"Your questions now","values":["","","","",""]}
+            ]
+          }
+        }
+
       ]
     },
     "toolbar": [
@@ -79,29 +114,6 @@
               "dataTestItem": "supports-list-items",
               "documentTypes": ["publication", "personalPublication"],
               "properties": ["isTeacherDocument", "!isDeleted"]
-            }
-          ]
-        },
-        {
-          "tab": "my-work",
-          "label": "My Work",
-          "sections": [
-            {
-              "title": "Story Notes",
-              "type": "problem-documents",
-              "dataTestHeader": "my-work-section-investigations",
-              "dataTestItem": "my-work-list-items",
-              "documentTypes": ["problem", "planning"],
-              "order": "original",
-              "showStars": []
-            },
-            {
-              "title": "Story Notes",
-              "type": "learning-logs",
-              "dataTestHeader": "learning-log-section",
-              "documentTypes": ["learningLog"],
-              "properties": ["!isDeleted"],
-              "addDocument": false
             }
           ]
         }
