@@ -99,8 +99,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       return;
     }
     setCurrEditAttrId(attrKey);
-    const facet = event.currentTarget.classList[0] as EditFacet;
-    const isEditing = event.currentTarget.classList[2] === "editing";
+    const facet = event.currentTarget.classList.contains("name") ? "name" : "value";
+    const isEditing = event.currentTarget.classList.contains("editing")
     activateInput(facet as EditFacet, isEditing);
   };
 
@@ -185,10 +185,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     {"has-image": gImageMap.isImageUrl(valueStr)}
   );
 
-  const valueInputClassNames = classNames(
-    `value-input ${attrKey}`,
-  );
-
   const deleteAttrButtonClassNames = classNames(
     `delete-attribute ${attrKey}`,
     { "show": currEditAttrId === attrKey }
@@ -198,6 +194,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     "cell-value",
     { "default-label": looksLikeDefaultLabel(getLabel()) }
   );
+
+  const valueInputClassNames = `value-input ${attrKey}`;
 
   return (
     <div className={pairClassNames}>

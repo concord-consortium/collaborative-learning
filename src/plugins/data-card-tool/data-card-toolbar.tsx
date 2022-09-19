@@ -59,7 +59,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
 
   const toolbarButtonsClasses = classNames(
     "toolbar-buttons",
-    buttonsEnabled ? "" : "disabled"
+    { disabled: !buttonsEnabled }
   );
 
   return documentContent
