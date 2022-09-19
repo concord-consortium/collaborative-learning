@@ -24,7 +24,7 @@ export const LoadDocumentHistory: React.FC<IProps> = ({ document, viaTeacherDash
   // Default message
   let message = `Unknown status ${status}`;
   if (isLoading) {
-    message = "Loading...";
+    message = "Loading history...";
   }
 
   if (isError) {

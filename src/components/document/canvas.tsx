@@ -25,11 +25,9 @@ interface IProps {
   document?: DocumentModelType;
   content?: DocumentContentModelType;
   showPlayback?: boolean;
-  showPlaybackControls?: boolean;
   overlayMessage?: string;
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
-  onTogglePlaybackControls?: () => void;
   /**
    * An optional component rendered between the document and history controls
    */
@@ -98,7 +96,6 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderContent() {
-    // const {content, document, showPlayback, showPlaybackControls, onTogglePlaybackControls, ...others} = this.props;
     const {content, document, showPlayback, overlay, viaTeacherDashboard, ...others} = this.props;
     const {showPlaybackControls} = this.state;
     const documentToShow = this.getDocumentToShow();

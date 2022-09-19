@@ -1,9 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from 'react-query';
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import { Instance, getSnapshot } from "mobx-state-tree";
-import { CDocumentType, TreeManager } from "../../models/history/tree-manager";
-import { createDocumentModel, DocumentModelType } from "../../models/document/document";
+import { DocumentModelType } from "../../models/document/document";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { ENavTabSectionType, NavTabSectionSpec, NavTabSpec } from "../../models/view/nav-tabs";
 import { EditableDocumentContent } from "../document/editable-document-content";
@@ -14,8 +12,6 @@ import { DocumentCollectionByType } from "../thumbnail/documents-type-collection
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
 import { NetworkDocumentsSection } from "./network-documents-section";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
-import { LoadDocumentHistory } from "./load-document-history";
-import { DEBUG_DOCUMENT } from "../../lib/debug";
 
 import "./section-document-or-browser.sass";
 
@@ -76,7 +72,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
     setReferenceDocument(undefined);
     ui.updateFocusDocument();
     ui.setSelectedTile();
-    setShowPlaybackControls(false);
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
       tab_section_name: title,
       tab_section_type: type
@@ -127,11 +122,17 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
     ui.problemWorkspace.setPrimaryDocument(document);
   }
 
+  // NOTE: this edit button is confusing when the history is being viewed. It
+  // open the original document for editing, not some old version of the
+  // document they might be looking at. Previously this edit button was disabled
+  // when the history document was being shown because SectionDocumentOrBrowser
+  // knew the state of playback controls. It no longer knows that state, so now
+  // the edit button is shown all of the time.
   const editButton = (type: string, sClass: string, document: DocumentModelType) => {
     return (
       (type === "my-work") || (type === "learningLog")
         ?
-          <div className={`edit-button ${sClass} ${showPlaybackControls ? "disabled" : ""}`}
+          <div className={`edit-button ${sClass}`}
                 onClick={() => handleEditClick(document)}>
             <EditIcon className={`edit-icon ${sClass}`} />
             <div>Edit</div>
@@ -202,40 +203,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   };
 
   const showPlayback = user.type ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
-  const [showPlaybackControls, setShowPlaybackControls] = useState(false);
-  const [documentToShow, setDocumentToShow] = useState<DocumentModelType>();
-
-  useEffect(() => {
-    setDocumentToShow(referenceDocument);
-  },[referenceDocument]);
-
-  // TODO: why did this have to moved all the way up here?
-  // If it could be put in the Canvas then it would work for 4-up too.
-  const handleTogglePlaybackControlComponent = () => {
-    setShowPlaybackControls(showControls => !showControls);
-    // What is the referenceDocument?
-    const newState = !showPlaybackControls;
-    setDocumentToShow(newState
-                        ? getDocumentToShow()
-                        : referenceDocument
-                      );
-  };
-
-  const getDocumentToShow = () => {
-    if (referenceDocument) {
-      const docCopy = createDocumentModel(getSnapshot(referenceDocument));
-      // TODO: I think all of this logic would make more sense if it was inside of the history component
-      // itself.
-      // If we don't put it there I think what we need to do is pass som
-
-      // Make a variable available with the current history document
-      if (DEBUG_DOCUMENT) {
-        (window as any).currentHistoryDocument = docCopy;
-      }
-      return docCopy;
-    }
-  };
-
   const documentView = referenceDocument && !referenceDocument?.getProperty("isDeleted") &&
     <div>
       <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
@@ -248,13 +215,10 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
       <EditableDocumentContent
         mode={"1-up"}
         isPrimary={false}
-        document={documentToShow || referenceDocument}
+        document={referenceDocument}
         readOnly={true}
         showPlayback={showPlayback}
-        showPlaybackControls={showPlaybackControls}
-        onTogglePlaybackControls={handleTogglePlaybackControlComponent}
       />
-      { showPlaybackControls && <LoadDocumentHistory document={documentToShow} />}
     </div>;
 
   return (
