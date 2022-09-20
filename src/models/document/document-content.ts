@@ -280,7 +280,7 @@ export const DocumentContentModel = types
     },
     getTilesInDocumentOrder(): string[] {
       // Returns list of tile ids in the document from top to bottom, left to right
-      let tiles: string[] = [];
+      const tiles: string[] = [];
       self.rowOrder.forEach(rowId => {
         const row = self.getRow(rowId);
         if (row) {
