@@ -36,9 +36,9 @@ export const LoadDocumentHistory: React.FC<IProps> = ({ document, viaTeacherDash
       // Take the firestore documents from data and put them into the document
       // This is put in a useEffect because it is modifying state and that should
       // never be done in the main render of the component.
-      // FIXME: this approach probably does not handle paging well, 
+      // FIXME-HISTORY: this approach probably does not handle paging well, 
       // and I'd suspect we'll have a lot of changes so we'll need to handle that.
-      // FIXME: we should protect active documents so that if they are accidentally
+      // FIXME-HISTORY: we should protect active documents so that if they are accidentally
       // passed to this component we don't replace their history. I think that means
       // adding a prop to documents so we can identify documents that are for being
       // used for history replaying

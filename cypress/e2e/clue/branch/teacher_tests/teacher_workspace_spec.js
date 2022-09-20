@@ -55,12 +55,15 @@ context('Teacher Workspace', () => {
       it('verify playback is disabled if there is not history', function() {
         cy.openTopTab('my-work');
         cy.openDocumentThumbnail('workspaces', this.investigationTitle);
-        // FIXME: this line is skipped for now because it is easy to always show the playback
-        // and then download the history when it is clicked. This is a UX change that I need
-        // to run by Leslie.
-        // The whole text isn't skipped because its first 2 lines are needed for the following
-        // tests
-        // cy.get('[data-testid="playback-component"]').should('have.class', 'disabled');
+        // FIXME-HISTORY: the following line is skipped for now because it is
+        // easier to always show the playback and then attempt to download the
+        // history when it is clicked. Story to fix this:
+        // https://www.pivotaltracker.com/story/show/183291329 
+        //
+        // The whole test isn't skipped because the 2 above lines are needed for
+        // the later tests.
+        // cy.get('[data-testid="playback-component"]').should('have.class',
+        // 'disabled');
       });
       it('verify playback button enables when there is a history', () => {
         clueCanvas.addTile('drawing');

@@ -20,7 +20,9 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
   const { document, showPlaybackControls, onTogglePlaybackControls  } = props;
   const { activeNavTab } = useUIStore();
   const treeManager = document?.treeManagerAPI as Instance<typeof TreeManager>;
-  // FIXME: hack for always enabling playback
+  // FIXME-HISTORY: hack for always enabling playback. Story to fix this:
+  // https://www.pivotaltracker.com/story/show/183291329
+  //
   // const history = treeManager?.document.history;
 
   const renderPlaybackToolbarButton = () => {
@@ -47,8 +49,10 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
   console.log("Rendering Playback", showPlaybackControls, historyLength, actuallyShowPlaybackControls);
 
   // const disablePlayback = history.length < 1;
-  // FIXME: HACK for now always enable playback so we can use the opening of the playback to 
-  // trigger the load of the history
+
+  // FIXME-HISTORY: HACK for now always enable playback so we can use the
+  // opening of the playback to trigger the load of the history.  Story to fix
+  // this: https://www.pivotaltracker.com/story/show/183291329
   const disablePlayback = false;
   const playbackComponentClass = classNames("playback-component", activeNavTab,
                                             {"show-control" : showPlaybackControls,

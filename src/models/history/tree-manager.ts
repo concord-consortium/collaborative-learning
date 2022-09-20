@@ -175,7 +175,7 @@ export const TreeManager = types
       // add a new document for this history entry
       const historyEntryPath = firestore.getFullPath(`${documentPath}/historyEntries`);
       console.log("trying to make a docRef for the new history entry", historyEntryPath);
-      // FIXME: this should use the id of the history entry, that way a specific entry can
+      // FIXME-HISTORY: this should use the id of the history entry, that way a specific entry can
       // be found again quickly. We plan to support the idea of providing links to teachers
       // to open specific spots in the history. It seems better to use these ids than indexes
       // by maybe indexes are fine. If we use indexes we can probably do range queries around 
@@ -185,12 +185,14 @@ export const TreeManager = types
       const snapshot = getSnapshot(entry);
       console.log("trying to write the history entry to the doc ref", documentPath, docRef.id, snapshot);
       docRef.set({
-        // FIXME: this use of a timestamp isn't good. This is because there could be a delay here
+        // FIXME-HISTORY: this use of a timestamp isn't good. This is because there could be a delay here
         // A concrete example is when the creation of the document in firestore takes a while
         // The first entry will be delayed until this happens. And the later entries might sneak
         // in ahead of the first entry.
         // It seems the best option is an incrementing index in the document that is modified in a 
-        // transaction when each event is sent up.
+        // transaction when each event is sent up. However this does mean the history document is
+        // edited on every change and it can only be updated 1 time per second. See:
+        // https://firebase.google.com/docs/firestore/solutions/aggregation
         index: firestore.timestamp(),
         entry: JSON.stringify(snapshot)}
       );
