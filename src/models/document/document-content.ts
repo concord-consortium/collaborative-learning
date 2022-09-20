@@ -278,6 +278,17 @@ export const DocumentContentModel = types
       // if all else fails, revert to last visible row
       return self.indexOfLastVisibleRow + 1;
     },
+    getTilesInDocumentOrder(): string[] {
+      // Returns list of tile ids in the document from top to bottom, left to right
+      let tiles: string[] = [];
+      self.rowOrder.forEach(rowId => {
+        const row = self.getRow(rowId);
+        if (row) {
+           tiles.push(...row.tiles.map(tile=>tile.tileId));
+        }
+      });
+      return tiles;
+    },
     getTilesInSection(sectionId: string) {
       const tiles: ToolTileModelType[] = [];
       const rows = self.getRowsInSection(sectionId);

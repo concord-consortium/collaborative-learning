@@ -2,8 +2,10 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { ModalProvider } from "react-modal-hook";
+import { DocumentContentModel } from "../../models/document/document-content";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { ChatPanel } from "./chat-panel";
+import { createSingleTileContent } from "../../utilities/test-utils";
 
 const mockPostComment = jest.fn();
 
@@ -61,6 +63,12 @@ jest.mock("../../hooks/use-stores", () => ({
   useDocumentFromStore: () => ({
     getDocument: () => ({ undefined })
   }),
+  useCurriculumContent:(key: string) => {
+    return DocumentContentModel.create(createSingleTileContent({
+      type: "Text",
+      text: "test"
+    }));
+  },
   useUIStore: () => ({
     showChatPanel: true,
     selectedTileIds: []
