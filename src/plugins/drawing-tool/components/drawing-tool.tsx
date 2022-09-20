@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import React, { useEffect, useState, useRef } from "react";
-import { IToolTileProps} from "../../../components/tools/tool-tile";
-import { ToolbarView} from "./drawing-toolbar";
+import { IToolTileProps } from "../../../components/tools/tool-tile";
+import { ToolbarView } from "./drawing-toolbar";
 import { DrawingLayerView } from "./drawing-layer";
 import { useToolbarToolApi } from "../../../components/tools/hooks/use-toolbar-tool-api";
 import { DrawingContentModelType } from "../model/drawing-content";
