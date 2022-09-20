@@ -185,10 +185,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       }
     };
 
-    const renderCanvas = (groupIndex: number, overlay?: React.ReactNode) => {
-      const cornerLabel = indexToCornerLabel[groupIndex];
-      const cell = this.grid.cells[groupIndex];
-      const document = groupDoc(groupIndex);
+    const renderCanvas = (cornerIndex: number, overlay?: React.ReactNode) => {
+      const cornerLabel = indexToCornerLabel[cornerIndex];
+      const cell = this.grid.cells[cornerIndex];
+      const document = groupDoc(cornerIndex);
       return <CanvasComponent context={cornerLabel} scale={cellScale(cell, cornerLabel)}
                        readOnly={isGhostUser /* Ghost users do not own group documents and cannot edit others' */}
                        document={document} overlayMessage={canvasMessage(document)}
@@ -211,27 +211,27 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
           isToggled && viaStudentGroupView
             ? <>
                 <div className={className} title={fullName}>{name}</div>
-                <button className="restore-fourup-button" onClick={()=>this.handleOverlayClicked(context)}>
+                <button className="restore-fourup-button" onClick={()=>this.handleOverlayClick(context)}>
                   <FourUpIcon /> 4-Up
                 </button>
               </>
-            : <div className={className} title={fullName} onClick={()=>this.handleOverlayClicked(context)}>
+            : <div className={className} title={fullName} onClick={()=>this.handleOverlayClick(context)}>
                   {name}
               </div>
         );
       }
     };
 
-    const renderCorner = (groupIndex: number) => {
-      const cornerLabel = indexToCornerLabel[groupIndex];
-      const cell = this.grid.cells[groupIndex];
-      const document = groupDoc(groupIndex);
+    const renderCorner = (cornerIndex: number) => {
+      const cornerLabel = indexToCornerLabel[cornerIndex];
+      const cell = this.grid.cells[cornerIndex];
+      const document = groupDoc(cornerIndex);
 
       const overlay = toggleable && 
         <FourUpOverlayComponent
           context={cornerLabel}
           style={{top: 0, left: 0, width: "100%", height: "100%"}}
-          onClick={this.handleOverlayClicked}
+          onClick={this.handleOverlayClick}
           documentViewMode={documentViewMode}
           document={document}
         />;
@@ -246,12 +246,12 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const overlayOnTopOfCanvas = !toggledContext && overlay;
 
       return !toggledContext || (toggledContext === cornerLabel) 
-        ? <div key={groupIndex} className={classNames("canvas-container", indexToCornerClass[groupIndex])} 
-              style={indexToStyle[groupIndex]}>
+        ? <div key={cornerIndex} className={classNames("canvas-container", indexToCornerClass[cornerIndex])} 
+              style={indexToStyle[cornerIndex]}>
             <div className="canvas-scaler" style={scaleStyle(cell)}>
-              {hideCanvas(groupIndex) 
-                ? this.renderUnshownMessage(groupUsers[groupIndex], indexToLocation[groupIndex]) 
-                : renderCanvas(groupIndex, overlayInsideOfCanvas)}
+              {hideCanvas(cornerIndex) 
+                ? this.renderUnshownMessage(groupUsers[cornerIndex], indexToLocation[cornerIndex]) 
+                : renderCanvas(cornerIndex, overlayInsideOfCanvas)}
             </div>
             {overlayOnTopOfCanvas}
             {memberName(cornerLabel)}
@@ -261,7 +261,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
     return (
       <div className="four-up" ref={(el) => this.container = el}>
-        { [0,1,2,3].map(groupIndex => renderCorner(groupIndex)) }
+        { [0,1,2,3].map(cornerIndex => renderCorner(cornerIndex)) }
         {!toggledContext ? this.renderSplitters() : null}
       </div>
     );
@@ -365,7 +365,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     window.addEventListener("mouseup", handleMouseUp);
   };
 
-  private handleOverlayClicked = (context: string) => {
+  private handleOverlayClick = (context: string) => {
     const { groupId, setFocusedGroupUser, onToggleContext } = this.props;
     const groupUser = this.userByContext[context];
     const toggledContext = this.getToggledContext();
