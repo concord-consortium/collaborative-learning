@@ -282,9 +282,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.setState({ isLoading: true }, () => {
       gImageMap.addFileImage(file)
         .then(image => {
-          console.log("image-Tool.tsx image is", image);
-          console.log("------------");
-
           if (this._isMounted) {
             const content = this.getContent();
             this.setState({ isLoading: false, imageEntry: image });

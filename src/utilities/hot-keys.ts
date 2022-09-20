@@ -94,12 +94,8 @@ export class HotKeys {
     if (str) {
       keys += (keys ? "-" : "") + str.toLowerCase();
     }
-    const handler = this.hotKeyMap[keys];
 
-    if (handler !== undefined) { //added
-      console.log("keys are", keys);
-      console.log("handler is", handler);
-    } //
+    const handler = this.hotKeyMap[keys];
 
     if (handler) {
       const result = handler(e, keys);
