@@ -75,7 +75,6 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     title && model.setTitle(title);
   };
 
-
   return (
     <DrawingContentModelContext.Provider value={contentRef.current} >
       <ToolTitleArea>
