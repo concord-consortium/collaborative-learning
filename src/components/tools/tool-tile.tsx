@@ -50,6 +50,8 @@ export function extractDragTileType(dataTransfer: DataTransfer) {
   }
 }
 
+
+
 /**
  * These props are used both by the ToolTileComponent and the components provided by the
  * individual tools.
@@ -70,6 +72,10 @@ interface IToolTileBaseProps {
   onRequestTilesOfType: (tileType: string) => Array<{ id: string, title?: string }>;
   onRequestUniqueTitle: (tileId: string) => string | undefined;
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
+}
+
+export interface IActionHandlers {
+  handlePaste: () => void;
 }
 
 export interface IRegisterToolApiProps {
