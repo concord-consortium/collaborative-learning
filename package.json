@@ -142,6 +142,7 @@
     "@typescript-eslint/parser": "^5.35.1",
     "autoprefixer": "^10.4.8",
     "babel-loader": "^8.2.5",
+    "canvas": "^2.10.1",
     "common-tags": "^1.8.2",
     "copy-webpack-plugin": "^11.0.0",
     "cross-env": "^7.0.3",
