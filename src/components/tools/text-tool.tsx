@@ -94,7 +94,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   private tileContentRect: DOMRectReadOnly;
   private toolbarToolApi: IToolApi | undefined;
   private plugins: HtmlSerializablePlugin[] | undefined;
-  private textOnFocus: any;
+  private textOnFocus: string | string [] | undefined;
 
   // map from slate type string to button icon name
   private slateMap: Record<string, string> = {
@@ -214,7 +214,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
           readOnly={readOnly}
           plugins={this.plugins}
           onValueChange={this.handleChange}
-          onFocus={ this.handleFocus}
+          onFocus={this.handleFocus}
           onBlur={this.handleBlur}
 
         />
