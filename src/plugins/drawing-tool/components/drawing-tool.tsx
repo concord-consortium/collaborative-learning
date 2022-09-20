@@ -43,7 +43,6 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-
   const handlePaste = () => {
     pasteImage();
   };
