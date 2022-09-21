@@ -79,8 +79,11 @@ export function useCurriculumContent(key?: string):  DocumentContentModelType | 
 }
 
 export function useCurriculumContentFromPath(key?: string): DocumentContentModelType| undefined {
-  const { problem } = useStores();
-  const { section } = getCurriculumMetadata(key) || {};
+  const { section, facet } = getCurriculumMetadata(key) || {};
+  const { problem, teacherGuide } = useStores();
+  if (facet === "guide") {
+    return teacherGuide && section ? teacherGuide.getSectionById(section)?.content : undefined;
+  }
   return problem && section
           ? problem.getSectionById(section)?.content 
           : undefined;
