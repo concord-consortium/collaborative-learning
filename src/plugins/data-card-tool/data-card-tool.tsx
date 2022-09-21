@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { useUIStore } from "../../hooks/use-stores";
 import { DataCardContentModelType } from "./data-card-content";
@@ -165,7 +165,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
     if ( isUploader ) return;
     setCurrEditAttrId("");
     setCurrEditFacet("");
-  }
+  };
 
   return (
     <div className="data-card-tool" onClick={handleToolClick}>
