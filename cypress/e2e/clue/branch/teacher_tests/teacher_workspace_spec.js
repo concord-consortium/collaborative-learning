@@ -15,7 +15,7 @@ let primaryWorkSpace = new PrimaryWorkspace;
 let teacherDoc = "Teacher Investigation Copy";
 const queryParams = "/?appMode=qa&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa";
 
-context('Teacher Workspace', () => {
+context.skip('Teacher Workspace', () => {
 
   before(() => {
     cy.clearQAData('all');
