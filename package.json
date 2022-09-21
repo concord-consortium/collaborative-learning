@@ -142,6 +142,7 @@
     "@typescript-eslint/parser": "^5.35.1",
     "autoprefixer": "^10.4.8",
     "babel-loader": "^8.2.5",
+    "canvas": "^2.10.1",
     "common-tags": "^1.8.2",
     "copy-webpack-plugin": "^11.0.0",
     "cross-env": "^7.0.3",
@@ -190,7 +191,7 @@
     "xhr-mock": "^2.5.1"
   },
   "dependencies": {
-    "@concord-consortium/diagram-view": "^0.0.15",
+    "@concord-consortium/diagram-view": "^0.0.16",
     "@concord-consortium/mobx-state-tree": "5.1.5-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",
