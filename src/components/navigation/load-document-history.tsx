@@ -1,16 +1,20 @@
 import React, { useEffect } from "react";
 import { useDocumentHistory } from "../../hooks/document-comment-hooks";
+import { useUserStore } from "../../hooks/use-stores";
 import { CDocument, TreeManagerType } from "../../models/history/tree-manager";
 import { DocumentModelType } from "../../models/document/document";
 
 interface IProps {
   document?: DocumentModelType,
-  viaTeacherDashboard?: boolean
 }
 
-export const LoadDocumentHistory: React.FC<IProps> = ({ document, viaTeacherDashboard }) => {
+export const LoadDocumentHistory: React.FC<IProps> = ({ document }) => {
+  const user = useUserStore();
+
+  const otherUserDocument = user.id !== document?.uid;
+
   const { data, isLoading, isSuccess, isError, status} = 
-    useDocumentHistory(document?.key, viaTeacherDashboard ? document?.uid : undefined);
+    useDocumentHistory(document?.key, otherUserDocument ? document?.uid : undefined);
 
   // TODO: hacky style to make loading visible
   const style: any = { 

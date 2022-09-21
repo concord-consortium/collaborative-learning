@@ -113,7 +113,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
                                               showPlaybackControls={showPlaybackControls}
                                               onTogglePlaybackControls={this.handleTogglePlaybackControlComponent} />
           }
-          { showPlaybackControls && <LoadDocumentHistory document={documentToShow} {...{viaTeacherDashboard}}/>}
+          { showPlaybackControls && <LoadDocumentHistory document={documentToShow} />}
         </>
       );
     }
