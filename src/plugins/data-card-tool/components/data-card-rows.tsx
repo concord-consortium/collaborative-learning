@@ -31,22 +31,21 @@ export const DataCardRows: React.FC<IProps> = observer(({
   return (
     <>
       { dataSet.attributes.map((attr) => {
-          return (
-            <CaseAttribute
-              key={attr.id}
-              model={ model }
-              caseId={ currentCaseId }
-              attrKey={attr.id}
-              currEditAttrId={currEditAttrId}
-              currEditFacet={currEditFacet}
-              setCurrEditAttrId={setCurrEditAttrId}
-              setCurrEditFacet={setCurrEditFacet}
-              setImageUrlToAdd={setImageUrlToAdd}
-              readOnly={readOnly}
-              imageUrlToAdd={imageUrlToAdd}
-            />
-          );
-        })
+        return (
+          <CaseAttribute
+            key={attr.id}
+            model={model}
+            caseId={currentCaseId}
+            attrKey={attr.id}
+            currEditAttrId={currEditAttrId}
+            currEditFacet={currEditFacet}
+            setCurrEditAttrId={setCurrEditAttrId}
+            setCurrEditFacet={setCurrEditFacet}
+            setImageUrlToAdd={setImageUrlToAdd}
+            readOnly={readOnly}
+            imageUrlToAdd={imageUrlToAdd}
+          />
+        );})
       }
     </>
   );

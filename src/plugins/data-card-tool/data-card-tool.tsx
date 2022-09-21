@@ -190,6 +190,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
         documentContent={documentContent}
         toolTile={toolTile}
         currEditAttrId={currEditAttrId}
+        currEditFacet={currEditFacet}
         setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
         handleDeleteValue={deleteSelectedValue}
       />

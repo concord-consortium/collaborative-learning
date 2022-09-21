@@ -16,12 +16,13 @@ import "./data-card-toolbar.scss";
 interface IProps extends IFloatingToolbarProps {
   model: ToolTileModelType;
   currEditAttrId: string;
+  currEditFacet: string;
   setImageUrlToAdd: (url: string) => void;
   handleDeleteValue: () => void;
 }
 
 export const DataCardToolbar: React.FC<IProps> = observer(({
-  model, documentContent, toolTile, currEditAttrId,
+  model, documentContent, toolTile, currEditAttrId, currEditFacet,
   onIsEnabled, setImageUrlToAdd, handleDeleteValue, ...others
   }: IProps) => {
 
@@ -33,15 +34,12 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
       toolTile,
       toolbarHeight: 34,
       toolbarTopOffset: 2,
-       enabled,
+      enabled,
        ...others
   });
 
-  const readyForEdit = () => {
-   return !!currEditAttrId && content.getToolBarOn();
-  };
-
-  const buttonsEnabled = onIsEnabled() && readyForEdit();
+  const isEditingValue = !!currEditAttrId && currEditFacet === "value";
+  const buttonsEnabled = enabled && isEditingValue;
 
   const uploadImage = (file: File) => {
     gImageMap.addFileImage(file)
