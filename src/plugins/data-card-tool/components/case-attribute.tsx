@@ -77,6 +77,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleLabelClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
+    event.stopPropagation();
     if (readOnly) return;
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("name");
@@ -84,6 +85,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   }
 
   const handleValueClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
+    event.stopPropagation();
     if (readOnly) return;
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("value");
