@@ -480,6 +480,7 @@ describe("useDocumentSyncToFirebase hook", () => {
       // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
       // to send the document to firestore and the environment is not setup
       // right
+      // https://www.pivotaltracker.com/story/show/183291353
       await waitFor(() => expect(spy).toBeCalledTimes(2));
       // trigger retry (successful) attempt
       jest.runAllTimers();
@@ -500,6 +501,7 @@ describe("useDocumentSyncToFirebase hook", () => {
       // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
       // to send the document to firestore and the environment is not setup
       // right
+      // https://www.pivotaltracker.com/story/show/183291353
       await waitFor(() => expect(spy).toBeCalledTimes(2));
       // trigger retry (successful) attempt
       jest.runAllTimers();
@@ -541,6 +543,7 @@ describe("useDocumentSyncToFirebase hook", () => {
       // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
       // to send the document to firestore and the environment is not setup
       // right
+      // https://www.pivotaltracker.com/story/show/183291353
       await waitFor(() => expect(spy).toBeCalledTimes(2));
       // trigger retry (successful) attempt
       jest.runAllTimers();
@@ -561,6 +564,7 @@ describe("useDocumentSyncToFirebase hook", () => {
       // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
       // to send the document to firestore and the environment is not setup
       // right
+      // https://www.pivotaltracker.com/story/show/183291353
       await waitFor(() => expect(spy).toBeCalledTimes(2));
       // trigger retry (successful) attempt
       jest.runAllTimers();
@@ -581,6 +585,7 @@ describe("useDocumentSyncToFirebase hook", () => {
       // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
       // to send the document to firestore and the environment is not setup
       // right
+      // https://www.pivotaltracker.com/story/show/183291353
       await waitFor(() => expect(spy).toBeCalledTimes(2));
       // trigger retry (successful) attempt
       jest.runAllTimers();

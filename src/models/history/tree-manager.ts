@@ -177,22 +177,22 @@ export const TreeManager = types
       console.log("trying to make a docRef for the new history entry", historyEntryPath);
       // FIXME-HISTORY: this should use the id of the history entry, that way a specific entry can
       // be found again quickly. We plan to support the idea of providing links to teachers
-      // to open specific spots in the history. It seems better to use these ids than indexes
-      // by maybe indexes are fine. If we use indexes we can probably do range queries around 
-      // that index so we don't have to load in the whole history. If we use ids then we might
-      // be able to support consolidation of entries in the future to save space.
+      // to open specific spots in the history. It seems better to use these ids than indexes,
+      // but maybe indexes are fine.
+      // https://www.pivotaltracker.com/story/show/183291353
       const docRef = firestore.newDocumentRef(historyEntryPath);
       const snapshot = getSnapshot(entry);
       console.log("trying to write the history entry to the doc ref", documentPath, docRef.id, snapshot);
       docRef.set({
-        // FIXME-HISTORY: this use of a timestamp isn't good. This is because there could be a delay here
-        // A concrete example is when the creation of the document in firestore takes a while
-        // The first entry will be delayed until this happens. And the later entries might sneak
-        // in ahead of the first entry.
-        // It seems the best option is an incrementing index in the document that is modified in a 
-        // transaction when each event is sent up. However this does mean the history document is
-        // edited on every change and it can only be updated 1 time per second. See:
-        // https://firebase.google.com/docs/firestore/solutions/aggregation
+        // FIXME-HISTORY: this use of a server timestamp isn't good. This is
+        // because there is a delay here. When the creation of the parent
+        // document in firestore takes a while, The first entry will be delayed
+        // until this happens. And the later entries might sneak in ahead of the
+        // first entry. 
+        //
+        // See Ordering of history entries in history-framework.md for better
+        // options. 
+        // https://www.pivotaltracker.com/story/show/183340035
         index: firestore.timestamp(),
         entry: JSON.stringify(snapshot)}
       );

@@ -98,22 +98,32 @@ export const useCommentableDocument = (documentKeyOrSectionPath?: string, userId
       },
       error: readError => {
         unsubscribeDocListener?.();
-        // an error presumably means that the document doesn't exist yet, so we create it
-        // WRONG!
+        // FIXME-HISTORY: This code assumes that onSnapshot will return an error
+        // if the history document doesn't exist. That isn't correct. The
+        // `onSnapshot` above will just sit there waiting for the document to
+        // show up if it doesn't exist. The better approach for checking for
+        // existence is `get`:
+        
+        // const documentRef = firestore.doc(documentPath);
+        //   documentRef.get()
+        //     .then(docSnapshot => {
+        //       if (docSnapshot.exists) {
+        //          ...
+        
+        // However, creating the document if it doesn't exist, is actually not
+        // necessary. `useCommentableDocument` is only called by
+        // `useDocumentComments` and `useDocumentHistory`. In the case of
+        // `useDocumentComments`, `postDocumentComment` will create the Document
+        // in firestore if it doesn't exist. In the case of `useDocumentHistory`
+        // the TreeManager will create the document if it doesn't exist.
         //
-        // FIXME-HISTORY: this never really called. The onSnapshot will just sit there waiting for the 
-        // for the document to show up if it doesn't exist.
-        // The better approach for this is to use:
-        //       const documentRef = firestore.doc(documentPath);
-        // documentRef.get()
-        //   .then(docSnapshot => {
-        //     if (docSnapshot.exists) {
-        //        ...
-        // However, this is actually not necessary because the postDocument will create the
-        // Document in firestore if it doesn't exist.
-        // `useCommentableDocument` is only called by `useDocumentComments`, so it is OK for this
-        // to wait or the document to show up. If there are comments there will be a document.
-
+        // Both `useDocumentComments` and `useDocumentHistory` should be fine
+        // waiting until there is actually a document available. However the 
+        // unsubscribeDocLister will never be called if the document is never 
+        // created. So even if the component that called this hook is unmounted.
+        // this onSnapshot listener is going to sit around.
+        //
+        // https://www.pivotaltracker.com/story/show/183291353
         validateDocumentMutation.mutate({ document: documentMetadata! }, {  // ! since query won't run otherwise
           onSuccess: result => resolve(result.data),
           onError: createError => { throw createError; }

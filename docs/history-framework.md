@@ -226,16 +226,84 @@ The authentication rules will need to be updated.
 
 ### Ordering of history entries
 
-Currently we are using a Firestore server timestamp. This isn't great because it isn't clear if the history entries will arrive at firestore in the same order that they are created. So they might be out of order. It might be better to maintain a lastHistoryIndex or historyLength property on the document. And then update it using a transaction at the same time the new history entry is written. 
+Currently we are using a Firestore server timestamp. This isn't great because the history entries do not always arrive at firestore in the same order that they are created. 
 
-We aren't doing that right now because the way this top level document is managed will probably change when we support student documents. 
+#### Ordering entries based on linked list approach
 
-Another alternative would be to use a session start data and then append a index after that. This way we are only relying on the date for the initial startup and then after that individual entries are ordered just based on local counting. This would not handle the case of multiple editors at the same time, but that is not a case we are currently supporting anyway.
+Store the previous entries id in the current entry (`previousEntryId`). The first entry will have an undefined previous entry.
+Also store a server timestamp.
+When reading the entries order by the server timestamp.
 
-New ideas:
-- add a numberOfSessions to the document. save the current value of this when the document is opened and then increment it. Now use the saved value a long with a local timestamp or incrementing index to order the events. This way the document doesn't have to be updated on each event.
-- in each event include the id of the previous event and also save the server timestamps. Then re-order the events after we download them all. This will require some slow scanning through all events to re-order them. Even if we don't use this information for ordering at the runtime it seems useful to record it so we can more easily identify out of order events.
-- save a index on each event then do a query which orders the events in reverse and limits the result to the last 1. This should get us the last event document and then we can use its index. I'd expect this to be pretty fast. However it would still suffer from the timing issue, if the first entry was trying to find out this index future entries would need to be chained off of this, so they get ordered correctly.
+To build the correct order requires basically two passes through the results.
+
+##### Pass 1
+First create a map with a type of `{ [entryId] : { entry, nextEntryId }, ...}`.
+Now go through the results. For each entry result:
+- add it to the entry value of map, if there is a nextEntryId don't change it
+- take the current entries `previousEntryId` look this up in the map and add `nextEntryId` to it with this `previousEntryId` value
+- if there is no `previousEntryId` save this entry as the first entry
+- if the `previousEntryId` already has a different `nextEntryId` it means the history has been corrupted by two or more users writing to history at the same time. Show a warning.
+
+##### Pass 2
+Create a empty array of the history entries.
+Start at the first entry, add it to the array.
+Lookup its nextEntryId in the map. 
+Add this to the array and keep going until you reach an object in the map with no nextEntryId
+To be safe you can use a counter and don't iterate more than the total size of the results.
+
+##### Storing requirements
+On the start of recording each session we need to know the entry id of the last history entry. So to be safe we have to download all the history entries to find the last one. We could cheat and reverse order the events by the server timestamp and then just look at the last X events. This assumes any out of order entries would be close to each other in time so we don't need to look far back in time to figure this out.
+
+##### Problems
+As described above, to be safe we have to look at every entry at the beginning of a new session with the document in order to figure out what the previousEntryId should be for the first entry of that session.
+
+Possibly this lookup could be done asynchronously. Just the first entry of the session needs to know this, any future entries can refer to this first entry. But still to be safe all of the entries of the last session need to be downloaded. And this could be a large amount of data.
+
+#### Ordering entries based on an index
+
+Store the index of the entry. The first entry will have an index of 0.
+
+To build the correct order we just request the entries from firestore ordered by this index.
+
+##### Storing requirements
+On the start of recording each session we need to know the entry index of the last history entry. This can be found by doing a query with a limit of one with the sorted by index in reverse. This would just download the last entry saved.
+
+All entries being written would have to wait for this lookup to occur before they will know their index.
+
+##### Problems
+If multiple users are editing the same document there can be entries with the same index. We can  mitigate this by storing a previousEntryId in each entry. We will know the last entry of the last session because we looked it up to find its index. Even if the sessions start out of order, at some point there will be two entries that have the same previousEntryId (and probably the same index).
+
+It will be a little complicated to block the writing of new entries until they know their offset from the last entry of the last session.
+
+#### Session start id plus index
+Create a CLUE document session record (Firestore document) at the beginning of working with each CLUE document. Store the history entries under this documentSession document with an index for the session. 
+The documentSession document would have a server timestamp that can be used to order them.
+
+We load all of the documentSession documents ordered by the serverTimestamp and their children history entries. 
+
+If the id of the documentSession is generated client side then the history entries don't need to wait.
+
+##### Problems
+We don't really know about overlapping entries here. 2 sessions could be active at the same time. The entries could include a server timestamp so we'd have a sense of this. We might be able to update the sessionDocument with an ending timestamp when the user closes the document, but that probably won't be reliable, since a network failure can break it.
+
+If one session is started, closed and other started very quickly the sessionDocument timestamps might be out of order.
+
+##### Benefits
+No waiting at the beginning of a session for a round trip to Firestore.
+Order of entries is in firestore 
+
+#### Other Notes
+
+Create a session start date when the user launches CLUE or first opens the document during this launch. In the history entry store this session start date along with an index of the entry during this session. This way we are only relying on the date for the initial startup and then after that individual entries are ordered just based on local counting. 
+
+This would not identify the case of multiple editors, so we probably want to store a previousEntryId as well to protect against that case.
+
+Also we'd have to rely on the local computer time for the start date, or use a firestore server timestamp which would require a roundtrip to firestore before we could start recording events.
+
+Add a numberOfSessions to the document. save the current value of this when the document is opened and then increment it. Now use the saved value along with a local timestamp or incrementing index to order the events. This way the parent document doesn't have to be updated on each event. It is just updated when the session starts.
+
+An alternative to querying the entries for the last index would be to store the last history entry in the parent document, but this means that document have to be updated with each new entry. And there is a limit of 1 sec per update. If you want to look into that approach more see:
+https://firebase.google.com/docs/firestore/solutions/aggregation
 
 ### Serialization TODO:
 - [x] Figure out why my use of validate is not sending the right userContext. When posting comments the right userContext is sent, but not when sending validate.

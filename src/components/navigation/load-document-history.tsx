@@ -38,10 +38,12 @@ export const LoadDocumentHistory: React.FC<IProps> = ({ document, viaTeacherDash
       // never be done in the main render of the component.
       // FIXME-HISTORY: this approach probably does not handle paging well, 
       // and I'd suspect we'll have a lot of changes so we'll need to handle that.
+      // https://www.pivotaltracker.com/story/show/183291353
       // FIXME-HISTORY: we should protect active documents so that if they are accidentally
       // passed to this component we don't replace their history. I think that means
       // adding a prop to documents so we can identify documents that are for being
       // used for history replaying
+      // https://www.pivotaltracker.com/story/show/183291353
       const treeManager = (document?.treeManagerAPI as TreeManagerType);
       const cDocument = CDocument.create({history: data});
       treeManager.setChangeDocument(cDocument);
