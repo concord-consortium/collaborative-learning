@@ -193,6 +193,9 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
         setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
         handleDeleteValue={deleteSelectedValue}
       />
+      <div>
+         <pre>currEditAttrId: { currEditAttrId } currEditFacet: { currEditFacet } </pre>
+      </div>
       <div className="data-card-header-row">
         <div className="panel title">
           { isEditingTitle && !readOnly

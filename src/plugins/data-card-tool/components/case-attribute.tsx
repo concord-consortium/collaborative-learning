@@ -99,25 +99,23 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   };
 
-  const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
+  const handleLabelClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     if (readOnly){
       return;
     }
     setCurrEditAttrId(attrKey);
-    const facet = event.currentTarget.classList.contains("name") ? "name" : "value";
-    const isEditing = event.currentTarget.classList.contains("editing");
-    activateInput(facet as EditFacet, isEditing);
-  };
+    setCurrEditFacet("name");
+    setLabelCandidate(getLabel());
+  }
 
-  const activateInput = (facet: EditFacet, isEditing: boolean) => {
-    setEditFacet(facet);
-    if (facet === "name" && !isEditing){
-      setLabelCandidate(getLabel());
+  const handleValueClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
+    if (readOnly){
+      return;
     }
-    if (facet === "value" && !isEditing){
-      setValueCandidate(getValue());
-    }
-  };
+    setCurrEditAttrId(attrKey);
+    setCurrEditFacet("value");
+    setValueCandidate(getValue());
+  }
 
   const handleInputDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
     event.currentTarget.select();
@@ -169,13 +167,13 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   // this allows user to edit next field when arriving by tab
-  const handleValueInputFocus = () => {
-    activateInput("value", true);
-  };
+  // const handleValueInputFocus = () => {
+  //   console.log("handleValueInputFocus!")
+  // };
 
   const pairClassNames = classNames(
     `attribute-name-value-pair ${attrKey}`,
-    {"editing": editFacet === "name" || editFacet === "value"},
+    // {"editing": editFacet === "name" || editFacet === "value"},
     {"has-image": gImageMap.isImageUrl(valueStr)}
   );
 
@@ -204,7 +202,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   return (
     <div className={pairClassNames}>
-      <div className={labelClassNames} onClick={handleClick}>
+      <div className={labelClassNames} onClick={handleLabelClick}>
         { !readOnly && editFacet === "name"
           ? <input
               type="text"
@@ -219,7 +217,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         }
       </div>
 
-      <div className={valueClassNames} onClick={handleClick}>
+      <div className={valueClassNames} onClick={handleValueClick}>
         {/* author view: text is in input, image is in an img */}
         { !readOnly && !valueIsImage() &&
           <input
@@ -230,7 +228,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
             onKeyDown={handleKeyDown}
             onBlur={handleCompleteValue}
             onDoubleClick={handleInputDoubleClick}
-            onFocus={handleValueInputFocus}
+            //onFocus={handleValueInputFocus}
           />
         }
         { !readOnly && valueIsImage() &&
