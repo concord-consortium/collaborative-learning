@@ -44,10 +44,11 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
   const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
 
-  // input needs to be reset if value deleted via toolbar
-  useEffect(() => {
-    valueStr === "" && setValueCandidate("")
-  },[valueStr])
+  // reset contents of input when attribute value changes without direct user input
+  // (when it is deleted by toolbar or the underlying case has changed )
+  useEffect(()=>{
+    setValueCandidate(valueStr);
+  },[valueStr]);
 
   gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
     .then((image)=>{
@@ -55,8 +56,8 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    editingLabel && setLabelCandidate(event.target.value)
-    editingValue && setValueCandidate(event.target.value)
+    editingLabel && setLabelCandidate(event.target.value);
+    editingValue && setValueCandidate(event.target.value);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -87,7 +88,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("name");
     !editingLabel && setLabelCandidate(getLabel());
-  }
+  };
 
   const handleValueClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
     event.stopPropagation();
@@ -95,7 +96,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("value");
     !editingValue && setValueCandidate(getValue());
-  }
+  };
 
   const handleInputDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
     event.currentTarget.select();
@@ -144,15 +145,16 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     return gImageMap.isImageUrl(valueStr);
   };
 
-  // this allows user to edit next field when arriving by tab
-  // const handleValueInputFocus = () => {
-  //   console.log("handleValueInputFocus!")
-  // };
+  //allow user to edit value when arriving by tab
+  const handleValueInputFocus = (event: React.FocusEvent) => {
+    if (event.target.classList.contains("value-input")){
+      setCurrEditAttrId(event.target.classList[1]);
+      setCurrEditFacet("value");
+    }
+  };
 
-  const pairClassNames = classNames(
-    `attribute-name-value-pair ${attrKey}`,
-    // {"has-image": gImageMap.isImageUrl(valueStr)}
-  );
+  const pairClassNames = `attribute-name-value-pair ${attrKey}`;
+  const valueInputClassNames = `value-input ${attrKey}`;
 
   const labelClassNames = classNames(
     `name ${attrKey}`,
@@ -174,8 +176,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     "cell-value",
     { "default-label": looksLikeDefaultLabel(getLabel()) }
   );
-
-  const valueInputClassNames = `value-input ${attrKey}`;
 
   return (
     <div className={pairClassNames}>
@@ -204,7 +204,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
             onKeyDown={handleKeyDown}
             onBlur={handleCompleteValue}
             onDoubleClick={handleInputDoubleClick}
-            //onFocus={handleValueInputFocus}
+            onFocus={handleValueInputFocus}
           />
         }
         { !readOnly && valueIsImage() &&
