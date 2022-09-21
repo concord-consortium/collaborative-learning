@@ -17,14 +17,19 @@ interface IProps {
   caseId?: string;
   attrKey: string;
   currEditAttrId: string;
+  currEditFacet: string;
   readOnly?: boolean;
   imageUrlToAdd?: string;
   setImageUrlToAdd: (url: string) => void;
   setCurrEditAttrId: (attrId: string) => void;
+  setCurrEditFacet: (facetName: EditFacet) => void;
 }
 
 export const CaseAttribute: React.FC<IProps> = observer(props => {
-  const { model, caseId, attrKey, currEditAttrId, setCurrEditAttrId, readOnly} = props;
+  const {
+    model, caseId, attrKey, currEditAttrId, currEditFacet,
+    setCurrEditFacet, setCurrEditAttrId, readOnly
+  } = props;
   const content = model.content as DataCardContentModelType;
   const getLabel = () => content.dataSet.attrFromID(attrKey).name;
   const getValue = () => {

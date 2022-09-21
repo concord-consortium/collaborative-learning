@@ -12,6 +12,8 @@ import { useCautionAlert } from "../../components/utilities/use-caution-alert";
 
 import "./data-card-tool.scss";
 
+type EditFacet = "name" | "value" | ""
+
 export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const { model, onRequestUniqueTitle, readOnly, documentContent, toolTile, onRegisterToolApi,
             onUnregisterToolApi } = props;
@@ -21,7 +23,9 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   const [titleValue, setTitleValue] = useState(content.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [currEditAttrId, setCurrEditAttrId] = useState<string>("");
-  const [imageUrlToAdd, setImageUrlToAdd] = useState("");
+  const [currEditFacet, setCurrEditFacet] = useState<EditFacet>("");
+  const [imageUrlToAdd, setImageUrlToAdd] = useState<string>("");
+  const [toolBarEnabled, setTooBarEnabled] = useState(false);
   const shouldShowAddCase = !readOnly && isTileSelected;
   const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
   const shouldShowAddField = !readOnly && isTileSelected;
@@ -33,29 +37,29 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
     }
   }, [content, model.id, onRequestUniqueTitle]);
 
-  const setToolbarAvailable = (e: any) => {
-    // toolbar button click targets do not have individual classes set, nor a common identifying attribute
-    // we don't want to change (volatile) content.toolbarOn status until click has propagated to correct element
-    // so the below confirms that we have clicked on a button in toolbar and should not change its status here
-    const firstClass = e.target.classList[0];
-    if (!firstClass){
-      const isDeleteButton = e.target.tagName === "svg" || e.target.tagName === "path";
-      const isUploadButton = e.target.type === "file";
-      if (isDeleteButton || isUploadButton){
-        return;
-      }
-    }
-    // having confirmed that we did not click the toolbar
-    // we only need to determine if we clicked an editable target
-    const editTargets = ["value-input", "image-value"];
-    const editable = editTargets.includes(firstClass);
-    if (editable){
-      content.setToolBarOn(true);
-    }
-    if (firstClass.length > 0 && !editable){
-      content.setToolBarOn(false);
-    }
-  };
+  // const setToolbarAvailable = (e: any) => {
+  //   // toolbar button click targets do not have individual classes set, nor a common identifying attribute
+  //   // we don't want to change (volatile) content.toolbarOn status until click has propagated to correct element
+  //   // so the below confirms that we have clicked on a button in toolbar and should not change its status here
+  //   const firstClass = e.target.classList[0];
+  //   if (!firstClass){
+  //     const isDeleteButton = e.target.tagName === "svg" || e.target.tagName === "path";
+  //     const isUploadButton = e.target.type === "file";
+  //     if (isDeleteButton || isUploadButton){
+  //       return;
+  //     }
+  //   }
+  //   // having confirmed that we did not click the toolbar
+  //   // we only need to determine if we clicked an editable target
+  //   const editTargets = ["value-input", "image-value"];
+  //   const editable = editTargets.includes(firstClass);
+  //   if (editable){
+  //     content.setToolBarOn(true);
+  //   }
+  //   if (firstClass.length > 0 && !editable){
+  //     content.setToolBarOn(false);
+  //   }
+  // };
 
   function nextCase(){
     if (content.caseIndex < content.totalCases - 1) {
@@ -170,10 +174,17 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
 
   const addCardClasses = classNames("add-card", "teal-bg", { hidden: !shouldShowAddCase });
   const removeCardClasses = classNames("remove-card", { hidden: !shouldShowDeleteCase });
-  const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
+  const toolbarProps = useToolbarToolApi(
+    {
+      id: model.id,
+      enabled: !readOnly, //we may add here
+      onRegisterToolApi,
+      onUnregisterToolApi
+    }
+  );
 
   return (
-    <div className="data-card-tool" onClick={setToolbarAvailable}>
+    <div className="data-card-tool">
       <DataCardToolbar
         model={model}
         documentContent={documentContent}
@@ -227,7 +238,9 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
             totalCases={content.totalCases}
             readOnly={readOnly}
             currEditAttrId={currEditAttrId}
+            currEditFacet={currEditFacet}
             setCurrEditAttrId={setCurrEditAttrId}
+            setCurrEditFacet={setCurrEditFacet}
             imageUrlToAdd={imageUrlToAdd}
             setImageUrlToAdd={setImageUrlToAdd}
           />
