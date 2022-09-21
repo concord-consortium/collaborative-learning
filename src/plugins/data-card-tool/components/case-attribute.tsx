@@ -39,39 +39,19 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const valueStr = getValue();
   const [labelCandidate, setLabelCandidate] = useState(() => getLabel());
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
-  const [editFacet, setEditFacet] = useState<EditFacet>("");
   const [imageUrl, setImageUrl] = useState("");
+
+  const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
+  const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
 
   gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
     .then((image)=>{
       setImageUrl(image.displayUrl || "");
     });
 
-  useEffect(()=>{
-    setValueCandidate(valueStr);
-  },[caseId]);
-
-  useEffect(() => {
-    if (currEditAttrId !== attrKey) {
-      setEditFacet("");
-    }
-  }, [attrKey, currEditAttrId]);
-
-  useEffect(() => {
-    const advancedToNewCard = getValue() === "" && valueCandidate !== "";
-    advancedToNewCard && setValueCandidate("");
-    setEditFacet("");
-  }, [valueStr]);
-
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (editFacet === "name"){
-      const inputVal = event.target.value;
-      setLabelCandidate(inputVal);
-    }
-    if (editFacet === "value"){
-      const inputVal = event.target.value;
-      setValueCandidate(inputVal);
-    }
+    editingLabel && setLabelCandidate(event.target.value)
+    editingValue && setValueCandidate(event.target.value)
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -80,41 +60,34 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       case "Enter":
         handleCompleteValue();
         handleCompleteName();
-        setEditFacet("");
         break;
       case "Escape":
-        if (editFacet === "name") {
+        if (currEditFacet === "name") {
           setLabelCandidate(getLabel());
         }
-        else if (editFacet === "value") {
+        else if (currEditFacet === "value") {
           setValueCandidate(getValue());
         }
-        setEditFacet("");
         break;
       case "Tab":
         handleCompleteValue();
         handleCompleteName();
-        setEditFacet("");
         break;
     }
   };
 
   const handleLabelClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
-    if (readOnly){
-      return;
-    }
+    if (readOnly) return;
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("name");
-    setLabelCandidate(getLabel());
+    !editingLabel && setLabelCandidate(getLabel());
   }
 
   const handleValueClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
-    if (readOnly){
-      return;
-    }
+    if (readOnly) return;
     setCurrEditAttrId(attrKey);
     setCurrEditFacet("value");
-    setValueCandidate(getValue());
+    !editingValue && setValueCandidate(getValue());
   }
 
   const handleInputDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
@@ -125,14 +98,12 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     if (labelCandidate !== getLabel()) {
       caseId && content.setAttName(attrKey, labelCandidate);
     }
-    setEditFacet("");
   };
 
   const handleCompleteValue = () => {
     if (valueCandidate !== getValue()) {
       caseId && content.setAttValue(caseId, attrKey, valueCandidate);
     }
-    setEditFacet("");
   };
 
   function deleteAttribute(){
@@ -173,18 +144,17 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const pairClassNames = classNames(
     `attribute-name-value-pair ${attrKey}`,
-    // {"editing": editFacet === "name" || editFacet === "value"},
-    {"has-image": gImageMap.isImageUrl(valueStr)}
+    // {"has-image": gImageMap.isImageUrl(valueStr)}
   );
 
   const labelClassNames = classNames(
     `name ${attrKey}`,
-    { "editing": editFacet === "name"}
+    { "editing": editingLabel }
   );
 
   const valueClassNames = classNames(
     `value ${attrKey}`,
-    { "editing": editFacet === "value" },
+    { "editing": editingValue },
     {"has-image": gImageMap.isImageUrl(valueStr)}
   );
 
@@ -203,7 +173,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   return (
     <div className={pairClassNames}>
       <div className={labelClassNames} onClick={handleLabelClick}>
-        { !readOnly && editFacet === "name"
+        { !readOnly && editingLabel
           ? <input
               type="text"
               className="input"
@@ -218,7 +188,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       </div>
 
       <div className={valueClassNames} onClick={handleValueClick}>
-        {/* author view: text is in input, image is in an img */}
         { !readOnly && !valueIsImage() &&
           <input
             className={valueInputClassNames}
@@ -235,14 +204,14 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
           <img src={imageUrl} className="image-value" />
         }
 
-        {/* read-only view: text is in div, image is in an img */}
-        { !valueIsImage() && readOnly &&
+        { readOnly && !valueIsImage() &&
           <div className="cell-value">{valueStr}</div>
         }
-        { valueIsImage() && readOnly &&
+        { readOnly && valueIsImage() &&
           <img src={imageUrl} className="image-value" />
         }
       </div>
+
       { !readOnly &&
         <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
       }
