@@ -45,6 +45,7 @@ export const ImageUploadButton: React.FC<IImageUploadButtonProps> =
           accept="image/png, image/jpeg"
           title=""
           onChange={handleFileInputChange}
+          className="input-for-upload"
         />
       </div>
     </Tooltip>

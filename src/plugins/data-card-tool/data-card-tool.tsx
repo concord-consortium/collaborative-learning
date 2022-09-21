@@ -149,19 +149,22 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
 
   const addCardClasses = classNames("add-card", "teal-bg", { hidden: !shouldShowAddCase });
   const removeCardClasses = classNames("remove-card", { hidden: !shouldShowDeleteCase });
+
   const toolbarProps = useToolbarToolApi(
     {
       id: model.id,
-      enabled: !readOnly, //we may add here
+      enabled: !readOnly, // "enabled" is "visible"
       onRegisterToolApi,
       onUnregisterToolApi
     }
   );
 
-  const handleToolClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    console.log("tool: handleToolClick!", event.target)
-    // setCurrEditAttrId("");
-    // setCurrEditFacet("");
+  const handleToolClick = (event: React.MouseEvent<HTMLDivElement | HTMLInputElement>) => {
+    const targetedElement = event.target as HTMLInputElement;
+    const isUploader = targetedElement.classList.contains("input-for-upload");
+    if ( isUploader ) return;
+    setCurrEditAttrId("");
+    setCurrEditFacet("");
   }
 
   return (
