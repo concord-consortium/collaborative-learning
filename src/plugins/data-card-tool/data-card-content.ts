@@ -35,8 +35,7 @@ export const DataCardContentModel = ToolContentModel
   .volatile(self => ({
     metadata: undefined as any as ToolMetadataModelType,
     // used as fallback when shared model isn't available
-    emptyDataSet: DataSet.create(),
-    toolBarOn: false
+    emptyDataSet: DataSet.create()
   }))
   .views(self => ({
     get title(): string | undefined {
@@ -76,9 +75,6 @@ export const DataCardContentModel = ToolContentModel
     },
     get totalCases(){
       return self.dataSet.cases.length;
-    },
-    getToolBarOn(){
-      return self.toolBarOn;
     },
     allCases(){
       return self.dataSet.getCanonicalCasesAtIndices(0, self.dataSet.cases.length);
@@ -131,9 +127,6 @@ export const DataCardContentModel = ToolContentModel
     }
   }))
   .actions(self => ({
-    setToolBarOn(x: boolean){
-      self.toolBarOn = x;
-    },
     afterAttach() {
       // Monitor our parents and update our shared model when we have a document parent
       addDisposer(self, reaction(() => {
