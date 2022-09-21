@@ -53,13 +53,22 @@
                     }
                   },
                   {
-                    "id": "AT1TvWsdcUJJeZtJ",
+                    "id": "19SEP20220952AM",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<h2>CHAPTER 1 SOURCES</h2>",
-                        "<p><strong>Evidence 1: </strong><a href='https://drive.google.com/file/d/1oNeWrCX6O7-u568L52az1E2dsafbVYIa/view'><strong>The Effects of Stress on the Heart</strong></a><strong> (video)</strong></p>",
+                        "<p><strong>Evidence 1: </strong><a href='https://drive.google.com/file/d/1oNeWrCX6O7-u568L52az1E2dsafbVYIa/view'><strong>The Effects of Stress on the Heart</strong></a><strong> (video)</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "AT1TvWsdcUJJeZtJ",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<p><strong></strong></p>",
                         "<p><strong>Questions About Evidence 1: </strong></p>",
                         "<p>1. The subordinate monkey has: </p>",
@@ -156,15 +165,23 @@
                     }
                   },
                   {
-                    "id": "ct7CvbKW3Uukl4nA",
+                    "id": "19SEP20220955AM",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<h2>CHAPTER 2 SOURCES</h2>",
-                        "<ul><li ><strong>Evidence 2: </strong><a href='curriculum/bio4community/images/L4Heart Evidence2CholesterolBlog.pdf'><strong>All the Fuss About Cholesterol</strong></a><strong> (blog post)</strong></li></ul>",
-                        "<p></p>",
-                        "<ul><li ><strong>Questions About Evidence 2:</strong></li></ul>",
+                        "<strong>Evidence 2: </strong><a href='curriculum/bio4community/images/L4Heart Evidence2CholesterolBlog.pdf'><strong>All the Fuss About Cholesterol</strong></a><strong> (blog post)</strong>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ct7CvbKW3Uukl4nA",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Questions About Evidence 2:</strong>",
                         "<ol><li >Our body can make all the cholesterol we need.  </li></ol>",
                         "<ul><li ><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
                         "<p></p>",
