@@ -40,6 +40,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
 
   const isEditingValue = !!currEditAttrId && currEditFacet === "value";
   const buttonsEnabled = enabled && isEditingValue;
+  console.log("toolbar calc: buttonsEnabled: ", buttonsEnabled)
 
   const uploadImage = (file: File) => {
     gImageMap.addFileImage(file)
@@ -62,8 +63,8 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
 
   return documentContent
     ? ReactDOM.createPortal(
-      <div className={toolbarClasses} style={location} onMouseDown={e => e.stopPropagation()}>
-        <div className={toolbarButtonsClasses} >
+      <div className={toolbarClasses} style={location}>
+        <div className={toolbarButtonsClasses}>
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
           <DeleteAttrIconButton onClick={handleDeleteValue} />
         </div>

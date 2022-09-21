@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { useUIStore } from "../../hooks/use-stores";
 import { DataCardContentModelType } from "./data-card-content";
@@ -25,7 +25,6 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   const [currEditAttrId, setCurrEditAttrId] = useState<string>("");
   const [currEditFacet, setCurrEditFacet] = useState<EditFacet>("");
   const [imageUrlToAdd, setImageUrlToAdd] = useState<string>("");
-  const [toolBarEnabled, setTooBarEnabled] = useState(false);
   const shouldShowAddCase = !readOnly && isTileSelected;
   const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
   const shouldShowAddField = !readOnly && isTileSelected;
@@ -36,30 +35,6 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
       title && content.setTitle(title);
     }
   }, [content, model.id, onRequestUniqueTitle]);
-
-  // const setToolbarAvailable = (e: any) => {
-  //   // toolbar button click targets do not have individual classes set, nor a common identifying attribute
-  //   // we don't want to change (volatile) content.toolbarOn status until click has propagated to correct element
-  //   // so the below confirms that we have clicked on a button in toolbar and should not change its status here
-  //   const firstClass = e.target.classList[0];
-  //   if (!firstClass){
-  //     const isDeleteButton = e.target.tagName === "svg" || e.target.tagName === "path";
-  //     const isUploadButton = e.target.type === "file";
-  //     if (isDeleteButton || isUploadButton){
-  //       return;
-  //     }
-  //   }
-  //   // having confirmed that we did not click the toolbar
-  //   // we only need to determine if we clicked an editable target
-  //   const editTargets = ["value-input", "image-value"];
-  //   const editable = editTargets.includes(firstClass);
-  //   if (editable){
-  //     content.setToolBarOn(true);
-  //   }
-  //   if (firstClass.length > 0 && !editable){
-  //     content.setToolBarOn(false);
-  //   }
-  // };
 
   function nextCase(){
     if (content.caseIndex < content.totalCases - 1) {
@@ -183,8 +158,14 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
     }
   );
 
+  const handleToolClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    console.log("tool: handleToolClick!", event.target)
+    // setCurrEditAttrId("");
+    // setCurrEditFacet("");
+  }
+
   return (
-    <div className="data-card-tool">
+    <div className="data-card-tool" onClick={handleToolClick}>
       <DataCardToolbar
         model={model}
         documentContent={documentContent}
@@ -194,9 +175,6 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
         setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
         handleDeleteValue={deleteSelectedValue}
       />
-      <div>
-         <pre>currEditAttrId: { currEditAttrId } currEditFacet: { currEditFacet } </pre>
-      </div>
       <div className="data-card-header-row">
         <div className="panel title">
           { isEditingTitle && !readOnly
