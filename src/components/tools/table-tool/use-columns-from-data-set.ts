@@ -95,8 +95,8 @@ export const useColumnsFromDataSet = ({
     }
     columnChanges;  // eslint-disable-line no-unused-expressions
     return cols;
-  }, [attributes, headerHeight, rowHeight, RowLabelHeader, RowLabelFormatter, readOnly, columnChanges,
-      controlsColumn, cellClasses, measureColumnWidth, metadata]);
+  }, [attributes, rowHeight, RowLabelHeader, RowLabelFormatter, readOnly, columnChanges,
+      ColumnHeaderCell, controlsColumn, cellClasses, measureColumnWidth, metadata]);
 
   return { columns, controlsColumn, columnEditingName, handleSetColumnEditingName };
 };

@@ -110,7 +110,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
 
   // A function to call when a column needs to change width
   const { onColumnResize } = useColumnResize({
-    columns, requestRowHeight, resizeColumn, resizeColumnWidth, triggerRowChange, userColumnWidths
+    columns, content, requestRowHeight, resizeColumn, resizeColumnWidth, triggerRowChange, userColumnWidths
   });
   // Finishes setting up the controlsColumn with changeHandlers (which weren't defined when controlColumn was created)
   useControlsColumn({ controlsColumn, readOnly: !!readOnly, onAddColumn, onRemoveRows });
