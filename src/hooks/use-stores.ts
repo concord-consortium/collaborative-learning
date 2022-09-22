@@ -72,10 +72,10 @@ export function useDocumentOrCurriculumMetadata(key?: string): IDocumentMetadata
   }, [documentMetadata, key]);
 }
 
-export function useCurriculumContent(key?: string):  DocumentContentModelType | undefined {
+export function useCurriculumOrDocumentContent(key?: string):  DocumentContentModelType | undefined {
   const curriculumContentFromPath = useCurriculumContentFromPath(key); 
-  const curriculumContentFromKey = useDocumentFromStore(key)?.content;
-  return isSectionPath(key) ? curriculumContentFromPath : curriculumContentFromKey;
+  const documentContentFromKey = useDocumentFromStore(key)?.content;
+  return isSectionPath(key) ? curriculumContentFromPath : documentContentFromKey;
 }
 
 export function useCurriculumContentFromPath(key?: string): DocumentContentModelType| undefined {

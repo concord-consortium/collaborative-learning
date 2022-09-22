@@ -284,7 +284,7 @@ export const DocumentContentModel = types
       self.rowOrder.forEach(rowId => {
         const row = self.getRow(rowId);
         if (row) {
-           tiles.push(...row.tiles.map(tile=>tile.tileId));
+          tiles.push(...row.tiles.map(tile=>tile.tileId));
         }
       });
       return tiles;

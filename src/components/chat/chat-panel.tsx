@@ -7,7 +7,7 @@ import {
   useCommentsCollectionPath, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
-import { useCurriculumContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
+import { useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
 import "./chat-panel.scss";
 
 interface IProps {
@@ -20,13 +20,17 @@ interface IProps {
 
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
   const document = useDocumentOrCurriculumMetadata(focusDocument);
-  const curriculumContent = useCurriculumContent(focusDocument);
-  const ordering = curriculumContent?.getTilesInDocumentOrder();
+  const content = useCurriculumOrDocumentContent(focusDocument);
+  const ordering = content?.getTilesInDocumentOrder();
   const { data: comments } = useDocumentComments(focusDocument);
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
   const documentComments = comments?.filter(comment => comment.tileId == null);
   const allTileComments = comments?.filter(comment=> comment.tileId !== null);
-  const commentsInDocumentOrder = ordering && allTileComments ? allTileComments.sort((a: any, b: any) => ordering.indexOf(a.tileId) - ordering.indexOf(b.tileId)) : [];
+  const commentsInDocumentOrder = ordering && allTileComments
+    ? allTileComments.sort((a: any, b: any) => ordering.indexOf(a.tileId) - ordering.indexOf(b.tileId))
+    : [];
+
+ 
   const postedComments = documentComments?.concat(commentsInDocumentOrder);
   const postCommentMutation = usePostDocumentComment();
 
