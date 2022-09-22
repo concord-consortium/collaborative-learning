@@ -9,10 +9,9 @@ interface IUseColumnResize {
   resizeColumn: React.MutableRefObject<string | undefined>;
   resizeColumnWidth: React.MutableRefObject<number | undefined>;
   triggerRowChange: () => void;
-  userColumnWidths: React.MutableRefObject<Record<string, number>>;
 }
 export const useColumnResize = ({
-  columns, content, requestRowHeight, resizeColumn, resizeColumnWidth, triggerRowChange, userColumnWidths
+  columns, content, requestRowHeight, resizeColumn, resizeColumnWidth, triggerRowChange
 }: IUseColumnResize) => {
   const startWidth = useRef<number | undefined>();
   const resizeInterval = useRef<any>();
@@ -32,9 +31,7 @@ export const useColumnResize = ({
     const saveResize = () => {
       if (resizeColumn.current && resizeColumnWidth.current !== undefined) {
         if (resizeColumnWidth.current !== startWidth.current) {
-          console.log(`saving resize for ${resizeColumn.current}`);
-          // TODO: Save to model
-          userColumnWidths.current[resizeColumn.current] = resizeColumnWidth.current;
+          content.setColumnWidth(resizeColumn.current, resizeColumnWidth.current);
         }
         clearRefs();
       }
@@ -54,14 +51,12 @@ export const useColumnResize = ({
       }
       resizeColumn.current = attrId;
       resizeColumnWidth.current = legalColumnWidth(width);
-      // TODO: Get this from the model
-      startWidth.current = userColumnWidths.current[attrId];
+      startWidth.current = content.columnWidth(attrId);
       resizeInterval.current = saveTimeout();
     }
-    // userColumnWidths.current[columns[idx].key] = width;
     requestRowHeight();
     triggerRowChange(); // triggerRowChange is used because triggerColumnChange doesn't force a rerender
-  }, [columns, requestRowHeight, resizeColumn, resizeColumnWidth, triggerRowChange, userColumnWidths]);
+  }, [columns, content, requestRowHeight, resizeColumn, resizeColumnWidth, triggerRowChange]);
 
   return { onColumnResize };
 };

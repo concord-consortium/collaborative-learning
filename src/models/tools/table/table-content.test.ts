@@ -35,7 +35,8 @@ describe("TableContent", () => {
     expect(emptyTable.dataSet.cases.length).toBe(0);
     expect(emptyTable.isUserResizable).toBe(true);
 
-    const defaultTable = TableContentModel.create(defaultTableContent());
+    // const defaultTable = TableContentModel.create(defaultTableContent());
+    const defaultTable = defaultTableContent();
     expect(defaultTable.type).toBe(kTableToolID);
     expect(defaultTable.isImported).toBe(true);
     expect(defaultTable.dataSet.attributes.length).toBe(2);

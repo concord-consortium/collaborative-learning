@@ -48,8 +48,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   } = useModelDataSet(model);
 
   // Set up user specified columns and function to measure a column
-  // TODO The user specified columns should be moved out of react and into MST
-  const { measureColumnWidth, resizeColumn, resizeColumnWidth, userColumnWidths }
+  const { measureColumnWidth, resizeColumn, resizeColumnWidth }
     = useMeasureColumnWidth({ content });
 
   // Functions for determining the height of rows, including the header
@@ -110,7 +109,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
 
   // A function to call when a column needs to change width
   const { onColumnResize } = useColumnResize({
-    columns, content, requestRowHeight, resizeColumn, resizeColumnWidth, triggerRowChange, userColumnWidths
+    columns, content, requestRowHeight, resizeColumn, resizeColumnWidth, triggerRowChange
   });
   // Finishes setting up the controlsColumn with changeHandlers (which weren't defined when controlColumn was created)
   useControlsColumn({ controlsColumn, readOnly: !!readOnly, onAddColumn, onRemoveRows });

@@ -11,19 +11,15 @@ export const useMeasureColumnWidth = ({ content }: IUseMeasureColumnWidth) => {
   const resizeColumn = useRef();
   // The current width of the column being modified
   const resizeColumnWidth = useRef();
-  // In the future, these should come from the model rather than being saved in react land
-  const userColumnWidths = useRef<Record<string, number>>({});
 
   const measureColumnWidth = useCallback((attr: IAttribute) => {
     // return Math.max(kMinColumnWidth, userColumnWidths.current[attr.id] || 0);
     if (resizeColumn.current === attr.id && resizeColumnWidth.current !== undefined) {
       return resizeColumnWidth.current;
     } else {
-      return Math.max(kMinColumnWidth, userColumnWidths.current[attr.id] || 0);
-      // TODO: Return the width from the model
-      // return content.columnWidth(attr.id);
+      return content.columnWidth(attr.id) || kMinColumnWidth;
     }
-  }, []);
+  }, [content]);
 
-  return { measureColumnWidth, resizeColumn, resizeColumnWidth, userColumnWidths };
+  return { measureColumnWidth, resizeColumn, resizeColumnWidth };
 };
