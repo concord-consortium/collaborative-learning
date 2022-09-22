@@ -22,6 +22,7 @@ import { ImageDragDrop } from "../utilities/image-drag-drop";
 import { isPlaceholderImage } from "../../utilities/image-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
 import { HotKeys } from "../../utilities/hot-keys";
+import { pasteClipboardImage } from "../../utilities/clipboard-utils";
 
 import "./image-tool.sass";
 
@@ -195,20 +196,47 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private handlePaste = () => {
-    this.pasteImage();
+    console.log("in handlePaste()");
+    pasteClipboardImage((imageFile) => {
+      if (imageFile instanceof File){
+        this.handleUploadImageFile(imageFile);
+      }
+    }, "file");
   };
 
-  private async pasteImage(){
-    const clipboardContents = await navigator.clipboard.read();
-    if (clipboardContents.length > 0){
-      if (clipboardContents[0].types.includes("image/png")){
-        clipboardContents[0].getType("image/png").then(blob=>{
-          const blobToFile = new File([blob], "clipboard-image");
-          this.handleUploadImageFile(blobToFile);
+  // private async pasteImage(){
+  //   const clipboardContents = await navigator.clipboard.read();
+  //   if (clipboardContents.length > 0){
+  //     if (clipboardContents[0].types.includes("image/png")){
+  //       clipboardContents[0].getType("image/png").then(blob=>{
+  //         console.log("image-tool.tsx blob", blob);
+  //         console.log("image-tool.tsx typeof Blob", typeof blob);
+  //         const blobToFile = new File([blob], "clipboard-image");
+  //         this.handleUploadImageFile(blobToFile);
+  //       });
+  //     }
+  //   }
+  // }
+
+  //method 1 END_______________________
+
+  private handleUploadImageFile = (file: File) => {
+    console.log("image-tool.tsx file is", file);
+    console.log("-------------------");
+
+    this.setState({ isLoading: true }, () => {
+      gImageMap.addFileImage(file)
+        .then(image => {
+          if (this._isMounted) {
+            const content = this.getContent();
+            this.setState({ isLoading: false, imageEntry: image });
+            if (image.contentUrl && (image.contentUrl !== content.url)) {
+              content.setUrl(image.contentUrl, file.name);
+            }
+          }
         });
-      }
-    }
-  }
+    });
+  };
 
   private handleIsEnabled = () => {
     const { model: { id }, readOnly } = this.props;
@@ -278,20 +306,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     this.updateImage(url, filename);
   }
 
-  private handleUploadImageFile = (file: File) => {
-    this.setState({ isLoading: true }, () => {
-      gImageMap.addFileImage(file)
-        .then(image => {
-          if (this._isMounted) {
-            const content = this.getContent();
-            this.setState({ isLoading: false, imageEntry: image });
-            if (image.contentUrl && (image.contentUrl !== content.url)) {
-              content.setUrl(image.contentUrl, file.name);
-            }
-          }
-        });
-    });
-  };
 
   private handleUrlChange = (url: string, filename?: string, context?: IDocumentContext) => {
     this.setState({

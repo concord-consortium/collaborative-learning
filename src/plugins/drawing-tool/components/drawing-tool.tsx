@@ -13,7 +13,9 @@ import { EditableTileTitle } from "../../../components/tools/editable-tile-title
 import { measureText } from "../../../components/tools/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { HotKeys } from "../../../utilities/hot-keys";
-import { gImageMap } from "../../../models/image-map";
+import { pasteClipboardImage } from "../../../utilities/clipboard-utils";
+
+import { gImageMap } from "../../../models/image-map"; //delete
 
 import "./drawing-tool.scss";
 
@@ -23,7 +25,6 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   const { documentContent, toolTile, model, readOnly, scale, onRegisterToolApi, onUnregisterToolApi } = props;
   const contentRef = useCurrent(model.content as DrawingContentModelType);
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
-  // const [actionHandlers, setActionHandlers] = useState<IActionHandlers>();
   const hotKeys = useRef(new HotKeys());
 
   useEffect(() => {
@@ -43,28 +44,45 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  //reusable method________
+
   const handlePaste = () => {
-    pasteImage();
-  };
-
-  const pasteImage = async()=>{
-    const clipboardContents = await navigator.clipboard.read();
-    if (clipboardContents.length > 0){
-      if (clipboardContents[0].types.includes("image/png")){
-        clipboardContents[0].getType("image/png").then(blob=>{
-          const blobToFile = new File([blob], "clipboard-image");
-          uploadImage(blobToFile);
-        });
+    pasteClipboardImage((imageUrl) => {
+      if (typeof imageUrl === "string"){
+        setImageUrlToAdd(imageUrl);
       }
-    }
+    }, "url");
   };
 
-  const uploadImage = (file: File) => {
-    gImageMap.addFileImage(file)
-      .then(image => {
-        setImageUrlToAdd(image.contentUrl || '');
-      });
-  };
+  // old method
+  // const handlePaste = () => {
+  //   pasteImage();
+  // };
+
+  // const pasteImage = async()=>{
+  //   const clipboardContents = await navigator.clipboard.read();
+  //   if (clipboardContents.length > 0){
+  //     if (clipboardContents[0].types.includes("image/png")){
+  //       clipboardContents[0].getType("image/png").then(blob=>{
+  //         console.log("drawing-tool.tsx blob", blob);
+  //         console.log("drawing-tool.tsx typeofBlob", typeof blob);
+  //         const blobToFile = new File([blob], "clipboard-image");
+  //         uploadImage(blobToFile);
+  //       });
+  //     }
+  //   }
+  // };
+
+  // const uploadImage = (file: File) => {
+  //   gImageMap.addFileImage(file)
+  //     .then(image => {
+  //       setImageUrlToAdd(image.contentUrl || '');
+  //     });
+  // };
+
+  //end old method
+
+
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
   const getTitle  = () => {
