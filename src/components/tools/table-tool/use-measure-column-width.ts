@@ -4,7 +4,7 @@ import { IAttribute } from "../../../models/data/attribute";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 
 interface IUseMeasureColumnWidth {
-  content: TableContentModelType
+  content: TableContentModelType;
 }
 export const useMeasureColumnWidth = ({ content }: IUseMeasureColumnWidth) => {
   // The column that is currently being modified

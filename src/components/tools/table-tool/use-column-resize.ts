@@ -36,7 +36,7 @@ export const useColumnResize = ({
         clearRefs();
       }
     };
-    const saveTimeout = () => setTimeout(() => { saveResize(); }, 500);
+    const saveTimeout = () => setTimeout(() => { saveResize(); }, 250);
 
     const attrId = columns[idx].key;
     if (resizeColumn.current === attrId) {

@@ -86,7 +86,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
 
   // The size of the title bar
   const { titleCellWidth, getTitleHeight } =
-    useTitleSize({ readOnly, columns, measureColumnWidth, dataSet: dataSet.current });
+    useTitleSize({ readOnly, columns, measureColumnWidth, dataSet: dataSet.current, rowChanges });
 
   // A function to update the height of the tile based on the content size
   const heightRef = useCurrent(height);
@@ -187,6 +187,13 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   // Force a rerender whenever the model's attributes change (which contain the individual cells)
   useEffect(() => {
     const disposer = onSnapshot((model.content as any).dataSet.attributes, () => {
+      triggerRowChange();
+    });
+    return () => disposer();
+  });
+
+  useEffect(() => {
+    const disposer = onSnapshot(content.columnWidths, () => {
       triggerRowChange();
     });
     return () => disposer();
