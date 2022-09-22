@@ -159,16 +159,14 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
     }
   );
 
-  const handleToolClick = (event: React.MouseEvent<HTMLDivElement | HTMLInputElement>) => {
-    const targetedElement = event.target as HTMLInputElement;
-    const isUploader = targetedElement.classList.contains("input-for-upload");
-    if ( isUploader ) return;
+  const handleBackgroundClick = (event: React.MouseEvent<HTMLDivElement | HTMLInputElement>) => {
+    console.log("handleBackgroundClick");
     setCurrEditAttrId("");
     setCurrEditFacet("");
   };
 
   return (
-    <div className="data-card-tool" onClick={handleToolClick}>
+    <div className="data-card-tool">
       <DataCardToolbar
         model={model}
         documentContent={documentContent}
@@ -178,61 +176,63 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
         setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
         handleDeleteValue={deleteSelectedValue}
       />
-      <div className="data-card-header-row">
-        <div className="panel title">
-          { isEditingTitle && !readOnly
-          ? <input
-              className="data-card-title-input-editing"
-              value={titleValue}
-              onChange={handleTitleChange}
-              onKeyDown={handleTitleKeyDown}
-              onBlur={handleCompleteTitle}
-              onClick={handleTitleInputClick}
-              onDoubleClick={handleTitleInputDoubleClick}
-          />
-          : <div className="editable-data-card-title-text" onClick={handleTitleClick}>
-              { content.title }
+      <div className="data-card-content" onClick={handleBackgroundClick}>
+        <div className="data-card-header-row">
+          <div className="panel title">
+            { isEditingTitle && !readOnly
+            ? <input
+                className="data-card-title-input-editing"
+                value={titleValue}
+                onChange={handleTitleChange}
+                onKeyDown={handleTitleKeyDown}
+                onBlur={handleCompleteTitle}
+                onClick={handleTitleInputClick}
+                onDoubleClick={handleTitleInputDoubleClick}
+            />
+            : <div className="editable-data-card-title-text" onClick={handleTitleClick}>
+                { content.title }
+              </div>
+            }
+          </div>
+          <div className="panel nav">
+            <div className="card-number-of-listing">
+              <div className="cell-text">
+                { content.totalCases > 0
+                    ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
+                    : "Add a card" }
+              </div>
             </div>
+            <div className="card-nav-buttons">
+              <button className={ previousButtonClasses } onClick={previousCase}></button>
+              <button className={ nextButtonClasses } onClick={nextCase}></button>
+            </div>
+            { !readOnly &&
+              <div className="add-remove-card-buttons">
+                <AddIconButton className={addCardClasses} onClick={addNewCase} />
+                <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
+              </div>
+            }
+          </div>
+        </div>
+        <div className="data-area">
+          { content.totalCases > 0 &&
+            <DataCardRows
+              caseIndex={content.caseIndex}
+              model={model}
+              totalCases={content.totalCases}
+              readOnly={readOnly}
+              currEditAttrId={currEditAttrId}
+              currEditFacet={currEditFacet}
+              setCurrEditAttrId={setCurrEditAttrId}
+              setCurrEditFacet={setCurrEditFacet}
+              imageUrlToAdd={imageUrlToAdd}
+              setImageUrlToAdd={setImageUrlToAdd}
+            />
           }
         </div>
-        <div className="panel nav">
-          <div className="card-number-of-listing">
-            <div className="cell-text">
-              { content.totalCases > 0
-                  ? `Card ${content.caseIndex + 1} of ${content.totalCases}`
-                  : "Add a card" }
-            </div>
-          </div>
-          <div className="card-nav-buttons">
-            <button className={ previousButtonClasses } onClick={previousCase}></button>
-            <button className={ nextButtonClasses } onClick={nextCase}></button>
-          </div>
-          { !readOnly &&
-            <div className="add-remove-card-buttons">
-              <AddIconButton className={addCardClasses} onClick={addNewCase} />
-              <RemoveIconButton className={removeCardClasses} onClick={handleDeleteCardClick} />
-            </div>
-          }
-        </div>
+        { shouldShowAddField && !readOnly &&
+          <AddIconButton className="add-field" onClick={handleAddField} /> }
       </div>
-      <div className="data-area">
-        { content.totalCases > 0 &&
-          <DataCardRows
-            caseIndex={content.caseIndex}
-            model={model}
-            totalCases={content.totalCases}
-            readOnly={readOnly}
-            currEditAttrId={currEditAttrId}
-            currEditFacet={currEditFacet}
-            setCurrEditAttrId={setCurrEditAttrId}
-            setCurrEditFacet={setCurrEditFacet}
-            imageUrlToAdd={imageUrlToAdd}
-            setImageUrlToAdd={setImageUrlToAdd}
-          />
-        }
-      </div>
-      { shouldShowAddField && !readOnly &&
-        <AddIconButton className="add-field" onClick={handleAddField} /> }
     </div>
   );
 });
