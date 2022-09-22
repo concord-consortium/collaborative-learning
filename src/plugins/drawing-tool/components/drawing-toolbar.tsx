@@ -22,7 +22,7 @@ interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
   setImageUrlToAdd: (url: string) => void;
 }
 
-const defaultButtons = ["select", "line", "vector", "rectangle", "ellipse", 
+const defaultButtons = ["select", "line", "vector", "rectangle", "ellipse",
   "stamp", "stroke-color", "fill-color", "image-upload", "delete"];
 
 export const ToolbarView: React.FC<IProps> = (
