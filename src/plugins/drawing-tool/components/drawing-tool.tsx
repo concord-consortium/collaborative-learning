@@ -42,11 +42,9 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePaste = () => {
-    pasteClipboardImage((imageUrl) => {
-      if (typeof imageUrl === "string"){
-        setImageUrlToAdd(imageUrl);
-      }
-    }, "url");
+    pasteClipboardImage(({ image }) => {
+      setImageUrlToAdd(image.contentUrl || '');
+    });
   };
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
