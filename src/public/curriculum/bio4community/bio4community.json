@@ -13,8 +13,43 @@
     "placeholderText": "Document your thoughts",
     "autoSectionProblemDocuments": false,
     "defaultDocumentTitle": "MyEvidence",
+    "defaultDocumentType": "personal",
     "defaultDocumentTemplate": {
       "tiles": [
+        {
+          "id": "17SEP20221154AM",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+            ]
+          }
+        },
+        {
+          "id": "-GfoEDw3vaSKoAz4",
+          "content": {
+            "type": "Table",
+            "name": "Cast of Characters",
+            "columns": [
+              {"name":"Character name","values":["Narrator","Rakesh (main character)","Nicole (co-worker)","Deaundre (co-worker) ","Meera (cousin)","Dr. Lee (physician)","Dr. Zeiders (scientist)","Ajay (son)","Zainab (daughter)"]},
+              {"name":"Actor name","values":["","","","","","","","",""]}
+            ]
+          }
+        },
+        {
+          "id": "17SEP20221202pm",
+          "content": {
+            "type": "Table",
+            "name": "Evidence Table",
+            "columns": [
+              {"name":"Evidence","values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+              {"name":"What did you learn from it?","values":["","","","",""]},
+              {"name":"Your questions now","values":["","","","",""]}
+            ]
+          }
+        }
+
       ]
     },
     "toolbar": [
@@ -79,29 +114,6 @@
               "dataTestItem": "supports-list-items",
               "documentTypes": ["publication", "personalPublication"],
               "properties": ["isTeacherDocument", "!isDeleted"]
-            }
-          ]
-        },
-        {
-          "tab": "my-work",
-          "label": "My Work",
-          "sections": [
-            {
-              "title": "Story Notes",
-              "type": "problem-documents",
-              "dataTestHeader": "my-work-section-investigations",
-              "dataTestItem": "my-work-list-items",
-              "documentTypes": ["problem", "planning"],
-              "order": "original",
-              "showStars": []
-            },
-            {
-              "title": "Story Notes",
-              "type": "learning-logs",
-              "dataTestHeader": "learning-log-section",
-              "documentTypes": ["learningLog"],
-              "properties": ["!isDeleted"],
-              "addDocument": false
             }
           ]
         }
@@ -280,29 +292,6 @@
                                 "format": "html",
                                 "text": [
                                   "<p><em>— Drag the  EvidenceTable tile into your Learning Log to write your answers —</em></p>"
-                                ]
-                              }
-                            },
-                            {
-                              "id": "document_Table_1",
-                              "content": {
-                                "type": "Table",
-                                "name": "Evidence Table",
-                                "columns": [
-                                  {"name":"Evidence","values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-                                  {"name":"What did you learn from it?","values":["","","","",""]},
-                                  {"name":"Your questions now","values":["","","","",""]}
-                                ]
-                              }
-                            },
-                            {
-                              "id": "-GfoEDw3vaSKoAz4",
-                              "content": {
-                                "type": "Table",
-                                "name": "Cast of Characters",
-                                "columns": [
-                                  {"name":"Character name","values":["Narrator","Rakesh (main character)","Nicole (co-worker)","Deaundre (co-worker) ","Meera (cousin)","Dr. Lee (physician)","Dr. Zeiders (scientist)","Ajay (son)","Zainab (daughter)"]},
-                                  {"name":"Actor name","values":["","","","","","","","",""]}
                                 ]
                               }
                             }
@@ -711,41 +700,7 @@
                                   "<p></p>"
                                 ]
                               }
-                            },
-                            {
-                              "id": "VLdaLz9dZMeDBuu6",
-                              "title": "Text 3",
-                              "content": {
-                                "type": "Text",
-                                "format": "html",
-                                "text": [
-                                  "<p><em>— Drag the  EvidenceTable tile into your Learning Log to write your answers —</em></p>"
-                                ]
-                              }
-                            },
-                            {
-                              "id": "B6dGOGykU71wUydx",
-                              "content": {
-                                "type": "Table",
-                                "name": "Evidence Table",
-                                "columns": [
-                                  {"name":"Evidence","values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-                                  {"name":"What did you learn from it?","values":["","","","",""]},
-                                  {"name":"Your questions now","values":["","","","",""]}
-                                ]
-                              }
-                            },
-                            {
-                              "id": "_P4lXUs9RWPbuwPJ",
-                              "content": {
-                                "type": "Table",
-                                "name": "Cast Of Characters",
-                                "columns": [
-                                  {"name":"Character","values":["Narrator","Estrella (main character)","Abuela (grandmother)","Paco (brother)","Tito (brother)","Sandra (sister)","Ms. Parker (former teacher)","Ms G. (teacher)"]},
-                                  {"name":"Actor","values":["","","","","","","",""]}
-                                ]
-                              }
-                            }   
+                            }
                           ]
                         },
                         "supports": []
@@ -1105,18 +1060,6 @@
                                   "<p>Felix reluctantly agreed. He was tired of Josue’s nagging and he was also starting to worry about why he got sick so often, so he figured a chat with Josue’s mom wasn’t too hard to do.  Josue, realizing he had a golden opportunity, pulled out his phone right away and rang his mother. </p>",
                                   "<p></p>",
                                   "<p>Josue’s mother picked up the phone and Josue loudly told her that Felix was sick again! Unfortunately, Josue’s mom was in the middle of seeing a patient and couldn’t talk. She told them that she would send them a link to a slide show that explains how and why you get sick. Later that day, Felix was in class when he saw an email from Josue’s mother with a link to the slide show. He couldn’t wait so he clicked on the link: “How Do You Get Sick?”</p>"
-                                ]
-                              }
-                            },
-                            {
-                              "id": "12SEP20220555PM",
-                              "content": {
-                                "type": "Table",
-                                "name": "Evidence Table",
-                                "columns": [
-                                  {"name":"Evidence","values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-                                  {"name":"What did you learn from it?","values":["","","","",""]},
-                                  {"name":"Your questions now","values":["","","","",""]}
                                 ]
                               }
                             }
