@@ -68,7 +68,7 @@ export const useColumnsFromDataSet = ({
         name: attr.name,
         key: attr.id,
         width,
-        resizable: true,
+        resizable: !readOnly,
         headerRenderer: ColumnHeaderCell,
         formatter: getCellFormatter(width, rowHeight),
         editor: !readOnly && !metadata.hasExpression(attr.id) ? CellTextEditor : undefined,
