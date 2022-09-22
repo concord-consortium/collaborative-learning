@@ -14,9 +14,6 @@ import { measureText } from "../../../components/tools/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { HotKeys } from "../../../utilities/hot-keys";
 import { pasteClipboardImage } from "../../../utilities/clipboard-utils";
-
-import { gImageMap } from "../../../models/image-map"; //delete
-
 import "./drawing-tool.scss";
 
 type IProps = IToolTileProps;
@@ -44,8 +41,6 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  //reusable method________
-
   const handlePaste = () => {
     pasteClipboardImage((imageUrl) => {
       if (typeof imageUrl === "string"){
@@ -53,36 +48,6 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
       }
     }, "url");
   };
-
-  // old method
-  // const handlePaste = () => {
-  //   pasteImage();
-  // };
-
-  // const pasteImage = async()=>{
-  //   const clipboardContents = await navigator.clipboard.read();
-  //   if (clipboardContents.length > 0){
-  //     if (clipboardContents[0].types.includes("image/png")){
-  //       clipboardContents[0].getType("image/png").then(blob=>{
-  //         console.log("drawing-tool.tsx blob", blob);
-  //         console.log("drawing-tool.tsx typeofBlob", typeof blob);
-  //         const blobToFile = new File([blob], "clipboard-image");
-  //         uploadImage(blobToFile);
-  //       });
-  //     }
-  //   }
-  // };
-
-  // const uploadImage = (file: File) => {
-  //   gImageMap.addFileImage(file)
-  //     .then(image => {
-  //       setImageUrlToAdd(image.contentUrl || '');
-  //     });
-  // };
-
-  //end old method
-
-
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
   const getTitle  = () => {

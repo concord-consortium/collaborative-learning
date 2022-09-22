@@ -196,7 +196,6 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private handlePaste = () => {
-    console.log("in handlePaste()");
     pasteClipboardImage((imageFile) => {
       if (imageFile instanceof File){
         this.handleUploadImageFile(imageFile);
@@ -204,26 +203,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     }, "file");
   };
 
-  // private async pasteImage(){
-  //   const clipboardContents = await navigator.clipboard.read();
-  //   if (clipboardContents.length > 0){
-  //     if (clipboardContents[0].types.includes("image/png")){
-  //       clipboardContents[0].getType("image/png").then(blob=>{
-  //         console.log("image-tool.tsx blob", blob);
-  //         console.log("image-tool.tsx typeof Blob", typeof blob);
-  //         const blobToFile = new File([blob], "clipboard-image");
-  //         this.handleUploadImageFile(blobToFile);
-  //       });
-  //     }
-  //   }
-  // }
-
-  //method 1 END_______________________
-
   private handleUploadImageFile = (file: File) => {
-    console.log("image-tool.tsx file is", file);
-    console.log("-------------------");
-
     this.setState({ isLoading: true }, () => {
       gImageMap.addFileImage(file)
         .then(image => {
