@@ -64,6 +64,9 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       case "Enter":
         handleCompleteValue();
         handleCompleteName();
+        event.currentTarget.blur();
+        setCurrEditAttrId("");
+        setCurrEditFacet("");
         break;
       case "Escape":
         if (currEditFacet === "name") {
