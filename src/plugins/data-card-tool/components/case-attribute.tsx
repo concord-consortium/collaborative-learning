@@ -15,7 +15,7 @@ interface IProps {
   caseId?: string;
   attrKey: string;
   currEditAttrId: string;
-  currEditFacet: string;
+  currEditFacet: EditFacet;
   readOnly?: boolean;
   imageUrlToAdd?: string;
   setImageUrlToAdd: (url: string) => void;
