@@ -79,8 +79,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     this.setSvgRef = (element) => {
       this.svgRef = element;
     };
-
-    this.addListeners();
   }
 
   public componentDidMount() {
@@ -135,20 +133,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
     tool.setSettings(settings);
     this.setCurrentTool(tool);
-  }
-
-  public addListeners() {
-    window.addEventListener("keyup", (e) => {
-      if (!this.props.readOnly) {
-        switch (e.key) {
-          case "Backspace":
-          case "Delete":
-          case "Del":             // IE 9 and maybe Edge
-            this.handleDelete();
-            break;
-        }
-      }
-    });
   }
 
   public addNewDrawingObject(drawingObject: DrawingObjectSnapshotForAdd) {
