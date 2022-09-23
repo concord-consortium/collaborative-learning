@@ -63,7 +63,7 @@ jest.mock("../../hooks/use-stores", () => ({
   useDocumentFromStore: () => ({
     getDocument: () => ({ undefined })
   }),
-  useCurriculumContent:(key: string) => {
+  useCurriculumOrDocumentContent:(key: string) => {
     return DocumentContentModel.create(createSingleTileContent({
       type: "Text",
       text: "test"
