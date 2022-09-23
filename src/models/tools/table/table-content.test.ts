@@ -2,6 +2,7 @@ import { defaultTableContent, kTableToolID, TableContentModel, TableMetadataMode
 import { TableContentTableImport } from "./table-import";
 import { IDataSet } from "../../data/data-set";
 import { kSerializedXKey } from "../../data/expression-utils";
+import { kDefaultColumnWidth } from "../../../components/tools/table-tool/table-types";
 
 // mock Logger calls
 jest.mock("../../../lib/logger", () => {
@@ -84,6 +85,30 @@ describe("TableContent", () => {
     expect(getCaseNoId(table.dataSet, 0)).toEqual({ xCol: "x1", yCol: "y1" });
     expect(getCaseNoId(table.dataSet, 1)).toEqual({ xCol: "x2", yCol: "y2" });
     expect(getCaseNoId(table.dataSet, 2)).toEqual({ xCol: "", yCol: "y3" });
+  });
+
+  it("can import an authored table with column widths", () => {
+    const colWidth = 200;
+    const importData: TableContentTableImport = {
+      type: "Table",
+      name: "Table Title",
+      columns: [
+        { name: "xCol", values: ["x1", "x2"] },
+        { name: "yCol", width: colWidth, values: ["y1", "y2", "y3"] }
+      ]
+    };
+    const table = TableContentModel.create(importData);
+    expect(table.type).toBe(kTableToolID);
+    const xCol = table.dataSet.attrFromName("xCol");
+    expect(xCol).not.toBeUndefined();
+    if (xCol) {
+      expect(table.columnWidth(xCol.id)).toEqual(kDefaultColumnWidth);
+    }
+    const yCol = table.dataSet.attrFromName("yCol");
+    expect(yCol).not.toBeUndefined();
+    if (yCol) {
+      expect(table.columnWidth(yCol.id)).toEqual(colWidth);
+    }
   });
 
   // Table Remodel 8/9/2022
