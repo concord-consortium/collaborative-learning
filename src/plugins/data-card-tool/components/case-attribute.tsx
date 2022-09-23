@@ -4,10 +4,9 @@ import React, { useEffect, useState } from "react";
 import { gImageMap } from "../../../models/image-map";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataCardContentModelType } from "../data-card-content";
-import { looksLikeDefaultLabel } from "../data-card-types";
+import { looksLikeDefaultLabel, EditFacet } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
-import { EditFacet } from "../data-card-types";
 
 import '../data-card-tool.scss';
 
