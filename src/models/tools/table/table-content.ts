@@ -431,7 +431,7 @@ export const TableContentModel = ToolContentModel
     //   return self.isValidDataSetForGeometryLink(self.dataSet);
     // },
     exportJson(options?: IDocumentExportOptions) {
-      return exportTableContentAsJson(self.metadata, self.dataSet);
+      return exportTableContentAsJson(self.metadata, self.dataSet, self.columnWidth);
     }
   }));
 
