@@ -159,7 +159,6 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   );
 
   const handleBackgroundClick = (event: React.MouseEvent<HTMLDivElement | HTMLInputElement>) => {
-    console.log("handleBackgroundClick");
     setCurrEditAttrId("");
     setCurrEditFacet("");
   };
