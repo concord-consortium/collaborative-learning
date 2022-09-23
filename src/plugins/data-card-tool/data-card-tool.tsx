@@ -9,10 +9,9 @@ import { DataCardToolbar } from "./data-card-toolbar";
 import { useToolbarToolApi } from "../../components/tools/hooks/use-toolbar-tool-api";
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
+import { EditFacet } from "./data-card-types";
 
 import "./data-card-tool.scss";
-
-type EditFacet = "name" | "value" | ""
 
 export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) => {
   const { model, onRequestUniqueTitle, readOnly, documentContent, toolTile, onRegisterToolApi,

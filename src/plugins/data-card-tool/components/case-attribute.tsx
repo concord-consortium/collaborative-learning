@@ -7,10 +7,9 @@ import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultLabel } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
+import { EditFacet } from "../data-card-types";
 
 import '../data-card-tool.scss';
-
-type EditFacet = "name" | "value" | ""
 
 interface IProps {
   model: ToolTileModelType;

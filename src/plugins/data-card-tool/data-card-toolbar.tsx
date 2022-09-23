@@ -10,13 +10,14 @@ import { DataCardContentModelType } from "./data-card-content";
 import { ToolTileModelType } from "../../models/tools/tool-tile";
 import { ImageUploadButton } from "../../components/tools/image/image-toolbar";
 import { DeleteAttrIconButton } from "./components/add-remove-icons";
+import { EditFacet } from "./data-card-types";
 
 import "./data-card-toolbar.scss";
 
 interface IProps extends IFloatingToolbarProps {
   model: ToolTileModelType;
   currEditAttrId: string;
-  currEditFacet: string;
+  currEditFacet: EditFacet;
   setImageUrlToAdd: (url: string) => void;
   handleDeleteValue: () => void;
 }

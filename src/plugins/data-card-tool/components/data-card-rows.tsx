@@ -3,8 +3,7 @@ import React from "react";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataCardContentModelType } from "../data-card-content";
 import { CaseAttribute } from "./case-attribute";
-
-type EditFacet = "name" | "value" | ""
+import { EditFacet } from "../data-card-types";
 
 interface IProps {
   caseIndex: any;
