@@ -206,7 +206,7 @@ $default-button-border-color: #979797;
 
       input {
         width: 100%;
-        height: 97%;
+        height: calc(100% - 1px);
         padding: $cell-padding;
         font-style: normal;
         font-weight: 300;
