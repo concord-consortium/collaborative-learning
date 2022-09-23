@@ -149,7 +149,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   //allow user to edit value when arriving by tab
   const handleValueInputFocus = (event: React.FocusEvent) => {
     if (event.target.classList.contains("value-input")){
-      setCurrEditAttrId(event.target.classList[1]);
+      setCurrEditAttrId(attrKey);
       setCurrEditFacet("value");
     }
   };
