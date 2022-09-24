@@ -27,7 +27,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   public static tileHandlesSelection = true;
 
   public render() {
-    const { readOnly, height } = this.props;
+
+    const { readOnly, height, model } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
@@ -49,6 +50,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
                   onZoomChange={this.handleProgramZoomChange}
                   size={size}
                   tileHeight={height}
+                  tileId={model.id}
                 />
               );
             }}
@@ -87,6 +89,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
 
   private handleTitleChange = (title?: string) => {
     title && this.getContent().setTitle(title);
+    // TODO LOG THIS
   };
 
   private renderTitle() {

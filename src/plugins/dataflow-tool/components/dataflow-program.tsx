@@ -33,6 +33,7 @@ import { NodeChannelInfo, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { SerialDevice } from "../../../models/stores/serial";
+import { dataflowLogEvent } from "../dataflow-logger";
 
 import "./dataflow-program.sass";
 
@@ -63,6 +64,7 @@ interface IProps extends SizeMeProps {
   programZoom?: ProgramZoomType;
   onZoomChange: (dx: number, dy: number, scale: number) => void;
   tileHeight?: number;
+  tileId: string;
 }
 
 interface IState {
@@ -140,7 +142,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             onDrop={event => {
               event.preventDefault();
               const nodeType = event.dataTransfer.getData("text/plain");
-              console.log(`Adding ${nodeType}`);
+              // console.log(`Adding ${nodeType}`); I don't think this is implemented
             }}
           >
             <div
@@ -322,6 +324,27 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.programEditor.view.resize();
       this.programEditor.trigger("process");
+
+      // Program changes are logged from here
+      this.programEditor.on("nodecreated", node => {
+        dataflowLogEvent("nodecreated", node, this.props.tileId);
+      });
+
+      this.programEditor.on("noderemoved", node => {
+        dataflowLogEvent("noderemoved", node, this.props.tileId);
+      });
+
+      this.programEditor.on("connectioncreated", connection => {
+        dataflowLogEvent("connectioncreated", connection, this.props.tileId);
+      });
+
+      this.programEditor.on("connectionremoved", connection => {
+        dataflowLogEvent("connectionremoved", connection, this.props.tileId);
+      });
+
+      this.programEditor.on("connectionremoved", connection => {
+        dataflowLogEvent("connectionremoved", connection, this.props.tileId);
+      });
     })();
   };
 
