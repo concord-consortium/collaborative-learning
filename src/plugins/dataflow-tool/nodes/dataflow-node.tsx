@@ -23,10 +23,17 @@ export class DataflowNode extends Node {
     const nodeType = NodeTypes.find( (n: NodeType) => n.name === node.name);
     const displayName = nodeType ? nodeType.displayName : node.name;
 
+    console.log("settingControls: ", settingsControls)
+
     const dynamicClasses = classNames({
       "has-gate": node.data.hasGate,
       "gate-active": node.data.gateActive
     });
+
+    const logControlAction = (e: any) => {
+      console.log("this: ", this)
+      console.log("e: ", e)
+    }
 
     return (
       <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}>
@@ -51,7 +58,7 @@ export class DataflowNode extends Node {
             key={control.key}
             control={control}
             innerRef={bindControl}
-            // LOG TODO onSomething, onChange Callback from control
+            onItemClick={logControlAction}
           />
           </>
         ))}
