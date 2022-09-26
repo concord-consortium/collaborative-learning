@@ -10,12 +10,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Save build folder
-        uses: actions/upload-artifact@v2
-        with:
-          name: build
-          if-no-files-found: error
-          path: dist
       - name: Build
         uses: cypress-io/github-action@v4
         with:
@@ -26,6 +20,12 @@ jobs:
           # so it can be used by the cypress tests.
           # This uses a webpack coverage-istanbul-loader.
           CODE_COVERAGE: true
+      - name: Save build folder
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          if-no-files-found: error
+          path: dist
   jest:
     name: Run Jest Tests
     runs-on: ubuntu-latest
@@ -60,7 +60,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Download the build folder
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: build
           path: dist
