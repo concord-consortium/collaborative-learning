@@ -36,7 +36,6 @@ describe("TableContent", () => {
     expect(emptyTable.dataSet.cases.length).toBe(0);
     expect(emptyTable.isUserResizable).toBe(true);
 
-    // const defaultTable = TableContentModel.create(defaultTableContent());
     const defaultTable = defaultTableContent();
     expect(defaultTable.type).toBe(kTableToolID);
     expect(defaultTable.isImported).toBe(true);
@@ -89,6 +88,7 @@ describe("TableContent", () => {
 
   it("can import an authored table with column widths", () => {
     const colWidth = 200;
+    const biggerColWidth = 500;
     const importData: TableContentTableImport = {
       type: "Table",
       name: "Table Title",
@@ -108,6 +108,8 @@ describe("TableContent", () => {
     expect(yCol).not.toBeUndefined();
     if (yCol) {
       expect(table.columnWidth(yCol.id)).toEqual(colWidth);
+      table.setColumnWidth(yCol.id, biggerColWidth);
+      expect(table.columnWidth(yCol.id)).toEqual(biggerColWidth);
     }
   });
 
