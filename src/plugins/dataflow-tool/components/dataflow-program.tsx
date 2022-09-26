@@ -327,6 +327,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // Program changes are logged from here
       this.programEditor.on("nodecreated", node => {
+        node.meta.createdInTileWithID = this.props.tileId;
         dataflowLogEvent("nodecreated", node, this.props.tileId);
       });
 

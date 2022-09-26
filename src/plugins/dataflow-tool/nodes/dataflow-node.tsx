@@ -45,12 +45,15 @@ export class DataflowNode extends Node {
           }
         </div>
         {settingsControls.map((control: any) => (
+          <> <div style={{width: "200px", background: "magenta"}}>CONTROL</div>
           <Control
             className="control"
             key={control.key}
             control={control}
             innerRef={bindControl}
+            // LOG TODO onSomething, onChange Callback from control
           />
+          </>
         ))}
         {settingsControls.length > 0 &&
           <div className="hr control-color" />
