@@ -341,10 +341,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.on("connectionremoved", connection => {
         dataflowLogEvent("connectionremoved", connection, this.props.tileId);
       });
-
-      this.programEditor.on("connectionremoved", connection => {
-        dataflowLogEvent("connectionremoved", connection, this.props.tileId);
-      });
     })();
   };
 

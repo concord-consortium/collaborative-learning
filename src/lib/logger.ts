@@ -137,17 +137,24 @@ export interface SimpleToolLogEvent {
   args?: Array<any>;
 }
 
+// Logging Question - should this be here?
 export interface DataflowProgramChange {
-  nodeType: string,
-  nodeId: number,
-  changeTarget: string,
-  changeValue?: string | number
+  nodeType: string[],
+  changeName: string, // using stuff like "nodecreated", but should enum even tho from various sources?
+  reteTargetType: string, // should be rete types? Might be passing as string...otherwise Node | Connection | Control
+  nodeId: number[],
+  nodeValue?: string | number, // the value in the program itself matters if its user input
+  targetValue?: string | number
+  connectionOutputNodeId?: number,
+  connectionOutputNodeType?: string,
+  connectionInputNodeId?: number,
+  connectionInputNodeType?: string
 }
 
 type LoggableToolChangeEvent =  Optional<JXGChange, "operation"> |
                                 SimpleToolLogEvent |
                                 Optional<ITableChange, "action"> |
-                                DataflowProgramChange;
+                                DataflowProgramChange; // Logging Question - should this be here?
 
 interface IDocumentInfo {
   type: string;
