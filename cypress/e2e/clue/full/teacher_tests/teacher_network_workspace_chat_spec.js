@@ -70,6 +70,9 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     cy.openTopTab("my-work");
     cy.openSection('my-work', 'workspaces');
 
+    // This line is flakey because often CLUE is not able to load in the network
+    // data for this teacher fast enough. The teacher has a lot of classes. Many
+    // of them have network documents.
     teacherNetwork.expandSectionClass('workspaces', 'my-network', classInfo1);
     teacherNetwork.verifyDocumentsListDisplays('workspaces', 'my-network', classInfo1);
     teacherNetwork.verifyDocumentName('workspaces', 'my-network', classInfo1, workDoc);
