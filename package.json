@@ -150,7 +150,7 @@
     "cypress": "^10.7.0",
     "cypress-commands": "2.0.1",
     "cypress-file-upload": "^5.0.8",
-    "cypress-terminal-report": "^3.5.2",
+    "cypress-terminal-report": "^4.1.2",
     "enquirer": "^2.3.6",
     "eslint": "^8.22.0",
     "eslint-config-react": "^1.1.7",

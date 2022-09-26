@@ -234,11 +234,22 @@ context('Draw Tool Tile', function () {
       });
       it("deletes rectangle drawings", () => {
         drawToolTile.getDrawTile().click();
-        for (let i=0; i<6; i++) {
+        // delete the first 4 with the toolbar button
+        for (let i=0; i<4; i++) {
           drawToolTile.getDrawToolSelect().click();
           drawToolTile.getRectangleDrawing().first().click({force:true, scrollBehavior: false});
           drawToolTile.getDrawToolDelete().click();
         }
+        // Delete with backspace key
+        drawToolTile.getDrawToolSelect().click();
+        drawToolTile.getRectangleDrawing().first().click({force:true, scrollBehavior: false});
+        drawToolTile.getDrawTileComponent().type("{backspace}");
+
+        // Delete with delete key
+        drawToolTile.getDrawToolSelect().click();
+        drawToolTile.getRectangleDrawing().first().click({force:true, scrollBehavior: false});
+        drawToolTile.getDrawTileComponent().type("{del}");
+
         drawToolTile.getRectangleDrawing().should("not.exist");
       });
     });
