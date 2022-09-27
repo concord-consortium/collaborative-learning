@@ -19,7 +19,9 @@ jobs:
           # Turn on code coverage instrumentation in this build
           # so it can be used by the cypress tests.
           # This uses a webpack coverage-istanbul-loader.
-          CODE_COVERAGE: true
+          # Try turning off code coverage to see how it effects
+          # the speed.
+          # CODE_COVERAGE: true
       - name: Save build folder
         uses: actions/upload-artifact@v3
         with:
