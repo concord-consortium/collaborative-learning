@@ -23,7 +23,7 @@ export class DemoOutputControl extends Rete.Control {
       const grabberFrame = this.getGrabberFrame(compProps.percentClosed);
       const chordFrame = this.getChordFrame(compProps.percentTilt);
       return (
-        <div style={{ padding: "20px;", width: "300px", background: "pink"}} className={`demo-output-control ${controlClassName}`}>
+        <div className={`demo-output-control ${controlClassName}`}>
           {compProps.type === "Light Bulb"
             ? <img src={ compProps.value ? lightBulbOn : lightBulbOff } className="demo-output-image lightbulb-image" />
             : compProps.type === "Grabber"

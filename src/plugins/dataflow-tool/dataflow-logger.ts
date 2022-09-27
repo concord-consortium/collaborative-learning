@@ -10,17 +10,17 @@ type DataflowLogPayload =  Node | Connection | Control | string;
    * [x] block create, delete
    * [x] block connection/disconnection
    * [x] minigraph toggle
-   * [ ] minigraph toggle on demo and live output blocks
+   * [x] minigraph toggle on demo and live output blocks
    * [x] title title change
    * [ ] clicks and value changes in controls below
    *
    * CONTROLS TO GET AT
    * [x] DropdownListControl
-   * NumControl
-   * PlotButtonControl
-   * DemoOutputControl (prob not)
-   * SensorSelectControl
-   * SensorValueControl
+   * [ ] NumControl
+   * [ ] PlotButtonControl
+   * [ ] DemoOutputControl (prob not)
+   * [ ] SensorSelectControl
+   * [ ] SensorValueControl
    */
 
 export function dataflowLogEvent( operation: string, payload: DataflowLogPayload, tileId: string ){
@@ -56,15 +56,14 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
     const ctrl = payload as Control;
     const node = payload.parent as Node;
 
-    console.log("GET INFO FROM CTRL: ", ctrl)
     if (ctrl && node){
       const change: DataflowProgramChange = {
         targetType: 'nodedropdown',
         nodeTypes: [node.name],
         nodeIds: [node.id],
         selectItem: ctrl.key,
-        selectionMade: (ctrl as any).props.value,
-        selectionUnits: (ctrl as any).props.currentUnits || ""
+        fieldValue: (ctrl as any).props.value,
+        fieldUnits: (ctrl as any).props.currentUnits || ""
       };
       Logger.logToolChange(logEventName, operation, change, tileId);
     }

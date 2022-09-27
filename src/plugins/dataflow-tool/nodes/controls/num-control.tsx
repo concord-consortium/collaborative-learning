@@ -46,7 +46,7 @@ export class NumControl extends Rete.Control {
       this.emitter.trigger("process");
 
       const n = this.getNode();
-      dataflowLogEvent("numberinputdropdownselection", this as Control, n.meta.inTileWithId as string);
+      dataflowLogEvent("unitdropdownselection", this as Control, n.meta.inTileWithId as string);
     };
     this.component = (compProps: { readonly: any,
                                    value: any;
@@ -60,7 +60,7 @@ export class NumControl extends Rete.Control {
       const inputRef = useRef<HTMLInputElement>(null);
       useStopEventPropagation(inputRef, "pointerdown");
       return (
-        <div style={{ padding: "20px;", width: "200px", background: "orange"}} className="number-container" title={compProps.tooltip}>
+        <div className="number-container" title={compProps.tooltip}>
           { label
             ? <label className="number-label">{compProps.label}</label>
             : null
@@ -107,13 +107,13 @@ export class NumControl extends Rete.Control {
       inputValue: initial / periodUnitsInSeconds,
       onChange: (v: any) => {
         this.setInputValue(v);
-        const n = this.getNode();
-        dataflowLogEvent("numberinputmanualentry", this as Control, n.meta.inTileWithId as string);
       },
       onBlur: (v: any) => {
         if (isFinite(v)) {
           this.setValue(Number(v));
           this.emitter.trigger("process");
+          const n = this.getNode();
+        dataflowLogEvent("numberinputmanualentry", this as Control, n.meta.inTileWithId as string);
         } else {
           this.restoreValue();
         }

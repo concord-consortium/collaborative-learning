@@ -328,7 +328,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.view.resize();
       this.programEditor.trigger("process");
 
-      // Program changes are logged from here, except nodecreated, which is above
+      // Program changes are logged from here, except nodecreated, above
       this.programEditor.on("noderemoved", node => {
         dataflowLogEvent("noderemoved", node, this.props.tileId);
       });
