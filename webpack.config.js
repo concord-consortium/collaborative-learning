@@ -26,6 +26,9 @@ module.exports = (env, argv) => {
       chunkFilename: '[name].[contenthash:8].js'
     },
     performance: { hints: false },
+    stats: {
+      loggingDebug: ["sass-loader"],
+    },
     externals: {
       // ignore optional dependency of JSXGraph
       'canvas': 'canvas'
@@ -176,8 +179,8 @@ module.exports = (env, argv) => {
         // in 2 or more chunks
         minChunks: 2,
         filename: (pathData) => {
-          // console.log("vendor filename", pathData.chunk.id, 
-          //   [...pathData.chunk._groups].map(group => group.options?.name), 
+          // console.log("vendor filename", pathData.chunk.id,
+          //   [...pathData.chunk._groups].map(group => group.options?.name),
           //   [...pathData.chunk._groups].map(group => group.chunks));
           const groupsNames = [...pathData.chunk._groups].map(group => group.options?.name);
           return `common-${groupsNames.join('-')}.[chunkhash:8].js`;
