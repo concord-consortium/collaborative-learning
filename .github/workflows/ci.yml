@@ -3,33 +3,8 @@ name: Continuous Integration
 on: push
 
 jobs:
-  build:
-    name: Build using cypress action and upload the result
-    runs-on: ubuntu-latest
-    container: cypress/browsers:node16.14.2-slim-chrome103-ff102
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Build
-        uses: cypress-io/github-action@v4
-        with:
-          runTests: false
-          build: npm run build
-        env:
-          # Turn on code coverage instrumentation in this build
-          # so it can be used by the cypress tests.
-          # This uses a webpack coverage-istanbul-loader.
-          # Try turning off code coverage to see how it effects
-          # the speed.
-          # CODE_COVERAGE: true
-      - name: Save build folder
-        uses: actions/upload-artifact@v3
-        with:
-          name: build
-          if-no-files-found: error
-          path: dist
-  jest:
-    name: Run Jest Tests
+  build_test:
+    name: Build and Run Jest Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -38,6 +13,8 @@ jobs:
           node-version: '16'
       - name: Install Dependencies
         run: npm ci
+      - name: Build
+        run: npm run build
       - name: Run Tests
         run: npm run test:coverage -- --runInBand
       - name: Upload coverage to Codecov
@@ -47,7 +24,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
   cypress:
     runs-on: ubuntu-latest
-    needs: build
     container: cypress/browsers:node16.14.2-slim-chrome103-ff102
     strategy:
       # when one test fails, DO NOT cancel the other
@@ -61,14 +37,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Download the build folder
-        uses: actions/download-artifact@v3
-        with:
-          name: build
-          path: dist
       - uses: cypress-io/github-action@v4
         with:
-          start: npx serve -l 8080 dist
+          start: npm start
           wait-on: 'http://localhost:8080'
           # only record the results to dashboard.cypress.io if CYPRESS_RECORD_KEY is set
           record: ${{ !!secrets.CYPRESS_RECORD_KEY }}
@@ -82,7 +53,12 @@ jobs:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           # pass GitHub token to allow accurately detecting a build vs a re-run build
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # turn on the code coverage tasks in cypress itself, these are disabled
+          # turn on code coverage when running npm start
+          # so far we've been using a webpack coverage-istanbul-loader for this
+          # but there has been work on using the code coverage support in the browser directly, 
+          # which should be much faster
+          CODE_COVERAGE: true
+          # Also turn on the code coverage tasks in cypress itself, these are disabled
           # by default.
           CYPRESS_coverage: true
       - name: Upload coverage to Codecov
@@ -93,7 +69,7 @@ jobs:
   s3-deploy:
     name: S3 Deploy
     needs:
-      - jest
+      - build_test
       - cypress
     runs-on: ubuntu-18.04
     steps:
