@@ -138,10 +138,10 @@ export interface SimpleToolLogEvent {
 }
 
 export interface DataflowProgramChange extends Record<string,any>{
-  nodeTypes: string[],
-  nodeIds: number[],
   changeName: string,
   targetType: string // | Node | Connection | Control ?
+  nodeTypes?: string[],
+  nodeIds?: number[],
 }
 
 type LoggableToolChangeEvent =  Optional<JXGChange, "operation"> |

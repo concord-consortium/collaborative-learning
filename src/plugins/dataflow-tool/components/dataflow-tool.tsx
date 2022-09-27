@@ -11,8 +11,10 @@ import { DataflowContentModelType } from "../model/dataflow-content";
 import { measureText } from "../../../components/tools/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { ToolTitleArea } from "../../../components/tools/tool-title-area";
+import { dataflowLogEvent } from "../dataflow-logger";
 
 import "./dataflow-tool.scss";
+
 
 interface IProps extends IToolTileProps{
   model: ToolTileModelType;
@@ -88,8 +90,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   }
 
   private handleTitleChange = (title?: string) => {
-    title && this.getContent().setTitle(title);
-    // TODO LOG THIS
+    console.log("title change: ", title )
+    if (title){
+      console.log("OK?  ")
+      this.getContent().setTitle(title);
+      dataflowLogEvent("changeprogramtitle", this.getTitle(), this.props.model.id);
+    }
   };
 
   private renderTitle() {

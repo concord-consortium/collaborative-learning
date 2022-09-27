@@ -3,7 +3,7 @@ import { Connection, Control, Node } from "rete";
 
 interface DataFlowLogEventParameters {
   operation: string,
-  reteObj: Node | Connection | Control,
+  payload: Node | Connection | Control | string,
   tileId: string
 }
   /**
@@ -15,7 +15,7 @@ interface DataFlowLogEventParameters {
    * [ ] value change in control
    * [x] minigraph toggle
    * [ ] minigraph toggle on demo and live output blocks
-   * [ ] title title change
+   * [x] title title change
    *
    * CONTROLS TO GET AT
    * DropdownListControl
@@ -26,11 +26,11 @@ interface DataFlowLogEventParameters {
    *
    */
 
-export function dataflowLogEvent( operation: string, reteObj: Node | Connection | Control, tileId: string ){
+export function dataflowLogEvent( operation: string, payload: Node | Connection | Control | string, tileId: string ){
   const logEventName = LogEventName.DATAFLOW_TOOL_CHANGE;
 
-  if (reteObj instanceof Node){
-    const n = reteObj;
+  if (payload instanceof Node){
+    const n = payload;
     const change: DataflowProgramChange = {
       nodeTypes: [n.name],
       nodeIds: [n.id],
@@ -40,9 +40,9 @@ export function dataflowLogEvent( operation: string, reteObj: Node | Connection 
     Logger.logToolChange(logEventName, operation, change, tileId);
   }
 
-  if (reteObj instanceof Connection){
-    const outputNode = reteObj.output.node as Node
-    const inputNode = reteObj.input.node as Node;
+  if (payload instanceof Connection){
+    const outputNode = payload.output.node as Node
+    const inputNode = payload.input.node as Node;
 
     const change: DataflowProgramChange = {
       nodeTypes: [outputNode.name, inputNode.name],
@@ -57,10 +57,18 @@ export function dataflowLogEvent( operation: string, reteObj: Node | Connection 
     Logger.logToolChange(logEventName, operation, change, tileId);
   }
 
-  if (reteObj instanceof Control){
-    const ctrl = reteObj;
-    console.log("ABOUT reteObj is Control: ", ctrl)
+  if (payload instanceof Control){
+    const ctrl = payload;
+    console.log("ABOUT payload is Control: ", ctrl)
   }
 
+  // when it is the title being changed we just pass a string, not a rete object
+  if (typeof(payload) === "string"){
+    const change: DataflowProgramChange = {
+      changeName: operation,
+      targetType: 'program',
+    };
+    Logger.logToolChange(logEventName, operation, change, tileId);
+  }
 }
 
