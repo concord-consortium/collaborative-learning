@@ -53,9 +53,9 @@ $controls-hover-background: #c0dfe7;
       }
 
       .link-geometry-button {
-        position: absolute;
-        right: 3.5px;
-        top: 3px;
+        margin-top: -23px;
+        margin-left: calc(100% - #{$index-column-width} + #{$table-padding});
+        @debug "index-column-width: #{$index-column-width}";
         width: 26px;
         height: 26px;
         border-radius: 5px;
