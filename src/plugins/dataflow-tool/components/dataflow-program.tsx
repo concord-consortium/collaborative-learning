@@ -291,6 +291,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.programEditor.on("selectnode", ( { node } ) => {
         this.moveNodeToFront(node, false);
+        console.log("what are this nodes control types, find em: ", node)
       });
 
       this.programEditor.on("nodedraged", node => {
@@ -329,6 +330,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.on("nodecreated", node => {
         node.meta.createdInTileWithID = this.props.tileId;
         dataflowLogEvent("nodecreated", node, this.props.tileId);
+        console.log("NODE CREATED: ", node)
       });
 
       this.programEditor.on("noderemoved", node => {

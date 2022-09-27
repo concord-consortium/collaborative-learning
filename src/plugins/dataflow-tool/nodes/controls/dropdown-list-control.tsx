@@ -131,11 +131,13 @@ export class DropdownListControl extends Rete.Control {
       readonly,
       value: initial,
       onItemClick: (v: any) => {
-        this.emitter.trigger("selectnode", { node: this.getNode() });
+        console.log("onItemClick: this TODO LOG THIS: ", this, v)
+        this.emitter.trigger("selectnode", { node: this.getNode()});
         this.props.showList = !this.props.showList;
         (this as any).update();
       },
       onListClick: (v: any) => () => {
+        console.log("onListClick: this, v TODO LOG THIS: ", this, v) // this is pattern to use on other five types of controls
         this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showList = !this.props.showList;
         this.setValue(v);

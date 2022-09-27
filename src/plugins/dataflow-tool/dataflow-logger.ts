@@ -16,6 +16,14 @@ interface DataFlowLogEventParameters {
    * [x] minigraph toggle
    * [ ] minigraph toggle on demo and live output blocks
    * [ ] title title change
+   *
+   * CONTROLS TO GET AT
+   * DropdownListControl
+   * NumControl
+   * PlotButtonControl
+   * ValueControl
+   * DemoOutputControl
+   *
    */
 
 export function dataflowLogEvent( operation: string, reteObj: Node | Connection | Control, tileId: string ){
