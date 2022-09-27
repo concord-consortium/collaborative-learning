@@ -40,7 +40,7 @@ export class PlotButtonControl extends Rete.Control {
 
     this.props = {
       showgraph: initial,
-      onGraphButtonClick: () => { // LOG TO DO - these are "late arriving" props, so redefine above with all data needed?
+      onGraphButtonClick: () => {
         this.logGraphToggle();
         this.setGraph(!this.props.showgraph);
       }
@@ -63,5 +63,4 @@ export class PlotButtonControl extends Rete.Control {
     const tileId = this.node.meta.inTileWithId as string;
     dataflowLogEvent(`toggle minigraph ${toggleStr}`, this.node, tileId);
   }
-
 }

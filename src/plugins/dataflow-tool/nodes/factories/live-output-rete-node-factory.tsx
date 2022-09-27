@@ -4,6 +4,7 @@ import { DataflowReteNodeFactory } from "./dataflow-rete-node-factory";
 import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { NodeLiveOutputTypes } from "../../model/utilities/node";
+import { dataflowLogEvent } from "../../dataflow-logger";
 
 export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
   constructor(numSocket: Socket) {
@@ -83,6 +84,9 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
           () => {
             node.data.plot = !node.data.plot;
             this.editor?.trigger("process");
+            const toggleStr = node.data.plot ? "on" : "off";
+            const tileId = node.meta.inTileWithId as string;
+            dataflowLogEvent(`toggle minigraph ${toggleStr}`, node, tileId);
           },
           displayLabel,
           0, // Initial value
