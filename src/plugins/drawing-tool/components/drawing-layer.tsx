@@ -164,10 +164,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     return drawingContent.currentStamp;
   }
 
-  public handleDelete() {
-    this.getContent().deleteObjects(this.getContent().selectedIds);
-  }
-
   public handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!this.props.readOnly && this.currentTool) {
       this.currentTool.handleMouseDown(e);

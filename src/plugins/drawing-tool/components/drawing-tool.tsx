@@ -36,11 +36,13 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         return getTitle();
       }
     });
-    hotKeys.current.register({
-      "cmd-v": handlePaste, //allows user to paste image with cmd+v
-      "delete": handleDelete, // I'm not sure if this will handle "Del" IE 9 and Edge
-      "backspace": handleDelete,
-    });
+    if (!readOnly) {
+      hotKeys.current.register({
+        "cmd-v": handlePaste, //allows user to paste image with cmd+v
+        "delete": handleDelete, // I'm not sure if this will handle "Del" IE 9 and Edge
+        "backspace": handleDelete,
+      });  
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePaste = () => {
