@@ -1,32 +1,30 @@
 import { LogEventName, Logger, DataflowProgramChange } from "../../lib/logger";
 import { Connection, Control, Node } from "rete";
 
-interface DataFlowLogEventParameters {
-  operation: string,
-  payload: Node | Connection | Control | string,
-  tileId: string
-}
+type DataflowLogPayload =  Node | Connection | Control | string;
+
   /**
    * Logging checklist
    *
    * [x] tile creation and deletion
    * [x] block create, delete
    * [x] block connection/disconnection
-   * [ ] value change in control
    * [x] minigraph toggle
    * [ ] minigraph toggle on demo and live output blocks
    * [x] title title change
+   * [ ] clicks and value changes in controls below
    *
    * CONTROLS TO GET AT
-   * DropdownListControl
+   * [x] DropdownListControl
    * NumControl
    * PlotButtonControl
    * ValueControl
    * DemoOutputControl
-   *
+   * SensorSelectControl
+   * SensorValueControl
    */
 
-export function dataflowLogEvent( operation: string, payload: Node | Connection | Control | string, tileId: string ){
+export function dataflowLogEvent( operation: string, payload: DataflowLogPayload, tileId: string ){
   const logEventName = LogEventName.DATAFLOW_TOOL_CHANGE;
 
   if (payload instanceof Node){
@@ -56,11 +54,22 @@ export function dataflowLogEvent( operation: string, payload: Node | Connection 
   }
 
   if (payload instanceof Control){
-    const ctrl = payload;
-    console.log("ABOUT payload is Control: ", ctrl)
+    const ctrl = payload as Control;
+    const node = payload.parent as Node;
+
+    if (ctrl && node){
+      const change: DataflowProgramChange = {
+        targetType: 'nodedropdown',
+        nodeTypes: [node.name],
+        nodeIds: [node.id],
+        selectItem: ctrl.key,
+        selectionMade: (ctrl as any).props.value
+      };
+      Logger.logToolChange(logEventName, operation, change, tileId);
+    }
   }
 
-  // when it is the title being changed we just pass a string, not a rete object
+  // title is not a rete object
   if (typeof(payload) === "string"){
     const change: DataflowProgramChange = {
       targetType: 'program',

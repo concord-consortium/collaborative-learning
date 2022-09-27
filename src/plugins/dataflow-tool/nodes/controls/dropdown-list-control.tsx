@@ -1,9 +1,11 @@
 // FIXME: ESLint is unhappy with these control components
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { FunctionComponent, SVGProps, useRef } from "react";
-import Rete, { NodeEditor, Node } from "rete";
+import Rete, { NodeEditor, Node, Control } from "rete";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
+import { dataflowLogEvent } from "../../dataflow-logger";
+
 import "./dropdown-list-control.scss";
 
 export interface ListOption {
@@ -131,17 +133,17 @@ export class DropdownListControl extends Rete.Control {
       readonly,
       value: initial,
       onItemClick: (v: any) => {
-        console.log("onItemClick: this TODO LOG THIS: ", this, v)
         this.emitter.trigger("selectnode", { node: this.getNode()});
         this.props.showList = !this.props.showList;
         (this as any).update();
+        dataflowLogEvent("nodedropdownclick", this as Control, this.getNode().meta.createdInTileWithID as string)
       },
       onListClick: (v: any) => () => {
-        console.log("onListClick: this, v TODO LOG THIS: ", this, v) // this is pattern to use on other five types of controls
         this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showList = !this.props.showList;
         this.setValue(v);
         this.emitter.trigger("process");
+        dataflowLogEvent("nodedropdownselection", this as Control, this.getNode().meta.createdInTileWithID as string)
       },
       showList: false,
       optionArray,
