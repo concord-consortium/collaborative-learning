@@ -138,7 +138,6 @@ export interface SimpleToolLogEvent {
 }
 
 export interface DataflowProgramChange extends Record<string,any>{
-  changeName: string,
   targetType: string // | Node | Connection | Control ?
   nodeTypes?: string[],
   nodeIds?: number[],

@@ -90,9 +90,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   }
 
   private handleTitleChange = (title?: string) => {
-    console.log("title change: ", title )
     if (title){
-      console.log("OK?  ")
       this.getContent().setTitle(title);
       dataflowLogEvent("changeprogramtitle", this.getTitle(), this.props.model.id);
     }

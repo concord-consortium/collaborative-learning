@@ -32,10 +32,9 @@ export function dataflowLogEvent( operation: string, payload: Node | Connection 
   if (payload instanceof Node){
     const n = payload;
     const change: DataflowProgramChange = {
+      targetType: 'node',
       nodeTypes: [n.name],
-      nodeIds: [n.id],
-      changeName: operation,
-      targetType: 'node'
+      nodeIds: [n.id]
     };
     Logger.logToolChange(logEventName, operation, change, tileId);
   }
@@ -45,14 +44,13 @@ export function dataflowLogEvent( operation: string, payload: Node | Connection 
     const inputNode = payload.input.node as Node;
 
     const change: DataflowProgramChange = {
+      targetType: 'connection',
       nodeTypes: [outputNode.name, inputNode.name],
       nodeIds: [outputNode.id, inputNode.id],
-      changeName: operation,
-      targetType: 'connection',
       connectionOutputNodeId: outputNode.id,
       connectionOutputNodeType: outputNode.name,
-      connectionInputNodeId: outputNode.id,
-      connectionInputNodeType: outputNode.name
+      connectionInputNodeId: inputNode.id,
+      connectionInputNodeType: inputNode.name
     };
     Logger.logToolChange(logEventName, operation, change, tileId);
   }
@@ -65,8 +63,8 @@ export function dataflowLogEvent( operation: string, payload: Node | Connection 
   // when it is the title being changed we just pass a string, not a rete object
   if (typeof(payload) === "string"){
     const change: DataflowProgramChange = {
-      changeName: operation,
       targetType: 'program',
+      programTitle: payload
     };
     Logger.logToolChange(logEventName, operation, change, tileId);
   }

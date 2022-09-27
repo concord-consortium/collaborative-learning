@@ -291,7 +291,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.programEditor.on("selectnode", ( { node } ) => {
         this.moveNodeToFront(node, false);
-        console.log("what are this nodes control types, find em: ", node)
       });
 
       this.programEditor.on("nodedraged", node => {
