@@ -5,22 +5,15 @@ type DataflowLogPayload =  Node | Connection | Control | string;
 
   /**
    * Logging checklist
-   *
    * [x] tile creation and deletion
    * [x] block create, delete
    * [x] block connection/disconnection
-   * [x] minigraph toggle
    * [x] minigraph toggle on demo and live output blocks
    * [x] title title change
-   * [ ] clicks and value changes in controls below
-   *
-   * CONTROLS TO GET AT
    * [x] DropdownListControl
-   * [ ] NumControl
-   * [ ] PlotButtonControl
-   * [ ] DemoOutputControl (prob not)
-   * [ ] SensorSelectControl
-   * [ ] SensorValueControl
+   * [x] NumControl
+   * [x] PlotButtonControl
+   * [ ] SensorSelectControl (sensor type and stream are in same control)
    */
 
 export function dataflowLogEvent( operation: string, payload: DataflowLogPayload, tileId: string ){
@@ -62,8 +55,8 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
         nodeTypes: [node.name],
         nodeIds: [node.id],
         selectItem: ctrl.key,
-        fieldValue: (ctrl as any).props.value,
-        fieldUnits: (ctrl as any).props.currentUnits || ""
+        value: (ctrl as any).props.value,
+        units: (ctrl as any).props.currentUnits || ""
       };
       Logger.logToolChange(logEventName, operation, change, tileId);
     }
