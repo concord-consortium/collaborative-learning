@@ -36,15 +36,23 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         return getTitle();
       }
     });
-    hotKeys.current.register({
-      "cmd-v": handlePaste, //allows user to paste image with cmd+v
-    });
+    if (!readOnly) {
+      hotKeys.current.register({
+        "cmd-v": handlePaste, //allows user to paste image with cmd+v
+        "delete": handleDelete, // I'm not sure if this will handle "Del" IE 9 and Edge
+        "backspace": handleDelete,
+      });  
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handlePaste = () => {
     pasteClipboardImage(({ image }) => {
       setImageUrlToAdd(image.contentUrl || '');
     });
+  };
+
+  const handleDelete = () => {
+    contentRef.current.deleteObjects(contentRef.current.selectedIds);
   };
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });

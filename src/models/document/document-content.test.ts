@@ -90,6 +90,7 @@ describe("DocumentContentModel", () => {
     expect(documentContent.indexOfLastVisibleRow).toBe(-1);
     expect(documentContent.defaultInsertRow).toBe(0);
     expect(parsedContentExport()).toEqual({ tiles: [] });
+    expect(documentContent.getTilesInDocumentOrder()).toEqual([]);
   });
 
   it("allows the tool tiles to be added", () => {
@@ -998,6 +999,12 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
         nowWhatDoYouKnowRow1: [ "nowWhatDoYouKnowPlaceholder" ]
     }
   */
+
+  it("getTilesInDocumentOrder handles rows with multiple tiles", () => {
+    expect(documentContent.getTilesInDocumentOrder()).toEqual(
+      ["textTool1", "drawingTool1", "tableTool", "imageTool","graphTool", "textTool2",
+      "drawingTool2", "whatIfPlaceholder", "nowWhatDoYouKnowPlaceholder"]);
+  });
 
   it("can query content", () => {
     expect(documentContent.isEmpty).toBe(false);

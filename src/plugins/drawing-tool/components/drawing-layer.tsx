@@ -79,8 +79,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     this.setSvgRef = (element) => {
       this.svgRef = element;
     };
-
-    this.addListeners();
   }
 
   public componentDidMount() {
@@ -137,20 +135,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     this.setCurrentTool(tool);
   }
 
-  public addListeners() {
-    window.addEventListener("keyup", (e) => {
-      if (!this.props.readOnly) {
-        switch (e.key) {
-          case "Backspace":
-          case "Delete":
-          case "Del":             // IE 9 and maybe Edge
-            this.handleDelete();
-            break;
-        }
-      }
-    });
-  }
-
   public addNewDrawingObject(drawingObject: DrawingObjectSnapshotForAdd) {
     this.getContent().addObject(drawingObject);
   }
@@ -178,10 +162,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   public getCurrentStamp() {
     const drawingContent = this.props.model.content as DrawingContentModelType;
     return drawingContent.currentStamp;
-  }
-
-  public handleDelete() {
-    this.getContent().deleteObjects(this.getContent().selectedIds);
   }
 
   public handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {

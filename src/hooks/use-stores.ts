@@ -7,6 +7,8 @@ import {
 import { ProblemModelType } from "../models/curriculum/problem";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { DocumentsModelType } from "../models/stores/documents";
+import { DocumentContentModelType} from "../models/document/document-content";
+
 import { GroupsModelType } from "../models/stores/groups";
 import { SelectionStoreModelType } from "../models/stores/selection";
 import { IStores } from "../models/stores/stores";
@@ -70,6 +72,22 @@ export function useDocumentOrCurriculumMetadata(key?: string): IDocumentMetadata
   }, [documentMetadata, key]);
 }
 
+export function useCurriculumOrDocumentContent(key?: string):  DocumentContentModelType | undefined {
+  const curriculumContentFromPath = useCurriculumContentFromPath(key); 
+  const documentContentFromKey = useDocumentFromStore(key)?.content;
+  return isSectionPath(key) ? curriculumContentFromPath : documentContentFromKey;
+}
+
+export function useCurriculumContentFromPath(key?: string): DocumentContentModelType| undefined {
+  const { section, facet } = getCurriculumMetadata(key) || {};
+  const { problem, teacherGuide } = useStores();
+  if (facet === "guide") {
+    return teacherGuide && section ? teacherGuide.getSectionById(section)?.content : undefined;
+  }
+  return problem && section
+          ? problem.getSectionById(section)?.content 
+          : undefined;
+}
 export function useTypeOfTileInDocumentOrCurriculum(key?: string, tileId?: string) {
   const { documents, networkDocuments } = useStores();
   if (!key || !tileId) return;
