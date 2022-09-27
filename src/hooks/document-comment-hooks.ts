@@ -243,8 +243,7 @@ const historyEntryConverter = {
       "We can't convert a raw HistoryEntry to firestore because we need the index from its parent collection");
   },
   fromFirestore: (doc: firebase.firestore.QueryDocumentSnapshot): HistoryEntrySnapshot => {
-    const { entry, index } = doc.data();
-    console.log("Loading Entry", entry, index);
+    const { entry } = doc.data();
     return JSON.parse(entry);
   }
 };

@@ -46,8 +46,6 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
 
   const actuallyShowPlaybackControls = showPlaybackControls && (historyLength !== undefined) && (historyLength > 0);
 
-  console.log("Rendering Playback", showPlaybackControls, historyLength, actuallyShowPlaybackControls);
-
   // const disablePlayback = history.length < 1;
 
   // FIXME-HISTORY: HACK for now always enable playback so we can use the

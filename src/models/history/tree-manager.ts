@@ -7,7 +7,8 @@ import { IUndoManager, UndoStore } from "./undo-store";
 import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot, HistoryOperation } from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { getFirebaseFunction } from "../../hooks/use-firebase-function";
-import { ICommentableDocumentParams, IDocumentMetadata, IUserContext, networkDocumentKey } from "../../../functions/src/shared";
+import { ICommentableDocumentParams, IDocumentMetadata, IUserContext, 
+  networkDocumentKey } from "../../../functions/src/shared";
 import { Firestore } from "../../lib/firestore";
 import { DocumentQueryType } from "../../hooks/document-comment-hooks";
 
@@ -114,7 +115,8 @@ export const TreeManager = types
     // TODO: send this history entry to firestore
 
     // Create the document in firestore if necessary
-    const validateCommentableDocument = getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
+    const validateCommentableDocument = 
+      getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
 
     // We'll need provide this context to the tree manager either through a MST env or volatile prop
 
@@ -124,8 +126,6 @@ export const TreeManager = types
         {userContext, documentMetadata, firestore});
       return;
     }
-
-    console.log("creating or accessing document for key", documentMetadata.key);
 
     // create a document if necessary
     // TODO: need to figure how to access firestore
@@ -143,10 +143,8 @@ export const TreeManager = types
       documentRef.get()
         .then(docSnapshot => {
           if (docSnapshot.exists) {
-            console.log("found existing document for key", documentMetadata.key);
             resolve(docSnapshot.data() as DocumentQueryType);          
           } else {
-            console.log("creating document for key", documentMetadata.key);
             resolve(
               validateCommentableDocument({context: userContext, document: documentMetadata})
               .then(result => result.data)
@@ -174,7 +172,7 @@ export const TreeManager = types
     .then(document => {
       // add a new document for this history entry
       const historyEntryPath = firestore.getFullPath(`${documentPath}/historyEntries`);
-      console.log("trying to make a docRef for the new history entry", historyEntryPath);
+
       // FIXME-HISTORY: this should use the id of the history entry, that way a specific entry can
       // be found again quickly. We plan to support the idea of providing links to teachers
       // to open specific spots in the history. It seems better to use these ids than indexes,
@@ -182,7 +180,6 @@ export const TreeManager = types
       // https://www.pivotaltracker.com/story/show/183291353
       const docRef = firestore.newDocumentRef(historyEntryPath);
       const snapshot = getSnapshot(entry);
-      console.log("trying to write the history entry to the doc ref", documentPath, docRef.id, snapshot);
       docRef.set({
         // FIXME-HISTORY: this use of a server timestamp isn't good. This is
         // because there is a delay here. When the creation of the parent
@@ -206,7 +203,6 @@ export const TreeManager = types
   },
 
   setPropsForFirestoreSaving({userContext, documentMetadata, firestore}: IFiresoreSavingProps) {
-    console.log("setPropsForFirestoreSaving", {userContext: JSON.parse(JSON.stringify(userContext)), documentMetadata});
     self.userContext = userContext;
     self.documentMetadata = documentMetadata;
     self.firestore = firestore;  
