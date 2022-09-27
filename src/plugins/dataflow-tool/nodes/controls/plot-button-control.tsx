@@ -41,7 +41,7 @@ export class PlotButtonControl extends Rete.Control {
     this.props = {
       showgraph: initial,
       onGraphButtonClick: () => {
-        this.logGraphToggle();
+        //this.logGraphToggle();
         this.setGraph(!this.props.showgraph);
       }
     };
@@ -57,11 +57,5 @@ export class PlotButtonControl extends Rete.Control {
     this.node.update();
     this.emitter.trigger("process");
   };
-
-  public logGraphToggle = () => {
-    const toggleStr = this.props.showgraph ? "off" : "on";
-    const tileId = this.node.meta.createdInTileWithID as string;
-    dataflowLogEvent(`toggle minigraph ${toggleStr}`, this.node, tileId);
-  }
 
 }
