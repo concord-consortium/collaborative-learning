@@ -194,53 +194,33 @@ sequenceDiagram
 ```
 
 ## Serialization
-We want to store the history in firestore in documents. There is already a pattern for storing firestore documents associated with a CLUE document. This is used by the comment system.
+We store the history of changes to a document in Firestore. Each history entry is stored in a separate Firestore document. These history entry documents are stored in the same way that comments are stored. There is a parent Firestore document that has meta data about the actual CLUE document and then under this parent Firestore document is a collection for the comments and a collection for the history entries.
 
-Other places that are interacting with the CLUE database are using react-query to manage the requests, I'm not sure if we need it in this case.
+The history entries are sent up by the TreeManager which is an MST model. In other places we interact with Firestore through react components so we can use hooks. Since we are in the model we just work directly with Firestore.
 
-We could send the data to firestore when the event is complete and stored in the history. This could be done as a hook on the history MST model. Or it could just be hardcoded into the history model. Or it could be done done as a middleware of some kind.
+The history events are downloaded only when needed for replaying the history. This is done by a mostly invisible `<LoadDocumentHistory>` component. It currently puts up an ugly message on the screen to let the user know something is happening. This component uses hooks to load in the history and then update the document with this history. It is kind of strange for a React component to be managing the MST model. But this temporary history MST model is being created by the component only as it is needed, it isn't something shared by multiple components.
 
-This sending of data from the model is different than in other cases where the data is sent via components which works nicely with react-query.
+The history loading currently doesn't do any batching/paging during the load, so if the history gets large enough this might cause problems. There is a FIXME in the code for this. The component is currently monitoring Firestore collection, so if new history events are added they will be shown immediately without having to close and open the history UI. It isn't totally clear how these incremental history entries are handled. I think the `LoadDocumentHistory` component is re-rendered when new events show up and then the history in the TreeManager gets completely replaced with the updated history. In other words the entries aren't really loaded incrementally. We'll probably need to improve this to handle documents with large histories.
 
-To retrieve the data we'd want to only load it when necessary. Currently this is when the time travel UI is opened on a document. We could pre-fetch it to speed things up. But initially we could just load it when that is opened.
-
-Loading the data would require a query for all of the documents in firestore that matched the specific CLUE document being viewed. This should be similar to the query requesting the comments for this document. In this case maybe react-query would make sense because maybe that is how comments are handled? However since this is firestore react query seems unnecessary firestore should take care of retries and syncing local and remote state.
-
-When we get the data we'd need to populate the history MST model with this data. So if the view is rendering the history UI it needs to know when this data is being fetched and when it is complete so it can update the view correctly. We could put that state in the history MST model as volatile. Or we could use react-query for it.  If we can follow the comment pattern here that is probably best. But it is strange for the component to be mananging the popluation of the history MST model. But this history MST model is essentially managed by the component anyway because it creates the temporary document with the history state.
-
-Seems like the best approach for loading is to add a hidden react component that uses `useCollectionOrderedRealTimeQuery` to load the history documents. And then as they are loaded they get put into the history MST model. I'm not sure about the ordering of these history documents but it seems like that could work. It would still be better to use an ordered map of these docs in MST so new ones could be batch "applied" without recreating the whole array. However I'm not sure how the ordering of Maps works in MST.
-
-From what I can tell the MST maps are basically ES6 Maps which remember their insertion order. So we can order them that way. However we can't just add documents coming out of order from Friestore to this map since they will be out of order. So the ordering of the map will have to managed carefully.
-
-Seems like a good path to use is.
-```
-`documents/${docKey}/historyEntries`
-```
-useCollectionOrderedRealTimeQuery takes care of making that path relative to the right scope.
-
-To post the data we need to have a document to hang it off of. It looks like I can use `useCommentableDocument` but it might not work for students since I think it was only used for teachers.  This calls a cloud function to create the document in firestore. But the problem is that all of these things are written as hooks, so I can't call them from the MST model when the histry event is saved.
-
-After the document is created, we should be able to use firestore commands to upload the history entries without having to add another cloud function to handle this.
-
-The authentication rules will need to be updated.
+To create the parent document which contains the history entires in Firestore the TreeManager is using out Firebase function `validateCommentableDocument`. This can create either a document associated with a networked teacher or a generic user document. When we tackle handling permissions this document will be required to grant students and teachers access to the history entries of this document.
 
 ### Ordering of history entries
 
-Currently we are using a Firestore server timestamp. This isn't great because the history entries do not always arrive at firestore in the same order that they are created. 
+Currently we are using a Firestore server timestamp. This isn't great because the history entries do not always arrive at firestore in the same order that they are created. In particular the first history entry is waiting for the `validateCommentableDocument` to return before being added. The next history entries just check for the existence of the document and if they find it, they are added right away. This can result in the history entries being added out of order. Below are some options for addressing this.
 
 #### Ordering entries based on linked list approach
 
-Store the previous entries id in the current entry (`previousEntryId`). The first entry will have an undefined previous entry.
+Store the previous entry's id in the current entry (`previousEntryId`). The first entry will have an undefined previous entry.
 Also store a server timestamp.
-When reading the entries order by the server timestamp.
+The query from firestore can order by the server timestamp so the entries are roughly in the right order.
 
-To build the correct order requires basically two passes through the results.
+To build the correct order efficiently we can do two passes through the results.
 
 ##### Pass 1
 First create a map with a type of `{ [entryId] : { entry, nextEntryId }, ...}`.
 Now go through the results. For each entry result:
 - add it to the entry value of map, if there is a nextEntryId don't change it
-- take the current entries `previousEntryId` look this up in the map and add `nextEntryId` to it with this `previousEntryId` value
+- take the current entry's `previousEntryId` look this up in the map and add `nextEntryId` to it with this `previousEntryId` value
 - if there is no `previousEntryId` save this entry as the first entry
 - if the `previousEntryId` already has a different `nextEntryId` it means the history has been corrupted by two or more users writing to history at the same time. Show a warning.
 
@@ -249,7 +229,7 @@ Create a empty array of the history entries.
 Start at the first entry, add it to the array.
 Lookup its nextEntryId in the map. 
 Add this to the array and keep going until you reach an object in the map with no nextEntryId
-To be safe you can use a counter and don't iterate more than the total size of the results.
+To be safe you can use a counter and don't iterate more than the total size of the results. This would prevent infinite loops if there was corrupt data.
 
 ##### Storing requirements
 On the start of recording each session we need to know the entry id of the last history entry. So to be safe we have to download all the history entries to find the last one. We could cheat and reverse order the events by the server timestamp and then just look at the last X events. This assumes any out of order entries would be close to each other in time so we don't need to look far back in time to figure this out.
@@ -266,7 +246,7 @@ Store the index of the entry. The first entry will have an index of 0.
 To build the correct order we just request the entries from firestore ordered by this index.
 
 ##### Storing requirements
-On the start of recording each session we need to know the entry index of the last history entry. This can be found by doing a query with a limit of one with the sorted by index in reverse. This would just download the last entry saved.
+On the start of recording each session we need to know the entry index of the last history entry. This can be found by doing a query with a limit of one sorted by the index in reverse. This would just download the last entry saved.
 
 All entries being written would have to wait for this lookup to occur before they will know their index.
 
@@ -294,27 +274,16 @@ Order of entries is in firestore
 
 #### Other Notes
 
-Create a session start date when the user launches CLUE or first opens the document during this launch. In the history entry store this session start date along with an index of the entry during this session. This way we are only relying on the date for the initial startup and then after that individual entries are ordered just based on local counting. 
+We could use local computer timestamps to avoid the problem out of order events, but these are not accurate and in some schools can be years off.
 
-This would not identify the case of multiple editors, so we probably want to store a previousEntryId as well to protect against that case.
+There might be an approach that does the "Session start id plus index" without using extra documents by putting this start time or id in each of the history entry documents.
 
-Also we'd have to rely on the local computer time for the start date, or use a firestore server timestamp which would require a roundtrip to firestore before we could start recording events.
-
-Add a numberOfSessions to the document. save the current value of this when the document is opened and then increment it. Now use the saved value along with a local timestamp or incrementing index to order the events. This way the parent document doesn't have to be updated on each event. It is just updated when the session starts.
+We could also put some session info the parent document itself, like a `numberOfSessions` to the document. So then a session index could be added to each history entry document. Then the history entry events could be ordered by the combination of this session index and a history entry index. 
 
 An alternative to querying the entries for the last index would be to store the last history entry in the parent document, but this means that document have to be updated with each new entry. And there is a limit of 1 sec per update. If you want to look into that approach more see:
 https://firebase.google.com/docs/firestore/solutions/aggregation
 
 ### Serialization TODO:
-- [x] Figure out why my use of validate is not sending the right userContext. When posting comments the right userContext is sent, but not when sending validate.
-- [x] Consider removing the validate call because it is never actually called. I left a comment in the code and will leave it at that for now.
-- [x] Figure out why the documents written with the post have a different id than what I'm creating directly
-- [x] Look at the rules to see how they are currently validating access to the comments. It is looking at the teachers of the parent document and the requesting teacher has to be in that list. Or the document has to have a network that is one of the teachers networks. This seems redundant to have networks as well as list of teachers on documents. I'm guessing that the network approach is the more modern one.
-- [x] Track down how the comments load. I remember they are not using MST, but I think they are using react-query and probably react state to store the comments from react-query. They call `useDocumentComments` which calls a generic `useCollectionOrderedRealTimeQuery` which can work with any firestore collection.
-- [x] add an order to the history entries that are stored in firestore so we can pull them out in the correct order. The trick here is that they are currently a direct copy of the history entries from MST, so that doesn't need an explict order field. So I guess the code that is storing these docs in firestore needs to be updated to add this field.
-- [x] make a hidden component that loads in the history into the CLUE document that is created when the history UI is opened. I think this hidden component can be added at this history opening location.
-- [ ] save student history entries to firestore, need to make a parent document for these entries, we could start with the same approach we use for teacher documents
-- [ ] add way for teachers to find the student history entries, perhaps this will just work, but we'll need to construct the id of the parent document. Also update the history control in the dashboard to actually work.
 - [ ] See if we can remove this use of cloud functions to do the network document writes, I think the only reason to use them is for permissions, I'd guess we can create rules that would allow them to be written without the functions. We probably are going to have either do this or change the cloud function so it can support students creating parent documents.
 - [ ] fix ordering issue, currently we are using a server timestamp which gets out of order when the first entry is delayed as the document parent is fetched. The right approach I think is to store the last index in the document and then on each session load this index and start from there. This last index will also be useful when dealing with publishing documents.
 - [ ] add access rules so authenticated students can write the parent document and the history entries
@@ -329,8 +298,6 @@ https://firebase.google.com/docs/firestore/solutions/aggregation
 - [ ] refactor history serialization's access to the user info which it uses to know where to write the history. This user info is set statically and not updated. Everywhere else in the code this info is dynamically updated, which makes it possible for the user to be switched (or logged out) without refreshing the page.
 - [ ] How do we handle the caching of this data? Each time we open the time travel slider we are currently copying the document and all of the history events. We could just load all of these history events from the database each time it is opened. I would guess that Firestore does some caching of these queries so it won't be too slow as long as we share the firestore connection object.
 - [ ] Handle published documents. We either need to copy and modify all of the history entries, or we need to change clue so the copies do not change the tile ids. In either case there are more details to fill out here.
-
-
 
 ## General TODO:
 - [ ] UndoStore.redo and UndoStore.undo do not handle async well, they are changing the undo index before all of the patches have been applied to the trees.
