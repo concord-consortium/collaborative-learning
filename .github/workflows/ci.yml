@@ -41,6 +41,7 @@ jobs:
         with:
           start: npm start
           wait-on: 'http://localhost:8080'
+          wait-on-timeout: 180
           # only record the results to dashboard.cypress.io if CYPRESS_RECORD_KEY is set
           record: ${{ !!secrets.CYPRESS_RECORD_KEY }}
           # only do parallel if we have a record key
