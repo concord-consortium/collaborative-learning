@@ -18,8 +18,7 @@ type DataflowLogPayload =  Node | Connection | Control | string;
    * [x] DropdownListControl
    * NumControl
    * PlotButtonControl
-   * ValueControl
-   * DemoOutputControl
+   * DemoOutputControl (prob not)
    * SensorSelectControl
    * SensorValueControl
    */
@@ -57,13 +56,15 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
     const ctrl = payload as Control;
     const node = payload.parent as Node;
 
+    console.log("GET INFO FROM CTRL: ", ctrl)
     if (ctrl && node){
       const change: DataflowProgramChange = {
         targetType: 'nodedropdown',
         nodeTypes: [node.name],
         nodeIds: [node.id],
         selectItem: ctrl.key,
-        selectionMade: (ctrl as any).props.value
+        selectionMade: (ctrl as any).props.value,
+        selectionUnits: (ctrl as any).props.currentUnits || ""
       };
       Logger.logToolChange(logEventName, operation, change, tileId);
     }

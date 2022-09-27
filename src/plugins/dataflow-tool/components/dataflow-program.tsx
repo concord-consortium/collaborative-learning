@@ -287,10 +287,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.on("nodecreated", node => {
         this.processAndSave();
         this.moveNodeToFront(node, true);
+        node.meta.inTileWithId = this.props.tileId;
+        dataflowLogEvent("nodecreated", node, this.props.tileId);
       });
 
       this.programEditor.on("selectnode", ( { node } ) => {
         this.moveNodeToFront(node, false);
+        node.meta.inTileWithId = this.props.tileId;
       });
 
       this.programEditor.on("nodedraged", node => {
@@ -325,13 +328,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.view.resize();
       this.programEditor.trigger("process");
 
-      // Program changes are logged from here
-      this.programEditor.on("nodecreated", node => {
-        node.meta.createdInTileWithID = this.props.tileId;
-        dataflowLogEvent("nodecreated", node, this.props.tileId);
-        console.log("NODE CREATED: ", node)
-      });
-
+      // Program changes are logged from here, except nodecreated, which is above
       this.programEditor.on("noderemoved", node => {
         dataflowLogEvent("noderemoved", node, this.props.tileId);
       });
