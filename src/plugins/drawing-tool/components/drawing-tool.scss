@@ -22,6 +22,11 @@
     text-align: center;
     .drawing-tool-button {
       position: relative;
+      // These are button elements so we have to disable default button styles
+      // of border, padding, and display
+      border: 0;    
+      padding: 0;
+      display: block;
       user-select: none;
       width: $toolbar-button-width;
       height: $toolbar-button-height;
