@@ -1,7 +1,6 @@
 import { LogEventName, Logger, DataflowProgramChange } from "../../lib/logger";
 import { Connection, Control, Node } from "rete";
 
-// I would like to use Record<string, any> instead of "object," but need to implement correctly
 type DataflowLogPayload = any; //Node | Connection | Control | object;
 
 export function dataflowLogEvent( operation: string, payload: DataflowLogPayload, tileId: string ){
