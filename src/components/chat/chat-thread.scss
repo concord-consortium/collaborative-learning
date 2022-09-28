@@ -4,12 +4,11 @@
     height:100%;
     overflow-y: scroll;
     overflow-x: hidden;
-    background-color: $classwork-purple-light-7;
     .chat-thread {
         width: 100%;
         margin: 2px;
-        border: solid 2px $charcoal-light-2;
         white-space: pre-wrap;
+        background-color: $classwork-purple-light-7;
         .user-icon {
           display: flex;
           align-items: center;

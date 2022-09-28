@@ -38,8 +38,10 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
             const numComments = commentThread.comments.length; 
             const shouldBeFocused = commentThread.tileId === focusId;
             const Icon = commentThread.tileType && getToolContentInfoById(commentThread.tileType)?.Icon;
+            const key= commentThread.tileId ? commentThread.tileId : "document";
+
             return (
-              <div key={idx} 
+              <div key={key} 
                   className={classNames("chat-thread", {
                     "chat-thread-focused": shouldBeFocused,
                   })}
@@ -71,7 +73,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
           })
         }
         {focusedItemHasNoComments  &&
-          <div key={0}
+          <div key={focusTileId ? focusTileId : "document"}
             className="chat-thread should-be-focused"
             data-testid="chat-thread">
               <div className="chat-thread-header"> 
