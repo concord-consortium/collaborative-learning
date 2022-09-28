@@ -34,6 +34,7 @@ $controls-hover-background: #c0dfe7;
       border-radius: $border-radius $border-radius 0 0;
       font-weight: bold;
       padding: 8px;
+      position: relative;
 
       &.table-title-default {
         font-style: italic;
@@ -54,8 +55,8 @@ $controls-hover-background: #c0dfe7;
 
       .link-geometry-button {
         position: absolute;
-        right: 3.5px;
-        top: 3px;
+        top: 5px;
+        right: 5px;
         width: 26px;
         height: 26px;
         border-radius: 5px;
