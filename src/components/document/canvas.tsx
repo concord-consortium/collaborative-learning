@@ -28,6 +28,10 @@ interface IProps {
   selectedSectionId?: string | null;
   viaTeacherDashboard?: boolean;
   onTogglePlaybackControls?: () => void;
+  /**
+   * An optional component rendered between the document and history controls
+   */
+  overlay?: React.ReactNode;
 }
 
 @inject("stores")
@@ -83,7 +87,8 @@ export class CanvasComponent extends BaseComponent<IProps> {
   }
 
   private renderContent() {
-    const {content, document, showPlayback, showPlaybackControls, onTogglePlaybackControls, ...others} = this.props;
+    const {content, document, showPlayback, showPlaybackControls, onTogglePlaybackControls, overlay, 
+      ...others} = this.props;
     const documentContent = content || document?.content; // we only pass in content if it is a problem panel
     const typeClass = document?.type === "planning" ? "planning-doc" : "";
 
@@ -94,6 +99,7 @@ export class CanvasComponent extends BaseComponent<IProps> {
                                     documentId={document?.key}
                                     typeClass={typeClass}
                                     {...others} />
+          {overlay}
           {showPlayback && <PlaybackComponent document={document}
                                               showPlaybackControls={showPlaybackControls}
                                               onTogglePlaybackControls={onTogglePlaybackControls} />

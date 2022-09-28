@@ -5,6 +5,9 @@ class DrawToolTile{
     getTileTitle(workspaceClass){
       return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title-text`);
     }
+    getDrawTileComponent(){
+      return cy.get('.primary-workspace [data-testid=drawing-tool]');
+    }
     getDrawToolSelect(){
       return cy.get('.primary-workspace .drawing-tool-button.button-select');
     }
@@ -41,6 +44,7 @@ class DrawToolTile{
     getDrawToolDelete(){
       return cy.get('.primary-workspace .drawing-tool-button.button-delete');
     }
+    
     getFreehandDrawing(){
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg path');
     }

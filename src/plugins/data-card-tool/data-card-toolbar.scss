@@ -5,6 +5,7 @@
   border: $toolbar-border;
   border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
   z-index: $toolbar-z-index;
+  background-color: $workspace-teal-light-9;
 
   &.disabled {
     display: none;
@@ -43,10 +44,6 @@
 
       &:active {
         background-color: $workspace-teal-light-4;
-
-        svg path {
-          fill: $workspace-teal-dark-1;
-        }
       }
 
       input {
@@ -56,6 +53,18 @@
         width: $toolbar-button-width;
         height: $toolbar-button-height;
       }
+    }
+
+    .delete-value-button {
+      svg path {
+        fill: $charcoal-dark-1;
+      }
+      opacity: 1;
+      transform: translate(-12px, -5px);
+    }
+
+    .delete-value-button:hover svg {
+      background-color:$workspace-teal-light-6;
     }
   }
 }

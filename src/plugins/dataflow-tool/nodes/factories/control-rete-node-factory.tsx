@@ -39,8 +39,9 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
 
   public worker(node: NodeData, inputs: any, outputs: any) {
     const funcName = node.data.controlOperator as string;
-    const recents: number[] = (node.data.recentValues as any).nodeValue;
-    const priorValue: number | undefined = recents[recents.length - 1];
+    const recents: number[] | undefined = (node.data.recentValues as any)?.nodeValue;
+    const lastRecentValue = recents?.[recents.length - 1];
+    const priorValue = lastRecentValue == null ? null : lastRecentValue;
     const n1 :number = inputs.num1.length ? inputs.num1[0] : node.data.num1;
     const n2 :number = inputs.num2 ? (inputs.num2.length ? inputs.num2[0] : node.data.num2) : 0;
 
@@ -82,13 +83,13 @@ export class ControlReteNodeFactory extends DataflowReteNodeFactory {
       if (n1 === 1){
         // Already a number here? Maintain. Otherwise set the new held value;
         this.heldValue = typeof this.heldValue === "number" ? this.heldValue : priorValue;
-        result = this.heldValue;
-        cResult = this.heldValue;
+        result = this.heldValue || 0;
+        cResult = this.heldValue || 0;
       }
       else {
         this.heldValue = null;
         result = n2;
-        cResult = priorValue;
+        cResult = priorValue || 0;
       }
     }
 

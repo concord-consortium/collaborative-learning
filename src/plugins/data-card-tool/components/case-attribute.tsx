@@ -4,27 +4,30 @@ import React, { useEffect, useState } from "react";
 import { gImageMap } from "../../../models/image-map";
 import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { DataCardContentModelType } from "../data-card-content";
-import { looksLikeDefaultLabel } from "../data-card-types";
+import { looksLikeDefaultLabel, EditFacet } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
 
 import '../data-card-tool.scss';
-
-type EditFacet = "name" | "value" | ""
 
 interface IProps {
   model: ToolTileModelType;
   caseId?: string;
   attrKey: string;
   currEditAttrId: string;
+  currEditFacet: EditFacet;
   readOnly?: boolean;
   imageUrlToAdd?: string;
   setImageUrlToAdd: (url: string) => void;
   setCurrEditAttrId: (attrId: string) => void;
+  setCurrEditFacet: (facetName: EditFacet) => void;
 }
 
 export const CaseAttribute: React.FC<IProps> = observer(props => {
-  const { model, caseId, attrKey, currEditAttrId, setCurrEditAttrId, readOnly} = props;
+  const {
+    model, caseId, attrKey, currEditAttrId, currEditFacet,
+    setCurrEditFacet, setCurrEditAttrId, readOnly
+  } = props;
   const content = model.content as DataCardContentModelType;
   const getLabel = () => content.dataSet.attrFromID(attrKey).name;
   const getValue = () => {
@@ -34,24 +37,25 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const valueStr = getValue();
   const [labelCandidate, setLabelCandidate] = useState(() => getLabel());
   const [valueCandidate, setValueCandidate] = useState(() => getValue());
-  const [editFacet, setEditFacet] = useState<EditFacet>("");
   const [imageUrl, setImageUrl] = useState("");
 
-  useEffect(() => {
-    if (currEditAttrId !== attrKey) {
-      setEditFacet("");
-    }
-  }, [attrKey, currEditAttrId]);
+  const editingLabel = currEditFacet === "name" && currEditAttrId === attrKey;
+  const editingValue = currEditFacet === "value" && currEditAttrId === attrKey;
+
+  // reset contents of input when attribute value changes without direct user input
+  // (when it is deleted by toolbar or the underlying case has changed )
+  useEffect(()=>{
+    setValueCandidate(valueStr);
+  },[valueStr]);
+
+  gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
+    .then((image)=>{
+      setImageUrl(image.displayUrl || "");
+    });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (editFacet === "name"){
-      const inputVal = event.target.value;
-      setLabelCandidate(inputVal);
-    }
-    if (editFacet === "value"){
-      const inputVal = event.target.value;
-      setValueCandidate(inputVal);
-    }
+    editingLabel && setLabelCandidate(event.target.value);
+    editingValue && setValueCandidate(event.target.value);
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -60,41 +64,39 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       case "Enter":
         handleCompleteValue();
         handleCompleteName();
-        setEditFacet("");
+        event.currentTarget.blur();
+        setCurrEditAttrId("");
+        setCurrEditFacet("");
         break;
       case "Escape":
-        if (editFacet === "name") {
+        if (currEditFacet === "name") {
           setLabelCandidate(getLabel());
         }
-        else if (editFacet === "value") {
+        else if (currEditFacet === "value") {
           setValueCandidate(getValue());
         }
-        setEditFacet("");
+        break;
+      case "Tab":
+        handleCompleteValue();
+        handleCompleteName();
         break;
     }
   };
 
-  const handleDeleteImageData = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleLabelClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
+    event.stopPropagation();
+    if (readOnly) return;
     setCurrEditAttrId(attrKey);
-    caseId && content.setAttValue(caseId, attrKey, "");
+    setCurrEditFacet("name");
+    !editingLabel && setLabelCandidate(getLabel());
   };
 
-
-  const handleClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
+  const handleValueClick = (event: React.MouseEvent<HTMLInputElement | HTMLDivElement>) => {
+    event.stopPropagation();
+    if (readOnly) return;
     setCurrEditAttrId(attrKey);
-    const facet = event.currentTarget.classList[0];
-    const editing = event.currentTarget.classList[2];
-    activateInput(facet as EditFacet, editing === "editing");
-
-    // allow to toggle on and off highlight of all text
-    const myInput = event.currentTarget.children[0] as HTMLInputElement;
-    if(myInput.tagName === "INPUT"){
-      const isHighlighted = myInput.selectionStart === 0;
-      const valLength = myInput.value.length;
-      if (isHighlighted && valLength > 0){
-        myInput.setSelectionRange(valLength, valLength, "forward");
-      }
-    }
+    setCurrEditFacet("value");
+    !editingValue && setValueCandidate(getValue());
   };
 
   const handleInputDoubleClick = (event: React.MouseEvent<HTMLInputElement>) => {
@@ -105,25 +107,12 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     if (labelCandidate !== getLabel()) {
       caseId && content.setAttName(attrKey, labelCandidate);
     }
-    setEditFacet("");
   };
 
   const handleCompleteValue = () => {
     if (valueCandidate !== getValue()) {
       caseId && content.setAttValue(caseId, attrKey, valueCandidate);
     }
-    setEditFacet("");
-  };
-
-  const activateInput = (facet: EditFacet, editing: boolean) => {
-    setEditFacet(facet);
-    if (facet === "name" && !editing){
-      setLabelCandidate(getLabel());
-    }
-    if (facet === "value" && !editing){
-      setValueCandidate(getValue());
-    }
-    setCurrEditAttrId(attrKey);
   };
 
   function deleteAttribute(){
@@ -153,39 +142,46 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     showAlert();
   };
 
-  const pairClassNames = classNames(
-    `attribute-name-value-pair ${attrKey}`,
-    {"editing": editFacet === "name" || editFacet === "value"},
-    {"has-image": gImageMap.isImageUrl(valueStr)}
-  );
+  const valueIsImage = () => {
+    return gImageMap.isImageUrl(valueStr);
+  };
+
+  //allow user to edit value when arriving by tab
+  const handleValueInputFocus = (event: React.FocusEvent) => {
+    if (event.target.classList.contains("value-input")){
+      setCurrEditAttrId(attrKey);
+      setCurrEditFacet("value");
+    }
+  };
+
+  const pairClassNames = `attribute-name-value-pair ${attrKey}`;
+  const valueInputClassNames = `value-input ${attrKey}`;
 
   const labelClassNames = classNames(
     `name ${attrKey}`,
-    { "editing": editFacet === "name"}
+    { "editing": editingLabel }
   );
 
   const valueClassNames = classNames(
     `value ${attrKey}`,
-    { "editing": editFacet === "value" }
+    { "editing": editingValue },
+    {"has-image": gImageMap.isImageUrl(valueStr)}
   );
 
   const deleteAttrButtonClassNames = classNames(
     `delete-attribute ${attrKey}`,
-    { "show": editFacet === "value" || editFacet === "name" }
+    { "show": currEditAttrId === attrKey }
   );
 
-  const isDefaultLabel = looksLikeDefaultLabel(getLabel());
-  const cellLabelClasses = classNames("cell-value", { "default-label": isDefaultLabel });
-
-  gImageMap.isImageUrl(valueStr) && gImageMap.getImage(valueStr)
-     .then((image)=>{
-       setImageUrl(image.displayUrl || "");
-     });
+  const cellLabelClasses = classNames(
+    "cell-value",
+    { "default-label": looksLikeDefaultLabel(getLabel()) }
+  );
 
   return (
     <div className={pairClassNames}>
-      <div className={labelClassNames} onClick={handleClick}>
-        { !readOnly && editFacet === "name"
+      <div className={labelClassNames} onClick={handleLabelClick}>
+        { !readOnly && editingLabel
           ? <input
               type="text"
               className="input"
@@ -199,27 +195,34 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
         }
       </div>
 
-      <div className={valueClassNames} onClick={handleClick}>
-        {/* TODO - image delete */}
-        { editFacet === "value" && !readOnly // && !gImageMap.isImageUrl(valueStr)
-          ? <input
-              type="text"
-              className="input"
-              value={valueCandidate}
-              onChange={handleChange}
-              onKeyDown={handleKeyDown}
-              onBlur={handleCompleteValue}
-              onDoubleClick={handleInputDoubleClick}
-            />
-          : gImageMap.isImageUrl(valueStr)
-            ?   <div className="image-wrapper">
-                  <img src={imageUrl} className="image-value" />
-                  <div className="delete-image-button" onClick={handleDeleteImageData}>X</div>
-                </div>
-            : <div className="cell-value">{valueStr}</div>
+      <div className={valueClassNames} onClick={handleValueClick}>
+        { !readOnly && !valueIsImage() &&
+          <input
+            className={valueInputClassNames}
+            type="text"
+            value={valueCandidate}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            onBlur={handleCompleteValue}
+            onDoubleClick={handleInputDoubleClick}
+            onFocus={handleValueInputFocus}
+          />
+        }
+        { !readOnly && valueIsImage() &&
+          <img src={imageUrl} className="image-value" />
+        }
+
+        { readOnly && !valueIsImage() &&
+          <div className="cell-value">{valueStr}</div>
+        }
+        { readOnly && valueIsImage() &&
+          <img src={imageUrl} className="image-value" />
         }
       </div>
-      <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
+
+      { !readOnly &&
+        <RemoveIconButton className={deleteAttrButtonClassNames} onClick={handleDeleteAttribute} />
+      }
     </div>
   );
 });

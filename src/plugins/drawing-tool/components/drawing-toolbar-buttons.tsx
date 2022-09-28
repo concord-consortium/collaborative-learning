@@ -42,10 +42,11 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
   const tooltipOptions = useTooltipOptions();
   return SvgIcon
     ? <Tooltip title={title} {...tooltipOptions}>
-        <div className={buttonClasses({ disabled, selected, others: `button-${buttonClass}` })} onClick={onClick}>
+        <button className={buttonClasses({ disabled, selected, others: `button-${buttonClass}` })} 
+            onClick={onClick} type="button">
           <SvgIcon fill={fill} stroke={stroke} strokeWidth={strokeWidth}
               strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}/>
-        </div>
+        </button>
       </Tooltip>
     : null;
 };
