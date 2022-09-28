@@ -43,14 +43,14 @@ export class SerialDevice {
   }
 
   public async requestAndSetPort(){
-    // Filter any local devices so we only see arduino uno and compatible in choices
-    const filters = [
-      { usbVendorId: 0x2341, usbProductId: 0x0043 },
-      { usbVendorId: 0x2341, usbProductId: 0x0001 }
-    ];
+    // Removing filters so that non-Arduino brand boards will show
+    // const filters = [
+    //   { usbVendorId: 0x2341, usbProductId: 0x0043 },
+    //   { usbVendorId: 0x2341, usbProductId: 0x0001 }
+    // ];
 
     try {
-      this.port = await navigator.serial.requestPort({ filters });
+      this.port = await navigator.serial.requestPort();
       this.deviceInfo = await this.port.getInfo();
     }
     catch (error) {
