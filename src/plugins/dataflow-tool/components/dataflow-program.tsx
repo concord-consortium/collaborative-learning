@@ -141,7 +141,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             }}
             onDrop={event => {
               event.preventDefault();
-              const nodeType = event.dataTransfer.getData("text/plain");
+              // const nodeType = event.dataTransfer.getData("text/plain");
               // console.log(`Adding ${nodeType}`); I don't think this is implemented
             }}
           >

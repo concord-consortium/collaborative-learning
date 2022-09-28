@@ -1,14 +1,15 @@
 // FIXME: ESLint is unhappy with these control components
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useRef }  from "react";
-import Rete, { NodeEditor, Node, Control } from "rete";
+import Rete, { NodeEditor, Node } from "rete";
 import { NodeSensorTypes, NodeChannelInfo,
          kSensorSelectMessage, kSensorMissingMessage } from "../../model/utilities/node";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
+import { dataflowLogEvent } from "../../dataflow-logger";
+
 import "./sensor-select-control.sass";
 import "./value-control.sass";
-import { dataflowLogEvent } from "../../dataflow-logger";
 
 export class SensorSelectControl extends Rete.Control {
   private emitter: NodeEditor;
@@ -231,6 +232,10 @@ export class SensorSelectControl extends Rete.Control {
         (this as any).update();
         this.setSensorType(v);
         this.emitter.trigger("process");
+
+        const tileId = this.getNode().meta.inTileWithId as string;
+        const changeObj = { node: this.getNode(), sensorTypeValue: v };
+        dataflowLogEvent("selectsensortype", changeObj, tileId);
       },
       onSensorOptionClick: (v: any) => () => {
         this.emitter.trigger("selectnode", { node: this.getNode() });
@@ -239,6 +244,10 @@ export class SensorSelectControl extends Rete.Control {
         (this as any).update();
         this.setSensor(v);
         this.emitter.trigger("process");
+
+        const tileId = this.getNode().meta.inTileWithId as string;
+        const changeObj = { node: this.getNode(), sensorDataOptionValue: v };
+        dataflowLogEvent("selectsensordataoption", changeObj, tileId);
       },
       showSensorList: false,
       showTypeList: false,
@@ -254,11 +263,9 @@ export class SensorSelectControl extends Rete.Control {
 
   public setSensorType = (val: any) => {
     this.setSensor("none");
-
     this.props.type = val;
     this.putData("type", val);
     (this as any).update();
-    console.log("1 this and/or ", this)
   };
 
   public setSensor = (val: any) => {
@@ -273,19 +280,12 @@ export class SensorSelectControl extends Rete.Control {
     this.props.sensor = val;
     this.putData("sensor", val);
     (this as any).update();
-    const tileId = this.getNode().meta.inTileWithId as string;
-    // TODO pick up here - just need to do this spot and one other in this file
-    // capturing selection of which sensor, and then which sensor stream
-    // right now these dropdowns have the same key and that should not be the case
-    console.log("2 this or: ", this)
-    //dataflowLogEvent("sensorselect", this as Control, tileId)
   };
 
   public setSensorValue = (val: any) => {
     this.props.value = val;
     this.putData("nodeValue", val);
     (this as any).update();
-    console.log("3 this: ", this)
   };
 
   public setSensorVirtualState = (val: boolean) => {

@@ -62,5 +62,5 @@ export class PlotButtonControl extends Rete.Control {
     const toggleStr = this.props.showgraph ? "off" : "on";
     const tileId = this.node.meta.inTileWithId as string;
     dataflowLogEvent(`toggle minigraph ${toggleStr}`, this.node, tileId);
-  }
+  };
 }

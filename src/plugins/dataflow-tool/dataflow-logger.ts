@@ -1,20 +1,8 @@
 import { LogEventName, Logger, DataflowProgramChange } from "../../lib/logger";
 import { Connection, Control, Node } from "rete";
 
-type DataflowLogPayload =  Node | Connection | Control | string;
-
-  /**
-   * Logging checklist
-   * [x] tile creation and deletion
-   * [x] block create, delete
-   * [x] block connection/disconnection
-   * [x] minigraph toggle on demo and live output blocks
-   * [x] title title change
-   * [x] DropdownListControl
-   * [x] NumControl
-   * [x] PlotButtonControl
-   * [ ] SensorSelectControl (sensor type and stream are in same control)
-   */
+// I would like to use Record<string, any> instead of "object," but need to implement correctly
+type DataflowLogPayload = any; //Node | Connection | Control | object;
 
 export function dataflowLogEvent( operation: string, payload: DataflowLogPayload, tileId: string ){
   const logEventName = LogEventName.DATAFLOW_TOOL_CHANGE;
@@ -29,8 +17,8 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
     Logger.logToolChange(logEventName, operation, change, tileId);
   }
 
-  if (payload instanceof Connection){
-    const outputNode = payload.output.node as Node
+  else if (payload instanceof Connection){
+    const outputNode = payload.output.node as Node;
     const inputNode = payload.input.node as Node;
 
     const change: DataflowProgramChange = {
@@ -45,7 +33,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
     Logger.logToolChange(logEventName, operation, change, tileId);
   }
 
-  if (payload instanceof Control){
+  else if (payload instanceof Control){
     const ctrl = payload as Control;
     const node = payload.parent as Node;
 
@@ -62,13 +50,40 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
     }
   }
 
-  // title is not a rete object
-  if (typeof(payload) === "string"){
-    const change: DataflowProgramChange = {
-      targetType: 'program',
-      programTitle: payload
-    };
-    Logger.logToolChange(logEventName, operation, change, tileId);
+  // we pass a plain object for title change and sensor selections
+  // so we differentiate by keys sent in object
+  else {
+    const changeProperties = Object.keys(payload);
+
+    if (changeProperties.includes("programTitleValue")){
+      const change: DataflowProgramChange = {
+        targetType: 'program',
+        programTitle: payload.programTitleValue
+      };
+      Logger.logToolChange(logEventName, operation, change, tileId);
+    }
+
+    if (changeProperties.includes("sensorTypeValue")){
+      const change: DataflowProgramChange = {
+        targetType: 'nodedropdown',
+        nodeTypes: [payload.node.name],
+        nodeIds: [payload.node.id],
+        selectItem: "sensorType",
+        value: payload.sensorTypeValue
+      };
+      Logger.logToolChange(logEventName, operation, change, tileId);
+    }
+
+    if (changeProperties.includes("sensorDataOptionValue")){
+      const change: DataflowProgramChange = {
+        targetType: 'nodedropdown',
+        nodeTypes: [payload.node.name],
+        nodeIds: [payload.node.id],
+        selectItem: "sensorDataOption",
+        value: payload.sensorDataOptionValue
+      };
+      Logger.logToolChange(logEventName, operation, change, tileId);
+    }
   }
 }
 
