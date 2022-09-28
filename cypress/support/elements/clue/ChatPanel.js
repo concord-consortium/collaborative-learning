@@ -62,11 +62,11 @@ class ChatPanel{
     }
     typeInCommentArea(commentText) {
       // If the comment list is long, the text box is off screen so force typing.
-      cy.get("[data-testid=comment-textarea]").type(commentText, {force:true});
+      cy.get("[data-testid=comment-textarea]").type(commentText);
     }
     clickPostCommentButton() {
       // If the comment list is long, the button is off screen so force the click.
-      cy.get("[data-testid=comment-post-button]").click({force:true});
+      cy.get("[data-testid=comment-post-button]").click();
       cy.wait(5000);
     }
     useEnterToPostComment() {

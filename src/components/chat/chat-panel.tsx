@@ -80,7 +80,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       <ChatPanelHeader activeNavTab={activeNavTab} newCommentCount={newCommentCount}
                        onCloseChatPanel={onCloseChatPanel} />
       {focusDocument ?
-        <div>
         <ChatThread
           user={user}
           activeNavTab={activeNavTab}
@@ -90,7 +89,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
           focusDocument={focusDocument}
           focusTileId={focusTileId}
         />
-        </div>
         : <div className="select-doc-message" data-testid="select-doc-message">
             Open a document to begin or view comment threads
           </div>
