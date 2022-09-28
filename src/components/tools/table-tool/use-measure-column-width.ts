@@ -7,10 +7,10 @@ interface IUseMeasureColumnWidth {
   content: TableContentModelType;
 }
 export const useMeasureColumnWidth = ({ content }: IUseMeasureColumnWidth) => {
-  // The column that is currently being modified
-  const resizeColumn = useRef();
+  // The id of the column that is currently being modified
+  const resizeColumn = useRef<string>();
   // The current width of the column being modified
-  const resizeColumnWidth = useRef();
+  const resizeColumnWidth = useRef<number>();
 
   const measureColumnWidth = useCallback((attr: IAttribute) => {
     // return Math.max(kMinColumnWidth, userColumnWidths.current[attr.id] || 0);

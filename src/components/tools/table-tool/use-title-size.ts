@@ -28,8 +28,7 @@ export const useTitleSize = ({ readOnly, columns, dataSet, measureColumnWidth, r
                       (sum, col, i) => sum + (i ? columnWidth(col) : 0),
                       1 - (readOnly ? 0 : kControlsColumnWidth));
     };
-    // eslint-disable-next-line no-unused-expressions
-    rowChanges;
+    rowChanges; // eslint-disable-line no-unused-expressions
     return getTitleCellWidthFromColumns();
   }, [readOnly, columns, dataSet, measureColumnWidth, rowChanges]);
 
