@@ -13,7 +13,6 @@ export const useMeasureColumnWidth = ({ content }: IUseMeasureColumnWidth) => {
   const resizeColumnWidth = useRef<number>();
 
   const measureColumnWidth = useCallback((attr: IAttribute) => {
-    // return Math.max(kMinColumnWidth, userColumnWidths.current[attr.id] || 0);
     if (resizeColumn.current === attr.id && resizeColumnWidth.current !== undefined) {
       return resizeColumnWidth.current;
     } else {

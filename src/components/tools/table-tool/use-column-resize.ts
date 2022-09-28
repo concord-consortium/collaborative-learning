@@ -13,6 +13,10 @@ interface IUseColumnResize {
 export const useColumnResize = ({
   columns, content, requestRowHeight, resizeColumn, resizeColumnWidth, triggerRowChange
 }: IUseColumnResize) => {
+  // We had to modify react-data-grid to make this work.
+  // We added the complete boolean, which is true when the user has finished modifying the column width (mouseup).
+  // Additionally, we're returning true to indicate that rdg shouldn't remember the user's specified width, and instead
+  // should always respect the width we send it (since we're remembering the user's width ourselves).
   const onColumnResize = useCallback((idx: number, width: number, complete: boolean) => {
     const attrId = columns[idx].key;
     const legalWidth = Math.max(kMinColumnWidth, width);

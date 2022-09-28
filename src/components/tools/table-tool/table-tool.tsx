@@ -48,8 +48,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   } = useModelDataSet(model);
 
   // Set up user specified columns and function to measure a column
-  const { measureColumnWidth, resizeColumn, resizeColumnWidth }
-    = useMeasureColumnWidth({ content });
+  const { measureColumnWidth, resizeColumn, resizeColumnWidth } = useMeasureColumnWidth({ content });
 
   // Functions for determining the height of rows, including the header
   // These require knowledge of the column widths
