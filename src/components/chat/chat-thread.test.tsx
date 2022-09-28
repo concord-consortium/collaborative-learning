@@ -40,7 +40,6 @@ describe("CommentThread", () => {
     const chatThreads =
       [makeFakeCommentThread("Thread 1", "abcd", "u1"), makeFakeCommentThread("Thread 2", "jkl", "u2")];
     const testUser = {id: "uuuuuu", "name": "test user"} as UserModelType;
-    debugger;
     render((
       <ModalProvider>
         <ChatThread chatThreads={chatThreads}
@@ -50,7 +49,6 @@ describe("CommentThread", () => {
         focusDocument="document-key"/>
       </ModalProvider>
     ));
-    debugger;
     expect(screen.getByTestId("chat-list")).toBeInTheDocument();
     expect(screen.getAllByTestId("chat-thread").length).toBe(2);
     expect(screen.getByText("Thread 1")).toBeInTheDocument();
