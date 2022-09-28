@@ -38,12 +38,13 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
-
+    cy.wait(1000);
     // Teacher 1 document comment
     chatPanel.verifyProblemCommentClass();
     chatPanel.addCommentAndVerify("This is a teacher1 problem document comment");
     // Teacher 1 tile comment
     cy.clickProblemResourceTile('introduction');
+    cy.wait(1000);
     chatPanel.addCommentAndVerify("This is a teacher1 problem tile comment");
   });
   it("verify teacher2 can view teacher1's comments and add more comments in Problem tab", () => {

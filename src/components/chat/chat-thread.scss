@@ -1,0 +1,66 @@
+@import "../vars";
+
+.chat-list {
+    height:100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    .chat-thread {
+        width: 100%;
+        margin: 2px;
+        border: solid 2px $charcoal-light-2;
+        white-space: pre-wrap;
+      
+        .user-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 2px;
+          border-radius: 4px;
+          border: solid 1px $charcoal-light-1-c;
+          background-color: white;
+          width: 21px;
+          height: 21px;
+          font-size: 14px;
+          font-weight: bold;
+          svg {
+            width: 14px;
+            height: 14px;
+            fill: $problem-orange;
+          }
+        }
+        .chat-thread-header {
+          display: flex;
+          flex-direction: row;
+          border: solid 2px var(--charcoal-light-2);
+          background-color: #c1f3b3;
+          align-items: center;
+          justify-content: space-between;
+        }
+        .chat-thread-title {
+            line-height: 1.29;
+        }
+        .chat-thread-comment-info {
+          display:flex;
+          flex-direction: row;
+          align-items:center;
+          height:100%;
+        }
+        .chat-thread-tile-info {
+          display:flex;
+          flex-direction:row;
+          align-items:center;
+        }
+      
+        .chat-thread-num {
+          width: 24px;
+          margin: 3px 2px 2px;
+          padding: 1px 6px 2px;
+          border-radius: 7.5px;
+          background-color: white;
+          text-align: center;
+        }
+      }
+      .chat-thread-focused {
+        background-color: blueviolet;
+    }
+}

@@ -37,6 +37,7 @@ describe('Teachers can communicate back and forth in chat panel', () => {
   it("verify teacher1 can post document and tile comments", () => {
     // Teacher 1 document comment
     chatPanel.verifyProblemCommentClass();
+    cy.wait(1000);
     chatPanel.addCommentAndVerify("This is a teacher1 document comment");
     // Teacher 1 tile comment
     cy.clickProblemResourceTile('introduction');

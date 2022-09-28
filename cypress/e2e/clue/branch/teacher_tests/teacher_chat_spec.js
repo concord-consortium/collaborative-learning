@@ -121,14 +121,14 @@ context('Chat Panel', () => {
     });
     it("verify commenting on tile only shows tile comment", () => {
       chatPanel.showAndVerifyTileCommentClass(3);
-      chatPanel.verifyCommentThreadContains("This is a document comment");
-      chatPanel.verifyCommentThreadContains("This is a tile comment for the first tile");
+      chatPanel.verifyCommentThreadDoesNotContain("This is a document comment");
+      chatPanel.verifyCommentThreadDoesNotContain("This is a tile comment for the first tile");
       chatPanel.verifyCommentThreadContains("This is the 3rd tile comment.");
       cy.clickProblemResourceTile('introduction');
       chatPanel.showAndVerifyTileCommentClass();
-      chatPanel.verifyCommentThreadContains("This is a document comment");
+      chatPanel.verifyCommentThreadDoesNotContain("This is a document comment");
       chatPanel.verifyCommentThreadContains("This is a tile comment for the first tile");
-      chatPanel.verifyCommentThreadContains("This is the 3rd tile comment.");
+      chatPanel.verifyCommentThreadDoesNotContain("This is the 3rd tile comment.");
     });
     it("verify clicking problem section tab shows document comment", () => {
       cy.openProblemSection("Introduction");
