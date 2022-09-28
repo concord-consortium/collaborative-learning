@@ -26,9 +26,6 @@ module.exports = (env, argv) => {
       chunkFilename: '[name].[contenthash:8].js'
     },
     performance: { hints: false },
-    stats: {
-      loggingDebug: ["sass-loader"],
-    },
     externals: {
       // ignore optional dependency of JSXGraph
       'canvas': 'canvas'
