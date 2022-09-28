@@ -2,7 +2,9 @@ import { IDataSet } from "../../data/data-set";
 import { TableMetadataModelType } from "./table-content";
 import { comma, StringBuilder } from "../../../utilities/string-builder";
 
-export const exportTableContentAsJson = (metadata: TableMetadataModelType, dataSet: IDataSet) => {
+export const exportTableContentAsJson = (
+  metadata: TableMetadataModelType, dataSet: IDataSet, columnWidth: (attrId: string) => number
+) => {
   const columns = dataSet.attributes.map((attr, attrIndex, attrs) => {
     const id = attr.id;
     const expression = metadata.expressions.get(id);
@@ -17,6 +19,7 @@ export const exportTableContentAsJson = (metadata: TableMetadataModelType, dataS
     }
     return `${JSON.stringify({
       name: attr.name,
+      width: columnWidth(id),
       expression,
       rawExpression,
       values: values.length ? values : undefined

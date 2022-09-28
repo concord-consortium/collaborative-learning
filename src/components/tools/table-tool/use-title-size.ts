@@ -11,8 +11,9 @@ interface IProps {
   columns: TColumn[];
   dataSet: IDataSet;
   measureColumnWidth: (attr: IAttribute) => number;
+  rowChanges: number;
 }
-export const useTitleSize = ({ readOnly, columns, dataSet, measureColumnWidth }: IProps) => {
+export const useTitleSize = ({ readOnly, columns, dataSet, measureColumnWidth, rowChanges }: IProps) => {
   const titleCellWidth = useMemo(() => {
     const columnWidth = (column: TColumn) => {
       if (!isDataColumn(column)) {
@@ -27,8 +28,9 @@ export const useTitleSize = ({ readOnly, columns, dataSet, measureColumnWidth }:
                       (sum, col, i) => sum + (i ? columnWidth(col) : 0),
                       1 - (readOnly ? 0 : kControlsColumnWidth));
     };
+    rowChanges; // eslint-disable-line no-unused-expressions
     return getTitleCellWidthFromColumns();
-  }, [readOnly, columns, dataSet, measureColumnWidth]);
+  }, [readOnly, columns, dataSet, measureColumnWidth, rowChanges]);
 
   const getTitleHeight = useCallback(() => {
     const font = `700 ${defaultFont}`;

@@ -1,0 +1,68 @@
+diff --git a/node_modules/react-data-grid/lib/bundle.js b/node_modules/react-data-grid/lib/bundle.js
+index d6d69ff..633ddaf 100644
+--- a/node_modules/react-data-grid/lib/bundle.js
++++ b/node_modules/react-data-grid/lib/bundle.js
+@@ -1115,12 +1115,19 @@ function HeaderCell({
+       const width = event.clientX + offset - currentTarget.getBoundingClientRect().left;
+ 
+       if (width > 0) {
+-        onResize(column, width);
++        // [CC] Call onResize with complete: false
++        onResize(column, width, false);
+       }
+     }
+ 
+     function onPointerUp(event) {
+       if (event.pointerId !== pointerId) return;
++
++      // [CC] Determine the width then call onResize with complete: true
++      const width = event.clientX + offset - currentTarget.getBoundingClientRect().left;
++      onResize(column, width, true);
++      // [/CC]
++
+       window.removeEventListener('pointermove', onPointerMove);
+       window.removeEventListener('pointerup', onPointerUp);
+     }
+@@ -1887,13 +1894,20 @@ function DataGrid({
+ 
+     selectCell
+   }));
+-  const handleColumnResize = useCallback((column, width) => {
++  // [CC] Add optional complete parameter, move onColumnResize() before setColumnWidths(),
++  // and delete saved column width depending on value of onColumnResize()
++  const handleColumnResize = useCallback((column, width, complete) => {
++    const result = onColumnResize?.(column.idx, width, complete);
+     setColumnWidths(columnWidths => {
+       const newColumnWidths = new Map(columnWidths);
+-      newColumnWidths.set(column.key, width);
++      if (result) {
++        newColumnWidths.delete(column.key);
++      } else {
++        newColumnWidths.set(column.key, width);
++      }
++      // [/CC]
+       return newColumnWidths;
+     });
+-    onColumnResize == null ? void 0 : onColumnResize(column.idx, width);
+   }, [onColumnResize]);
+   const setDraggedOverRowIdx = useCallback(rowIdx => {
+     setOverRowIdx(rowIdx);
+diff --git a/node_modules/react-data-grid/lib/index.d.ts b/node_modules/react-data-grid/lib/index.d.ts
+index e3d1398..b792226 100644
+--- a/node_modules/react-data-grid/lib/index.d.ts
++++ b/node_modules/react-data-grid/lib/index.d.ts
+@@ -159,7 +159,8 @@ export declare interface DataGridProps<R, SR = unknown> extends SharedDivProps {
+     /** Called when the grid is scrolled */
+     onScroll?: (event: React.UIEvent<HTMLDivElement>) => void;
+     /** Called when a column is resized */
+-    onColumnResize?: (idx: number, width: number) => void;
++    // [CC] Add optional complete parameter
++    onColumnResize?: (idx: number, width: number, complete?: boolean) => void;
+     /** Function called whenever selected cell is changed */
+     onSelectedCellChange?: (position: Position) => void;
+     /**
+@@ -380,3 +381,4 @@ export declare function ToggleGroupFormatter<R, SR>({ groupKey, isExpanded, isCe
+ export declare function ValueFormatter<R, SR>(props: FormatterProps<R, SR>): JSX.Element | null;
+ 
+ export { }
++
