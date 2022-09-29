@@ -1,5 +1,4 @@
 import { getMembers, Instance, SnapshotIn, types } from "mobx-state-tree";
-import React from "react";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
 import { BoundingBox, DefaultToolbarSettings, Point, ToolbarSettings } from "../model/drawing-basic-types";
