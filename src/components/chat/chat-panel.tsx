@@ -27,7 +27,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const { data: comments } = useDocumentComments(focusDocument);
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
   const documentComments = comments?.filter(comment => comment.tileId == null);
-  const allTileComments = comments?.filter(comment=>  comment.tileId != null);
+  const allTileComments = comments?.filter(comment=> comment.tileId != null);
   const commentsInDocumentOrder = ordering && allTileComments
     ? allTileComments.sort((a: any, b: any) => ordering.indexOf(a.tileId) - ordering.indexOf(b.tileId))
     : [];
