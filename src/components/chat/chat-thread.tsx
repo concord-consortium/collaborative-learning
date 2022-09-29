@@ -31,7 +31,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   
   return (
     <div className="chat-list" data-testid="chat-list">
-         {chatThreads?.map((commentThread: ChatCommentThread, idx:number) => {
+         {chatThreads?.map((commentThread: ChatCommentThread) => {
             const title = commentThread.title ? commentThread.title : '';
             const shouldShowUserIcon = 
                 commentThread.comments.some((comment: WithId<CommentDocument>) => user?.id === comment.uid);
