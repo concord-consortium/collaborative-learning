@@ -1,3 +1,5 @@
+import { addDisposer } from "mobx-state-tree";
+import { reaction } from "mobx";
 import { AppConfigModelType, AppConfigModel } from "./app-config-model";
 import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
 import { InvestigationModelType, InvestigationModel } from "../curriculum/investigation";
@@ -7,6 +9,7 @@ import { UserModel, UserModelType } from "./user";
 import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";
 import { DB } from "../../lib/db";
+import { getUserContext } from "../../hooks/use-user-context";
 import { registerTools } from "../../register-tools";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
@@ -17,6 +20,7 @@ import { ClipboardModel, ClipboardModelType } from "./clipboard";
 import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
 import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
+import { IUserContext } from "functions/src/shared";
 
 export interface IBaseStores {
   appMode: AppMode;
@@ -128,23 +132,36 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   stores.unit = UnitModel.create(unitJson);
   const {investigation, problem} = stores.unit.getProblem(_problemOrdinal);
 
+  // TODO: make this dynamic like the way the components work. The components
+  // access these values from the stores when they need them. This way the values
+  // can be changed on the fly without having to track down each object that is
+  // using them.
   stores.documents.setAppConfig(stores.appConfig);
+  stores.documents.setFirestore(stores.db.firestore);
+  stores.documents.setUserContext(getUserContext(stores));
+
   if (investigation && problem) {
     stores.investigation = investigation;
     stores.problem = problem;
   }
   stores.problemPath = getProblemPath(stores);
 
-  // need to use a listener because user type can be determined after unit initialization
-  unit.installUserListener(() => stores.user.isTeacher, async (isTeacher: boolean) => {
-    // only load the teacher guide content for teachers
-    if (isTeacher) {
-      const guideJson = await getGuideJson(unitId, stores.appConfig);
-      const unitGuide = guideJson && UnitModel.create(guideJson);
-      const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
-      stores.teacherGuide = teacherGuide;
-    }
-  });
+  // need to use a listener because user type, id, name can be determined after unit initialization
+  addDisposer(unit, reaction(() => ({
+      userContext: getUserContext(stores)
+    }),
+    async ({userContext}: {userContext: IUserContext}) => {
+      // only load the teacher guide content for teachers
+      if (userContext.type === "teacher") {
+        const guideJson = await getGuideJson(unitId, stores.appConfig);
+        const unitGuide = guideJson && UnitModel.create(guideJson);
+        const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
+        stores.teacherGuide = teacherGuide;
+      }
+      stores.documents.setUserContext(userContext);
+    },
+    { fireImmediately: true }
+  ));
 };
 
 export function isShowingTeacherContent(stores: IStores) {

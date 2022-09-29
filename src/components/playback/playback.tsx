@@ -20,7 +20,10 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
   const { document, showPlaybackControls, onTogglePlaybackControls  } = props;
   const { activeNavTab } = useUIStore();
   const treeManager = document?.treeManagerAPI as Instance<typeof TreeManager>;
-  const history = treeManager?.document.history;
+  // FIXME-HISTORY: hack for always enabling playback. Story to fix this:
+  // https://www.pivotaltracker.com/story/show/183291329
+  //
+  // const history = treeManager?.document.history;
 
   const renderPlaybackToolbarButton = () => {
     const playbackToolbarButtonComponentStyle =
@@ -37,14 +40,25 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
     );
   };
 
-  const disablePlayback = history.length < 1;
+  // This should delay showing the playback controls until the history is actually
+  // loaded into documentToShow
+  const historyLength = treeManager.document.history.length;
+
+  const actuallyShowPlaybackControls = showPlaybackControls && (historyLength !== undefined) && (historyLength > 0);
+
+  // const disablePlayback = history.length < 1;
+
+  // FIXME-HISTORY: HACK for now always enable playback so we can use the
+  // opening of the playback to trigger the load of the history.  Story to fix
+  // this: https://www.pivotaltracker.com/story/show/183291329
+  const disablePlayback = false;
   const playbackComponentClass = classNames("playback-component", activeNavTab,
                                             {"show-control" : showPlaybackControls,
                                               "disabled" : disablePlayback});
   return (
     <div className={playbackComponentClass} data-testid="playback-component">
       {renderPlaybackToolbarButton()}
-      {showPlaybackControls && <PlaybackControlComponent treeManager={treeManager} />}
+      {actuallyShowPlaybackControls && <PlaybackControlComponent treeManager={treeManager} />}
     </div>
   );
 });

@@ -42,8 +42,6 @@ interface IOneUpCanvasProps {
   document: DocumentModelType;
   showPlayback?: boolean;
   readOnly: boolean;
-  showPlaybackControls?: boolean;
-  onTogglePlaybackControls?: () => void;
 }
 const OneUpCanvas: React.FC<IOneUpCanvasProps> = props => {
   const {document, ...others} = props;
@@ -73,17 +71,15 @@ interface IDocumentCanvasProps {
   document: DocumentModelType;
   readOnly: boolean;
   showPlayback?: boolean;
-  showPlaybackControls?: boolean;
-  onTogglePlaybackControls?: () => void;
 }
 const DocumentCanvas: React.FC<IDocumentCanvasProps> = props => {
-  const { mode, isPrimary, document, readOnly, showPlayback, ...others } = props;
+  const { mode, isPrimary, document, readOnly, showPlayback } = props;
   const isFourUp = (document.type === ProblemDocument) && (isPrimary && (mode === "4-up"));
   return (
     <div className="canvas-area">
       {isFourUp
         ? <EditableFourUpCanvas userId={document.uid} />
-        : <OneUpCanvas document={document} readOnly={readOnly} showPlayback={showPlayback} {...others} />}
+        : <OneUpCanvas {...{document, readOnly, showPlayback}} />}
     </div>
   );
 };
@@ -95,11 +91,9 @@ export interface IProps {
   showPlayback?: boolean;
   toolbar?: ToolbarModelType;
   readOnly?: boolean;
-  showPlaybackControls?: boolean;
-  onTogglePlaybackControls?: () => void;
 }
 export const EditableDocumentContent: React.FC<IProps> = props => {
-  const { mode, isPrimary, document, toolbar, readOnly, ...others } = props;
+  const { mode, isPrimary, document, toolbar, readOnly, showPlayback } = props;
 
   const documentContext = useDocumentContext(document);
   const { db: { firebase }, ui, user } = useStores();
@@ -124,7 +118,7 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
               data-focus-document={document.key} >
           {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} />}
           {isShowingToolbar && <div className="canvas-separator"/>}
-          <DocumentCanvas mode={mode} isPrimary={isPrimary} document={document} readOnly={isReadOnly} {...others} />
+          <DocumentCanvas readOnly={isReadOnly} {...{mode, isPrimary, document, showPlayback}} />
         </div>
       </EditableToolApiInterfaceRefContext.Provider>
     </DocumentContextReact.Provider>

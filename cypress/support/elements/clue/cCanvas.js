@@ -51,7 +51,7 @@ class ClueCanvas {
     getSectionHeader(header) {
         // headers=['IN','IC','WI','NW'];
         // headerTitles=["Introduction", "Initial Challenge", "What If...?","Now What Do You Know?"]
-        return cy.get('#section_' + header);
+        return cy.get('.primary-workspace #section_' + header);
     }
 
     getPlaceHolder() {

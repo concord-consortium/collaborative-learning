@@ -18,7 +18,7 @@ export const VariableChipObject = DrawingObject.named("VariableObject")
   .views(self => ({
     get boundingBox() {
       const {x, y} = self;
-      // FIXME: this is a problem. The model is looking at the rendered element.
+      // FIXME-DRAWING: this is a problem. The model is looking at the rendered element.
       // Also MobX might not be able to cache this correctly.  
       // We only really know the size once the text is rendered. 
       // A possible solution is to add volatile props for chipWidth and chipHeight and then have
@@ -55,7 +55,7 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = function 
       onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null }
       onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null }
     >
-      { // FIXME: the same variable can have multiple chips so that would mean multiple
+      { // FIXME-DRAWING: the same variable can have multiple chips so that would mean multiple
         // spans with the same id. The model.id would be a better id to use.
         // PT story to fix this: https://www.pivotaltracker.com/story/show/182352893
       }

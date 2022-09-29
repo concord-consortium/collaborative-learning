@@ -10,6 +10,9 @@ import {
 import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
 import { DEBUG_DOCUMENT } from "../../lib/debug";
+import { IUserContext } from "../../../functions/src/shared";
+import { Firestore } from "../../lib/firestore";
+import { TreeManagerType } from "../history/tree-manager";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
   const latestPublications: DocumentModelType[] = [];
@@ -36,6 +39,8 @@ export const DocumentsModel = types
   })
   .volatile(self => ({
     appConfig: undefined as AppConfigModelType | undefined,
+    userContext: undefined as IUserContext | undefined,
+    firestore: undefined as Firestore | undefined,
     requiredDocuments: {} as Record<string, IRequiredDocumentPromise>,
     all: observable<DocumentModelType>([])
   }))
@@ -160,6 +165,18 @@ export const DocumentsModel = types
       return "";
     }
   }))
+  .actions(self => ({
+    setAppConfig(appConfig: AppConfigModelType) {
+      self.appConfig = appConfig;
+    },
+    setUserContext(userContext: IUserContext) {
+      self.userContext = userContext;
+    },
+    setFirestore(firestore: Firestore) {
+      self.firestore = firestore;
+    }
+
+  }))
   .actions((self) => {
     const add = (document: DocumentModelType) => {
       if (DEBUG_DOCUMENT) {
@@ -177,6 +194,21 @@ export const DocumentsModel = types
         if (documentEnv) {
           documentEnv.appConfig = self.appConfig;
         }
+
+        const {firestore, userContext} = self;
+
+        if (!firestore || !userContext) {
+          console.warn("Adding document before firestore and userContext is available");
+          return;
+        }
+
+        const treeManager = document.treeManagerAPI as TreeManagerType;
+        treeManager.setPropsForFirestoreSaving({
+          firestore,
+          userContext,
+          documentMetadata: { contextId: userContext.classHash, ...document.getMetadata()}
+        });
+      
       } else {
         console.warn("Document with the same key already exists");
       }
@@ -244,10 +276,6 @@ export const DocumentsModel = types
       return parentDocument || null;
     };
 
-    const setAppConfig = (appConfig: AppConfigModelType) => {
-      self.appConfig = appConfig;
-    };
-
     return {
       add,
       remove,
@@ -255,8 +283,7 @@ export const DocumentsModel = types
       resolveRequiredDocumentPromise,
       resolveRequiredDocumentPromiseWithNull,
       resolveRequiredDocumentPromisesWithNull,
-      findDocumentOfTile,
-      setAppConfig
+      findDocumentOfTile
     };
   });
 
