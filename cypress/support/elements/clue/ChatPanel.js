@@ -61,12 +61,12 @@ class ChatPanel{
       return cy.get('[data-testid=tool-tile]').eq(tileIndex);
     }
     typeInCommentArea(commentText) {
-      // If the comment list is long, the text box is off screen so scroll.
-      cy.get("[data-testid=comment-textarea]").scrollIntoView().type(commentText);
+      // If the comment list is long, the text box is off screen so force.
+      cy.get("[data-testid=comment-textarea]").type(commentText, {force: true});
     }
     clickPostCommentButton() {
-      // If the comment list is long, the button is off screen so scroll.
-      cy.get("[data-testid=comment-post-button]").scrollIntoView().click();
+      // If the comment list is long, the button is off screen so force.
+      cy.get("[data-testid=comment-post-button]").click({force: true});
       cy.wait(5000);
     }
     useEnterToPostComment() {
