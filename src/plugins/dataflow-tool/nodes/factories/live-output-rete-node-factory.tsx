@@ -70,7 +70,7 @@ export class LiveOutputReteNodeFactory extends DataflowReteNodeFactory {
     }
   }
 
-  // IMPROVEMENT - this is a duplicate method - abstract for all factories?
+  // TODO IMPROVEMENT - this is a duplicate method - abstract for all factories?
   private addInput(node: Node, inputKey: string, displayLabel = "") {
     if (this.editor) {
       const oldInput = node.inputs.get(inputKey);

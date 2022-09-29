@@ -139,11 +139,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               event.preventDefault();
               event.dataTransfer.dropEffect = "copy";
             }}
-            onDrop={event => {
-              event.preventDefault();
-              // const nodeType = event.dataTransfer.getData("text/plain");
-              // console.log(`Adding ${nodeType}`); I don't think this is implemented
-            }}
           >
             <div
               className={editorClass}
@@ -611,9 +606,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const lastMsg = localStorage.getItem('last-connect-message');
 
     let alertMessage = "";
-    const btnMsg = "Click the ⚡️ button on the upper left, then choose the device at the prompt.";
 
-    // no physical connection
+    const btnMsg = `
+      Click the ⚡️ button on the upper left, then select your device in the popup.
+      Devices differ, but it may contain the words "usbserial" or "usbmodem"`;
+
+      // no physical connection
     if (lastMsg !== "connect" && this.stores.serialDevice.serialNodesCount > 0){
       alertMessage += `1. Connect the arduino to your computer.  2.${btnMsg}`;
     }

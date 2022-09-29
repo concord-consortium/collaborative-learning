@@ -113,7 +113,7 @@ export class NumControl extends Rete.Control {
           this.setValue(Number(v));
           this.emitter.trigger("process");
           const n = this.getNode();
-        dataflowLogEvent("numberinputmanualentry", this as Control, n.meta.inTileWithId as string);
+          dataflowLogEvent("numberinputmanualentry", this as Control, n.meta.inTileWithId as string);
         } else {
           this.restoreValue();
         }

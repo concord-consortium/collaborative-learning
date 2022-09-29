@@ -15,7 +15,6 @@ import { dataflowLogEvent } from "../dataflow-logger";
 
 import "./dataflow-tool.scss";
 
-
 interface IProps extends IToolTileProps{
   model: ToolTileModelType;
   readOnly?: boolean;

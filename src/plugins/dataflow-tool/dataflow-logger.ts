@@ -62,7 +62,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
       Logger.logToolChange(logEventName, operation, change, tileId);
     }
 
-    if (changeProperties.includes("sensorTypeValue")){
+   else if (changeProperties.includes("sensorTypeValue")){
       const change: DataflowProgramChange = {
         targetType: 'nodedropdown',
         nodeTypes: [payload.node.name],
@@ -73,7 +73,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
       Logger.logToolChange(logEventName, operation, change, tileId);
     }
 
-    if (changeProperties.includes("sensorDataOptionValue")){
+    else if (changeProperties.includes("sensorDataOptionValue")){
       const change: DataflowProgramChange = {
         targetType: 'nodedropdown',
         nodeTypes: [payload.node.name],

@@ -43,7 +43,14 @@ export class SerialDevice {
   }
 
   public async requestAndSetPort(){
-    // Removing filters so that non-Arduino brand boards will show
+
+    /* The filters commented out below were set up so that only Arduino boards (and close-match non-Arduinos
+    such as the DFRobot one) will show as options for users to connect.  It turns out that there are working
+    Arduino clones that do not match these filters, one of which is being shipped with the latest generation
+    of BB hardware. Rather than attempt to match every non-standard board, we are removing the filters
+    for now and adding a message to the dialog that should help users make the right selection. A TODO item
+    would be to import an updatable and comprehensive list and use it to dynamically create filters. */
+
     // const filters = [
     //   { usbVendorId: 0x2341, usbProductId: 0x0043 },
     //   { usbVendorId: 0x2341, usbProductId: 0x0001 }
