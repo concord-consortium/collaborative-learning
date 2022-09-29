@@ -11,6 +11,7 @@ import { DataflowContentModelType } from "../model/dataflow-content";
 import { measureText } from "../../../components/tools/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { ToolTitleArea } from "../../../components/tools/tool-title-area";
+import { dataflowLogEvent } from "../dataflow-logger";
 
 import "./dataflow-tool.scss";
 
@@ -27,7 +28,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   public static tileHandlesSelection = true;
 
   public render() {
-    const { readOnly, height } = this.props;
+
+    const { readOnly, height, model } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
@@ -49,6 +51,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
                   onZoomChange={this.handleProgramZoomChange}
                   size={size}
                   tileHeight={height}
+                  tileId={model.id}
                 />
               );
             }}
@@ -86,7 +89,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   }
 
   private handleTitleChange = (title?: string) => {
-    title && this.getContent().setTitle(title);
+    if (title){
+      this.getContent().setTitle(title);
+      dataflowLogEvent("changeprogramtitle", { programTitleValue: this.getTitle() }, this.props.model.id);
+    }
   };
 
   private renderTitle() {

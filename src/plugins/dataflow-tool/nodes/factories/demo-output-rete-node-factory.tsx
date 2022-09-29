@@ -6,6 +6,7 @@ import { InputValueControl } from "../controls/input-value-control";
 import { DropdownListControl } from "../controls/dropdown-list-control";
 import { MinigraphOptions } from "../dataflow-node-plot";
 import { NodeDemoOutputTypes, NodePlotRed } from "../../model/utilities/node";
+import { dataflowLogEvent } from "../../dataflow-logger";
 
 const minigraphOptions: Record<string, MinigraphOptions> = {
   "tilt": {
@@ -113,6 +114,9 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
           () => {
             node.data.plot = !node.data.plot;
             this.editor?.trigger("process");
+            const toggleStr = node.data.plot ? "on" : "off";
+            const tileId = node.meta.inTileWithId as string;
+            dataflowLogEvent(`toggle minigraph ${toggleStr}`, node, tileId);
           },
           displayLabel,
           0, // Initial value
