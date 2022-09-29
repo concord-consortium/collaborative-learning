@@ -13,7 +13,7 @@ export const LoadDocumentHistory: React.FC<IProps> = ({ document }) => {
 
   const otherUserDocument = user.id !== document?.uid;
 
-  const { data, isLoading, isSuccess, isError, status} = 
+  const { data, isLoading, isSuccess, isError, status } = 
     useDocumentHistory(document?.key, otherUserDocument ? document?.uid : undefined);
 
   // TODO: hacky style to make loading visible
@@ -32,23 +32,23 @@ export const LoadDocumentHistory: React.FC<IProps> = ({ document }) => {
   }
 
   if (isError) {
-    message = "Error loading doc history";
+    message = "Error loading history";
   }
 
   useEffect(() => {
     if (isSuccess) {
       // Take the firestore documents from data and put them into the document
-      // This is put in a useEffect because it is modifying state and that should
+      // This is in a useEffect because it is modifying state and that should
       // never be done in the main render of the component.
       // FIXME-HISTORY: this approach probably does not handle paging well, 
       // and I'd suspect we'll have a lot of changes so we'll need to handle that.
       // https://www.pivotaltracker.com/story/show/183291353
       // FIXME-HISTORY: we should protect active documents so that if they are accidentally
       // passed to this component we don't replace their history. I think that means
-      // adding a prop to documents so we can identify documents that are for being
+      // adding a prop to documents so we can identify documents that are being
       // used for history replaying
       // https://www.pivotaltracker.com/story/show/183291353
-      const treeManager = (document?.treeManagerAPI as TreeManagerType);
+      const treeManager = document?.treeManagerAPI as TreeManagerType;
       const cDocument = CDocument.create({history: data});
       treeManager.setChangeDocument(cDocument);
       treeManager.setCurrentHistoryIndex(cDocument.history.length);

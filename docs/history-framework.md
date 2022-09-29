@@ -194,15 +194,15 @@ sequenceDiagram
 ```
 
 ## Serialization
-We store the history of changes to a document in Firestore. Each history entry is stored in a separate Firestore document. These history entry documents are stored in the same way that comments are stored. There is a parent Firestore document that has meta data about the actual CLUE document and then under this parent Firestore document is a collection for the comments and a collection for the history entries.
+We store the history of changes to a document in Firestore. Each history entry is stored in a separate Firestore document. These history entry documents are stored in the same way that comments are stored. There is a parent Firestore document that has metadata about the actual CLUE document and then under this parent Firestore document is a collection for the comments and a collection for the history entries.
 
-The history entries are sent up by the TreeManager which is an MST model. In other places we interact with Firestore through react components so we can use hooks. Since we are in the model we just work directly with Firestore.
+The history entries are written by the TreeManager which is an MST model. In other places we interact with Firestore through react components so we can use hooks. Since we are in the model we just work directly with Firestore.
 
 The history events are downloaded only when needed for replaying the history. This is done by a mostly invisible `<LoadDocumentHistory>` component. It currently puts up an ugly message on the screen to let the user know something is happening. This component uses hooks to load in the history and then update the document with this history. It is kind of strange for a React component to be managing the MST model. But this temporary history MST model is being created by the component only as it is needed, it isn't something shared by multiple components.
 
 The history loading currently doesn't do any batching/paging during the load, so if the history gets large enough this might cause problems. There is a FIXME in the code for this. The component is currently monitoring Firestore collection, so if new history events are added they will be shown immediately without having to close and open the history UI. It isn't totally clear how these incremental history entries are handled. I think the `LoadDocumentHistory` component is re-rendered when new events show up and then the history in the TreeManager gets completely replaced with the updated history. In other words the entries aren't really loaded incrementally. We'll probably need to improve this to handle documents with large histories.
 
-To create the parent document which contains the history entires in Firestore the TreeManager is using out Firebase function `validateCommentableDocument`. This can create either a document associated with a networked teacher or a generic user document. When we tackle handling permissions this document will be required to grant students and teachers access to the history entries of this document.
+To create the parent document which contains the history entries in Firestore the TreeManager is using our Firebase function `validateCommentableDocument`. This can create either a document associated with a networked teacher or a generic user document. When we tackle handling permissions it will be necessary to grant students and teachers access to the history entries of this document.
 
 ### Ordering of history entries
 
@@ -219,16 +219,16 @@ To build the correct order efficiently we can do two passes through the results.
 ##### Pass 1
 First create a map with a type of `{ [entryId] : { entry, nextEntryId }, ...}`.
 Now go through the results. For each entry result:
-- add it to the entry value of map, if there is a nextEntryId don't change it
+- add it to the entry value of map, if there is a `nextEntryId` don't change it
 - take the current entry's `previousEntryId` look this up in the map and add `nextEntryId` to it with this `previousEntryId` value
 - if there is no `previousEntryId` save this entry as the first entry
 - if the `previousEntryId` already has a different `nextEntryId` it means the history has been corrupted by two or more users writing to history at the same time. Show a warning.
 
 ##### Pass 2
-Create a empty array of the history entries.
+Create an empty array of the history entries.
 Start at the first entry, add it to the array.
-Lookup its nextEntryId in the map. 
-Add this to the array and keep going until you reach an object in the map with no nextEntryId
+Look up its `nextEntryId` in the map. 
+Add this to the array and keep going until you reach an object in the map with no `nextEntryId`.
 To be safe you can use a counter and don't iterate more than the total size of the results. This would prevent infinite loops if there was corrupt data.
 
 ##### Storing requirements
@@ -251,7 +251,7 @@ On the start of recording each session we need to know the entry index of the la
 All entries being written would have to wait for this lookup to occur before they will know their index.
 
 ##### Problems
-If multiple users are editing the same document there can be entries with the same index. We can  mitigate this by storing a previousEntryId in each entry. We will know the last entry of the last session because we looked it up to find its index. Even if the sessions start out of order, at some point there will be two entries that have the same previousEntryId (and probably the same index).
+If multiple users are editing the same document there can be entries with the same index. We can mitigate this by storing a `previousEntryId` in each entry. We will know the last entry of the last session because we looked it up to find its index. Even if the sessions start out of order, at some point there will be two entries that have the same previousEntryId (and probably the same index).
 
 It will be a little complicated to block the writing of new entries until they know their offset from the last entry of the last session.
 

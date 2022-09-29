@@ -135,7 +135,7 @@ export const TreeManager = types
     new Promise<DocumentQueryType>((resolve, reject) => {
       // It is crazy that we get this on every request
       // This document should be provided as view, but we can't do async
-      // views. So I guess it is really an async action that fetchs the document and the view 
+      // views. So I guess it is really an async action that fetches the document and the view 
       // will be undefined until then.
       // so then we use something like mobx's `when()` to block the async action until the 
       // view is updated.

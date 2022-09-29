@@ -123,7 +123,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   }
 
   // NOTE: this edit button is confusing when the history is being viewed. It
-  // open the original document for editing, not some old version of the
+  // opens the original document for editing, not some old version of the
   // document they might be looking at. Previously this edit button was disabled
   // when the history document was being shown because SectionDocumentOrBrowser
   // knew the state of playback controls. It no longer knows that state, so now

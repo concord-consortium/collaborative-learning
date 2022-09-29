@@ -40,7 +40,7 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
     );
   };
 
-  // This should delay the showing the playback controls until the history is actually
+  // This should delay showing the playback controls until the history is actually
   // loaded into documentToShow
   const historyLength = treeManager.document.history.length;
 
