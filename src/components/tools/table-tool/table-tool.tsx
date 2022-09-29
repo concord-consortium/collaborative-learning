@@ -1,6 +1,6 @@
 import { observer } from "mobx-react";
 import { onSnapshot } from "mobx-state-tree";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
 import { exportTableContentAsJson } from "../../../models/tools/table/table-export";
@@ -39,6 +39,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   // Gather data from the model
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
+  const content = useMemo(() => getContent(), [getContent]);
   const metadata = getContent().metadata;
 
   // Basic operations based on the model
@@ -47,8 +48,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   } = useModelDataSet(model);
 
   // Set up user specified columns and function to measure a column
-  // TODO The user specified columns should be moved out of react and into MST
-  const { userColumnWidths, measureColumnWidth } = useMeasureColumnWidth();
+  const { measureColumnWidth, resizeColumn, resizeColumnWidth } = useMeasureColumnWidth({ content });
 
   // Functions for determining the height of rows, including the header
   // These require knowledge of the column widths
@@ -85,7 +85,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
 
   // The size of the title bar
   const { titleCellWidth, getTitleHeight } =
-    useTitleSize({ readOnly, columns, measureColumnWidth, dataSet: dataSet.current });
+    useTitleSize({ readOnly, columns, measureColumnWidth, dataSet: dataSet.current, rowChanges });
 
   // A function to update the height of the tile based on the content size
   const heightRef = useCurrent(height);
@@ -108,7 +108,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
 
   // A function to call when a column needs to change width
   const { onColumnResize } = useColumnResize({
-    columns, userColumnWidths, requestRowHeight, triggerRowChange
+    columns, content, requestRowHeight, resizeColumn, resizeColumnWidth, triggerRowChange
   });
   // Finishes setting up the controlsColumn with changeHandlers (which weren't defined when controlColumn was created)
   useControlsColumn({ controlsColumn, readOnly: !!readOnly, onAddColumn, onRemoveRows });
@@ -169,8 +169,8 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     });
   }, [rows, rowHeight, headerHeight, getTitleHeight, getContent, modelRef, readOnly]);
   const exportContentAsTileJson = useCallback(() => {
-    return exportTableContentAsJson(getContent().metadata, dataSet.current);
-  }, [dataSet, getContent]);
+    return exportTableContentAsJson(content.metadata, dataSet.current, content.columnWidth);
+  }, [dataSet, content]);
   useToolApi({ content: getContent(), getTitle, getContentHeight, exportContentAsTileJson,
                 onRegisterToolApi, onUnregisterToolApi });
 
@@ -186,6 +186,13 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   // Force a rerender whenever the model's attributes change (which contain the individual cells)
   useEffect(() => {
     const disposer = onSnapshot((model.content as any).dataSet.attributes, () => {
+      triggerRowChange();
+    });
+    return () => disposer();
+  });
+
+  useEffect(() => {
+    const disposer = onSnapshot(content.columnWidths, () => {
       triggerRowChange();
     });
     return () => disposer();

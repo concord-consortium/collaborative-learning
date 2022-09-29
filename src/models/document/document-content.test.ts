@@ -7,6 +7,7 @@ import { IDropRowInfo } from "../../models/document/document-content";
 import { cloneTileSnapshotWithoutId, IDragTileItem } from "../../models/tools/tool-tile";
 import { TextContentModel } from "../tools/text/text-content";
 import { IDocumentExportOptions } from "../tools/tool-content-info";
+import { kDefaultColumnWidth } from "../../components/tools/table-tool/table-types";
 import { safeJsonParse } from "../../utilities/js-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
 
@@ -112,7 +113,8 @@ describe("DocumentContentModel", () => {
           { title: "Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
-        { title: "Table 1", content: { type: "Table", columns: [{ name: "x" }, { name: "y" }] } },
+        { title: "Table 1", content: { type: "Table",
+          columns: [{ name: "x", width: kDefaultColumnWidth }, { name: "y", width: kDefaultColumnWidth }] } },
         { title: "Drawing 1", content: { type: "Drawing", objects: [] } }
       ]
     });
@@ -1030,8 +1032,8 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
             content: {
               type: "Table",
               columns: [
-                { name: "x", values: [1, 2, 3] },
-                { name: "y", values: [2, 4, 6] }
+                { name: "x", width: kDefaultColumnWidth, values: [1, 2, 3] },
+                { name: "y", width: kDefaultColumnWidth, values: [2, 4, 6] }
               ]
             }
           },

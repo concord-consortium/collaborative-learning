@@ -1,14 +1,24 @@
 import { useCallback, useRef } from "react";
 import { kMinColumnWidth } from "./table-types";
 import { IAttribute } from "../../../models/data/attribute";
+import { TableContentModelType } from "../../../models/tools/table/table-content";
 
-export const useMeasureColumnWidth = () => {
-  // In the future, these should come from the model rather than being saved in react land
-  const userColumnWidths = useRef<Record<string, number>>({});
+interface IUseMeasureColumnWidth {
+  content: TableContentModelType;
+}
+export const useMeasureColumnWidth = ({ content }: IUseMeasureColumnWidth) => {
+  // The id of the column that is currently being modified
+  const resizeColumn = useRef<string>();
+  // The current width of the column being modified
+  const resizeColumnWidth = useRef<number>();
 
   const measureColumnWidth = useCallback((attr: IAttribute) => {
-    return Math.max(kMinColumnWidth, userColumnWidths.current[attr.id] || 0);
-  }, []);
+    if (resizeColumn.current === attr.id && resizeColumnWidth.current !== undefined) {
+      return resizeColumnWidth.current;
+    } else {
+      return content.columnWidth(attr.id) || kMinColumnWidth;
+    }
+  }, [content]);
 
-  return { userColumnWidths, measureColumnWidth };
+  return { measureColumnWidth, resizeColumn, resizeColumnWidth };
 };

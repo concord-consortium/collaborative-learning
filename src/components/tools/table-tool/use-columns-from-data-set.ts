@@ -68,7 +68,7 @@ export const useColumnsFromDataSet = ({
         name: attr.name,
         key: attr.id,
         width,
-        resizable: true,
+        resizable: !readOnly,
         headerRenderer: ColumnHeaderCell,
         formatter: getCellFormatter(width, rowHeight),
         editor: !readOnly && !metadata.hasExpression(attr.id) ? CellTextEditor : undefined,
@@ -95,8 +95,8 @@ export const useColumnsFromDataSet = ({
     }
     columnChanges;  // eslint-disable-line no-unused-expressions
     return cols;
-  }, [attributes, headerHeight, rowHeight, RowLabelHeader, RowLabelFormatter, readOnly, columnChanges,
-      controlsColumn, cellClasses, measureColumnWidth, metadata]);
+  }, [attributes, rowHeight, RowLabelHeader, RowLabelFormatter, readOnly, columnChanges,
+      ColumnHeaderCell, controlsColumn, cellClasses, measureColumnWidth, metadata]);
 
   return { columns, controlsColumn, columnEditingName, handleSetColumnEditingName };
 };

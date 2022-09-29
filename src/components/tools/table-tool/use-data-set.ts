@@ -28,7 +28,7 @@ interface IUseDataSet {
   rows: TRow[];
   changeHandlers: IContentChangeHandlers;
   columns: TColumn[];
-  onColumnResize: (idx: number, width: number) => void;
+  onColumnResize: (idx: number, width: number, complete: boolean) => void;
 }
 export const useDataSet = ({
   gridRef, model, dataSet, triggerColumnChange, triggerRowChange, readOnly, inputRowId, selectedCell, rows,
@@ -112,9 +112,10 @@ export const useDataSet = ({
       }
     }
   };
-  const handleColumnResize = useCallback((idx: number, width: number) => {
-    onColumnResize(idx, width);
+  const handleColumnResize = useCallback((idx: number, width: number, complete?: boolean) => {
+    const returnVal = onColumnResize(idx, width, complete || false);
     triggerColumnChange();
+    return returnVal;
   }, [onColumnResize, triggerColumnChange]);
   return { hasLinkableRows, onColumnResize: handleColumnResize, onRowsChange, onSelectedCellChange};
 };
