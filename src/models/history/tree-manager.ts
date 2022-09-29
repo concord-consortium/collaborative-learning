@@ -34,7 +34,7 @@ export const CDocument = types
 });
 export interface CDocumentType extends Instance<typeof CDocument> {}
 
-interface IFiresoreSavingProps {
+interface IFirestoreSavingProps {
   userContext: IUserContext;
   documentMetadata: IDocumentMetadata;
   firestore: Firestore;
@@ -112,9 +112,8 @@ export const TreeManager = types
       self.undoStore.addHistoryEntry(entry);
     }
 
-    // TODO: send this history entry to firestore
-
     // Create the document in firestore if necessary
+    // FIXME-HISTORY: rename this function to validateFirestoreDocumentMetadata_v1
     const validateCommentableDocument = 
       getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
 
@@ -202,7 +201,7 @@ export const TreeManager = types
     self.document = cDoc;
   },
 
-  setPropsForFirestoreSaving({userContext, documentMetadata, firestore}: IFiresoreSavingProps) {
+  setPropsForFirestoreSaving({userContext, documentMetadata, firestore}: IFirestoreSavingProps) {
     self.userContext = userContext;
     self.documentMetadata = documentMetadata;
     self.firestore = firestore;  

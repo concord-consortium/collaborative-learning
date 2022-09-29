@@ -148,12 +148,11 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
 
   // need to use a listener because user type, id, name can be determined after unit initialization
   addDisposer(unit, reaction(() => ({
-      isTeacher: stores.user.isTeacher,
       userContext: getUserContext(stores)
     }),
-    async ({isTeacher, userContext}: {isTeacher: boolean, userContext: IUserContext}) => {
+    async ({userContext}: {userContext: IUserContext}) => {
       // only load the teacher guide content for teachers
-      if (isTeacher) {
+      if (userContext.type === "teacher") {
         const guideJson = await getGuideJson(unitId, stores.appConfig);
         const unitGuide = guideJson && UnitModel.create(guideJson);
         const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
@@ -163,17 +162,6 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
     },
     { fireImmediately: true }
   ));
-
-  // unit.installUserListener(() => stores.user.isTeacher, async (isTeacher: boolean) => {
-  //   // only load the teacher guide content for teachers
-  //   if (isTeacher) {
-  //     const guideJson = await getGuideJson(unitId, stores.appConfig);
-  //     const unitGuide = guideJson && UnitModel.create(guideJson);
-  //     const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
-  //     stores.teacherGuide = teacherGuide;
-  //   }
-  //   stores.documents.setUserContext(getUserContext(stores));
-  // });
 };
 
 export function isShowingTeacherContent(stores: IStores) {

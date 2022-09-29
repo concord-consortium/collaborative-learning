@@ -122,12 +122,13 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
     ui.problemWorkspace.setPrimaryDocument(document);
   }
 
-  // NOTE: this edit button is confusing when the history is being viewed. It
+  // TODO: this edit button is confusing when the history is being viewed. It
   // opens the original document for editing, not some old version of the
   // document they might be looking at. Previously this edit button was disabled
   // when the history document was being shown because SectionDocumentOrBrowser
   // knew the state of playback controls. It no longer knows that state, so now
   // the edit button is shown all of the time.
+  // PT Story: https://www.pivotaltracker.com/story/show/183416176
   const editButton = (type: string, sClass: string, document: DocumentModelType) => {
     return (
       (type === "my-work") || (type === "learningLog")
