@@ -1,6 +1,7 @@
 import { observer } from "mobx-react";
 import React from "react";
 import ChatIcon from "../../assets/chat-icon.svg";
+//import ChatIcon from "../../assets/expand-toggle-icon.svg";
 import NotificationIcon from "../../assets/notifications-icon.svg";
 
 import "./chat-panel-header.scss";
