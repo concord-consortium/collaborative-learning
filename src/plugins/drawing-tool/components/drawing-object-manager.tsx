@@ -117,7 +117,7 @@ export function registerDrawingToolInfo(drawingToolInfo: IDrawingToolInfo) {
 }
 
 export function renderDrawingObject(drawingObject: DrawingObjectType,
-                                    handleHover?: HandleObjectHover, handleDrag: HandleObjectDrag) {
+                                    handleHover?: HandleObjectHover, handleDrag?: HandleObjectDrag) {
   const DrawingObjectComponent = getDrawingObjectComponent(drawingObject);
   return DrawingObjectComponent ?
     <DrawingObjectComponent key={drawingObject.id} model={drawingObject}
