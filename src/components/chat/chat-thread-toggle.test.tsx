@@ -12,7 +12,6 @@ describe("Comment Textbox", () => {
   });
   
   it("Chat toggle collapsed", () => {
-    const activeNavTab = "problems";
     render((
       <ChatThreadToggle  isThreadExpanded={false} />
     ));
