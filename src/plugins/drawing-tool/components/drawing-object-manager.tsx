@@ -1,11 +1,12 @@
 import { types } from "mobx-state-tree";
 import React from "react";
-import { DrawingComponentType, DrawingObject, DrawingObjectType, 
-  DrawingTool, HandleObjectHover, IDrawingLayer, IToolbarButtonProps } from "../objects/drawing-object";
+import { DrawingComponentType, DrawingObject, DrawingObjectType,
+  DrawingTool, HandleObjectHover, HandleObjectDrag,
+  IDrawingLayer, IToolbarButtonProps } from "../objects/drawing-object";
 import { EllipseComponent, EllipseDrawingTool, EllipseObject, EllipseToolbarButton } from "../objects/ellipse";
 import { ImageComponent, ImageObject, StampDrawingTool, StampToolbarButton } from "../objects/image";
 import { LineComponent, LineDrawingTool, LineObject, LineToolbarButton } from "../objects/line";
-import { RectangleComponent, RectangleDrawingTool, RectangleObject,  
+import { RectangleComponent, RectangleDrawingTool, RectangleObject,
   RectangleToolbarButton} from "../objects/rectangle";
 import { VectorComponent, VectorDrawingTool, VectorObject, VectorToolbarButton } from "../objects/vector";
 import { DeleteButton, SelectToolbarButton } from "./drawing-toolbar-buttons";
@@ -20,7 +21,7 @@ export interface IDrawingObjectInfo {
 export interface IDrawingToolInfo {
   name: string;
   // using a simple `typeof DrawingTool` can't be used because that type
-  // is an abstract class so can't be instantiated. 
+  // is an abstract class so can't be instantiated.
   toolClass?: { new(drawingLayer: IDrawingLayer): DrawingTool };
   buttonComponent: React.ComponentType<IToolbarButtonProps>;
 }
@@ -115,12 +116,12 @@ export function registerDrawingToolInfo(drawingToolInfo: IDrawingToolInfo) {
   gDrawingToolInfos[drawingToolInfo.name] = drawingToolInfo;
 }
 
-export function renderDrawingObject(drawingObject: DrawingObjectType, 
-                                    handleHover?: HandleObjectHover) {
+export function renderDrawingObject(drawingObject: DrawingObjectType,
+                                    handleHover?: HandleObjectHover, handleDrag: HandleObjectDrag) {
   const DrawingObjectComponent = getDrawingObjectComponent(drawingObject);
-  return DrawingObjectComponent ? 
-    <DrawingObjectComponent key={drawingObject.id} model={drawingObject} 
-      handleHover={handleHover}/> 
+  return DrawingObjectComponent ?
+    <DrawingObjectComponent key={drawingObject.id} model={drawingObject}
+      handleHover={handleHover} handleDrag={handleDrag}/>
     : null;
 }
 
