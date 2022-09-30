@@ -113,7 +113,6 @@ export const ImageComponent: React.FC<IDrawingComponentProps> = observer(functio
       if (handleDrag !== undefined){
         handleDrag(e, model);
       }
-      console.log("in image.tsx, onMouseDown");
     }}
     />;
 
