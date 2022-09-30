@@ -84,9 +84,8 @@ export const LineComponent = observer(function LineComponent({model, handleHover
       if (handleDrag !== undefined){
         handleDrag(e, model);
       }
-      console.log("in line.tsx, onMouseDown");
-    }} //added
-    />
+    }}
+    />;
 });
 
 export class LineDrawingTool extends DrawingTool {
