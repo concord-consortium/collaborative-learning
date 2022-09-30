@@ -1,9 +1,7 @@
 @import "../vars";
-
 .chat-thread-toggle {
   transform: rotate(270deg);
-
- &.problems {
+  &.problems {
     border-color: $problem-orange-light-3;
   }
   &.my-work {
