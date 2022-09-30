@@ -14,27 +14,27 @@ jest.mock("../../hooks/use-stores", () => ({
 }));
 
 const makeFakeCommentThread = (title: string, tileId: string, uid: string) => {
-    return {
-        title,
-        tileId,
-        tileType: "Image",
-        comments: [
-            { uid, id: "asdf", name: "Teacher 1", createdAt: new Date(), content: title + " Comment 1" },
-            { uid, id: "zyxw", name: "Teacher 2", createdAt: new Date(), content: title + " Comment 2" },
-        ]
-    };
+  return {
+    title,
+    tileId,
+    tileType: "Image",
+    comments: [
+      { uid, id: "asdf", name: "Teacher 1", createdAt: new Date(), content: title + " Comment 1" },
+      { uid, id: "zyxw", name: "Teacher 2", createdAt: new Date(), content: title + " Comment 2" },
+    ]
+  };
 };
 describe("CommentThread", () => {
-    it("render with no threads", () => {
-        render((
-            <ModalProvider>
-            <ChatThread activeNavTab={ENavTab.kMyWork} focusDocument="document-key"/>
-            </ModalProvider>
-        ));
-        expect(screen.getByTestId("chat-list")).toBeInTheDocument();
-        // One empty chat thread to show the comment box
-        expect(screen.queryByTestId("chat-thread")).toBeInTheDocument();
-    });
+  it("render with no threads", () => {
+    render((
+      <ModalProvider>
+      <ChatThread activeNavTab={ENavTab.kMyWork} focusDocument="document-key"/>
+      </ModalProvider>
+    ));
+    expect(screen.getByTestId("chat-list")).toBeInTheDocument();
+    // One empty chat thread to show the comment box
+    expect(screen.queryByTestId("chat-thread")).toBeInTheDocument();
+  });
 
   it("Render threads. No User owned comments", () => {
     const chatThreads =
@@ -63,11 +63,11 @@ describe("CommentThread", () => {
     render((
       <ModalProvider>
         <ChatThread
-            focusTileId = "abcd"
-            user={testUser}
-            chatThreads={chatThreads}
-            activeNavTab={ENavTab.kMyWork}
-            focusDocument="document-key"
+          focusTileId = "abcd"
+          user={testUser}
+          chatThreads={chatThreads}
+          activeNavTab={ENavTab.kMyWork}
+          focusDocument="document-key"
         />
       </ModalProvider>
     ));
