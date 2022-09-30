@@ -4,7 +4,6 @@ import { ChatThreadToggle } from "./chat-thread-toggle";
 
 describe("Comment Textbox", () => {
   it("Chat toggle expanded", () => {
-    const activeNavTab = "problems";
     render((
       <ChatThreadToggle  isThreadExpanded={true} />
     ));
