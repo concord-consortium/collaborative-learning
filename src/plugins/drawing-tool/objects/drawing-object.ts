@@ -41,6 +41,15 @@ export const DrawingObject = types.model("DrawingObject", {
 })
 .views(self => ({
   get boundingBox(): BoundingBox {
+    // SC: I tried an approach of tracking the SVG elements that were rendered,
+    // and using a generic SVG getBBox() here, but it had performance issues.
+    // The bounding box is used to draw a highlight around the element when the
+    // element is moving its x and y are changing and then the x and y of the
+    // getBBox get updated after it moves and then the highlight updates after
+    // this move using getBBox causes a weird lag in how the highlight tracks
+    // the box. Additionally if the implementation doesn't access the x or y of
+    // self then MobX observation is not triggered so moving the element doesn't
+    // cause the selection highlight to update.
     throw "Subclass needs to implement this";
   }
 }))

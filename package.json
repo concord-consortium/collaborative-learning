@@ -242,6 +242,7 @@
     "ts-polyfill": "^3.8.2",
     "tslib": "^2.4.0",
     "ulid": "^2.3.0",
+    "use-resize-observer": "^9.0.2",
     "uuid": "^8.3.2",
     "whatwg-fetch": "^3.6.2"
   }
