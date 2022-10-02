@@ -11,6 +11,7 @@ import { ToolMetadataModel, ToolContentModel, toolContentModelHooks } from "../t
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { SharedDataSet, SharedDataSetType } from "../shared-data-set";
 import { SharedModelType } from "../shared-model";
+import { kMinColumnWidth } from "../../../components/tools/table-tool/table-types";
 import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
 import { uniqueId } from "../../../utilities/js-utils";
@@ -28,7 +29,8 @@ export function defaultTableContent(props?: IDefaultContentOptions) {
                             columns: [
                               { name: "x" },
                               { name: "y" }
-                            ]
+                            ],
+                            columnWidths: {}
                           // This type cast could probably go away if MST was upgraded and
                           // types.snapshotProcessor(TableContentModel, ...) was used
                           } as SnapshotIn<typeof TableContentModel>);
@@ -146,7 +148,8 @@ export const TableContentModel = ToolContentModel
     type: types.optional(types.literal(kTableToolID), kTableToolID),
     isImported: false,
     // Used to store the dataset when importing legacy formats
-    importedDataSet: types.optional(DataSet, () => DataSet.create())
+    importedDataSet: types.optional(DataSet, () => DataSet.create()),
+    columnWidths: types.map(types.number)
   })
   .volatile(self => ({
     metadata: undefined as any as TableMetadataModelType
@@ -194,6 +197,9 @@ export const TableContentModel = ToolContentModel
         return self.sharedModel.dataSet;
       }
       return self.importedDataSet;
+    },
+    columnWidth(attrId: string) {
+      return self.columnWidths.get(attrId) || kMinColumnWidth;
     },
     get isUserResizable() {
       return true;
@@ -314,6 +320,9 @@ export const TableContentModel = ToolContentModel
 
       self.logChange({ action: "update", target: "table", props: { name } });
     },
+    setColumnWidth(attrId: string, width: number) {
+      self.columnWidths.set(attrId, width);
+    },
     addAttribute(id: string, name: string) {
       self.dataSet.addAttributeWithID({ id, name });
       self.metadata.updateDatasetByExpressions(self.dataSet);
@@ -422,7 +431,7 @@ export const TableContentModel = ToolContentModel
     //   return self.isValidDataSetForGeometryLink(self.dataSet);
     // },
     exportJson(options?: IDocumentExportOptions) {
-      return exportTableContentAsJson(self.metadata, self.dataSet);
+      return exportTableContentAsJson(self.metadata, self.dataSet, self.columnWidth);
     }
   }));
 

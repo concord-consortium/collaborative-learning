@@ -94,6 +94,7 @@ export enum LogEventName {
   DRAWING_TOOL_CHANGE,
   TABLE_TOOL_CHANGE,
   TEXT_TOOL_CHANGE,
+  DATAFLOW_TOOL_CHANGE,
 
   TILE_UNDO,
   TILE_REDO,
@@ -130,15 +131,22 @@ export enum LogEventName {
   TEACHER_NETWORK_COLLAPSE_DOCUMENT_SECTION,
 }
 
-// This is the form the log events take  
+// This is the form the log events take
 export interface SimpleToolLogEvent {
   path?: string;
   args?: Array<any>;
 }
 
-type LoggableToolChangeEvent = Optional<JXGChange, "operation"> |
+export interface DataflowProgramChange extends Record<string,any>{
+  targetType: string,
+  nodeTypes?: string[],
+  nodeIds?: number[],
+}
+
+type LoggableToolChangeEvent =  Optional<JXGChange, "operation"> |
                                 SimpleToolLogEvent |
-                                Optional<ITableChange, "action">;
+                                Optional<ITableChange, "action"> |
+                                DataflowProgramChange;
 
 interface IDocumentInfo {
   type: string;

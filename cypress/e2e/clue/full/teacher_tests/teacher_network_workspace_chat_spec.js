@@ -58,11 +58,13 @@ describe('Teachers can communicate back and forth in chat panel', () => {
 
     teacherNetwork.expandSectionClass('workspaces', 'my-classes', classInfo1);
     teacherNetwork.selectDocument('workspaces', 'my-classes', classInfo1, workDoc);
+    cy.wait(1000);
     chatPanel.addCommentAndVerify("This is a teacher1 working document comment");
 
     cy.openSection('my-work', 'workspaces');
     teacherNetwork.expandSectionClass('workspaces', 'my-classes', classInfo1);
     teacherNetwork.selectDocument('workspaces', 'my-classes', classInfo1, planningDoc);
+    cy.wait(1000);
     chatPanel.addCommentAndVerify("This is a teacher1 planning document comment");
   });
   it("verify teacher2 can view teacher1's comments and add more comments in My Work tab", () => {
@@ -70,17 +72,22 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     cy.openTopTab("my-work");
     cy.openSection('my-work', 'workspaces');
 
+    // This line is flakey because often CLUE is not able to load in the network
+    // data for this teacher fast enough. The teacher has a lot of classes. Many
+    // of them have network documents.
     teacherNetwork.expandSectionClass('workspaces', 'my-network', classInfo1);
     teacherNetwork.verifyDocumentsListDisplays('workspaces', 'my-network', classInfo1);
     teacherNetwork.verifyDocumentName('workspaces', 'my-network', classInfo1, workDoc);
     teacherNetwork.verifyDocumentName('workspaces', 'my-network', classInfo1, planningDoc);
     teacherNetwork.selectDocument('workspaces', 'my-network', classInfo1, workDoc);
+    cy.wait(1000);
     chatPanel.verifyCommentThreadContains("This is a teacher1 working document comment");
     chatPanel.addCommentAndVerify("This is teacher2's comment on teacher1's working document");
 
     cy.openSection('my-work', 'workspaces');
     teacherNetwork.expandSectionClass('workspaces', 'my-network', classInfo1);
     teacherNetwork.selectDocument('workspaces', 'my-network', classInfo1, planningDoc);
+    cy.wait(1000);
     chatPanel.verifyCommentThreadContains("This is a teacher1 planning document comment");
     chatPanel.addCommentAndVerify("This is teacher2's comment on teacher1's planning document");
   });

@@ -1,23 +1,39 @@
 import React, { useCallback } from "react";
-import { TColumn } from "./table-types";
+import { kMinColumnWidth, TColumn } from "./table-types";
+import { TableContentModelType } from "../../../models/tools/table/table-content";
 
 interface IUseColumnResize {
   columns: TColumn[];
-  userColumnWidths: React.MutableRefObject<Record<string, number>>;
+  content: TableContentModelType;
   requestRowHeight: () => void;
+  resizeColumn: React.MutableRefObject<string | undefined>;
+  resizeColumnWidth: React.MutableRefObject<number | undefined>;
   triggerRowChange: () => void;
 }
 export const useColumnResize = ({
-  columns, userColumnWidths, requestRowHeight, triggerRowChange
+  columns, content, requestRowHeight, resizeColumn, resizeColumnWidth, triggerRowChange
 }: IUseColumnResize) => {
-
-  // This is called constantly as the user resizes the column. When we start saving the width to the model,
-  // we'll only want to do so when the user ends adjusting the width.
-  const onColumnResize = useCallback((idx: number, width: number) => {
-    userColumnWidths.current[columns[idx].key] = width;
+  // We had to modify react-data-grid to make this work.
+  // We added the complete boolean, which is true when the user has finished modifying the column width (mouseup).
+  // Additionally, we're returning true to indicate that rdg shouldn't remember the user's specified width, and instead
+  // should always respect the width we send it (since we're remembering the user's width ourselves).
+  const onColumnResize = useCallback((idx: number, width: number, complete: boolean) => {
+    const attrId = columns[idx].key;
+    const legalWidth = Math.max(kMinColumnWidth, width);
+    if (complete) {
+      // We're finished updating the width, so save it to the model
+      content.setColumnWidth(attrId, legalWidth);
+      resizeColumn.current = undefined;
+      resizeColumnWidth.current = undefined;
+    } else {
+      // We're not finished updating the width, so just save it in react for now
+      resizeColumn.current = attrId;
+      resizeColumnWidth.current = legalWidth;
+    }
     requestRowHeight();
     triggerRowChange(); // triggerRowChange is used because triggerColumnChange doesn't force a rerender
-  }, [columns, userColumnWidths, requestRowHeight, triggerRowChange]);
+    return true;
+  }, [columns, content, requestRowHeight, resizeColumn, resizeColumnWidth, triggerRowChange]);
 
   return { onColumnResize };
 };

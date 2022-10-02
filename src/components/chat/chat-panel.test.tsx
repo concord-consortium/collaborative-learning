@@ -66,7 +66,7 @@ jest.mock("../../hooks/use-stores", () => ({
   useCurriculumOrDocumentContent:(key: string) => {
     return DocumentContentModel.create(createSingleTileContent({
       type: "Text",
-      text: "test"
+      title: "test title"
     }));
   },
   useUIStore: () => ({
@@ -101,24 +101,14 @@ describe("ChatPanel", () => {
     ));
     expect(screen.getByTestId("select-doc-message")).toBeInTheDocument();
   });
-  it("should show comment card if document has been selected", () => {
+  it("Should show chat list with thread if document selected", () => {
     const mockCloseChatPanel = jest.fn();
     render((
       <ModalProvider>
         <ChatPanel activeNavTab={ENavTab.kMyWork} focusDocument="document-key" onCloseChatPanel={mockCloseChatPanel} />
       </ModalProvider>
     ));
-    expect(screen.getByTestId("comment-card")).toBeInTheDocument();
+    expect(screen.getByTestId("chat-list")).toBeInTheDocument();
+    expect(screen.getAllByTestId("comment-card").length).toBe(1);
   });
-  it("should show comment card if there is a focused document outside of My Work", () => {
-    const mockCloseChatPanel = jest.fn();
-    render((
-      <ModalProvider>
-        <ChatPanel activeNavTab={ENavTab.kProblems} focusDocument="document-key"
-                    onCloseChatPanel={mockCloseChatPanel} />
-      </ModalProvider>
-    ));
-    expect(screen.getByTestId("comment-card")).toBeInTheDocument();
-  });
-
 });

@@ -8,6 +8,7 @@ import {
 
 export interface TableContentColumnImport {
   name: string;
+  width?: number;
   // user-editable expression for y variable in terms of x variable by name
   // corresponds to rawExpression in the internal model
   expression?: string;
@@ -23,10 +24,13 @@ export function isTableImportSnapshot(snapshot: any): snapshot is TableContentTa
   return (snapshot.type === "Table") && !!snapshot.columns;
 }
 
-export function convertImportToSnapshot(snapshot: TableContentTableImport): { dataSet: IDataSet } {
+export function convertImportToSnapshot(snapshot: TableContentTableImport):
+  { dataSet: IDataSet, columnWidths: Record<string, number> }
+{
+  const columnWidths: Record<string, number> = {};
   const dataSet = DataSet.create();
   const columns = snapshot?.columns;
-  if (!columns) return { dataSet };
+  if (!columns) return { dataSet, columnWidths };
 
   // set the name
   snapshot?.name && (dataSet.setName(snapshot?.name));
@@ -42,10 +46,14 @@ export function convertImportToSnapshot(snapshot: TableContentTableImport): { da
   // add the attributes (which will flesh out the cases internally)
   columns.forEach((col, index) => {
     const { name, expression: formula, values } = col;
-    dataSet.addAttributeWithID({ id: uniqueId(), name, formula, values });
+    const id = uniqueId();
+    dataSet.addAttributeWithID({ id, name, formula, values });
+    if (col.width) {
+      columnWidths[id] = col.width;
+    }
   });
 
-  return { dataSet };
+  return { dataSet, columnWidths };
 }
 
 function migrateChange(change: ITableChange | IEarlyTableCreateChange): ITableChange {

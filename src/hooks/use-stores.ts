@@ -116,9 +116,20 @@ export function useNetworkDocuments(): DocumentsModelType {
   return useStores().networkDocuments;
 }
 
-export function useNetworkDocumentKey(documentKey: string) {
+/**
+ *
+ * @param documentKey 
+ * @param userId if this is passed the current user and their network is
+ * ignored. This is useful for teachers to generate paths to student documents
+ * @returns 
+ */
+export function useNetworkDocumentKey(documentKey: string, userId?: string) {
   const user = useUserStore();
-  return networkDocumentKey(user.id, documentKey, user.network);
+  if (userId) {
+    return networkDocumentKey(userId, documentKey);
+  } else {
+    return networkDocumentKey(user.id, documentKey, user.network);
+  }
 }
 
 export function useProblemPath() {

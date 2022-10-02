@@ -33,6 +33,7 @@ import { NodeChannelInfo, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { SerialDevice } from "../../../models/stores/serial";
+import { dataflowLogEvent } from "../dataflow-logger";
 
 import "./dataflow-program.sass";
 
@@ -63,6 +64,7 @@ interface IProps extends SizeMeProps {
   programZoom?: ProgramZoomType;
   onZoomChange: (dx: number, dy: number, scale: number) => void;
   tileHeight?: number;
+  tileId: string;
 }
 
 interface IState {
@@ -136,11 +138,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             onDragOver={event => {
               event.preventDefault();
               event.dataTransfer.dropEffect = "copy";
-            }}
-            onDrop={event => {
-              event.preventDefault();
-              const nodeType = event.dataTransfer.getData("text/plain");
-              console.log(`Adding ${nodeType}`);
             }}
           >
             <div
@@ -285,10 +282,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.on("nodecreated", node => {
         this.processAndSave();
         this.moveNodeToFront(node, true);
+        node.meta.inTileWithId = this.props.tileId;
+        dataflowLogEvent("nodecreated", node, this.props.tileId);
       });
 
       this.programEditor.on("selectnode", ( { node } ) => {
         this.moveNodeToFront(node, false);
+        node.meta.inTileWithId = this.props.tileId;
       });
 
       this.programEditor.on("nodedraged", node => {
@@ -322,6 +322,19 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       this.programEditor.view.resize();
       this.programEditor.trigger("process");
+
+      // Program changes are logged from here, except nodecreated, above
+      this.programEditor.on("noderemoved", node => {
+        dataflowLogEvent("noderemoved", node, this.props.tileId);
+      });
+
+      this.programEditor.on("connectioncreated", connection => {
+        dataflowLogEvent("connectioncreated", connection, this.props.tileId);
+      });
+
+      this.programEditor.on("connectionremoved", connection => {
+        dataflowLogEvent("connectionremoved", connection, this.props.tileId);
+      });
     })();
   };
 
@@ -593,9 +606,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const lastMsg = localStorage.getItem('last-connect-message');
 
     let alertMessage = "";
-    const btnMsg = "Click the ⚡️ button on the upper left, then choose the device at the prompt.";
 
-    // no physical connection
+    const btnMsg = `
+      Click the ⚡️ button on the upper left, then select your device in the popup.
+      Devices differ, but it may contain the words "usbserial" or "usbmodem"`;
+
+      // no physical connection
     if (lastMsg !== "connect" && this.stores.serialDevice.serialNodesCount > 0){
       alertMessage += `1. Connect the arduino to your computer.  2.${btnMsg}`;
     }

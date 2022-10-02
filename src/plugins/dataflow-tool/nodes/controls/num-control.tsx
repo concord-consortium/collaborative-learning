@@ -1,9 +1,10 @@
 // FIXME: ESLint is unhappy with these control components
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useRef } from "react";
-import Rete, { NodeEditor, Node } from "rete";
+import Rete, { NodeEditor, Node, Control } from "rete";
 import { useStopEventPropagation } from "./custom-hooks";
 import { NodePeriodUnits } from "../../model/utilities/node";
+import { dataflowLogEvent } from "../../dataflow-logger";
 import "./num-control.sass";
 
 // cf. https://codesandbox.io/s/retejs-react-render-t899c
@@ -41,9 +42,11 @@ export class NumControl extends Rete.Control {
       const pUnits = NodePeriodUnits.find((u: any) => u.unit === this.props.currentUnits);
       const pUnitsInSecs = pUnits ? pUnits.lengthInSeconds : 1;
       this.putData(this.key, this.props.value * pUnitsInSecs);
-
       (this as any).update();
       this.emitter.trigger("process");
+
+      const n = this.getNode();
+      dataflowLogEvent("unitdropdownselection", this as Control, n.meta.inTileWithId as string);
     };
     this.component = (compProps: { readonly: any,
                                    value: any;
@@ -109,6 +112,8 @@ export class NumControl extends Rete.Control {
         if (isFinite(v)) {
           this.setValue(Number(v));
           this.emitter.trigger("process");
+          const n = this.getNode();
+          dataflowLogEvent("numberinputmanualentry", this as Control, n.meta.inTileWithId as string);
         } else {
           this.restoreValue();
         }
