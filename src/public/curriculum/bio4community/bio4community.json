@@ -14,44 +14,6 @@
     "autoSectionProblemDocuments": false,
     "defaultDocumentTitle": "MyEvidence",
     "defaultDocumentType": "personal",
-    "defaultDocumentTemplate": {
-      "tiles": [
-        {
-          "id": "17SEP20221154AM",
-          "content": {
-            "type": "Text",
-            "format": "html",
-            "text": [
-              "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
-            ]
-          }
-        },
-        {
-          "id": "-GfoEDw3vaSKoAz4",
-          "content": {
-            "type": "Table",
-            "name": "Cast of Characters",
-            "columns": [
-              {"name":"Character name","values":["Narrator","Rakesh (main character)","Nicole (co-worker)","Deaundre (co-worker) ","Meera (cousin)","Dr. Lee (physician)","Dr. Zeiders (scientist)","Ajay (son)","Zainab (daughter)"]},
-              {"name":"Actor name","values":["","","","","","","","",""]}
-            ]
-          }
-        },
-        {
-          "id": "17SEP20221202pm",
-          "content": {
-            "type": "Table",
-            "name": "Evidence Table",
-            "columns": [
-              {"name":"Evidence","values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-              {"name":"What did you learn from it?","values":["","","","",""]},
-              {"name":"Your questions now","values":["","","","",""]}
-            ]
-          }
-        }
-
-      ]
-    },
     "toolbar": [
       {
         "id": "select",
@@ -300,6 +262,46 @@
                         "supports": []
                         }
                       ],
+          "config": {
+            "defaultDocumentTemplate": {
+                          "tiles": [
+                            {
+                              "id": "17SEP20221154AM",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "dCd3mnjfG3EpvlXr",
+                              "title": "Table 1",
+                              "content": {
+                                "type": "Table",
+                                "name": "Cast of Characters",
+                                "columns": [
+                                  {"name":"Character name","width":200,"values":["Narrator","Rakesh (main character)","Nicole (co-worker)","Deaundre (co-worker) ","Meera (cousin)","Dr. Lee (physician)","Dr. Zeiders (scientist)","Ajay (son)","Zainab (daughter)"]},
+                                  {"name":"Actor name","width":200,"values":["","","","","","","","",""]}
+                                ]
+                              }
+                            },
+                            {
+                              "id": "17SEP20221202pm",
+                              "content": {
+                                "type": "Table",
+                                "name": "Evidence Table",
+                                "columns": [
+                                  {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                                  {"name":"What did you learn from it?","width":200,"values":["","","","",""]},
+                                  {"name":"Your questions now","width":200,"values":["","","","",""]}
+                                ]
+                              }
+                            }
+                          ]
+            }
+          },
           "supports": []
         },
         {
@@ -401,6 +403,46 @@
                           "supports": []
                         }
                       ],
+          "config": {
+                        "defaultDocumentTemplate": {
+                                      "tiles": [
+                                        {
+                                          "id": "17SEP20221154AM",
+                                          "content": {
+                                            "type": "Text",
+                                            "format": "html",
+                                            "text": [
+                                              "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "id": "dCd3mnjfG3EpvlXr",
+                                          "title": "Table 1",
+                                          "content": {
+                                            "type": "Table",
+                                            "name": "Cast of Characters",
+                                            "columns": [
+                                              {"name":"Character name","width":200,"values":["Narrator","Rakesh (main character)","Nicole (co-worker)","Deaundre (co-worker) ","Meera (cousin)","Dr. Lee (physician)","Dr. Zeiders (scientist)","Ajay (son)","Zainab (daughter)"]},
+                                              {"name":"Actor name","width":200,"values":["","","","","","","","",""]}
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "id": "17SEP20221202pm",
+                                          "content": {
+                                            "type": "Table",
+                                            "name": "Evidence Table",
+                                            "columns": [
+                                              {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                                              {"name":"What did you learn from it?","width":200,"values":["","","","",""]},
+                                              {"name":"Your questions now","width":200,"values":["","","","",""]}
+                                            ]
+                                          }
+                                        }
+                                      ]
+                        }
+                      },
           "supports": []
         },
         {
@@ -434,6 +476,46 @@
                           }
                         }
                       ],
+          "config": {
+                        "defaultDocumentTemplate": {
+                                      "tiles": [
+                                        {
+                                          "id": "17SEP20221154AM",
+                                          "content": {
+                                            "type": "Text",
+                                            "format": "html",
+                                            "text": [
+                                              "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "id": "dCd3mnjfG3EpvlXr",
+                                          "title": "Table 1",
+                                          "content": {
+                                            "type": "Table",
+                                            "name": "Cast of Characters",
+                                            "columns": [
+                                              {"name":"Character name","width":200,"values":["Narrator","Rakesh (main character)","Nicole (co-worker)","Deaundre (co-worker) ","Meera (cousin)","Dr. Lee (physician)","Dr. Zeiders (scientist)","Ajay (son)","Zainab (daughter)"]},
+                                              {"name":"Actor name","width":200,"values":["","","","","","","","",""]}
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "id": "17SEP20221202pm",
+                                          "content": {
+                                            "type": "Table",
+                                            "name": "Evidence Table",
+                                            "columns": [
+                                              {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                                              {"name":"What did you learn from it?","width":200,"values":["","","","",""]},
+                                              {"name":"Your questions now","width":200,"values":["","","","",""]}
+                                            ]
+                                          }
+                                        }
+                                      ]
+                        }
+                      },
           "supports": []
         },
         {
@@ -477,6 +559,46 @@
                           }
                         }
                       ],
+          "config": {
+                        "defaultDocumentTemplate": {
+                                      "tiles": [
+                                        {
+                                          "id": "17SEP20221154AM",
+                                          "content": {
+                                            "type": "Text",
+                                            "format": "html",
+                                            "text": [
+                                              "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "id": "dCd3mnjfG3EpvlXr",
+                                          "title": "Table 1",
+                                          "content": {
+                                            "type": "Table",
+                                            "name": "Cast of Characters",
+                                            "columns": [
+                                              {"name":"Character name","width":200,"values":["Narrator","Rakesh (main character)","Nicole (co-worker)","Deaundre (co-worker) ","Meera (cousin)","Dr. Lee (physician)","Dr. Zeiders (scientist)","Ajay (son)","Zainab (daughter)"]},
+                                              {"name":"Actor name","width":200,"values":["","","","","","","","",""]}
+                                            ]
+                                          }
+                                        },
+                                        {
+                                          "id": "17SEP20221202pm",
+                                          "content": {
+                                            "type": "Table",
+                                            "name": "Evidence Table",
+                                            "columns": [
+                                              {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                                              {"name":"What did you learn from it?","width":200,"values":["","","","",""]},
+                                              {"name":"Your questions now","width":200,"values":["","","","",""]}
+                                            ]
+                                          }
+                                        }
+                                      ]
+                        }
+                      },
           "supports": []
         },
         {
@@ -525,6 +647,46 @@
                           }
                         }
                       ],
+          "config": {
+            "defaultDocumentTemplate": {
+                          "tiles": [
+                            {
+                              "id": "17SEP20221154AM",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "dCd3mnjfG3EpvlXr",
+                              "title": "Table 1",
+                              "content": {
+                                "type": "Table",
+                                "name": "Cast of Characters",
+                                "columns": [
+                                  {"name":"Character name","width":200,"values":["Narrator","Rakesh (main character)","Nicole (co-worker)","Deaundre (co-worker) ","Meera (cousin)","Dr. Lee (physician)","Dr. Zeiders (scientist)","Ajay (son)","Zainab (daughter)"]},
+                                  {"name":"Actor name","width":200,"values":["","","","","","","","",""]}
+                                ]
+                              }
+                            },
+                            {
+                              "id": "17SEP20221202pm",
+                              "content": {
+                                "type": "Table",
+                                "name": "Evidence Table",
+                                "columns": [
+                                  {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                                  {"name":"What did you learn from it?","width":200,"values":["","","","",""]},
+                                  {"name":"Your questions now","width":200,"values":["","","","",""]}
+                                ]
+                              }
+                            }
+                          ]
+                        }
+                      },
           "supports": []
         },
         {
@@ -580,6 +742,46 @@
                           }
                         }
                       ],
+          "config": {
+            "defaultDocumentTemplate": {
+                          "tiles": [
+                            {
+                              "id": "17SEP20221154AM",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "dCd3mnjfG3EpvlXr",
+                              "title": "Table 1",
+                              "content": {
+                                "type": "Table",
+                                "name": "Cast of Characters",
+                                "columns": [
+                                  {"name":"Character name","width":200,"values":["Narrator","Rakesh (main character)","Nicole (co-worker)","Deaundre (co-worker) ","Meera (cousin)","Dr. Lee (physician)","Dr. Zeiders (scientist)","Ajay (son)","Zainab (daughter)"]},
+                                  {"name":"Actor name","width":200,"values":["","","","","","","","",""]}
+                                ]
+                              }
+                            },
+                            {
+                              "id": "17SEP20221202pm",
+                              "content": {
+                                "type": "Table",
+                                "name": "Evidence Table",
+                                "columns": [
+                                  {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                                  {"name":"What did you learn from it?","width":200,"values":["","","","",""]},
+                                  {"name":"Your questions now","width":200,"values":["","","","",""]}
+                                ]
+                              }
+                            }
+                          ]
+            }
+          },
           "supports": []
         }
       ]
@@ -705,7 +907,47 @@
                         },
                         "supports": []
                         }
-                      ],
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "17SEP20221154AM",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "dCd3mnjfG3EpvlXr",
+                  "title": "Table 1",
+                  "content": {
+                    "type": "Table",
+                    "name": "Cast of Characters",
+                    "columns": [
+                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)", "Ms.Guerra (science teacher)"]},
+                      {"name":"Actor name","width":200,"values":["","","","","","","","","",""]}
+                    ]
+                  }
+                },
+                {
+                  "id": "17SEP20221202pm",
+                  "content": {
+                    "type": "Table",
+                    "name": "Evidence Table",
+                    "columns": [
+                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
+                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                    ]
+                  }
+                }
+              ]
+            }
+          },
           "supports": []
         },
         {
@@ -778,7 +1020,47 @@
                           },
                           "supports": []
                         }
-                      ],
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "17SEP20221154AM",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "dCd3mnjfG3EpvlXr",
+                  "title": "Table 1",
+                  "content": {
+                    "type": "Table",
+                    "name": "Cast of Characters",
+                    "columns": [
+                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)", "Ms.Guerra (science teacher)"]},
+                      {"name":"Actor name","width":200,"values":["","","","","","","","","",""]}
+                    ]
+                  }
+                },
+                {
+                  "id": "17SEP20221202pm",
+                  "content": {
+                    "type": "Table",
+                    "name": "Evidence Table",
+                    "columns": [
+                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
+                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                    ]
+                  }
+                }
+              ]
+            }
+          },
           "supports": []
         },
         {
@@ -822,7 +1104,47 @@
                             "supports": []
                           }
                         }
-                      ],
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "17SEP20221154AM",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "dCd3mnjfG3EpvlXr",
+                  "title": "Table 1",
+                  "content": {
+                    "type": "Table",
+                    "name": "Cast of Characters",
+                    "columns": [
+                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)", "Ms.Guerra (science teacher)"]},
+                      {"name":"Actor name","width":200,"values":["","","","","","","","","",""]}
+                    ]
+                  }
+                },
+                {
+                  "id": "17SEP20221202pm",
+                  "content": {
+                    "type": "Table",
+                    "name": "Evidence Table",
+                    "columns": [
+                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
+                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                    ]
+                  }
+                }
+              ]
+            }
+          },
           "supports": []
         },
         {
@@ -856,7 +1178,47 @@
                             "supports": []
                           }
                         }
-                      ],
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "17SEP20221154AM",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "dCd3mnjfG3EpvlXr",
+                  "title": "Table 1",
+                  "content": {
+                    "type": "Table",
+                    "name": "Cast of Characters",
+                    "columns": [
+                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)", "Ms.Guerra (science teacher)"]},
+                      {"name":"Actor name","width":200,"values":["","","","","","","","","",""]}
+                    ]
+                  }
+                },
+                {
+                  "id": "17SEP20221202pm",
+                  "content": {
+                    "type": "Table",
+                    "name": "Evidence Table",
+                    "columns": [
+                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
+                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                    ]
+                  }
+                }
+              ]
+            }
+          },
           "supports": []
         },
         {
@@ -891,7 +1253,47 @@
                             "supports": []
                           }
                         }
-                      ],
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "17SEP20221154AM",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "dCd3mnjfG3EpvlXr",
+                  "title": "Table 1",
+                  "content": {
+                    "type": "Table",
+                    "name": "Cast of Characters",
+                    "columns": [
+                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)", "Ms.Guerra (science teacher)"]},
+                      {"name":"Actor name","width":200,"values":["","","","","","","","","",""]}
+                    ]
+                  }
+                },
+                {
+                  "id": "17SEP20221202pm",
+                  "content": {
+                    "type": "Table",
+                    "name": "Evidence Table",
+                    "columns": [
+                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
+                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                    ]
+                  }
+                }
+              ]
+            }
+          },
           "supports": []
         },
         {
@@ -944,7 +1346,47 @@
                             "supports": []
                           }
                         }
-                      ],
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "17SEP20221154AM",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "dCd3mnjfG3EpvlXr",
+                  "title": "Table 1",
+                  "content": {
+                    "type": "Table",
+                    "name": "Cast of Characters",
+                    "columns": [
+                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)", "Ms.Guerra (science teacher)"]},
+                      {"name":"Actor name","width":200,"values":["","","","","","","","","",""]}
+                    ]
+                  }
+                },
+                {
+                  "id": "17SEP20221202pm",
+                  "content": {
+                    "type": "Table",
+                    "name": "Evidence Table",
+                    "columns": [
+                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
+                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                    ]
+                  }
+                }
+              ]
+            }
+          },
           "supports": []
         }
       ]
@@ -1067,7 +1509,47 @@
                         },
                         "supports": []
                         }
-                      ],
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "17SEP20221154AM",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "dCd3mnjfG3EpvlXr",
+                  "title": "Table 1",
+                  "content": {
+                    "type": "Table",
+                    "name": "Cast of Characters",
+                    "columns": [
+                      {"name":"Character name","width":200,"values":["Narrator","Felix (main character)","Josué (boyfriend)","Camila (friend)","Prof. Nassir (teacher)","Mamá (mother)"]},
+                      {"name":"Actor name","width":200,"values":["","","","","",""]}
+                    ]
+                  }
+                },
+                {
+                  "id": "17SEP20221202pm",
+                  "content": {
+                    "type": "Table",
+                    "name": "Evidence Table",
+                    "columns": [
+                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
+                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                    ]
+                  }
+                }
+              ]
+            }
+          },
           "supports": []
         },
         {
@@ -1140,7 +1622,47 @@
                           },
                           "supports": []
                         }
-                      ],
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "17SEP20221154AM",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "dCd3mnjfG3EpvlXr",
+                  "title": "Table 1",
+                  "content": {
+                    "type": "Table",
+                    "name": "Cast of Characters",
+                    "columns": [
+                      {"name":"Character name","width":200,"values":["Narrator","Felix (main character)","Josué (boyfriend)","Camila (friend)","Prof. Nassir (teacher)","Mamá (mother)"]},
+                      {"name":"Actor name","width":200,"values":["","","","","",""]}
+                    ]
+                  }
+                },
+                {
+                  "id": "17SEP20221202pm",
+                  "content": {
+                    "type": "Table",
+                    "name": "Evidence Table",
+                    "columns": [
+                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
+                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                    ]
+                  }
+                }
+              ]
+            }
+          },
           "supports": []
         },
         {
@@ -1255,7 +1777,47 @@
                             "supports": []
                           }
                         }
-                      ],
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "17SEP20221154AM",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "dCd3mnjfG3EpvlXr",
+                  "title": "Table 1",
+                  "content": {
+                    "type": "Table",
+                    "name": "Cast of Characters",
+                    "columns": [
+                      {"name":"Character name","width":200,"values":["Narrator","Felix (main character)","Josué (boyfriend)","Camila (friend)","Prof. Nassir (teacher)","Mamá (mother)"]},
+                      {"name":"Actor name","width":200,"values":["","","","","",""]}
+                    ]
+                  }
+                },
+                {
+                  "id": "17SEP20221202pm",
+                  "content": {
+                    "type": "Table",
+                    "name": "Evidence Table",
+                    "columns": [
+                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
+                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                    ]
+                  }
+                }
+              ]
+            }
+          },
           "supports": []
         },
         {
@@ -1309,7 +1871,47 @@
                 ]
               }
             }
-                      ],
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "17SEP20221154AM",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "dCd3mnjfG3EpvlXr",
+                  "title": "Table 1",
+                  "content": {
+                    "type": "Table",
+                    "name": "Cast of Characters",
+                    "columns": [
+                      {"name":"Character name","width":200,"values":["Narrator","Felix (main character)","Josué (boyfriend)","Camila (friend)","Prof. Nassir (teacher)","Mamá (mother)"]},
+                      {"name":"Actor name","width":200,"values":["","","","","",""]}
+                    ]
+                  }
+                },
+                {
+                  "id": "17SEP20221202pm",
+                  "content": {
+                    "type": "Table",
+                    "name": "Evidence Table",
+                    "columns": [
+                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
+                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                    ]
+                  }
+                }
+              ]
+            }
+          },
           "supports": []
         },
         {
@@ -1387,7 +1989,47 @@
                             "supports": []
                           }
                         }
-                      ],
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "17SEP20221154AM",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "dCd3mnjfG3EpvlXr",
+                  "title": "Table 1",
+                  "content": {
+                    "type": "Table",
+                    "name": "Cast of Characters",
+                    "columns": [
+                      {"name":"Character name","width":200,"values":["Narrator","Felix (main character)","Josué (boyfriend)","Camila (friend)","Prof. Nassir (teacher)","Mamá (mother)"]},
+                      {"name":"Actor name","width":200,"values":["","","","","",""]}
+                    ]
+                  }
+                },
+                {
+                  "id": "17SEP20221202pm",
+                  "content": {
+                    "type": "Table",
+                    "name": "Evidence Table",
+                    "columns": [
+                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
+                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
+                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                    ]
+                  }
+                }
+              ]
+            }
+          },
           "supports": []
         }
       ]
