@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import classNames from "classnames";
 import { UserModelType } from "../../models/stores/user";
 import { WithId } from "../../hooks/firestore-hooks";
+import { useUIStore } from "../../hooks/use-stores";
 import { CommentDocument } from "../../lib/firestore-schema";
 import { CommentCard } from "./comment-card";
 import { getToolContentInfoById } from "../../models/tools/tool-content-info";
@@ -33,13 +34,15 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   const focusId = focusTileId === undefined ? null : focusTileId;
   const focusedItemHasNoComments = !chatThreads?.find(item => (item.tileId === focusId));
   const [expandedThread, setExpandedThread] = useState(focusId || '');
-  
+  const ui = useUIStore();
   const handleThreadClick = (clickedId: string | null) => {
     if (clickedId === expandedThread) {
       // We're closing the thread so clear it out.
       setExpandedThread('');
+      ui.setSelectedTileId('');
     } else {
       setExpandedThread(clickedId || "document");
+      ui.setSelectedTileId(clickedId || '');
     }
   };
 
