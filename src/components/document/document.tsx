@@ -357,16 +357,18 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
     const isPrimary = this.isPrimary();
     const displayId = document.getDisplayId(appConfig);
     const hasDisplayId = !!displayId;
+    const showFileMenu = this.showFileMenu();
     return (
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
           <div className="actions">
-            <DocumentFileMenu document={document}
-              onOpenDocument={this.handleOpenDocumentClick}
-              onCopyDocument={this.handleCopyDocumentClick}
-              isDeleteDisabled={countNotDeleted < 1}
-              onDeleteDocument={this.handleDeleteDocumentClick}
-              onAdminDestroyDocument={this.handleAdminDestroyDocument} />
+            { showFileMenu && 
+              <DocumentFileMenu document={document}
+                onOpenDocument={this.handleOpenDocumentClick}
+                onCopyDocument={this.handleCopyDocumentClick}
+                isDeleteDisabled={countNotDeleted < 1}
+                onDeleteDocument={this.handleDeleteDocumentClick}
+                onAdminDestroyDocument={this.handleAdminDestroyDocument} /> }
             {this.showPublishButton(document) &&
               <PublishButton document={document} />}
           </div>
