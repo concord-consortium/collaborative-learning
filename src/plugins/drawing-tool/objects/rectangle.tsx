@@ -75,6 +75,8 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
         handleDrag(e, model);
       }
     }}
+    pointerEvents={"visible"} //allows user to select inside of an unfilled object
+
     />;
 
 });

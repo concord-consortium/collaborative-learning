@@ -58,6 +58,7 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
         handleDrag(e, model);
       }
     }}
+    pointerEvents={"visible"}
     />;
 });
 

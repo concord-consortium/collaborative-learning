@@ -62,12 +62,6 @@ export interface LineObjectSnapshot extends SnapshotIn<typeof LineObject> {}
 
 export const LineComponent = observer(function LineComponent({model, handleHover, handleDrag}
   : IDrawingComponentProps) {
-  // console.log(model);
-  // console.log("-------");
-  // console.log(handleHover);
-  // console.log("-------");
-  // console.log(handleDrag);
-
   if (model.type !== "line") return null;
   const { id, x, y, deltaPoints, stroke, strokeWidth, strokeDashArray } = model as LineObjectType;
   const commands = `M ${x} ${y} ${deltaPoints.map((point) => `l ${point.dx} ${point.dy}`).join(" ")}`;
@@ -85,6 +79,7 @@ export const LineComponent = observer(function LineComponent({model, handleHover
         handleDrag(e, model);
       }
     }}
+    pointerEvents={"visible"}
     />;
 });
 
@@ -96,7 +91,6 @@ export class LineDrawingTool extends DrawingTool {
   }
 
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
-    // console.log("FreeHand Drawing, handleMouseDown");
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
     const {stroke, strokeWidth, strokeDashArray} = this.settings;
