@@ -9,12 +9,6 @@
   overflow-y: auto;
   white-space: pre-wrap;
 
-  .comment-card-content {
-    padding-bottom: 2px;
-    &.selected {
-      background-color: $comment-select-green;
-    }
-  }
 
   .comment-card-header {
     display: flex;
@@ -24,27 +18,6 @@
     padding: 0;
     background-color: $charcoal-light-8;
     color: $charcoal;
-    &.comment-select {
-      background-color: $comment-select-green-dark;
-    }
-    &.problems {
-      background-color: $problem-orange-light-7;
-    }
-    &.teacher-guide {
-      background-color: $learninglog-green-light-7;
-    }
-    &.my-work {
-      background-color: $workspace-teal-light-6;
-    }
-    &.class-work {
-      background-color: $classwork-purple-light-7;
-    }
-    &.supports {
-      background-color: $support-blue-light-7;
-    }
-    .comment-card-header-icon {
-      height: 34px;
-    }
   }
   .comment-thread {
     margin: 3px 0 2px 5px;
