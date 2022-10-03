@@ -328,6 +328,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   //we want to populate our objectsBeingDragged state array
 
   public setCurrentDrawingObject(object: DrawingObjectType | null) {
+    console.log("in setCurrentDrawingObject");
     this.setState({currentDrawingObject: object});
   }
 
@@ -365,7 +366,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           {this.renderObjects(object => object.type === "image" && !idsBeingDragged.includes(object.id))}
           {this.renderObjects(object => object.type !== "image" && !idsBeingDragged.includes(object.id))}
           {this.renderSelectedObjects(objectsToRenderSelected, SELECTION_COLOR)}
-
+          {console.log("current tool:", this.state.currentDrawingObject)}
           {this.state.objectsBeingDragged.map((object) => renderDrawingObject(object))}
           {(this.state.hoverObject && !hoveringOverAlreadySelectedObject && isAlive(this.state.hoverObject))
             ? this.renderSelectedObjects([this.state.hoverObject], HOVER_COLOR)

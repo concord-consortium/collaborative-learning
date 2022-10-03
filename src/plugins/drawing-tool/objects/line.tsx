@@ -96,7 +96,7 @@ export class LineDrawingTool extends DrawingTool {
   }
 
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
-    console.log("FreeHand Drawing, handleMouseDown");
+    // console.log("FreeHand Drawing, handleMouseDown");
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
     const {stroke, strokeWidth, strokeDashArray} = this.settings;
