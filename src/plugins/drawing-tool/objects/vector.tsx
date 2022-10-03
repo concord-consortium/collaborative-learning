@@ -51,6 +51,7 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
         handleDrag(e, model);
       }
     }}
+    pointerEvents={"visible"}
     />;
 });
 
