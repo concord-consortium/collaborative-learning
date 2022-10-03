@@ -186,7 +186,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   // TODO: it seems this could be cleaned up. Keeping the state variable objectsBeingDragged
   // locally in this function and modifying the local variable is not safe.
   public handleSelectedObjectMouseDown = (e: React.MouseEvent<any>, obj: DrawingObjectType) => {
-    console.log("selected object[mouseDown]: ", obj);
     if (this.props.readOnly) return;
     let moved = false;
     const {selectedObjects, hoverObject } = this.state;
@@ -299,7 +298,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   }
 
   public renderSelectedObjects(selectedObjects: DrawingObjectType[], color: string) {
-    console.log("line 301 renderSelectedObjects");
     return selectedObjects.map((object, index) => {
       let {nw: {x: nwX, y: nwY}, se: {x: seX, y: seY}} = object.boundingBox;
       nwX -= SELECTION_BOX_PADDING;
@@ -366,11 +364,9 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         <svg xmlnsXlink="http://www.w3.org/1999/xlink" width={1500} height={1500} ref={this.setSvgRef}>
           {this.renderObjects(object => object.type === "image" && !idsBeingDragged.includes(object.id))}
           {this.renderObjects(object => object.type !== "image" && !idsBeingDragged.includes(object.id))}
-          {console.log("State: objectsBeingDragged", this.state.objectsBeingDragged)}
           {this.renderSelectedObjects(objectsToRenderSelected, SELECTION_COLOR)}
 
           {this.state.objectsBeingDragged.map((object) => renderDrawingObject(object))}
-          {console.log("State: selectedObject", this.state.selectedObjects)}
           {(this.state.hoverObject && !hoveringOverAlreadySelectedObject && isAlive(this.state.hoverObject))
             ? this.renderSelectedObjects([this.state.hoverObject], HOVER_COLOR)
             : null}
