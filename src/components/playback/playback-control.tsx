@@ -49,13 +49,14 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   useEffect(() => {
     if (sliderValue > history.length) {
       setSliderValue(history.length);
+      handlePlayPauseToggle(false);
     }
-  },[history.length, sliderValue]);
+  },[handlePlayPauseToggle, history.length, sliderValue]);
 
   useEffect(() => {
     if (sliderPlaying) {
       const slider = setTimeout(()=>{
-        if (sliderValue < history.length) {
+        if (sliderValue <= history.length) {
           treeManager.goToHistoryEntry(sliderValue)
             .then(()=>{
               treeManager.setCurrentHistoryIndex(sliderValue);
