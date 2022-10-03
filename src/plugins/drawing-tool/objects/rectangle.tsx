@@ -72,8 +72,6 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
     onMouseDown={(e)=> {
       if (handleDrag !== undefined){
-        // console.log("rectangle Model", model);
-        // console.log("rectangle handleHover", handleHover);
         handleDrag(e, model);
       }
     }}

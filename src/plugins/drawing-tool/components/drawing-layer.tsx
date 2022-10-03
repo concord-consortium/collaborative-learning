@@ -186,7 +186,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   // TODO: it seems this could be cleaned up. Keeping the state variable objectsBeingDragged
   // locally in this function and modifying the local variable is not safe.
   public handleSelectedObjectMouseDown = (e: React.MouseEvent<any>, obj: DrawingObjectType) => {
-    if (this.props.readOnly) return;
+    if (this.props.readOnly || (this.currentTool !== this.tools.select)) return;
     let moved = false;
     const {selectedObjects, hoverObject } = this.state;
     let { objectsBeingDragged } = this.state;
@@ -328,7 +328,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   //we want to populate our objectsBeingDragged state array
 
   public setCurrentDrawingObject(object: DrawingObjectType | null) {
-    console.log("in setCurrentDrawingObject");
     this.setState({currentDrawingObject: object});
   }
 
@@ -366,7 +365,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
           {this.renderObjects(object => object.type === "image" && !idsBeingDragged.includes(object.id))}
           {this.renderObjects(object => object.type !== "image" && !idsBeingDragged.includes(object.id))}
           {this.renderSelectedObjects(objectsToRenderSelected, SELECTION_COLOR)}
-          {console.log("current tool:", this.state.currentDrawingObject)}
           {this.state.objectsBeingDragged.map((object) => renderDrawingObject(object))}
           {(this.state.hoverObject && !hoveringOverAlreadySelectedObject && isAlive(this.state.hoverObject))
             ? this.renderSelectedObjects([this.state.hoverObject], HOVER_COLOR)

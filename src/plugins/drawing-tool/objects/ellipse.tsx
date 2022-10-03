@@ -55,7 +55,6 @@ export const EllipseComponent = observer(function EllipseComponent({model, handl
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
     onMouseDown={(e)=> {
       if (handleDrag !== undefined){
-        console.log("in ellipse.tsx, onMouseDown");
         handleDrag(e, model);
       }
     }}
