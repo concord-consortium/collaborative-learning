@@ -108,7 +108,6 @@ export class LineDrawingTool extends DrawingTool {
     };
 
     const handleMouseMove = (e2: MouseEvent) => {
-      console.log("Freehand Drawing handleMouseMove");
       e2.preventDefault();
       addPoint(e2);
     };
