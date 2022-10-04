@@ -5,7 +5,7 @@
   min-height: 106px;
   overflow-y: auto;
   white-space: pre-wrap;
-  margin: 0 2px;
+  padding: 0 2px;
 
   &.selected {
     background-color: $comment-select-green;

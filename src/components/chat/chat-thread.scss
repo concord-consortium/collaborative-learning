@@ -25,17 +25,22 @@
         fill: $problem-orange;
       }
     }
+    &.chat-thread-focused {
+      border: solid 1px $charcoal-light-2;
+    }
     .chat-thread-header {
-      margin: 0 2px;
+      padding: 0 2px;
       display: flex;
       flex-direction: row;
-      border: solid 2px var(--charcoal-light-2);
       align-items: center;
       justify-content: space-between;
       background-color: $charcoal-light-8;
       color: $charcoal;
+      border: solid 1px $charcoal-light-2;
+
       &.selected {
         background-color: $comment-select-green-dark;
+        border: none;
       }
       &.problems {
         background-color: $problem-orange-light-7;
