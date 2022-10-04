@@ -37,12 +37,16 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   const ui = useUIStore();
   const handleThreadClick = (clickedId: string | null) => {
     if (clickedId === expandedThread) {
-      // We're closing the thread so clear it out.
+      // We're closing the thread so clear out expanded thread.
+      // The tile should stay selected though.
       setExpandedThread('');
-      ui.setSelectedTileId('');
     } else {
-      setExpandedThread(clickedId || "document");
-      ui.setSelectedTileId(clickedId || '');
+      setExpandedThread(clickedId || '');
+      // Don't change the selected tile when we clicked on the document
+      // isntead of a tile.
+      if (clickedId !== "document") {
+        ui.setSelectedTileId(clickedId || '');
+      }
     }
   };
 
