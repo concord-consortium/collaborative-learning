@@ -41,12 +41,10 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       // The tile should stay selected though.
       setExpandedThread('');
     } else {
+      // If the clickedId was the document, the selectedTile should be set to empty.
+      const selectedTileId = clickedId === "document" ? '' : clickedId;
+      ui.setSelectedTileId(selectedTileId || '');
       setExpandedThread(clickedId || '');
-      // Don't change the selected tile when we clicked on the document
-      // isntead of a tile.
-      if (clickedId !== "document") {
-        ui.setSelectedTileId(clickedId || '');
-      }
     }
   };
 
