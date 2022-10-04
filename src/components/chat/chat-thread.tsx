@@ -63,7 +63,12 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
               "chat-thread-focused": shouldBeFocused,
             })}
             data-testid="chat-thread">
-            <div className="chat-thread-header" onClick={() => handleThreadClick(key)}> 
+            <div className={classNames(`chat-thread-header ${activeNavTab}`,
+            {
+             "selected": shouldBeFocused 
+            })
+            }
+            onClick={() => handleThreadClick(key)}> 
               <div className="chat-thread-tile-info">
                 {Icon && <Icon/>}
                 <div className="chat-thread-title"> {title} </div>
@@ -97,7 +102,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
         <div key={focusTileId ? focusTileId : "document"}
           className="chat-thread should-be-focused"
           data-testid="chat-thread">
-          <div className="chat-thread-header"> 
+          <div className={`chat-thread-header ${activeNavTab} selected`}> 
             <div className="chat-thread-tile-info">
               <div className="comment-card-header comment-select" data-testid="comment-card-header">
                 <div className="comment-card-header-icon" data-testid="comment-card-header-icon">

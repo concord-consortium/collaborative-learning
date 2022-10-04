@@ -8,7 +8,6 @@
     width: 100%;
     margin: 2px;
     white-space: pre-wrap;
-    background-color: $classwork-purple-light-7;
     .user-icon {
       display: flex;
       align-items: center;
@@ -33,6 +32,32 @@
       border: solid 2px var(--charcoal-light-2);
       align-items: center;
       justify-content: space-between;
+      background-color: $charcoal-light-8;
+      color: $charcoal;
+      &.selected {
+        background-color: $comment-select-green-dark;
+      }
+      &.problems {
+        background-color: $problem-orange-light-7;
+      }
+      &.teacher-guide {
+        background-color: $learninglog-green-light-7;
+      }
+      &.my-work {
+        background-color: $workspace-teal-light-6;
+      }
+      &.class-work {
+        background-color: $classwork-purple-light-7;
+      }
+      &.supports {
+        background-color: $support-blue-light-7;
+      }
+      .comment-card-header-icon {
+        height: 34px;
+      }
+      &.selected {
+        background-color: $comment-select-green-dark;
+      }
     }
     .chat-thread-title {
         line-height: 1.29;
@@ -56,8 +81,5 @@
       background-color: white;
       text-align: center;
     }
-  }
-  .chat-thread.chat-thread-focused {
-    background-color: $learninglog-green-light-7
   }
 }
