@@ -169,8 +169,8 @@ context('Draw Tool Tile', function () {
         drawToolTile.getRectangleDrawing().first().should("have.attr", "x").then(parseInt).and("within", 150, 250);
 
         // The best way I found to remove the hover was to delete the rectangle
-        drawToolTile.getRectangleDrawing().first().click({force: true, scrollBehavior: false});
         drawToolTile.getDrawToolDelete().click();
+        drawToolTile.getRectangleDrawing().should("not.exist");
         drawToolTile.getSelectionBox().should("not.exist");
       });
       it("verify draw squares", () => {

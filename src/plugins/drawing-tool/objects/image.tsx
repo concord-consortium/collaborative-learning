@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import { autorun } from "mobx";
 import { Tooltip } from "react-tippy";
 import { EntryStatus, gImageMap } from "../../../models/image-map";
-import { DrawingObject, DrawingObjectSnapshot, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
+import { DrawingObject, DrawingObjectSnapshot, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import placeholderImage from "../../../assets/image_placeholder.png";
@@ -22,7 +22,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
 
     // The filename needs to be stored because it is meta data created when a user adds a file
     // by uploading a file from their computer. The filename cannot be discovered just from the
-    // URL. Currently images can't be uploaded into the drawing tile, but they can be uploaded 
+    // URL. Currently images can't be uploaded into the drawing tile, but they can be uploaded
     // into a image tile and then that image dragged to the drawing tile. In this case we want
     // to preserve the filename of the source image.
     filename: types.maybe(types.string),
@@ -55,7 +55,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
     setHeight(height: number){self.height = height;}
   }))
   .actions(self => ({
-    setUrl(url: string, filename?: string){  
+    setUrl(url: string, filename?: string){
       self.url = url;
     },
 
@@ -68,7 +68,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
       // this way when the image is reloaded from state the width and height are immediately
       // available and there won't be any resize flickering.
       // In all cases I can find, the correct width and height will be set when the ImageObject is
-      // created. However the old code was modifying the width and height after the image 
+      // created. However the old code was modifying the width and height after the image
       // entry became available, so there might be a case where width and height change.
       addDisposer(self, autorun(() =>{
         const imageMapEntry = gImageMap.getCachedImage(self.url);
@@ -95,7 +95,8 @@ export function isImageObjectSnapshot(object: DrawingObjectSnapshot): object is 
   return object.type === "image";
 }
 
-export const ImageComponent: React.FC<IDrawingComponentProps> = observer(function ImageComponent({model, handleHover}){
+export const ImageComponent: React.FC<IDrawingComponentProps> = observer(function ImageComponent({model, handleHover,
+  handleDrag}){
   if (model.type !== "image") return null;
   const { id, displayUrl, x, y, width, height } = model as ImageObjectType;
 
@@ -107,7 +108,10 @@ export const ImageComponent: React.FC<IDrawingComponentProps> = observer(functio
     width={width}
     height={height}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null} />;
+    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+    onMouseDown={(e)=> handleDrag?.(e, model)}
+    />;
+
 });
 
 export class StampDrawingTool extends DrawingTool {
@@ -166,7 +170,7 @@ export const StampToolbarButton: React.FC<IToolbarButtonProps> = ({
   };
 
   return (
-    currentStamp 
+    currentStamp
       ? <Tooltip title="Stamp" {...tooltipOptions}>
           <div className={buttonClasses({ modalButton, selected })} {...handlers}>
             <img src={currentStamp.url} draggable="false" />

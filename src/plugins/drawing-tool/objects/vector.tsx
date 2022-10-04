@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
-import { computeStrokeDashArray, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
+import { computeStrokeDashArray, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
@@ -12,7 +12,7 @@ export const VectorObject = StrokedObject.named("VectorObject")
   .props({
     type: typeField("vector"),
     dx: types.number,
-    dy: types.number    
+    dy: types.number
   })
   .views(self => ({
     get boundingBox() {
@@ -31,7 +31,8 @@ export const VectorObject = StrokedObject.named("VectorObject")
 export interface VectorObjectType extends Instance<typeof VectorObject> {}
 export interface VectorObjectSnapshot extends SnapshotIn<typeof VectorObject> {}
 
-export const VectorComponent = observer(function VectorComponent({model, handleHover} : IDrawingComponentProps) {
+export const VectorComponent = observer(function VectorComponent({model, handleHover,
+  handleDrag} : IDrawingComponentProps) {
   if (model.type !== "vector") return null;
   const { id, x, y, dx, dy, stroke, strokeWidth, strokeDashArray } = model as VectorObjectType;
   return <line
@@ -44,7 +45,9 @@ export const VectorComponent = observer(function VectorComponent({model, handleH
     strokeWidth={strokeWidth}
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null} />;
+    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+    onMouseDown={(e)=> handleDrag?.(e, model)}
+    />;
 });
 
 export class VectorDrawingTool extends DrawingTool {

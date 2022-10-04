@@ -1,7 +1,7 @@
 import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
-import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer, 
+import { computeStrokeDashArray, DrawingTool, FilledObject, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import RectToolIcon from "../assets/rectangle-icon.svg";
@@ -54,7 +54,8 @@ export interface RectangleObjectType extends Instance<typeof RectangleObject> {}
 export interface RectangleObjectSnapshot extends SnapshotIn<typeof RectangleObject> {}
 export interface RectangleObjectSnapshotForAdd extends SnapshotIn<typeof RectangleObject> {type: string}
 
-export const RectangleComponent = observer(function RectangleComponent({model, handleHover} : IDrawingComponentProps) {
+export const RectangleComponent = observer(function RectangleComponent({model, handleHover,
+  handleDrag} : IDrawingComponentProps) {
   if (model.type !== "rectangle") return null;
   const { id, x, y, width, height, stroke, strokeWidth, strokeDashArray, fill } = model as RectangleObjectType;
   return <rect
@@ -68,7 +69,11 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
     strokeWidth={strokeWidth}
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null} />;
+    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+    onMouseDown={(e)=> handleDrag?.(e, model)}
+    pointerEvents={"visible"} //allows user to select inside of an unfilled object
+
+    />;
 
 });
 
@@ -115,6 +120,6 @@ export class RectangleDrawingTool extends DrawingTool {
 }
 
 export function RectangleToolbarButton({toolbarManager}: IToolbarButtonProps) {
-  return <SvgToolModeButton modalButton="rectangle" title="Rectangle" 
+  return <SvgToolModeButton modalButton="rectangle" title="Rectangle"
     toolbarManager={toolbarManager} SvgIcon={RectToolIcon}  />;
 }

@@ -25,9 +25,9 @@ export interface IToolbarManager {
  * This creates the definition for a type field in MST.
  * The field is optional so it doesn't have to be specified when creating
  * an instance.
- * 
+ *
  * @param typeName the type
- * @returns 
+ * @returns
  */
 export function typeField(typeName: string) {
   return types.optional(types.literal(typeName), typeName);
@@ -35,7 +35,7 @@ export function typeField(typeName: string) {
 
 export const DrawingObject = types.model("DrawingObject", {
   type: types.optional(types.string, () => {throw "Type must be overridden";}),
-  id: types.optional(types.identifier, () => uniqueId()),  
+  id: types.optional(types.identifier, () => uniqueId()),
   x: types.number,
   y: types.number
 })
@@ -69,7 +69,7 @@ export interface DrawingObjectType extends Instance<typeof DrawingObject> {}
 export interface DrawingObjectSnapshot extends SnapshotIn<typeof DrawingObject> {}
 // Snapshots being passed to addNewDrawingObject need to have a type so the MST Union can figure out
 // what they are.  They do not need an id because object will add that when it is created
-export interface DrawingObjectSnapshotForAdd extends SnapshotIn<typeof DrawingObject> {type: string} 
+export interface DrawingObjectSnapshotForAdd extends SnapshotIn<typeof DrawingObject> {type: string}
 
 export const StrokedObject = DrawingObject.named("StrokedObject")
 .props({
@@ -116,13 +116,19 @@ export const DeltaPoint = types.model("DeltaPoint", {
   dx: types.number, dy: types.number
 });
 
-export type HandleObjectHover = 
+export type HandleObjectHover =
   (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObjectType, hovering: boolean) => void;
+
+export type HandleObjectDrag =
+(e: React.MouseEvent<any>, obj: DrawingObjectType) => void;
 
 export interface IDrawingComponentProps {
   model: DrawingObjectType;
   handleHover?: HandleObjectHover;
+  handleDrag?: HandleObjectDrag;
 }
+
+
 
 // TODO: the support for palettes is hard coded to specific tools
 export interface IPaletteState {
@@ -136,7 +142,7 @@ export const kClosedPalettesState = { showStamps: false, showStroke: false, show
 export interface IToolbarButtonProps {
   toolbarManager: IToolbarManager;
   // TODO: the support for palettes is hard coded to specific tools
-  togglePaletteState: (palette: PaletteKey, show?: boolean) => void;  
+  togglePaletteState: (palette: PaletteKey, show?: boolean) => void;
   clearPaletteState: () => void;
 }
 

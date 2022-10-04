@@ -9,8 +9,8 @@ import { safeJsonParse } from "../../../utilities/js-utils";
 import { ImageContentSnapshotOutType } from "../../../models/tools/image/image-content";
 import { gImageMap } from "../../../models/image-map";
 import { SelectionBox } from "./selection-box";
-import { DrawingObjectSnapshotForAdd, DrawingObjectType, DrawingTool, 
-  HandleObjectHover, 
+import { DrawingObjectSnapshotForAdd, DrawingObjectType, DrawingTool,
+  HandleObjectHover,
   IDrawingLayer} from "../objects/drawing-object";
 import { Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { getDrawingToolInfos, renderDrawingObject } from "./drawing-object-manager";
@@ -21,7 +21,6 @@ const HOVER_COLOR = "#bbdd00";
 const SELECTION_BOX_PADDING = 10;
 
 /**  ======= Drawing Layer ======= */
-
 interface DrawingToolMap {
   [key: string]: DrawingTool | undefined;
 }
@@ -45,7 +44,7 @@ interface DrawingLayerViewState {
 }
 
 @observer
-export class DrawingLayerView extends React.Component<DrawingLayerViewProps, DrawingLayerViewState> 
+export class DrawingLayerView extends React.Component<DrawingLayerViewProps, DrawingLayerViewState>
     implements IDrawingLayer {
   public currentTool: DrawingTool|null;
   public tools: DrawingToolMap;
@@ -93,7 +92,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     // TODO: the list of selected objects is operated on directly by the model for example:
     // deleteSelectedObjects. So it is redundant to have the selection stored here in the state
     // too. There are still a few places working with this list of selected objects from the
-    // state instead of the model. 
+    // state instead of the model.
     this.disposers.push(reaction(
       () => this.getContent().selectedIds,
       selectedIds => {
@@ -125,7 +124,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   public syncCurrentTool(selectedButton: string) {
     const settings = this.getContent().toolbarSettings;
     const tool = this.tools[selectedButton];
-    
+
     if (!tool) {
       console.warn("Unknown tool selected", selectedButton);
       return;
@@ -186,7 +185,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   // TODO: it seems this could be cleaned up. Keeping the state variable objectsBeingDragged
   // locally in this function and modifying the local variable is not safe.
   public handleSelectedObjectMouseDown = (e: React.MouseEvent<any>, obj: DrawingObjectType) => {
-    if (this.props.readOnly) return;
+    if (this.props.readOnly || (this.currentTool !== this.tools.select)) return;
     let moved = false;
     const {selectedObjects, hoverObject } = this.state;
     let { objectsBeingDragged } = this.state;
@@ -293,7 +292,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       if (!object || !_filter(object)) {
         return null;
       }
-      return renderDrawingObject(object, this.handleObjectHover);
+      return renderDrawingObject(object, this.handleObjectHover, this.handleSelectedObjectMouseDown);
     });
   }
 
@@ -316,12 +315,12 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
                 stroke={color}
                 strokeWidth="1.5"
                 strokeDasharray="10 5"
-                onMouseDown={(e) => this.handleSelectedObjectMouseDown(e, object)}
-                onMouseEnter={(e) => this.handleObjectHover(e, object, true) }
-                onMouseLeave={(e) => this.handleObjectHover(e, object, false) }
+                pointerEvents={"none"}
                />;
     });
   }
+
+  //we want to populate our objectsBeingDragged state array
 
   public setCurrentDrawingObject(object: DrawingObjectType | null) {
     this.setState({currentDrawingObject: object});
@@ -346,7 +345,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         : false;
 
     const idsBeingDragged = this.state.objectsBeingDragged.map(object => object.id);
-    const objectsToRenderSelected = this.state.objectsBeingDragged.length > 0 ? 
+    const objectsToRenderSelected = this.state.objectsBeingDragged.length > 0 ?
       this.state.objectsBeingDragged : this.state.selectedObjects;
 
     return (
