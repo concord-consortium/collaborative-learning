@@ -315,7 +315,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
                 stroke={color}
                 strokeWidth="1.5"
                 strokeDasharray="10 5"
-                pointerEvents={"none"} //added
+                pointerEvents={"none"}
                />;
     });
   }
