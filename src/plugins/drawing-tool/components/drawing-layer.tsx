@@ -315,11 +315,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
                 stroke={color}
                 strokeWidth="1.5"
                 strokeDasharray="10 5"
-
                 pointerEvents={"none"} //added
-                // onMouseDown={(e) => this.handleSelectedObjectMouseDown(e, object)}
-                // onMouseEnter={(e) => this.handleObjectHover(e, object, true) }
-                // onMouseLeave={(e) => this.handleObjectHover(e, object, false) }
                />;
     });
   }
