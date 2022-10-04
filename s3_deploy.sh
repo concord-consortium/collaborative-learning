@@ -88,4 +88,4 @@ mv $SRC_DIR $DEPLOY_DEST
 
 # deploy the site contents
 echo Deploying "$BRANCH_OR_TAG" to "$S3_BUCKET:$S3_BUCKET_PREFIX$S3_DEPLOY_DIR"...
-JAVA_TOOL_OPTIONS="-Xms4g -Xmx7g" s3_website push --site _site
+JAVA_TOOL_OPTIONS="-Xms4g -Xmx8g" s3_website push --site _site
