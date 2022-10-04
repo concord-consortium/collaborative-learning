@@ -21,7 +21,6 @@ const HOVER_COLOR = "#bbdd00";
 const SELECTION_BOX_PADDING = 10;
 
 /**  ======= Drawing Layer ======= */
-
 interface DrawingToolMap {
   [key: string]: DrawingTool | undefined;
 }
