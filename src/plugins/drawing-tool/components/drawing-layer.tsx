@@ -359,8 +359,8 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
         <svg xmlnsXlink="http://www.w3.org/1999/xlink" width={1500} height={1500} ref={this.setSvgRef}>
           {this.renderObjects(object => object.type === "image" && !idsBeingDragged.includes(object.id))}
           {this.renderObjects(object => object.type !== "image" && !idsBeingDragged.includes(object.id))}
-          {this.renderSelectedObjects(objectsToRenderSelected, SELECTION_COLOR)}
           {this.state.objectsBeingDragged.map((object) => renderDrawingObject(object))}
+          {this.renderSelectedObjects(objectsToRenderSelected, SELECTION_COLOR)}
           {(this.state.hoverObject && !hoveringOverAlreadySelectedObject && isAlive(this.state.hoverObject))
             ? this.renderSelectedObjects([this.state.hoverObject], HOVER_COLOR)
             : null}
