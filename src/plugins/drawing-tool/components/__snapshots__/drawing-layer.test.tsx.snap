@@ -10,6 +10,7 @@ exports[`Drawing Layer Components Ellipse adds a ellipse 1`] = `
     cx="10"
     cy="10"
     fill="#cccccc"
+    pointer-events="visible"
     rx="10"
     ry="10"
     stroke="#888888"
@@ -37,6 +38,7 @@ exports[`Drawing Layer Components Ellipse moves a ellipse 1`] = `
     cx="5"
     cy="5"
     fill="#cccccc"
+    pointer-events="visible"
     rx="10"
     ry="10"
     stroke="#888888"
@@ -55,6 +57,7 @@ exports[`Drawing Layer Components Freehand Line adds a freehand line 1`] = `
   <path
     d="M 10 10 l 1 1 l 2 2"
     fill="none"
+    pointer-events="visible"
     stroke="#888888"
     stroke-dasharray=""
     stroke-width="1"
@@ -79,6 +82,7 @@ exports[`Drawing Layer Components Freehand Line moves a freehand line 1`] = `
   <path
     d="M 5 5 l 1 1 l 2 2"
     fill="none"
+    pointer-events="visible"
     stroke="#888888"
     stroke-dasharray=""
     stroke-width="1"
@@ -135,6 +139,7 @@ exports[`Drawing Layer Components Rectangle adds a Rectangle 1`] = `
   <rect
     fill="#cccccc"
     height="10"
+    pointer-events="visible"
     stroke="#888888"
     stroke-dasharray=""
     stroke-width="1"
@@ -162,6 +167,7 @@ exports[`Drawing Layer Components Rectangle moves a rectangle 1`] = `
   <rect
     fill="#cccccc"
     height="10"
+    pointer-events="visible"
     stroke="#888888"
     stroke-dasharray=""
     stroke-width="1"
