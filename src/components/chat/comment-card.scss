@@ -1,23 +1,18 @@
 @import "../vars";
 
 .comment-card {
-  width: calc(100% - 4px);
   height: calc(100% - 38px);
   min-height: 106px;
-  margin: 2px;
-  border: solid 2px $charcoal-light-2;
   overflow-y: auto;
   white-space: pre-wrap;
+  margin: 0 2px;
 
-  .comment-card-content {
-    padding-bottom: 2px;
-    &.selected {
-      background-color: $comment-select-green;
-    }
+  &.selected {
+    background-color: $comment-select-green;
   }
 
   .comment-thread {
-    margin: 3px 0 2px 5px;
+    margin: 0 0px 0 5px;
     .comment-text-header {
       display: flex;
       flex-direction: row;
