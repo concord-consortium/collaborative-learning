@@ -74,11 +74,7 @@ export const LineComponent = observer(function LineComponent({model, handleHover
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onMouseDown={(e)=> {
-      if (handleDrag !== undefined){
-        handleDrag(e, model);
-      }
-    }}
+    onMouseDown={(e)=> handleDrag?.(e, model)}
     pointerEvents={"visible"}
     />;
 });

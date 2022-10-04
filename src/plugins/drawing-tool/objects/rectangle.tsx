@@ -70,11 +70,7 @@ export const RectangleComponent = observer(function RectangleComponent({model, h
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
     onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
-    onMouseDown={(e)=> {
-      if (handleDrag !== undefined){
-        handleDrag(e, model);
-      }
-    }}
+    onMouseDown={(e)=> handleDrag?.(e, model)}
     pointerEvents={"visible"} //allows user to select inside of an unfilled object
 
     />;
