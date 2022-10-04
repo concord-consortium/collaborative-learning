@@ -5,8 +5,8 @@ import ExpandIndicatorIcon from "../../assets/expand-toggle-icon.svg";
 import "./chat-thread-toggle.scss";
 
 interface IProps {
-    isThreadExpanded: boolean;
-    activeNavTab?: string;
+  isThreadExpanded: boolean;
+  activeNavTab?: string;
 }
 
 export const ChatThreadToggle: React.FC<IProps> = ({ isThreadExpanded, activeNavTab}) => {
