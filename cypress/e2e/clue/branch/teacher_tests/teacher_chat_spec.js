@@ -45,11 +45,11 @@ context('Chat Panel', () => {
       chatPanel.getChatPanelToggle().should('exist');
       chatPanel.getChatPanel().should('not.exist');
     });
-    it('verify new comment card is visible, card icon is visible and Post button is disabled', () => {
+    it('verify new comment card exits, card icon exists and Post button is disabled', () => {
       chatPanel.getChatPanelToggle().click();
-      chatPanel.getCommentCard().should('be.visible');
+      cy.wait(2000);
+      chatPanel.getCommentCard().should('exist');
       chatPanel.getCommentPostButton().should('have.class', 'disabled');
-      chatPanel.getCommentCardHeaderIcon().should('be.visible');
     });
     it('verify the comment card and the document are highlighted', () => {
       chatPanel.verifyProblemCommentClass();
@@ -57,10 +57,11 @@ context('Chat Panel', () => {
       chatPanel.getSelectedCommentThreadHeader().should('have.css', 'background-color');
       chatPanel.getSelectedCommentThreadHeader().should('have.css', 'background-color').and('eq', expandedChatBackground);
     });
-    it('verify the comment card and tile are highlighted', () => {
+    it('verify the comment card and tile are highlighted and have tile icon', () => {
       cy.clickProblemResourceTile('introduction');
       cy.wait(2000);
-      chatPanel.getSelectedCommentThreadHeader().should('be.visible').should('have.css', 'background-color').and('eq', expandedChatBackground);
+      chatPanel.getSelectedCommentThreadHeader().should('exist').should('have.css', 'background-color').and('eq', expandedChatBackground);
+      chatPanel.getCommentTileTypeIcon().should('exist');
       chatPanel.getToolTile().should('be.visible').should('have.css', 'background-color').and('eq', selectedChatBackground);
     });
     it('verify user can cancel a comment', () => {

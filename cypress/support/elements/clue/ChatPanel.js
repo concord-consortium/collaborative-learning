@@ -24,8 +24,8 @@ class ChatPanel{
     getCommentCard() {
       return cy.get('[data-testid=comment-card]');
     }
-    getCommentCardHeaderIcon() {
-      return cy.get('[data-testid=comment-card-header-icon]');
+    getCommentTileTypeIcon() {
+      return cy.get('[data-testid=chat-thread-tile-type]').find('svg');
     }
     getCommentTextArea() {
       return cy.get('[data-testid=comment-textarea]');

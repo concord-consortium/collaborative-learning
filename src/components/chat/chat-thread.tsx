@@ -71,7 +71,9 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
               onClick={() => handleThreadClick(key)}
             > 
               <div className="chat-thread-tile-info">
-                {Icon && <Icon/>}
+               {Icon && (
+                <div data-testid="chat-thread-tile-type"><Icon/></div>
+               )}
                 <div className="chat-thread-title"> {title} </div>
               </div>
               <div className="chat-thread-comment-info">  
@@ -111,7 +113,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
                 </div>
               </div>
               <div className="chat-thread-comment-info">  
-                <div className="chat-thread-num">{0}</div>  
+                <div className="chat-thread-num">{0}</div>
               </div>
             </div> 
           </div>
