@@ -165,6 +165,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
 
   public handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!this.props.readOnly && this.currentTool) {
+      console.log("handleMouseDown");
       this.currentTool.handleMouseDown(e);
     }
   };
@@ -172,6 +173,11 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   public handleObjectClick = (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObjectType) => {
     if (!this.props.readOnly && this.currentTool) {
       this.currentTool.handleObjectClick(e, obj);
+      if (this.state.selectedObjects.length> 1){
+        const filteredArray = this.state.selectedObjects.filter(selObj=> selObj === obj); //correct behavior
+        console.log("filitered Array", filteredArray);
+        this.setState({selectedObjects: filteredArray});
+      }
     }
   };
 
