@@ -40,7 +40,7 @@ class ChatPanel{
       return cy.get('[data-testid=comment-cancel-button]');
     }
     getSelectedCommentThreadHeader(){
-      return cy.get('.chat-thread-focused').find('[data-testid=chat-thread-header]')
+      return cy.get('.chat-thread-focused').find('[data-testid=chat-thread-header]');
     }
     getCommentFromThread() {
       return cy.get('[data-testid=comment-thread] [data-testid=comment]');
