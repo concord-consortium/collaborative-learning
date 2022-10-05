@@ -66,11 +66,10 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
             })}
             data-testid="chat-thread">
             <div className={classNames(`chat-thread-header ${activeNavTab}`,
-            {
-             "selected": shouldBeFocused 
-            })
-            }
-            onClick={() => handleThreadClick(key)}> 
+              { "selected": shouldBeFocused })}
+              data-testid="chat-thread-header"
+              onClick={() => handleThreadClick(key)}
+            > 
               <div className="chat-thread-tile-info">
                 {Icon && <Icon/>}
                 <div className="chat-thread-title"> {title} </div>
