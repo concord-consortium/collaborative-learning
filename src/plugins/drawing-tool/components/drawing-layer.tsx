@@ -174,7 +174,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
       this.currentTool.handleObjectClick(e, obj);
       if (this.state.selectedObjects.length> 1 && !(e.shiftKey || e.metaKey)){
         const filteredArray = this.state.selectedObjects.filter(selObj=> selObj === obj); //correct behavior
-        this.setState({selectedObjects: filteredArray});
+        this.setState(prevState => ({selectedObjects: filteredArray}));
       }
     }
   };
