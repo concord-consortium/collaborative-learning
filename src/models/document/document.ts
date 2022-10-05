@@ -26,6 +26,11 @@ interface IMatchPropertiesOptions {
   isTeacherDocument?: boolean;
 }
 
+export enum ContentStatus {
+  Valid,
+  Error
+}
+
 export const DocumentModel = Tree.named("Document")
   .props({
     uid: types.string,
@@ -48,6 +53,9 @@ export const DocumentModel = Tree.named("Document")
   })
   .volatile(self => ({
     queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined,
+    contentStatus: ContentStatus.Valid,
+    invalidContent: undefined as object | undefined,
+    contentErrorMessage: undefined as string | undefined,
   }))
   .views(self => ({
     // This is needed for the tree monitor and manager
@@ -279,6 +287,18 @@ export const DocumentModel = Tree.named("Document")
 
     setProperties(properties: ISetProperties) {
       forEach(properties, (value, key) => self.setProperty(key, value));
+    },
+
+    setContentStatus(status: ContentStatus) {
+      self.contentStatus = status;
+    },
+
+    setInvalidContent(content: object) {
+      self.invalidContent = content;
+    },
+
+    setContentErrorMessage(message: string) {
+      self.contentErrorMessage = message;
     }
   }))
   .actions(self => ({
@@ -325,19 +345,47 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
     sharedModelManager,
     documentEnv: {}
   };
-  const document = DocumentModel.create(snapshot, fullEnvironment);
-  addDisposer(document, onAction(document, (call) => {
-    if (!document.content || !call.path?.match(/\/content\/tileMap\//)) {
-      return;
+  try {
+    const document = DocumentModel.create(snapshot, fullEnvironment);
+    addDisposer(document, onAction(document, (call) => {
+      if (!document.content || !call.path?.match(/\/content\/tileMap\//)) {
+        return;
+      }
+      const toolTileId = call.path?.match(/\/content\/tileMap\/([^/]*)/)?.[1];
+      if (toolTileId) {
+        const toolTile = document.content.tileMap.get(toolTileId);
+        toolTile?.onTileAction(call);
+      }
+    }));
+    if (document.content) {
+      sharedModelManager.setDocument(document.content);
     }
-    const toolTileId = call.path?.match(/\/content\/tileMap\/([^/]*)/)?.[1];
-    if (toolTileId) {
-      const toolTile = document.content.tileMap.get(toolTileId);
-      toolTile?.onTileAction(call);
+    return document;
+  } catch (e) {
+    // The only time we've seen this error so far is when MST fails to load the content
+    // because it doesn't match the types of the MST models
+    if (!snapshot) {
+      console.error("Empty document failed to be created");
+      throw e;
     }
-  }));
-  if (document.content) {
-    sharedModelManager.setDocument(document.content);
+
+    if (!snapshot.content) {
+      console.error("Document with empty content failed to be created", {docKey: snapshot.key});
+      throw e;
+    }
+
+    // Putting the error in a object like this prevents Chrome from expanding the 
+    // error and taking up a bunch of console lines.
+    console.error("Failed to load document", {docKey: snapshot.key, error: e});
+
+    // Create a document without the content, so this can be returned and passed
+    // through the rest of the CLUE system. The Canvas component checks the contentStatus
+    // and renders a DocumentError component if the status is Error
+    const {content, ...snapshotWithoutContent} = snapshot;
+    const documentWithoutContent = DocumentModel.create(snapshotWithoutContent, fullEnvironment);
+    documentWithoutContent.setContentStatus(ContentStatus.Error);
+    documentWithoutContent.setInvalidContent(content);
+    documentWithoutContent.setContentErrorMessage((e as Error)?.message);
+    return documentWithoutContent;
   }
-  return document;
 };
