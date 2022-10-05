@@ -56,7 +56,6 @@ context('Chat Panel', () => {
       chatPanel.getProblemDocumentContent().should('be.visible').should('have.css', 'background-color').and('eq', selectedChatBackground);
       chatPanel.getSelectedCommentThreadHeader().should('have.css', 'background-color');
       chatPanel.getSelectedCommentThreadHeader().should('have.css', 'background-color').and('eq', expandedChatBackground);
-      cy.pause();
     });
     it('verify the comment card and tile are highlighted', () => {
       cy.clickProblemResourceTile('introduction');
