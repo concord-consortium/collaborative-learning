@@ -103,13 +103,16 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       }
       {focusedItemHasNoComments  &&
         <div key={focusTileId ? focusTileId : "document"}
-          className="chat-thread should-be-focused"
+          className="chat-thread chat-thread-focused"
           data-testid="chat-thread">
-          <div className={`chat-thread-header ${activeNavTab} selected`}> 
+          <div className={`chat-thread-header ${activeNavTab} selected`}
+            data-testid="chat-thread-header"> 
             <div className="chat-thread-tile-info">
               <div className="comment-card-header comment-select" data-testid="comment-card-header">
                 <div className="comment-card-header-icon" data-testid="comment-card-header-icon">
+                <div data-testid="chat-thread-tile-type">
                   <ToolIconComponent documentKey={focusDocument} tileId={focusTileId}/>
+                </div>
                 </div>
               </div>
               <div className="chat-thread-comment-info">  

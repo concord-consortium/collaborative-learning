@@ -54,7 +54,6 @@ context('Chat Panel', () => {
     it('verify the comment card and the document are highlighted', () => {
       chatPanel.verifyProblemCommentClass();
       chatPanel.getProblemDocumentContent().should('be.visible').should('have.css', 'background-color').and('eq', selectedChatBackground);
-      chatPanel.getSelectedCommentThreadHeader().should('have.css', 'background-color');
       chatPanel.getSelectedCommentThreadHeader().should('have.css', 'background-color').and('eq', expandedChatBackground);
     });
     it('verify the comment card and tile are highlighted and have tile icon', () => {
