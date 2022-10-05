@@ -1,9 +1,9 @@
 @import "../vars";
 
 .chat-list {
-  height: 100%;
-  overflow-y: scroll;
-  overflow-x: hidden;
+  max-height: calc(100vh - (#{$header-height} + #{$problem-header-height} + #{$workspace-content-margin} * 2));
+  overflow-y: auto;
+
   .chat-thread {
     margin: 2px;
     white-space: pre-wrap;
