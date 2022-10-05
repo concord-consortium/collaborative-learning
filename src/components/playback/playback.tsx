@@ -5,7 +5,7 @@ import classNames from "classnames";
 import { useUIStore } from "../../hooks/use-stores";
 import { TreeManager } from "../../models/history//tree-manager";
 import { DocumentModelType } from "../../models/document/document";
-import { PlaybackControlComponent } from "./playback-control";
+import { NoHistory, PlaybackControlComponent } from "./playback-control";
 import PlaybackIcon from "../../clue/assets/icons/playback/playback-icon.svg";
 
 import "./playback.scss";
@@ -58,7 +58,11 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
   return (
     <div className={playbackComponentClass} data-testid="playback-component">
       {renderPlaybackToolbarButton()}
-      {actuallyShowPlaybackControls && <PlaybackControlComponent treeManager={treeManager} />}
+      {actuallyShowPlaybackControls
+        ? <PlaybackControlComponent treeManager={treeManager} />
+        : showPlaybackControls
+        ? <NoHistory />
+        : ''}
     </div>
   );
 });

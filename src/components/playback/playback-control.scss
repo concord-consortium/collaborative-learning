@@ -8,6 +8,10 @@ $border-radius-base: 6px;
   width: calc(100% - 2px);
   height: 46px;
 
+  &.no-history {
+    justify-content: center;
+  }
+
   &.my-work {
     background-color: $workspace-teal-light-8;
   }
