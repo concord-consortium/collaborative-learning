@@ -102,7 +102,7 @@
         {
           "description": "Problem 1.1",
           "ordinal": 1,
-          "title": "CR 1.1 The Game of Going Positive",
+          "title": "CR 1.1 The Going Positive Game",
           "subtitle": "Using Positive and Negative Numbers",
           "disabled": [],
           "sections": [
@@ -141,6 +141,7 @@
           "description": "Problem 1.2",
           "ordinal": 2,
           "title": "CR 1.2 Falling and Rising Temperatures in Montana",
+          "subtitle": "Using a Number Line",
           "sections": [
                         {
                         "type": "introduction",
@@ -347,7 +348,7 @@
         {
           "description": "Problem 3.2",
           "ordinal": 2,
-          "title": "CR 3.2 Revisiting the Relay Race",
+          "title": "CR 3.2 Families of Facts",
           "subtitle": "Division of Rational Numbers",
           "sections": [
                         {
@@ -384,6 +385,42 @@
         {
           "description": "Problem 3.3",
           "ordinal": 3,
+          "title": "CR 3.3 Connecting Fractions to Decimals",
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
+          "supports": []
+        },
+        {
+          "description": "Problem 3.3",
+          "ordinal": 4,
           "title": "CR 3.3 The Integer Product Game",
           "subtitle": "Applying Multiplication and Division",
           "sections": [
@@ -428,7 +465,7 @@
         {
           "description": "Problem 4.1",
           "ordinal": 1,
-          "title": "CR 4.1 The Game of Dealing Up",
+          "title": "CR 4.1 The Dealing Up Game",
           "subtitle": "Writing and Evaluating Expressions",
           "sections": [
                         {
