@@ -400,3 +400,17 @@ describe("Canvas unit config test", function () {
     cy.get(".icon-button.icon-publish").should("not.exist");
   });
 });
+
+// This is using an intentionally broken document.
+// Info about this document can be found here: src/test-fixtures/broken-doc-content.md
+describe("Canvas document error test", function () {
+  before(function () {
+    cy.visit("?appMode=demo&demoName=BrokenDocs&fakeClass=1&fakeUser=student:1&unit=sas&problem=0.1");
+    cy.waitForLoad();
+  });
+
+  it("verify an error message is shown", function () {
+    cy.get('[data-test="document-title"]').should("contain", "0.1 Intro to CLUE");
+    cy.get(".document-error").should("exist");
+  });
+});
