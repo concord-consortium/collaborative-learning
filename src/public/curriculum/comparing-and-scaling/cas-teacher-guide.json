@@ -1782,6 +1782,7 @@
                 [
                   {
                     "id": "lZzMVPIQlHGNKNI4",
+                    "title": "Large Table",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group1LargeTable.png"
@@ -1789,6 +1790,7 @@
                   },
                   {
                     "id": "cF7EL9S7l6pLy7IC",
+                    "title": "Small Table",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group1SmallTable.png"
@@ -1819,6 +1821,7 @@
                 [
                   {
                     "id": "c4M0UpgTasB0uTj4",
+                    "title": "4 Groups of 2 Share with 2 people",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group2LargeTable.png"
@@ -1826,6 +1829,7 @@
                   },
                   {
                     "id": "EE9xKvJ_GINm9bO6",
+                    "title": "3 Groups of 2 Share with 2 people",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group2SmallTable.png"
@@ -1842,22 +1846,6 @@
                     ]
                   }
                 },
-                [
-                  {
-                    "id": "c4M0UpgTasB0uTj4",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group2LargeTable2.png"
-                    }
-                  },
-                  {
-                    "id": "EE9xKvJ_GINm9bO6",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group2SmallTable2.png"
-                    }
-                  }
-                ],
                 {
                   "id": "d9hIjlauLHNMKUfF",
                   "content": {
@@ -1911,6 +1899,7 @@
                 [
                   {
                     "id": "SrrU5yU-fdtM6Yi7",
+                    "title": "8 slices in 3 pizzas",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3SmallTable.png"
@@ -1920,6 +1909,7 @@
                     "id": "j8dhTU7Zk4cUXLEk",
                     "content": {
                       "type": "Image",
+                      "title": "8 slices Pizza 1",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable1st.png"
                     }
                   }
@@ -1959,6 +1949,7 @@
                   },
                   {
                     "id": "_MdYhg2ssHbsLPi-",
+                    "title": "8 slices Pizza 2",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable2nd.png"
@@ -1990,6 +1981,7 @@
                 [
                   {
                     "id": "TDa8wkmqgVIQUSTS",
+                    "title": "8 slices Pizza 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -2041,6 +2033,7 @@
                   },
                   {
                     "id": "P1kEZWx9JAIgEO6q",
+                    "title": "2 slices Pizza 4",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable4th.png"
@@ -2103,6 +2096,7 @@
                 },
                 {
                   "id": "Pp4kfbosYfLAniaS",
+                  "title": "Unit Rate",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group4.png"
@@ -2120,6 +2114,7 @@
                 },
                 {
                   "id": "jsETUBZJHs3fZLHK",
+                  "title": "Explaining the Rate Calculation",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy2Group4.png"
@@ -2165,6 +2160,7 @@
                 },
                 {
                   "id": "D8g0eoWLYx4cowha",
+                  "title": "Percentage of Pizza Calculation",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-1_GROUP6.png"
@@ -2183,6 +2179,7 @@
                 [
                   {
                     "id": "AlrNhgeN-02TfS6d",
+                    "title": "Calculation",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy2Group6_1.png"
@@ -2218,6 +2215,7 @@
                 },
                 {
                   "id": "8uEZKoukxO1Z_WOR",
+                  "title": "Slices per person",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-1_GROUP7.png"
@@ -2236,29 +2234,8 @@
                 },
                 [
                   {
-                    "id": "p-nWEe6fmFr6yD-3",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Large Table</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "5MUPf7JyGL1l8CY0",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Small Table</p>"
-                      ]
-                    }
-                  }
-                ],
-                [
-                  {
                     "id": "tjIC_4JTDVYGmlCK",
+                    "title": "Large Table",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group8_LargeTable.png"
@@ -2266,6 +2243,7 @@
                   },
                   {
                     "id": "w4IpojoW8OyNOtqV",
+                    "title": "Small Table",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group8_SmallTable.png"
@@ -5571,8 +5549,8 @@
                       "type": "Table",
                       "name": "Leaky Faucet Experiment",
                       "columns": [
-                        {"name":"Number of Seconds","values":["0","5","10","15","20","25","30","35","40","45","50","55","60"]},
-                        {"name":"Amount of Water (ml)","values":["0","5","9","14","18","24","29","35","41","43","49","55","61"]}
+                        {"name":"Number of Seconds","width": 100,"values":["0","5","10","15","20","25","30","35","40","45","50","55","60"]},
+                        {"name":"Amount of Water (ml)","width": 100,"values":["0","5","9","14","18","24","29","35","41","43","49","55","61"]}
                       ]
                     }
                   },
@@ -5595,6 +5573,7 @@
                   },
                   {
                     "id": "q-O-yKv9q1-33AGK",
+                    "title": "Scaling by 3",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-4_CartersIdea.png"
@@ -5616,12 +5595,13 @@
                   },
                   {
                     "id": "ML3sAJ6ptdcLJxkG",
+                    "title": "Rate Table",
                     "content": {
                       "type": "Table",
-                      "name": "Table 1",
+                      "name": "Rate Table",
                       "columns": [
-                        {"name":"Number of Seconds","values":["0","5","10","15","20","25","30","35","40","45","50","55","60"]},
-                        {"name":"Amount of Water (ml)","values":["0","5","9","14","18","24","29","35","41","43","49","55","61"]}
+                        {"name":"Number of Seconds","width": 100,"values":["0","5","10","15","20","25","30","35","40","45","50","55","60"]},
+                        {"name":"Amount of Water (ml)","width": 100,"values":["0","5","9","14","18","24","29","35","41","43","49","55","61"]}
                       ]
                     }
                   },
@@ -5639,6 +5619,7 @@
                   },
                   {
                     "id": "HdBpYhBqGXFh_gfJ",
+                    "title": "Water calculation per minute",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-4_AlansIdea.png"
@@ -5662,6 +5643,7 @@
                   },
                   {
                     "id": "ifgWmc750ng9qlZ_",
+                    "title": "Water calculation per hour",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-4_ScarlettsIdea_1.png"
@@ -5669,6 +5651,7 @@
                   },
                   {
                     "id": "n9UZDt8uoDapLTFU",
+                    "title": "Water calculation per day",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-4_ScarlettsIdea_2.png"
