@@ -194,11 +194,14 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const {selectedObjects, hoverObject } = this.state;
     let { objectsBeingDragged } = this.state;
 
-    // Prevents dragging two objects when you have one selected
-    // and then drag a second one unless shift/cmd pressed
-    if (this.state.selectedObjects.length > 0 && !(e.shiftKey || e.metaKey)){
+    // Prevents dragging multiple objects when you have one (or more) selected
+    // and then drag one unless shift/cmd pressed
+    const selectedObjectsLength = this.state.selectedObjects.length;
+    if (selectedObjectsLength > 0 && !(e.shiftKey || e.metaKey)){
       const clearSelectedObjects = this.state.selectedObjects;
-      clearSelectedObjects.pop();
+      for (let i = 0; i < selectedObjectsLength; i++){
+        clearSelectedObjects.pop();
+      }
       this.setState((prevState)=> ({selectedObjects: clearSelectedObjects}));
     }
 
