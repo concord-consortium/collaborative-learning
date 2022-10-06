@@ -5,7 +5,8 @@ import classNames from "classnames";
 import { useUIStore } from "../../hooks/use-stores";
 import { TreeManager } from "../../models/history//tree-manager";
 import { DocumentModelType } from "../../models/document/document";
-import { NoHistory, PlaybackControlComponent } from "./playback-control";
+import { LoadDocumentHistory } from "./load-document-history";
+import { PlaybackControlComponent } from "./playback-control";
 import PlaybackIcon from "../../clue/assets/icons/playback/playback-icon.svg";
 
 import "./playback.scss";
@@ -59,9 +60,11 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
     <div className={playbackComponentClass} data-testid="playback-component">
       {renderPlaybackToolbarButton()}
       {actuallyShowPlaybackControls
+        // If we've found history, display the playback control
         ? <PlaybackControlComponent treeManager={treeManager} />
         : showPlaybackControls
-        ? <NoHistory />
+        // If we're loading the history or couldn't find any, display the loading component
+        ? <LoadDocumentHistory document={document} />
         : ''}
     </div>
   );

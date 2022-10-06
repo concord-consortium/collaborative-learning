@@ -15,15 +15,6 @@ export const LoadDocumentHistory: React.FC<IProps> = ({ document }) => {
 
   const { data, isLoading, isSuccess, isError, status } = 
     useDocumentHistory(document?.key, otherUserDocument ? document?.uid : undefined);
-
-  // TODO: hacky style to make loading visible
-  const style: any = { 
-    position: "absolute", 
-    top: "100px", 
-    left: "20px", 
-    background: "white", 
-    fontSize: "x-large"
-  };
   
   // Default message
   let message = `Unknown status ${status}`;
@@ -55,8 +46,13 @@ export const LoadDocumentHistory: React.FC<IProps> = ({ document }) => {
     }
   });
 
-  // We don't need to display if we are loaded
-  return isSuccess ? null : <div style={style}>{message}</div>;
+  // If this is still being displayed after loading the history, then no history was found
+  // css classes used here are defined in playback-control.scss
+  return (
+      <div className="playback-controls loading">
+        {isSuccess ? "This document has no history." : message}
+      </div>
+    );
 
   // TODO: what do we do about component caching, if the history button is clicked 
   // more than once perhaps it won't re-read the history.

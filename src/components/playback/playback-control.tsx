@@ -208,11 +208,3 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   );
 });
 PlaybackControlComponent.displayName = "PlaybackControlComponent";
-
-export const NoHistory = () => {
-  return (
-    <div className="playback-controls no-history">
-      This document has no history.
-    </div>
-  );
-};
