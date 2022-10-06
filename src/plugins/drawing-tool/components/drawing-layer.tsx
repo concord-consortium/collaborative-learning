@@ -194,7 +194,7 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     const {selectedObjects, hoverObject } = this.state;
     let { objectsBeingDragged } = this.state;
 
-    //prevents dragging two objects when you have one selected
+    // Prevents dragging two objects when you have one selected
     // and then drag a second one unless shift/cmd pressed
     if (this.state.selectedObjects.length > 0 && !(e.shiftKey || e.metaKey)){
       const clearSelectedObjects = this.state.selectedObjects;
@@ -283,15 +283,18 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   }
 
-  public endSelectionBox(addToSelectedObjects: boolean) {
+  public endSelectionBox(addToSelectedObjects: boolean, e2: MouseEvent) {
     const {selectionBox} = this.state;
     if (selectionBox) {
       selectionBox.close();
-      const selectedObjects: DrawingObjectType[] = addToSelectedObjects ? this.state.selectedObjects : [];
+      let selectedObjects: DrawingObjectType[] = addToSelectedObjects ? this.state.selectedObjects : [];
       this.forEachObject((object) => {
         if (object.inSelection(selectionBox)) {
           if (selectedObjects.indexOf(object) === -1) {
             selectedObjects.push(object);
+            if (e2.metaKey || e2.shiftKey){  //when shift/meta add boxed selected objects to our state selectedObjects
+              selectedObjects = selectedObjects.concat(this.state.selectedObjects);
+            }
           }
         }
       });

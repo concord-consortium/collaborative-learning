@@ -21,7 +21,7 @@ export class SelectionDrawingTool extends DrawingTool {
     };
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
-      drawingLayerView.endSelectionBox(addToSelectedObjects);
+      drawingLayerView.endSelectionBox(addToSelectedObjects, e2);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };

@@ -155,7 +155,7 @@ export interface IDrawingLayer {
   getCurrentStamp: () => StampModelType|null;
   startSelectionBox: (start: Point) => void;
   updateSelectionBox: (p: Point) => void;
-  endSelectionBox: (addToSelectedObjects: boolean) => void;
+  endSelectionBox: (addToSelectedObjects: boolean, e: MouseEvent) => void;
   setSelectedObjects: (selectedObjects: DrawingObjectType[]) => void;
   getSelectedObjects: () => DrawingObjectType[];
 }
