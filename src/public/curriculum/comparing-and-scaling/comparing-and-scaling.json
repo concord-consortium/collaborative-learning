@@ -106,15 +106,20 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>In the 6th grade Unit Comparing Quantities, we looked at many situations that involved ratios. Recall that a ratio is a comparison between two quantities. We looked at many comparison situations, for example, Packaging Green and White Cupcakes, Walking Backwards Race, and Sharing Smoothie Bars.</p>",
-                        "<p>Writing a ratio as  2/3  is called the <em>fraction form of a ratio</em>.</p>",
-                        "<p>                             <em>How is this fraction form of a ratio the same as or different from fractions</em>?</p>",
-                        "<p>Two ratios are equivalent if they express the same comparisons. For example, the ratio of green cupcakes to white cupcakes is the same in the following packages:</p>",
-                        "<p>                                                                                     2 green cupcakes and 3 white cupcakes</p>",
-                        "<p>                                                                                     4 green cupcakes and 6 white cupcakes</p>",
-                        "<p>                                                                                  12 green cupcakes and 18 white cupcakes</p>",
-                        "<p>                                                    <em>What patterns do you see among the comparisons?</em></p>",
+                        "<p>In the <em>Comparing Quantities</em> unit, we looked at many situations that involved ratios. Recall that a ratio is a comparison between two quantities. We looked at many comparison situations such as Packaging Green and White Cupcakes, Walking Backwards Race, and Sharing Smoothie Bars. </p>",
+                        "<p>The ratio of green cupcakes to white cupcakes is expressed as:</p>",
+                        "<p>            For every 2 green cupcakes there are 3 white cupcakes, or</p>",
+                        "<p>            2 green for every 3 white, or</p>",
+                        "<p>            2 to 3  or  2 : 3  or    2/3</p>",
+                        "<p>In the <em>Stretching and Shrinking</em> unit, we also wrote the ratio 2 to 3 as ⅔. This is called the fraction form of a ratio. </em></p>",
+                        "<p>     <em>How is this fraction form of a ratio the same as or different from fractions?</em></p>",
+                        "<p>We also know that two ratios are equivalent if they express the same comparisons. For example, the ratio of green cupcakes to white cupcakes is the same in the following packages: </p>",
+                        "            2 green cupcakes and 3 white cupcakes",
+                        "            4 green cupcakes and 6 white cupcakes",
+                        "            12 green cupcakes and 18 white cupcakes",
+                        "<p>     <em>What patterns do you see among the comparisons?</em></p>",
                         "<p>In this Unit we will learn more about ratios and reasoning with ratios.</p>"
+                    
                       ]
                     }
                   },
@@ -149,12 +154,15 @@
                   [
                     {
                       "id": "kctEO63ySdDAahLm",
+                      "title": "Recipe",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_1-1_RecipieList.png"
                       }
                     },
                     {
+                      "id": "km06OCT20220429PM",
+                      "title": "Orange Juice",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_1-1_OrangeJuice.png"
@@ -162,6 +170,7 @@
                     },
                     {
                       "id": "hK2W-WY8sM4QYscA",
+                      "title": "Measuring cup",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_1-1_1Cup.jpg"
@@ -184,7 +193,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Recipe A will make the most orangey juice and Mix C will make the least orangey juice. Students will use part-to-part (concentrate to water) or part-to-whole (concentrate to juice) comparisons. Strategies students might use to conclude the most and least orangey juice:</p>",
+                        "<p>Recipe A will make the most orangey juice and Mix C will make the least orangey juice. Students will use part-to-part (concentrate to juice) or part-to-whole (concentrate to juice) comparisons. Strategies students might use to conclude the most and least orangey juice:</p>",
                         "<ul><li>Scaling up each ratio to the same number of parts for one of the quantities. This would look very much like “Common Denominator” or “Common Numerator” thinking. (Note: Since these are ratios, there is no denominator or numerator.)</li><li>Unit Rate. Students might scale each ratio to have one of the quantities equal to 1. For example, 1 concentrate to x water or x concentrate to 1 water.</li><li>Drawing pictures to show how much water for each cup of concentrate is in each mix. The goal is to partition the water so that each cup of concentrate gets the same amount of water. For example:</li></ul>"
                       ]
                     }
@@ -201,6 +210,7 @@
                   },
                   {
                     "display": "teacher",
+                    "title": "Mix A Solution",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_1-1_SolutionMixA_350w.png"
@@ -218,6 +228,7 @@
                   },
                   {
                     "display": "teacher",
+                    "title": "Mix B Solution",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_1-1_SolutionMixB_350w.png"
@@ -235,6 +246,7 @@
                   },
                   {
                     "display": "teacher",
+                    "title": "Mix C Solution",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_1-1_SolutionMixC_350w.png"
@@ -252,6 +264,7 @@
                   },
                   {
                     "display": "teacher",
+                    "title": "Mix D Solution",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_1-1_SolutionMixD_350w.png"
@@ -272,7 +285,8 @@
                       "text": [
                         "<strong>Situation A. Mr. Zhoa’s Students’ Strategies</strong>",
                         "<p>Mr. Zhoa’s class had some interesting strategies for answering the questions about the orange juice recipes which they displayed on posters. Examine the work of each group.</p>",
-                        "<ol><li>Do you agree with the students’ strategies? Can you use the strategy to decide which recipe is the most orangey? Explain.</li><li>How are the strategies alike? Different?</li></ol>"
+                        "<ol><li>Do you agree with the students’ strategies? Can you use the strategy to decide which recipe is the most orangey? Explain.</li><li>How are the strategies alike? Different?</li></ol>",
+                        "<p>All of the groups use strategies that can answer the question of which recipe is the most orangey.</p>"
                       ]
                     }
                   },
@@ -286,9 +300,20 @@
                     }
                   },
                   {
+                    "id": "UM57UqDw8SpnKqxE",
+                    "title": "Moja's Group Strategy",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_1-1_MojasGroup.png"
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Moja’s group scales up each part-to-part recipe to 90 cups of water. Since the water is all the same amount, you can see which one has more concentrate – or is the most orangey. Mix A has the most concentrate (60) for the 90 cups of water."
+                      ]
                     }
                   },
                   {
@@ -301,12 +326,23 @@
                     }
                   },
                   {
+                    "id": "THU06OCT2022E",
+                    "title": "Lima's Group Strategy",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_1-1_LimasGroup_350w.jpg"
                     }
                   },
-                   {
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Lima’s group uses a picture to show a part-to-part relationship. They seem to look at how the concentrate is “spread out” over the water. They also show the unit rate of how much water per cup of concentrate. Since you have the same amount of concentrate, you can see which recipe has more water – or is more watered down.  Mix A has the least water (1 1/2 ) for the 1 cup of water. So it is the least watered down and will have the strongest orangey taste."
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -316,12 +352,23 @@
                     }
                   },
                   {
+                    "id": "THU06OCT2022E0427PM",
+                    "title": "Tatu's Group Strategy",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_1-1_TatusGroup_350w.png"
                     }
                   },
-                   {
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "Tatu’s group uses percents of the part-to-whole recipe. The largest percent of concentrate will be the most orangey. Mix A is 40% concentrate."
+                      ]
+                    }
+                  },
+                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -331,62 +378,19 @@
                     }
                   },
                   {
+                    "id": "THU06OCT2022E0430PM",
+                    "title": "Sanji's Group Strategy",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_1-1_SanjisGroup.png"
                     }
                   },
                   {
-                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>All of the groups use strategies that can answer the question of which recipe is the most orangey.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Moja’s Group</p>",
-                        "<p>Moja’s group scales up each part-to-part recipe to 90 cups of water. Since the water is all the same amount, you can see which one has more concentrate – or is the most orangey.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Lima’s Group</p>",
-                        "<p>Lima’s group uses a picture to show a part-to-part relationship. They seem to look at how the concentrate is “spread out” over the water. They also show the unit rate of how much water per cup of concentrate. Since you have the same amount of concentrate, you can see which recipe has more water – or is more watered down. Mix A has the least water (1 1/2 ) for the 1 cup of water. So it is the least watered down and will have the strongest orangey taste.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Tatu’s Group</p>",
-                        "<p>Tatu’s group uses percents of the part-to-whole recipe. The largest percent of concentrate will be the most orangey. Mix A is 40% concentrate.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Sanji’s Group</p>",
-                        "<p>Sanji’s group uses part-to-whole amounts of the recipes. They scale all of the concentrates to 15. Since there is the same amount of concentrate, you can see which recipe makes the most juice — in other words, where the concentrate is most watered down and thus the least orangey (Mix C). Mix A makes the least amount of juice (37.5 cups) for the 15 cups of concentrate. So it is the juice that contains the must orangey concentrate.</p>"
+                        "Sanji’s group uses part-to-whole amounts of the recipes. They scale all of the concentrates to 15.Since there is the same amount of concentrate, you can see which recipe makes the most juice — in other words, where the concentrate is most watered down and thus the least orangey (Mix C). Mix A makes the least amount of juice (37.5 cups) for the 15 cups of concentrate. So it is the juice that contains the must orangey concentrate."
                       ]
                     }
                   },
@@ -401,36 +405,15 @@
                     }
                   },
                   {
+                    "id": "chm5hy6sl43ZLGsX",
                     "display": "teacher",
+                    "title": "Table 1",
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Alike</p>",
-                        "<p>All use correct strategies that can be used to answer the question.</p>",
-                        "<p>All of them set one of the quantities equal, so they could compare the amount of the other quantity.</p>",
-                        "<p>Moja – 90 cups of water</p>",
-                        "<p>Lima – 1 cup concentrate</p>",
-                        "<p>Tatu – 100% juice</p>",
-                        "<p>Sanji – 15 cups of concentrate</p>",
-                        "<p>Part-to-part ratio was used by Moja and Lima.</p>",
-                        "<p>Part-to-whole ratio was used by Tatu and Sanji.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Different</p>",
-                        "<p>All the strategies are slightly different.</p>",
-                        "<p>Moja scaled up each part-to-part recipe to 90 cups water.</p>",
-                        "<p>Lima used a picture to show the unit rate of water per cup of concentrate in the part-to-part recipes.</p>",
-                        "<p>Tatu used percents to get all the juice amounts to 100. Percents are a part-to-whole ratio with 100 as the whole.</p>",
-                        "<p>Sanji scaled up to 15 parts concentrate per the whole amounts of juice.</p>",
-                        "<p></p>"
+                      "type": "Table",
+                      "name": "Differences and Similarities in Strategies",
+                      "columns": [
+                        {"name":"Alike","width":225,"values":["All use correct strategies that can be used to answer the question.","All of them set one of the quantities equal, so they could compare the amount of the other quantity.","Moja – 90 cups of water","Lima – 1 cup concentrate","Tatu – 100% juice","Sanji – 15 cups of concentrate","Part-to-part ratio was used by Moja and Lima. Part-to-whole ratio was used by Tatu and Sanji."]},
+                        {"name":"Different","width":200,"values":["All the strategies are slightly different","","Moja scaled up each part-to-part recipe to 90 cups water.","Lima used a picture to show the unit rate of water per cup of concentrate in the part-to-part recipes."," Tatu used percents to get all the juice amounts to 100. Percents are a part-to-whole ratio with 100 as the whole.","Sanji scaled up to 15 parts concentrate per the whole amounts of juice.",""]}
                       ]
                     }
                   },
@@ -458,12 +441,16 @@
                   },
                   [
                     {
+                      "id": "pD9YAK7OFfsFq77S",
+                      "title": "Recipe A",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_1-1_MaxsStrategyRecipieA.png"
                       }
                     },
                     {
+                      "id": "pHKnr2piefEZcRq0",
+                      "title": "Recipe B",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_1-1_MaxsStrategyRecipieC.png"
@@ -485,7 +472,7 @@
                         "<p>To help Max see this, we might scale Recipe C to have one of the quantities the same amount. If we think of making batches of Recipe C:</p>",
                         "<p>Recipe A  Recipe C</p>",
                         "<p>2 to 3          1 to 2</p>",
-                        "<p>                    2 to 4</p>",
+                        "<p>                     2 to 4</p>",
                         "<p>Now with the concentrates the same, you can see that the difference between the total quantities is different. <strong><u></u></strong></p>"
                       ]
                     }
@@ -527,7 +514,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>3 cups of water to 2 cups of concentrate or</p>"
+                        "3 cups of water to 2 cups of concentrate or",
+                        "↓   ÷    3                            ↓   ÷    3",
+                        " 1 cup of water for 2/3 cup of concentrate."
                       ]
                     }
                   },
@@ -537,7 +526,11 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>↓   ÷    3                            ↓   ÷    3</p>"
+                        "<p>Elise used the part-to-part ratio and scaled it down to 1 cup of concentrate.</p>",
+                        "2 cups of concentrate for 3 cups of water or",
+                        "↓   ÷    2                                          ↓   ÷    2",
+                        "1 cup of concentrate for   3/2 cups of water."
+                        
                       ]
                     }
                   },
@@ -547,87 +540,10 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p> 1 cup of water for 2/3 cup of concentrate.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Elise used the part-to-part ratio and scaled it down to 1 cup of concentrate.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>2 cups of concentrate for 3 cups of water or</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>↓   ÷    2                                          ↓   ÷    2</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>1 cup of concentrate for   3/2 cups of water.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Dan used the part-to-whole ratio and scaled it down to 1 cup of concentrate.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>2 cups of concentrate for 5 cups of juice or</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p> ↓   ÷    2                                        ↓   ÷    2</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>1 cup of concentrate for 5/2 cups of juice.</p>"
+                        "<p>Dan used the part-to-whole ratio and scaled it down to 1 cup of concentrate.</p>",
+                        "2 cups of concentrate for 5 cups of juice or",
+                        " ↓   ÷    2                                        ↓   ÷    2",
+                        "1 cup of concentrate for 5/2 cups of juice."
                       ]
                     }
                   }
@@ -759,9 +675,28 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Arvin and Mariah need to make a decision on which recipe to use during camp.</p>",
-                        "<p>Consider each camper getting a cup of juice. For each of the four recipes, determine:</p>",
-                        "<ul><li>How many batches of each recipe are needed to make juice for 210 campers?</li><li>For each recipe, how much concentrate is needed to make 1 cup of juice? How much water is needed?</li><li>How much concentrate and how much water are needed to make juice for 210 campers?</li></ul>"
+                        "<p>Arvin and Mariah need to decide on which recipe to use during camp.</p>",
+                        "<p>Each camper gets a cup of juice. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "uRYDN667aYd5kt96",
+                    "title": "Recipe A through D",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-1_RecipieList.png",
+                      "filename": "curriculum/comparing-and-scaling/images/C&S_1-1_RecipieList.png"
+                    }
+                  },
+                  {
+                    "id": "6t4n29wdafdsf30t4xSQ9exR",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For each of the four recipes, determine:</p>",
+                        "<ul><li>How much concentrate is needed to make 1 cup of juice? How much water is needed?</li><li>How much concentrate and how much water are needed to make juice for 210 campers?</li></ul>"
                       ]
                     }
                   },
@@ -777,6 +712,8 @@
                     }
                   },
                   {
+                    "id": "07OCt20220459PM",
+                    "title": "Recipe A Solution",
                     "display": "teacher",
                     "content": {
                       "type": "Image",
@@ -784,6 +721,8 @@
                     }
                   },
                   {
+                    "id": "07OCt20220500pM",
+                    "title": "Recipe B Solution",
                     "display": "teacher",
                     "content": {
                       "type": "Image",
@@ -791,6 +730,8 @@
                     }
                   },
                   {
+                    "id": "07OCt20220501PM",
+                    "title": "Recipe C Solution",
                     "display": "teacher",
                     "content": {
                       "type": "Image",
@@ -798,6 +739,8 @@
                     }
                   },
                   {
+                    "id": "07OCt20220502PM",
+                    "title": "Recipe D Solution",
                     "display": "teacher",
                     "content": {
                       "type": "Image",
@@ -816,6 +759,8 @@
                   },
                   [
                     {
+                      "id": "07OCT20220505PM",
+                      "title": "Recipe A Solution",
                       "display": "teacher",
                       "content": {
                         "type": "Image",
@@ -823,6 +768,8 @@
                       }
                     },
                     {
+                      "id": "07OCT20220504PM",
+                      "title": "Recipe B Solution",
                       "display": "teacher",
                       "content": {
                         "type": "Image",
@@ -832,6 +779,8 @@
                   ],
                   [
                     {
+                      "id": "07OCT20220503PM",
+                      "title": "Recipe C Solution",
                       "display": "teacher",
                       "content": {
                         "type": "Image",
@@ -839,6 +788,8 @@
                       }
                     },
                     {
+                      "id": "07OCT20220555PM",
+                      "title": "Recipe D Solution",
                       "display": "teacher",
                       "content": {
                         "type": "Image",
@@ -878,9 +829,15 @@
                     }
                   },
                   {
+                    "id": "Geco2vI8XAFZ8DX8",
+                    "title": "Table 1",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/C&S_1-2_AdiasStrategy_350w.png"
+                      "type": "Table",
+                      "name": "Adia's Strategy",
+                      "columns": [
+                        {"name":"Number of batches of Recipe A","width":140,"values":["1","2","3","4","5","10","20","40","41","        ?"]},
+                        {"name":"Number of 1 cup servings of juice","width":122,"values":["5","","","","","","","","","210"]}
+                      ]
                     }
                   },
                   {
@@ -912,7 +869,7 @@
                       "format": "html",
                       "text": [
                         "<strong>Situation B. Cece Makes Lemonade</strong>",
-                        "<p>After the camp, Cece went home and made lemonade for her family. She uses the unit rate of one cup of concentrate to three cups of cold water. She needs 160 ounces of juice.</p>",
+                        "<p>After the camp, Cece makes lemonade for her family. She uses the unit rate of one cup of concentrate to three cups of cold water. She needs 160 ounces of juice. Note that one cup is equal to 8 ounces.</p>",
                         "<p>1.  How much concentrate will she need?</p>",
                         "<p>2.  How much water will she need?</p>"
                       ]
@@ -924,7 +881,7 @@
                       "type": "Table",
                       "name": "Cece's Lemonade",
                       "columns": [
-                        {"name":"Recipe","values":["Concentrate","Water","Total Lemonade"]},
+                        {"name":"Recipe", "width": 140, "values":["Concentrate","Water","Total Lemonade"]},
                         {"name":"Cups","values":["1","3","4"]},
                         {"name":"Oz","values":["8","24","32"]},
                         {"name":"x 5","values":["40","120","160"]},
@@ -990,12 +947,13 @@
                         }
                       },
                       {
+                        "id": "OV4hI1MBtqeSapI8",
                         "content": {
                           "type": "Table",
-                          "name": "Table 1",
+                          "name": "Adia's strategy",
                           "columns": [
-                            {"name":"Batches of A","values":["1","2","3","4","5","10","20","40","41","x"]},
-                            {"name":"1 cup Servings","values":["5","10","15","20","25","50","100","200","205","210"]}
+                            {"name":"Number of Batches of Recipe A","width":106,"values":["1","2","3","4","5","10","20","40","41","x"]},
+                            {"name":"Number of 1 cup servings of juice","width":117,"values":["5","10","15","20","25","50","100","200","205","210"]}
                           ]
                         }
                       },
@@ -1010,6 +968,8 @@
                         }
                       },
                       {
+                        "id": "01qasdfeMrTuRBgHG",
+                        "title": "Otis' strategy",
                         "content": {
                           "type": "Image",
                           "url": "curriculum/comparing-and-scaling/images/C&S_1-3_Intro2_350w.png"
@@ -1022,8 +982,12 @@
                           "format": "html",
                           "text": [
                             "<p>This equation showing two ratios that are equal is called a <strong>proportion.</strong></p>",
-                            "<p>When we find equivalent ratios using strategies like Adia’s table or Otis’s equation to answer questions, we are using <strong>proportional reasoning</strong>. Both strategies involve proportions. Adia’s table shows many proportions. Otis’s equation shows one proportion.</p>",
-                            "<p>In the <em>Comparing Quantities</em> Unit, we worked with ratios to determine how to share Smoothie Bars. In the <em>Stretching and Shrinking Unit</em>, we worked with ratios to find missing lengths in similar figures. These examples involved proportional reasoning. There are many other situations in which setting up a proportion can help us solve a problem.</p>"
+                            "<p>When we find equivalent ratios using strategies like Adia’s table or Otis’s equation to answer questions, we are using <strong>proportional reasoning</strong>. Both strategies involve proportions. </p>",
+                            "<p>Adia’s table shows many proportions, such as</p>",
+                            "1/5 = 2/10 or 2/10 = 3/15 or 5/25 = 10/50",
+                            "<p>Otis’s equation shows one proportion.</p>",
+                            "1/5 = x/210",
+                            "<p>In the <em>Comparing Quantities</em> Unit, we worked with ratios to determine how to share Smoothie Bars. In the <em>Stretching and Shrinking Unit</em>, we worked with ratios to find missing lengths in similar figures. These examples involved proportional reasoning. There are many other situations in which setting up a proportion can help us solve a problem, as in the next problem.</p>"
                           ]
                         }
                       }
@@ -1058,12 +1022,16 @@
                     }
                   },
                   {
+                    "id": "123407OCT2020",
+                    "title": "Smoothie Bar",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_1-3_SmoothieBar.png"
                     }
                   },
                   {
+                    "id": "08OCT20200322pm",
+                    "title": "Smoothie Bar Possible Answer",
                     "display": "teacher",
                     "content": {
                       "type": "Image",
@@ -1084,6 +1052,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "08OCT20200323pm",
+                    "title": "Reading Speed Possible Answer",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_1-3_ReadingSpeedsSolution_350w.png"
@@ -1102,6 +1072,8 @@
                     }
                   },
                   {
+                    "id": "08OCT20200324pm",
+                    "title": "Height of Trees",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_1-3_HeightOfTrees.png"
@@ -1109,6 +1081,8 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "08OCT20200325pm",
+                    "title": "Tree Height Possible Answer",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_1-3_HeightOfTreesSolution_350w.png"
@@ -1125,7 +1099,7 @@
                         "<p>Grade 6 has 121 students</p>",
                         "<p>Grade 7 has 119 students</p>",
                         "<p>Grade 8 has 135 students</p>",
-                        "<p>Each grade will get one representative for every 30 students in the grade.</p>",
+                        "<p>Each grade will get one student representative for every 30 students in the grade.</p>",
                         "<ul><li>How many representatives will each class have?</li></ul>"
                       ]
                     }
@@ -1162,7 +1136,8 @@
                         "format": "html",
                         "text": [
                           "<strong>Situation A. Writing a Proportion</strong>",
-                          "<ul><li>Nic wrote the following proportions to solve the first part of Reading Speeds scenario. What are other ways you could write the proportions? Is the answer the same? Explain.</li></ul>"
+                          "Nic’s Proportions",
+                          "<p>I wrote the following proportions to solve the first part of Reading Speeds scenario.</p>"
                         ]
                       }
                     },
@@ -1172,23 +1147,29 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>(3 minutes)/(480 words)  =  (x minutes)/(20,000 words)</p>"
+                          "(3 minutes)/(480 words)  =  (x minutes)/(20,000 words)",
+                          "(3 minutes)/(x minutes)  =  (480 words)/(20,000 words)",
+                          "<p>1. Are Nic’s proportions correct? What other proportions could you write? Do they all have the same answer?</p>"
                         ]
                       }
                     },
                     {
-                      "id": "I2qWLiXZzyWCigOA",
+                      "display": "teacher",
+                      "id": "uxIIowsfBkyhuMQS",
+                      "title": "Solution",
                       "content": {
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>(3 minutes)/(x minutes)  =  (480 words)/(20,000 words)</p>"
+                          "<p>Nic’s proportions are correct. There are other ways to write the proportion correctly.</p>"
                         ]
                       }
                     },
                     [
                       {
                         "display": "teacher",
+                        "id": "08OCT20200329pm",
+                        "title": "Reading Speeds Possible Answer 1",
                         "content": {
                           "type": "Image",
                           "url": "curriculum/comparing-and-scaling/images/C&S_1-3_WhatIf_SitASolution1_350w.png"
@@ -1196,6 +1177,8 @@
                       },
                       {
                         "display": "teacher",
+                        "id": "08OCT20200340pm",
+                        "title": "Reading Speeds Possible Answer 2",
                         "content": {
                           "type": "Image",
                           "url": "curriculum/comparing-and-scaling/images/C&S_1-3_WhatIf_SitASolution2_350w.png"
@@ -1204,6 +1187,8 @@
                     ],
                     [
                       {
+                        "id": "08OCT20200341pm",
+                        "title": "Reading Speeds Possible Answer 3",
                         "display": "teacher",
                         "content": {
                           "type": "Image",
@@ -1212,6 +1197,8 @@
                       },
                       {
                         "display": "teacher",
+                        "id": "08OCT20200342pm",
+                        "title": "Reading Speeds Possible Answer 4",
                         "content": {
                           "type": "Image",
                           "url": "curriculum/comparing-and-scaling/images/C&S_1-3_WhatIf_SitASolution4_350w.png"
@@ -1224,7 +1211,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>There are other ways to write the proportion correctly. The answer will be 125 minutes for each proportion. The scale factor is different depending on the relationships shown. It is important to pay attention to which quantities and units you are comparing in the proportion. For example, you would not scale 20,000 words to 3 minutes. Note that some students may mention using the unit rate of 160 words in 1 minute as a way to write the proportions.</p>"
+                          "<p>The answer will be 125 minutes for each proportion. The scale factor is different depending on the relationships shown. It is important to pay attention to which quantities and units you are comparing in the proportion. For example, you would not scale 20,000 words to 3 minutes. Note that some students may mention using the unit rate of 160 words in 1 minute as a way to write the proportions.</p>"
                         ]
                       }
                     },
@@ -1234,7 +1221,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<ul><li>Pick one of the other situations in the Initial Challenge and write it as a proportion.</li></ul>"
+                          "<p>2. Pick one of the other situations in the Initial Challenge and write it as a proportion.</p>"
                         ]
                       }
                     },
@@ -1244,8 +1231,10 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
+                          "<p>Possible answers:</p>",
                           "<p><em>Smoothie Bar</em></p>",
-                          "<p>(12 (Zane^&#x27; s age))/(4 (Stella^&#x27; sage)) = (3 segments)/(1 segment)  OR (12 (Zane^&#x27; s age))/(3 segments) = (4 (Stella^&#x27; sage))/(1 segment)</p>",
+                          "<p>(12 (Zane^&#x27; s age))/(4 (Stella^&#x27; sage)) = (3 segments)/(1 segment)  OR </p>",
+                          "(12 (Zane^&#x27; s age))/(3 segments) = (4 (Stella^&#x27; sage))/(1 segment)</p>",
                           "<p></p>",
                           "<p><em>Height of Trees</em></p>",
                           "<p>(5 ft.nested triangle.)/(8 ft.nested triangle) = (30  ft.large triangle )/(48 ft.large triangle ) OR (48 ft.large triangle)/(8 ft.nested triangle) = (30  ft.large triangle )/(5 ft.nested triangle.)</p>",
@@ -1316,7 +1305,9 @@
                         "format": "html",
                         "text": [
                           "<strong>Situation C. Fair Representation</strong>",
-                          "<p>The 7th and 8th grade students at the Mighty Middle School claimed that the assignment of representation was not fair. Do you agree? If yes, explain why. If not, describe a fairer method to assign delegates.</p>"
+                          "<p>Mighty Middle School 7th and 8th Grade Complaint</p>",
+                          "<p>We think that the selection of Student Council Representation was not fair.</p>",
+                          "Do you agree? If yes, explain why. If not, describe a fairer method to assign delegates."
                         ]
                       }
                     },
@@ -1328,7 +1319,8 @@
                         "text": [
                           "<p>This is an opinion of how students interpret the designation of delegates or how they deal with rounding.</p>",
                           "<p>7th grade may say it is not fair since Grade 6 has only 2 more students, but they might get one more representative.</p>",
-                          "<p>8th grade may say it is not fair since Grade 7 has 16 fewer students, but they may get the same number of representatives.</p>"
+                          "<p>8th grade may say it is not fair since Grade 7 has 16 fewer students, but they may get the same number of representatives.</p>",
+                          "Students may have ideas for what they think is fair representation. For example, they may feel that each grade should get the same number of representatives (like 4 per grade)."
                         ]
                       }
                     }
@@ -1360,6 +1352,18 @@
                           "<ul><li>Proportions scale ratios like other strategies.</li><li>Like other strategies, proportions help you answer questions</li></ul>",
                           "<p>Different:</p>",
                           "<ul><li>Proportions are an equation.</li><li>With some strategies, you get many equivalent ratios. With proportions, you get a specific equivalent ratio.</li><li>Proportions are written in fraction form.</li></ul>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "hLWgvEn67dy0ossn",
+                      "title": "Text 2",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<h3>Did You Know?</h3>",
+                          "<p>Over the years the number of Representatives in United States House has changed several times. As of 1929 the House passed the Permanent Apportionment Act of 1929, fixing the number of Representatives at 435. But the House continued to debate how to apportion the seats to the 50 states. In 1941, Congress adopted the current formula for reapportioning House seats. In the 2020 census some states gained seats and some lost seats. For example, due to a decline in population, Michigan will lose one Representative. Note there are also 6 non-voting members from Washington, D.C., American Samoa, Guam, the US Virgin Islands, the Commonwealth of Northern Mariana Islands, and Puerto Rico.</p>"
                         ]
                       }
                     }
@@ -1396,7 +1400,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>In Investigation 1, we explored strategies for comparing quantities. We used ratios, scaling, proportions, percents, and differences. Knowing several methods of comparison is not enough. We also need to be able to recognize when a situation is proportional and which method of comparison is appropriate to solve the problem.</p>"
+                        "<p>In Investigation 1, we explored strategies for comparing quantities. We used ratios, scaling, proportions, percents, and differences. We also need to be able to recognize when a situation is proportional and which method of comparison is appropriate to solve the problem.</p>"
                       ]
                     }
                   },
@@ -1492,12 +1496,16 @@
                     },
                     [
                       {
+                        "id": "08OCt20220400PM",
+                        "title": "Large Table for 10 people",
                         "content": {
                           "type": "Image",
                           "url": "curriculum/comparing-and-scaling/images/C&S_2-1_LargeTable.png"
                         }
                       },
                       {
+                        "id": "08OCt20220400PM",
+                        "title": "Small Table for 8 people",
                         "content": {
                           "type": "Image",
                           "url": "curriculum/comparing-and-scaling/images/C&S_2-1_SmallTable.png"
@@ -1686,133 +1694,67 @@
                       "format": "html",
                       "text": [
                         "<strong>Situation A. Three Strategies</strong>",
-                        "<p>Selma, Tony, and Terry came up with different ways to solve the problem. Who is correct? Explain.</p>"
+                        "<p>Selma, Tony, and Terry have different ways to solve the problem. Who is correct? Explain.</p>"
                       ]
                     }
                   },
-                  [
-                    {
-                      "id": "vEab0G_bG7wOnupH",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<strong>Selma’s Strategy</strong>",
-                          "<p>For each table, I found the amount of pizza each person would get.</p>",
-                          "<p>Large Table</p>",
-                          "<p>4 pizzas for 10 people =</p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "HMWDg4LnCKwaJxo_",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<strong>Tony’s Strategy</strong>",
-                          "<p>For each table, I found the number of people that would share one pizza.</p>",
-                          "<p>Large Table</p>",
-                          "<p>10 people for every 4 pizzas =</p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "PUxoc1B769vulEp6",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<strong>Terry’s Strategy</strong>",
-                          "<p>For the large table, there are 10 people for 4 pizzas. The difference is 6.</p>",
-                          "<p>For the small table there are 8 people for 3 pizzas. The difference is 5.</p>"
-                        ]
-                      }
+                  {
+                    "id": "vEab0G_bG7wOnupH",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Selma’s Strategy</strong>",
+                        "<p>For each table, I found the amount of pizza each person would get.</p>",
+                        "Large Table",
+                        "4 pizzas for 10 people =",
+                        "↓   ÷ 10             ↓   ÷ 10",
+                        "4/10 pizza for 1 person",
+                        "",
+                        "Small Table",
+                        "3 pizzas for 8 people = 3/8 pizza for 1 person",
+                        "<p>The people at the large table get more pizza.</p>"
+                      ]
                     }
-                  ],
-                  [
-                    {
-                      "id": "7jghecf_FZEoydsc",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>↓   ÷ 10             ↓   ÷ 10</p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "YRJ2Wv3tfxRg6bmV",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>↓   ÷ 4                                 ↓   ÷ 4</p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "wZ1sC46pdlW2xgQo",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p></p>"
-                        ]
-                      }
+                  },
+                  {
+                    "id": "HMWDg4LnCKwaJxo_",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Tony’s Strategy</strong>",
+                        "<p>For each table, I found the number of people that would share one pizza.</p>",
+                        "Large Table",
+                        "10 people for every 4 pizzas =",
+                        "↓   ÷ 4                                 ↓   ÷ 4",
+                        "(x people for every 1 pizza = 2.5 people for every 1 pizza)",
+                        "",
+                        "Small Table",
+                        "8 people for every 3 pizzas =",
+                        "↓   ÷ 3                              ↓   ÷ 3",
+                        "x people for every 1 pizza = 2 2/3 people for every 1 pizza",
+                        "<p>The people at the small table get more pizza since 2 2/3 or 2.666…is greater than 2.5.</p>"
+                      ]
                     }
-                  ],
-                  [
-                    {
-                      "id": "6jisjW9hSSFJFPf_",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>4/10 pizza for 1 person</p>",
-                          "<p>Small Table</p>",
-                          "<p>3 pizzas for 8 people =</p>",
-                          "<p></p>",
-                          "<p>3/8 pizza for 1 person</p>",
-                          "<p>The people at the large table get more pizza.</p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "gKvsHsCb5Y5dBQf6",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>(x people for every 1 pizza = )</p>",
-                          "<p></p>",
-                          "<p>2.5 people for every 1 pizza</p>",
-                          "<p>Small Table</p>",
-                          "<p>8 people for every 3 pizzas =</p>",
-                          "<p>↓   ÷ 3                              ↓   ÷ 3</p>",
-                          "<p>x people for every 1 pizza =</p>",
-                          "<p></p>",
-                          "<p>2 2/3 people for every 1 pizza</p>",
-                          "<p>The people at the small table get more pizza since 2 2/3 or 2.666…is greater than 2.5.</p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "ZzvhnPIH5Ix7tint",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>Large Table</p>",
+                  },
+                  {
+                    "id": "PUxoc1B769vulEp6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Terry’s Strategy</strong>",
+                        "<p>For the large table, there are 10 people for 4 pizzas. The difference is 6.</p>",
+                        "<p>For the small table there are 8 people for 3 pizzas. The difference is 5.</p>",
+                        "<p>Large Table</p>",
                           "<p>10 people - 4 pizzas = 6</p>",
                           "<p>Small Table</p>",
                           "<p>8 people - 3 pizzas = 5</p>",
-                          "<p>So, the people at the small table get more pizza.</p>",
-                          "<p></p>"
-                        ]
-                      }
+                          "<p>So, the people at the small table get more pizza.</p>"
+                      ]
                     }
-                  ],
+                  },
                   {
                     "display": "teacher",
                     "content": {
@@ -1866,7 +1808,7 @@
                       "text": [
                         "<strong>Situation B. Pizza for all the Campers</strong>",
                         "<p>If there are 210 campers, how many pizzas are needed</p>",
-                        "<ul><li>If only large tables are used?</li></ul>"
+                        "1. If only large tables are used?"
                       ]
                     }
                   },
@@ -1877,13 +1819,13 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Proportions as a Strategy</strong></p>",
-                        "\u00a0                    x 21",
-                        "\u00a0                     ⃕",
+                        "\u00a0                     x 21",
+                        "\u00a0                      ⃕",
                         "10 people = 210 people",
                         "____________________________",
                         "\u00a0    4 pizzas = 84 pizzas",
-                        "\u00a0                 ⤻",
-                        "\u00a0               x 21"
+                        "\u00a0                   ⤻",
+                        "\u00a0                 x 21"
                       ]
                     }
                   },
@@ -1902,10 +1844,10 @@
                     "display": "teacher",
                     "content": {
                       "type": "Table",
-                      "name": "Table 1",
+                      "name": "Unit Rate Table",
                       "columns": [
-                        {"name":"Number of People","values":["5/2","5","10","20","30","40","50","blank","210","blank"]},
-                        {"name":"Number of Pizzas","values":["1","2","4","8","12","16","20","","84",""]}
+                        {"name":"Number of People","width": 150, "values":["5/2","5","10","20","30","40","50","blank","210","blank"]},
+                        {"name":"Number of Pizzas","width": 150, "values":["1","2","4","8","12","16","20","","84",""]}
                       ]
                     }
                   },
@@ -1914,8 +1856,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Unit Rate as a Strategy</strong></p>",
-                        "<ul><li>If only small tables are used?</li></ul>"
+                        "2. If only small tables are used?"
                       ]
                     }
                   },
@@ -1925,13 +1866,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "\u00a0                x 26.25",
-                        "                       ⃕",
+                        "\u00a0                 x 26.25",
+                        "                        ⃕",
                         "8 people = 210 people",
                         "___________________________",
                         "3 pizzas = 78.75 pizzas",
-                         "                 ⤻",
-                        "\u00a0             x26.25"
+                         "                   ⤻",
+                        "\u00a0               x26.25"
                       ]
                     }
                   },
@@ -1950,10 +1891,10 @@
                     "display": "teacher",
                     "content": {
                       "type": "Table",
-                      "name": "Table 2",
+                      "name": "Unit Rate Table",
                       "columns": [
-                        {"name":"Number of people","values":["8/3","8","80","160","208","210"]},
-                        {"name":"Number of pizzas","values":["1","3","30","60","78","78 3/4"]}
+                        {"name":"Number of people","width": 150, "values":["8/3","8","80","160","208","210"]},
+                        {"name":"Number of pizzas","width": 150, "values":["1","3","30","60","78","78 3/4"]}
                       ]
                     }
                   },
@@ -1965,7 +1906,7 @@
                       "text": [
                         "<strong>Situation C. Considering Extra-large Tables</strong>",
                         "<p>The camp decides to use only extra-large tables that seat 25 people.</p>",
-                        "<ul><li>How many pizzas should be put on an extra-large table?</li></ul>"
+                        "1. How many pizzas should be put on an extra-large table?"
                       ]
                     }
                   },
@@ -1997,7 +1938,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<ul><li>How many pizzas would be used to serve 210 campers if they sit at extra-large tables?</li></ul>"
+                        "2. How many pizzas would be used to serve 210 campers if they sit at extra-large tables?"
                       ]
                     }
                   },
@@ -2059,14 +2000,6 @@
           "subtitle": "How Do We Know It Is Proportional?",
           "sections": [
             {
-              "type": "introduction",
-              "content": {
-                "tiles": [
-                ]
-              },
-              "supports": []
-            },
-            {
               "type": "initialChallenge",
               "content": {
                 "tiles": [
@@ -2081,12 +2014,16 @@
                   },
                   [
                     {
+                      "id": "08OCT20220428PM",
+                      "title": "Royal Pizza - 5 for $65",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_2-2_RoyalPizzaFlyer.png"
                       }
                     },
                     {
+                      "id": "08OCT20220429PM",
+                      "title": "Howdy's Pizza - 15 for $165 + Delivery",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_2-2_HowdysPizzaFlyer.png"
@@ -2107,39 +2044,8 @@
                       "type": "Table",
                       "name": "Pizza Price of Royal Pizza",
                       "columns": [
-                        {"name":"Number of Pizzas","values":["1","2","3","4","5","10","15","20","100","150","200"]},
-                        {"name":"Total Cost in Dollars","values":["--","--","--","--","$65","--","--","--","--","--","--"]}
-                      ]
-                    }
-                  },
-                  {
-                    "id": "t-cIVNG003HLLzWX",
-                    "content": {
-                      "type": "Table",
-                      "name": "Pizza Price of Howdy's Pizza",
-                      "columns": [
-                        {"name":"Number of Pizzas","values":["1","2","3","4","5","10","15","20","100","150","200"]},
-                        {"name":"Total Cost of Pizza in Dollars","values":["--","--","--","--","--","--","$195","--","--","--","--"]}
-                      ]
-                    }
-                  },
-                  {
-                    "id": "wehSEgZb6ZDW6Vu9",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<ul><li>On a copy of the tables, fill in the total costs for each number of pizzas shown.</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "zN_Ac2lOzCS7nEni",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<ul><li>How can Julia use the tables to make her choice? Which company should she choose and why?</li></ul>"
+                        {"name":"Number of Pizzas","width": 150,"values":["1","2","3","4","5","10","15","20","100","150","200"]},
+                        {"name":"Total Cost in Dollars","width": 150,"values":["--","--","--","--","$65","--","--","--","--","--","--"]}
                       ]
                     }
                   },
@@ -2149,8 +2055,8 @@
                       "type": "Table",
                       "name": "Pizza Price of Royal Pizza- Solution",
                       "columns": [
-                        {"name":"Number of Pizzas","values":["1","2","3","4","5","10","15","20","100","150","200"]},
-                        {"name":"Total Cost in Dollars","values":["13","26","39","52","65","130","195","260","1300","1950","2600"]}
+                        {"name":"Number of Pizzas","width": 150,"values":["1","2","3","4","5","10","15","20","100","150","200"]},
+                        {"name":"Total Cost in Dollars","width": 150,"values":["13","26","39","52","65","130","195","260","1300","1950","2600"]}
                       ]
                     }
                   },
@@ -2165,14 +2071,25 @@
                     }
                   },
                   {
+                    "id": "t-cIVNG003HLLzWX",
+                    "content": {
+                      "type": "Table",
+                      "name": "Pizza Price of Howdy's Pizza",
+                      "columns": [
+                        {"name":"Number of Pizzas","width": 150,"values":["1","2","3","4","5","10","15","20","100","150","200"]},
+                        {"name":"Total Cost of Pizza in Dollars","width": 150,"values":["--","--","--","--","--","--","$195","--","--","--","--"]}
+                      ]
+                    }
+                  },
+                  {
                     "display": "teacher",
                     "content": {
                       "type": "Table",
                       "name": "Pizza Prices for Howdys Pizza- Solution",
                       "columns": [
-                        {"name":"No. of Pizzas","values":["1","2","3","4","5","10","15","20","100","150","200"]},
-                        {"name":"Total Cost in $","values":["41","52","63","74","85","140","195","250","1130","1680","2230"]},
-                        {"name":"Cost w/o Delivery in $","values":["11","22","33","44","55","110","165","220","1100","1650","2200"]}
+                        {"name":"No. of Pizzas","width": 150,"values":["1","2","3","4","5","10","15","20","100","150","200"]},
+                        {"name":"Total Cost in $","width": 150,"values":["41","52","63","74","85","140","195","250","1130","1680","2230"]},
+                        {"name":"Cost w/o Delivery in $","width": 150,"values":["11","22","33","44","55","110","165","220","1100","1650","2200"]}
                       ]
                     }
                   },
@@ -2184,6 +2101,26 @@
                       "text": [
                         "<p>Students need to recognize that the $195 for 15 pizzas also includes the $30 delivery charge.  They need to subtract that and then use the $165 to either scale up or down to find the other values in the table.</p>",
                         "<p>Some students may create another row to the table to find the cost of the pizzas without delivery.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "wehSEgZb6ZDW6Vu9",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>On a copy of the tables, find the total costs for each number of pizzas shown in the table. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "zN_Ac2lOzCS7nEni",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>How can Julia use the tables to make her choice? Which company should she choose and why?</li></ul>"
                       ]
                     }
                   },
@@ -2234,8 +2171,8 @@
                       "type": "Table",
                       "name": "Pizza Price of Howdy's Pizza",
                       "columns": [
-                        {"name":"Number of Pizzas","values":["1","2","3","4","5","10","15","20","100","150","200"]},
-                        {"name":"Total Cost ($)","values":["","","","","divide 15 by 3","","195","","","",""]}
+                        {"name":"Number of Pizzas","width": 150,"values":["1","2","3","4","divide 15 by 3","10","15","20","100","150","200"]},
+                        {"name":"Total Cost ($)","width": 150,"values":["","","","","divide 195 by 3","","195","","","",""]}
                       ]
                     }
                   },
@@ -2265,6 +2202,29 @@
                     {
                       "content": {
                         "type": "Geometry",
+                        "title": "Royal Pizza",
+                        "board": {
+                          "properties": {
+                            "axisMin": [-1.1, 0],
+                            "axisRange": [15.035, 105.263],
+                            "axisNames": ["x", "y"],
+                            "axisLabels": ["Number of Pizzas", "Cost in Dollars"]
+                          }
+                        },
+                        "objects": [
+                          { "type": "point", "parents": [1, 13], "properties": {"id":"vdPP8NOTFYfI1GTg","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [2, 26], "properties": {"id":"LMzVgWMVEKmbF-kU","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [3, 39.00000000000001], "properties": {"id":"x22MrSCZPA0zRuho","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [4, 52.000000000000014], "properties": {"id":"Mo7aKsGENkhQjvgr","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [5, 64.99999999999996], "properties": {"id":"ZegQZ7s9BlBHCsxX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [10, 130.00000000000003], "properties": {"id":"Nr-yMYMwTJxK40aS","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "polygon", "parents": ["vdPP8NOTFYfI1GTg", "LMzVgWMVEKmbF-kU", "x22MrSCZPA0zRuho", "Mo7aKsGENkhQjvgr", "ZegQZ7s9BlBHCsxX", "Nr-yMYMwTJxK40aS"],"properties": {"id":"iUcAVIQeavifTl1Y"} }
+                        ]
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Geometry",
                         "title": "Howdy Pizza",
                         "board": {
                           "properties": {
@@ -2283,29 +2243,6 @@
                           { "type": "point", "parents": [10, 140.00000000000003], "properties": {"id":"b_ZJMhiV8ggpQNBz","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
                           { "type": "point", "parents": [15, 195], "properties": {"id":"bEzTiGORjXpUifWX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
                           { "type": "polygon", "parents": ["ZfmEiftXc7XsDAyo", "vo_WEMFMeo-Rt8SG", "Wt7595slDPkbjGhC", "zZRFMvBCkEAd5SXj", "zbDELqB1i_IMk32B", "b_ZJMhiV8ggpQNBz", "bEzTiGORjXpUifWX"],"properties": {"id":"Aw0ovQjdAqlVu8uF"} }
-                        ]
-                      }
-                    },
-                    {
-                      "content": {
-                        "type": "Geometry",
-                        "title": "Royal Pizza",
-                        "board": {
-                          "properties": {
-                            "axisMin": [-1.1, 0],
-                            "axisRange": [15.035, 105.263],
-                            "axisNames": ["x", "y"],
-                            "axisLabels": ["Number of Pizzas", "Cost in Dollars"]
-                          }
-                        },
-                        "objects": [
-                          { "type": "point", "parents": [1, 13], "properties": {"id":"vdPP8NOTFYfI1GTg","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [2, 26], "properties": {"id":"LMzVgWMVEKmbF-kU","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [3, 39.00000000000001], "properties": {"id":"x22MrSCZPA0zRuho","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [4, 52.000000000000014], "properties": {"id":"Mo7aKsGENkhQjvgr","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [5, 64.99999999999996], "properties": {"id":"ZegQZ7s9BlBHCsxX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [10, 130.00000000000003], "properties": {"id":"Nr-yMYMwTJxK40aS","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "polygon", "parents": ["vdPP8NOTFYfI1GTg", "LMzVgWMVEKmbF-kU", "x22MrSCZPA0zRuho", "Mo7aKsGENkhQjvgr", "ZegQZ7s9BlBHCsxX", "Nr-yMYMwTJxK40aS"],"properties": {"id":"iUcAVIQeavifTl1Y"} }
                         ]
                       }
                     }
@@ -2368,10 +2305,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Meredith’s Strategy</p>",
-                        "<p></p>",
+                        "<p><strong>Meredith’s Strategy</strong></p>",
                         "<p>I found the unit rate of the cost for one pizza for each company. Then I scaled up to find the total cost for pizzas.</p>",
-                        "<p></p>",
                         "<p>However, with Howdy’s, after finding the cost of one pizza, I had to add the $30 delivery charge.</p>"
                       ]
                     }
@@ -2394,8 +2329,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Mary’s Strategy</strong>",
-                        "<p></p>",
+                        "<strong>Raffaele’s Strategy</strong>",
                         "<p>I used the unit rate to write equations.</p>",
                         "<p>C is the total cost of the pizza and n is the number of pizzas.</p>",
                         "<p>For Royal: CR = 13n</p>",
@@ -2409,7 +2343,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Mary’s strategy is correct.</p>",
+                        "<p>Raffaele’s strategy is correct.</p>",
                         "<p>The unit rate is shown as the multiplier (coefficient). At Royal’s for 1 pizza, you pay $13.</p>",
                         "<p>Note: This is an introduction to an equation that is not proportional. In the next Unit, we will look more closely at both proportional and non-proportional equations.</p>",
                         "<p></p>"
@@ -2430,7 +2364,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>How can you determine if a situation is proportional?</p>"
+                        "<p>How can you determine if a situation is a proportional relationship?</p>"
                       ]
                     }
                   },
@@ -2471,8 +2405,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>In a proportional relationship the multiplicative relationship between the quantities is always the same. The unit rate or constant of proportionality tells us about the multiplicative relationship between the two quantities. The unit rate for the cost of one pizza at Royal’s is $13.</p>",
-                        "<p>For example,</p>"
+                        "<p>In a proportional relationship the multiplicative relationship between the quantities is always the same. The unit rate or <em>constant of proportionality</em> tells us about the multiplicative relationship between the two quantities. </p>",
+                        "<p>For example, the unit rate for the cost of one pizza at Royal’s is $13.</p>"
                       ]
                     }
                   },
@@ -2482,13 +2416,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>5 pizzas for $65</p>",
-                        "<p>              or</p>",
-                        "<p>1 pizza for $13</p>",
-                        "<p>             or</p>",
-                        "<p>Cost C for N pizzas is 13N</p>",
-                        "<p>              or</p>",
-                        "<p>C = 13N</p>"
+                        "5 pizzas for $65",
+                        "              or",
+                        "1 pizza for $13",
+                        "<p>We can use the unit rate to write a general equation:</p>",
+                        "Cost C for N pizzas is 13N",
+                        "              or",
+                        "C = 13N"
                       ]
                     }
                   },
@@ -2509,8 +2443,8 @@
                       "format": "html",
                       "text": [
                         "<p>C = 13N</p>",
-                        "<p>13 is the unit rate or constant of proportionality</p>",
-                        "<p>What is the other constant of proportionality? Is it useful in this situation?</p>",
+                        "<p>13 is the unit rate or <strong>constant of proportionality</strong></p>",
+                        "<p><em>What is the other constant of proportionality? Is it useful in this situation?</em></p>",
                         "<p>In this Problem we will look at tables, equations, and graphs of proportional relationships.</p>"
                       ]
                     }
@@ -2539,8 +2473,8 @@
                       "type": "Table",
                       "name": "Mia's Table",
                       "columns": [
-                        {"name":"Number of Oranges, N","values":["10","5","1","2","3"]},
-                        {"name":"Total Cost in Dollars, C","values":["2","1","0.20","0.4","0.6"]}
+                        {"name":"Number of Oranges, N","width":150,"values":["10","5","1","2","3"]},
+                        {"name":"Total Cost in Dollars, C","width":150,"values":["2","1","0.20","0.4","0.6"]}
                       ]
                     }
                   },
@@ -2551,7 +2485,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>10/$2 = 5/$1</p>"
+                          "10/$2 = 5/$1"
                         ]
                       }
                     },
@@ -2561,7 +2495,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>10/$2 = 1/$0.20</p>"
+                          "10/$2 = 1/$0.20"
                         ]
                       }
                     }
@@ -2573,7 +2507,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>N = 5C</p>"
+                          "N = 5C"
                         ]
                       }
                     },
@@ -2583,7 +2517,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>C = 0.20N</p>"
+                          "C = 0.20N"
                         ]
                       }
                     }
@@ -2717,14 +2651,20 @@
                   },
                   [
                     {
-                      "id": "_Z8h3VYWUbxcXd4P",
+                      "id": "QPIw_hR9ye-iDU1G",
+                      "title": "Cost of Tickets from the Box Office",
                       "content": {
-                        "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/C&S_2-3_BoxOfficeTicketsTable_350w.jpg"
+                        "type": "Table",
+                        "name": "Cost of Tickets from the Box Office",
+                        "columns": [
+                          {"name":"Number of Tickets","width":99.49609375,"values":["0","1","2","1x4 = 4"]},
+                          {"name":"Total Cost of Tickets","width":122.85546875,"values":["0","30","60","30 x 4 = 120"]}
+                        ]
                       }
                     },
                     {
                       "id": "GRJjpe07QzPACiT_",
+                      "title": "Cost Graph",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_2-3_BoxOfficeTicketsGraph_350w.jpg"
@@ -2843,57 +2783,50 @@
                       "type": "Table",
                       "name": "Cost of Ticket from the Box Office",
                       "columns": [
-                        {"name":"Number of Tickets","values":["0","1","2"]},
-                        {"name":"Total Cost of Tickets","values":["0","30","60"]},
-                        {"name":"Cost with Process Fee","values":["10","40","70"]}
+                        {"name":"Number of Tickets","width": 120,"values":["0","1","2"]},
+                        {"name":"Total Cost of Tickets","width": 120,"values":["0","30","60"]},
+                        {"name":"Cost with Process Fee","width": 120,"values":["10","40","70"]}
                       ]
                     }
                   },
-                  [
-                    {
-                       "display": "teacher",
-                      "content": {
-                        "type": "Geometry",
-                        "title": "Ticket Cost",
-                        "board": {
-                          "properties": {
-                            "axisMin": [-1, -1],
-                            "axisRange": [5.322, 93.913],
-                            "axisNames": ["N", "C"],
-                            "axisLabels": ["", ""]
-                          }
-                        },
-                        "objects": [
-                          { "type": "point", "parents": [0, 0], "properties": {"id":"Ihr5BjKOynTl0c2A","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [1, 30], "properties": {"id":"aS5Ew5Rwy5tdn8ch","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [2, 60], "properties": {"id":"GGcrdtotKoPYP-uP","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "polygon", "parents": ["Ihr5BjKOynTl0c2A", "aS5Ew5Rwy5tdn8ch", "GGcrdtotKoPYP-uP"],"properties": {"id":"g1vwVrUCfVpRRuke"} },
-                          { "type": "point", "parents": [2, 70], "properties": {"id":"vn-OfinQf3FDj2yu","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [1, 40], "properties": {"id":"6E5sNTUokvEsW4-i","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [0, 10], "properties": {"id":"ujmL3sAA0FcGouDh","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "polygon", "parents": ["vn-OfinQf3FDj2yu", "6E5sNTUokvEsW4-i", "ujmL3sAA0FcGouDh"],"properties": {"id":"5w8yzNODx5N45pNA"} }
-                        ]
-                      }
-                    },
-                    {
-                       "display": "teacher",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>C is cost of the tickets</p>",
-                          "<p></p>",
-                          "<p>N is the number of tickets</p>",
-                          "<p></p>",
-                          "<p></p>",
-                          "<p>C = 30N</p>",
-                          "<p></p>",
-                          "<p>C = 30N + 10</p>",
-                          "<p></p>"
-                        ]
-                      }
+                  {
+                      "display": "teacher",
+                    "content": {
+                      "type": "Geometry",
+                      "title": "Ticket Cost",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-1, -1],
+                          "axisRange": [6, 100],
+                          "axisNames": ["N", "C"],
+                          "axisLabels": ["", ""]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [0, 0], "properties": {"id":"Ihr5BjKOynTl0c2A","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [1, 30], "properties": {"id":"aS5Ew5Rwy5tdn8ch","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [2, 60], "properties": {"id":"GGcrdtotKoPYP-uP","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["Ihr5BjKOynTl0c2A", "aS5Ew5Rwy5tdn8ch", "GGcrdtotKoPYP-uP"],"properties": {"id":"g1vwVrUCfVpRRuke"} },
+                        { "type": "point", "parents": [2, 70], "properties": {"id":"vn-OfinQf3FDj2yu","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [1, 40], "properties": {"id":"6E5sNTUokvEsW4-i","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [0, 10], "properties": {"id":"ujmL3sAA0FcGouDh","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["vn-OfinQf3FDj2yu", "6E5sNTUokvEsW4-i", "ujmL3sAA0FcGouDh"],"properties": {"id":"5w8yzNODx5N45pNA"} }
+                      ]
                     }
-                  ],
+                  },
+                  {
+                      "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>C is cost of the tickets</p>",
+                        "<p>N is the number of tickets</p>",
+                        "<p>C = 30N</p>",
+                        "<p>C = 30N + 10</p>"
+                      ]
+                    }
+                  },
                   {
                     "display": "teacher",
                     "content": {
@@ -3102,49 +3035,8 @@
                   },
                   [
                     {
-                      "id": "Hewa3STsJe0rdeZW",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>Notepad: $8.95</p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "yr0gKiCW7QneEfPk",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>Markers: $6.75</p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "QoKFTXKfh_ri1Knq",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>Pencils: $3.80</p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "JBiceTMkBKUK1tIj",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>Sticky notes: $4.25</p>"
-                        ]
-                      }
-                    }
-                  ],
-                  [
-                    {
                       "id": "thzd5hEmw35Ax_-R",
+                      "title": "Notepad: $8.95",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_3-1_Notepad.png"
@@ -3152,6 +3044,7 @@
                     },
                     {
                       "id": "sNmCCYHXPkmleVnC",
+                      "title": "Markers: $6.75",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_3-1_Markers.png"
@@ -3159,6 +3052,7 @@
                     },
                     {
                       "id": "3UJlgyI8YWVB3PyT",
+                      "title": "Pencils: $3.80",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_3-1_Pencils.png"
@@ -3166,6 +3060,7 @@
                     },
                     {
                       "id": "9uKrABz1s66-ZgXy",
+                      "title": "Sticky notes: $4.25",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_3-1_StickyNotes.png"
@@ -3278,11 +3173,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Casey’s Strategy</p>",
+                        "<p><strong>Casey’s Strategy</strong></p>",
                         "<p>To compute the total cost of an item that costs $8.95 with a 5% sales tax, I multiply $8.95 by 0.05 and then add the tax to the $8.95.</p>",
-                        "<p>  8.95 • 0.05 + 8.95</p>",
-                        "<p>Casey is using the Distributive Property finding the cost • the % tax + the cost • 100%.</p>",
-                        "<p>8.95 • 0.05 + 8.95 •1</p>"
+                        "<p>  8.95 • 0.05 + 8.95</p>"
                       ]
                     }
                   },
@@ -3302,7 +3195,60 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Sammi’s Strategy</p>",
+                        "<strong>Vanessa’s Strategy</strong>",
+                        "<p>I used the Distributive Property. I think this strategy will work for any bill.</p>",
+                        "             0.05 • 8.95 + 1 • 8.95 = ",
+                        "                         (0.05 + 1) • 8.95",
+                        "                                 or",
+                        "      1.05 • 8.95 to find the total bill."
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                       "<p>Vanessa is using a combination of what Casey and Sammi do. Vanessa uses the Distributive Property which results in multiplying by 1.05 (like Sammi does).</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<strong>Ash’s Strategy</strong>",
+                        "<p>I used a percent bar or tape diagram. Extend the bar to find 105%.</p>",
+                        "<p>Ash uses a percent bar/tape diagram. (Students learned this strategy in Comparing Quantities.) Ash extends the bar past the 100% mark to find the 105% mark. Using the amount of money for 1%, Ash can scale up to 105%. This is like Alex’s strategy with a different representation – a bar diagram rather than a proportion.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "11OCT2022o800pm",
+                    "title": "Ash's Tape",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_3-1_AshsStrategy.png"
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                       "<p>Ash uses a percent bar/tape diagram. (Students learned this strategy in Comparing Quantities.) Ash extends the bar past the 100% mark to find the 105% mark. Using the amount of money for 1%, Ash can scale up to 105%. This is like Alex’s strategy with a different representation – a bar diagram rather than a proportion.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Sammi’s Strategy</strong></p>",
                         "<p>Multiply $8.95 by 1.05.</p>",
                         "<p>That will get the whole amount (100% or 1) and the tax (5% or 0.05).</p>"
                       ]
@@ -3338,30 +3284,6 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Vanessa’s Strategy</p>",
-                        "<p>I used the Distributive Property. I think this strategy will work for any bill.</p>",
-                        "             0.05 • 8.95 + 1 • 8.95 = ",
-                        "                         (0.05 + 1) • 8.95",
-                        "                                 or",
-                        "      1.05 • 8.95 to find the total bill."
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                       "<p>Vanessa is using a combination of what Casey and Sammi do. Vanessa uses the Distributive Property which results in multiplying by 1.05 (like Sammi did).</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
                         "<p><strong>Alex’s Strategy</strong></p>",
                         "<p>I first find 1%. Then I can find any percent, like the 105% needed for this question.</p>"
                       ]
@@ -3383,33 +3305,6 @@
                       "format": "html",
                       "text": [
                        "<p>Alex scales the ratio down to find the unit rate (the amount of money for 1%). Then he scales the rate up to 105 to find the amount of money for 105%.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<strong>Ash’s Strategy</strong>",
-                        "<p>I used a percent bar or tape diagram. Extend the bar to find 105%.</p>",
-                        "<p>Ash uses a percent bar/tape diagram. (Students learned this strategy in Comparing Quantities.) Ash extends the bar past the 100% mark to find the 105% mark. Using the amount of money for 1%, Ash can scale up to 105%. This is like Alex’s strategy with a different representation – a bar diagram rather than a proportion.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/C&S_3-1_AshsStrategy.png"
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                       "<p>Ash uses a percent bar/tape diagram. (Students learned this strategy in Comparing Quantities.) Ash extends the bar past the 100% mark to find the 105% mark. Using the amount of money for 1%, Ash can scale up to 105%. This is like Alex’s strategy with a different representation – a bar diagram rather than a proportion.</p>"
                       ]
                     }
                   },
@@ -3438,6 +3333,18 @@
                     }
                   },
                   {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>This discussion holds a subtle point that should be discussed with your students.</p>",
+                        "<p>Percents are rates. Fractions are numbers.</p>",
+                        "<p>But we use fractions or decimals to compute with percents. Sam is thinking of the fraction form and the way that the ratios/rates scale like finding equivalent fractions. Percents are a ratio because they compare two quantities – some number to 100 with 100 representing one whole.</p>"
+                      ]
+                    }
+                  },
+                  {
                     "id": "0nTdoz7aOHB91s8c",
                     "content": {
                       "type": "Text",
@@ -3454,18 +3361,6 @@
                         "<p> $9 + $7 + $4 + $4 = total amount for all the items</p>",
                         "<p>Total amount for all the items + 5% tax = a different total price</p>",
                         "<p>Marta disagrees with Nicky. She claims the answers are the same because of the Distributive Property. And the total prices are the same.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>This discussion holds a subtle point that should be discussed with your students.</p>",
-                        "<p>Percents are rates. Fractions are numbers.</p>",
-                        "<p>But we use fractions or decimals to compute with percents. Sam is thinking of the fraction form and the way that the ratios/rates scale like finding equivalent fractions. Percents are a ratio because they compare two quantities – some number to 100 with 100 representing one whole.</p>"
                       ]
                     }
                   },
@@ -3506,9 +3401,12 @@
                   },
                   {
                     "display": "teacher",
+                    "id": "oO3tSDj-rCnbQwY7",
+                    "title": "Percent Bar for solving Funda's tax",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/C&S_3-1_SituationCSolution.png"
+                      "url": "curriculum/comparing-and-scaling/images/Fundastape.png",
+                      "filename": "curriculum/comparing-and-scaling/images/Fundastape.png"
                     }
                   }
                 ]
@@ -3590,6 +3488,7 @@
                   },
                   {
                     "id": "9O0KDB8Crjz7g0VD",
+                    "title": "Lenny's Lunch Place Menu",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_3-2_LarrysLunchPlace.png"
@@ -3634,10 +3533,10 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation A. Benchmarks</strong>",
-                        "<p>Many people use benchmarks for determining tips.</p>",
-                        "<p>Gil explains his strategy: “I always figure out 10% of the bill, and then I use this information to calculate a 15% or 20% tip.”</p>",
-                        "<ul><li>Explain why Gil’s method works.</li></ul>"
+                        "<strong>Situation A. Gil Uses Benchmarks</strong>",
+                        "<p>Gil’s Strategy</p>",
+                        "<p>10% is easy to find. So, I always figure out 10% of the bill, and then I use this information to calculate a 15% or 20% tip. </p>",
+                        "<p>1. Explain why Gil’s method works.</p>"
                       ]
                     }
                   },
@@ -3647,6 +3546,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
+                        "<p>10% is 1/10 of the total. You can find 10% by dividing by 10 which “moves the decimal in our base ten number system.”</p>",
                         "<p>Once you find 10% you can take that amount and divide it in half to get 5%. Add together the amount for 10% and 5% and you will have the 15% tip.</p>",
                         "<p>Once you have 10% you can take that amount and double it to get the amount for a 20% tip.</p>"
                       ]
@@ -3658,7 +3558,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<ul><li>Use his method to compute a 15% tip and a 20% tip if the final bill is:</li></ul>"
+                        "<p>2. Use his method to compute a 15% tip and a 20% tip if the final bill is:</p>"
                       ]
                     }
                   },
@@ -3764,7 +3664,7 @@
                         "<p><strong>Situation C. Another Meal at Larry’s</strong></p>",
                         "<p></p>",
                         "<p>Sandy has a 10% discount off the total price before tax is added for Larry’s Lunch Place. If the cost of the meal is $18.50,</p>",
-                        "<ul><li>What is the cost of the meal after the discount?</li></ul>"
+                        "<p>1. What is the cost of the meal after the discount?</li></ul>"
                       ]
                     }
                   },
@@ -3786,7 +3686,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<ul><li>What is the total cost with a 6% tax and a 15% tip?</li></ul>"
+                        "<p>2. What is the total cost with a 6% tax and a 15% tip?</p>"
                       ]
                     }
                   },
@@ -3813,7 +3713,7 @@
                         "<strong>Situation D. Discount After Discount</strong>",
                         "<p>Aladar has a 20% discount coupon to buy new headphones priced at $95. When he got to the telecom store, he learned that they were having a 30% off sale.</p>",
                         "<p>The clerk calculated the 30% discount first and then applied the 20% off coupon to the discounted amount.</p>",
-                        "<ul><li>What should be the final price (without sales tax)?</li></ul>"
+                        "<p>1. What should be the final price (without sales tax)?</p>"
                       ]
                     }
                   },
@@ -3837,7 +3737,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<ul><li>Is that final price the same as a 50% discount? Explain.</li></ul>"
+                        "<p>2. Is that final price the same as a 50% discount? Explain.</p>"
                       ]
                     }
                   },
@@ -3896,7 +3796,7 @@
         {
           "description": "Problem 3.3",
           "ordinal": 3,
-          "title": "CAS 3.3 Free Throws and Feeding Chimps",
+          "title": "CAS 3.3 Feeding Chimps",
           "subtitle": "The Percent Connection",
           "sections": [
             {
@@ -3933,6 +3833,7 @@
                   },
                   {
                     "id": "3NBo-q49rqcb1a_2",
+                    "title": "Chimp Food Recipes",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_3-3_ChimpFoodRecipies.png"
@@ -3952,18 +3853,13 @@
                   {
                     "display": "teacher",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/C&S_3-3_FiberandProteinScoops.png"
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
+                        "<p>40 High Fiber Scoops + 60 High Protein Scoops for every 100 Total Scoops</p>",
+                        "<p>⤸ × 2.25                                       ⤸ × 2.25                                               ⤸ × 2.25 </p>",
+                        "<p>90 High Fiber scoops + 135 High Protein scoops for every 225 total scoops</p>",
                         "<p>OR</p>",
-                        "<p></p>",
                         "<p>60% of high protein 🡲 0.60 x 225 = 135 scoops</p>",
                         "<p>40% of high fiber 🡲 0.40 x 225 =  90 scoops</p>"
                       ]
@@ -4037,13 +3933,14 @@
                   },
                   {
                     "id": "nxs0dunxywsScOSV",
+                    "title": "Ahmed's Strategy",
                     "content": {
                       "type": "Table",
                       "name": "Ahmed's Strategy",
                       "columns": [
-                        {"name":"Fiber","values":["40","?"]},
-                        {"name":"Protein","values":["60","?"]},
-                        {"name":"Total","values":["100","?"]}
+                        {"name":"Fiber","width":100,"values":["40","?"]},
+                        {"name":"Protein","width":100,"values":["60","?"]},
+                        {"name":"Total","width":100,"values":["100",1]}
                       ]
                     }
                   },
@@ -4087,7 +3984,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Michelle’s Strategy</p>",
+                        "<strong>Michelle’s Strategy</strong>",
                         "<p>0.4 x total amount of food = amount of high fiber</p>",
                         "<p>  0.4<em>T=F</em></p>",
                         "<p>0.6 x total amount of food = amount of high protein</p>",
@@ -4214,7 +4111,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Sze’s Strategy</p>",
+                        "<strong>Sze’s Strategy</strong>",
                         "<p>He says you can use a proportion.</p>",
                         "<p> He wrote:</p>",
                         "<p>(x scoops of high fiber)/(30 scoops of high protein )=   (60%)/(40%)</p>",
@@ -4373,6 +4270,8 @@
                     }
                   },
                   {
+                    "id": "11OCt20220859PM",
+                    "title": "Wild Chimpanzee",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/CS_LA_O1_monkey_350w.png"
@@ -4405,8 +4304,8 @@
         {
           "description": "Problem 3.4",
           "ordinal": 4,
-          "title": "CAS 3.4 Leaky Faucet Experiment",
-          "subtitle": "",
+          "title": "CAS 3.4 4  Leaky Faucets, Free Throws, Populations, and Environment",
+          "subtitle": "What’s the Connection?",
           "sections": [
             {
               "type": "introduction",
@@ -4426,6 +4325,7 @@
                   },
                   {
                     "id": "aSedHJ_NN2MhZAhM",
+                    "title": "Annual Household Water Waste = 1 Trillion Gallons",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/C&S_3.4_AnnualHouseholdLeaksWaste.png"
@@ -4455,8 +4355,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Equipment</p>",
-                        "<p></p>",
+                        "<strong>Equipment</strong>",
                         "<ul><li> A timer, such as a watch, clock with a second hand, or smart phone</li><li>A Styrofoam or paper cup</li><li>A paper clip</li><li>A clear measuring container that measures milliliters (such as a graduated cylinder)</li></ul>"
                       ]
                     }
@@ -4475,6 +4374,7 @@
                     },
                     {
                       "id": "w-Dfow057CJIDb0a",
+                      "title": "Measuring Leaks",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_3-4_InitialChallenge.png"
@@ -4600,7 +4500,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Situation A. Ratios, Ratios, and More Ratios!</strong>",
+                        "<h2>Situation A. Ratios, Ratios, and More Ratios!</h2>",
                         "<p>Examine each ratio application and answer the questions for each.</p>"
                       ]
                     }
@@ -4612,7 +4512,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Free Throws</p>",
+                          "<strong>Free Throws</strong>",
                           "<p>Two basketball teams recently competed in free throw attempts. Team A made 108 out of 126 attempts. Team B made 195 out of 257 attempts. It is difficult to tell which team was better by looking at the raw numbers. Sid thought it would help to express the raw numbers as percents.</p>",
                           "<ol><li>Describe how Sid could use percents to decide which team has the best free throw average.</li><li>Describe another strategy for deciding which team has the best free throw average.</li></ol>"
                         ]
@@ -4624,7 +4524,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>2020 Census Population Data</p>",
+                          "<strong>2020 Census Population Data</strong>",
                           "<p>The 2020 Census data shows that the population of people in the USA under the age of 18 was 73.1 million in 2020. That is a decline of 1.4% from the 2010 Census.</p>",
                           "<ol><li>What was the population of people under the age of 18 in 2010?</li><li>If the decline of people under the age of 18 continued at this rate, what will be the population in 2030? 2040?</li></ol>"
                         ]
@@ -4713,6 +4613,7 @@
                   [
                     {
                       "id": "_DorjUf6UgmNC6yO",
+                      "title": "Beach on the Atlantic Ocean",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_3-4_RisingOceanLevelsandErosion.jpg"
@@ -4720,6 +4621,7 @@
                     },
                     {
                       "id": "6xoUFL_ernZEQBPM",
+                      "title": "Two Puffins",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/C&S_3-4_PuffinsinAlaska.png"
@@ -4963,7 +4865,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>1st Strategy:</p>"
+                          "<p>Sophie' Work:</p>"
                         ]
                       }
                     },
@@ -4973,7 +4875,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>2nd Strategy.</p>"
+                          "<p>Marla's Work:</p>"
                         ]
                       }
                     }
