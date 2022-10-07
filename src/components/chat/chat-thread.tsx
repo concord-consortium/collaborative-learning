@@ -72,7 +72,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
             > 
               <div className="chat-thread-tile-info">
                {Icon && (
-                <div data-testid="chat-thread-tile-type"><Icon/></div>
+                  <Icon data-testid="chat-thread-tile-type"/>
                )}
                 <div className="chat-thread-title"> {title} </div>
               </div>
@@ -110,9 +110,9 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
             <div className="chat-thread-tile-info">
               <div className="comment-card-header comment-select" data-testid="comment-card-header">
                 <div className="comment-card-header-icon" data-testid="comment-card-header-icon">
-                <div data-testid="chat-thread-tile-type">
-                  <ToolIconComponent documentKey={focusDocument} tileId={focusTileId}/>
-                </div>
+                  <div data-testid="chat-thread-tile-type">
+                    <ToolIconComponent documentKey={focusDocument} tileId={focusTileId}/>
+                  </div>
                 </div>
               </div>
               <div className="chat-thread-comment-info">  
