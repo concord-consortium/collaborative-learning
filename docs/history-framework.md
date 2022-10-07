@@ -304,3 +304,17 @@ https://firebase.google.com/docs/firestore/solutions/aggregation
 - [ ] review how exchangeId is handled when an undo triggers a call to updateSharedModel, should a new exchangeId be generated here or should it be re-using an existing exchangeId?
 - [ ] try to unify Document.afterCreate with createDocument
 - [ ] move some of the large comments in the code into this document and put references in the code.
+
+# Ordering Plan
+
+Make a promise that represents the verification/creation of the parent document and the request of the last entry to figure out the index.
+
+If that promise has been started don't make a new one.
+
+When a new history entry comes in add a "then" to that promise which sets the index of the entry and then uploads it.
+
+The index of the entry will need to be computed in order. So either each new entry needs to be chained off of the completion of the previous one. Or we compute the index based on the position of the entry in the local treeManager array. And we just add this local position to the initial remote position when we send it up.
+
+We also want to include the previousEntryId. All entries can figure this out locally except for the first one. So the first one will need update this after the promise is resolved.
+
+Another complication is that the previousEntryId might be different when the entry first starts from when it ends. This is the case for asynchronous entries. The order in firestore will be based on when it ends. But to help track down issues, we might want to record the start and end previousEntryId.

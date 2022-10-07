@@ -112,6 +112,25 @@ export const TreeManager = types
       self.undoStore.addHistoryEntry(entry);
     }
 
+    // TODO:
+    // To better support history entry ordering we want to include an index
+    // in each entry, and for record keeping also include a previousEntryId
+    // When we first start up, we need to know the last entries index.
+    // It will take some time for that query to complete and we need to allow
+    // the user to generate entries in the meantime.
+    // I think the best approach to support this, is to separate the saving 
+    // of history from the completion of the entry.
+    // So the saving code would instead be monitoring the list of entries
+    // and then once it figures out the status of the parent document and 
+    // the last entry then it starts to save the entries.
+    // We could do this with a separate queue, or we could add a flag to each
+    // entry indicating if it has been saved to firestore.
+
+    // Another thing to consider is what happens if the user closes the document
+    // before the history is saved. It would be nice for this system to continue
+    // saving the history even after the document is closed. I think that would 
+    // work, no mater which way we implement this. 
+
     // Create the document in firestore if necessary
     // FIXME-HISTORY: rename this function to validateFirestoreDocumentMetadata_v1
     const validateCommentableDocument = 
