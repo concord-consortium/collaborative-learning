@@ -13,7 +13,12 @@ export const DocumentError: React.FC<IProps> = ({ document }) => {
   return (
     <div className="document-error" data-testid="document-error">
       <h1>Error loading the document</h1>
-      Document Key: {document.key}
+      <ul>
+        <li>Key: &quot;{document.key}&quot;</li>
+        <li>User ID (uid): {document.uid}</li>
+        <li>Context ID (remoteContext): {document.remoteContext}</li>
+        <li>Type: &quot;{document.type}&quot;</li>
+      </ul>
       <h2>Error Message</h2>
       <pre>{document.contentErrorMessage}</pre>
       {document.invalidContent &&

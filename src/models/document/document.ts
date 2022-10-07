@@ -289,15 +289,9 @@ export const DocumentModel = Tree.named("Document")
       forEach(properties, (value, key) => self.setProperty(key, value));
     },
 
-    setContentStatus(status: ContentStatus) {
-      self.contentStatus = status;
-    },
-
-    setInvalidContent(content: object) {
+    setContentError(content: object, message?: string) {
+      self.contentStatus = ContentStatus.Error;
       self.invalidContent = content;
-    },
-
-    setContentErrorMessage(message: string) {
       self.contentErrorMessage = message;
     }
   }))
@@ -383,9 +377,7 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
     // and renders a DocumentError component if the status is Error
     const {content, ...snapshotWithoutContent} = snapshot;
     const documentWithoutContent = DocumentModel.create(snapshotWithoutContent, fullEnvironment);
-    documentWithoutContent.setContentStatus(ContentStatus.Error);
-    documentWithoutContent.setInvalidContent(content);
-    documentWithoutContent.setContentErrorMessage((e as Error)?.message);
+    documentWithoutContent.setContentError(content, (e as Error)?.message);
     return documentWithoutContent;
   }
 };

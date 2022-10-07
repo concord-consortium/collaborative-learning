@@ -4,8 +4,9 @@
   background: #f6cece;
   overflow: auto;
   user-select: text;
+  text-align: left;
 
-  pre {
-    text-align: left;
+  h1, h2 {
+    text-align: center;
   }
 }
