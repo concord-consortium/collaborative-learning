@@ -8,7 +8,7 @@ export class SelectionDrawingTool extends DrawingTool {
 
   public handleMouseDown(e: React.MouseEvent<HTMLDivElement>) {
     const drawingLayerView = this.drawingLayer;
-    const addToSelectedObjects = e.ctrlKey || e.metaKey;
+    const addToSelectedObjects = e.ctrlKey || e.metaKey || e.shiftKey;
     const start = this.drawingLayer.getWorkspacePoint(e);
     if (!start) return;
     drawingLayerView.startSelectionBox(start);
@@ -21,7 +21,7 @@ export class SelectionDrawingTool extends DrawingTool {
     };
     const handleMouseUp = (e2: MouseEvent) => {
       e2.preventDefault();
-      drawingLayerView.endSelectionBox(addToSelectedObjects, e2);
+      drawingLayerView.endSelectionBox(addToSelectedObjects);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
@@ -31,13 +31,20 @@ export class SelectionDrawingTool extends DrawingTool {
   }
 
   public handleObjectClick(e: React.MouseEvent<HTMLDivElement>, obj: DrawingObjectType) {
-    const selectedObjects = this.drawingLayer.getSelectedObjects();
+    let selectedObjects = this.drawingLayer.getSelectedObjects();
     const index = selectedObjects.indexOf(obj);
     if (index === -1) {
-      selectedObjects.push(obj);
+      if (e.shiftKey || e.metaKey){
+        selectedObjects.push(obj);
+      }
+      else {
+        selectedObjects = [obj];
+      }
     }
     else {
-      selectedObjects.splice(index, 1);
+      if (!(e.shiftKey||e.metaKey)){
+        selectedObjects.splice(index, 1);
+      }
     }
     this.drawingLayer.setSelectedObjects(selectedObjects);
   }

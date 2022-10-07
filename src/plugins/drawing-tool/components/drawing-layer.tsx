@@ -172,10 +172,6 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
   public handleObjectClick = (e: MouseEvent|React.MouseEvent<any>, obj: DrawingObjectType) => {
     if (!this.props.readOnly && this.currentTool) {
       this.currentTool.handleObjectClick(e, obj);
-      if (this.state.selectedObjects.length> 1 && !(e.shiftKey || e.metaKey)){
-        const filteredArray = this.state.selectedObjects.filter(selObj=> selObj === obj);
-        this.setState(prevState => ({selectedObjects: filteredArray}));
-      }
     }
   };
 
@@ -193,26 +189,25 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     let moved = false;
     const {selectedObjects, hoverObject } = this.state;
     let { objectsBeingDragged } = this.state;
-
-    // Prevents dragging multiple objects when you have one (or more) selected
-    // and then drag one unless shift/cmd pressed.
-    const selectedObjectsLength = this.state.selectedObjects.length;
-    if (selectedObjectsLength > 0 && !(e.shiftKey || e.metaKey)){
-      const clearSelectedObjects = this.state.selectedObjects;
-      for (let i = 0; i < selectedObjectsLength; i++){
-        clearSelectedObjects.pop();
-      }
-      this.setState((prevState)=> ({selectedObjects: clearSelectedObjects}));
-    }
-
     let objectsToInteract: DrawingObjectType[];
     let needToAddHoverToSelection = false;
+
+    //If the object you are dragging is selected then the selection should not be cleared
+    //and all objects should be moved.
+    //If the object you are dragging was not selected then only then all of the other objects
+    //should be deselected and just the object you are dragging should be selected.
     if (hoverObject && !selectedObjects.some(object => object.id === hoverObject.id)) {
-      objectsToInteract = [hoverObject, ...selectedObjects];
       needToAddHoverToSelection = true;
+      if (e.shiftKey || e.metaKey){
+        objectsToInteract = [hoverObject, ...selectedObjects];
+      }
+      else {
+        objectsToInteract = [hoverObject];
+      }
     } else {
       objectsToInteract = selectedObjects;
     }
+
     const starting = this.getWorkspacePoint(e);
     if (!starting) return;
 
@@ -286,18 +281,15 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     }
   }
 
-  public endSelectionBox(addToSelectedObjects: boolean, e2: MouseEvent) {
+  public endSelectionBox(addToSelectedObjects: boolean) {
     const {selectionBox} = this.state;
     if (selectionBox) {
       selectionBox.close();
-      let selectedObjects: DrawingObjectType[] = addToSelectedObjects ? this.state.selectedObjects : [];
+      const selectedObjects: DrawingObjectType[] = addToSelectedObjects ? this.state.selectedObjects : [];
       this.forEachObject((object) => {
         if (object.inSelection(selectionBox)) {
           if (selectedObjects.indexOf(object) === -1) {
             selectedObjects.push(object);
-            if (e2.metaKey || e2.shiftKey){  //when shift/meta add boxed selected objects to our state selectedObjects
-              selectedObjects = selectedObjects.concat(this.state.selectedObjects);
-            }
           }
         }
       });
