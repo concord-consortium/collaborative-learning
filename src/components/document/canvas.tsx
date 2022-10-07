@@ -5,7 +5,7 @@ import React from "react";
 import { DocumentLoadingSpinner } from "./document-loading-spinner";
 import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
-import { createDocumentModel, DocumentModelType } from "../../models/document/document";
+import { createDocumentModel, ContentStatus, DocumentModelType } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
 import { PlaybackComponent } from "../playback/playback";
@@ -15,6 +15,7 @@ import {
 import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT } from "../../lib/debug";
 import { LoadDocumentHistory } from "../navigation/load-document-history";
+import { DocumentError } from "./document-error";
 
 import "./canvas.sass";
 
@@ -102,7 +103,12 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     const documentContent = content || documentToShow?.content; // we only pass in content if it is a problem panel
     const typeClass = document?.type === "planning" ? "planning-doc" : "";
 
-    if (documentContent) {
+    // Note: If there is an error in the main document, we are currently ignoring documentToShow.
+    // It might be useful in the future to support showing the history so a user could try to
+    // rewind to a document version that doesn't have an error.
+    if (document?.contentStatus === ContentStatus.Error) {
+      return <DocumentError document={document} />;
+    } else if (documentContent) {
       return (
         <>
           <DocumentContentComponent content={documentContent}
