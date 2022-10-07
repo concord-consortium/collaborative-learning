@@ -123,7 +123,7 @@ context('Draw Tool Tile', function () {
           .trigger("mousemove", 200, 100)
           .trigger("mouseup", 200, 100);
         // For some reason the move isn't very accurate in cypress so often the final location off
-           drawToolTile.getRectangleDrawing().first().should("have.attr", "x").then(parseInt).and("within", 160, 220);
+        drawToolTile.getRectangleDrawing().first().should("have.attr", "x").then(parseInt).and("within", 160, 220);
       });
       it("verify hovering objects", () => {
         drawToolTile.getDrawTile()
