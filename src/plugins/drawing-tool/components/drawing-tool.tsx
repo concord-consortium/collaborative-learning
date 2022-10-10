@@ -41,7 +41,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         "cmd-v": handlePaste, //allows user to paste image with cmd+v
         "delete": handleDelete, // I'm not sure if this will handle "Del" IE 9 and Edge
         "backspace": handleDelete,
-      });  
+      });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -83,13 +83,19 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         tabIndex={0}
         onKeyDown={(e) => hotKeys.current.dispatch(e)}
       >
-        <ToolbarView model={model}
-                    documentContent={documentContent}
-                    toolTile={toolTile}
-                    scale={scale}
-                    setImageUrlToAdd={setImageUrlToAdd}
-                    {...toolbarProps} />
-        <DrawingLayerView {...props} imageUrlToAdd={imageUrlToAdd} setImageUrlToAdd={setImageUrlToAdd} />
+        <ToolbarView
+          model={model}
+          documentContent={documentContent}
+          toolTile={toolTile}
+          scale={scale}
+          setImageUrlToAdd={setImageUrlToAdd}
+          {...toolbarProps}
+        />
+        <DrawingLayerView
+          {...props}
+          imageUrlToAdd={imageUrlToAdd}
+          setImageUrlToAdd={setImageUrlToAdd}
+        />
       </div>
     </DrawingContentModelContext.Provider>
   );
