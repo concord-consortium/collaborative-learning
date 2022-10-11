@@ -51,6 +51,7 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     chatPanel.openTeacherChat(portalUrl, clueTeacher2, reportUrl2);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
+    cy.wait(2000);
 
     // Teacher 2 document comment
     chatPanel.verifyProblemCommentClass();
@@ -58,6 +59,7 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     chatPanel.addCommentAndVerify("This is a teacher2 problem document comment");
     // Teacher 2 tile comment
     cy.clickProblemResourceTile('introduction');
+    cy.wait(2000);
     chatPanel.verifyCommentThreadContains("This is a teacher1 problem tile comment");
     chatPanel.addCommentAndVerify("This is a teacher2 problem tile comment");
   });
@@ -65,12 +67,14 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
+    cy.wait(2000);
 
     // Teacher 1 document comment
     chatPanel.verifyProblemCommentClass();
     chatPanel.verifyCommentThreadContains("This is a teacher2 problem document comment");
     // Teacher 1 tile comment
     cy.clickProblemResourceTile('introduction');
+    cy.wait(2000);
     chatPanel.verifyCommentThreadContains("This is a teacher2 problem tile comment");
   });
     //TODO: verify delete is disabled for now until work is merged to master, but keep the delete to clean up chat space

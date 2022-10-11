@@ -3,7 +3,7 @@ import { useSyncMstNodeToFirebase } from "./use-sync-mst-node-to-firebase";
 import { useSyncMstPropToFirebase } from "./use-sync-mst-prop-to-firebase";
 import { DEBUG_DOCUMENT, DEBUG_SAVE } from "../lib/debug";
 import { Firebase } from "../lib/firebase";
-import { DocumentModelType } from "../models/document/document";
+import { ContentStatus, DocumentModelType } from "../models/document/document";
 import { isPublishedType, LearningLogDocument, LearningLogPublication, PersonalDocument,
          PersonalPublication, ProblemDocument, ProblemPublication, SupportPublication
         } from "../models/document/document-types";
@@ -26,12 +26,13 @@ function debugLog(...args: any[]) {
  */
 export function useDocumentSyncToFirebase(
                   user: UserModelType, firebase: Firebase, document: DocumentModelType, readOnly = false) {
-  const { key, type, uid } = document;
+  const { key, type, uid, contentStatus } = document;
   const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
   !readOnly && (user.id !== uid) && console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
   useEffect(() => {
-    if (!readOnly) {
+    // To handle errors this should be disabled if the document status is error
+    if (!readOnly && contentStatus === ContentStatus.Valid) {
       // enable history tracking on this document
       if (document.treeMonitor) {
         document.treeMonitor.enabled = true;
@@ -43,7 +44,7 @@ export function useDocumentSyncToFirebase(
         }
       };
     }
-  }, [readOnly, document.treeMonitor]);
+  }, [readOnly, contentStatus, document.treeMonitor]);
 
   if (!readOnly && DEBUG_DOCUMENT) {
     // provide the document to the console so developers can inspect its content
@@ -58,7 +59,7 @@ export function useDocumentSyncToFirebase(
   // sync visibility (public/private) for problem documents
   useSyncMstPropToFirebase<typeof document.visibility>({
     firebase, model: document, prop: "visibility", path: typedMetadata,
-    enabled: !readOnly && (type === ProblemDocument),
+    enabled: !readOnly && (type === ProblemDocument) && contentStatus === ContentStatus.Valid,
     options: {
       onSuccess: (data, visibility) => {
         debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
@@ -72,7 +73,8 @@ export function useDocumentSyncToFirebase(
   // sync title for personal and learning log documents
   useSyncMstPropToFirebase<typeof document.title>({
     firebase, model: document, prop: "title", path: typedMetadata,
-    enabled: !readOnly && [PersonalDocument, LearningLogDocument].includes(type),
+    enabled: !readOnly && [PersonalDocument, LearningLogDocument].includes(type) &&
+      contentStatus === ContentStatus.Valid,
     options: {
       onSuccess: (data, title) => {
         debugLog(`DEBUG: Updated document title for ${type} document ${key}:`, title);
@@ -86,7 +88,8 @@ export function useDocumentSyncToFirebase(
   // sync properties for problem, personal, and learning log documents
   useSyncMstNodeToFirebase({
     firebase, model: document.properties, path: `${metadata}/properties`,
-    enabled: !readOnly && [ProblemDocument, PersonalDocument, LearningLogDocument].includes(type),
+    enabled: !readOnly && [ProblemDocument, PersonalDocument, LearningLogDocument].includes(type) &&
+      contentStatus === ContentStatus.Valid,
     options: {
       onSuccess: (data, properties) => {
         debugLog(`DEBUG: Updated document properties for ${type} document ${key}:`, JSON.stringify(properties));
@@ -102,7 +105,8 @@ export function useDocumentSyncToFirebase(
     useSyncMstNodeToFirebase({
       firebase, model: document.properties, path: `${metadata}/properties`,
       enabled: readOnly && (user.id === uid) && document.supportContentType !== "multiclass" &&
-        [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication ].includes(type),
+        [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication ].includes(type) &&
+        contentStatus === ContentStatus.Valid,
       options: {
         onSuccess: (data, properties) => {
           debugLog(`DEBUG: Updated document properties for ${type} document ${key}:`, JSON.stringify(properties));
@@ -117,7 +121,8 @@ export function useDocumentSyncToFirebase(
   // sync content for editable document types
   useSyncMstNodeToFirebase({
     firebase, model: document.content, path: contentPath,
-    enabled: !readOnly && document.content && !isPublishedType(type),
+    enabled: !readOnly && !!document.content && !isPublishedType(type) &&
+      contentStatus === ContentStatus.Valid,
     transform: snapshot => ({ changeCount: document.incChangeCount(), content: JSON.stringify(snapshot) }),
     options: {
       onSuccess: (data, snapshot) => {

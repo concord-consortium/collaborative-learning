@@ -191,12 +191,23 @@ export class DrawingLayerView extends React.Component<DrawingLayerViewProps, Dra
     let { objectsBeingDragged } = this.state;
     let objectsToInteract: DrawingObjectType[];
     let needToAddHoverToSelection = false;
+
+    //If the object you are dragging is selected then the selection should not be cleared
+    //and all objects should be moved.
+    //If the object you are dragging was not selected then only then all of the other objects
+    //should be deselected and just the object you are dragging should be selected.
     if (hoverObject && !selectedObjects.some(object => object.id === hoverObject.id)) {
-      objectsToInteract = [hoverObject, ...selectedObjects];
       needToAddHoverToSelection = true;
+      if (e.shiftKey || e.metaKey){
+        objectsToInteract = [hoverObject, ...selectedObjects];
+      }
+      else {
+        objectsToInteract = [hoverObject];
+      }
     } else {
       objectsToInteract = selectedObjects;
     }
+
     const starting = this.getWorkspacePoint(e);
     if (!starting) return;
 
