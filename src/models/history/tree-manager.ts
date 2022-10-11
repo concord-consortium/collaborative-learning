@@ -10,8 +10,6 @@ import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { ICommentableDocumentParams, IDocumentMetadata, IUserContext, 
   networkDocumentKey } from "../../../functions/src/shared";
 import { Firestore } from "../../lib/firestore";
-import { DocumentQueryType } from "../../hooks/document-comment-hooks";
-import { number } from "@concord-consortium/mobx-state-tree/dist/internal";
 
 /**
  * Helper method to print objects in template strings
@@ -92,7 +90,6 @@ export const TreeManager = types
       getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
 
     // We'll need provide this context to the tree manager either through a MST env or volatile prop
-
     const {userContext, documentMetadata, firestore} = self;
     if (!userContext || !documentMetadata || !firestore || !userContext.uid) {
       console.error("cannot record history entry because environment is not valid", 
@@ -110,6 +107,7 @@ export const TreeManager = types
       await validateCommentableDocument({context: userContext, document: documentMetadata});
     }
 
+    // Query the last history entry to find its index and id
     let lastEntryIndex = -1;
     // We use null here so this is a valid value in Firestore
     let lastEntryId: string | null = null;
@@ -131,16 +129,12 @@ export const TreeManager = types
       lastEntryId = lastEntry.id;
     }
 
-    // TODO query the last history entry document to find out its id
     return {documentPath, lastEntryIndex, lastEntryId};
   }
 
   function getFirestoreHistoryInfo(): Promise<IFirestoreHistoryInfo> {
     if (!firestoreHistoryInfoPromise) {
-      console.log("figuring history info");
       firestoreHistoryInfoPromise = prepareFirestoreHistoryInfo();
-    } else {
-      console.log("reusing history info");
     }
 
     return firestoreHistoryInfoPromise;
@@ -186,24 +180,6 @@ export const TreeManager = types
         self.undoStore.addHistoryEntry(entry);
       }
 
-      // TODO:
-      // To better support history entry ordering we want to include an index
-      // in each entry, and for record keeping also include a previousEntryId
-      // When we first start up, we need to know the last entries index.
-      // It will take some time for that query to complete and we need to allow
-      // the user to generate entries in the meantime.
-      // I think the best approach to support this, is to separate the saving 
-      // of history from the completion of the entry.
-      // So the saving code would instead be monitoring the list of entries
-      // and then once it figures out the status of the parent document and 
-      // the last entry then it starts to save the entries.
-      // We could do this with a separate queue, or we could add a flag to each
-      // entry indicating if it has been saved to firestore.
-
-      // Another thing to consider is what happens if the user closes the document
-      // before the history is saved. It would be nice for this system to continue
-      // saving the history even after the document is closed. I think that would 
-      // work, no mater which way we implement this. 
 
       if (!firestore) {
         throw new Error("History entry is complete, but firestore isn't defined");
