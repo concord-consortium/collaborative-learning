@@ -14,7 +14,6 @@ import {
 } from "../tools/tool-api";
 import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT } from "../../lib/debug";
-import { LoadDocumentHistory } from "../navigation/load-document-history";
 import { DocumentError } from "./document-error";
 
 import "./canvas.sass";
@@ -119,7 +118,6 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
                                               showPlaybackControls={showPlaybackControls}
                                               onTogglePlaybackControls={this.handleTogglePlaybackControlComponent} />
           }
-          { showPlaybackControls && <LoadDocumentHistory document={documentToShow} />}
         </>
       );
     }
