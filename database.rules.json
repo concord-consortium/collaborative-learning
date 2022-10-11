@@ -49,6 +49,22 @@
               }
             }
           }
+        },
+        "learn-migrate_concord_org": {
+          "classes": {
+            "$class_hash": {
+              ".read": "auth != null && auth.class_hash == $class_hash",
+              ".write": "auth != null && auth.class_hash == $class_hash",
+              "users": {
+                "$user_id": {
+                  "latestGroupId": {
+                    ".read": "auth !== null",
+      							".write": "auth !== null"
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
