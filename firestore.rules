@@ -294,7 +294,7 @@ service cloud.firestore {
         // teachers can only delete their own documents
         allow delete: if isAuthedTeacher() && userIsResourceUser();
         // teachers can read their own documents or other documents in their network
-        allow read: if isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks());
+        allow read: if  (isAuthed() &&  resource == null) || (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks()));
 
         // return the list of teachers associated with the specified document
         function getDocumentTeachers() {
