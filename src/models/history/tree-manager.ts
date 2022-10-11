@@ -11,6 +11,7 @@ import { ICommentableDocumentParams, IDocumentMetadata, IUserContext,
   networkDocumentKey } from "../../../functions/src/shared";
 import { Firestore } from "../../lib/firestore";
 import { DocumentQueryType } from "../../hooks/document-comment-hooks";
+import { number } from "@concord-consortium/mobx-state-tree/dist/internal";
 
 /**
  * Helper method to print objects in template strings
@@ -38,6 +39,12 @@ interface IFirestoreSavingProps {
   userContext: IUserContext;
   documentMetadata: IDocumentMetadata;
   firestore: Firestore;
+}
+
+interface IFirestoreHistoryInfo {
+  documentPath: string;
+  lastEntryIndex: number;
+  lastEntryId: string | null;
 }
 
 export const TreeManager = types
@@ -77,62 +84,10 @@ export const TreeManager = types
     return self.activeHistoryEntries.find(entry => entry.id === historyEntryId);
   }
 }))
-.actions(self => ({
-  completeHistoryEntry(entry: Instance<typeof HistoryEntry>) {
-    entry.state = "complete";
+.actions(self => {
+  let firestoreHistoryInfoPromise: Promise<IFirestoreHistoryInfo> | undefined;
 
-    // Remove the entry from the activeHistoryEntries
-    detach(entry);
-
-    // If the history entry resulted in no changes don't add it to the real
-    // history.
-    //
-    // TODO: we might not want to do this, it could be useful for researchers
-    // and teachers to see actions the student took even if they didn't change
-    // state. For example if a button was clicked even if it didn't change the
-    // state we might want to show that somehow. There are lots of entries
-    // that are empty though, so they are removed for the time being.
-    if (entry.records.length === 0) {
-      destroy(entry);
-      return;
-    }
-
-    // Re-attach the entry to the history 
-    self.document.history.push(entry);
-
-    // Add the entry to the undo stack if it is undoable.
-    //
-    // TODO: Is it best to wait until the entry is complete like this? It
-    // might be better to add it earlier so it has the right position in the
-    // undo stack. For example if a user action caused some async behavior
-    // that takes a while, should its place in the stack be at the beginning
-    // or end of these changes? As a downside, if we add it earlier the undo
-    // stack will have incomplete entries in sometimes.
-    if (entry.undoable) {
-      self.undoStore.addHistoryEntry(entry);
-    }
-
-    // TODO:
-    // To better support history entry ordering we want to include an index
-    // in each entry, and for record keeping also include a previousEntryId
-    // When we first start up, we need to know the last entries index.
-    // It will take some time for that query to complete and we need to allow
-    // the user to generate entries in the meantime.
-    // I think the best approach to support this, is to separate the saving 
-    // of history from the completion of the entry.
-    // So the saving code would instead be monitoring the list of entries
-    // and then once it figures out the status of the parent document and 
-    // the last entry then it starts to save the entries.
-    // We could do this with a separate queue, or we could add a flag to each
-    // entry indicating if it has been saved to firestore.
-
-    // Another thing to consider is what happens if the user closes the document
-    // before the history is saved. It would be nice for this system to continue
-    // saving the history even after the document is closed. I think that would 
-    // work, no mater which way we implement this. 
-
-    // Create the document in firestore if necessary
-    // FIXME-HISTORY: rename this function to validateFirestoreDocumentMetadata_v1
+  async function prepareFirestoreHistoryInfo(): Promise<IFirestoreHistoryInfo> {
     const validateCommentableDocument = 
       getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
 
@@ -140,80 +95,143 @@ export const TreeManager = types
 
     const {userContext, documentMetadata, firestore} = self;
     if (!userContext || !documentMetadata || !firestore || !userContext.uid) {
-      console.warn("cannot record history entry because environment is not valid", 
+      console.error("cannot record history entry because environment is not valid", 
         {userContext, documentMetadata, firestore});
-      return;
+      throw new Error("cannot record history entry because environment is not valid");
     }
-
-    // create a document if necessary
-    // TODO: need to figure how to access firestore
 
     const networkDocKey = networkDocumentKey(userContext.uid, documentMetadata.key, userContext.network);
     const documentPath = `documents/${networkDocKey}`;
-    new Promise<DocumentQueryType>((resolve, reject) => {
-      // It is crazy that we get this on every request
-      // This document should be provided as view, but we can't do async
-      // views. So I guess it is really an async action that fetches the document and the view 
-      // will be undefined until then.
-      // so then we use something like mobx's `when()` to block the async action until the 
-      // view is updated.
-      const documentRef = firestore.doc(documentPath);
-      documentRef.get()
-        .then(docSnapshot => {
-          if (docSnapshot.exists) {
-            resolve(docSnapshot.data() as DocumentQueryType);          
-          } else {
-            resolve(
-              validateCommentableDocument({context: userContext, document: documentMetadata})
-              .then(result => result.data)
-            );
-          }
-        });
-      })
-    //   const unsubscribeDocListener = documentRef.onSnapshot({
-    //     next: docSnapshot => {
-    //       unsubscribeDocListener?.();
-    //       console.log("found existing document for key", documentMetadata.key);
-    //       resolve(docSnapshot.data() as DocumentQueryType);          
-    //     },
-    //     error: readError => {
-    //       unsubscribeDocListener?.();
-    //       // an error presumably means that the document doesn't exist yet, so we create it
-    //       console.log("creating document for key", documentMetadata.key);
-    //       resolve(
-    //         validateCommentableDocument({context: userContext, document: documentMetadata})
-    //         .then(result => result.data)
-    //       );
-    //     }
-    //   });
-    // })
-    .then(document => {
-      // add a new document for this history entry
-      const historyEntryPath = firestore.getFullPath(`${documentPath}/historyEntries`);
+    const documentRef = firestore.doc(documentPath);
+    const docSnapshot = await documentRef.get();
+    // create a document if necessary
+    if (!docSnapshot.exists) {
+      // FIXME-HISTORY: rename this function to validateFirestoreDocumentMetadata_v1
+      await validateCommentableDocument({context: userContext, document: documentMetadata});
+    }
 
-      // FIXME-HISTORY: this should use the id of the history entry, that way a specific entry can
-      // be found again quickly. We plan to support the idea of providing links to teachers
-      // to open specific spots in the history. It seems better to use these ids than indexes,
-      // but maybe indexes are fine.
-      // https://www.pivotaltracker.com/story/show/183291353
-      const docRef = firestore.newDocumentRef(historyEntryPath);
-      const snapshot = getSnapshot(entry);
-      docRef.set({
-        // FIXME-HISTORY: this use of a server timestamp isn't good. This is
-        // because there is a delay here. When the creation of the parent
-        // document in firestore takes a while, The first entry will be delayed
-        // until this happens. And the later entries might sneak in ahead of the
-        // first entry. 
-        //
-        // See Ordering of history entries in history-framework.md for better
-        // options. 
-        // https://www.pivotaltracker.com/story/show/183340035
-        index: firestore.timestamp(),
-        entry: JSON.stringify(snapshot)}
-      );
-    });
+    let lastEntryIndex = -1;
+    // We use null here so this is a valid value in Firestore
+    let lastEntryId: string | null = null;
+    const lastEntryQuery = await firestore.collection(`${documentPath}/history`)
+      .limit(1)
+      .orderBy("index", "desc")
+      .get();
+
+    if(!lastEntryQuery.empty) {
+      const lastEntry = lastEntryQuery.docs[0];
+      lastEntryIndex = lastEntry.get("index");
+      if (typeof lastEntryIndex !== "number"){
+        // This is an invalid entry. 
+        // It could be a legacy entry that is using a timestamp
+        // However to prevent that the collection name was changed
+        // from historyEntries to history
+        throw new Error(`lastEntryIndex is not a number: ${lastEntryIndex}`);
+      }
+      lastEntryId = lastEntry.id;
+    }
+
+    // TODO query the last history entry document to find out its id
+    return {documentPath, lastEntryIndex, lastEntryId};
   }
-}))
+
+  function getFirestoreHistoryInfo(): Promise<IFirestoreHistoryInfo> {
+    if (!firestoreHistoryInfoPromise) {
+      console.log("figuring history info");
+      firestoreHistoryInfoPromise = prepareFirestoreHistoryInfo();
+    } else {
+      console.log("reusing history info");
+    }
+
+    return firestoreHistoryInfoPromise;
+  }
+
+  return {
+    completeHistoryEntry(entry: Instance<typeof HistoryEntry>) {
+      const {firestore} = self;
+      entry.state = "complete";
+
+      // Remove the entry from the activeHistoryEntries
+      detach(entry);
+
+      // If the history entry resulted in no changes don't add it to the real
+      // history.
+      //
+      // TODO: we might not want to do this, it could be useful for researchers
+      // and teachers to see actions the student took even if they didn't change
+      // state. For example if a button was clicked even if it didn't change the
+      // state we might want to show that somehow. There are lots of entries
+      // that are empty though, so they are removed for the time being.
+      if (entry.records.length === 0) {
+        destroy(entry);
+        return;
+      }
+
+      // Save the index in the local history. This is used to figure out
+      // the index written into the firestore entry document
+      const newLocalIndex = self.document.history.length;
+
+      // Re-attach the entry to the history
+      self.document.history.push(entry);
+
+      // Add the entry to the undo stack if it is undoable.
+      //
+      // TODO: Is it best to wait until the entry is complete like this? It
+      // might be better to add it earlier so it has the right position in the
+      // undo stack. For example if a user action caused some async behavior
+      // that takes a while, should its place in the stack be at the beginning
+      // or end of these changes? As a downside, if we add it earlier the undo
+      // stack will have incomplete entries in sometimes.
+      if (entry.undoable) {
+        self.undoStore.addHistoryEntry(entry);
+      }
+
+      // TODO:
+      // To better support history entry ordering we want to include an index
+      // in each entry, and for record keeping also include a previousEntryId
+      // When we first start up, we need to know the last entries index.
+      // It will take some time for that query to complete and we need to allow
+      // the user to generate entries in the meantime.
+      // I think the best approach to support this, is to separate the saving 
+      // of history from the completion of the entry.
+      // So the saving code would instead be monitoring the list of entries
+      // and then once it figures out the status of the parent document and 
+      // the last entry then it starts to save the entries.
+      // We could do this with a separate queue, or we could add a flag to each
+      // entry indicating if it has been saved to firestore.
+
+      // Another thing to consider is what happens if the user closes the document
+      // before the history is saved. It would be nice for this system to continue
+      // saving the history even after the document is closed. I think that would 
+      // work, no mater which way we implement this. 
+
+      if (!firestore) {
+        throw new Error("History entry is complete, but firestore isn't defined");
+      }
+
+      // Create the document in firestore if necessary
+      getFirestoreHistoryInfo()
+      .then(({documentPath, lastEntryIndex, lastEntryId}) => {
+        // add a new document for this history entry
+        const historyEntryPath = firestore.getFullPath(`${documentPath}/history`);
+
+        const previousEntryLocalIndex = newLocalIndex - 1;
+        const previousEntry = previousEntryLocalIndex >= 0 && self.document.history.at(previousEntryLocalIndex);
+        const previousEntryId = previousEntry ? previousEntry.id : lastEntryId;
+
+        const docRef = firestore.documentRef(historyEntryPath, entry.id);
+        const snapshot = getSnapshot(entry);
+        const index = lastEntryIndex + 1 + newLocalIndex;
+        docRef.set({
+          index,
+          created: firestore.timestamp(),
+          previousEntryId,
+          entry: JSON.stringify(snapshot)
+        });
+      });
+    }
+  };
+})
 .actions((self) => ({
   // This is only currently used for tests
   setChangeDocument(cDoc: CDocumentType) {
