@@ -23,7 +23,7 @@ interface IProps {
   focusTileId?: string;
 }
 
-export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads, 
+export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   onPostComment, onDeleteComment,
   focusDocument, focusTileId }) => {
   useEffect(() => {
@@ -46,29 +46,31 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
     }
   };
 
+
   return (
     <div className="chat-list" data-testid="chat-list">
+      {console.log("chatThread:", chatThreads)}
       {chatThreads?.map((commentThread: ChatCommentThread) => {
         const title = commentThread.title || '';
-        const shouldShowUserIcon = 
+        const shouldShowUserIcon =
           commentThread.comments.some((comment: WithId<CommentDocument>) => user?.id === comment.uid);
-        const numComments = commentThread.comments.length; 
+        const numComments = commentThread.comments.length;
         const shouldBeFocused = commentThread.tileId === focusId;
         const Icon = commentThread.tileType && getToolContentInfoById(commentThread.tileType)?.Icon;
         const key= commentThread.tileId || "document";
 
         return (
-          <div key={key} 
+          <div key={key}
             className={classNames("chat-thread", {
               "chat-thread-focused": shouldBeFocused,
             })}
             data-testid="chat-thread">
-            <div className="chat-thread-header" onClick={() => handleThreadClick(key)}> 
+            <div className="chat-thread-header" onClick={() => handleThreadClick(key)}>
               <div className="chat-thread-tile-info">
                 {Icon && <Icon/>}
                 <div className="chat-thread-title"> {title} </div>
               </div>
-              <div className="chat-thread-comment-info">  
+              <div className="chat-thread-comment-info">
                 {shouldShowUserIcon &&
                   <div className="user-icon" data-testid="chat-thread-user-icon"><UserIcon /></div>
                 }
@@ -78,7 +80,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
                   activeNavTab={activeNavTab}
                     />
               </div>
-            </div> 
+            </div>
             {expandedThread === key &&
               <CommentCard
                 user={user}
@@ -97,17 +99,17 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
         <div key={focusTileId ? focusTileId : "document"}
           className="chat-thread should-be-focused"
           data-testid="chat-thread">
-          <div className="chat-thread-header"> 
+          <div className="chat-thread-header">
             <div className="chat-thread-tile-info">
               <div className="comment-card-header comment-select" data-testid="comment-card-header">
                 <div className="comment-card-header-icon" data-testid="comment-card-header-icon">
                   <ToolIconComponent documentKey={focusDocument} tileId={focusTileId}/>
                 </div>
               </div>
-              <div className="chat-thread-comment-info">  
-                <div className="chat-thread-num">{0}</div>  
+              <div className="chat-thread-comment-info">
+                <div className="chat-thread-num">{0}</div>
               </div>
-            </div> 
+            </div>
           </div>
           <CommentCard
             user={user}
