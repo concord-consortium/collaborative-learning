@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, {useState} from "react";
+import React, {Dispatch, SetStateAction} from "react";
 import ChatIcon from "../../assets/chat-icon.svg";
 import NotificationIcon from "../../assets/notifications-icon.svg";
 import DocumentsWithCommentsIcon  from "../../assets/documents-list-icon.svg";
@@ -11,11 +11,12 @@ interface IProps {
   activeNavTab: string;
   newCommentCount: number;
   onCloseChatPanel:(show:boolean) => void;
+  isDocumentView: boolean;
+  setIsDocumentView: Dispatch<SetStateAction<boolean>>;
 }
 
-export const ChatPanelHeader: React.FC<IProps> = observer(({activeNavTab, newCommentCount, onCloseChatPanel}) => {
-
-  const [isDocumentView, setIsDocumentView] = useState(false);
+export const ChatPanelHeader: React.FC<IProps> = observer(({activeNavTab, newCommentCount, onCloseChatPanel,
+  isDocumentView, setIsDocumentView}) => {
 
   const renderNotification = () => {
     return (
@@ -24,8 +25,8 @@ export const ChatPanelHeader: React.FC<IProps> = observer(({activeNavTab, newCom
           {/* <NotificationIcon className={`icon-image themed-negative ${activeNavTab}`}/> */}
           <DocumentsWithCommentsIcon
             className={`icon-image themed-negative ${activeNavTab}`}
-            onClick={()=> {
-              setIsDocumentView(!isDocumentView);
+            onClick={()=>{
+              setIsDocumentView((prevState) => !prevState);
               console.log("next thing");
             }}
           />

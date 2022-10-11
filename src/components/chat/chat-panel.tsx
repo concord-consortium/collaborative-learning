@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState} from "react";
 import { ILogComment, Logger } from "../../lib/logger";
 import { UserModelType } from "../../models/stores/user";
 import { ChatPanelHeader } from "./chat-panel-header";
@@ -31,10 +31,10 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const commentsInDocumentOrder = ordering && allTileComments
     ? allTileComments.sort((a: any, b: any) => ordering.indexOf(a.tileId) - ordering.indexOf(b.tileId))
     : [];
-
   const postedComments = documentComments?.concat(commentsInDocumentOrder);
   const commentThreads = makeChatThreads(postedComments, content);
   const postCommentMutation = usePostDocumentComment();
+
 
   const postComment = useCallback((comment: string) => {
     if (focusDocument) {
@@ -73,12 +73,20 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
       : undefined;
   }, [commentsPath, deleteCommentMutation, focusDocument, focusTileId]);
+  //state - determines comments vs documentView
+  const [isDocumentView, setIsDocumentView] = useState(false);
+
 
   const newCommentCount = unreadComments?.length || 0;
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
-      <ChatPanelHeader activeNavTab={activeNavTab} newCommentCount={newCommentCount}
-                       onCloseChatPanel={onCloseChatPanel} />
+      <ChatPanelHeader
+        activeNavTab={activeNavTab}
+        newCommentCount={newCommentCount}
+        onCloseChatPanel={onCloseChatPanel}
+        isDocumentView = {isDocumentView}
+        setIsDocumentView={setIsDocumentView}
+      />
       {focusDocument ?
         <ChatThread
           user={user}
@@ -88,6 +96,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
           chatThreads={commentThreads}
           focusDocument={focusDocument}
           focusTileId={focusTileId}
+          isDocumentView={isDocumentView}
         />
         : <div className="select-doc-message" data-testid="select-doc-message">
             Open a document to begin or view comment threads

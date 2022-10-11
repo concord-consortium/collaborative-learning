@@ -10,6 +10,7 @@ import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import {ChatCommentThread} from "./chat-comment-thread";
 import { ToolIconComponent } from "./tool-icon-component";
 import { ChatThreadToggle } from "./chat-thread-toggle";
+import { CommentedDocuments } from "./commented-documents";
 
 import "./chat-thread.scss";
 
@@ -21,11 +22,12 @@ interface IProps {
   onDeleteComment?: (commentId: string, commentContent: string) => void;
   focusDocument?: string;
   focusTileId?: string;
+  isDocumentView?: boolean;
 }
 
 export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   onPostComment, onDeleteComment,
-  focusDocument, focusTileId }) => {
+  focusDocument, focusTileId, isDocumentView}) => {
   useEffect(() => {
     setExpandedThread(focusTileId || 'document');
   },[focusTileId]);
@@ -52,54 +54,60 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   return (
     <div className="chat-list" data-testid="chat-list">
       {console.log("chatThread:", chatThreads)}
-      {chatThreads?.map((commentThread: ChatCommentThread) => {
-        const title = commentThread.title || '';
-        const shouldShowUserIcon =
-          commentThread.comments.some((comment: WithId<CommentDocument>) => user?.id === comment.uid);
-        const numComments = commentThread.comments.length;
-        const shouldBeFocused = commentThread.tileId === focusId;
-        const Icon = commentThread.tileType && getToolContentInfoById(commentThread.tileType)?.Icon;
-        const key= commentThread.tileId || "document";
+      {
+        isDocumentView ?
+        <CommentedDocuments></CommentedDocuments>
+        :
+        chatThreads?.map((commentThread: ChatCommentThread) => {
+          const title = commentThread.title || '';
+          const shouldShowUserIcon =
+            commentThread.comments.some((comment: WithId<CommentDocument>) => user?.id === comment.uid);
+          const numComments = commentThread.comments.length;
+          const shouldBeFocused = commentThread.tileId === focusId;
+          const Icon = commentThread.tileType && getToolContentInfoById(commentThread.tileType)?.Icon;
+          const key= commentThread.tileId || "document";
 
-        return (
-          <div key={key}
-            className={classNames("chat-thread", {
-              "chat-thread-focused": shouldBeFocused,
-            })}
-            data-testid="chat-thread">
-            <div className={classNames(`chat-thread-header ${activeNavTab}`,
-              { "selected": shouldBeFocused })}
-              data-testid="chat-thread-header"
-              onClick={() => handleThreadClick(key)}
-            >
-              <div className="chat-thread-tile-info">
-               {Icon && (
-                  <Icon data-testid="chat-thread-tile-type"/>
-               )}
-                <div className="chat-thread-title"> {title} </div>
+          return (
+            <div key={key}
+              className={classNames("chat-thread", {
+                "chat-thread-focused": shouldBeFocused,
+              })}
+              data-testid="chat-thread">
+              <div className={classNames(`chat-thread-header ${activeNavTab}`,
+                { "selected": shouldBeFocused })}
+                data-testid="chat-thread-header"
+                onClick={() => handleThreadClick(key)}
+              >
+                <div className="chat-thread-tile-info">
+                {Icon && (
+                    <Icon data-testid="chat-thread-tile-type"/>
+                )}
+                  <div className="chat-thread-title"> {title} </div>
+                </div>
+                <div className="chat-thread-comment-info">
+                  {shouldShowUserIcon &&
+                    <div className="user-icon" data-testid="chat-thread-user-icon"><UserIcon /></div>
+                  }
+                  <div className="chat-thread-num">{numComments}</div>
+                  <ChatThreadToggle
+                    isThreadExpanded={expandedThread === key}
+                    activeNavTab={activeNavTab}
+                      />
+                </div>
               </div>
-              <div className="chat-thread-comment-info">
-                {shouldShowUserIcon &&
-                  <div className="user-icon" data-testid="chat-thread-user-icon"><UserIcon /></div>
-                }
-                <div className="chat-thread-num">{numComments}</div>
-                <ChatThreadToggle
-                  isThreadExpanded={expandedThread === key}
+              {
+                expandedThread === key &&
+                <CommentCard
+                  user={user}
                   activeNavTab={activeNavTab}
-                    />
-              </div>
+                  onPostComment={onPostComment}
+                  onDeleteComment={onDeleteComment}
+                  postedComments={commentThread.comments}
+                  focusDocument={focusDocument}
+                  focusTileId={focusTileId}
+                />
+              }
             </div>
-            {expandedThread === key &&
-              <CommentCard
-                user={user}
-                activeNavTab={activeNavTab}
-                onPostComment={onPostComment}
-                onDeleteComment={onDeleteComment}
-                postedComments={commentThread.comments}
-                focusDocument={focusDocument}
-                focusTileId={focusTileId}
-              />}
-          </div>
           );
         })
       }
