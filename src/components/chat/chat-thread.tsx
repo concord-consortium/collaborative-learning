@@ -115,9 +115,6 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
                   </div>
                 </div>
               </div>
-              <div className="chat-thread-comment-info">  
-                <div className="chat-thread-num">{0}</div>
-              </div>
             </div> 
           </div>
           <CommentCard
