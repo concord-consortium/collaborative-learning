@@ -150,6 +150,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
               </div>
             </div>
           </div>
+          {console.log("line 153")}
           <CommentCard
             user={user}
             activeNavTab={activeNavTab}

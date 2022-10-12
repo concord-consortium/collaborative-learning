@@ -144,6 +144,7 @@ export const UIModel = types
         self.error = null;
       },
       setActiveNavTab(tab: string) {
+        console.log("ui.ts > setActiveNavTab");
         self.activeNavTab = tab;
       },
       setActiveStudentGroup(groupId: string) {
