@@ -2,8 +2,8 @@ import React, {useEffect, useState} from "react";
 import classNames from "classnames";
 import { UserModelType } from "../../models/stores/user";
 import { WithId } from "../../hooks/firestore-hooks";
-import { useUIStore } from "../../hooks/use-stores";
-import { CommentDocument } from "../../lib/firestore-schema";
+import { useDocumentOrCurriculumMetadata, useUIStore } from "../../hooks/use-stores";
+import { CommentDocument, CurriculumDocument } from "../../lib/firestore-schema";
 import { CommentCard } from "./comment-card";
 import { getToolContentInfoById } from "../../models/tools/tool-content-info";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
@@ -33,6 +33,9 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   },[focusTileId]);
 
   // make focusId null if undefined so it can be compared with tileId below.
+  const document = useDocumentOrCurriculumMetadata(focusDocument);// added
+
+
   const focusId = focusTileId === undefined ? null : focusTileId;
   const focusedItemHasNoComments = !chatThreads?.find(item => (item.tileId === focusId));
   const [expandedThread, setExpandedThread] = useState(focusId || '');
@@ -49,14 +52,22 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       setExpandedThread(clickedId || '');
     }
   };
+  const mockCurriculumDocument = { unit: "unit", problem: "1.1", section: "intro", path: "unit/1/1/intro" };
 
+  //architecture question?
+  //idea 1: make one state array - arrayToMap (line70), fill it with either chatThreads or
+  //docsCommentedOn (commented-documents.tsx), they have different structure, see copy and paste
 
   return (
     <div className="chat-list" data-testid="chat-list">
       {console.log("chatThread:", chatThreads)}
+
       {
         isDocumentView ?
-        <CommentedDocuments></CommentedDocuments>
+        <>
+          <CommentedDocuments user={user} documentObj={document as CurriculumDocument} />
+          {console.log("comment view \n array (chatThreads) is", chatThreads)}
+        </>
         :
         chatThreads?.map((commentThread: ChatCommentThread) => {
           const title = commentThread.title || '';

@@ -73,6 +73,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)
       : undefined;
   }, [commentsPath, deleteCommentMutation, focusDocument, focusTileId]);
+
   //state - determines comments vs documentView
   const [isDocumentView, setIsDocumentView] = useState(false);
 

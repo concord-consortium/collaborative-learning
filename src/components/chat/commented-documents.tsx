@@ -53,13 +53,16 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user}) => {
   },[]);
 
   return (
-    <>
-      <p>Docs In Scope With Comments:</p>
-      { docsCommentedOn &&
+    <div>
+      {console.log("documentView\n (docsCommentedOn) is ", docsCommentedOn)}
+      {
+        docsCommentedOn &&
         (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => {
-          return <p key={index}>{ doc.id }</p>;
+          return <div key={index}> { doc.id } </div>;
         })
       }
-    </>
+    </div>
+
+
   );
 };

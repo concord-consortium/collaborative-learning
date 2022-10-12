@@ -27,7 +27,6 @@ export const ChatPanelHeader: React.FC<IProps> = observer(({activeNavTab, newCom
             className={`icon-image themed-negative ${activeNavTab}`}
             onClick={()=>{
               setIsDocumentView((prevState) => !prevState);
-              console.log("next thing");
             }}
           />
         </div>
