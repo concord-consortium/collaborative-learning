@@ -32,6 +32,7 @@ export const UIModel = types
     activeGroupId: "",
     selectedTileIds: types.array(types.string),
     selectedCommentId: types.maybe(types.string),
+    scrollToTileId: types.maybe(types.string),
     showDemo: false,
     showDemoCreator: false,
     showTeacherContent: true,
@@ -158,6 +159,9 @@ export const UIModel = types
       },
       removeTileIdFromSelection(tileId: string) {
         self.selectedTileIds.remove(tileId);
+      },
+      setScrollToTileId(tileId: string) {
+        self.scrollToTileId = tileId;
       },
       setShowDemoCreator(showDemoCreator: boolean) {
         self.showDemoCreator = showDemoCreator;

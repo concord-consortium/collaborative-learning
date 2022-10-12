@@ -1,4 +1,5 @@
 import { inject, observer } from "mobx-react";
+import { IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import { findDOMNode } from "react-dom";
 import { throttle } from "lodash";
@@ -53,6 +54,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private domElement: HTMLElement | null;
   private rowRefs: Array<TileRowComponent | null>;
   private mutationObserver: MutationObserver;
+  private scrollDisposer: IReactionDisposer;
 
   public componentDidMount() {
     if (this.domElement) {
@@ -67,11 +69,20 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       // We pass the domElement to our children, but it's undefined during the first render,
       // so we force an update to make sure we draw at least once after we have our domElement.
       this.forceUpdate();
+
+      this.scrollDisposer = reaction(() => this.stores.ui.scrollToTileId,
+        (tileId: string | undefined, prevTileId: string | undefined) => {
+        console.log(`scroll id`, tileId);
+        // Find the row containing tileId
+        // Scroll to it
+      });
     }
   }
 
   public componentWillUnmount() {
     this.mutationObserver.disconnect();
+
+    this.scrollDisposer?.();
   }
 
   public componentDidUpdate(prevProps: IProps) {
