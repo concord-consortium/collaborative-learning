@@ -108,8 +108,10 @@ export const TreeManager = types
     }
 
     // Query the last history entry to find its index and id
+    // We start with -1 so if there is no last entry the next entry will get 
+    // an index of 0
     let lastEntryIndex = -1;
-    // We use null here so this is a valid value in Firestore
+    // We use null here so this is a valid Firestore property value
     let lastEntryId: string | null = null;
     const lastEntryQuery = await firestore.collection(`${documentPath}/history`)
       .limit(1)
@@ -120,10 +122,11 @@ export const TreeManager = types
       const lastEntry = lastEntryQuery.docs[0];
       lastEntryIndex = lastEntry.get("index");
       if (typeof lastEntryIndex !== "number"){
-        // This is an invalid entry. 
-        // It could be a legacy entry that is using a timestamp
-        // However to prevent that the collection name was changed
-        // from historyEntries to history
+        // This is an invalid entry.
+        // Previously the index was a timestamp instead of a number, however
+        // the Firestore collection of entries was changed from
+        // `historyEntries` to `history`, so we shouldn't pick
+        // up any legacy entries.
         throw new Error(`lastEntryIndex is not a number: ${lastEntryIndex}`);
       }
       lastEntryId = lastEntry.id;
@@ -165,7 +168,7 @@ export const TreeManager = types
       // the index written into the firestore entry document
       const newLocalIndex = self.document.history.length;
 
-      // Re-attach the entry to the history
+      // Re-attach the entry to the actual history
       self.document.history.push(entry);
 
       // Add the entry to the undo stack if it is undoable.
@@ -181,16 +184,14 @@ export const TreeManager = types
       }
 
       if (!firestore) {
-        // We might want to throw an error here to figure out why this is happening.
-        // Currently, when running the spec tests firestore is not setup so it is 
-        // easier to just bailout and not save the history to firestore if it isn't
-        // defined.
+        // We might want to throw an error here to figure out when this happens.
+        // Currently, when running the spec tests firestore is not setup, so it is 
+        // easier to just return and not try to save the history to Firestore.
         return;
       }
 
       // Create the document in firestore if necessary
-      getFirestoreHistoryInfo()
-      .then(({documentPath, lastEntryIndex, lastEntryId}) => {
+      getFirestoreHistoryInfo().then(({documentPath, lastEntryIndex, lastEntryId}) => {
         // add a new document for this history entry
         const historyEntryPath = firestore.getFullPath(`${documentPath}/history`);
 
@@ -200,6 +201,8 @@ export const TreeManager = types
 
         const docRef = firestore.documentRef(historyEntryPath, entry.id);
         const snapshot = getSnapshot(entry);
+        // If there was no last entry in Firestore getFirestoreHistoryInfo sets
+        // lastEntryIndex to -1
         const index = lastEntryIndex + 1 + newLocalIndex;
         docRef.set({
           index,

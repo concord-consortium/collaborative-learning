@@ -196,40 +196,31 @@ sequenceDiagram
 ## Serialization
 We store the history of changes to a document in Firestore. Each history entry is stored in a separate Firestore document. These history entry documents are stored in the same way that comments are stored. There is a parent Firestore document that has metadata about the actual CLUE document and then under this parent Firestore document is a collection for the comments and a collection for the history entries.
 
-The history entries are written by the TreeManager which is an MST model. In other places we interact with Firestore through react components so we can use hooks. Since we are in the model we just work directly with Firestore.
+The history entries are written by the TreeManager which is an MST model. In other places we interact with Firestore through react components so we can use React hooks. Since the TreeManager is a model it work directly with Firestore.
 
-The history events are downloaded only when needed for replaying the history. This is done by a mostly invisible `<LoadDocumentHistory>` component. It currently puts up an ugly message on the screen to let the user know something is happening. This component uses hooks to load in the history and then update the document with this history. It is kind of strange for a React component to be managing the MST model. But this temporary history MST model is being created by the component only as it is needed, it isn't something shared by multiple components.
+The history events are downloaded only when needed for replaying the history. This is done by a `<LoadDocumentHistory>` component. It currently puts up an ugly message on the screen to let the user know something is happening. This component uses hooks to load in the history and then update the document with this history. It is kind of strange for a React component to be managing the MST model. But this temporary history MST model is being created by the component only as it is needed, it isn't something shared by multiple components.
 
 The history loading currently doesn't do any batching/paging during the load, so if the history gets large enough this might cause problems. There is a FIXME in the code for this. The component is currently monitoring Firestore collection, so if new history events are added they will be shown immediately without having to close and open the history UI. It isn't totally clear how these incremental history entries are handled. I think the `LoadDocumentHistory` component is re-rendered when new events show up and then the history in the TreeManager gets completely replaced with the updated history. In other words the entries aren't really loaded incrementally. We'll probably need to improve this to handle documents with large histories.
 
 To create the parent document which contains the history entries in Firestore the TreeManager is using our Firebase function `validateCommentableDocument`. This can create either a document associated with a networked teacher or a generic user document. When we tackle handling permissions it will be necessary to grant students and teachers access to the history entries of this document.
 
+When a document is being edited it does not load all of the previous history entries from Firestore. The new history entries are stored locally and sent up to Firestore.  So once a document has been worked over multiple sessions with CLUE, there will be more entries in Firestore that are not available locally.
+
 ### Ordering of history entries
 
-Currently we are using a Firestore server timestamp. This isn't great because the history entries do not always arrive at firestore in the same order that they are created. In particular the first history entry is waiting for the `validateCommentableDocument` to return before being added. The next history entries just check for the existence of the document and if they find it, they are added right away. This can result in the history entries being added out of order. Below are some options for addressing this.
+Locally the history entries are ordered in the `TreeManager.document.history`.  When a user wants to replay the history all of the history entries are downloaded from Firestore ordered by a `index` field on the history entry. These downloaded history entries are set as the `TreeManager.document.history`.
 
-#### Ordering entries based on linked list approach
+In addition to the `index` field the history entries in Firestore include a previousEntryId this could help if entries get out of order and we need to figure out what happened. The Firestore entries also include a `created` server timestamp which would be useful for debugging issues.
 
-Store the previous entry's id in the current entry (`previousEntryId`). The first entry will have an undefined previous entry.
-Also store a server timestamp.
-The query from firestore can order by the server timestamp so the entries are roughly in the right order.
+Because the `index` and `previousEntryId` fields need to know what the last entry stored in Firestore, this last entry is downloaded before any new entries are written up to Firestore. Additionally before this last entry is download the parent document is created. The serialization of this is done using a common promise that all history entry writes wait for. Any history entries that are created before this promise is resolved are saved in `TreeManager.document.history`. The `index` of an entry is computed by adding its position in `TreeManager.document.history` to the index of the last entry saved in Firestore.
 
-To build the correct order efficiently we can do two passes through the results.
+**Other history entry ordering options**
 
-##### Pass 1
-First create a map with a type of `{ [entryId] : { entry, nextEntryId }, ...}`.
-Now go through the results. For each entry result:
-- add it to the entry value of map, if there is a `nextEntryId` don't change it
-- take the current entry's `previousEntryId` look this up in the map and add `nextEntryId` to it with this `previousEntryId` value
-- if there is no `previousEntryId` save this entry as the first entry
-- if the `previousEntryId` already has a different `nextEntryId` it means the history has been corrupted by two or more users writing to history at the same time. Show a warning.
+Before settling on the `index` approach for history entries I considered a few different options. Here is a list and why I didn't choose them.
 
-##### Pass 2
-Create an empty array of the history entries.
-Start at the first entry, add it to the array.
-Look up its `nextEntryId` in the map. 
-Add this to the array and keep going until you reach an object in the map with no `nextEntryId`.
-To be safe you can use a counter and don't iterate more than the total size of the results. This would prevent infinite loops if there was corrupt data.
+**Linked List**
+
+Store the previous entry's id in the current entry (`previousEntryId`). The first entry will have an undefined previous entry. Also store a server timestamp. The query from Firestore can order by the server timestamp so the entries are roughly in the right order. To build the correct order efficiently we can do two passes through the results.
 
 ##### Storing requirements
 On the start of recording each session we need to know the entry id of the last history entry. So to be safe we have to download all the history entries to find the last one. We could cheat and reverse order the events by the server timestamp and then just look at the last X events. This assumes any out of order entries would be close to each other in time so we don't need to look far back in time to figure this out.
@@ -239,23 +230,8 @@ As described above, to be safe we have to look at every entry at the beginning o
 
 Possibly this lookup could be done asynchronously. Just the first entry of the session needs to know this, any future entries can refer to this first entry. But still to be safe all of the entries of the last session need to be downloaded. And this could be a large amount of data.
 
-#### Ordering entries based on an index
+**Session start id plus index**
 
-Store the index of the entry. The first entry will have an index of 0.
-
-To build the correct order we just request the entries from firestore ordered by this index.
-
-##### Storing requirements
-On the start of recording each session we need to know the entry index of the last history entry. This can be found by doing a query with a limit of one sorted by the index in reverse. This would just download the last entry saved.
-
-All entries being written would have to wait for this lookup to occur before they will know their index.
-
-##### Problems
-If multiple users are editing the same document there can be entries with the same index. We can mitigate this by storing a `previousEntryId` in each entry. We will know the last entry of the last session because we looked it up to find its index. Even if the sessions start out of order, at some point there will be two entries that have the same previousEntryId (and probably the same index).
-
-It will be a little complicated to block the writing of new entries until they know their offset from the last entry of the last session.
-
-#### Session start id plus index
 Create a CLUE document session record (Firestore document) at the beginning of working with each CLUE document. Store the history entries under this documentSession document with an index for the session. 
 The documentSession document would have a server timestamp that can be used to order them.
 
@@ -272,7 +248,7 @@ If one session is started, closed and other started very quickly the sessionDocu
 No waiting at the beginning of a session for a round trip to Firestore.
 Order of entries is in firestore 
 
-#### Other Notes
+**Other Notes**
 
 We could use local computer timestamps to avoid the problem out of order events, but these are not accurate and in some schools can be years off.
 
@@ -285,7 +261,7 @@ https://firebase.google.com/docs/firestore/solutions/aggregation
 
 ### Serialization TODO:
 - [ ] See if we can remove this use of cloud functions to do the network document writes, I think the only reason to use them is for permissions, I'd guess we can create rules that would allow them to be written without the functions. We probably are going to have either do this or change the cloud function so it can support students creating parent documents.
-- [ ] fix ordering issue, currently we are using a server timestamp which gets out of order when the first entry is delayed as the document parent is fetched. The right approach I think is to store the last index in the document and then on each session load this index and start from there. This last index will also be useful when dealing with publishing documents.
+- [x] fix ordering issue, currently we are using a server timestamp which gets out of order when the first entry is delayed as the document parent is fetched. The right approach I think is to store the last index in the document and then on each session load this index and start from there. This last index will also be useful when dealing with publishing documents.
 - [ ] add access rules so authenticated students can write the parent document and the history entries
 - [ ] add access rules so authenticated teachers can read the student created parent document and history entries
 - [ ] add tests for the new access rules
@@ -304,17 +280,3 @@ https://firebase.google.com/docs/firestore/solutions/aggregation
 - [ ] review how exchangeId is handled when an undo triggers a call to updateSharedModel, should a new exchangeId be generated here or should it be re-using an existing exchangeId?
 - [ ] try to unify Document.afterCreate with createDocument
 - [ ] move some of the large comments in the code into this document and put references in the code.
-
-# Ordering Plan
-
-Make a promise that represents the verification/creation of the parent document and the request of the last entry to figure out the index.
-
-If that promise has been started don't make a new one.
-
-When a new history entry comes in add a "then" to that promise which sets the index of the entry and then uploads it.
-
-The index of the entry will need to be computed in order. So either each new entry needs to be chained off of the completion of the previous one. Or we compute the index based on the position of the entry in the local treeManager array. And we just add this local position to the initial remote position when we send it up.
-
-We also want to include the previousEntryId. All entries can figure this out locally except for the first one. So the first one will need update this after the promise is resolved.
-
-Another complication is that the previousEntryId might be different when the entry first starts from when it ends. This is the case for asynchronous entries. The order in firestore will be based on when it ends. But to help track down issues, we might want to record the start and end previousEntryId.
