@@ -196,7 +196,7 @@ sequenceDiagram
 ## Serialization
 We store the history of changes to a document in Firestore. Each history entry is stored in a separate Firestore document. These history entry documents are stored in the same way that comments are stored. There is a parent Firestore document that has metadata about the actual CLUE document and then under this parent Firestore document is a collection for the comments and a collection for the history entries.
 
-The history entries are written by the TreeManager which is an MST model. In other places we interact with Firestore through react components so we can use React hooks. Since the TreeManager is a model it work directly with Firestore.
+The history entries are written by the TreeManager which is an MST model. In other places we interact with Firestore through react components so we can use React hooks. Since the TreeManager is a model it works directly with Firestore.
 
 The history events are downloaded only when needed for replaying the history. This is done by a `<LoadDocumentHistory>` component. It currently puts up an ugly message on the screen to let the user know something is happening. This component uses hooks to load in the history and then update the document with this history. It is kind of strange for a React component to be managing the MST model. But this temporary history MST model is being created by the component only as it is needed, it isn't something shared by multiple components.
 
@@ -208,11 +208,11 @@ When a document is being edited it does not load all of the previous history ent
 
 ### Ordering of history entries
 
-Locally the history entries are ordered in the `TreeManager.document.history`.  When a user wants to replay the history all of the history entries are downloaded from Firestore ordered by a `index` field on the history entry. These downloaded history entries are set as the `TreeManager.document.history`.
+Locally the history entries are ordered in the `TreeManager.document.history`.  When a user wants to replay the history all of the history entries are downloaded from Firestore ordered by an `index` field on the history entry. These downloaded history entries are set as the `TreeManager.document.history`.
 
-In addition to the `index` field the history entries in Firestore include a previousEntryId this could help if entries get out of order and we need to figure out what happened. The Firestore entries also include a `created` server timestamp which would be useful for debugging issues.
+In addition to the `index` field the history entries in Firestore include a `previousEntryId`, which could help if entries get out of order and we need to figure out what happened. The Firestore entries also include a `created` server timestamp which would be useful for debugging issues.
 
-Because the `index` and `previousEntryId` fields need to know what the last entry stored in Firestore, this last entry is downloaded before any new entries are written up to Firestore. Additionally before this last entry is download the parent document is created. The serialization of this is done using a common promise that all history entry writes wait for. Any history entries that are created before this promise is resolved are saved in `TreeManager.document.history`. The `index` of an entry is computed by adding its position in `TreeManager.document.history` to the index of the last entry saved in Firestore.
+Because the `index` and `previousEntryId` fields need to know the last entry stored in Firestore, this last entry is downloaded before any new entries are written up to Firestore. Additionally, before this last entry is download the parent document is created. The serialization of this is done using a common promise that all history entry writes wait for. Any history entries that are created before this promise is resolved are saved in `TreeManager.document.history`. The `index` of an entry is computed by adding its position in `TreeManager.document.history` to the index of the last entry saved in Firestore.
 
 **Other history entry ordering options**
 
