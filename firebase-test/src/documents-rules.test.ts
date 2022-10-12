@@ -50,6 +50,7 @@ describe("Firestore security rules", () => {
 
     it("authenticated generic users can't read authenticated user documents", async () => {
       db = initFirestore(genericAuth);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
       await expectReadToFail(db, kDocumentDocPath);
     });
 
@@ -62,6 +63,32 @@ describe("Firestore security rules", () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
       await expectReadToSucceed(db, kDocumentDocPath);
+    });
+
+    it("teacher can tell if document exists", async () => {
+      db = initFirestore(teacherAuth);
+      await expectReadToSucceed(db, kDocumentDocPath);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
+      await expectReadToSucceed(db, kDocumentDocPath);
+    });
+
+    it("student can tell if document exists, but not read it", async () => {
+      db = initFirestore(studentAuth);
+      await expectReadToSucceed(db, kDocumentDocPath);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
+      await expectReadToFail(db, kDocumentDocPath);
+    });
+
+    it("generic auth can tell if document exists, but not read it", async () => {
+      db = initFirestore(genericAuth);
+      await expectReadToSucceed(db, kDocumentDocPath);
+      await adminWriteDoc(kDocumentDocPath, specDocumentDoc());
+      await expectReadToFail(db, kDocumentDocPath);
+    });
+
+    it("un auth'd can't tell if document exists", async () => {
+      db = initFirestore();
+      await expectReadToFail(db, kDocumentDocPath);
     });
 
     it("authenticated teachers can't write user documents without required uid", async () => {
