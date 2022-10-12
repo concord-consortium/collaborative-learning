@@ -77,6 +77,15 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
           const shouldBeFocused = commentThread.tileId === focusId;
           const Icon = commentThread.tileType && getToolContentInfoById(commentThread.tileType)?.Icon;
           const key= commentThread.tileId || "document";
+          console.log("title:", title);
+          console.log("shouldShowUserIcon", shouldShowUserIcon);
+          console.log("numComments", numComments);
+          console.log("shouldBeFocused", shouldBeFocused);
+          // console.log("Icon", Icon);
+          console.log("key", key);
+          console.log("------------------------");
+
+
 
           return (
             <div key={key}
