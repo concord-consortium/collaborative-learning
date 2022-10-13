@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useDocumentHistory } from "../../hooks/document-comment-hooks";
 import { useUserStore } from "../../hooks/use-stores";
 import { CDocument, TreeManagerType } from "../../models/history/tree-manager";
@@ -13,19 +13,14 @@ export const LoadDocumentHistory: React.FC<IProps> = ({ document }) => {
 
   const otherUserDocument = user.id !== document?.uid;
 
-  const { data, isLoading, isSuccess, isError, status } = 
+  const { data, isSuccess, status } = 
     useDocumentHistory(document?.key, otherUserDocument ? document?.uid : undefined);
   
-  // Default message
-  let message = `Unknown status ${status}`;
-  if (isLoading) {
-    message = "Loading history...";
-  }
+  // Default success message is "Processing.." this will happen in the brief
+  // time when status == "success", before the useEffect is run
+  const [ successMessage, setSuccessMessage ] = useState<string | null>("Processing history...");
 
-  if (isError) {
-    message = "Error loading history";
-  }
-
+  const treeManager = document?.treeManagerAPI as TreeManagerType;
   useEffect(() => {
     if (isSuccess) {
       // Take the firestore documents from data and put them into the document
@@ -39,20 +34,34 @@ export const LoadDocumentHistory: React.FC<IProps> = ({ document }) => {
       // adding a prop to documents so we can identify documents that are being
       // used for history replaying
       // https://www.pivotaltracker.com/story/show/183291353
-      const treeManager = document?.treeManagerAPI as TreeManagerType;
+      
       const cDocument = CDocument.create({history: data});
       treeManager.setChangeDocument(cDocument);
       treeManager.setCurrentHistoryIndex(cDocument.history.length);
+      if (cDocument.history.length > 0) {
+        // No message because the playback controls will be rendered instead
+        setSuccessMessage(null);        
+      } else {
+        setSuccessMessage("This document has no history.");
+      }
     }
-  });
+  }, [isSuccess, data, treeManager, setSuccessMessage]);
 
-  // If this is still being displayed after loading the history, then no history was found
-  // css classes used here are defined in playback-control.scss
-  return (
-      <div className="playback-controls loading">
-        {isSuccess ? "This document has no history." : message}
-      </div>
-    );
+  const messages = {
+    idle: "Loading history idle...", // TODO: is this state possible? what does it mean?
+    loading: "Loading history...",
+    error: "Error loading history",
+    success: successMessage
+  };
+
+  const message = messages[status];
+
+  return message ?
+    <div className="playback-controls loading">
+      {message}
+    </div>
+    : null;
+
 
   // TODO: what do we do about component caching, if the history button is clicked 
   // more than once perhaps it won't re-read the history.
