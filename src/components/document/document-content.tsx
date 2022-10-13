@@ -72,9 +72,13 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
       this.scrollDisposer = reaction(() => this.stores.ui.scrollToTileId,
         (tileId: string | undefined, prevTileId: string | undefined) => {
-        console.log(`scroll id`, tileId);
-        // Find the row containing tileId
-        // Scroll to it
+        if (tileId) {
+          this.rowRefs.forEach((row: TileRowComponent | null) => {
+            if (row?.tileRowDiv && row.hasTile(tileId)) {
+              this.scrollToElement(row.tileRowDiv);
+            }
+          });
+        }
       });
     }
   }
@@ -250,6 +254,28 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     }
   };
 
+  private scrollToElement = (element: Element) => {
+    if (!this.domElement) return;
+
+    const elementBounds = element.getBoundingClientRect();
+    const contentBounds = this.domElement.getBoundingClientRect();
+    const visibleContent = {
+      top: this.domElement.scrollTop,
+      bottom: this.domElement.scrollTop + contentBounds.height
+    };
+    const elementInContent = {
+      top: elementBounds.top - contentBounds.top + this.domElement.scrollTop,
+      bottom: elementBounds.bottom - contentBounds.top + this.domElement.scrollTop
+    };
+    const kScrollTopMargin = 2;
+    const kScrollBottomMargin = 10;
+    if (elementInContent.bottom > visibleContent.bottom) {
+      this.domElement.scrollTop += elementInContent.bottom + kScrollBottomMargin - visibleContent.bottom;
+    } else if (elementInContent.top < visibleContent.top) {
+      this.domElement.scrollTop += elementInContent.top - kScrollTopMargin - visibleContent.top;
+    }
+  };
+
   private handleRowElementsChanged = (mutationsList: MutationRecord[], mutationsObserver: MutationObserver) => {
     if (!this.domElement) return;
 
@@ -258,24 +284,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         // auto-scroll to new tile rows
         if (mutation.addedNodes.length) {
           const newRow = mutation.addedNodes[mutation.addedNodes.length - 1] as Element;
-          const newRowBounds = newRow.getBoundingClientRect();
-          const contentBounds = this.domElement.getBoundingClientRect();
-          const visibleContent = {
-                  top: this.domElement.scrollTop,
-                  bottom: this.domElement.scrollTop + contentBounds.height
-                };
-          const newRowInContent = {
-                  top: newRowBounds.top - contentBounds.top + this.domElement.scrollTop,
-                  bottom: newRowBounds.bottom - contentBounds.top + this.domElement.scrollTop
-                };
-          const kScrollTopMargin = 2;
-          const kScrollBottomMargin = 10;
-          if (newRowInContent.bottom > visibleContent.bottom) {
-            this.domElement.scrollTop += newRowInContent.bottom + kScrollBottomMargin - visibleContent.bottom;
-          }
-          else if (newRowInContent.top < visibleContent.top) {
-            this.domElement.scrollTop += newRowInContent.top - kScrollTopMargin - visibleContent.top;
-          }
+          this.scrollToElement(newRow);
         }
       }
     }

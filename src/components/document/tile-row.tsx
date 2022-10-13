@@ -85,7 +85,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
 
   public state: IState = {};
 
-  private tileRowDiv: HTMLElement | null;
+  public tileRowDiv: HTMLElement | null;
 
   public render() {
     const { model, typeClass } = this.props;
@@ -101,6 +101,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     if (!isSectionHeader && !renderableTiles.length) return null;
     return (
       <div className={classes} data-row-id={model.id}
+          // style={style} ref={this.ref}>
           style={style} ref={elt => this.tileRowDiv = elt}>
         { isSectionHeader && sectionId
           ? <SectionHeader type={sectionId} typeClass={typeClass}/>
@@ -113,6 +114,10 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
 
   private getTile(tileId: string) {
     return this.props.tileMap.get(tileId) as ToolTileModelType | undefined;
+  }
+
+  public hasTile(tileId?: string) {
+    return tileId && this.props.model.hasTile(tileId);
   }
 
   private isTileRenderable(tileId: string) {
@@ -208,6 +213,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     }
     if (this.tileRowDiv) {
       const boundingBox = this.tileRowDiv.getBoundingClientRect();
+      // const boundingBox = this.ref.current.getBoundingClientRect();
       e.dataTransfer.setData(dragResizeRowDomHeight(boundingBox.height), String(boundingBox.height));
     }
   };
