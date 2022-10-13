@@ -72,7 +72,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
           this.rowRefs.forEach((row: TileRowComponent | null) => {
             if (row?.tileRowDiv && row.hasTile(tileId)) {
               // Javascript struggles to scroll multiple elements at the same time,
-              // so we delay scrolling any document on the left and only animate the later element
+              // so we delay scrolling any document on the left and only animate the left document
               setTimeout(() => {
                 row?.tileRowDiv?.scrollIntoView({
                   behavior: this.props.readOnly ? "smooth" : "auto",

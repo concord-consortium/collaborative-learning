@@ -101,7 +101,6 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     if (!isSectionHeader && !renderableTiles.length) return null;
     return (
       <div className={classes} data-row-id={model.id}
-          // style={style} ref={this.ref}>
           style={style} ref={elt => this.tileRowDiv = elt}>
         { isSectionHeader && sectionId
           ? <SectionHeader type={sectionId} typeClass={typeClass}/>
@@ -213,7 +212,6 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     }
     if (this.tileRowDiv) {
       const boundingBox = this.tileRowDiv.getBoundingClientRect();
-      // const boundingBox = this.ref.current.getBoundingClientRect();
       e.dataTransfer.setData(dragResizeRowDomHeight(boundingBox.height), String(boundingBox.height));
     }
   };
