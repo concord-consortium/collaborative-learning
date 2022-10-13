@@ -45,8 +45,8 @@ export const ProblemTabContent: React.FC<IProps>
   }, [ui]);
 
   const handleTabClick = (titleArgButReallyType: string, typeArgButReallyTitle: string) => {
-    // console.log("problem-tab-content.tsx > handleTabClick with titleArgButReallyType", titleArgButReallyType,
-    // "typeArgButReallyTitle", typeArgButReallyTitle);
+    console.log("problem-tab-content.tsx > handleTabClick with titleArgButReallyType", titleArgButReallyType,
+    "typeArgButReallyTitle", typeArgButReallyTitle);
 
     // TODO: this function has its argument names reversed (see caller for details.)
     // We can't simply switch it, however, because that would introduce a breaking change
@@ -73,7 +73,7 @@ export const ProblemTabContent: React.FC<IProps>
             // console.log("problem-tab-content.tsx \nsections array\n", section);
             // console.log("problem-tab-content.tsx> \n section.type:\n\n", section.type);
             const sectionTitle = getSectionTitle(section.type);
-            console.log("prpoblem-tab-content.tsx \nsectionTitle\n\n", sectionTitle);
+            // console.log("prpoblem-tab-content.tsx \nsectionTitle\n\n", sectionTitle);
             return (
               <Tab className={classNames("prob-tab", context)} key={`section-${section.type}`}
                   onClick={() => handleTabClick(section.type, sectionTitle)} >

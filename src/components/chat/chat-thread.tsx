@@ -60,13 +60,13 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
 
   return (
     <div className="chat-list" data-testid="chat-list">
-      {console.log("chatThread:", chatThreads)}
+      {/* {console.log("chatThread:", chatThreads)} */}
 
       {
         isDocumentView ?
         <>
           <CommentedDocuments user={user} documentObj={document as CurriculumDocument} />
-          {console.log("comment view \n array (chatThreads) is", chatThreads)}
+          {/* {console.log("comment view \n array (chatThreads) is", chatThreads)} */}
         </>
         :
         chatThreads?.map((commentThread: ChatCommentThread) => {
@@ -77,13 +77,13 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
           const shouldBeFocused = commentThread.tileId === focusId;
           const Icon = commentThread.tileType && getToolContentInfoById(commentThread.tileType)?.Icon;
           const key= commentThread.tileId || "document";
-          console.log("title:", title);
-          console.log("shouldShowUserIcon", shouldShowUserIcon);
-          console.log("numComments", numComments);
-          console.log("shouldBeFocused", shouldBeFocused);
+          // console.log("title:", title);
+          // console.log("shouldShowUserIcon", shouldShowUserIcon);
+          // console.log("numComments", numComments);
+          // console.log("shouldBeFocused", shouldBeFocused);
           // console.log("Icon", Icon);
-          console.log("key", key);
-          console.log("------------------------");
+          // console.log("key", key);
+          // console.log("------------------------");
 
 
 
@@ -150,7 +150,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
               </div>
             </div>
           </div>
-          {console.log("line 153")}
+          {/* {console.log("line 153")} */}
           <CommentCard
             user={user}
             activeNavTab={activeNavTab}

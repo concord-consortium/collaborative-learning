@@ -16,6 +16,7 @@ interface IProps extends IBaseProps {
 export class ProblemPanelComponent extends BaseComponent<IProps> {
 
   public render() {
+    console.log("problem-tab-content.tsx>render()");
     const { section } = this.props;
 
     return (
@@ -26,6 +27,8 @@ export class ProblemPanelComponent extends BaseComponent<IProps> {
   }
 
   private renderSection(section: SectionModelType) {
+    console.log("problem-tab-content.tsx>renderSection()");
+
     const {content} = section;
     return (
       <div className="section">
@@ -35,6 +38,8 @@ export class ProblemPanelComponent extends BaseComponent<IProps> {
   }
 
   private renderContent(content: DocumentContentModelType) {
+    console.log("problem-tab-content.tsx>renderContent()");
+
     return (
       <CanvasComponent context="left-nav" readOnly={true} content={content}/>
     );

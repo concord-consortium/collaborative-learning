@@ -76,7 +76,7 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user}) => {
       {
         docsCommentedOn &&
         (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => {
-          console.log("map docs", doc);
+          // console.log("map docs", doc);
           let navTab: string;
           if (doc.id?.includes("guide")){
             navTab = "teacher-guide";
@@ -88,7 +88,19 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user}) => {
             <div
               className={"document-box"}
               key={index}
-              onClick={() => ui.setActiveNavTab(navTab)}
+              onClick={() => {
+                ui.setActiveNavTab(navTab); //open tab
+                // ui.setActiveNavTab("problem"); //open tab
+                ui.setSelectedTile();
+                ui.updateFocusDocument();
+
+                //set some global flag here
+
+                ui.setFocusDocument(doc.path);
+                //then open section ?
+                // ui.setFocusDocument(doc.id);
+                // ui.updateFocusDocument();
+              }}
             >
               <div className={"title"}>
                 { doc.title }

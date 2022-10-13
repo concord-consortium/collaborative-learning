@@ -149,7 +149,7 @@ export const UIModel = types
         self.activeNavTab = tab;
       },
       //added
-      setSectionTab(tab: string){
+      setFocusSection(tab: string){
         self.activeSectionTab = tab;
       },
       //
@@ -158,7 +158,7 @@ export const UIModel = types
         self.activeGroupId = groupId;
       },
       setSelectedTile(tile?: ToolTileModelType, options?: {append: boolean}) {
-        console.log("ui.ts>setSelectedTile");
+        console.log("ui.ts>setSelectedTile with tile\n", tile, "\n options \n", options);
         setOrAppendTileIdToSelection(tile && tile.id, options);
       },
       setSelectedTileId(tileId: string, options?: {append: boolean}) {
@@ -172,9 +172,11 @@ export const UIModel = types
       },
       closeDialog,
       setFocusDocument(documentKey?: string) {
+        console.log("ui.ts > setFocusDocument", documentKey);
         self.focusDocument = documentKey;
       },
       updateFocusDocument() {
+        console.log("ui.ts > updateFocusDocument");
         // increment counter to trigger observers to update
         ++self.focusDocUpdates;
       },

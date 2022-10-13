@@ -23,9 +23,13 @@ interface IProps {
   navTabPanelElt: HTMLDivElement | null;
 }
 export const FocusDocumentTracker = observer(({ navTabPanelElt }: IProps) => {
+  // console.log("<FocusDocumentTracker with navTabPanelElt\n", navTabPanelElt);
   const ui = useUIStore();
   const prevUpdates = usePrevious(ui.focusDocUpdates);
   const prevTab = usePrevious(navTabPanelElt);
+
+  console.log("focus-document-tracker.tsx > prevUpdates:\n", prevUpdates, "\n prevTab \n", prevTab);
+
 
   useEffect(() => {
     if (navTabPanelElt && ((prevTab !== navTabPanelElt) || (ui.focusDocUpdates !== prevUpdates))) {
@@ -53,9 +57,14 @@ export const FocusDocumentTracker = observer(({ navTabPanelElt }: IProps) => {
           focusDoc && (focusDocument = focusDoc);
           focusSec && (focusSection = focusSec);
         }
+        console.log("focus-document-tracker.tsx > ui.setFocusDocument() \n focusSection\n", focusSection,
+        "\nfocusDocument\n", focusDocument);
+
+        //if flag is up, pass end of path as focus section ( which should be a global variable)??
         ui.setFocusDocument(focusSection
                               ? `${focusDocument}/${focusSection}`
                               : focusDocument);
+
       }, 30);
     }
   }, [navTabPanelElt, prevTab, prevUpdates, ui, ui.focusDocUpdates]);
