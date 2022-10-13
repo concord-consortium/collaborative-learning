@@ -52,24 +52,15 @@ context('Teacher Workspace', () => {
     });
 
     describe('verify playback', () => {
-      it('verify playback is disabled if there is not history', function() {
+      it('verify playback shows no history if there is no history', function() {
         cy.openTopTab('my-work');
         cy.openDocumentThumbnail('workspaces', this.investigationTitle);
-        // FIXME-HISTORY: the following line is skipped for now because it is
-        // easier to always show the playback and then attempt to download the
-        // history when it is clicked. Story to fix this:
-        // https://www.pivotaltracker.com/story/show/183291329 
-        //
-        // The whole test isn't skipped because the 2 above lines are needed for
-        // the later tests.
-        // cy.get('[data-testid="playback-component"]').should('have.class',
-        // 'disabled');
+        cy.get('[data-testid="playback-component-button"]').click();
+        cy.get('.playback-controls').contains("This document has no history");
+        cy.get('[data-testid="playback-component-button"]').click();
       });
-      it('verify playback button enables when there is a history', () => {
+      it('verify playback controls open with slider when there is history', () => {
         clueCanvas.addTile('drawing');
-        cy.get('[data-testid="playback-component"]').should('not.have.class', 'disabled');
-      });
-      it('verify playback controls open', () => {
         cy.get('[data-testid="playback-component-button"]').click();
         cy.get('[data-testid="playback-slider"]').should('be.visible');
         cy.get('[data-testid="playback-time-info"]').should('be.visible');
