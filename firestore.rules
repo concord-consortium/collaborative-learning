@@ -301,6 +301,15 @@ service cloud.firestore {
           return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data.teachers;
         }
 
+        // return owner of the parent document
+        function getHistoryParentDocumentOwner() {
+         return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data.uid;
+        }
+         // return context of the parent document
+        function getHistoryDocumentContext() {
+         return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data.context_id;
+        }
+
         // return the network with which the specified document is associated
         function getDocumentNetwork() {
           return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data.network;
@@ -338,7 +347,14 @@ service cloud.firestore {
         function isValidCommentUpdateRequest() {
           return userIsRequestUser() && preservesReadOnlyCommentFields();
         }
-
+        
+        function userOwnsParentHistoryDocument() {
+          return getHistoryParentDocumentOwner() == string(request.auth.token.platform_user_id);
+        }
+        function teacherCanReadStudentHistory() {
+          return getHistoryDocumentContext() == string(request.auth.token.class_hash);
+        }
+        
         match /comments/{commentId} {
           // portal-authenticated teachers with access to the document can create valid comments
           allow create: if isAuthedTeacher() && teacherCanAccessDocument() && isValidCommentCreateRequest();
@@ -349,8 +365,15 @@ service cloud.firestore {
           // only teachers that "own" the document can read the comments (for now)
           allow read: if isAuthedTeacher() && teacherCanAccessDocument();
         }
+        // For writing individual history entries
+        match /history/{entryId} {
+          allow create: if isAuthed() && userOwnsParentHistoryDocument();
+          allow read: if isAuthed() && (userOwnsParentHistoryDocument() || teacherCanReadStudentHistory());
+          allow delete: if false;
+          allow update: if false;
+        }
       }
-
+      
       match /mcsupports/{docId} {
         // portal-authenticated teachers can create valid supports
         allow create: if isAuthedTeacher() && isValidSupportCreateRequest();
