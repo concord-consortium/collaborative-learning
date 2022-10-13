@@ -71,7 +71,15 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
         if (tileId) {
           this.rowRefs.forEach((row: TileRowComponent | null) => {
             if (row?.tileRowDiv && row.hasTile(tileId)) {
-              this.scrollToElement(row.tileRowDiv);
+              // Javascript struggles to scroll multiple elements at the same time,
+              // so we delay scrolling any document on the left and only animate the later element
+              setTimeout(() => {
+                row?.tileRowDiv?.scrollIntoView({
+                  behavior: this.props.readOnly ? "smooth" : "auto",
+                  block: "nearest",
+                  inline: "nearest"
+                });
+              }, this.props.readOnly ? 100 : 1);
             }
           });
         }
@@ -245,28 +253,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     // click must be on DocumentContent itself, not bubble up from child
     if (e.target === e.currentTarget) {
       ui.setSelectedTile();
-    }
-  };
-
-  private scrollToElement = (element: Element) => {
-    if (!this.domElement) return;
-
-    const elementBounds = element.getBoundingClientRect();
-    const contentBounds = this.domElement.getBoundingClientRect();
-    const visibleContent = {
-      top: this.domElement.scrollTop,
-      bottom: this.domElement.scrollTop + contentBounds.height
-    };
-    const elementInContent = {
-      top: elementBounds.top - contentBounds.top + this.domElement.scrollTop,
-      bottom: elementBounds.bottom - contentBounds.top + this.domElement.scrollTop
-    };
-    const kScrollTopMargin = 2;
-    const kScrollBottomMargin = 10;
-    if (elementInContent.bottom > visibleContent.bottom) {
-      this.domElement.scrollTop += elementInContent.bottom + kScrollBottomMargin - visibleContent.bottom;
-    } else if (elementInContent.top < visibleContent.top) {
-      this.domElement.scrollTop += elementInContent.top - kScrollTopMargin - visibleContent.top;
     }
   };
 
