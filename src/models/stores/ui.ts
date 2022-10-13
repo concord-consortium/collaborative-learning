@@ -26,7 +26,7 @@ type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 
 export const UIModel = types
   .model("UI", {
-    dividerPosition: kDividerMax,
+    dividerPosition: kDividerHalf,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kProblems,
     activeSectionTab: types.maybe(types.string), //added
