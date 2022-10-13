@@ -228,6 +228,13 @@ describe("Firestore security rules", () => {
       await expectReadToSucceed(db, kDocumentHistoryDocPath);
     });
     
+    it ("users authed from different portals cannot read each other's history entries", async () => {
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
+      await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
+      await expectReadToFail(db, "authed/otherPortal/documents/myDocument/history/myHistoryEntry");
+    });
+
     it ("user cannot read someone else's history entries", async () => {
       db = initFirestore(genericAuth);
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
@@ -250,6 +257,12 @@ describe("Firestore security rules", () => {
       db = initFirestore(studentAuth);
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
       await expectWriteToSucceed(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
+    });
+
+    it ("users authed from different portals cannot write each other's history entries", async () => {
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
+      await expectWriteToFail(db, "authed/otherPortal/documents/myDocument/history/myHistoryEntry", specHistoryEntryDoc());
     });
     
     it ("user cannot write someone else's history entries", async () => {
