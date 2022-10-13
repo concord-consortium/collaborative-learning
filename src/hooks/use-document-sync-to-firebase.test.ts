@@ -298,73 +298,73 @@ describe("useDocumentSyncToFirebase hook", () => {
     expect(mockUpdate).toHaveBeenCalledTimes(3);
   });
 
-  it("monitors problem documents with additional logging when DEBUG_SAVE == true", async () => {
-    libDebug.DEBUG_SAVE = true;
-    const { user, firebase, document } = specArgs(ProblemDocument, "xyz");
+  // it("monitors problem documents with additional logging when DEBUG_SAVE == true", async () => {
+  //   libDebug.DEBUG_SAVE = true;
+  //   const { user, firebase, document } = specArgs(ProblemDocument, "xyz");
 
-    expect.assertions(18);
+  //   expect.assertions(18);
 
-    // logs monitoring of document
-    let unmount: () => void;
-    let waitFor: (callback: () => boolean | void) => Promise<void>;
-    await jestSpyConsole("log", async spy => {
-      const { unmount: _unmount, waitFor: _waitFor } =
-        renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
-      unmount = _unmount;
-      waitFor = _waitFor;
-      await waitFor(() => expect(spy).toBeCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledTimes(0);
-      expect(mockUpdate).toHaveBeenCalledTimes(0);
-    });
+  //   // logs monitoring of document
+  //   let unmount: () => void;
+  //   let waitFor: (callback: () => boolean | void) => Promise<void>;
+  //   await jestSpyConsole("log", async spy => {
+  //     const { unmount: _unmount, waitFor: _waitFor } =
+  //       renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+  //     unmount = _unmount;
+  //     waitFor = _waitFor;
+  //     await waitFor(() => expect(spy).toBeCalledTimes(1));
+  //     expect(mockRef).toHaveBeenCalledTimes(0);
+  //     expect(mockUpdate).toHaveBeenCalledTimes(0);
+  //   });
 
-    // saves when visibility changes with additional logging
-    mockRef.mockClear();
-    mockUpdate.mockClear();
-    await jestSpyConsole("log", async spy => {
-      document.setVisibility("public");
-      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/problem/${document.key}`);
-      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-      await waitFor(() => expect(spy).toBeCalledTimes(1));
-    });
+  //   // saves when visibility changes with additional logging
+  //   mockRef.mockClear();
+  //   mockUpdate.mockClear();
+  //   await jestSpyConsole("log", async spy => {
+  //     document.setVisibility("public");
+  //     await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
+  //     expect(mockRef).toHaveBeenCalledWith(`${user.id}/problem/${document.key}`);
+  //     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+  //     await waitFor(() => expect(spy).toBeCalledTimes(1));
+  //   });
 
-    // doesn't respond to title change
-    mockRef.mockClear();
-    mockUpdate.mockClear();
-    await jestSpyConsole("log", spy => {
-      document.setTitle("New Title");
-      expect(mockRef).toHaveBeenCalledTimes(0);
-      expect(mockUpdate).toHaveBeenCalledTimes(0);
-      expect(spy).not.toBeCalled();
-    });
+  //   // doesn't respond to title change
+  //   mockRef.mockClear();
+  //   mockUpdate.mockClear();
+  //   await jestSpyConsole("log", spy => {
+  //     document.setTitle("New Title");
+  //     expect(mockRef).toHaveBeenCalledTimes(0);
+  //     expect(mockUpdate).toHaveBeenCalledTimes(0);
+  //     expect(spy).not.toBeCalled();
+  //   });
 
-    // responds to properties change when we publish problem documents (pubCount)
-    mockRef.mockClear();
-    mockUpdate.mockClear();
-    await jestSpyConsole("log", spy => {
-      document.setProperty("foo", "bar");
-      expect(mockRef).toHaveBeenCalledTimes(1);
-      expect(mockUpdate).toHaveBeenCalledTimes(1);
-      expect(spy).not.toBeCalled();
-    });
+  //   // responds to properties change when we publish problem documents (pubCount)
+  //   mockRef.mockClear();
+  //   mockUpdate.mockClear();
+  //   await jestSpyConsole("log", spy => {
+  //     document.setProperty("foo", "bar");
+  //     expect(mockRef).toHaveBeenCalledTimes(1);
+  //     expect(mockUpdate).toHaveBeenCalledTimes(1);
+  //     expect(spy).not.toBeCalled();
+  //   });
 
-    // saves when content changes with additional logging
-    mockRef.mockClear();
-    mockUpdate.mockClear();
-    await jestSpyConsole("log", async spy => {
-      document.content?.addTile("text");
-      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-      expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-      await waitFor(() => expect(spy).toBeCalledTimes(1));
-    });
+  //   // saves when content changes with additional logging
+  //   mockRef.mockClear();
+  //   mockUpdate.mockClear();
+  //   await jestSpyConsole("log", async spy => {
+  //     document.content?.addTile("text");
+  //     await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
+  //     expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
+  //     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+  //     await waitFor(() => expect(spy).toBeCalledTimes(1));
+  //   });
 
-    // logs unmonitoring of document
-    await jestSpyConsole("log", async spy => {
-      unmount();
-      await waitFor(() => expect(spy).toBeCalledTimes(1));
-    });
-  });
+  //   // logs unmonitoring of document
+  //   await jestSpyConsole("log", async spy => {
+  //     unmount();
+  //     await waitFor(() => expect(spy).toBeCalledTimes(1));
+  //   });
+  // });
 
   it("monitors personal documents with additional logging when DEBUG_SAVE == true", async () => {
     libDebug.DEBUG_SAVE = true;
