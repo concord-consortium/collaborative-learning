@@ -62,10 +62,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       this.updateVisibleRows();
       this.scrollToSection(this.props.selectedSectionId);
 
-      if ((window as any).MutationObserver) {
-        this.mutationObserver = new MutationObserver(this.handleRowElementsChanged);
-        this.mutationObserver.observe(this.domElement, { childList: true });
-      }
       // We pass the domElement to our children, but it's undefined during the first render,
       // so we force an update to make sure we draw at least once after we have our domElement.
       this.forceUpdate();
@@ -84,8 +80,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   }
 
   public componentWillUnmount() {
-    this.mutationObserver.disconnect();
-
     this.scrollDisposer?.();
   }
 
@@ -273,20 +267,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       this.domElement.scrollTop += elementInContent.bottom + kScrollBottomMargin - visibleContent.bottom;
     } else if (elementInContent.top < visibleContent.top) {
       this.domElement.scrollTop += elementInContent.top - kScrollTopMargin - visibleContent.top;
-    }
-  };
-
-  private handleRowElementsChanged = (mutationsList: MutationRecord[], mutationsObserver: MutationObserver) => {
-    if (!this.domElement) return;
-
-    for (const mutation of mutationsList) {
-      if (mutation.type === "childList") {
-        // auto-scroll to new tile rows
-        if (mutation.addedNodes.length) {
-          const newRow = mutation.addedNodes[mutation.addedNodes.length - 1] as Element;
-          this.scrollToElement(newRow);
-        }
-      }
     }
   };
 
