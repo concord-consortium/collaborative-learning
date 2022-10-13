@@ -29,6 +29,7 @@ export const UIModel = types
     dividerPosition: kDividerMax,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kProblems,
+    activeSectionTab: types.maybe(types.string), //added
     activeGroupId: "",
     selectedTileIds: types.array(types.string),
     selectedCommentId: types.maybe(types.string),
@@ -144,14 +145,20 @@ export const UIModel = types
         self.error = null;
       },
       setActiveNavTab(tab: string) {
-        console.log("ui.ts > setActiveNavTab");
+        console.log("ui.ts > setActiveNavTab with tab", tab);
         self.activeNavTab = tab;
       },
+      //added
+      setSectionTab(tab: string){
+        self.activeSectionTab = tab;
+      },
+      //
       setActiveStudentGroup(groupId: string) {
         self.activeNavTab = ENavTab.kStudentWork;
         self.activeGroupId = groupId;
       },
       setSelectedTile(tile?: ToolTileModelType, options?: {append: boolean}) {
+        console.log("ui.ts>setSelectedTile");
         setOrAppendTileIdToSelection(tile && tile.id, options);
       },
       setSelectedTileId(tileId: string, options?: {append: boolean}) {

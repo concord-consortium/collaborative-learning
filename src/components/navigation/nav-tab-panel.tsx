@@ -142,6 +142,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
 
   private renderProblem = () => {
     const { user: { isTeacher }, problem: { sections } } = this.stores;
+    console.log("sections: ", sections);
     return (
       <ProblemTabContent
         sections={sections}
@@ -152,6 +153,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   private renderTeacherGuide = () => {
     const { user: { isTeacher }, teacherGuide } = this.stores;
     const sections = teacherGuide?.sections;
+    console.log("teacherGuide render > sections", sections);
     return isTeacher && sections && (
       <ProblemTabContent
         context={ENavTab.kTeacherGuide}
@@ -161,7 +163,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private handleSelectTab = (tabIndex: number) => {
-    console.log("handleSelectTab");
+    console.log("handleSelectTab with tabIndex", tabIndex);
     const { tabs } = this.props;
     const { ui } = this.stores;
     if (tabs) {
