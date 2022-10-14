@@ -218,13 +218,20 @@ describe("Firestore security rules", () => {
       await expectReadToFail(db, kDocumentHistoryDocPath);
     });
     
-    it ("teacher can read student history", async () => {
+    it ("teacher can read student history in teacher list", async () => {
       db = initFirestore(teacherAuth);
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
       await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
       await expectReadToSucceed(db, kDocumentHistoryDocPath);
     });
     
+    it("teacher cannot read student history if not in the list", async () => {
+      db = initFirestore(teacherAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId, teachers: [99, 100] }}));
+      await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
+      await expectReadToFail(db, kDocumentHistoryDocPath);
+    });
+
     // FIX-ME: https://www.pivotaltracker.com/n/projects/2441242/stories/183545430
     it.skip("users authed from different portals cannot read each other's history entries", async () => {
       db = initFirestore(studentAuth);
@@ -253,15 +260,15 @@ describe("Firestore security rules", () => {
     
     it ("student can write their own history entries", async () => {
       db = initFirestore(studentAuth);
-      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add: {uid: studentId }}));
       await expectWriteToSucceed(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
     });
     
     // FIX-ME: https://www.pivotaltracker.com/n/projects/2441242/stories/183545430
     it.skip("users authed from different portals cannot write each other's history entries", async () => {
       db = initFirestore(studentAuth);
-      await adminWriteDoc("authed/otherPortal/documents/myDocument", specHistoryEntryParentDoc({add:{uid: studentId }}));
-      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
+      await adminWriteDoc("authed/otherPortal/documents/myDocument", specHistoryEntryParentDoc({add: {uid: studentId }}));
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({ add: {uid: studentId }}));
       await expectWriteToFail(db, "authed/otherPortal/documents/myDocument/history/myHistoryEntry", specHistoryEntryDoc());
     });
     

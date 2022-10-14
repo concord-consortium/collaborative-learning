@@ -308,10 +308,6 @@ service cloud.firestore {
         function getDocumentOwner() {
          return getDocumentData().uid;
         }
-         // return context of the parent document
-        function getHistoryDocumentContext() {
-         return getDocumentData().context_id;
-        }
 
         // return the network with which the specified document is associated
         function getDocumentNetwork() {
@@ -351,13 +347,9 @@ service cloud.firestore {
           return userIsRequestUser() && preservesReadOnlyCommentFields();
         }
         
-        function userOwnsParentHistoryDocument() {
+        function userOwnsDocument() {
           return getDocumentOwner() == string(request.auth.token.platform_user_id);
         }
-        function teacherCanReadStudentHistory() {
-          return getHistoryDocumentContext() == string(request.auth.token.class_hash);
-        }
-        
         match /comments/{commentId} {
           // portal-authenticated teachers with access to the document can create valid comments
           allow create: if isAuthedTeacher() && teacherCanAccessDocument() && isValidCommentCreateRequest();
@@ -368,10 +360,11 @@ service cloud.firestore {
           // only teachers that "own" the document can read the comments (for now)
           allow read: if isAuthedTeacher() && teacherCanAccessDocument();
         }
+        
         // For writing individual history entries
         match /history/{entryId} {
-          allow create: if isAuthed() && userOwnsParentHistoryDocument();
-          allow read: if isAuthed() && (userOwnsParentHistoryDocument() || teacherCanReadStudentHistory());
+          allow create: if isAuthed() && userOwnsDocument();
+          allow read: if (isAuthed() && userOwnsDocument()) || (isAuthedTeacher() && teacherCanAccessDocument());
           allow delete: if false;
           allow update: if false;
         }
