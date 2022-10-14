@@ -15,7 +15,6 @@ import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tools/tool-til
 import { safeJsonParse } from "../../utilities/js-utils";
 
 import "./document-content.sass";
-import { ScrollToType } from "src/models/stores/ui";
 
 interface IProps extends IBaseProps {
   context: string;
