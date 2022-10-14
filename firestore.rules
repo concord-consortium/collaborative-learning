@@ -305,7 +305,7 @@ service cloud.firestore {
         }
 
         // return owner of the parent document
-        function getHistoryParentDocumentOwner() {
+        function getDocumentOwner() {
          return getDocumentData().uid;
         }
          // return context of the parent document
@@ -352,7 +352,7 @@ service cloud.firestore {
         }
         
         function userOwnsParentHistoryDocument() {
-          return getHistoryParentDocumentOwner() == string(request.auth.token.platform_user_id);
+          return getDocumentOwner() == string(request.auth.token.platform_user_id);
         }
         function teacherCanReadStudentHistory() {
           return getHistoryDocumentContext() == string(request.auth.token.class_hash);
