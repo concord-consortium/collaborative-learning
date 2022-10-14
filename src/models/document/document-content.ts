@@ -19,9 +19,6 @@ import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModel, SharedModelType, SharedModelUnion } from "../tools/shared-model";
 import { DocumentModelType, IDocumentEnvironment } from "./document";
 import { SectionModelType } from "../curriculum/section";
-import { ProblemModelType } from "../curriculum/problem";
-import { InvestigationModelType } from "../curriculum/investigation";
-import { UnitModelType } from "../curriculum/unit";
 
 export interface INewTileOptions {
   rowHeight?: number;
@@ -265,13 +262,7 @@ export const DocumentContentModel = types
       if (Object.hasOwn(parent, "key")) {
         return (parent as DocumentModelType).key;
       } else {
-        const section = parent as SectionModelType;
-        // getParent is called twice below because the direct parent is an array
-        const problem = getParent(getParent(section)) as ProblemModelType;
-        const investigation = getParent(getParent(problem)) as InvestigationModelType;
-        const unit = getParent(getParent(investigation)) as UnitModelType;
-        const sectionTitle = section.title.toLowerCase().replace(' ', '-');
-        return `${unit.code}/${investigation.ordinal}/${problem.ordinal}/${sectionTitle}`;
+        return (parent as SectionModelType).path;
       }
     },
     getSectionTypeForPlaceholderRow(row: TileRowModelType) {
