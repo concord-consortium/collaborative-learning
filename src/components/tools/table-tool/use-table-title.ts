@@ -1,21 +1,23 @@
 import { useCallback, useEffect, useRef } from "react";
+import { ToolTileModelType } from "../../../models/tools/tool-tile";
 import { useCurrent } from "../../../hooks/use-current";
-import { IDataSet } from "../../../models/data/data-set";
 import { IGridContext } from "./table-types";
+import { TableContentModelType } from "../../../models/tools/table/table-content";
 
 interface IProps {
   gridContext: IGridContext;
-  dataSet: IDataSet;
+  model: ToolTileModelType;
   readOnly?: boolean;
   onRequestUniqueTitle?: () => string | undefined;
   onSetTableTitle?: (title: string) => void;
   requestRowHeight: () => void;
 }
 export const useTableTitle = ({
-  gridContext, dataSet, readOnly, onRequestUniqueTitle, onSetTableTitle, requestRowHeight
+  gridContext, model, readOnly, onRequestUniqueTitle, onSetTableTitle, requestRowHeight
 }: IProps) => {
-
-  const getTitle = useCallback(() => dataSet.name, [dataSet.name]);
+  
+  const tableContent = model.content as TableContentModelType;
+  const getTitle = useCallback(() => tableContent.dataSet.name, [tableContent]);
   const editingTitle = useCurrent(getTitle());
 
   const onBeginTitleEdit = () => {
@@ -33,12 +35,12 @@ export const useTableTitle = ({
   // request a default title if we don't already have one
   const onRequestUniqueTitleRef = useRef(onRequestUniqueTitle);
   useEffect(() => {
-    if (!dataSet.name) {
+    if (!tableContent.dataSet.name) {
       // wait for all tiles to have registered their callbacks
       setTimeout(() => {
         const _title = onRequestUniqueTitleRef.current?.();
         if (_title) {
-          dataSet.setName(_title);
+          tableContent.dataSet.setName(_title);
         }
       }, 100);
     }

@@ -27,7 +27,6 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       setDocument: action,
       findFirstSharedModelByType: action,
       addTileSharedModel: action,
-      getTileSharedModels: action,
       removeTileSharedModel: action
     });
   }
@@ -100,6 +99,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     tileContentModel.updateAfterSharedModelChanges(sharedModel);
   }
 
+  // This is not an action because it is deriving state.
   getTileSharedModels(tileContentModel: IAnyStateTreeNode): SharedModelType[] {
     if (!this.document) {
       console.warn("getTileSharedModels has no document");
