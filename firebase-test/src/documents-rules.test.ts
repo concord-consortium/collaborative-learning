@@ -225,9 +225,10 @@ describe("Firestore security rules", () => {
       await expectReadToSucceed(db, kDocumentHistoryDocPath);
     });
     
-    it ("users authed from different portals cannot read each other's history entries", async () => {
+    // FIX-ME: https://www.pivotaltracker.com/n/projects/2441242/stories/183545430
+    it.skip("users authed from different portals cannot read each other's history entries", async () => {
       db = initFirestore(studentAuth);
-      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
+      await adminWriteDoc("authed/otherPortal/documents/myDocument", specHistoryEntryParentDoc({add:{uid: studentId }}));
       await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
       await expectReadToFail(db, "authed/otherPortal/documents/myDocument/history/myHistoryEntry");
     });
@@ -255,9 +256,11 @@ describe("Firestore security rules", () => {
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
       await expectWriteToSucceed(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
     });
-
-    it ("users authed from different portals cannot write each other's history entries", async () => {
+    
+    // FIX-ME: https://www.pivotaltracker.com/n/projects/2441242/stories/183545430
+    it.skip("users authed from different portals cannot write each other's history entries", async () => {
       db = initFirestore(studentAuth);
+      await adminWriteDoc("authed/otherPortal/documents/myDocument", specHistoryEntryParentDoc({add:{uid: studentId }}));
       await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
       await expectWriteToFail(db, "authed/otherPortal/documents/myDocument/history/myHistoryEntry", specHistoryEntryDoc());
     });
