@@ -2,7 +2,7 @@ import firebase from "firebase";
 import {
   adminWriteDoc, expectDeleteToFail, expectDeleteToSucceed, expectReadToFail, expectReadToSucceed,
   expectUpdateToFail, expectUpdateToSucceed, expectWriteToFail, expectWriteToSucceed, genericAuth,
-  initFirestore, mockTimestamp, noNetwork, prepareEachTest, studentAuth, teacher2Auth, teacher2Id, teacherAuth,
+  initFirestore, mockTimestamp, noNetwork, prepareEachTest, studentAuth, studentId, teacher2Auth, teacher2Id, teacherAuth,
   teacherId, teacherName, tearDownTests, thisClass
 } from "./setup-rules-tests";
 
@@ -157,6 +157,147 @@ describe("Firestore security rules", () => {
       await expectWriteToFail(db, kDocumentDocPath, specDocumentDoc());
     });
 
+  });
+
+  describe("history entries", () => {
+    const kDocumentDocPath = "authed/myPortal/documents/myDocument";
+    const kDocumentHistoryDocPath = `${kDocumentDocPath}/history/myHistoryEntry`;
+    interface ISpecHisoryDoc {
+      add?: Record<string, string | string[] | object>;
+      remove?: string[];
+    }
+    function specHistoryEntryDoc(options?: ISpecHisoryDoc) {
+      // a valid history document specification
+      const historyDoc = {id: "an-id", tree: "my-document", action: "/content/stuff",
+                           undoable: true, createdAt: mockTimestamp(),
+                           records: [], state: "complete"
+                         };
+      const doc = {index: 1, entry: JSON.stringify(historyDoc), created: mockTimestamp(), previousEntryId: "prev-id"};
+
+      // remove specified props for validating the tests that require them
+      options?.remove?.forEach(prop => delete (doc as any)[prop]);
+      // add additional props to test behavior of additional props
+      options?.add && Object.keys(options.add).forEach(prop => {
+        (doc as any)[prop] = options.add?.[prop];
+      });
+      return doc;
+    }
+    function specHistoryEntryParentDoc(options?: ISpecHisoryDoc) {
+      const historyDoc = {context_id: thisClass, network: noNetwork, teachers: [teacherId], uid: teacherId,
+        type: "problemDocument", key: "my-document", createdAt: mockTimestamp()};
+      // remove specified props for validating the tests that require them
+      options?.remove?.forEach(prop => delete (historyDoc as any)[prop]);
+      // add additional props to test behavior of additional props
+      options?.add && Object.keys(options.add).forEach(prop => {
+        (historyDoc as any)[prop] = options.add?.[prop];
+      });
+      return historyDoc;
+    }
+    
+    it("unauthed reads fail", async () => {
+      db = initFirestore();
+      await expectReadToFail(db, kDocumentHistoryDocPath);
+    });
+    
+    it("unauthed user cannot read. Parent doc exists", async () => {
+      db = initFirestore();
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc());
+      await expectReadToFail(db, kDocumentHistoryDocPath);
+    });
+    
+    it ("student can read their own history entries", async () => {
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
+      await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
+      await expectReadToSucceed(db, kDocumentHistoryDocPath);
+    });
+    
+    it ("student cannot read their own history entries if no parent", async () => {
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
+      await expectReadToFail(db, kDocumentHistoryDocPath);
+    });
+    
+    it ("teacher can read student history in teacher list", async () => {
+      db = initFirestore(teacherAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
+      await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
+      await expectReadToSucceed(db, kDocumentHistoryDocPath);
+    });
+    
+    it("teacher cannot read student history if not in the list", async () => {
+      db = initFirestore(teacherAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId, teachers: [99, 100] }}));
+      await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
+      await expectReadToFail(db, kDocumentHistoryDocPath);
+    });
+
+    // FIX-ME: https://www.pivotaltracker.com/n/projects/2441242/stories/183545430
+    it.skip("users authed from different portals cannot read each other's history entries", async () => {
+      db = initFirestore(studentAuth);
+      await adminWriteDoc("authed/otherPortal/documents/myDocument", specHistoryEntryParentDoc({add:{uid: studentId }}));
+      await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
+      await expectReadToFail(db, "authed/otherPortal/documents/myDocument/history/myHistoryEntry");
+    });
+
+    it ("user cannot read someone else's history entries", async () => {
+      db = initFirestore(genericAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
+      await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
+      expectReadToFail(db, kDocumentHistoryDocPath);
+    });
+    
+    it("unauthed user cannot write. Parent doc does not exist", async () => {
+      db = initFirestore();
+      await expectWriteToFail(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
+    });
+    
+    it("unauthed user cannot write. Parent doc exists", async () => {
+      db = initFirestore();
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc());
+      await expectWriteToFail(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
+    });
+    
+    it ("student can write their own history entries", async () => {
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add: {uid: studentId }}));
+      await expectWriteToSucceed(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
+    });
+    
+    // FIX-ME: https://www.pivotaltracker.com/n/projects/2441242/stories/183545430
+    it.skip("users authed from different portals cannot write each other's history entries", async () => {
+      db = initFirestore(studentAuth);
+      await adminWriteDoc("authed/otherPortal/documents/myDocument", specHistoryEntryParentDoc({add: {uid: studentId }}));
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({ add: {uid: studentId }}));
+      await expectWriteToFail(db, "authed/otherPortal/documents/myDocument/history/myHistoryEntry", specHistoryEntryDoc());
+    });
+    
+    it ("user cannot write someone else's history entries", async () => {
+      db = initFirestore(genericAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add: {uid: studentId}}));
+      await expectWriteToFail(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
+    });
+    
+    it ("user cannot write their history entries if no parent document", async () => {
+      db = initFirestore(genericAuth);
+      await expectWriteToFail(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
+    });
+    
+    it ("teacher can write their own history entries", async () => {
+      db = initFirestore(teacherAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: teacherId }}));
+      await expectWriteToSucceed(db, kDocumentHistoryDocPath, specHistoryEntryDoc());
+    });
+
+    it ("all updates fail", async () => {
+      db = initFirestore();
+      await expectUpdateToFail(db, kDocumentHistoryDocPath, {});
+    });
+    
+    it ("all deletes fail", async () => {
+      db = initFirestore();
+      await expectUpdateToFail(db, kDocumentHistoryDocPath, {});
+    });
   });
 
   describe("teacher document comments", () => {

@@ -296,14 +296,22 @@ service cloud.firestore {
         // teachers can read their own documents or other documents in their network
         allow read: if  (isAuthed() &&  resource == null) || (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks()));
 
+        function getDocumentData() {
+          return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data;
+        }
         // return the list of teachers associated with the specified document
         function getDocumentTeachers() {
-          return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data.teachers;
+          return getDocumentData().teachers;
+        }
+
+        // return owner of the parent document
+        function getDocumentOwner() {
+         return getDocumentData().uid;
         }
 
         // return the network with which the specified document is associated
         function getDocumentNetwork() {
-          return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data.network;
+          return getDocumentData().network;
         }
 
         // check whether the current teacher is one of the teachers associated with the document
@@ -338,7 +346,10 @@ service cloud.firestore {
         function isValidCommentUpdateRequest() {
           return userIsRequestUser() && preservesReadOnlyCommentFields();
         }
-
+        
+        function userOwnsDocument() {
+          return getDocumentOwner() == string(request.auth.token.platform_user_id);
+        }
         match /comments/{commentId} {
           // portal-authenticated teachers with access to the document can create valid comments
           allow create: if isAuthedTeacher() && teacherCanAccessDocument() && isValidCommentCreateRequest();
@@ -349,8 +360,16 @@ service cloud.firestore {
           // only teachers that "own" the document can read the comments (for now)
           allow read: if isAuthedTeacher() && teacherCanAccessDocument();
         }
+        
+        // For writing individual history entries
+        match /history/{entryId} {
+          allow create: if isAuthed() && userOwnsDocument();
+          allow read: if (isAuthed() && userOwnsDocument()) || (isAuthedTeacher() && teacherCanAccessDocument());
+          allow delete: if false;
+          allow update: if false;
+        }
       }
-
+      
       match /mcsupports/{docId} {
         // portal-authenticated teachers can create valid supports
         allow create: if isAuthedTeacher() && isValidSupportCreateRequest();
