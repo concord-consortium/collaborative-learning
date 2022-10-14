@@ -15,6 +15,7 @@ import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tools/tool-til
 import { safeJsonParse } from "../../utilities/js-utils";
 
 import "./document-content.sass";
+import { ScrollToType } from "src/models/stores/ui";
 
 interface IProps extends IBaseProps {
   context: string;
@@ -66,11 +67,12 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       // so we force an update to make sure we draw at least once after we have our domElement.
       this.forceUpdate();
 
-      this.scrollDisposer = reaction(() => this.stores.ui.scrollToTileId,
-        (tileId: string | undefined, prevTileId: string | undefined) => {
-        if (tileId) {
+      this.scrollDisposer = reaction(
+        () => ({ tileId: this.stores.ui.scrollTo?.tileId, docId: this.stores.ui.scrollTo?.docId }),
+        (scrollTo: Record<string, any>, prevScrollTo: Record<string, any>) => {
+        if (scrollTo.tileId && this.props.content?.documentIdentifier === scrollTo.docId) {
           this.rowRefs.forEach((row: TileRowComponent | null) => {
-            if (row?.tileRowDiv && row.hasTile(tileId)) {
+            if (row?.tileRowDiv && row.hasTile(scrollTo.tileId)) {
               // Javascript struggles to scroll multiple elements at the same time,
               // so we delay scrolling any document on the left and only animate the left document
               setTimeout(() => {

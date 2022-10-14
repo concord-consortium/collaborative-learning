@@ -44,7 +44,7 @@ export const ChatThread: React.FC<IProps> = (
       // If the clickedId was the document, the selectedTile should be set to empty.
       const selectedTileId = clickedId === "document" ? '' : clickedId;
       ui.setSelectedTileId(selectedTileId || '');
-      ui.setScrollToTileId(selectedTileId || '');
+      ui.setScrollTo(selectedTileId || '', focusDocument || '');
       setExpandedThread(clickedId || '');
     }
   };
