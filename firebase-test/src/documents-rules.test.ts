@@ -211,6 +211,11 @@ describe("Firestore security rules", () => {
       await adminWriteDoc(kDocumentHistoryDocPath, specHistoryEntryDoc());
       await expectReadToSucceed(db, kDocumentHistoryDocPath);
     });
+    it ("student can read parent if it already exists", async () => {
+      db = initFirestore(studentAuth);
+      await adminWriteDoc(kDocumentDocPath, specHistoryEntryParentDoc({add:{uid: studentId }}));
+      await expectReadToSucceed(db, kDocumentDocPath);
+    });
     
     it ("student cannot read their own history entries if no parent", async () => {
       db = initFirestore(studentAuth);

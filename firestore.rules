@@ -294,7 +294,7 @@ service cloud.firestore {
         // teachers can only delete their own documents
         allow delete: if isAuthedTeacher() && userIsResourceUser();
         // teachers can read their own documents or other documents in their network
-        allow read: if  (isAuthed() &&  resource == null) || (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks()));
+        allow read: if  (isAuthed() && (resource == null || userOwnsDocument())) || (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks()));
 
         function getDocumentData() {
           return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data;
@@ -316,7 +316,7 @@ service cloud.firestore {
 
         // check whether the current teacher is one of the teachers associated with the document
         function teacherInDocumentTeachers() {
-          return isAuthedTeacher() && (request.auth.uid in getDocumentTeachers());
+          return isAuthedTeacher() && (string(request.auth.token.platform_user_id) in getDocumentTeachers());
         }
 
         // check whether the document's network corresponds to one of the teacher's networks
