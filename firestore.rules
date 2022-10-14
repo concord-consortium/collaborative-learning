@@ -296,23 +296,26 @@ service cloud.firestore {
         // teachers can read their own documents or other documents in their network
         allow read: if  (isAuthed() &&  resource == null) || (isAuthedTeacher() && (userInResourceTeachers() || resourceInTeacherNetworks()));
 
+        function getDocumentData() {
+          return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data;
+        }
         // return the list of teachers associated with the specified document
         function getDocumentTeachers() {
-          return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data.teachers;
+          return getDocumentData().teachers;
         }
 
         // return owner of the parent document
         function getHistoryParentDocumentOwner() {
-         return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data.uid;
+         return getDocumentData().uid;
         }
          // return context of the parent document
         function getHistoryDocumentContext() {
-         return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data.context_id;
+         return getDocumentData().context_id;
         }
 
         // return the network with which the specified document is associated
         function getDocumentNetwork() {
-          return get(/databases/$(database)/documents/authed/$(portal)/documents/$(docId)).data.network;
+          return getDocumentData().network;
         }
 
         // check whether the current teacher is one of the teachers associated with the document

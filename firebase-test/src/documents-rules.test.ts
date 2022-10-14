@@ -168,17 +168,19 @@ describe("Firestore security rules", () => {
     }
     function specHistoryEntryDoc(options?: ISpecHisoryDoc) {
       // a valid history document specification
-      const historyDoc = { id: "an-id", tree: "my-document", action: "/content/stuff",
+      const historyDoc = {id: "an-id", tree: "my-document", action: "/content/stuff",
                            undoable: true, createdAt: mockTimestamp(),
                            records: [], state: "complete"
                          };
+      const doc = {index: 1, entry: JSON.stringify(historyDoc), created: mockTimestamp(), previousEntryId: "prev-id"};
+
       // remove specified props for validating the tests that require them
-      options?.remove?.forEach(prop => delete (historyDoc as any)[prop]);
+      options?.remove?.forEach(prop => delete (doc as any)[prop]);
       // add additional props to test behavior of additional props
       options?.add && Object.keys(options.add).forEach(prop => {
-        (historyDoc as any)[prop] = options.add?.[prop];
+        (doc as any)[prop] = options.add?.[prop];
       });
-      return historyDoc;
+      return doc;
     }
     function specHistoryEntryParentDoc(options?: ISpecHisoryDoc) {
       const historyDoc = {context_id: thisClass, network: noNetwork, teachers: [teacherId], uid: teacherId,
@@ -193,11 +195,6 @@ describe("Firestore security rules", () => {
     }
     
     it("unauthed reads fail", async () => {
-      db = initFirestore();
-      await expectReadToFail(db, kDocumentHistoryDocPath);
-    });
-    
-    it("unauthed user cannot read. Parent doc does not exist", async () => {
       db = initFirestore();
       await expectReadToFail(db, kDocumentHistoryDocPath);
     });
