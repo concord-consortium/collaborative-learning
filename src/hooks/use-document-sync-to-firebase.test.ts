@@ -477,11 +477,7 @@ describe("useDocumentSyncToFirebase hook", () => {
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
       expect(mockRef).toHaveBeenCalledWith(`${user.id}/problem/${document.key}`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-      // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
-      // to send the document to firestore and the environment is not setup
-      // right
-      // https://www.pivotaltracker.com/story/show/183291353
-      await waitFor(() => expect(spy).toBeCalledTimes(2));
+      await waitFor(() => expect(spy).toBeCalledTimes(1));
       // trigger retry (successful) attempt
       jest.runAllTimers();
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
@@ -498,11 +494,7 @@ describe("useDocumentSyncToFirebase hook", () => {
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
       expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-      // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
-      // to send the document to firestore and the environment is not setup
-      // right
-      // https://www.pivotaltracker.com/story/show/183291353
-      await waitFor(() => expect(spy).toBeCalledTimes(2));
+      await waitFor(() => expect(spy).toBeCalledTimes(1));
       // trigger retry (successful) attempt
       jest.runAllTimers();
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
@@ -540,11 +532,7 @@ describe("useDocumentSyncToFirebase hook", () => {
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
       expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-      // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
-      // to send the document to firestore and the environment is not setup
-      // right
-      // https://www.pivotaltracker.com/story/show/183291353
-      await waitFor(() => expect(spy).toBeCalledTimes(2));
+      await waitFor(() => expect(spy).toBeCalledTimes(1));
       // trigger retry (successful) attempt
       jest.runAllTimers();
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
@@ -561,11 +549,7 @@ describe("useDocumentSyncToFirebase hook", () => {
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
       expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-      // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
-      // to send the document to firestore and the environment is not setup
-      // right
-      // https://www.pivotaltracker.com/story/show/183291353
-      await waitFor(() => expect(spy).toBeCalledTimes(2));
+      await waitFor(() => expect(spy).toBeCalledTimes(1));
       // trigger retry (successful) attempt
       jest.runAllTimers();
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
@@ -582,11 +566,7 @@ describe("useDocumentSyncToFirebase hook", () => {
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
       expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
       await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-      // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
-      // to send the document to firestore and the environment is not setup
-      // right
-      // https://www.pivotaltracker.com/story/show/183291353
-      await waitFor(() => expect(spy).toBeCalledTimes(2));
+      await waitFor(() => expect(spy).toBeCalledTimes(1));
       // trigger retry (successful) attempt
       jest.runAllTimers();
       await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
