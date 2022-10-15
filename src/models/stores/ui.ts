@@ -12,6 +12,13 @@ type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
 type StringDialogResolver = (value: string | PromiseLike<string>) => void;
 let dialogResolver: BooleanDialogResolver | StringDialogResolver | undefined;
 
+// Information needed to scroll to a tile (for example, when a comment about a tile is selected)
+const ScrollToModel = types
+  .model("ScrollTo", {
+    tileId: types.string,
+    docId: types.string // key for user doc, path for problem doc
+  });
+
 export const UIDialogModel = types
   .model("UIDialog", {
     type: UIDialogTypeEnum,
@@ -32,6 +39,7 @@ export const UIModel = types
     activeGroupId: "",
     selectedTileIds: types.array(types.string),
     selectedCommentId: types.maybe(types.string),
+    scrollTo: types.maybe(ScrollToModel),
     showDemo: false,
     showDemoCreator: false,
     showTeacherContent: true,
@@ -158,6 +166,9 @@ export const UIModel = types
       },
       removeTileIdFromSelection(tileId: string) {
         self.selectedTileIds.remove(tileId);
+      },
+      setScrollTo(tileId: string, docId: string) {
+        self.scrollTo = ScrollToModel.create({ tileId, docId });
       },
       setShowDemoCreator(showDemoCreator: boolean) {
         self.showDemoCreator = showDemoCreator;
