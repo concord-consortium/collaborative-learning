@@ -45,7 +45,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
   // Basic operations based on the model
   const {
     dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange, ...gridModelProps
-  } = useModelDataSet(model);
+  } = useModelDataSet(content);
 
   // Set up user specified columns and function to measure a column
   const { measureColumnWidth, resizeColumn, resizeColumnWidth } = useMeasureColumnWidth({ content });
@@ -115,7 +115,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
 
   // Functions for getting and modifying the title
   const { getTitle, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
-    gridContext, model, readOnly,
+    gridContext, content, readOnly,
     onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle, requestRowHeight
   });
 

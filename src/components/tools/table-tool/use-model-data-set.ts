@@ -1,10 +1,8 @@
 import classNames from "classnames";
 import { useCallback, useState } from "react";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
-import { ToolTileModelType } from "../../../models/tools/tool-tile";
 
-export const useModelDataSet = (model: ToolTileModelType) => {
-  const content = (model.content as TableContentModelType);
+export const useModelDataSet = (content: TableContentModelType) => {
   const dataSet = content.dataSet;
   const [columnChanges, setColumnChanges] = useState(0);
   const triggerColumnChange = useCallback(() => setColumnChanges(state => ++state), []);

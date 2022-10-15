@@ -6,18 +6,17 @@ import { TableContentModelType } from "../../../models/tools/table/table-content
 
 interface IProps {
   gridContext: IGridContext;
-  model: ToolTileModelType;
+  content: TableContentModelType;
   readOnly?: boolean;
   onRequestUniqueTitle?: () => string | undefined;
   onSetTableTitle?: (title: string) => void;
   requestRowHeight: () => void;
 }
 export const useTableTitle = ({
-  gridContext, model, readOnly, onRequestUniqueTitle, onSetTableTitle, requestRowHeight
+  gridContext, content, readOnly, onRequestUniqueTitle, onSetTableTitle, requestRowHeight
 }: IProps) => {
   
-  const tableContent = model.content as TableContentModelType;
-  const getTitle = useCallback(() => tableContent.dataSet.name, [tableContent]);
+  const getTitle = useCallback(() => content.dataSet.name, [content]);
   const editingTitle = useCurrent(getTitle());
 
   const onBeginTitleEdit = () => {
@@ -35,12 +34,12 @@ export const useTableTitle = ({
   // request a default title if we don't already have one
   const onRequestUniqueTitleRef = useRef(onRequestUniqueTitle);
   useEffect(() => {
-    if (!tableContent.dataSet.name) {
+    if (!content.dataSet.name) {
       // wait for all tiles to have registered their callbacks
       setTimeout(() => {
         const _title = onRequestUniqueTitleRef.current?.();
         if (_title) {
-          tableContent.dataSet.setName(_title);
+          content.dataSet.setName(_title);
         }
       }, 100);
     }
