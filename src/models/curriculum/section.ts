@@ -1,10 +1,9 @@
 import { getParent, types } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
 import { ProblemModelType } from "./problem";
-import { InvestigationModelType } from "./investigation";
-import { UnitModelType } from "./unit";
 import { SupportModel } from "./support";
 import { each } from "lodash";
+import { buildSectionPath } from "../../../functions/src/shared";
 
 export type SectionType = string;
 
@@ -108,12 +107,10 @@ export const SectionModel = types
   .views(self => {
     return {
       get path(): string {
-        // getParent is called twice below because each direct parent is an array
+        // getParent is called twice below because the direct parent is an array
         const problem = getParent(getParent(self)) as ProblemModelType;
-        const investigation = getParent(getParent(problem)) as InvestigationModelType;
-        const unit = getParent(getParent(investigation)) as UnitModelType;
-        const sectionTitle = self.title.toLowerCase().replace(' ', '-');
-        return `${unit.code}/${investigation.ordinal}/${problem.ordinal}/${sectionTitle}`;
+        const sectionTitle: string = self.title.toLowerCase().replace(' ', '-');
+        return buildSectionPath(problem.problemPath, sectionTitle) || '';
       }
     };
   });

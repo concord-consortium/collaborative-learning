@@ -52,6 +52,10 @@ const facetMap: Record<string, string> = {
   "teacher-guide": "guide"
 }
 
+export const buildProblemPath = (unitCode: string, investigationOrdinal: string, problemOrdinal: string) => {
+  return `${unitCode}/${investigationOrdinal}/${problemOrdinal}`;
+};
+
 export const buildSectionPath = (problemPath: string, section?: string, facet?: string) => {
   const [unit, investigation, problem] = parseProblemPath(problemPath) || [];
   if (!unit || !investigation || !problem) return;
