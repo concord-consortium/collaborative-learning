@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useUIStore } from "../../hooks/use-stores";
+import { useUIStore, useStores } from "../../hooks/use-stores";
 import { useFirestore } from "../../hooks/firestore-hooks";
 import { CurriculumDocument } from "../../lib/firestore-schema";
 import { getSectionTitle } from "../../models/curriculum/section";
@@ -22,8 +22,6 @@ interface PromisedCurriculumDocument extends CurriculumDocument {
 
 export const CommentedDocuments: React.FC<IProps> = ({documentObj, user}) => {
   // console.log("<CommentedDocuments> with args", documentObj, user)
-  // This is not good.  I am doing this to handle the case when this component exists
-  // before the current problem is defined.  It breaks the rules of hooks though.
   const [docsCommentedOn, setDocsCommentedOn] = useState<PromisedCurriculumDocument[]>();
   const [db] = useFirestore();
   const cDocsRef = db.collection("curriculum");
@@ -33,6 +31,7 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user}) => {
     .where("problem", "==", problem)
     .where("network","==", user?.network);
   const ui = useUIStore();
+  const stores = useStores();
 
   useEffect(() => {
 
@@ -76,7 +75,6 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user}) => {
       {
         docsCommentedOn &&
         (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => {
-          // console.log("map docs", doc);
           let navTab: string;
           if (doc.id?.includes("guide")){
             navTab = "teacher-guide";
@@ -90,16 +88,18 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user}) => {
               key={index}
               onClick={() => {
                 ui.setActiveNavTab(navTab); //open tab
-                // ui.setActiveNavTab("problem"); //open tab
                 ui.setSelectedTile();
-                ui.updateFocusDocument();
-
-                //set some global flag here
-
                 ui.setFocusDocument(doc.path);
-                //then open section ?
-                // ui.setFocusDocument(doc.id);
-                // ui.updateFocusDocument();
+                switch (navTab){
+                  case "problems":
+                    ui.setSelectedSectionIndex(doc.section, stores.problem.sections);
+                    break;
+                  case "teacher-guide":
+                    ui.setSelectedSectionIndex(doc.section, stores.teacherGuide?.sections);
+
+                    break;
+                }
+
               }}
             >
               <div className={"title"}>

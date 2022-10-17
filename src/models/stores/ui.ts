@@ -7,6 +7,7 @@ import { DocumentModelType } from "../document/document";
 import { LogEventName, Logger } from "../../lib/logger";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { ENavTab } from "../view/nav-tabs";
+import { tab } from "@testing-library/user-event/dist/tab";
 
 type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
 type StringDialogResolver = (value: string | PromiseLike<string>) => void;
@@ -26,10 +27,10 @@ type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 
 export const UIModel = types
   .model("UI", {
-    dividerPosition: kDividerHalf,
+    dividerPosition: kDividerMax,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kProblems,
-    activeSectionTab: types.maybe(types.string), //added
+    activeSectionIndex: types.maybe(types.number), //added
     activeGroupId: "",
     selectedTileIds: types.array(types.string),
     selectedCommentId: types.maybe(types.string),
@@ -58,7 +59,7 @@ export const UIModel = types
     },
     get workspaceShown () {
       return self.dividerPosition < kDividerMax;
-    }
+    },
   }))
   .actions((self) => {
     const alert = (textOrOpts: string | UIDialogModelSnapshotWithoutType, title?: string) => {
@@ -121,6 +122,7 @@ export const UIModel = types
       }
     };
 
+
     return {
       alert,
       prompt,
@@ -145,12 +147,17 @@ export const UIModel = types
         self.error = null;
       },
       setActiveNavTab(tab: string) {
-        console.log("ui.ts > setActiveNavTab with tab", tab);
+        // console.log("ui.ts > setActiveNavTab with tab", tab);
         self.activeNavTab = tab;
       },
+
       //added
-      setFocusSection(tab: string){
-        self.activeSectionTab = tab;
+      setSelectedSectionIndex(sectionSelected: string, sections: any){
+        console.log("sectionSelected", sectionSelected);
+        // console.log("navTab", navTab);
+        // const sections = navTab.sections;
+        self.activeSectionIndex =  sections.findIndex((section: any) => section.type === sectionSelected);
+        console.log("our ActiveSectionTab is", self.activeSectionIndex);
       },
       //
       setActiveStudentGroup(groupId: string) {
@@ -158,7 +165,7 @@ export const UIModel = types
         self.activeGroupId = groupId;
       },
       setSelectedTile(tile?: ToolTileModelType, options?: {append: boolean}) {
-        console.log("ui.ts>setSelectedTile with tile\n", tile, "\n options \n", options);
+        // console.log("ui.ts>setSelectedTile with tile\n", tile, "\n options \n", options);
         setOrAppendTileIdToSelection(tile && tile.id, options);
       },
       setSelectedTileId(tileId: string, options?: {append: boolean}) {
@@ -172,11 +179,11 @@ export const UIModel = types
       },
       closeDialog,
       setFocusDocument(documentKey?: string) {
-        console.log("ui.ts > setFocusDocument", documentKey);
+        // console.log("ui.ts > setFocusDocument", documentKey);
         self.focusDocument = documentKey;
       },
       updateFocusDocument() {
-        console.log("ui.ts > updateFocusDocument");
+        // console.log("ui.ts > updateFocusDocument");
         // increment counter to trigger observers to update
         ++self.focusDocUpdates;
       },

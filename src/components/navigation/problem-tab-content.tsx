@@ -15,6 +15,7 @@ interface IProps {
   context?: string;   // ENavTab.kTeacherGuide for teacher guide, blank otherwise
   sections: SectionModelType[];
   showSolutionsSwitch: boolean;
+  selectedIndex?: number;
 }
 
 const kHeaderHeight = 55;
@@ -23,8 +24,9 @@ const kNavTabHeight = 34;
 const kTabSectionBorderWidth = 2;
 
 export const ProblemTabContent: React.FC<IProps>
-  = observer(({ context, sections, showSolutionsSwitch }: IProps) => {
-  // console.log("<ProblemTabContent>");
+  = observer(({ context, sections, showSolutionsSwitch, selectedIndex }: IProps) => {
+  // console.log("<ProblemTabContent> with context", context);
+  console.log("sections are", sections);
   const { isTeacher } = useUserStore();
   const ui = useUIStore();
   const problemPath = useProblemPathWithFacet(context);
@@ -57,16 +59,22 @@ export const ProblemTabContent: React.FC<IProps>
     });
     ui.setSelectedTile();
     ui.updateFocusDocument();
+    ui.setSelectedSectionIndex(titleArgButReallyType, sections); //
 };
 
   const handleToggleSolutions = () => {
     ui.toggleShowTeacherContent(!showTeacherContent);
     Logger.log(showTeacherContent ? LogEventName.HIDE_SOLUTIONS : LogEventName.SHOW_SOLUTIONS);
   };
-
+  // console.log("problem-tab-content > problemPath:", problemPath);
+  // console.log("context", context);
   return (
-    <Tabs className={classNames("problem-tabs", context, chatBorder)} selectedTabClassName="selected"
-          data-focus-document={problemPath}>
+    <Tabs className={classNames("problem-tabs", context, chatBorder)}
+          selectedTabClassName="selected"
+          selectedIndex={ui.activeSectionIndex}
+          data-focus-document={problemPath}
+    >
+      {console.log("ui.activeSectionIndex", ui.activeSectionIndex)}
       <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
         <TabList className={classNames("tab-list", {"chat-open" : ui.showChatPanel})}>
           {sections?.map((section) => {

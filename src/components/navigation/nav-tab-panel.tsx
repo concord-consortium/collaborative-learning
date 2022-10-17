@@ -40,7 +40,9 @@ export class NavTabPanel extends BaseComponent<IProps> {
     // console.log("nav-tab-panel.tsx> render(), tabs:", tabs);
     const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
             user } = this.stores;
+
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
+    console.log("selectedTabIndex:", selectedTabIndex);
     const resizePanelWidth = 6;
     const collapseTabWidth = 44;
     const resourceWidth = dividerPosition === kDividerMin
@@ -142,7 +144,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
 
   private renderProblem = () => {
     const { user: { isTeacher }, problem: { sections } } = this.stores;
-    // console.log("commented-document.tsx > renderProblem sections: ", sections);
     return (
       <ProblemTabContent
         sections={sections}

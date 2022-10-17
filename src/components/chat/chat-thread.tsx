@@ -52,7 +52,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       setExpandedThread(clickedId || '');
     }
   };
-  const mockCurriculumDocument = { unit: "unit", problem: "1.1", section: "intro", path: "unit/1/1/intro" };
+  const mockCurriculumDocument = { unit: "unit", problemDec: "1.1", section: "intro", path: "unit/1/1/intro" };
 
   //architecture question?
   //idea 1: make one state array - arrayToMap (line70), fill it with either chatThreads or
@@ -60,7 +60,6 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
 
   return (
     <div className="chat-list" data-testid="chat-list">
-      {/* {console.log("chatThread:", chatThreads)} */}
 
       {
         isDocumentView ?

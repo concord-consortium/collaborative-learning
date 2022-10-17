@@ -17,6 +17,7 @@ export const WorkspaceModel = types
     type: WorkspaceTypeEnum,
     mode: WorkspaceModeEnum,
     primaryDocumentKey: types.maybe(types.string),
+    // activeSectionIndex: types.number, //added
     comparisonDocumentKey: types.maybe(types.string),
     comparisonVisible: false,
     hidePrimaryForCompare: false

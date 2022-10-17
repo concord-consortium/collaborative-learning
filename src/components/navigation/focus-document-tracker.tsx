@@ -28,7 +28,7 @@ export const FocusDocumentTracker = observer(({ navTabPanelElt }: IProps) => {
   const prevUpdates = usePrevious(ui.focusDocUpdates);
   const prevTab = usePrevious(navTabPanelElt);
 
-  console.log("focus-document-tracker.tsx > prevUpdates:\n", prevUpdates, "\n prevTab \n", prevTab);
+  // console.log("focus-document-tracker.tsx > prevUpdates:\n", prevUpdates, "\n prevTab \n", prevTab);
 
 
   useEffect(() => {
@@ -56,11 +56,16 @@ export const FocusDocumentTracker = observer(({ navTabPanelElt }: IProps) => {
           const focusSec = elt.getAttribute("data-focus-section");
           focusDoc && (focusDocument = focusDoc);
           focusSec && (focusSection = focusSec);
-        }
-        console.log("focus-document-tracker.tsx > ui.setFocusDocument() \n focusSection\n", focusSection,
-        "\nfocusDocument\n", focusDocument);
+          // console.log("line 59, focusSection", focusSection);
 
-        //if flag is up, pass end of path as focus section ( which should be a global variable)??
+        }
+
+        //this gets called again which sets it back to first section tab
+        // console.log("focus-document-tracker.tsx > useEffect() > ui.setFocusDocument() \n focusSection\n",
+        // focusSection, "\nfocusDocument\n", focusDocument);
+
+        // if flag is up
+        //! isDocumentViewMode
         ui.setFocusDocument(focusSection
                               ? `${focusDocument}/${focusSection}`
                               : focusDocument);
