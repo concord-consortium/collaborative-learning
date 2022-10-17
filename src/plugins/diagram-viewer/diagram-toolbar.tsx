@@ -77,9 +77,8 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
   });
   return documentContent
     ? ReactDOM.createPortal(
-        <div className={`image-toolbar ${enabled && location ? "enabled" : "disabled"}`}
-            style={location}
-            onMouseDown={e => e.stopPropagation()}>
+        <div className={`diagram-toolbar ${enabled && location ? "enabled" : "disabled"}`}
+            style={location} onMouseDown={e => e.stopPropagation()}>
           <DialogButton />
           <DeleteButton />
         </div>, documentContent)
