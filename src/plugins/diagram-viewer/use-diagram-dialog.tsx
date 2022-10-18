@@ -1,16 +1,15 @@
 import React from "react";
-import VariablesIcon from "./shared-variables/slate/variables.svg";
+import VariablesIcon from "../shared-variables/slate/variables.svg";
 import { useCustomModal } from "../../hooks/use-custom-modal";
 
-import './movable-line-dialog.scss';
-import './dialog.scss';
+import './diagram-dialog.scss';
 
 interface IContentProps {
   message: string;
 }
 const Content = ({ message }: IContentProps) => {
   return (
-    <div>
+    <div className="diagram-dialog-content" >
       { message }
     </div>
   );
@@ -20,7 +19,7 @@ interface IProps {
   onAccept: () => void;
   onClose: () => void;
 }
-export const useMovableLineDialog = ({ onAccept, onClose }: IProps) => {
+export const useDiagramDialog = ({ onAccept, onClose }: IProps) => {
 
   const handleClick = () => {
     onAccept();

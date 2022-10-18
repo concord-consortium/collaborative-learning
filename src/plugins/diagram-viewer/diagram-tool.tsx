@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { DiagramToolbar } from "./diagram-toolbar";
 import { DiagramContentModelType } from "./diagram-content";
 import { kQPVersion } from "./diagram-types";
+import { useDiagramDialog } from "./use-diagram-dialog";
 import { useToolbarToolApi } from "../../components/tools/hooks/use-toolbar-tool-api";
 import { Diagram } from "@concord-consortium/diagram-view";
 import "@concord-consortium/diagram-view/dist/index.css";
@@ -14,12 +15,26 @@ export const DiagramToolComponent: React.FC<IToolTileProps> = (
 ) => {
   const content = model.content as DiagramContentModelType;
 
+  const [diagramDialogOpen, setDiagramDialogOpen] = useState(false);
+  const [showDiagramDialog, hideDiagramDialog] = useDiagramDialog({
+    onAccept: () => console.log("Acceptable."),
+    onClose: () => setDiagramDialogOpen(false)
+  });
+  useEffect(() => {
+    if (diagramDialogOpen) {
+      showDiagramDialog();
+    } else {
+      hideDiagramDialog();
+    }
+  }, [diagramDialogOpen, hideDiagramDialog, showDiagramDialog]);
+
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
   
   return (
     <div className="diagram-tool">
       <DiagramToolbar
         documentContent={documentContent}
+        handleDialogClick={() => setDiagramDialogOpen(true)}
         toolTile={toolTile}
         scale={scale}
         { ...toolbarProps }

@@ -46,8 +46,10 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
     : null;
 };
 
-const DialogButton = () => {
-  const handleClick = () => console.log("dialog!");
+interface IDialogButton {
+  handleClick: () => void;
+}
+const DialogButton = ({ handleClick }: IDialogButton) => {
   return (
     <SvgToolbarButton SvgIcon={VariablesToolIcon} buttonClass="button-dialog" title="variable-dialog"
       onClick={handleClick} style={{fill: "#000000", strokeWidth: 0.1}} />
@@ -63,9 +65,10 @@ const DeleteButton = () => {
 };
 
 interface IProps extends IFloatingToolbarProps {
+  handleDialogClick: () => void;
 }
 export const DiagramToolbar: React.FC<IProps> = observer(({
-  documentContent, onIsEnabled, ...others
+  documentContent, handleDialogClick, onIsEnabled, ...others
 }) => {
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
@@ -79,7 +82,7 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
     ? ReactDOM.createPortal(
         <div className={`diagram-toolbar ${enabled && location ? "enabled" : "disabled"}`}
             style={location} onMouseDown={e => e.stopPropagation()}>
-          <DialogButton />
+          <DialogButton handleClick={handleDialogClick} />
           <DeleteButton />
         </div>, documentContent)
     : null;
