@@ -65,16 +65,20 @@ export const ProblemTabContent: React.FC<IProps>
   return (
     <Tabs className={classNames("problem-tabs", context, chatBorder)}
           selectedTabClassName="selected"
-          selectedIndex={ui.activeSectionIndex}
+          selectedIndex={ui.activeSectionIndex || 0} //need to add so it won't be undefined
           data-focus-document={problemPath}
     >
       <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
         <TabList className={classNames("tab-list", {"chat-open" : ui.showChatPanel})}>
-          {sections?.map((section) => {
+          {sections?.map((section, index) => {
             const sectionTitle = getSectionTitle(section.type);
             return (
-              <Tab className={classNames("prob-tab", context)} key={`section-${section.type}`}
-                  onClick={() => handleTabClick(section.type, sectionTitle)} >
+              <Tab
+                className={classNames("prob-tab", context)}
+                key={`section-${section.type}`}
+                onClick={() => handleTabClick(section.type, sectionTitle)}
+
+              >
                 {sectionTitle}
               </Tab>
             );

@@ -59,7 +59,11 @@ export class NavTabPanel extends BaseComponent<IProps> {
         <div className={`nav-tab-panel ${showChatPanel ? "chat-open" : ""}`}
             ref={elt => this.navTabPanelElt = elt}>
           <FocusDocumentTracker navTabPanelElt={this.navTabPanelElt} />
-          <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
+          <Tabs
+            selectedIndex={selectedTabIndex}
+            onSelect={this.handleSelectTab}
+            forceRenderTabPanel={true}
+          >
             <div className="top-row">
               <TabList className="top-tab-list">
                 { tabs?.map((tabSpec, index) => {
