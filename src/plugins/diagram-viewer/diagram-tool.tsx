@@ -18,6 +18,7 @@ export const DiagramToolComponent: React.FC<IToolTileProps> = (
   const [diagramDialogOpen, setDiagramDialogOpen] = useState(false);
   const [showDiagramDialog, hideDiagramDialog] = useDiagramDialog({
     onAccept: () => console.log("Acceptable."),
+    onClear: () => true,
     onClose: () => setDiagramDialogOpen(false)
   });
   useEffect(() => {

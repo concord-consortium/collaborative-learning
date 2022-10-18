@@ -17,9 +17,10 @@ const Content = ({ message }: IContentProps) => {
 
 interface IProps {
   onAccept: () => void;
+  onClear: () => boolean;
   onClose: () => void;
 }
-export const useDiagramDialog = ({ onAccept, onClose }: IProps) => {
+export const useDiagramDialog = ({ onAccept, onClear, onClose }: IProps) => {
 
   const handleClick = () => {
     onAccept();
@@ -31,6 +32,9 @@ export const useDiagramDialog = ({ onAccept, onClose }: IProps) => {
     Content,
     contentProps: { message: "One day, I'll be a real dialog!" },
     buttons: [
+      { label: "Clear",
+        onClick: onClear
+      },
       { label: "Cancel" },
       { label: "OK",
         isDefault: true,
