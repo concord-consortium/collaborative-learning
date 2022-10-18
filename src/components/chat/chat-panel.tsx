@@ -2,12 +2,14 @@ import React, { useCallback } from "react";
 import { ILogComment, Logger } from "../../lib/logger";
 import { UserModelType } from "../../models/stores/user";
 import { ChatPanelHeader } from "./chat-panel-header";
-import { CommentCard } from "./comment-card";
+import { ChatThread } from "./chat-thread";
+import { makeChatThreads} from "./chat-comment-thread";
 import {
   useCommentsCollectionPath, useDocumentComments, usePostDocumentComment, useUnreadDocumentComments
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
-import { useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
+import {useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
+
 import "./chat-panel.scss";
 
 interface IProps {
@@ -20,11 +22,18 @@ interface IProps {
 
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
   const document = useDocumentOrCurriculumMetadata(focusDocument);
+  const content = useCurriculumOrDocumentContent(focusDocument);
+  const ordering = content?.getTilesInDocumentOrder();
   const { data: comments } = useDocumentComments(focusDocument);
   const { data: unreadComments } = useUnreadDocumentComments(focusDocument);
   const documentComments = comments?.filter(comment => comment.tileId == null);
-  const tileComments = comments?.filter(comment => comment.tileId === focusTileId);
-  const postedComments = focusTileId ? tileComments : documentComments;
+  const allTileComments = comments?.filter(comment=> comment.tileId != null);
+  const commentsInDocumentOrder = ordering && allTileComments
+    ? allTileComments.sort((a: any, b: any) => ordering.indexOf(a.tileId) - ordering.indexOf(b.tileId))
+    : [];
+
+  const postedComments = documentComments?.concat(commentsInDocumentOrder);
+  const commentThreads = makeChatThreads(postedComments, content);
   const postCommentMutation = usePostDocumentComment();
 
   const postComment = useCallback((comment: string) => {
@@ -66,21 +75,20 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   }, [commentsPath, deleteCommentMutation, focusDocument, focusTileId]);
 
   const newCommentCount = unreadComments?.length || 0;
-
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
       <ChatPanelHeader activeNavTab={activeNavTab} newCommentCount={newCommentCount}
                        onCloseChatPanel={onCloseChatPanel} />
-      {focusDocument
-        ? <CommentCard
-            user={user}
-            activeNavTab={activeNavTab}
-            onPostComment={postComment}
-            onDeleteComment={deleteComment}
-            postedComments={postedComments}
-            focusDocument={focusDocument}
-            focusTileId={focusTileId}
-          />
+      {focusDocument ?
+        <ChatThread
+          user={user}
+          activeNavTab={activeNavTab}
+          onPostComment={postComment}
+          onDeleteComment={deleteComment}
+          chatThreads={commentThreads}
+          focusDocument={focusDocument}
+          focusTileId={focusTileId}
+        />
         : <div className="select-doc-message" data-testid="select-doc-message">
             Open a document to begin or view comment threads
           </div>

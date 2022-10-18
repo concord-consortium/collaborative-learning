@@ -1,6 +1,8 @@
 import React from "react";
 import Rete, { NodeEditor, Node } from "rete";
 import PreviewPlotIcon from "../../assets/icons/preview-plot.svg";
+import { dataflowLogEvent } from "../../dataflow-logger";
+
 import "./plot-button-control.scss";
 
 const handleChange = (onChange: any) => {
@@ -39,6 +41,7 @@ export class PlotButtonControl extends Rete.Control {
     this.props = {
       showgraph: initial,
       onGraphButtonClick: () => {
+        this.logGraphToggle();
         this.setGraph(!this.props.showgraph);
       }
     };
@@ -55,4 +58,9 @@ export class PlotButtonControl extends Rete.Control {
     this.emitter.trigger("process");
   };
 
+  public logGraphToggle = () => {
+    const toggleStr = this.props.showgraph ? "off" : "on";
+    const tileId = this.node.meta.inTileWithId as string;
+    dataflowLogEvent(`toggle minigraph ${toggleStr}`, this.node, tileId);
+  };
 }

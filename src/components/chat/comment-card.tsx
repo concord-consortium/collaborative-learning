@@ -7,7 +7,6 @@ import { getDisplayTimeDate } from "../../utilities/time";
 import { useCautionAlert } from "../utilities/use-caution-alert";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import DeleteMessageIcon from "../../assets/delete-message-icon.svg";
-import { ToolIconComponent } from "./tool-icon-component";
 import "./comment-card.scss";
 import "../themes.scss";
 
@@ -55,21 +54,9 @@ export const CommentCard: React.FC<IProps> = ({ activeNavTab, user, postedCommen
       showConfirmDeleteAlert();
     }
   };
-
-  const renderThreadHeader = () => {
-    return (
-      <div className="comment-card-header comment-select" data-testid="comment-card-header">
-        <div className="comment-card-header-icon" data-testid="comment-card-header-icon">
-          <ToolIconComponent documentKey={focusDocument} tileId={focusTileId}/>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="comment-card" data-testid="comment-card">
+    <div className="comment-card selected" data-testid="comment-card">
       <div className="comment-card-content selected" data-testid="comment-card-content">
-        {renderThreadHeader()}
         {postedComments?.map((comment, idx) => {
             const userInitialBackgroundColor = ["#f79999", "#ffc18a", "#99d099", "#ff9", "#b2b2ff", "#efa6ef"];
             const commenterInitial = comment.name.charAt(0);

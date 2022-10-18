@@ -14,6 +14,7 @@ import { TextToolbarComponent } from "./text-toolbar";
 import { IToolApi, TileResizeEntry } from "./tool-api";
 import { IToolTileProps } from "./tool-tile";
 import { getTextPluginInstances, getTextPluginIds } from "../../models/tools/text/text-plugin-info";
+import { LogEventName, Logger, SimpleToolLogEvent } from "../../lib/logger";
 
 import "./text-tool.sass";
 
@@ -93,6 +94,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   private tileContentRect: DOMRectReadOnly;
   private toolbarToolApi: IToolApi | undefined;
   private plugins: HtmlSerializablePlugin[] | undefined;
+  private textOnFocus: string | string [] | undefined;
 
   // map from slate type string to button icon name
   private slateMap: Record<string, string> = {
@@ -212,10 +214,9 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
           readOnly={readOnly}
           plugins={this.plugins}
           onValueChange={this.handleChange}
-          onFocus={ () => this.setState({ editing: true}) }
-          onBlur={ () => {
-            this.setState({ editing: false });
-          }}
+          onFocus={this.handleFocus}
+          onBlur={this.handleBlur}
+
         />
       </div>
     );
@@ -302,6 +303,19 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     return this.props.model.content as TextContentModelType;
   }
 
+  private handleBlur = () => {
+    this.setState({ editing: false });
+    // If the text has changed since the editor was focused, log the new text.
+    if (this.getContent().text !== this.textOnFocus) {
+      const change:SimpleToolLogEvent = {args:[{text: this.getContent().text}]};
+      Logger.logToolChange(LogEventName.TEXT_TOOL_CHANGE, 'update', change, this.props.model.id);
+    }
+  };
+
+  private handleFocus = () => {
+    this.textOnFocus = this.getContent().text;
+    this.setState({ editing: true });
+  };
   private handleEditorRef = (editor?: Editor) => {
     this.editor = editor;
     editor && this.getContent()?.setEditor(editor);

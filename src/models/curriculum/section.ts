@@ -1,7 +1,9 @@
-import { types } from "mobx-state-tree";
+import { getParent, types } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
+import { ProblemModelType } from "./problem";
 import { SupportModel } from "./support";
 import { each } from "lodash";
+import { buildSectionPath } from "../../../functions/src/shared";
 
 export type SectionType = string;
 
@@ -99,6 +101,16 @@ export const SectionModel = types
       },
       get placeholder() {
         return getSectionPlaceholder(self.type);
+      }
+    };
+  })
+  .views(self => {
+    return {
+      get path(): string {
+        // getParent is called twice below because the direct parent is an array
+        const problem = getParent(getParent(self)) as ProblemModelType;
+        const sectionTitle: string = self.title.toLowerCase().replace(' ', '-');
+        return buildSectionPath(problem.problemPath, sectionTitle) || '';
       }
     };
   });

@@ -24,26 +24,6 @@ describe("DataflowContentModel", () => {
     expect(dcm.programZoom.scale).toBe(newZoom.scale);
   });
 
-  it("should handle run time changes", () => {
-    const dcm = defaultDataflowContent();
-    const [runId, startTime1, endTime1, startTime2, endTime2] = ['testid', 10, 30, 25, 50];
-    dcm.setProgramRunId(runId);
-    expect(dcm.programRunId).toBe(runId);
-    dcm.setProgramStartTime(startTime1);
-    expect(dcm.programStartTime).toBe(startTime1);
-    dcm.setProgramEndTime(endTime1);
-    expect(dcm.programEndTime).toBe(endTime1);
-    dcm.setProgramStartEndTime(startTime2, endTime2);
-    expect(dcm.programStartTime).toBe(startTime2);
-    expect(dcm.programEndTime).toBe(endTime2);
-    const later = Date.now() + 10000;
-    dcm.setRunningStatus(later);
-    expect(dcm.programIsRunning).toBe("true");
-    const past = Date.now() - 1000;
-    dcm.setRunningStatus(past);
-    expect(dcm.programIsRunning).toBe("");
-  });
-
   it("should be able to import rete programs", () => {
     const dcm = defaultDataflowContent();
     expect(Object.values(getSnapshot(dcm.program.nodes)).length).toBe(0);

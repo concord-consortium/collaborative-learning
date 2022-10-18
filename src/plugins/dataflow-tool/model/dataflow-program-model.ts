@@ -80,9 +80,6 @@ const DataflowNodeDataModel = types.
     // Control
     controlOperator: types.maybe(types.string),
 
-    // Relay
-    relayList: types.maybe(types.string),
-
     // Demo Output
     outputType: types.maybe(types.string),
     demoOutput: types.maybe(types.number),
@@ -90,12 +87,6 @@ const DataflowNodeDataModel = types.
     // Live Output
     liveOutputType: types.maybe(types.string),
     liveOutput: types.maybe(types.number),
-
-    // Data Storage
-    datasetName: types.maybe(types.string),
-    interval: types.maybe(types.string),
-    inputKeys: types.array(types.string),
-    // sequence1, sequence2, ...
   });
 
 const postProcessNodeSnapshotForRete = (snapshot: DataflowNodeSnapshotOut) => {

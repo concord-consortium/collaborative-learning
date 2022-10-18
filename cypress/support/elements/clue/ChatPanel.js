@@ -24,8 +24,8 @@ class ChatPanel{
     getCommentCard() {
       return cy.get('[data-testid=comment-card]');
     }
-    getCommentCardHeaderIcon() {
-      return cy.get('[data-testid=comment-card-header-icon]');
+    getCommentTileTypeIcon() {
+      return cy.get('[data-testid=chat-thread-tile-type]').find('svg');
     }
     getCommentTextArea() {
       return cy.get('[data-testid=comment-textarea]');
@@ -38,6 +38,9 @@ class ChatPanel{
     }
     getCommentCancelButton(){
       return cy.get('[data-testid=comment-cancel-button]');
+    }
+    getSelectedCommentThreadHeader(){
+      return cy.get('.chat-thread-focused').find('[data-testid=chat-thread-header]');
     }
     getCommentFromThread() {
       return cy.get('[data-testid=comment-thread] [data-testid=comment]');
@@ -61,10 +64,12 @@ class ChatPanel{
       return cy.get('[data-testid=tool-tile]').eq(tileIndex);
     }
     typeInCommentArea(commentText) {
-      cy.get("[data-testid=comment-textarea]").type(commentText);
+      // If the comment list is long, the text box is off screen so force.
+      cy.get("[data-testid=comment-textarea]").scrollIntoView().type(commentText, {force: true});
     }
     clickPostCommentButton() {
-      cy.get("[data-testid=comment-post-button]").click();
+      // If the comment list is long, the button is off screen so force.
+      cy.get("[data-testid=comment-post-button]").scrollIntoView().click({force: true});
       cy.wait(5000);
     }
     useEnterToPostComment() {
@@ -90,10 +95,10 @@ class ChatPanel{
       cy.getToolTile(tileIndex).should('not.have.class', TILE_COMMENT_CLASS);
     }
     verifyCommentAreaContains(commentText) {
-      this.getCommentTextArea().should('contain', commentText);
+      this.getCommentTextArea().scrollIntoView().should('contain', commentText);
     }
     verifyCommentAreaDoesNotContain(commentText) {
-      this.getCommentTextArea().should('not.contain', commentText);
+      this.getCommentTextArea().scrollIntoView().should('not.contain', commentText);
     }
     verifyCommentThreadLength(length) {
       this.getCommentFromThread().should("have.length", length);
@@ -113,7 +118,7 @@ class ChatPanel{
       cy.launchReport(reportUrl);
       cy.waitForLoad();
       dashboard.switchView("Workspace & Resources");
-      resourcesPanel.getCollapsedResourcesTab().click();
+      // resourcesPanel.getCollapsedResourcesTab().click();
       this.getChatPanelToggle().click();
     }
 }

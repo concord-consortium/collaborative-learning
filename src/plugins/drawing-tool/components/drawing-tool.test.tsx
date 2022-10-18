@@ -19,7 +19,7 @@ describe("DrawingToolComponent", () => {
 
   const content = createDrawingContent();
   const model = ToolTileModel.create({content});
-
+  model.setTitle('A Title for Testing');
   render(<div className="document-content" data-testid="document-content"/>);
   const documentContent = screen.getByTestId("document-content");
 
@@ -63,6 +63,7 @@ describe("DrawingToolComponent", () => {
   );
     expect(screen.getByTestId("drawing-tool")).toBeInTheDocument();
     expect(screen.getByTestId("drawing-toolbar")).toBeInTheDocument();
+    expect(screen.getByText("A Title for Testing")).toBeInTheDocument();
   });
 });
 

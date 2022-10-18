@@ -42,6 +42,22 @@ jest.mock("react-query", () => ({
   useMutation: (callback: (vars: any) => Promise<any>, options?: any) => mockUseMutation(callback, options)
 }));
 
+const mockValidateCommentableDocument_v1 = jest.fn();
+const mockPostDocumentComment_v1 = jest.fn();
+const mockHttpsCallable = jest.fn((fn: string) => {
+  switch(fn) {
+    case "validateCommentableDocument_v1":
+      return mockValidateCommentableDocument_v1;
+    case "postDocumentComment_v1":
+      return mockPostDocumentComment_v1;
+  }
+});
+jest.mock("firebase/app", () => ({
+  functions: () => ({
+    httpsCallable: (fn: string) => mockHttpsCallable(fn)
+  })
+}));
+
 const mockUpdate = jest.fn();
 const mockRef = jest.fn();
 
@@ -446,6 +462,11 @@ describe("useDocumentSyncToFirebase hook", () => {
     const { waitFor } = renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
     expect(mockRef).toHaveBeenCalledTimes(0);
     expect(mockUpdate).toHaveBeenCalledTimes(0);
+
+    // This use of waitFor makes debugging a failed test very difficult
+    // The error message from the expectation seems to be eaten by waitFor
+    // The only information will be that the test timed out and the number
+    // of assertions is wrong.
 
     // handles visibility change errors
     mockRef.mockClear();

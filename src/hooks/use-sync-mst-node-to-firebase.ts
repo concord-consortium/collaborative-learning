@@ -16,13 +16,13 @@ interface IProps<T> {
   firebase: Firebase;
   model: T; // MST model or complex type (e.g. types.map())
   path: string;
-  enabled?: boolean;
+  enabled: boolean;
   options?: Omit<UseMutationOptions<unknown, unknown, SnapshotOut<T>>, 'mutationFn'>;
   throttle?: number;
   transform?: (snapshot: SnapshotOut<T>) => any;
 }
 export function useSyncMstNodeToFirebase<T extends IAnyStateTreeNode>({
-  firebase, model, path, enabled = true, options: clientOptions, throttle = 1000, transform
+  firebase, model, path, enabled, options: clientOptions, throttle = 1000, transform
 }: IProps<T>) {
 
   const options: Omit<UseMutationOptions<unknown, unknown, SnapshotOut<T>>, 'mutationFn'> = {

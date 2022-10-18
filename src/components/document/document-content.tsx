@@ -1,4 +1,5 @@
 import { inject, observer } from "mobx-react";
+import { IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import { findDOMNode } from "react-dom";
 import { throttle } from "lodash";
@@ -53,6 +54,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   private domElement: HTMLElement | null;
   private rowRefs: Array<TileRowComponent | null>;
   private mutationObserver: MutationObserver;
+  private scrollDisposer: IReactionDisposer;
 
   public componentDidMount() {
     if (this.domElement) {
@@ -60,18 +62,34 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       this.updateVisibleRows();
       this.scrollToSection(this.props.selectedSectionId);
 
-      if ((window as any).MutationObserver) {
-        this.mutationObserver = new MutationObserver(this.handleRowElementsChanged);
-        this.mutationObserver.observe(this.domElement, { childList: true });
-      }
       // We pass the domElement to our children, but it's undefined during the first render,
       // so we force an update to make sure we draw at least once after we have our domElement.
       this.forceUpdate();
+
+      this.scrollDisposer = reaction(
+        () => ({ tileId: this.stores.ui.scrollTo?.tileId, docId: this.stores.ui.scrollTo?.docId }),
+        (scrollTo: Record<string, any>, prevScrollTo: Record<string, any>) => {
+        if (scrollTo.tileId && this.props.content?.documentIdentifier === scrollTo.docId) {
+          this.rowRefs.forEach((row: TileRowComponent | null) => {
+            if (row?.tileRowDiv && row.hasTile(scrollTo.tileId)) {
+              // Javascript struggles to scroll multiple elements at the same time,
+              // so we delay scrolling any document on the left and only animate the left document
+              setTimeout(() => {
+                row?.tileRowDiv?.scrollIntoView({
+                  behavior: this.props.readOnly ? "smooth" : "auto",
+                  block: "nearest",
+                  inline: "nearest"
+                });
+              }, this.props.readOnly ? 100 : 1);
+            }
+          });
+        }
+      });
     }
   }
 
   public componentWillUnmount() {
-    this.mutationObserver.disconnect();
+    this.scrollDisposer?.();
   }
 
   public componentDidUpdate(prevProps: IProps) {
@@ -105,7 +123,8 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const {viaTeacherDashboard} = this.props;
     const {ui, user: {isNetworkedTeacher}} = this.stores;
     const isChatEnabled = isNetworkedTeacher;
-    const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0;
+    const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0
+                                          && ui.focusDocument;
     const documentClass = classNames("document-content", {"document-content-smooth-scroll" : viaTeacherDashboard,
                                      "comment-select" : documentSelectedForComment});
     return (
@@ -235,37 +254,6 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     // click must be on DocumentContent itself, not bubble up from child
     if (e.target === e.currentTarget) {
       ui.setSelectedTile();
-    }
-  };
-
-  private handleRowElementsChanged = (mutationsList: MutationRecord[], mutationsObserver: MutationObserver) => {
-    if (!this.domElement) return;
-
-    for (const mutation of mutationsList) {
-      if (mutation.type === "childList") {
-        // auto-scroll to new tile rows
-        if (mutation.addedNodes.length) {
-          const newRow = mutation.addedNodes[mutation.addedNodes.length - 1] as Element;
-          const newRowBounds = newRow.getBoundingClientRect();
-          const contentBounds = this.domElement.getBoundingClientRect();
-          const visibleContent = {
-                  top: this.domElement.scrollTop,
-                  bottom: this.domElement.scrollTop + contentBounds.height
-                };
-          const newRowInContent = {
-                  top: newRowBounds.top - contentBounds.top + this.domElement.scrollTop,
-                  bottom: newRowBounds.bottom - contentBounds.top + this.domElement.scrollTop
-                };
-          const kScrollTopMargin = 2;
-          const kScrollBottomMargin = 10;
-          if (newRowInContent.bottom > visibleContent.bottom) {
-            this.domElement.scrollTop += newRowInContent.bottom + kScrollBottomMargin - visibleContent.bottom;
-          }
-          else if (newRowInContent.top < visibleContent.top) {
-            this.domElement.scrollTop += newRowInContent.top - kScrollTopMargin - visibleContent.top;
-          }
-        }
-      }
     }
   };
 

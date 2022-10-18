@@ -5,6 +5,7 @@ import classNames from "classnames";
 import { useUIStore } from "../../hooks/use-stores";
 import { TreeManager } from "../../models/history//tree-manager";
 import { DocumentModelType } from "../../models/document/document";
+import { LoadDocumentHistory } from "./load-document-history";
 import { PlaybackControlComponent } from "./playback-control";
 import PlaybackIcon from "../../clue/assets/icons/playback/playback-icon.svg";
 
@@ -20,7 +21,6 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
   const { document, showPlaybackControls, onTogglePlaybackControls  } = props;
   const { activeNavTab } = useUIStore();
   const treeManager = document?.treeManagerAPI as Instance<typeof TreeManager>;
-  const history = treeManager?.document.history;
 
   const renderPlaybackToolbarButton = () => {
     const playbackToolbarButtonComponentStyle =
@@ -37,14 +37,21 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
     );
   };
 
-  const disablePlayback = history.length < 1;
+  // This should delay showing the playback controls until the history is actually
+  // loaded into documentToShow
+  const historyLength = treeManager.document.history.length;
+
+  const actuallyShowPlaybackControls = showPlaybackControls && (historyLength !== undefined) && (historyLength > 0);
+
+  const disablePlayback = false;
   const playbackComponentClass = classNames("playback-component", activeNavTab,
                                             {"show-control" : showPlaybackControls,
                                               "disabled" : disablePlayback});
   return (
     <div className={playbackComponentClass} data-testid="playback-component">
       {renderPlaybackToolbarButton()}
-      {showPlaybackControls && <PlaybackControlComponent treeManager={treeManager} />}
+      {showPlaybackControls && <LoadDocumentHistory document={document} />}
+      {actuallyShowPlaybackControls && <PlaybackControlComponent treeManager={treeManager} />}
     </div>
   );
 });

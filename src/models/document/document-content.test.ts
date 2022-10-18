@@ -7,6 +7,7 @@ import { IDropRowInfo } from "../../models/document/document-content";
 import { cloneTileSnapshotWithoutId, IDragTileItem } from "../../models/tools/tool-tile";
 import { TextContentModel } from "../tools/text/text-content";
 import { IDocumentExportOptions } from "../tools/tool-content-info";
+import { kDefaultColumnWidth } from "../../components/tools/table-tool/table-types";
 import { safeJsonParse } from "../../utilities/js-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
 
@@ -90,6 +91,7 @@ describe("DocumentContentModel", () => {
     expect(documentContent.indexOfLastVisibleRow).toBe(-1);
     expect(documentContent.defaultInsertRow).toBe(0);
     expect(parsedContentExport()).toEqual({ tiles: [] });
+    expect(documentContent.getTilesInDocumentOrder()).toEqual([]);
   });
 
   it("allows the tool tiles to be added", () => {
@@ -111,7 +113,8 @@ describe("DocumentContentModel", () => {
           { title: "Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
-        { title: "Table 1", content: { type: "Table", columns: [{ name: "x" }, { name: "y" }] } },
+        { title: "Table 1", content: { type: "Table",
+          columns: [{ name: "x", width: kDefaultColumnWidth }, { name: "y", width: kDefaultColumnWidth }] } },
         { title: "Drawing 1", content: { type: "Drawing", objects: [] } }
       ]
     });
@@ -166,7 +169,7 @@ describe("DocumentContentModel", () => {
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         { title: "Image 1", content: { type: "Image", url: placeholderImage } },
-        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
+        { title: "Text 2", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         { title: "Image 2", content: { type: "Image", url: placeholderImage } }
       ]
     });
@@ -206,7 +209,7 @@ describe("DocumentContentModel", () => {
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
           { title: "Image 1", content: { type: "Image", url: placeholderImage } },
-          { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
+          { title: "Text 2", content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ]
       ]
     });
@@ -250,7 +253,7 @@ describe("DocumentContentModel", () => {
           { title: "Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
-        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
+        { title: "Text 2", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
@@ -292,7 +295,7 @@ describe("DocumentContentModel", () => {
         [
           { title: "Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } },
-          { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
+          { title: "Text 2", content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ]
       ]
     });
@@ -393,7 +396,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
       tiles: [
-        { title: "Text 1", content: { type: "Text", format: "html", text: ["<p>foo</p>"] } },
+        { title: "Text 2", content: { type: "Text", format: "html", text: ["<p>foo</p>"] } },
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
@@ -999,6 +1002,12 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
     }
   */
 
+  it("getTilesInDocumentOrder handles rows with multiple tiles", () => {
+    expect(documentContent.getTilesInDocumentOrder()).toEqual(
+      ["textTool1", "drawingTool1", "tableTool", "imageTool","graphTool", "textTool2",
+      "drawingTool2", "whatIfPlaceholder", "nowWhatDoYouKnowPlaceholder"]);
+  });
+
   it("can query content", () => {
     expect(documentContent.isEmpty).toBe(false);
     expect(documentContent.contentId).toBeDefined();
@@ -1023,8 +1032,8 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
             content: {
               type: "Table",
               columns: [
-                { name: "x", values: [1, 2, 3] },
-                { name: "y", values: [2, 4, 6] }
+                { name: "x", width: kDefaultColumnWidth, values: [1, 2, 3] },
+                { name: "y", width: kDefaultColumnWidth, values: [2, 4, 6] }
               ]
             }
           },

@@ -1,0 +1,25 @@
+@import "../vars";
+.chat-thread-toggle {
+  transform: rotate(270deg);
+  &.problems {
+    border-color: $problem-orange-light-3;
+  }
+  &.my-work {
+    border-color: $workspace-teal;
+  }
+  &.class-work {
+    border-color: $classwork-purple;
+  }
+  &.supports {
+    border-color: $support-blue;
+  }
+  &.student-work {
+    border-color: $charcoal-dark-1;
+  }
+  .themed {
+    background-color: inherit;
+  }
+}
+.chat-thread-toggle.expanded  {
+  transform: rotate(0);
+}

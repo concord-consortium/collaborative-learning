@@ -232,6 +232,22 @@ function makeRealHistoryEntry(entry: any): HistoryEntrySnapshot {
   return realEntry;
 }
 
+const mockValidateCommentableDocument_v1 = jest.fn();
+const mockPostDocumentComment_v1 = jest.fn();
+const mockHttpsCallable = jest.fn((fn: string) => {
+  switch(fn) {
+    case "validateCommentableDocument_v1":
+      return mockValidateCommentableDocument_v1;
+    case "postDocumentComment_v1":
+      return mockPostDocumentComment_v1;
+  }
+});
+jest.mock("firebase/app", () => ({
+  functions: () => ({
+    httpsCallable: (fn: string) => mockHttpsCallable(fn)
+  })
+}));
+
 it("records multiple history entries", async () => {
   const {tileContent, manager} = setupDocument();
   tileContent.setFlag(true);

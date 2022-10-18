@@ -46,6 +46,24 @@ interface ContextUserMap {
 // The bottom of the four-up view is covered by the border of the bottom nav, so this lost height must be considered
 export const BORDER_SIZE = 4;
 
+const indexToCornerLabel = [
+  "four-up-nw",
+  "four-up-ne",
+  "four-up-se",
+  "four-up-sw"
+] as const;
+
+const indexToCornerClass = [
+  "north-west",
+  "north-east",
+  "south-east",
+  "south-west"
+] as const;
+
+const indexToLocation = [
+  "nw", "ne", "se", "sw"
+] as const;
+
 @inject("stores")
 @observer
 export class FourUpComponent extends BaseComponent<IProps, IState> {
@@ -98,10 +116,12 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     const seCell = this.grid.cells[CellPositions.SouthEast];
     const swCell = this.grid.cells[CellPositions.SouthWest];
     const toggledStyle = {top: 0, left: 0, width, height};
-    const nwStyle = toggledContext ? toggledStyle : {top: 0, left: 0, width: nwCell.width, height: nwCell.height};
-    const neStyle = toggledContext ? toggledStyle : {top: 0, left: neCell.left, right: 0, height: neCell.height};
-    const seStyle = toggledContext ? toggledStyle : {top: seCell.top, left: seCell.left, right: 0, bottom: 0};
-    const swStyle = toggledContext ? toggledStyle : {top: swCell.top, left: 0, width: swCell.width, bottom: 0};
+    const indexToStyle = [
+      toggledContext ? toggledStyle : {top: 0, left: 0, width: nwCell.width, height: nwCell.height},
+      toggledContext ? toggledStyle : {top: 0, left: neCell.left, right: 0, height: neCell.height},
+      toggledContext ? toggledStyle : {top: seCell.top, left: seCell.left, right: 0, bottom: 0},
+      toggledContext ? toggledStyle : {top: swCell.top, left: 0, width: swCell.width, bottom: 0}
+    ];
     const scaleStyle = (cell: FourUpGridCellModelType) => {
       const transform = `scale(${toggledContext ? 1 : cell.scale})`;
       return {width, height, transform, transformOrigin: "0 0"};
@@ -149,6 +169,10 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     };
 
     const hideCanvas = (index: number) => {
+      // Index 0 is never hidden, I'm not sure why
+      if (index === 0) {
+        return false;
+      }
       const doc = groupDoc(index);
       const unopenedDoc = groupUsers[index] && !doc;
       // Don't hide anything from ghost users, and treat unopened documents as private by default
@@ -161,30 +185,19 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       }
     };
 
+    const renderCanvas = (cornerIndex: number, overlay?: React.ReactNode) => {
+      const cornerLabel = indexToCornerLabel[cornerIndex];
+      const cell = this.grid.cells[cornerIndex];
+      const document = groupDoc(cornerIndex);
+      return <CanvasComponent context={cornerLabel} scale={cellScale(cell, cornerLabel)}
+                       readOnly={isGhostUser /* Ghost users do not own group documents and cannot edit others' */}
+                       document={document} overlayMessage={canvasMessage(document)}
+                       showPlayback={toggledContext === cornerLabel} {...others} overlay={overlay} />;
+    };
+
     // Double the scale if the cell is focused
     const cellScale =
       (cell: FourUpGridCellModelType, corner: string) => (toggledContext === corner ? 2 : 1) * cell.scale;
-    const nwCanvas = (
-      <CanvasComponent context="four-up-nw" scale={cellScale(nwCell, "four-up-nw")}
-                       readOnly={isGhostUser /* Ghost users do not own group documents and cannot edit others' */}
-                       document={groupDoc(0)} overlayMessage={canvasMessage(groupDoc(0))}
-                       showPlayback={toggledContext === "four-up-nw"} {...others} />
-    );
-    const neCanvas = (
-      <CanvasComponent context="four-up-ne" scale={cellScale(neCell, "four-up-ne")}
-                       readOnly={true} document={groupDoc(1)} overlayMessage={canvasMessage(groupDoc(1))}
-                       showPlayback={toggledContext === "four-up-ne"} {...others} />
-    );
-    const seCanvas = (
-      <CanvasComponent context="four-up-se" scale={cellScale(seCell, "four-up-se")}
-                       readOnly={true} document={groupDoc(2)} overlayMessage={canvasMessage(groupDoc(2))}
-                       showPlayback={toggledContext === "four-up-se"} {...others}/>
-    );
-    const swCanvas = (
-      <CanvasComponent context="four-up-sw" scale={cellScale(swCell, "four-up-sw")}
-                       readOnly={true} document={groupDoc(3)} overlayMessage={canvasMessage(groupDoc(3))}
-                       showPlayback={toggledContext === "four-up-sw"} {...others}/>
-    );
 
     const memberName = (context: string) => {
       const groupUser = this.userByContext[context];
@@ -198,49 +211,58 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
           isToggled && viaStudentGroupView
             ? <>
                 <div className={className} title={fullName}>{name}</div>
-                <button className="restore-fourup-button" onClick={()=>this.handleOverlayClicked(context)}>
+                <button className="restore-fourup-button" onClick={()=>this.handleOverlayClick(context)}>
                   <FourUpIcon /> 4-Up
                 </button>
               </>
-            : <div className={className} title={fullName} onClick={()=>this.handleOverlayClicked(context)}>
+            : <div className={className} title={fullName} onClick={()=>this.handleOverlayClick(context)}>
                   {name}
               </div>
         );
       }
     };
 
+    const renderCorner = (cornerIndex: number) => {
+      const cornerLabel = indexToCornerLabel[cornerIndex];
+      const cell = this.grid.cells[cornerIndex];
+      const document = groupDoc(cornerIndex);
+
+      const overlay = toggleable && 
+        <FourUpOverlayComponent
+          context={cornerLabel}
+          style={{top: 0, left: 0, width: "100%", height: "100%"}}
+          onClick={this.handleOverlayClick}
+          documentViewMode={documentViewMode}
+          document={document}
+        />;
+
+      // If we are looking at a specific student toggledContext equals the cornerLabel
+      // of that student. When we are looking at a specific student we need the overlay
+      // to be inside of the Canvas so the canvas can put its history UI on top of the 
+      // overlay. When we are not looking at a specific student we need the overlay
+      // to be unscaled and have dimensions based on the grid so its clickable area
+      // covers the whole quadrant of the grid not just the area of the canvas
+      const overlayInsideOfCanvas = toggledContext && overlay;
+      const overlayOnTopOfCanvas = !toggledContext && overlay;
+
+      return !toggledContext || (toggledContext === cornerLabel) 
+        ? <div key={cornerIndex} className={classNames("canvas-container", indexToCornerClass[cornerIndex])} 
+              style={indexToStyle[cornerIndex]}>
+            <div className="canvas-scaler" style={scaleStyle(cell)}>
+              {hideCanvas(cornerIndex) 
+                ? this.renderUnshownMessage(groupUsers[cornerIndex], indexToLocation[cornerIndex]) 
+                : renderCanvas(cornerIndex, overlayInsideOfCanvas)}
+            </div>
+            {overlayOnTopOfCanvas}
+            {memberName(cornerLabel)}
+          </div> 
+        : null;
+    };
+
     return (
       <div className="four-up" ref={(el) => this.container = el}>
-        {!toggledContext || (toggledContext === "four-up-nw") ?
-        <div className="canvas-container north-west" style={nwStyle}>
-          <div className="canvas-scaler" style={scaleStyle(nwCell)}>
-            {nwCanvas}
-          </div>
-          {memberName("four-up-nw")}
-        </div> : null}
-        {!toggledContext || (toggledContext === "four-up-ne") ?
-        <div className="canvas-container north-east" style={neStyle}>
-          <div className="canvas-scaler" style={scaleStyle(neCell)}>
-            {hideCanvas(1) ? this.renderUnshownMessage(groupUsers[1], "ne") : neCanvas}
-          </div>
-          {memberName("four-up-ne")}
-        </div> : null}
-        {!toggledContext || (toggledContext === "four-up-se") ?
-        <div className="canvas-container south-east" style={seStyle}>
-          <div className="canvas-scaler" style={scaleStyle(seCell)}>
-            {hideCanvas(2) ? this.renderUnshownMessage(groupUsers[2], "se") : seCanvas}
-          </div>
-          {memberName("four-up-se")}
-        </div> : null}
-        {!toggledContext || (toggledContext === "four-up-sw") ?
-        <div className="canvas-container south-west" style={swStyle}>
-          <div className="canvas-scaler" style={scaleStyle(swCell)}>
-            {hideCanvas(3) ? this.renderUnshownMessage(groupUsers[3], "sw") : swCanvas}
-          </div>
-          {memberName("four-up-sw")}
-        </div> : null}
+        { [0,1,2,3].map(cornerIndex => renderCorner(cornerIndex)) }
         {!toggledContext ? this.renderSplitters() : null}
-        {toggleable ? this.renderToggleOverlays(groupUsers) : null}
       </div>
     );
   }
@@ -272,72 +294,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     );
   }
 
-  private renderToggleOverlays(groupUsers: FourUpUser[]) {
-    const {documentViewMode} = this.props;
-    const {width, height, hSplitter, vSplitter} = this.grid;
-    const toggledStyle = {top: 0, left: 0, width, height};
-    const nwStyle = {top: 0, left: 0, width: vSplitter, height: hSplitter};
-    const neStyle = {top: 0, left: vSplitter, right: 0, height: hSplitter};
-    const seStyle = {top: hSplitter, left: vSplitter, right: 0, bottom: 0};
-    const swStyle = {top: hSplitter, left: 0, width: vSplitter, bottom: 0};
-
-    const groupDoc = (index: number) => {
-      return groupUsers[index] && groupUsers[index].doc;
-    };
-
-    const toggledGroupDoc = (context: string) => {
-      const user = this.userByContext[context];
-      return user && user.doc;
-    };
-
-    const toggledContext = this.getToggledContext();
-    if (toggledContext) {
-      return (
-        <FourUpOverlayComponent
-            context={toggledContext}
-            style={toggledStyle}
-            onClick={this.handleOverlayClicked}
-            documentViewMode={documentViewMode}
-            document={toggledGroupDoc(toggledContext)}
-        />
-      );
-    } else {
-      return (
-        <div>
-          <FourUpOverlayComponent
-            context="four-up-nw"
-            style={nwStyle}
-            onClick={this.handleOverlayClicked}
-            documentViewMode={documentViewMode}
-            document={groupDoc(0)}
-          />
-          <FourUpOverlayComponent
-            context="four-up-ne"
-            style={neStyle}
-            onClick={this.handleOverlayClicked}
-            documentViewMode={documentViewMode}
-            document={groupDoc(1)}
-          />
-          <FourUpOverlayComponent
-            context="four-up-se"
-            style={seStyle}
-            onClick={this.handleOverlayClicked}
-            documentViewMode={documentViewMode}
-            document={groupDoc(2)}
-          />
-          <FourUpOverlayComponent
-            context="four-up-sw"
-            style={swStyle}
-            onClick={this.handleOverlayClicked}
-            documentViewMode={documentViewMode}
-            document={groupDoc(3)}
-          />
-        </div>
-      );
-    }
-  }
-
-  private renderUnshownMessage = (groupUser: FourUpUser, location: "ne" | "se" | "sw") => {
+  private renderUnshownMessage = (groupUser: FourUpUser, location: "nw" | "ne" | "se" | "sw") => {
     const groupUserName = groupUser ? groupUser.user.name : "User";
     return (
       <div className={`unshared ${location}`}>
@@ -408,7 +365,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
     window.addEventListener("mouseup", handleMouseUp);
   };
 
-  private handleOverlayClicked = (context: string) => {
+  private handleOverlayClick = (context: string) => {
     const { groupId, setFocusedGroupUser, onToggleContext } = this.props;
     const groupUser = this.userByContext[context];
     const toggledContext = this.getToggledContext();

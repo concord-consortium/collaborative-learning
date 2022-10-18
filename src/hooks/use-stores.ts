@@ -7,6 +7,8 @@ import {
 import { ProblemModelType } from "../models/curriculum/problem";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { DocumentsModelType } from "../models/stores/documents";
+import { DocumentContentModelType} from "../models/document/document-content";
+
 import { GroupsModelType } from "../models/stores/groups";
 import { SelectionStoreModelType } from "../models/stores/selection";
 import { IStores } from "../models/stores/stores";
@@ -70,6 +72,22 @@ export function useDocumentOrCurriculumMetadata(key?: string): IDocumentMetadata
   }, [documentMetadata, key]);
 }
 
+export function useCurriculumOrDocumentContent(key?: string):  DocumentContentModelType | undefined {
+  const curriculumContentFromPath = useCurriculumContentFromPath(key); 
+  const documentContentFromKey = useDocumentFromStore(key)?.content;
+  return isSectionPath(key) ? curriculumContentFromPath : documentContentFromKey;
+}
+
+export function useCurriculumContentFromPath(key?: string): DocumentContentModelType| undefined {
+  const { section, facet } = getCurriculumMetadata(key) || {};
+  const { problem, teacherGuide } = useStores();
+  if (facet === "guide") {
+    return teacherGuide && section ? teacherGuide.getSectionById(section)?.content : undefined;
+  }
+  return problem && section
+          ? problem.getSectionById(section)?.content 
+          : undefined;
+}
 export function useTypeOfTileInDocumentOrCurriculum(key?: string, tileId?: string) {
   const { documents, networkDocuments } = useStores();
   if (!key || !tileId) return;
@@ -98,9 +116,20 @@ export function useNetworkDocuments(): DocumentsModelType {
   return useStores().networkDocuments;
 }
 
-export function useNetworkDocumentKey(documentKey: string) {
+/**
+ *
+ * @param documentKey 
+ * @param userId if this is passed the current user and their network is
+ * ignored. This is useful for teachers to generate paths to student documents
+ * @returns 
+ */
+export function useNetworkDocumentKey(documentKey: string, userId?: string) {
   const user = useUserStore();
-  return networkDocumentKey(user.id, documentKey, user.network);
+  if (userId) {
+    return networkDocumentKey(userId, documentKey);
+  } else {
+    return networkDocumentKey(user.id, documentKey, user.network);
+  }
 }
 
 export function useProblemPath() {

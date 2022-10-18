@@ -429,6 +429,7 @@ export class DB {
 
   public publishProblemDocument(documentModel: DocumentModelType) {
     const {user, groups} = this.stores;
+    // JSON content with modified unique ids which will break the history
     const content = documentModel.content?.publish();
     if (!content) {
       throw new Error("Could not publish the specified document because its content is not available.");

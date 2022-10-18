@@ -80,10 +80,10 @@ describe("ui model", () => {
   });
 
   it("allows divider position to be set", () => {
-    expect(ui.navTabContentShown).toBe(false);
-    expect(ui.workspaceShown).toBe(true);
-    ui.setDividerPosition(50);
     expect(ui.navTabContentShown).toBe(true);
+    expect(ui.workspaceShown).toBe(true);
+    ui.setDividerPosition(0);
+    expect(ui.navTabContentShown).toBe(false);
     expect(ui.workspaceShown).toBe(true);
   });
 

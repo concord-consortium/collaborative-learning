@@ -6,6 +6,8 @@ import { NodeSensorTypes, NodeChannelInfo,
          kSensorSelectMessage, kSensorMissingMessage } from "../../model/utilities/node";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
+import { dataflowLogEvent } from "../../dataflow-logger";
+
 import "./sensor-select-control.sass";
 import "./value-control.sass";
 
@@ -132,7 +134,7 @@ export class SensorSelectControl extends Rete.Control {
                                     });
 
       const channelsForType = channels.filter((ch: NodeChannelInfo) => {
-        return (ch.type === type) || (type === "none" && ch.type !== "relay");
+        return (ch.type === type) || (type === "none");
       });
       const selectedChannel = channelsForType.find((ch: any) => ch.channelId === id);
 
@@ -230,6 +232,10 @@ export class SensorSelectControl extends Rete.Control {
         (this as any).update();
         this.setSensorType(v);
         this.emitter.trigger("process");
+
+        const tileId = this.getNode().meta.inTileWithId as string;
+        const changeObj = { node: this.getNode(), sensorTypeValue: v };
+        dataflowLogEvent("selectsensortype", changeObj, tileId);
       },
       onSensorOptionClick: (v: any) => () => {
         this.emitter.trigger("selectnode", { node: this.getNode() });
@@ -238,6 +244,10 @@ export class SensorSelectControl extends Rete.Control {
         (this as any).update();
         this.setSensor(v);
         this.emitter.trigger("process");
+
+        const tileId = this.getNode().meta.inTileWithId as string;
+        const changeObj = { node: this.getNode(), sensorDataOptionValue: v };
+        dataflowLogEvent("selectsensordataoption", changeObj, tileId);
       },
       showSensorList: false,
       showTypeList: false,
@@ -253,7 +263,6 @@ export class SensorSelectControl extends Rete.Control {
 
   public setSensorType = (val: any) => {
     this.setSensor("none");
-
     this.props.type = val;
     this.putData("type", val);
     (this as any).update();

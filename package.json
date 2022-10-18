@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "config": {
@@ -53,6 +53,7 @@
   },
   "scripts": {
     "build": "npm-run-all lint:build clean build:webpack",
+    "build-and-serve": "npm-run-all build serve",
     "build:debug": "npm-run-all lint clean build:webpack",
     "build:webpack": "cross-env NODE_OPTIONS=--max-old-space-size=4096 webpack --mode production",
     "check:types": "tsc --noEmit",
@@ -66,6 +67,8 @@
     "lint:unused": "tsc --noUnusedLocals --project .",
     "migrate": "node ./migrations/migrate",
     "migrate:debug": "node --inspect-brk ./migrations/migrate",
+    "postinstall": "patch-package",
+    "serve": "npx serve -l 8080 dist",
     "start": "webpack-dev-server --hot",
     "start:secure": "webpack-dev-server --https --hot --cert ~/.localhost-ssl/localhost.pem --key ~/.localhost-ssl/localhost.key",
     "stats": "webpack --profile --json --mode production > stats.json",
@@ -146,10 +149,10 @@
     "copy-webpack-plugin": "^11.0.0",
     "cross-env": "^7.0.3",
     "css-loader": "^6.7.1",
-    "cypress": "^9.7.0",
+    "cypress": "^10.9.0",
     "cypress-commands": "2.0.1",
     "cypress-file-upload": "^5.0.8",
-    "cypress-terminal-report": "^3.5.2",
+    "cypress-terminal-report": "^4.1.2",
     "enquirer": "^2.3.6",
     "eslint": "^8.22.0",
     "eslint-config-react": "^1.1.7",
@@ -190,12 +193,12 @@
     "xhr-mock": "^2.5.1"
   },
   "dependencies": {
-    "@concord-consortium/diagram-view": "^0.0.15",
+    "@concord-consortium/diagram-view": "^0.0.16",
     "@concord-consortium/mobx-state-tree": "5.1.5-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",
     "@concord-consortium/rete-react-render-plugin": "^0.2.1-cc.2",
-    "@concord-consortium/slate-editor": "^0.8.1",
+    "@concord-consortium/slate-editor": "^0.8.2",
     "chart.js": "^2.9.4",
     "classnames": "^2.3.1",
     "color-string": "^1.9.1",
@@ -214,6 +217,7 @@
     "mobx-react": "^7.5.2",
     "nanoid": "^4.0.0",
     "object-hash": "^3.0.0",
+    "patch-package": "^6.4.7",
     "query-string": "7.1.1",
     "rc-slider": "^10.0.1",
     "react": "^17.0.2",
@@ -238,6 +242,7 @@
     "ts-polyfill": "^3.8.2",
     "tslib": "^2.4.0",
     "ulid": "^2.3.0",
+    "use-resize-observer": "^9.0.2",
     "uuid": "^8.3.2",
     "whatwg-fetch": "^3.6.2"
   }

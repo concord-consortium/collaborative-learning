@@ -6,9 +6,7 @@ import "./dataflow-program-toolbar.sass";
 interface IProps {
   onNodeCreateClick: (type: string) => void;
   onClearClick: () => void;
-  onResetClick: () => void;
   isTesting: boolean;
-  isDataStorageDisabled: boolean;
   disabled: boolean;
 }
 
@@ -26,7 +24,6 @@ export class DataflowProgramToolbar extends React.Component<IProps> {
           ))
         }
         { isTesting && <button className={"qa"} onClick={this.props.onClearClick}>Clear</button> }
-        { isTesting && <button className={"qa"} onClick={this.props.onResetClick}>Reset</button> }
       </div>
     );
   }
@@ -53,10 +50,8 @@ export class DataflowProgramToolbar extends React.Component<IProps> {
         nodeIcons.push(<div className="icon-node left mid" key={"icon-node-l-m" + i}/>);
         nodeIcons.push(<div className="icon-node right mid" key={"icon-node-r-m" + i}/>);
         break;
-      case "Relay":
       case "Demo Output":
       case "Live Output":
-      case "Data Storage":
         nodeIcons.push(<div className="icon-node left mid" key={"icon-node-l-m" + i}/>);
         break;
     }
@@ -67,24 +62,9 @@ export class DataflowProgramToolbar extends React.Component<IProps> {
     );
     return (
       <button
-        disabled={nodeType === "Data Storage" && this.props.isDataStorageDisabled || this.props.disabled}
+        disabled={this.props.disabled}
         key={i} title={`Add ${nodeType} Block`}
         onClick={handleAddNodeButtonClick}
-        draggable="true"
-        onDragStart={event => {
-          event.dataTransfer.setData("text/plain", nodeType);
-          // const image = new Image();
-          // image.src = "../../assets/lightbulb-on.png";
-          // event.dataTransfer.setDragImage(image, 10, 10);
-          event.dataTransfer.dropEffect = "copy";
-          console.log("Start drag");
-        }}
-        onDrag={event => {
-          console.log("Dragging");
-        }}
-        onDragEnd={event => {
-          console.log("End drag");
-        }}
       >
         {nodeIcon}
         <div className="label">{nodeType}</div>

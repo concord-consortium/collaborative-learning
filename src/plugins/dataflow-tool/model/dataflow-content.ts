@@ -28,11 +28,7 @@ export const DataflowContentModel = ToolContentModel
   .props({
     type: types.optional(types.literal(kDataflowToolID), kDataflowToolID),
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
-    programRunId: "",
-    programStartTime: 0,
-    programEndTime: 0,
     programDataRate: DEFAULT_DATA_RATE,
-    programIsRunning: "",
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .volatile(self => ({
@@ -92,30 +88,10 @@ export const DataflowContentModel = ToolContentModel
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;
     },
-    setProgramRunId(id: string) {
-      self.programRunId = id;
-    },
-    setProgramStartEndTime(startTime: number, endTime: number) {
-      self.programStartTime = startTime;
-      self.programEndTime = endTime;
-    },
-    setProgramStartTime(startTime: number) {
-      self.programStartTime = startTime;
-    },
-    setProgramEndTime(endTime: number) {
-      self.programEndTime = endTime;
-    },
     setProgramZoom(dx: number, dy: number, scale: number) {
       self.programZoom.dx = dx;
       self.programZoom.dy = dy;
       self.programZoom.scale = scale;
-    },
-    setRunningStatus(endTime: number) {
-      if (endTime > Date.now()) {
-        self.programIsRunning = "true";
-      } else {
-        self.programIsRunning = "";
-      }
     }
   }));
 

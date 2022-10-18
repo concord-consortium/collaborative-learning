@@ -1,0 +1,213 @@
+import Canvas from '../../../../support/elements/common/Canvas';
+import ClueCanvas from '../../../../support/elements/clue/cCanvas';
+import GraphToolTile from '../../../../support/elements/clue/GraphToolTile';
+import TableToolTile from '../../../../support/elements/clue/TableToolTile';
+
+const canvas = new Canvas;
+const clueCanvas = new ClueCanvas;
+const graphToolTile = new GraphToolTile;
+const tableToolTile = new TableToolTile;
+
+context.skip('Graph Table Integration', function () {
+  before(function () {
+    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.3&qaGroup=5"; //using different problem bec. 2.1 disables graph table integration
+    cy.clearQAData('all');
+
+    cy.visit(queryParams);
+    cy.waitForLoad();
+    cy.closeResourceTabs();
+
+    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
+  });
+
+  context('Tests for graph and table integration', function () {
+    const x = ['3', '7', '6', '0'];
+    const y = ['2.5', '5', '1', '0'];
+    before(function () {
+      clueCanvas.addTile('table');
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.getTableCell().eq(1).click().type(x[0] +'{enter}');
+        tableToolTile.getTableCell().eq(2).click();
+        tableToolTile.getTableCell().eq(2).type(y[0] +'{enter}');
+        tableToolTile.getTableCell().eq(5).click();
+        tableToolTile.getTableCell().eq(5).type(x[1] + '{enter}');
+        tableToolTile.getTableCell().eq(6).click();
+        cy.wait(500);
+        tableToolTile.getTableCell().eq(6).type(y[1] + '{enter}');
+        tableToolTile.getTableCell().eq(9).click();
+        tableToolTile.getTableCell().eq(9).type(x[2] + '{enter}');
+        tableToolTile.getTableCell().eq(10).click();
+        tableToolTile.getTableCell().eq(10).type(y[2] + '{enter}');
+        tableToolTile.getTableCell().eq(13).click();
+        tableToolTile.getTableCell().eq(13).type(x[3] + '{enter}');
+        tableToolTile.getTableCell().eq(14).click();
+        tableToolTile.getTableCell().eq(14).type(y[3] + '{enter}');
+        tableToolTile.getTableCell().eq(17).click();
+      });
+      clueCanvas.addTile('geometry');
+      clueCanvas.deleteTile('text');
+    });
+    describe('Link graph dialog', () => {
+      it('verify correct graph names appear in selection list', function () {
+        tableToolTile.getTableTile().click();
+        cy.get('.primary-workspace .link-geometry-button').click();
+        cy.wait(2000);
+        // cy.get('[data-test=link-graph-select]').select('Second One');
+        cy.get('[data-test=link-graph-select]').select('Graph 1');
+      });
+      after(function () {
+        cy.get('.ReactModalPortal button').contains('Cancel').click();
+      });
+    });
+    describe("connect and disconnect table and graph after coordinates have been added", function () {
+      it('verify link icon appears when table and graph are connected', function () {
+        cy.get(clueCanvas.linkIconEl()).should('not.exist');
+        cy.linkTableToGraph('Table 1', "Graph 1");
+        tableToolTile.getTableTile().scrollIntoView();
+        graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('exist');
+        // verifies that values exported from .scss file were successfully imported
+        graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).children('svg').attribute('data-indicator-width').should('exist');
+        graphToolTile.getGraph().should('have.class', 'is-linked');
+      });
+      it.skip('verify points added has p1 label in table and graph', function () {
+        tableToolTile.getIndexNumberToggle().click();
+        tableToolTile.getTableIndexColumnCell().first().should('contain', '1');
+        graphToolTile.getGraphPointLabel().contains('p1').should('exist');
+      });
+      it('verify table can be linked to two graphs', function () {
+        clueCanvas.addTile('geometry');
+        cy.linkTableToGraph('Table 1', "Graph 2");
+        graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('have.length', 2);
+      });
+      it.skip('verify unlink of graph and table', function () {
+        cy.unlinkTableToGraph('Table 1', "Graph 2");
+        graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('have.length', 1);
+        graphToolTile.getGraph().last().should('not.have.class', 'is-linked');
+      });
+      it.skip('verify point no longer has p1 in table and graph', function () {
+        graphToolTile.getGraphPointLabel().contains('p1').should('have.length', 1);
+      });
+      after(function () {
+        clueCanvas.deleteTile('graph');
+      });
+    });
+    describe.skip('test creating a polygon', function () {
+      it('will create a polygon', function () {
+        graphToolTile.getGraphPoint().last().click({ force: true }).dblclick({ force: true });
+        graphToolTile.getGraphPolygon().should('exist');
+      });
+      it('will add angle to a table point', function () {
+        tableToolTile.getTableIndexColumnCell().contains('3').click({ force: true });
+        graphToolTile.getGraphPoint().first().click({ force: true }).dblclick({ force: true });
+        graphToolTile.showAngle();
+        graphToolTile.getAngleAdornment().should('exist');
+
+      });
+      it('will move a point by changing coordinates on the table', function () {
+        let new_y = '8';
+        tableToolTile.getTableTile().click();
+        cy.get(".primary-workspace").within((workspace) => {
+          tableToolTile.getTableCell().eq(10).click();
+          tableToolTile.getTableCell().eq(10).type(new_y + '{enter}');
+        });
+        graphToolTile.getGraphPointCoordinates(2).should('contain', '(6, ' + new_y + ')');
+      });
+      it('will delete a point in the table', function () {
+        let point = 0; //the 4th point in the graph
+        tableToolTile.getTableTile().click();
+        tableToolTile.removeRow(point);
+
+        //verifies p1 no longer exist in table and graph
+        tableToolTile.getTableRow().should('have.length', 4);
+        tableToolTile.getTableIndexColumnCell().eq(2).should('contain', '3');
+        tableToolTile.getTableIndexColumnCell().eq(3).should('not.contain', 'p4');
+        graphToolTile.getGraphPointLabel().contains('p4').should('not.exist');
+        graphToolTile.getGraphPointID(point)
+          .then((id) => {
+            id = '#'.concat(id);
+            cy.get(id).then(($el) => {
+              expect($el).to.not.be.visible;
+            });
+          });
+        //verifies angle adornment no longer exists
+        // graphToolTile.getAngleAdornment().should('not.exist'); TODO
+      });
+    });
+    describe.skip('text axes changes', function () {
+      it('will change the name of the x-axis in the table', function () {
+        tableToolTile.getTableTile().click();
+        cy.get(".primary-workspace").within((workspace) => {
+          tableToolTile.renameColumn('x', 'mars');
+        });
+        graphToolTile.getGraphAxisLabelId('x')
+          .then((id) => {
+            id = '#'.concat(id);
+            cy.get(id).then(($el) => {
+              expect($el.text()).to.contain('mars');
+            });
+          });
+      });
+      it('will change the name of the y-axis in the table', function () {
+        tableToolTile.getTableTile().click();
+        cy.get(".primary-workspace").within((workspace) => {
+          tableToolTile.renameColumn('y', 'venus');
+        });
+        graphToolTile.getGraphAxisLabelId('y')
+          .then((id) => {
+            id = '#'.concat(id);
+            cy.get(id).then(($el) => {
+              expect($el.text()).to.contain('venus');
+            });
+          });
+      });
+    });
+    describe.skip('normal graph interactions', function () {
+      it('will add a polygon directly onto the graph', function () {
+        graphToolTile.getGraphTile().click();
+        graphToolTile.addPointToGraph(10, 10); //not sure why this isn't appearing
+        graphToolTile.addPointToGraph(10, 10);
+        graphToolTile.addPointToGraph(15, 10);
+        graphToolTile.addPointToGraph(10, 5);
+        graphToolTile.getGraphPoint().last().click({ force: true }).click({ force: true });
+      });
+      it('will add an angle to a point created from a table', function () {
+        graphToolTile.getGraphPolygon().last().click({force: true});
+        graphToolTile.showAngle();
+        graphToolTile.getAngleAdornment().should('exist');
+      });
+    });
+    describe.skip('test non-numeric entries in table', function () {
+      it('will enter non-numeric number in the table', function () {
+        tableToolTile.getTableCellWithColIndex(2, 6).scrollIntoView();
+        tableToolTile.getTableCellWithColIndex(2, 6).click({force: true}).type(9);
+        tableToolTile.getTableCell().eq(3).should('contain', x[1]);
+      });
+    });
+
+  });
+  context.skip('Save and restore keeps the connection between table and graph', function () {
+    before(function () {
+      let title = '2.3 Mouthing Off and Nosing Around';
+      canvas.createNewExtraDocumentFromFileMenu("empty",'my-work');
+      cy.wait(2000);
+      cy.openResourceTabs();
+      cy.openTopTab('my-work');
+      cy.openDocumentWithTitle('my-work', 'workspaces', title);
+      cy.closeResourceTabs();
+    });
+    it('verify connection of table and graph on restored canvas', function () {
+      graphToolTile.getGraphPointLabel().contains('p1').should('exist');
+    });
+  });
+  context.skip('Delete connected table', function () {
+    it('will delete connected table', function () {
+      clueCanvas.deleteTile('table');
+      graphToolTile.getGraphPointLabel().contains('p1').should('not.exist');
+    });
+    it('will verify graph is still functional after connected table is deleted', function () {
+      graphToolTile.getGraphTile().click();
+      graphToolTile.addPointToGraph(2, 6);
+      graphToolTile.getGraphPoint().should('exist').and('have.length', 3);
+    });
+  });
+});

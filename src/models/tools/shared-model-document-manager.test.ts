@@ -9,6 +9,22 @@ import { DocumentContentModel } from "../document/document-content";
 import { createDocumentModel, DocumentModelType } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
 
+const mockValidateCommentableDocument_v1 = jest.fn();
+const mockPostDocumentComment_v1 = jest.fn();
+const mockHttpsCallable = jest.fn((fn: string) => {
+  switch(fn) {
+    case "validateCommentableDocument_v1":
+      return mockValidateCommentableDocument_v1;
+    case "postDocumentComment_v1":
+      return mockPostDocumentComment_v1;
+  }
+});
+jest.mock("firebase/app", () => ({
+  functions: () => ({
+    httpsCallable: (fn: string) => mockHttpsCallable(fn)
+  })
+}));
+
 function wait(millis: number) {
   return new Promise(resolve => setTimeout(resolve, millis));
 }

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { kRowHeight, TColumn, THeaderRendererProps } from "./table-types";
+import { TColumn, THeaderRendererProps } from "./table-types";
 import { HeaderCellInput } from "./header-cell-input";
 
 interface IProps extends THeaderRendererProps {
+  height: number;
 }
-export const EditableHeaderCell: React.FC<IProps> = ({ column: _column }) => {
+export const EditableHeaderCell: React.FC<IProps> = ({ column: _column, height }) => {
   const column = _column as unknown as TColumn;
   const { name, appData } = column;
   const {
@@ -13,10 +14,11 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column }) => {
   } = appData || {};
   const [nameValue, setNameValue] = useState(editableName ? name as string : "");
   const handleClick = () => {
-    !isEditing && gridContext?.onSelectColumn(column.key);
-  };
-  const handleDoubleClick = () => {
-    editableName && !isEditing && onBeginHeaderCellEdit?.();
+    if (gridContext?.isColumnSelected(column.key)) {
+      editableName && !isEditing && onBeginHeaderCellEdit?.();
+    } else {
+      !isEditing && gridContext?.onSelectColumn(column.key);
+    }
   };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const { key } = e;
@@ -37,7 +39,8 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column }) => {
   const handleClose = (accept: boolean) => {
     onEndHeaderCellEdit?.(accept ? nameValue : undefined);
   };
-  const style: React.CSSProperties = { width: column.width };
+  const ehcStyle: React.CSSProperties = { height };
+  const style: React.CSSProperties = { width: column.width, ...ehcStyle };
   // ReactDataGrid's styling of the cell editor relies on an interesting interplay between the container
   // (.rdg-editor-container), which has `{ display: "contents" }` in its CSS, which according to MDN means:
   //
@@ -51,13 +54,13 @@ export const EditableHeaderCell: React.FC<IProps> = ({ column: _column }) => {
   // height calculation no longer works for the column header cells in Chrome, although it continues to
   // work for the title cell and the table body cells in Chrome as well as in all three contexts in Firefox.
   // ¯\_(ツ)_/¯ The fix is to force the <input> to be the height of the row with an inline style.
-  const inputStyle: React.CSSProperties = { height: kRowHeight };
+  const inputStyle: React.CSSProperties = { ...ehcStyle };
   return (
-    <div className={"editable-header-cell"} onClick={handleClick} onDoubleClick={handleDoubleClick}>
+    <div className="editable-header-cell" onClick={handleClick} style={ehcStyle}>
       {isEditing
         ? <HeaderCellInput style={style} inputStyle={inputStyle} value={nameValue}
             onKeyDown={handleKeyDown} onChange={handleChange} onClose={handleClose} />
-        : name}
+        : <div className="header-name">{name}</div>}
     </div>
   );
 };

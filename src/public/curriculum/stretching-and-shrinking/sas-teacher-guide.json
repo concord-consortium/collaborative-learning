@@ -165,7 +165,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Problem Overview</strong></p>",
-                        "<p>The introduction to this Problem can be used to assess students’ initial ideas about the concept of scaled drawings/similarity. The P.I. Mystery Club enters a contest to guess the identity of a teacher in disguise. A photo of the mystery teacher is shown, and students use a known measure (height of a magazine) to estimate an unknown measure (height of the mystery teacher). Students are asked to express their informal ideas about the mathematical meaning of similarity.</p>",
+                        "<p>This Problem can be used to assess students’ initial ideas about the concept of scaled drawings/similarity. The P.I. Mystery Club enters a contest to guess the identity of a teacher in disguise. A photo of the mystery teacher is shown, and students use a known measure (height of a magazine) to estimate an unknown measure (height of the mystery teacher). Students are asked to express their informal ideas about the mathematical meaning of similarity.</p>",
                         "<p><strong>Note</strong>: The word <strong>similar</strong> is not defined in the Student Edition yet. Students are formulating their own working definition of mathematical similarity. Scaled drawings and the concept of similarity are used to set the backdrop for the students’ work in 7th grade on proportional reasoning. The words scaled drawings and similarity can be used interchangeably at this point for students. Students’ understanding will develop throughout the Unit and is revisited in each of the Mathematical Reflections. Students will take this understanding into 8th grade where they will study similarity more formally as they study what happens to congruent and similar figures under transformations in the Flip, Spin, Slide, and Stretch Unit.</p>"
                       ]
                     }
@@ -247,8 +247,8 @@
                       "format": "html",
                       "text": [
                         "<p><u>Presenting the Challenge</u><strong></strong></p>",
-                        "<p>Launch Video</p>",
-                        "<p>This animation depicts members of the Mystery Club describing the contest and looking for clues to help them identify the mystery teacher. One student shows a photo she snapped of the teacher in disguise. The video prompts students to think about what information the photo gives them about the mystery teacher. You can show students this animation before discussing the introduction to the Problem. <strong>Display Learning Aid 1.1: Photograph of Mystery Teacher </strong>or have the students refer to their books.</p>"
+                        "<p><strong>Display Learning Aid 1.1: Photograph of Mystery Teacher </strong>or have the students refer to their books. </p>",
+                        "Suggested questions"
                       ]
                     }
                   },
@@ -336,7 +336,9 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>What would you expect the range of possible heights for the mystery teacher to be? If an answer is over 7 ft, is that reasonable? What about an answer of under 4 ft? (The teacher is about 72.5 in. or 6 ft 1/2  in. tall.)</li></ul>"
+                        "<ul><li>What measurements were important to you in finding the height of the teacher? (height of the magazine in the picture, height of the magazine in real life, height of the teacher in the picture.)</li><li>What would you expect the range of possible heights for the mystery teacher to be? If an answer is over 7 ft, is that reasonable? What about an answer of under 4 ft? (The teacher is about 72.5 in. or 6 ft 1/2  in. tall.)</li></ul>",
+                        "Making the Mathematics Explicit ", 
+                        "Focus the summary conversations on the use of ratios, “for every” statements and measurement.  Listen for the use of formal and informal language to assess your students’ understanding of these ideas to help you in your instruction for the rest of the Unit."
                       ]
                     }
                   },
@@ -390,7 +392,7 @@
                         "<p><strong>Suggested Questions</strong></p>",
                         "<ul><li>What measurements were important to you in finding the height of the teacher? (height of the magazine in the picture, height of the magazine in real life, height of the teacher in the picture.)</li></ul>",
                         "<p>Revisit the questions from the What If:</p>",
-                        "<ul><li>In What If Situation A, do you agree with Daphne’s reasoning? (Yes. Guide the conversation around the reasoning that the teacher being 7 inches tall and each magazine being 10 inches in real life gives us 7 groups of 10.)</li><li>Can someone explain Daphne’s statement: For every one magazine height, there are 10 inches in real life? (Answers will vary. Listen for their current understanding about rates and unit rates so you can expand on this throughout the Unit.)</li></ul>"
+                        "<ul><li>In What If Situation A, do you agree with Daphne’s reasoning? (Yes. Guide the conversation around the reasoning that the teacher being 7 inches tall and each magazine being 10 inches in real life gives us 7 groups of 10.)</li><li>Can someone explain Daphne’s statement: For every one magazine height, there are 10 inches in real life? (Answers will vary. Listen for their current understanding about rates and unit rates so you can expand on this throughout the Unit.)</li><li>In What If Situation A, do you agree with Daphne’s reasoning? (Yes. Guide the conversation around the reasoning that the teacher being 7 inches tall and each magazine being 10 inches in real life gives us 7 groups of 10.)</li></ul>"
                       ]
                     }
                   },
@@ -512,7 +514,7 @@
                       "text": [
                         "<p><u><strong>Launch (Getting Started)</strong></u></p>",
                         "<p><u>Connecting to Prior Knowledge</u></p>",
-                        "<p>In launching this Problem, your goal is to understand what your students intuitively know about scaled drawings or similar figures. Since CCSS does not mention similarity or scale drawings in prior grades, students’ understanding will likely be based on the use of “similarity” in everyday situations. In addition, you will want to assess their measurement skills.</p>"
+                        "<p>In launching this Problem, your goal is to understand what your students intuitively know about scaled drawings or similar figures. Students’ understanding will likely be based on the use of “similarity” in everyday situations. In addition, you will want to assess their measurement skills.</p>"
                       ]
                     }
                   },
@@ -525,7 +527,9 @@
                         "<p><u>Presenting the Challenge</u></p>",
                         "<p>Members of the Mystery Club want to make a poster that shows their logo. To do this, they need to enlarge the logo on the flyer they designed. Briefly discuss with students the desire to make a larger version of the original picture. Then tell them that you are going to demonstrate one method for doing so.</p>",
                         "<p></p>",
-                        "<p>You will need to demonstrate how to draw a figure using a rubber band stretcher, using a marker either on the board or on chart paper taped to the wall. Test your setup before class so you know everything works. Place the anchor point so that the enlarged drawing will not overlap the original. Choose a figure to enlarge that your students will find interesting, such as a popular cartoon character, a logo, a smiley face, or a ghost. Some teachers make a stretcher with larger rubber bands to make it easier for students to see what the teacher is doing at the board.</p>"
+                        "<p>You will need to demonstrate how to draw a figure using a rubber band stretcher, using a marker either on the board or on chart paper taped to the wall. Test your setup before class so you know everything works. ",
+                        "This <a href='https://www.youtube.com/watch?v=IFg71N3EKdc'>short video</a> shows a teacher using a rubber band stretcher to make a similar triangle.",
+                        "Place the anchor point so that the enlarged drawing will not overlap the original. Choose a figure to enlarge that your students will find interesting, such as a popular cartoon character, a logo, a smiley face, or a ghost. Some teachers make a stretcher with larger rubber bands to make it easier for students to see what the teacher is doing at the board.</p>"
                       ]
                     }
                   },
@@ -555,7 +559,7 @@
                         "<p></p>",
                         "<p>Finish the drawing and ask students to describe the results. They will probably say the two figures look alike but that the new one is larger. Until they have made their own drawings, you do not need to press for more specific observations or relationships.</p>",
                         "<p></p>",
-                        "<p>Distribute two rubber bands, a blank sheet of paper, and <strong>Learning Aid 1.2A: Right-handed version or Learning Aid 1.2B: Left-handed version</strong> to each student. Have students tape the two sheets to their desks using masking tape as shown below and in the Student Edition. Left-handed students will have the anchor point to their right and the blank sheet of paper to their left.</p>"
+                        "<p>Distribute two rubber bands, a blank sheet of paper, and <strong>Learning Aid 1.2A: Right-handed version or Learning Aid 1.2B: Left-handed version</strong> to each student (one side will have the Super Sleuth and the other side some simpler shapes.  Choose the one best suited for your classroom environment). Have students tape the two sheets to their desks using masking tape as shown below and in the Student Edition. Left-handed students will have the anchor point to their right and the blank sheet of paper to their left.</p>"
                       ]
                     }
                   },
@@ -609,7 +613,7 @@
                         "<p></p>",
                         "<p>Transparent grids may be a helpful visual aid for some students to compare lengths of sides, perimeters, or areas of the figures. You may want to have them available throughout this Unit. </p>",
                         "<p></p>",
-                        "<p>For What If Situation A, some students may benefit from the circle and square drawings that are in the ACE problems.</p>"
+                        "<p>For What If Situation A, some students may benefit from the circle and square drawings that are in the ACE problems. They are located on the back of Learning Aid 1.2A: Right-handed version or Learning Aid 1.2B: Left-handed version.</p>"
                       ]
                     }
                   },
@@ -633,7 +637,7 @@
                         "<p><u>Planning for the Summary</u></p>",
                         "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>",
                         "<p><em>Now What Do You Know?</em></p>",
-                        "<p><em>The original figure and its image are similar figures. The image is also called the scale drawing of the original figure. For two similar figures, what characteristics and measures are the same?  Different? Explain how you know.</em></p>"
+                        "<p><em>The original figure and its image are similar figures or scale drawings. The image is also called the scale drawing of the original figure. For two similar figures, what characteristics and measures are the same?  Different? Explain how you know.</em></p>"
                       ]
                     }
                   },
@@ -674,7 +678,7 @@
                       "format": "html",
                       "text": [
                         "<p><u>Making the Mathematics Explicit </u></p>",
-                        "<p>Students will focus on their drawings, which aren’t perfect. The Summary needs to focus them back onto the mathematics around the use of the super stretcher. Discuss the Comparisons in What If Situation A.</p>"
+                        "<p>Students will focus on their drawings, which aren’t perfect. The Summary needs to focus them back onto the mathematics around the use of the rubber band stretcher. Discuss the Comparisons in What If Situation A.</p>"
                       ]
                     }
                   },
@@ -684,7 +688,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>How do the lengths of the line segments compare between the two figures? (The image’s line segments are twice as long.)</li><li>How do the angles of the two figures compare? (They didn’t change.)</li><li>Which comparison statements in What If Situation A can be written as ratio statements?  (Comparison 1—1:2 for original side length to image side length. Comparison 4—1:   for original area to image area)</li></ul>",
+                        "<ul><li>How do the lengths of the line segments compare between the two figures? (The image’s line segments are twice as long.)</li><li>Note:  The students measurements won’t be exact because the rubber band stretcher isn’t an exact tool. You may need to take a few measurements from students and then say something like, “It looks like the general shape of Super Sleuth is about the same, we are all getting the side lengths to about double, the angles seem to stay the same, the perimeter seems to about double and the area seems to do more than double.”  </li><li>How do the angles of the two figures compare? (They didn’t change.)</li><li>Which comparison statements in What If Situation A can be written as ratio statements?  (Comparison 1—1:2 for original side length to image side length. Comparison 4—1:   for original area to image area)</li></ul>",
                         "<p>Blank transparency film is helpful in showing how the angles compare. Copy one angle of a figure and then place it on top of the corresponding angle of the second figure. Or have both figures on transparencies and place one on top of the other.</p>",
                         "<ul><li> How does the area change from the original to the image? (Students can informally compare the areas. They may use transparent grids or show informally how four of the smaller figures cover the larger figure. Or they may focus on the hat, which has a rectangular shape.)</li></ul>",
                         "<p>Students may mention things other than that the side lengths have doubled. Do not be too concerned about the exactness of their observations at this stage, as long as their answers are reasonable for their drawings.</p><p>Students are often amazed at the result of using a rubber-band stretcher. It is helpful to have in mind that what makes the stretcher work is really similarity. In the first figure below, you can see that when we knot two same-size rubber bands together and the knot travels on a segment of the original figure, the drawing of a segment in the image will be twice the length of the segment in the original. The scale factor between the original and the image is 2.</p>",
@@ -744,7 +748,9 @@
                       "text": [
                         "<p></p>",
                         "<p>Connect this thinking to:</p>",
-                        "<ul><li>the idea of the rubber bands being multipliers and </li><li>the ratio of 1:3 of the side lengths of the original to the side lengths of the image.  </li></ul>"
+                        "<ul><li>the idea of the rubber bands being multipliers and </li><li>the ratio of 1:3 of the side lengths of the original to the side lengths of the image.  </li></ul>",
+                        "Have students share their drawings from What If Situation B.",
+                        "When you used the super stretcher on a different figure, what comparisons from Situation A are still true?  (The same ones that were true when the logo was stretched using the super stretcher.)"
                       ]
                     }
                   },
@@ -973,7 +979,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>How are students answering the questions in the What If part? How are they describing the changes in the side lengths, area, and perimeter? Listen for their use of  “for every” statements that you can expand on in the Summary. (Language) </p>"
+                        "<p>As you are circulating, listen for how students are answering the questions in the What If part? How are they describing the changes in the side lengths, area, and perimeter? Listen for their use of  “for every” statements that you can expand on in the Summary. (Language) </p>"
                       ]
                     }
                   }
@@ -1020,7 +1026,7 @@
                       "text": [
                         "<p><u>Making the Mathematics Explicit </u></p>",
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>How did you describe the comparison between the corresponding side lengths? (Answers will vary. Students will often use additive descriptions first such as, ”For 150% you just take the original and added on half as much.”  Guide them to refine their thinking and use multiplicative structures to see that the side lengths are 1.5 times longer.)</li><li>To help students think about these ideas with a multiplicative structure versus additive you could ask them if there is a way to use a “for every” statement to express their idea.  (“For every length on the original the corresponding length on the image is 1.5 times as long”.)</li><li>If I want to enlarge a figure by 25% will the image be larger or smaller than the original? What number do I enter in the photocopier? (To increase a figure by 25% you multiply the figure by a factor of 1.25. So, you enter 125% into the photocopier.)  Explain why this is true.</li></ul>"
+                        "<ul><li>How did you describe the comparison between the corresponding side lengths? (Answers will vary. Students will often use additive descriptions first such as, ”For 150% you just take the original and added on half as much.”  Guide them to refine their thinking and use multiplicative structures to see that the side lengths are 1.5 times longer.)</li><li>To help students think about these ideas with a multiplicative structure versus additive you could ask them if there is a way to use a “for every” statement to express their idea.  (“For every length on the original the corresponding length on the image is 1.5 times as long”.)</li><li>If I want to enlarge a figure by 25% will the image be larger or smaller than the original? What number do I enter in the photocopier? (To increase a figure by 25% you multiply the figure by a factor of 1.25. So, you enter 125% into the photocopier.)  Explain why this is true.</li> <li>If we want to make a copy of the original drawing that does NOT change the size, what percent would we use?(100%)</li><li>How do the corresponding angles of the Super Sleuth’s characters compare?  (Corresponding angles are all the same angle measure) </li></ul>"
                       ]
                     }
                   },
@@ -1430,7 +1436,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Listen for the way students are deciding on the imposters.  Take notes on groups that are using ratios, “for every” statements, etc. to describe the figures that are scaled drawings of Mug and use those in your Summary.</p>"
+                        "<p>Listen for the way students are deciding on the imposters.  Take notes on groups that are using ratios, “for every” statements, etc. to describe the figures that are scaled drawings of Mug and use those in your Summary. Listen for students finding relationships between both dimensions with the figures that are similar (example Bug’s dimensions- vertical and horizontal- are 3 times the size of Mug where Lug only had the horizontal dimension multiply by 3).  Listen for students describing that Mug, Bug and Zug have congruent corresponding angles and Zug and Glug do not.) </p>"
                       ]
                     }
                   }
@@ -1493,7 +1499,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>For students who are ready for an extra challenge you could have them use the Mugwump Activity on Realize and create a rule that would have Mug appear in a different quadrant. (Agency, Identity, Ownership)</p>"
+                        "<p>For students who are ready for an extra challenge you could have them use the <a href='https://connectedmath.msu.edu/teacher-support/using-realize-dash-student-activities/'>Mugwump Activity</a> on Realize (optional CMP3 resource) and create a rule that would have Mug appear in a different quadrant.  (Agency, Identity, Ownership)</p>"
                       ]
                     }
                   },
@@ -1655,7 +1661,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Implementation Note</strong>:  Drawing the hats in the Initial Challenge can be time consuming.  During the What If you could have students do one of the situations and then have groups share the findings during the summary conversation.</p>"
+                        "<p><strong>Implementation Note</strong>:  Drawing the hats in the Initial Challenge can be time consuming but it is necessary for students to understand the effects of addition and subtraction versus multiplication on the algebraic rules.  During the What If you could have students do one of the situations and then have groups share the findings during the summary conversation.</p>"
                       ]
                     }
                   }
@@ -1703,16 +1709,6 @@
                     }
                   },
                   {
-                    "id": "8QxL7e_KchvumKOB",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>Using Technology</strong>:  Your students can use <strong>Coordinate Grapher, Desmos App</strong>, or another graphing technology to plot points on an electronic coordinate grid.  (Agency, Identity, Ownership)</p>"
-                      ]
-                    }
-                  },
-                  {
                     "display": "teacher",
                     "content": {
                       "type": "Text",
@@ -1732,7 +1728,7 @@
                       "format": "html",
                       "text": [
                         "<p></p>",
-                        "<p>Look for how students are connecting the rules to the hats they are creating. Look for students who can explain the effect of fractional coefficients and adding/subtracting to the x or y coordinate. Select students/groups to explain how to move figures, enlarge or shrink figures on a grid using rules</p>"
+                        "<p>As you are circulating during the Explore look for how students are connecting the rules to the hats they are creating. Look for students who can explain the effect of fractional coefficients and adding/subtracting to the x or y coordinate. Select students/groups to explain how to move figures, enlarge or shrink figures on a grid using rules</p>"
                       ]
                     }
                   }
@@ -1931,10 +1927,23 @@
                       "text": [
                         "<p><u><strong>Launch (Getting Started)</strong></u></p>",
                         "<p><u><em>Connecting to Prior Knowledge</em></u></p>",
-                        "<p>Discuss the pair of similar rectangles in the introduction to Problem 2.3. Ask students to describe the relationship between the side lengths when going from the large shape to the smaller shape and vice versa. You can show the Launch Video here to reinforce the relationships between corresponding angles and corresponding sides of similar figures.(Language)</p>",
+                        "Introduce the vocabulary of scale factor and connect it to the work from previous problems. Discussing the pair of similar rectangles below can spring board the conversation.",
+                        "<p>Ask students to describe the relationship between the side lengths when going from the large shape to the smaller shape and vice versa. You can show the Launch Video here to reinforce the relationships between corresponding angles and corresponding sides of similar figures.(Language)</p>",
                         "<p></p>",
                         "<p>This Launch Video gives students a dynamic representation of similar figures.</p>",
                         "<p>A man is building houses for his cat and dog, and he wants their houses to be similar to his own. As he puts the roofs on the houses, he discusses their characteristics. The pairs of corresponding sides of the triangular roofs are highlighted in succession, as are the pairs of corresponding angles. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "NjIU7qTNK5_oC7fX",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Suggested Questions</strong></p>",
+                        "<ul><li>How would you describe the relationship between the side lengths when going from the large shape to the smaller shape and vice versa? (Answers will vary. Focus the conversation on the lengths of the sides.)</li><li> What would you multiply each side length of the small rectangle by to get the larger rectangle?  (3) </li><li>What would you multiply each side length of the larger rectangle to get the smaller rectangle? (1/3) </li><li>What scale factor was used to turn Mug into Zug? (2)  </li><li>What scale factor was used to turn Mug into Bug? (3) </li></ul>"
                       ]
                     }
                   },
@@ -2098,6 +2107,7 @@
                       "format": "html",
                       "text": [
                         "<p>Repeat some of the questions above for triangles. It is best if you use the original nose (Triangle O) as the reference.</p>",
+                        "<ul><li>Which mouth belongs to Mug? (L) Zug? (J)  Bug? (N)  Glug? (K)  Lug? (M)  How do you know? (Answers will vary.  Focus the conversation on scale factor and/or rules to create the figures.)</li><li>Which nose belongs to Mug? (O) Zug? (R)  Bug? (S)  Glug? (P) Lug? (Q)  How do you know? (Answers will vary.  Focus the conversation on scale factor and/or rules to create the figures.)</li></ul>",
                         "<p>As part of the Summarize or as an extension, you could extend the idea of similar rectangles to similar quadrilaterals. On grid paper, draw a quadrilateral (or a parallelogram) that is not a rectangle. Make a similar quadrilateral using a scale factor of 2. (To do this, students need to keep corresponding angles congruent. Limiting it to nonrectangular parallelograms would be a bit easier.) Compare the corresponding lengths of the two figures. Compare the measures of the corresponding angles.</p>",
                         "<p></p>",
                         "<p>All the triangles and rectangles are in the correct orientation to make it easier to reason about similarity when comparing corresponding sides. Rotate Rectangle J (or draw a new rectangle that looks like J rotated) and ask students whether this rectangle is similar to Rectangle L. Some students may say it is not similar because comparing the bases and the heights results in different ratios. However, similarity of shapes does not change under a rotation (or a flip).</p>"
@@ -2146,7 +2156,7 @@
           "description": "Problem 3.1",
           "ordinal": 1,
            "title": "SAS 3.1 Using Proportional Reasoning to Rep-tile",
-          "subtitle": "",
+          "subtitle": "The Area Connection",
           "sections": [
             {
               "type": "overview",
@@ -2246,7 +2256,7 @@
                       "text": [
                         "<p><u><strong>Launch (Getting Started)</strong></u></p>",
                         "<p><u><em>Connecting to Prior Knowledge</em></u></p>",
-                        "<p>In the previous Investigation, students explored the relationship between the corresponding sides, corresponding angles, perimeters, and areas of similar figures. This Problem continues students’ exploration of scale factors and similarity by rep-tiling, or building shapes from copies of smaller, similar shapes.</p>",
+                        "<p>In the previous Investigation, students explored the relationship between the corresponding sides, corresponding angles, perimeters, and areas of similar figures. This Problem continues students’ exploration of scale factors and similarity by rep-tiling, or building shapes from copies of smaller, similar shapes with a focus on the area change.</p>",
                         "<p>In each of these contexts, students study how the areas of two similar figures are related to the scale factor. It is often surprising to students that if they apply a scale factor of 2 to a figure (or in general, n), the area becomes four times as great (in general, n2 as great).</p>",
                         "<p>At this stage, students should not be concerned with area calculations. Instead, students use rep-tiles to see that when they apply a scale factor of 2, it requires four copies of the original figure. In this case, students measure area using the original figure as the unit rather than units of square inches or square centimeters.</p>"
                       ]
@@ -2259,8 +2269,7 @@
                       "format": "html",
                       "text": [
                         "<p><u>Presenting the Challenge</u></p>",
-                        "<p>Launch Video</p>",
-                        "<p>This Launch video animates a section of the Introduction in the Student Edition. The animation shows two tessellations and asks students to think about the difference between the tessellations. From this, students can identify what patterns can be used to classify a tessellation as a rep-tile. Use this animation either as a supplement or a replacement of the first section of the Introduction in the Student Edition.  </p>"
+                        "<p>Use the diagrams in the student edition. </p>"
                       ]
                     }
                   },
@@ -2419,7 +2428,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Listen to students as they are discussing the questions in the What If.  Use their responses to frame your summary.</p>"
+                        "<p>Listen to students as they are discussing the shapes that would rep-tile in the Initial Challenge.  Find student work examples to highlight the scale factor and area change relationship to use in the Summary.  Listen to how students reason through the student claims in the What If Situations. Use their responses to frame your summary.</p>"
                       ]
                     }
                   }
@@ -2441,7 +2450,7 @@
                         "<p><u><em>Solutions and Strategies</em></u><em> </em></p>",
                         "<p>You can have different groups of students display their rep‑tiles during the Summarize. Students can use their copies of use <strong>Learning Aid 3.1C Rep-tile Recording Sheet</strong>  or a large classroom poster during a gallery walk to draw some conclusions. Students should look at the displayed rep‑tiles and record any new information or questions that they have about rep‑tiles. Groups can share their observations, but be sure they provide explanations. <strong>Teaching Aid: Answers for Triangles or Teaching Aid: Answers for Quadrilaterals</strong> could be used as well. </p>",
                         "<p>Encourage the class to verify the explanations or to ask questions of each other. Ask questions that require students to focus on the relationship between the scale factor and areas of the similar figures. Students should be able to articulate that the area of the larger rep-tile figure is the square of the scale factor times the original area. They should have mental images of the rep-tiles to support that fact.  </p>",
-                        "<p>Have groups share what they found on the Situations they worked on from the What If section. </p>"
+                        "<p>Have groups share what they decided about the student claims from the What If Situations.</p>"
                       ]
                     }
                   },
@@ -2474,8 +2483,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>How many smaller rectangles do I need to make the next larger rep‑tile figure? (5) </li><li>How many rectangles are there altogether? (9) </li><li>Predict what will happen for the next rep‑tile figure. (You will need 16 total rectangles to make the next rep‑tile figure.) </li><li>What pattern do you see when extending the rep‑tile figures? (You can find out how many of the original copies are needed to make the rep‑tile figure by using the scale factor. You need to square the scale factor to find the number of rectangles needed for the rep‑tile.) </li><li>Predict how many rectangles we’ll need for the 10th rep‑tile figure.  (10<sup>2</sup> or 100 rectangles)</li></ul>"
+                        "<ul><li>How many smaller rectangles do I need to make the next larger rep‑tile figure? (5) </li><li>How many rectangles are there altogether? (9) </li><li>Predict what will happen for the next rep‑tile figure. (You will need 16 total rectangles to make the next rep‑tile figure.) </li><li>What pattern do you see when extending the rep‑tile figures? (You can find out how many of the original copies are needed to make the rep‑tile figure by using the scale factor. You need to square the scale factor to find the number of rectangles needed for the rep‑tile.) </li><li>Predict how many rectangles we’ll need for the 10th rep‑tile figure.  (10<sup>2</sup> or 100 rectangles)</li><li>What do you know about the relationship of scale factor and area change for two similar figures?  (scale factor squared is the area change)</li></ul>"
                       ]
                     }
                   },
@@ -2484,6 +2492,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
+                        "Use the same type of questions when discussing the triangle rep-tiles. Sketch a triangle or quadrilateral or use What If Situation B.",
                         "<p>Sketch a triangle or quadrilateral for the class to use to answer these questions.</p>",
                         "<ul><li>Can you subdivide this triangle or quadrilateral into smaller congruent triangles or quadrilaterals? What is the scale factor? How do the perimeters and areas compare? (Answers may vary. If the scale factor is 1/2, then the perimeter of each smaller triangle or quadrilateral is 1/2 the perimeter of the larger triangle or quadrilateral. The area of each smaller triangle or quadrilateral is 1/4 the area of the larger one. For a scale factor of 1/3, the perimeter of the smaller triangle is 1/3 the perimeter of the larger triangle. The area is 1/9 the area of the larger triangle.)</li></ul>"
                       ]
@@ -2538,9 +2547,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Students may say that the pattern is found by adding consecutive odd integers, and the sum is the square of the number of integers being summed. For example, the sum of the first 5 odd integers is 52, or 25. The sum of the first 10 odd integers is 10<sup>2</sup>, or 100. Some students may verbalize this to say that the sum of the first n odd integers is n<sup>2</sup>.</p>",
-                        "<p></p>",
-                        "<p>Have a conversation about What If Situation B. Students understanding of triangles, angles of a triangle, and ratios are all addressed in this question. It is a chance to gather information on what students are understanding about triangles and lay some groundwork for future work in Investigations 3 and 4.</p>"
+                        "<p>Students may say that the pattern is found by adding consecutive odd integers, and the sum is the square of the number of integers being summed. For example, the sum of the first 5 odd integers is 52, or 25. The sum of the first 10 odd integers is 10<sup>2</sup>, or 100. Some students may verbalize this to say that the sum of the first n odd integers is n<sup>2</sup>.</p>"
                       ]
                     }
                   },
@@ -2695,7 +2702,7 @@
                       "text": [
                         "<p><u>Presenting the Challenge</u></p>",
                         "<p>Display Rectangle A and Triangle B for the class. Tell the class that their challenge is to draw similar figures with the conditions given in the Problem.</p>",
-                        "<p><strong>Implementation Note:</strong> Assign one or two from each set to partner groups.  Have students create posters to present their findings.</p>"
+                        "<p><strong>Implementation Note:</strong> Assign one or two from each set in the Initial Challenge to partner groups.  Have students create posters to present their findings.</p>"
                       ]
                     }
                   },
@@ -2747,7 +2754,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>Can using corresponding sides help you? (yes)</li><li>Can using corresponding angle help you? (yes)</li><li>What is the scale factor from one shape to the other?  (Answers will vary.)</li></ul>"
+                        "<ul><li>Can using corresponding sides help you? (yes)</li><li>Can using corresponding angle help you? (yes)</li><li>What is the scale factor from one shape to the other?  (Answers will vary.)</li><li>What do you we know about the relationship between scale factor and area change?  (Scale factor squared is the area change)</li></ul>"
                       ]
                     }
                   },
@@ -2771,7 +2778,8 @@
                         "<p><u>Planning for the Summary</u></p>",
                         "<p>What evidence will you use in the summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>",
                         "<p><em>Now What Do You Know?</em></p>",
-                        "<p><em>How can you use scale factors to draw similar figures (scale drawings)? How can you use scale factors to find missing information about angle measures? Area? Perimeter?</em></p>"        ]
+                        "<p><em>How can you use scale factors to draw similar figures (scale drawings)? How can you use scale factors to find missing information about angle measures? Area? Perimeter?</em></p>",
+                        "(As you are circulating during the summary select student work from the design criteria in the Initial Challenge to use for the summary discussion- select work that is correct and incorrect to help students work on justifying their ideas about scale factor and area relationships. Choose examples from the What If Situations to discuss how to use scale factor to find missing side lengths.)"     ]
                     }
                   }
                 ]
@@ -2801,7 +2809,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Implementation Note:</strong> As an optional enrichment activity, you can hand out copies of <strong>Learning Aid 3.2B: Polygon Sets</strong> for students to extend their understanding of similarity to other polygons. As a further extension, you can assign side lengths to the polygons on this Learning Aid and ask students to find missing side measures.</p>"
+                        "<p><strong>Implementation Note:</strong> As an optional enrichment activity, you can hand out copies of <strong>Learning Aid 3.2B: Polygon Sets</strong> for students to extend their understanding of similarity to other polygons. As a further extension, you can assign side lengths to the polygons on this Learning Aid and ask students to find missing side measures. Note: Students will have an activity like this in Problem 4.3.</p>"
                       ]
                     }
                   },
@@ -2812,7 +2820,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions</strong> </p>",
-                        "<p>As the students work with <strong>Learning Aid 3.3B: Polygon Sets</strong>:</p>",
+                        "<p>As the students work with <strong>Learning Aid 3.2B: Polygon Sets</strong>:</p>",
                         "<ul><li>In each set, which polygons are similar? Explain how you know. (Rectangles A and C are similar, Parallelograms B and C are similar, Decagons A and B are similar, and Stars A and C are similar. For the rectangles, we need to check only the side lengths. The corresponding side lengths from one figure to the other must grow by the same scale factor. For the others, we need to check the angle measurements as well. For a pair of similar figures, angle measures are congruent.)</li></ul>"
                       ]
                     }
@@ -2824,6 +2832,7 @@
                       "format": "html",
                       "text": [
                         "<p><u>Making the Mathematics Explicit </u></p>",
+                        "Suggested questions<ul><li>What does a whole number scale factor do to change a shape? (It makes a larger similar figure)</li><li>What does a fractional scale factor do to change a shape? (It makes a smaller similar figure.)</li><li>How did you draw _____?  (Answers will vary depending on the criteria and shape.)</li><li>How did scale factor help you to draw _____? (Answers will vary depending on the criteria and shape.)</li><li>What is the relationship between scale factor and area?  (scale factor squared will give you the area change)</li><li>How did you find the missing side lengths in the What If Situations?  (Answers will vary.  Focus the conversation on their use of scale factor.)</li></ul> ",
                         "<p>Students should be solidifying the use of scale factor and how it effects length, perimeter and area of similar figures. Having conversations on how they created the similar rectangle or triangle for the constraints will make this understanding visible. This is an example of a conversation that took place in one classroom about creating Rectangle R:</p>",
                         "<p></p>",
                         "<p>Teacher:    How did you draw Rectangle R?</p>",
@@ -3000,9 +3009,7 @@
                       "text": [
                         "<p><u><strong>Launch (Getting Started)</strong></u></p>",
                         "<p><u>Connecting to Prior Knowledge</u></p>",
-                        "<p>Launch Video</p>",
-                        "<p>This animation provides students with the context of Problem 3.3. Show your students this animation before reading through the Student Edition Introduction. Students will see that math can help them to solve real-world problems, such as how to measure the distance across a wide river.  </p>",
-                        "<p>Describe the Problem to the class. Ask how it is similar to Problem 3.2. Have the class identify the similar triangles and find the corresponding angles and sides. You may want to introduce the term nested in the Launch for this Problem to describe the two triangles pictured in Problem 3.3 in the Student Edition. It is a handy, though nontechnical, way to describe a smaller triangle within a larger triangle, where the triangles share an angle.  (Language)</p>",
+                        "<p>Describe the Problem to the class. Ask students to compare the ideas to Problem 3.2. Have the class identify the similar triangles and find the corresponding angles and sides. You may want to introduce the term nested in the Launch for this Problem to describe the two triangles pictured in Problem 3.3 in the Student Edition. It is a handy, though nontechnical, way to describe a smaller triangle within a larger triangle, where the triangles share an angle.  (Language)</p>",
                         "<p>In the two previous Problems, we used the fact that if two triangles have congruent corresponding angles, then the triangles are similar. This is not generally true for other polygons. Explain why this is not true for parallelograms or rectangles. ( All rectangles have four 90° angles, yet not all rectangles are similar. Corresponding side lengths in two rectangles can have different scale factors. Likewise, for any parallelogram, we can stretch just one pair of sides, as in the diagram below. The parallelogram maintains the same angles but results in a figure that is not similar to the original.) </p>"
                       ]
                     }
@@ -3022,7 +3029,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>What shapes do you see on the diagram?</li><li>What measurements do you need? </li></ul>"
+                        "<ul><li>What shapes do you see on the diagram?</li><li>What measurements do you need? </li></ul>Refer to Problem 3.1 and the Rep-tiling with triangles. Do you see nested triangles in this rep-tile? Where?"
                       ]
                     }
                   },
@@ -3043,7 +3050,7 @@
                       "format": "html",
                       "text": [
                         "<p><u>Presenting the Challenge</u></p>",
-                        "<p>Have the students use the diagram to find the distance across the river.  Make sure they provide explanations for their methods. </p>"
+                        "<p>Have the students use the diagram to find the distance across the river.  Make sure they provide explanations for their methods. Have students work with a partner on this problem.  </p>"
                       ]
                     }
                   }
@@ -3119,7 +3126,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Look for students using scale factor to find missing sides lengths.  </p>"
+                        "<p>Look for examples of students using scale factor to find missing sides lengths.  </p>"
                       ]
                     }
                   }
@@ -3139,7 +3146,7 @@
                       "text": [
                         "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
                         "<p><u>Solutions and Strategies</u> </p>",
-                        "<p>When all groups have made their calculations, give each group a chance to share their work. If there are a variety of answers, ask the class why groups arrived at different answers. See if students can explain to others how to correct their work. This is a good opportunity to discuss accuracy with the class.</p>"
+                        "<p>When all groups have made their calculations, give each group a chance to share their work. If there are a variety of answers, ask the class why groups arrived at different answers. See if students can explain to others how to correct their work. This is a good opportunity to discuss accuracy and attending to precision with the class.</p>"
                       ]
                     }
                   },
@@ -3151,7 +3158,8 @@
                       "text": [
                         "<p><u>Making the Mathematics Explicit </u></p>",
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>Describe the relationship between the perimeter of the smaller triangle and the perimeter of the larger rectangle in the Initial Challenge? (The larger triangle has a perimeter that is 1.75 times as large.)  In the What If Situation B? (The larger triangle has a perimeter that is 4 times as large.)</li><li>Discuss What If Situation A and students’ thinking around Durrell’s suggestion. (Portrayal) (Answers will vary. This connects back to ideas of unit rate. The rep-tile would have to have measures that keep the 80:120 ratio, and end up fitting into 140 feet, so Durrell could use a triangle with sides 2’ : 3’ (or 1:1.5) and rep-tile that up to 140: 210)</li><li>In What If Situation B, what order do you think these students located the key points and measure the segments and angles?  Explain your reasoning. (Answers will vary.)</li></ul>"
+                        "<ul><li>Describe the relationship between the perimeter of the smaller triangle and the perimeter of the larger triangle in the Initial Challenge? (The larger triangle has a perimeter that is 1.75 times as large.)  In the What If Situation B? (The larger triangle has a perimeter that is 4 times as large.)</li><li>Discuss What If Situation A and students’ thinking around Durrell’s suggestion. (Portrayal) (Answers will vary. This connects back to ideas of unit rate. The rep-tile would have to have measures that keep the 80:120 ratio, and end up fitting into 140 feet, so Durrell could use a triangle with sides 2’ : 3’ (or 1:1.5) and rep-tile that up to 140: 210)</li><li>In What If Situation B, what order do you think these students located the key points and measure the segments and angles?  Explain your reasoning. (Answers will vary.)</li></ul>",
+                        "Discuss the Did You Know picture of the Louisville Slugger Museum and Factory.  Relate it to Problem 1.1 and the Mystery teacher."
                       ]
                     }
                   },
@@ -3287,7 +3295,7 @@
                       "text": [
                         "<p><u><strong>Launch (Getting Started)</strong></u></p>",
                         "<p><u>Connecting to Prior Knowledge</u></p>",
-                        "<p>Students extend their notions of similarity of triangles from previous Investigations to similarity of parallelograms (including rectangles). Specifically, the ratios of adjacent sides of parallelograms are emphasized since parallelograms have at most two different pairs of congruent angles and two different side lengths.</p>",
+                        "<p>Students extend their notions of similarity of triangles from previous Investigations to similarity of rectangles. Specifically, the ratios of adjacent sides of rectangles. By comparing their ideas about similar triangles to other similar figures, such as rectangles, students deepen their understanding of similarity. For example, two rectangles can have congruent corresponding angles but not be similar. This is not true for triangles.</p>",
                         "<p>By comparing their ideas about similar triangles to other similar figures, such as parallelograms, students deepen their understanding of similarity. For example, two parallelograms can have congruent corresponding angles but not be similar. This is not true for triangles.</p>",
                         "<p></p>",
                         "<p>Display <strong>Teaching Aid 4.1A: Girl with Fish</strong> or use the pictures in the Student Edition. Tell the class the images were formed on a computer.</p>"
@@ -3368,9 +3376,9 @@
                         "<p>In this animation, a robot finds a device that takes his picture. The robot distorts the photo in a few different ways. The robot wonders which of the distortions is similar to the original picture.</p>",
                         "<p>Tell students that, in this Problem, they will look at sets of quadrilaterals and triangles to determine if they are similar.  They will use scale factors and ratios of adjacent sides to determine similarity.</p>",
                         "<p></p>",
-                        "<p>Pass out <strong>Learning Aid 4.1A Rectangles Sets 1-3 and Learning Aid 4.1C Ratio Recording Sheet</strong> for the initial Challenge. Distribute <strong>Learning Aid 4.1B Triangles Sets 4-7 </strong>for students to use during What If Situation A.</p>",
+                        "<p>Pass out Learning Aid 4.1A Rectangles Sets and Triangle Set and Learning Aid 4.1C Ratio Recording Sheet for the initial Challenge. Distribute Learning Aid 4.1B What If, Situation B:  Shape Pairs for students to use during What If Situation A.</p>",
                         "<p></p>",
-                        "<p><strong>Implementation Notes:</strong> You might want to assign one group of parallelograms and one group of triangles to some groups and have other groups do the rest. The focus of this Problem is on internal ratios – ratio of two adjacent sides in one figure being equivalent to the two corresponding adjacent sides in the other similar figure. For quadrilaterals suggest they use short to long side as the ratio. Then ask in the Summary about long side to short. Both produce equal ratios, but the order of the ratio needs to be consistent.</p>"
+                        "<p><strong>Implementation Notes:</strong> The focus of this Problem is on internal ratios – ratio of two adjacent sides in one figure being equivalent to the two corresponding adjacent sides in the other similar figure. For quadrilaterals suggest they use short to long side as the ratio. Then ask in the Summary about long side to short. Both produce equal ratios, but the order of the ratio needs to be consistent.</p>"
                       ]
                     }
                   }
@@ -3390,7 +3398,7 @@
                       "text": [
                         "<p><u><strong>Explore (Digging In)</strong></u></p>",
                         "<p><u>Providing for Individual Needs</u></p>",
-                        "<p>As you circulate, check to make sure that students are writing correct ratios  for each rectangle and for each parallelogram. You can hand out copies of <strong>Learning Aid 4.1D: Ratio Recording Sheet</strong> (Agency, Identity, Ownership) if your students would benefit from using a table to organize their work. Provide any necessary help in keeping track of the place of corresponding measures in the ratios. The numerators of each ratio need to relate corresponding lengths, and the denominators of each ratio need to relate corresponding lengths.</p>",
+                        "<p>As you circulate, check to make sure that students are writing correct ratios for each rectangle and for each triangle. You can hand out copies of <strong>Learning Aid 4.1C: Ratio Recording Sheet</strong> (Agency, Identity, Ownership) if your students would benefit from using a table to organize their work. Provide any necessary help in keeping track of the place of corresponding measures in the ratios. The numerators of each ratio need to relate corresponding lengths, and the denominators of each ratio need to relate corresponding lengths.</p>",
                         "<p>Students should label their work in some way, such as length to width or width to length. Students need to be consistent in what they consider to be the width or length in terms of which one is the long side, and which one is the short side on rectangles and parallelograms.</p>"
                       ]
                     }
@@ -3415,7 +3423,7 @@
                         "<p><u>Planning for the Summary</u></p>",
                         "<p><u></u>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>",
                         "<p><em>Now What Do You Know?</em></p>",
-                        "<p><em>How does the ratio of adjacent side lengths with in two similar figures compare to the ratio of corresponding side lengths across two similar figures? How are these ratios helpful in solving problems?</em></p>"
+                        "<p><em>How does the ratio of adjacent side lengths with in two similar figures compare to the ratio of corresponding side lengths across two similar figures? How are these ratios helpful in solving problems?</em> (As you are circulating during the Explore, look for students making sense of using ratios and connecting this reasoning with their understanding of scale factors.)</p>"
                       ]
                     }
                   },
@@ -3447,7 +3455,7 @@
                         "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
                         "<p><u>Solutions and Strategies </u></p>",
                         "<p>Discuss which figures were similar in the Initial Challenge. Be sure that students’ ratios name corresponding side lengths in the numerators of the ratios, and that they name corresponding side lengths in the denominators of the ratios.</p>",
-                        "<p>Students should compare the ratios for both similar and non-similar figures. This is an opportunity to review or assess their understanding of equivalent fractions.</p>"
+                        "<p>Students should compare the ratios for both similar and non-similar figures. This is an opportunity to review or assess their understanding of equivalence.</p>"
                       ]
                     }
                   },
@@ -3523,7 +3531,8 @@
                       "text": [
                         "<p>Students might claim that Triangle A and Triangle B are similar because, for each triangle, the difference between the long side and the middle side is 1 meter. Additionally, the difference between the middle side and the short side is 3 meters for each triangle. This is a common mistake that students make, and it may be mentioned in your class. If it is not, you might consider stating this in the form of a student conjecture:</p>",
                         "<ul><li>George thought Triangle B was similar to Triangle A. Why might he be thinking this? (The difference between the long side and the middle side is 1 meter, and the difference between the middle side and the short side is 3 meters for each triangle.) </li><li>What would you tell George in order to explain why he is incorrect?  (One reason why these triangles are not similar is because their angles  are different.)</li></ul>",
-                        "<p>Have a discussion about the What If questions. Focus the conversation on scale factors and internal ratios.</p>"
+                        "<p>Have a discussion about the What If questions. Focus the conversation on scale factors and internal ratios.</p>",
+                        "<strong>Mathematical Note:</strong>  If corresponding angles are equal in a triangle, the triangles are similar as Rolland’s Strategy suggests. But students may not know this but some might make that observation. It is true which will be prove in 8th grade.  In Jessica’s strategy she is assuming if A is similar to C and C is similar to D , then A and D are similar. This also has not been proven true, but for now it makes sense for students informally."
                       ]
                     }
                   },
@@ -3534,9 +3543,9 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>Choose a pair of similar figures.  What is the scale factor? (Answers will vary depending on the pair chosen.)</li><li>How did you find the scale factor? (Answers will vary.  Students will talk about matching corresponding sides and using division to find the scale factor.)</li><li>How does the method you used to find scale factor relate to the ratio of corresponding sides in two similar figures? (Answers will vary.  One example follows.</li></ul>",
+                        "<ul><li>Choose a pair of similar figures.  What is the scale factor? (Answers will vary depending on the pair chosen.)</li><li>How did you find the scale factor? (Answers will vary.  Students will talk about matching corresponding sides and using division to find the scale factor.)</li><li>How does the method you used to find scale factor relate to the ratio of corresponding sides in two similar figures? (Answers will vary.  One example from a classroom:</li></ul>",
                         "<p></p>",
-                        "<p>Darnell: Rectangles B and C are similar with a scale factor of 1.5 from B to C.</p>",
+                        "<p>Darnell: Rectangles B and C in the Initial Challenge are similar with a scale factor of 1.5 from B to C.</p>",
                         "<p></p>",
                         "<p>Teacher: How did you find it?</p>",
                         "<p></p>",
@@ -3597,11 +3606,12 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Problem Overview</strong></p>",
-                        "<p>In this Problem, students use shadows and mirror reflections to estimate the heights of real objects that are difficult to measure directly. They collect relevant pieces of data in order to make the estimate. They also discuss the accuracy of these estimated heights and point out problems that might arise from these methods. The shadow method in Problem 4.3 needs to be done outside on a sunny day.</p>",
+                        "<p>In this Problem, students use shadows and mirror reflections to estimate the heights of real objects that are difficult to measure directly. Students recognize that the mathematics they have learned so far in this Unit is helpful for solving problems in real life.</p>",
                         "<p>If it is not sunny or you do not have the resources to complete this Problem outside, you can use an alternative method of measuring inaccessible heights or lengths using a picture.</p>",
                         "<p>Students recognize that the mathematics they have learned so far in this Unit is helpful for solving problems in real life.</p>",
-                        "<p>The parallel lines of the rays can be used to show that the corresponding angles are equal. This was done in Shapes and Designs. In the Shapes Unit students find that they can only draw one (unique) triangle given three angle measures. This means that if two triangles have corresponding angles equal, then the figures are congruent and hence similar. Sun and shadows always produce similar triangles.</p>",
-                        "<p><strong>Mathematics Note:</strong>  We have only used adjacent sides because we are dealing with are triangles and rectangles. The sides being compared do not have to be adjacent if we are working with other figures. For example, in a hexagon the ratio of any two sides will work as long as the ratio of the same corresponding side lengths in the other hexagon work.</p>"
+                        "<p>The parallel lines of the rays can be used to show that the corresponding angles are equal. This was done in Shapes and Designs. In the Shapes and Designs Unit students find that they can only draw one (unique) triangle given three angle measures. This means that if two triangles have corresponding angles equal, then the figures are congruent and hence similar. Sun and shadows always produce similar triangles.</p>",
+                        "<p><strong>Mathematics Note:</strong>  We have only used adjacent sides because we are dealing with are triangles and rectangles. The sides being compared do not have to be adjacent if we are working with other figures. For example, in a hexagon the ratio of any two sides will work as long as the ratio of the same corresponding side lengths in the other hexagon work.</p>",
+                        "Implementation Note:  What If Situation A has two experiments. One is using the shadow method to find the height of a tall object near the school.  The second experiment is using the mirror method to find the heigh of a tall object in your school.  You could do one or both of these with your students."
                       ]
                     }
                   },
@@ -3702,24 +3712,13 @@
                     }
                   },
                   {
-                    "id": "LybR7I23x3rl7qmb",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><u>Presenting the Challenge</u></p>",
-                        "<p>If it is a sunny day begin with the shadow method and find the height of the school building, tree or other large object. If it isn’t a sunny day you can begin with the mirror method in the Initial Challenge followed by the Statue of Liberty example of the shadow method in What If Situation A and the camera distances in What If Situation B.</p>"
-                      ]
-                    }
-                  },
-                  {
                     "id": "k_0fP7Lqx40SzYje",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions</strong> </p>",
-                        "<ul><li>Today is a sunny day, and we are going to use the sun to help us estimate heights that we are interested in measuring. When the sun shines on objects, the objects cast shadows. From your experiences, what can you say about the shadows that the sun casts? (Students may note that the length of the shadow depends on the height of the object. They may also note that shadows for all objects change length as the sun moves during the day. Shadows are longer when the sun is near the horizon, whether in the morning or evening, and very short in the middle of the day when the sun is more directly overhead. They may mention that shadows are cast in the same direction for all objects.) </li><li>Let’s think about the relationship between the length of a shadow and the height of an object. At the same time of day, how will the shadows of two objects that have different heights compare? (The shadow of the taller object will be longer.) </li><li>This means that the length of the shadow depends on the height of the object. Imagine that you are looking at a tall pole when the sun casts a shadow for the pole. In your mind, move around the pole until you can see both the pole and its shadow from the side. Sketch what you think this would look like. (Make sure the students envision the two legs of the right triangle made by the pole and the shadow.) (Portrayal)</li><li>Who would like to share their sketch with the class? (A sample sketch is shown below)</li></ul>"
+                        "<ul><li>What do you notice about the drawing of the mirror method to find the height of the principal?  (Answers will vary)</li><li>Are there similar figures in the drawing?  (Two triangles.)</li><li>How do you know they are similar? (Answers will vary.  The corresponding angles are congruent)</li><li>If it is a sunny day, we can use the sun to help us estimate heights that we are interested in measuring. When the sun shines on objects, the objects cast shadows. From your experiences, what can you say about the shadows that the sun casts? (Students may note that the length of the shadow depends on the height of the object. They may also note that shadows for all objects change length as the sun moves during the day. Shadows are longer when the sun is near the horizon, whether in the morning or evening, and very short in the middle of the day when the sun is more directly overhead. They may mention that shadows are cast in the same direction for all objects.) </li><li>Let’s think about the relationship between the length of a shadow and the height of an object. At the same time of day, how will the shadows of two objects that have different heights compare? (The shadow of the taller object will be longer.) </li><li>This means that the length of the shadow depends on the height of the object. Imagine that you are looking at a tall pole when the sun casts a shadow for the pole. In your mind, move around the pole until you can see both the pole and its shadow from the side. Sketch what you think this would look like. (Make sure the students envision the two legs of the right triangle made by the pole and the shadow.) (Portrayal)</li><li>Who would like to share their sketch with the class? (A sample sketch is shown below)</li></ul>"
                       ]
                     }
                   },
@@ -3761,7 +3760,8 @@
                         "<p>Hold up a meter stick.</p>",
                         "<ul><li>How can you use this meter stick and the sun to find out how tall our school is?  What measurements do you need to take? (Students can describe using similar triangles consisting of the objects (the school and the meter stick), their shadows, and the sun’s rays to determine the height of the school.  They need to find the measurements of both shadows and the meter stick.)</li></ul>",
                         "<p>In order to reinforce the importance of checking angles, you might hold the meter stick at an obtuse angle to the ground and stick:</p>",
-                        "<ul><li>Can I hold the meter stick this way and use the resulting shadow length to find the height of the building? Why or why not? (No, the school’s wall is perpendicular to the ground, so the meter stick must also be perpendicular.)</li><li>The parallel lines of the rays can be used to show that the corresponding angles are equal. This was done in Shapes and Designs. You could choose to tell them that sun and shadows always produce similar triangles.  </li></ul>"
+                        "<ul><li>Can I hold the meter stick this way and use the resulting shadow length to find the height of the building? Why or why not? (No, the school’s wall is perpendicular to the ground, so the meter stick must also be perpendicular.)</li><li>The parallel lines of the rays can be used to show that the corresponding angles are equal. This was done in Shapes and Designs. You could choose to tell them that sun and shadows always produce similar triangles.  </li></ul>",
+                        "Tell students that in this problem they will look for similar figures and use them to find missing measurements.  Distribute Learning Aid 4.2: Reflection and Shadow Diagrams.  Have students now begin the Problem in groups of 2. "
                       ]
                     }
                   },
@@ -3791,7 +3791,9 @@
                       "text": [
                         "<p><u><strong>Explore (Digging In)</strong></u></p>",
                         "<p><u>Providing for Individual Needs</u></p>",
-                        "<p>Some students do not have many opportunities to make actual measurements of distances larger than a desktop. If this is true of your students, some groups may need help in getting started. One of the important goals of this Problem is to give students these measuring experiences, as well as experience using similarity to solve a real-world problem. Be prepared to assist students in their measuring. As you are monitoring their progress, ask students to estimate what they are measuring to gauge the reasonableness of their answers.</p>"
+                        "<p>Suggested questions</p><ul><li>Would a scale factor or ratio help you find the height? (Yes. Either one could be used.)</li><li>How is this problem similar to Problem 4.1? (We are finding a missing side of a triangle.)</li><li>Do your measurements seem reasonable?(Answers will vary.)</li></ul>",
+                        "When students are working with the mirror method in What If Situation A monitor how they are making their measurements.  Remind them to walk backwards until they see the reflection of the top of the object in the mirror. ", 
+                        "<p>When students are working with the shadow method in What If Situation A monitor how they are making their measurements.  Assist them with measuring from end to end on the shadow. </p>"
                       ]
                     }
                   },
@@ -3804,7 +3806,8 @@
                         "<p><u>Planning for the Summary</u></p>",
                         "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>",
                         "<p><em>Now What Do You Know?</em></p>",
-                        "<p><em>Describe how similar figures can be used to find missing measurements of  objects that cannot be measured directly. Is there another method? Explain.</em></p>"
+                        "<p><em>Describe how similar figures can be used to find missing measurements of  objects that cannot be measured directly. Is there another method? Explain.</em></p>",
+                        "(As you are circulating during the Explore find examples of students using scale factors or ratios to find the heights of the objects.  Use this student work in the summary discussion.)"
                       ]
                     }
                   }
@@ -3824,7 +3827,7 @@
                       "text": [
                         "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
                         "<p><u>Solutions and Strategies </u></p>",
-                        "<p>Collect the students’ data and display a line plot of their estimates. Discuss the patterns of the various data entries and possible sources of error.</p>"
+                        "<p>Collect the students’ answers for each of the missing lengths.  Collect student heights for the tall objects from the shadow and/or mirror method in What If Situation A.</p>"
                       ]
                     }
                   },
@@ -3837,7 +3840,19 @@
                         "<p><u>Making the Mathematics Explicit</u> </p>",
                         "<p>The parallel lines of the rays can be used to show that the corresponding angles are equal. This was done in Shapes and Designs. In the Shapes Unit students find that they can only draw one (unique) triangle given three angle measures. This means that if two triangles have corresponding angles equal, then the figures are congruent and hence similar. Or you could choose to tell them that sun and shadows always produce similar triangles.</p>",
                         "<p>We could push this fact here or just remind students that the two triangles are similar. That is if corresponding angles of two triangles are congruent/equal, then the triangles are similar.</p>",
-                        "<ul><li>What is a typical unit of measure to describe the height of the building (or other object you choose) based on the class data? Why? (Possible answer. Meters: They are big enough that we won’t have huge numbers recorded, but small enough that we will have an answer larger than 1.) </li><li>Who can describe to the class exactly how your group used similar triangles to estimate the measure of the building? (Answers will vary. Students can reference the sketches they drew. Bring out the vocabulary of scale factors and/or ratios.) </li><li>Can you always use this method to estimate the height of an object? Why or why not? (Yes, the method always works because facts about similar triangles do not change. However, if it is not sunny out, a different method must be used.)</li><li>Why does each angle of the large triangle have the same measure as the corresponding angle of the small triangle? (The statue is at a right angle to the ground, so we are careful to hold the stick at a right angle to the ground, too. Another angle is the angle formed by the sun and the ground. For two nearby points at a common time, the sun appears at the same angle, making these corresponding angles congruent. Finally, the third angle must be the same in each triangle since all three interior angles of a triangle must add to 180°.) </li><li>What does this suggest about the similarity of the triangles? (Because all of the angles of the two triangles are congruent, the triangles are similar.)</li><li>When using the shadow method, what problems might affect the accuracy of your answer? (Answers will vary.)</li></ul>"
+                        "<ul><li>What is a typical unit of measure to describe the height of the building (or other object you choose) based on the class data? Why? (Possible answer. Meters: They are big enough that we won’t have huge numbers recorded, but small enough that we will have an answer larger than 1.) </li><li>Who can describe to the class exactly how your group used similar triangles to estimate the measure of the building? (Answers will vary. Students can reference the sketches they drew. Bring out the vocabulary of scale factors and/or ratios.) </li><li>Can you always use this method to estimate the height of an object? Why or why not? (Yes, the method always works because facts about similar triangles do not change. However, if it is not sunny out, a different method must be used.)</li><li>Why does each angle of the large triangle have the same measure as the corresponding angle of the small triangle? (The statue is at a right angle to the ground, so we are careful to hold the stick at a right angle to the ground, too. Another angle is the angle formed by the sun and the ground. For two nearby points at a common time, the sun appears at the same angle, making these corresponding angles congruent. Finally, the third angle must be the same in each triangle since all three interior angles of a triangle must add to 180°.) </li><li>What does this suggest about the similarity of the triangles? (Because all of the angles of the two triangles are congruent, the triangles are similar.)</li><li>When using the shadow method, what problems might affect the accuracy of your answer? (Answers will vary.)</li><li>How did you use scale factor/ratio to find the height of the principal? (Answers will vary) </li><li>How did you use scale factor/ratio to find the height of the Statue of Liberty? (Answers will vary) </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "9vLHYANbthvg8Y-F",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>When discussing their heights from the experiment(s) in What If Situation A discuss reasonableness of their answers.  Have students share their sketches to emphasize the similar triangles in the experiments.</p>",
+                        "<ul><li>How tall is the _______ from the mirror method experiment? (Answers will vary.  Discuss reasonable results) </li><li>How tall is the _______ from the shadow experiment? (Answers will vary.  Discuss reasonable results) </li><li>How did you find the height of _______ from the mirror method experiment? (Answers will vary.  Bring out the use of scale factor and/or ratios)  </li><li>How did you find the height of _______ from the shadow method experiment? (Answers will vary.  Bring out the use of scale factor and/or ratios) </li><li>How did you use scale factor/ratio to find the height of the tree? (Answers will vary) </li></ul>"
                       ]
                     }
                   },
@@ -3874,8 +3889,8 @@
         {
           "description": "SAS Problem 4.3",
           "ordinal": 3,
-          "title": "SAS 4.3 Using Shadows to Find Heights",
-          "subtitle": "",
+          "title": "SAS 4.3 More Imposters",
+          "subtitle": "Pulling it All Together",
           "sections": [
             {
               "type": "overview",
@@ -3975,7 +3990,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>How did we decide which Wumps were imposters? (Answer will vary. Students should be able to talk about scale factor, corresponding angle measures, ratios of adjacent sides, coordinate rules, etc.)</li><li>Could I use these ideas to find imposters with other shapes? (Yes.)</li></ul>"
+                        "<ul><li>How did we decide which Wumps were imposters? (Answer will vary. Students should be able to talk about scale factor, corresponding angle measures, ratios of adjacent sides, coordinate rules, etc.)</li><li>How could we use these ideas to find imposters with other shapes? (Answer will vary. Students should be able to talk about scale factor, corresponding angle measures, ratios of adjacent sides, coordinate rules, etc.)</li></ul>"
                       ]
                     }
                   },
@@ -3987,7 +4002,7 @@
                       "text": [
                         "<p><u>Presenting the Challenge</u></p>",
                         "<p>Have students work with a partner on this Problem. In the Initial Challenge they will look at each set and determine which shape is the imposter. Have each partner group work on 2-3 sets.  </p>",
-                        "<p>Distribute <strong>Learning Aid 4.3: Sets of Figures.</strong></p>"
+                        "<p>Distribute <strong>Learning Aid 4.3: Sets of Figures.</strong> Implementation Note:  Have each partner group work on 2-3 of the sets in the Initial Challenge.  </p>"
                       ]
                     }
                   }
@@ -4020,7 +4035,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>What tools might help you? (Answers will vary. Ruler, angle ruler, protractor)</li><li>What are the corresponding sides of the two figures? (Answers will vary depending on the two figures)</li><li>What is the ratio between the adjacent sides? (Answers will vary depending on the two figures)</li><li>What is the scale factor between the corresponding sides of the two figures? (Answers will vary depending on the two figures)</li><li>What are the corresponding angles of the two figures? (Answers will vary depending on the two figures)</li></ul>"
+                        "<ul><li>What tools might help you? (Answers will vary. Ruler, angle ruler, protractor)</li><li>What are the corresponding sides of the two figures? (Answers will vary depending on the two figures)</li><li>What is the ratio between the adjacent sides? (Answers will vary depending on the two figures)</li><li>What is the scale factor between the corresponding sides of the two figures? (Answers will vary depending on the two figures)</li><li>What are the corresponding angles of the two figures? (Answers will vary depending on the two figures)</li></ul>",
+                        "Have students put their sketches for What If Situation B on large paper to display and discuss in the Summary."
                       ]
                     }
                   },
@@ -4033,7 +4049,9 @@
                         "<p><u>Planning for the Summary</u></p>",
                         "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>",
                         "<p><em>Now What Do You Know?</em></p>",
-                        "<p><em>What are strategies for identifying if shapes have been scaled (similar figures) or if the shapes are imposters? </em></p>"        ]
+                        "<p><em>What are strategies for identifying if shapes have been scaled (similar figures) or if the shapes are imposters? </em></p>",
+                        "(Take note of the strategies that students are using to decide which shape is the imposter so that these can be discussed in the Summary. Look for students who are using scale factors, equivalent ratios of adjacent sides, and rep-tiles.)"      
+                      ]
                     }
                   }
                 ]
@@ -4064,7 +4082,7 @@
                       "text": [
                         "<p><u>Making the Mathematics Explicit</u> </p>",
                         "<p>Suggested Questions</p>",
-                        "<ul><li>How did you decide which one was the imposter? (Answers will vary. Connect the strategies.)</li></ul>"
+                        "<ul><li>How did you decide which one was the imposter? (Answers will vary. Connect the strategies.)</li><li>Do you have any What If questions? (Answers will vary.)</li></ul>"
                       ]
                     }
                   },
@@ -4116,7 +4134,7 @@
                         "<p>Teacher: Did anyone think about it another way?</p>",
                         "<p></p>",
                         "<p>Carter: We used ratios. The ratio of the short side to long side in the medium and large rectangle are equivalent and the small rectangle is not. This also proves that they are similar, and that the small rectangle is the imposter.</p>",
-                        "<ul><li>Find the perimeter of one of the triangles in the Initial Challenge.</li><li>Do you have any What If questions? (Answers will vary.)</li></ul>"
+                        "<ul><li>Find the perimeter of one of the triangles in the Initial Challenge.</li><li>Which claims do you agree with in What If Situation A? (All are correct except Juan’s claim.) </li><li>Look at the work from other groups for What If Situation B.  Do you agree with their sketches?  Why or Why not?  (Answers will vary.) </li></ul>"
                       ]
                     }
                   },
@@ -4208,7 +4226,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>The Mathematical Reflections questions provide an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over the time (TIME). </p>",
+                        "<p>The Mathematical Reflection provides an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over the time (TIME). </p>",
                         "<p>After the class discussion, students can record their responses to the Mathematical Reflection to create a record of their current understandings of the big ideas of the Unit. </p>",
                         "<p>A teacher can gain an understanding of student thinking during a discussion of the reflection question. Then one can assess individual understanding based on each student’s written work.</p>",
                         "<p>Students have been working with factors and multiples and the multiplicative structure of numbers. Students will reflect upon what they know about the multiplicative structure of numbers. </p>",
@@ -4299,7 +4317,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>The Mathematical Reflection questions provide an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over the time (TIME). </p>",
+                        "<p>The Mathematical Reflection provides an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over the time (TIME). </p>",
                         "<p>After the class discussion, students can record their responses to the Mathematical Reflection to create a record of their current understandings of the big ideas of the Unit. </p>",
                         "<p>A teacher can gain an understanding of student thinking during a discussion of the reflection question. Then one can assess individual understanding based on each student’s written work.</p>",
                         "<p>Students have been working with factors and multiples and the multiplicative structure of numbers. Students will reflect upon what they know about the multiplicative structure of numbers. </p>"
@@ -4388,7 +4406,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>The Mathematical Reflection questions provide an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over the time (TIME). </p>",
+                        "<p>The Mathematical Reflection provides an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over the time (TIME). </p>",
                         "<p>After the class discussion, students can record their responses to the Mathematical Reflection to create a record of their current understandings of the big ideas of the Unit. </p>",
                         "<p>A teacher can gain an understanding of student thinking during a discussion of the reflection questions. Then one can assess individual understanding based on each student’s written work.</p>",
                         "<p>Students have been working with factors and multiples and the multiplicative structure of numbers. Students will reflect upon what they know about the multiplicative structure of numbers. </p>"
@@ -4468,7 +4486,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>The Mathematical Reflection questions provide an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over time (TIME). </p>",
+                          "<p>The Mathematical Reflection provides an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over time (TIME). </p>",
                           "<p>After the class discussion, students can record their responses to the Mathematical Reflection to create a record of their current understandings of the big ideas of the Unit. </p>",
                           "<p>A teacher can gain an understanding of student thinking during a discussion of the reflection questions. Then assess individual understanding based on each student’s written work.</p>",
                           "<p>Students have been working with factors and multiples and the multiplicative structure of numbers. Students will reflect upon what they know about the multiplicative structure of numbers</p>"
@@ -4496,6 +4514,60 @@
                           "<p><strong>Reflecting on Student Learning</strong></p>",
                           "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
                           "<ul><li>What evidence in students’ work shows an understanding the ideas in this Unit?</li><li>What mathematical ideas will still need emphasis?</li><li>What opportunities exist in the rest of the Unit, or in future Units, to extend and connect the students’ learning?</li></ul>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "NAGrB8uSWatTdJKy",
+                      "title": "Text 1",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>These are two examples of student responses to the Mathematical Reflection after Investigation 4:  </p>",
+                          "<p><strong>Student 1</strong></p>",
+                          "<p>When it comes to similar figures and proportional reasoning I feel like I have learned quite a lot about the two. With similar figures, they must have the same angle measures and the same type of shape. </p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "gEwsBfUvj481JnUO",
+                      "title": "Variety of similar triangles",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/stretching-and-shrinking/images/manyTrianglesMR.png",
+                        "filename": "curriculum/stretching-and-shrinking/images/manyTrianglesMR.png"
+                      }
+                    },
+                    {
+                      "id": "NWOBUPmMmMCCKjBD",
+                      "title": "Text 2",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>These triangles are similar, they have the same angle measures and type of shape. But, not all of these triangles are similar. The triangle furthest to the right is not similar to the rest of the triangles in the picture. The three triangles on the left are all right triangles. But, the triangle on the right is not a right triangle. So, this means that the triangle on the right is not similar to the rest of the triangles in the picture. </p>",
+                          "<p>When it comes to proportional reasoning, I have learned that on copiers, you can choose a percentage that decides the size of what you’re copying. We went over how to prove what percentage a person chose when copying a shape. For example, the original copy would be 100%. If you wanted a shape half that size, you would have to choose the 50% option. But, if you wanted a shape 2 times that size, you would choose the 200% option. To prove what percentage a person used, you would have to measure the sides and compare that to the original photo. When a person uses the 50% option on a copier, they will notice the side lengths are half of what the original side lengths are. When you are using the 200% option on a copier, you will notice that the side lengths are double what the original side lengths were on the original.</p>",
+                          "<p>We used the Wumps to find out about stretching, shrinking, and moving images on a coordinate plane. When stretching and shrinking a shape on the coordinate plane you can use a set of rules to change the shape. For example, (3x,2y) This is multiplying the original coordinates. But, the coefficients are not equal, so this shape would not be similar to the original shape. But, if the rule was (5x,5y), the original shape would grow 5 times larger and still be a similar shape. To shrink a shape your coefficients, have to be less than one. For example, (.5x,.5y) or, (.3x,.7y), these would both shrink the shape. But, (.3x,.7y ) would not create a similar figure because the coefficients are not equal.</p>",
+                          "<p>To move a shape on the coordinate plane you would need to use addition and subtraction in your rules. If you are adding to x, the shape would be moving that many units to the right, if you were subtracting from x, your shape would be moving that many units to the left. But, if you wanted to move your shape up, you would add to y. If you wanted to move your shape down, you would need to subtract from y.  For example, (7+x,y-4), or, (5+x,5+y). ( 7+x, y-4 ) would move the shape 4 units down and 7 units to the right. (5+x,5+y)would move your shape 5 units to the right and 5 units up.  </p>",
+                          "<p>To find a missing side on a similar figure, you first must verify that the shapes are in fact similar. You can start by measuring the angles, unless the shape is a rectangle, in which case, all the angles will be 90 degrees. If the corresponding angles are congruent, and the corresponding side lengths are related, you have a similar figure. To find the missing side length, you first want to determine which of the shapes provides the most information(shape 1). Then, you must find the scale factor from that shape, to the shape that has that missing side you’re trying to find. To do this, you should divide one of the sides on the larger shape by the corresponding side on the smaller shape. Once you have an answer, you can check it by multiplying one of the lengths by the quotient of your division problem. Once you’re verified correct, multiply the side on shape 1 that corresponds to the missing side on shape 2, and you will get the missing length.</p>",
+                          "<p>I have learned quite a bit in Unit 3. From proportional reasoning, to similar figures, I feel quite confident in what I have learned. </p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "-_hOM4CaEWO_MbAk",
+                      "title": "Text 3",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Student 2</strong></p>",
+                          "<p>Mathematical Reflection U3 </p>",
+                          "<p>In Unit 3, we learned all about similar figures, area, perimeter, proportional reasoning, and scale factors. We did activities such as rubber band stretchers to make a scaled-up version of pictures.  Similar figures are not always congruent but they share some of the same qualities. They have the same angles but can have different side lengths. They are also different in size but not shape. There is always a scale factor for similar figures. For example, a 4 by 4 square and a 16 by 16 square are similar, and they have a scale factor of 4 because square #1 times 4 is square #2. Proportional reasoning is when you compare objects/shapes using clues like quantity, value, shape, size, etc. Area is the space inside of a shape, to find the area of a rectangle, you do length × width. But for triangles you do (length × width) times 1/2. Perimeter is the distance around a shape. In order to find perimeter, you add up all the side lengths of your shape. Ex: The perimeter of a 3 by 3 square would be 3 + 3 + 3 + 3 = 12. When a scale factor is applied to a shape, the perimeter will be sized up by how much the scale factor is. Ex: if the perimeter of a rectangle is 12 and the scale factor is 3, the new rectangle’s area will be 36. Area on the other hand works a bit differently. If the scale factor for a triangle is 4, the new copy’s area will actually be 16x greater than the original triangle. Cool, right?   </p>",
+                          "<p>During this unit, we spent a lot of time talking about the Wump Family. The Wumps are a group of creatures that are of different sizes and shapes. Our job was to discover whether one wump was similar to another. I did this by measuring angles, perimeter, area, and side lengths. I needed all the information I could get to figure out whether the Wumps were really family. The difficult part about this investigation was plotting out every creature. Graphs are another thing we talked about in this unit. I learned that when you add to x your figure will move to the right, and if you subtract from x it moves to the left! For y, on the other hand, when you subtract from it your figure moves down and when you add to y it will move up. After graphing all the Wumps, I first started off by measuring their side lengths, then I found the angle measurements, then the area and perimeter. I compared all this information to see if the angles were the same and if a scale factor could be applied to one Wump to make another. Ex: If one Wump had a mouth 3 units long and another had a mouth 9 units long, I would know the scale factor between those two is 3. After the investigation was over, we had finally sorted out the Wump family tree. This experiment showed me how area and perimeter act differently when a scale factor is applied. </p>",
+                          "<p>Finally, in this unit, we talked about ratios, specifically internal ratios.  We made ratios out of shapes (for example, if a triangle has a base of 4cm and one side is 8cm then we know the ratio would be 4:8) and then compare them. Say there&#x27;s another triangle with a base of 8cm and one side length that&#x27;s 16cm (8:16) if we compared 4:8 and 8:16 we would see that the second triangle is 2x bigger than the first. This is another method of figuring out whether two shapes are similar or not. Always remember that ratios compare two parts, not part to whole, careful not to get them confused with fractions. I hope this report helped you understand our 3rd unit a bit better. :)  </p>",
+                          "<p></p>"
                         ]
                       }
                     }

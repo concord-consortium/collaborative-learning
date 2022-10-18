@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import { Instance, SnapshotIn, types, getSnapshot } from "mobx-state-tree";
 import React from "react";
 import { SelectionBox } from "../components/selection-box";
-import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer, 
+import { computeStrokeDashArray, DeltaPoint, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, StrokedObject, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
 import { SvgToolModeButton } from "../components/drawing-toolbar-buttons";
@@ -36,7 +36,7 @@ export const LineObject = StrokedObject.named("LineObject")
           return true;
         }
       }
-      return false;  
+      return false;
     },
 
     get boundingBox() {
@@ -49,7 +49,7 @@ export const LineObject = StrokedObject.named("LineObject")
         se.x = Math.max(se.x, point.x);
         se.y = Math.max(se.y, point.y);
       }
-      return {nw, se};  
+      return {nw, se};
     }
   }))
   .actions(self => ({
@@ -60,7 +60,8 @@ export const LineObject = StrokedObject.named("LineObject")
 export interface LineObjectType extends Instance<typeof LineObject> {}
 export interface LineObjectSnapshot extends SnapshotIn<typeof LineObject> {}
 
-export const LineComponent = observer(function LineComponent({model, handleHover} : IDrawingComponentProps) {
+export const LineComponent = observer(function LineComponent({model, handleHover, handleDrag}
+  : IDrawingComponentProps) {
   if (model.type !== "line") return null;
   const { id, x, y, deltaPoints, stroke, strokeWidth, strokeDashArray } = model as LineObjectType;
   const commands = `M ${x} ${y} ${deltaPoints.map((point) => `l ${point.dx} ${point.dy}`).join(" ")}`;
@@ -72,7 +73,10 @@ export const LineComponent = observer(function LineComponent({model, handleHover
     strokeWidth={strokeWidth}
     strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}
     onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null}
-    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null} />;
+    onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null}
+    onMouseDown={(e)=> handleDrag?.(e, model)}
+    pointerEvents={"visible"}
+    />;
 });
 
 export class LineDrawingTool extends DrawingTool {

@@ -2,8 +2,10 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { ModalProvider } from "react-modal-hook";
+import { DocumentContentModel } from "../../models/document/document-content";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { ChatPanel } from "./chat-panel";
+import { createSingleTileContent } from "../../utilities/test-utils";
 
 const mockPostComment = jest.fn();
 
@@ -61,6 +63,12 @@ jest.mock("../../hooks/use-stores", () => ({
   useDocumentFromStore: () => ({
     getDocument: () => ({ undefined })
   }),
+  useCurriculumOrDocumentContent:(key: string) => {
+    return DocumentContentModel.create(createSingleTileContent({
+      type: "Text",
+      title: "test title"
+    }));
+  },
   useUIStore: () => ({
     showChatPanel: true,
     selectedTileIds: []
@@ -93,24 +101,14 @@ describe("ChatPanel", () => {
     ));
     expect(screen.getByTestId("select-doc-message")).toBeInTheDocument();
   });
-  it("should show comment card if document has been selected", () => {
+  it("Should show chat list with thread if document selected", () => {
     const mockCloseChatPanel = jest.fn();
     render((
       <ModalProvider>
         <ChatPanel activeNavTab={ENavTab.kMyWork} focusDocument="document-key" onCloseChatPanel={mockCloseChatPanel} />
       </ModalProvider>
     ));
-    expect(screen.getByTestId("comment-card")).toBeInTheDocument();
+    expect(screen.getByTestId("chat-list")).toBeInTheDocument();
+    expect(screen.getAllByTestId("comment-card").length).toBe(1);
   });
-  it("should show comment card if there is a focused document outside of My Work", () => {
-    const mockCloseChatPanel = jest.fn();
-    render((
-      <ModalProvider>
-        <ChatPanel activeNavTab={ENavTab.kProblems} focusDocument="document-key"
-                    onCloseChatPanel={mockCloseChatPanel} />
-      </ModalProvider>
-    ));
-    expect(screen.getByTestId("comment-card")).toBeInTheDocument();
-  });
-
 });
