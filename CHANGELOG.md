@@ -44,25 +44,39 @@ Curriculum Enhancements:
 - MST dataset fixes [#183523506](https://www.pivotaltracker.com/story/show/183523506)
 
 ### Asset Sizes
+|        File                                                                           |    Size   |
+|---------------------------------------------------------------------------------------|-----------|
+| vendor-main.2048c2e8.js                                                               |      2.1M |
+| Geometry.2acdd728.js                                                                  |      886K |
+| Dataflow.7b0fe82c.js                                                                  |      735K |
+| common-Diagram-SharedVariables.ae94f7b3.js                                            |      611K |
+| index.2f810b939d662c464cda.js                                                         |      397K |
+| SharedVariables.e47d7d7d.js                                                           |       86K |
+| Table.d5e285a4.js                                                                     |       84K |
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.1c62df70.js |       51K |
+| common-SharedVariables-Drawing.96107f60.js                                            |       33K |
+| common-Dataflow-Geometry.0bd31c83.js                                                  |       26K |
+| Drawing.f47d1726.js                                                                   |       26K |
+| DataCard.797d1870.js                                                                  |       18K |
+| Text.7e4ddd5d.js                                                                      |       16K |
+| Image.a3400d7c.js                                                                     |       16K |
+| Diagram.0ce29ffe.js                                                                   |      9.6K |
+| Starter.b26bfa75.js                                                                   |      1.2K |
+| SharedDataSet.98119794.js                                                             |      254B |
+
 |        File                   |    Size   |
 |-------------------------------|-----------|
-| 2.1M | vendor-main.2048c2e8.js |
-| 886K | Geometry.2acdd728.js |
-| 735K | Dataflow.7b0fe82c.js |
-| 611K | common-Diagram-SharedVariables.ae94f7b3.js |
-| 397K | index.2f810b939d662c464cda.js |
-| 86K | SharedVariables.e47d7d7d.js |
-| 84K | Table.d5e285a4.js |
-| 51K | common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.1c62df70.js |
-| 33K | common-SharedVariables-Drawing.96107f60.js |
-| 26K | common-Dataflow-Geometry.0bd31c83.js |
-| 26K | Drawing.f47d1726.js |
-| 18K | DataCard.797d1870.js |
-| 16K | Text.7e4ddd5d.js |
-| 16K | Image.a3400d7c.js |
-| 9.6K | Diagram.0ce29ffe.js |
-| 1.2K | Starter.b26bfa75.js |
-| 254B | SharedDataSet.98119794.js |
+| main.f4a598b6.css             |      162K |
+| Dataflow.5351851e.css         |       32K |
+| Diagram.d44044a2.css          |       11K |
+| Table.779f3837.css            |       10K |
+| Geometry.9119587f.css         |       10K |
+| DataCard.4b49ee7d.css         |      8.4K |
+| Image.b5870984.css            |      6.3K |
+| Drawing.030947a3.css          |      5.2K |
+| Text.32b9f6a4.css             |      4.5K |
+| SharedVariables.427c48a1.css  |      696B |
+| Starter.3c909986.css          |      207B |
 
 ## Version 3.0.0 - August 26, 2022
 
