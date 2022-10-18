@@ -53,11 +53,9 @@ export const FocusDocumentTracker = observer(({ navTabPanelElt }: IProps) => {
           focusDoc && (focusDocument = focusDoc);
           focusSec && (focusSection = focusSec);
         }
-
         ui.setFocusDocument(focusSection
                               ? `${focusDocument}/${focusSection}`
                               : focusDocument);
-
       }, 30);
     }
   }, [navTabPanelElt, prevTab, prevUpdates, ui, ui.focusDocUpdates]);

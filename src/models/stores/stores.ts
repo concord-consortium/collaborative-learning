@@ -74,14 +74,11 @@ export function createStores(params?: ICreateStores): IStores {
       problemWorkspace: {
         type: ProblemWorkspace,
         mode: "1-up",
-      }
-      ,
+      },
       learningLogWorkspace: {
         type: LearningLogWorkspace,
         mode: "1-up"
       },
-      activeSectionIndex: 0
-
     }),
     groups: params?.groups || GroupsModel.create({ acceptUnknownStudents: params?.isPreviewing }),
     class: params?.class || ClassModel.create({ name: "Null Class", classHash: "" }),

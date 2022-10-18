@@ -39,7 +39,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const { tabs, isResourceExpanded, isExpanderShown } = this.props;
     const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
             user } = this.stores;
-
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const resizePanelWidth = 6;
     const collapseTabWidth = 44;

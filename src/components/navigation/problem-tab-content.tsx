@@ -54,7 +54,7 @@ export const ProblemTabContent: React.FC<IProps>
     });
     ui.setSelectedTile();
     ui.updateFocusDocument();
-    ui.setSelectedSectionIndex(titleArgButReallyType, sections); //
+    ui.setSelectedSectionIndex(titleArgButReallyType, sections);
 };
 
   const handleToggleSolutions = () => {

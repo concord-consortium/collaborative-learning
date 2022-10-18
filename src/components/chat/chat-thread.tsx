@@ -22,8 +22,8 @@ interface IProps {
   onDeleteComment?: (commentId: string, commentContent: string) => void;
   focusDocument?: string;
   focusTileId?: string;
-  isDocumentView: boolean;
-  setIsDocumentView: Dispatch<SetStateAction<boolean>>;
+  isDocumentView?: boolean;
+  setIsDocumentView?: Dispatch<SetStateAction<boolean>>;
 }
 
 export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
@@ -33,14 +33,13 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
     setExpandedThread(focusTileId || 'document');
   },[focusTileId]);
 
+  const document = useDocumentOrCurriculumMetadata(focusDocument);
   // make focusId null if undefined so it can be compared with tileId below.
-  const document = useDocumentOrCurriculumMetadata(focusDocument);// added
-
-
   const focusId = focusTileId === undefined ? null : focusTileId;
   const focusedItemHasNoComments = !chatThreads?.find(item => (item.tileId === focusId));
   const [expandedThread, setExpandedThread] = useState(focusId || '');
   const ui = useUIStore();
+
   const handleThreadClick = (clickedId: string | null) => {
     if (clickedId === expandedThread) {
       // We're closing the thread so clear out expanded thread.
@@ -55,13 +54,8 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   };
 
   const handleDocumentClick = () => {
-    setIsDocumentView((prevState) => !prevState);
+    if (setIsDocumentView !== undefined) setIsDocumentView((prevState) => !prevState);
   };
-
-
-  //architecture question?
-  //idea 1: make one state array - arrayToMap (line70), fill it with either chatThreads or
-  //docsCommentedOn (commented-documents.tsx), they have different structure, see copy and paste
 
   return (
     <div className="chat-list" data-testid="chat-list">

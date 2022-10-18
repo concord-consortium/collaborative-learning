@@ -29,7 +29,7 @@ export const UIModel = types
     dividerPosition: kDividerHalf,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kProblems,
-    activeSectionIndex: types.maybe(types.number), //added
+    activeSectionIndex: types.maybe(types.number), //keeps track of which section we are in
     activeGroupId: "",
     selectedTileIds: types.array(types.string),
     selectedCommentId: types.maybe(types.string),
@@ -58,7 +58,7 @@ export const UIModel = types
     },
     get workspaceShown () {
       return self.dividerPosition < kDividerMax;
-    },
+    }
   }))
   .actions((self) => {
     const alert = (textOrOpts: string | UIDialogModelSnapshotWithoutType, title?: string) => {

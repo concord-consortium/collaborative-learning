@@ -298,73 +298,73 @@ describe("useDocumentSyncToFirebase hook", () => {
     expect(mockUpdate).toHaveBeenCalledTimes(3);
   });
 
-  // it("monitors problem documents with additional logging when DEBUG_SAVE == true", async () => {
-  //   libDebug.DEBUG_SAVE = true;
-  //   const { user, firebase, document } = specArgs(ProblemDocument, "xyz");
+  it("monitors problem documents with additional logging when DEBUG_SAVE == true", async () => {
+    libDebug.DEBUG_SAVE = true;
+    const { user, firebase, document } = specArgs(ProblemDocument, "xyz");
 
-  //   expect.assertions(18);
+    expect.assertions(18);
 
-  //   // logs monitoring of document
-  //   let unmount: () => void;
-  //   let waitFor: (callback: () => boolean | void) => Promise<void>;
-  //   await jestSpyConsole("log", async spy => {
-  //     const { unmount: _unmount, waitFor: _waitFor } =
-  //       renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
-  //     unmount = _unmount;
-  //     waitFor = _waitFor;
-  //     await waitFor(() => expect(spy).toBeCalledTimes(1));
-  //     expect(mockRef).toHaveBeenCalledTimes(0);
-  //     expect(mockUpdate).toHaveBeenCalledTimes(0);
-  //   });
+    // logs monitoring of document
+    let unmount: () => void;
+    let waitFor: (callback: () => boolean | void) => Promise<void>;
+    await jestSpyConsole("log", async spy => {
+      const { unmount: _unmount, waitFor: _waitFor } =
+        renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+      unmount = _unmount;
+      waitFor = _waitFor;
+      await waitFor(() => expect(spy).toBeCalledTimes(1));
+      expect(mockRef).toHaveBeenCalledTimes(0);
+      expect(mockUpdate).toHaveBeenCalledTimes(0);
+    });
 
-  //   // saves when visibility changes with additional logging
-  //   mockRef.mockClear();
-  //   mockUpdate.mockClear();
-  //   await jestSpyConsole("log", async spy => {
-  //     document.setVisibility("public");
-  //     await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-  //     expect(mockRef).toHaveBeenCalledWith(`${user.id}/problem/${document.key}`);
-  //     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-  //     await waitFor(() => expect(spy).toBeCalledTimes(1));
-  //   });
+    // saves when visibility changes with additional logging
+    mockRef.mockClear();
+    mockUpdate.mockClear();
+    await jestSpyConsole("log", async spy => {
+      document.setVisibility("public");
+      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/problem/${document.key}`);
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(spy).toBeCalledTimes(1));
+    });
 
-  //   // doesn't respond to title change
-  //   mockRef.mockClear();
-  //   mockUpdate.mockClear();
-  //   await jestSpyConsole("log", spy => {
-  //     document.setTitle("New Title");
-  //     expect(mockRef).toHaveBeenCalledTimes(0);
-  //     expect(mockUpdate).toHaveBeenCalledTimes(0);
-  //     expect(spy).not.toBeCalled();
-  //   });
+    // doesn't respond to title change
+    mockRef.mockClear();
+    mockUpdate.mockClear();
+    await jestSpyConsole("log", spy => {
+      document.setTitle("New Title");
+      expect(mockRef).toHaveBeenCalledTimes(0);
+      expect(mockUpdate).toHaveBeenCalledTimes(0);
+      expect(spy).not.toBeCalled();
+    });
 
-  //   // responds to properties change when we publish problem documents (pubCount)
-  //   mockRef.mockClear();
-  //   mockUpdate.mockClear();
-  //   await jestSpyConsole("log", spy => {
-  //     document.setProperty("foo", "bar");
-  //     expect(mockRef).toHaveBeenCalledTimes(1);
-  //     expect(mockUpdate).toHaveBeenCalledTimes(1);
-  //     expect(spy).not.toBeCalled();
-  //   });
+    // responds to properties change when we publish problem documents (pubCount)
+    mockRef.mockClear();
+    mockUpdate.mockClear();
+    await jestSpyConsole("log", spy => {
+      document.setProperty("foo", "bar");
+      expect(mockRef).toHaveBeenCalledTimes(1);
+      expect(mockUpdate).toHaveBeenCalledTimes(1);
+      expect(spy).not.toBeCalled();
+    });
 
-  //   // saves when content changes with additional logging
-  //   mockRef.mockClear();
-  //   mockUpdate.mockClear();
-  //   await jestSpyConsole("log", async spy => {
-  //     document.content?.addTile("text");
-  //     await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-  //     expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-  //     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-  //     await waitFor(() => expect(spy).toBeCalledTimes(1));
-  //   });
+    // saves when content changes with additional logging
+    mockRef.mockClear();
+    mockUpdate.mockClear();
+    await jestSpyConsole("log", async spy => {
+      document.content?.addTile("text");
+      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(spy).toBeCalledTimes(1));
+    });
 
-  //   // logs unmonitoring of document
-  //   await jestSpyConsole("log", async spy => {
-  //     unmount();
-  //     await waitFor(() => expect(spy).toBeCalledTimes(1));
-  //   });
-  // });
+    // logs unmonitoring of document
+    await jestSpyConsole("log", async spy => {
+      unmount();
+      await waitFor(() => expect(spy).toBeCalledTimes(1));
+    });
+  });
 
   it("monitors personal documents with additional logging when DEBUG_SAVE == true", async () => {
     libDebug.DEBUG_SAVE = true;
@@ -446,154 +446,154 @@ describe("useDocumentSyncToFirebase hook", () => {
     expect(mockUpdate).toHaveBeenCalledTimes(0);
   });
 
-  // it("fails gracefully on problem document save errors", async () => {
-  //   libDebug.DEBUG_SAVE = false;
+  it("fails gracefully on problem document save errors", async () => {
+    libDebug.DEBUG_SAVE = false;
 
-  //   expect.assertions(16);
+    expect.assertions(16);
 
-  //   // alternate failures and success (on retry)
-  //   mockUpdate
-  //     .mockImplementationOnce(() => Promise.reject("No save for you!"))
-  //     .mockImplementationOnce(value => Promise.resolve(value))
-  //     .mockImplementationOnce(() => Promise.reject("No save for you!"))
-  //     .mockImplementationOnce(value => Promise.resolve(value));
+    // alternate failures and success (on retry)
+    mockUpdate
+      .mockImplementationOnce(() => Promise.reject("No save for you!"))
+      .mockImplementationOnce(value => Promise.resolve(value))
+      .mockImplementationOnce(() => Promise.reject("No save for you!"))
+      .mockImplementationOnce(value => Promise.resolve(value));
 
-  //   const { user, firebase, document } = specArgs(ProblemDocument, "xyz");
-  //   const { waitFor } = renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
-  //   expect(mockRef).toHaveBeenCalledTimes(0);
-  //   expect(mockUpdate).toHaveBeenCalledTimes(0);
+    const { user, firebase, document } = specArgs(ProblemDocument, "xyz");
+    const { waitFor } = renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    expect(mockRef).toHaveBeenCalledTimes(0);
+    expect(mockUpdate).toHaveBeenCalledTimes(0);
 
-  //   // This use of waitFor makes debugging a failed test very difficult
-  //   // The error message from the expectation seems to be eaten by waitFor
-  //   // The only information will be that the test timed out and the number
-  //   // of assertions is wrong.
+    // This use of waitFor makes debugging a failed test very difficult
+    // The error message from the expectation seems to be eaten by waitFor
+    // The only information will be that the test timed out and the number
+    // of assertions is wrong.
 
-  //   // handles visibility change errors
-  //   mockRef.mockClear();
-  //   mockUpdate.mockClear();
-  //   await jestSpyConsole("warn", async spy => {
-  //     document.setVisibility("public");
-  //     // assert initial (failed) attempt
-  //     await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-  //     expect(mockRef).toHaveBeenCalledWith(`${user.id}/problem/${document.key}`);
-  //     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-  //     // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
-  //     // to send the document to firestore and the environment is not setup
-  //     // right
-  //     // https://www.pivotaltracker.com/story/show/183291353
-  //     await waitFor(() => expect(spy).toBeCalledTimes(2));
-  //     // trigger retry (successful) attempt
-  //     jest.runAllTimers();
-  //     await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
-  //     expect(mockRef).toHaveBeenCalledWith(`${user.id}/problem/${document.key}`);
-  //     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
-  //   });
+    // handles visibility change errors
+    mockRef.mockClear();
+    mockUpdate.mockClear();
+    await jestSpyConsole("warn", async spy => {
+      document.setVisibility("public");
+      // assert initial (failed) attempt
+      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/problem/${document.key}`);
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+      // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
+      // to send the document to firestore and the environment is not setup
+      // right
+      // https://www.pivotaltracker.com/story/show/183291353
+      await waitFor(() => expect(spy).toBeCalledTimes(2));
+      // trigger retry (successful) attempt
+      jest.runAllTimers();
+      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/problem/${document.key}`);
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
+    });
 
-  //   // handles content change errors
-  //   mockRef.mockClear();
-  //   mockUpdate.mockClear();
-  //   await jestSpyConsole("warn", async spy => {
-  //     document.content?.addTile("text");
-  //     // assert initial (failed) attempt
-  //     await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-  //     expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-  //     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-  //     // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
-  //     // to send the document to firestore and the environment is not setup
-  //     // right
-  //     // https://www.pivotaltracker.com/story/show/183291353
-  //     await waitFor(() => expect(spy).toBeCalledTimes(2));
-  //     // trigger retry (successful) attempt
-  //     jest.runAllTimers();
-  //     await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
-  //     expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-  //     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
-  //   });
-  // });
+    // handles content change errors
+    mockRef.mockClear();
+    mockUpdate.mockClear();
+    await jestSpyConsole("warn", async spy => {
+      document.content?.addTile("text");
+      // assert initial (failed) attempt
+      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+      // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
+      // to send the document to firestore and the environment is not setup
+      // right
+      // https://www.pivotaltracker.com/story/show/183291353
+      await waitFor(() => expect(spy).toBeCalledTimes(2));
+      // trigger retry (successful) attempt
+      jest.runAllTimers();
+      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
+    });
+  });
 
-  // it("fails gracefully on personal document save errors", async () => {
-  //   libDebug.DEBUG_SAVE = false;
+  it("fails gracefully on personal document save errors", async () => {
+    libDebug.DEBUG_SAVE = false;
 
-  //   expect.assertions(23);
+    expect.assertions(23);
 
-  //   // alternate failures and success (on retry)
-  //   mockUpdate
-  //     .mockImplementationOnce(() => Promise.reject("No save for you!"))
-  //     .mockImplementationOnce(value => Promise.resolve(value))
-  //     .mockImplementationOnce(() => Promise.reject("No save for you!"))
-  //     .mockImplementationOnce(value => Promise.resolve(value))
-  //     .mockImplementationOnce(() => Promise.reject("No save for you!"))
-  //     .mockImplementationOnce(value => Promise.resolve(value));
+    // alternate failures and success (on retry)
+    mockUpdate
+      .mockImplementationOnce(() => Promise.reject("No save for you!"))
+      .mockImplementationOnce(value => Promise.resolve(value))
+      .mockImplementationOnce(() => Promise.reject("No save for you!"))
+      .mockImplementationOnce(value => Promise.resolve(value))
+      .mockImplementationOnce(() => Promise.reject("No save for you!"))
+      .mockImplementationOnce(value => Promise.resolve(value));
 
-  //   const { user, firebase, document } = specArgs(PersonalDocument, "xyz");
-  //   const { waitFor } =
-  //     renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
-  //   expect(mockRef).toHaveBeenCalledTimes(0);
-  //   expect(mockUpdate).toHaveBeenCalledTimes(0);
+    const { user, firebase, document } = specArgs(PersonalDocument, "xyz");
+    const { waitFor } =
+      renderHook(() => useDocumentSyncToFirebase(user, firebase, document));
+    expect(mockRef).toHaveBeenCalledTimes(0);
+    expect(mockUpdate).toHaveBeenCalledTimes(0);
 
-  //   // handles title change errors
-  //   mockRef.mockClear();
-  //   mockUpdate.mockClear();
-  //   await jestSpyConsole("warn", async spy => {
-  //     document.setTitle("New Title");
-  //     // assert initial (failed) attempt
-  //     await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-  //     expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
-  //     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-  //     // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
-  //     // to send the document to firestore and the environment is not setup
-  //     // right
-  //     // https://www.pivotaltracker.com/story/show/183291353
-  //     await waitFor(() => expect(spy).toBeCalledTimes(2));
-  //     // trigger retry (successful) attempt
-  //     jest.runAllTimers();
-  //     await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
-  //     expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
-  //     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
-  //   });
+    // handles title change errors
+    mockRef.mockClear();
+    mockUpdate.mockClear();
+    await jestSpyConsole("warn", async spy => {
+      document.setTitle("New Title");
+      // assert initial (failed) attempt
+      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+      // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
+      // to send the document to firestore and the environment is not setup
+      // right
+      // https://www.pivotaltracker.com/story/show/183291353
+      await waitFor(() => expect(spy).toBeCalledTimes(2));
+      // trigger retry (successful) attempt
+      jest.runAllTimers();
+      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/personal/${document.key}`);
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
+    });
 
-  //   // handles property change errors
-  //   mockRef.mockClear();
-  //   mockUpdate.mockClear();
-  //   await jestSpyConsole("warn", async spy => {
-  //     document.setProperty("foo", "bar");
-  //     // assert initial (failed) attempt
-  //     await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-  //     expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
-  //     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-  //     // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
-  //     // to send the document to firestore and the environment is not setup
-  //     // right
-  //     // https://www.pivotaltracker.com/story/show/183291353
-  //     await waitFor(() => expect(spy).toBeCalledTimes(2));
-  //     // trigger retry (successful) attempt
-  //     jest.runAllTimers();
-  //     await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
-  //     expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
-  //     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
-  //   });
+    // handles property change errors
+    mockRef.mockClear();
+    mockUpdate.mockClear();
+    await jestSpyConsole("warn", async spy => {
+      document.setProperty("foo", "bar");
+      // assert initial (failed) attempt
+      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+      // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
+      // to send the document to firestore and the environment is not setup
+      // right
+      // https://www.pivotaltracker.com/story/show/183291353
+      await waitFor(() => expect(spy).toBeCalledTimes(2));
+      // trigger retry (successful) attempt
+      jest.runAllTimers();
+      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/metadata/${document.key}/properties`);
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
+    });
 
-  //   // handles content change errors
-  //   mockRef.mockClear();
-  //   mockUpdate.mockClear();
-  //   await jestSpyConsole("warn", async spy => {
-  //     document.content?.addTile("text");
-  //     // assert initial (failed) attempt
-  //     await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
-  //     expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-  //     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
-  //     // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
-  //     // to send the document to firestore and the environment is not setup
-  //     // right
-  //     // https://www.pivotaltracker.com/story/show/183291353
-  //     await waitFor(() => expect(spy).toBeCalledTimes(2));
-  //     // trigger retry (successful) attempt
-  //     jest.runAllTimers();
-  //     await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
-  //     expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
-  //     await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
-  //   });
-  // });
+    // handles content change errors
+    mockRef.mockClear();
+    mockUpdate.mockClear();
+    await jestSpyConsole("warn", async spy => {
+      document.content?.addTile("text");
+      // assert initial (failed) attempt
+      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(1));
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(1));
+      // FIXME-HISTORY: the second warning is from the tree-manager when it is trying
+      // to send the document to firestore and the environment is not setup
+      // right
+      // https://www.pivotaltracker.com/story/show/183291353
+      await waitFor(() => expect(spy).toBeCalledTimes(2));
+      // trigger retry (successful) attempt
+      jest.runAllTimers();
+      await waitFor(() => expect(mockRef).toHaveBeenCalledTimes(2));
+      expect(mockRef).toHaveBeenCalledWith(`${user.id}/content/${document.key}`);
+      await waitFor(() => expect(mockUpdate).toHaveBeenCalledTimes(2));
+    });
+  });
 
   it("sets window.currentDocument when DOCUMENT_DEBUG is true", () => {
     libDebug.DEBUG_DOCUMENT = true;
