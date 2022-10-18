@@ -26,7 +26,7 @@ const kTabSectionBorderWidth = 2;
 export const ProblemTabContent: React.FC<IProps>
   = observer(({ context, sections, showSolutionsSwitch, selectedIndex }: IProps) => {
   // console.log("<ProblemTabContent> with context", context);
-  console.log("sections are", sections);
+  // console.log("sections are", sections);
   const { isTeacher } = useUserStore();
   const ui = useUIStore();
   const problemPath = useProblemPathWithFacet(context);
@@ -47,8 +47,8 @@ export const ProblemTabContent: React.FC<IProps>
   }, [ui]);
 
   const handleTabClick = (titleArgButReallyType: string, typeArgButReallyTitle: string) => {
-    console.log("problem-tab-content.tsx > handleTabClick with titleArgButReallyType", titleArgButReallyType,
-    "typeArgButReallyTitle", typeArgButReallyTitle);
+    // console.log("problem-tab-content.tsx > handleTabClick with titleArgButReallyType", titleArgButReallyType,
+    // "typeArgButReallyTitle", typeArgButReallyTitle);
 
     // TODO: this function has its argument names reversed (see caller for details.)
     // We can't simply switch it, however, because that would introduce a breaking change
@@ -74,7 +74,6 @@ export const ProblemTabContent: React.FC<IProps>
           selectedIndex={ui.activeSectionIndex}
           data-focus-document={problemPath}
     >
-      {console.log("ui.activeSectionIndex", ui.activeSectionIndex)}
       <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
         <TabList className={classNames("tab-list", {"chat-open" : ui.showChatPanel})}>
           {sections?.map((section) => {

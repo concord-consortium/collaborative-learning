@@ -25,9 +25,7 @@ export const ChatPanelHeader: React.FC<IProps> = observer(({activeNavTab, newCom
           {/* <NotificationIcon className={`icon-image themed-negative ${activeNavTab}`}/> */}
           <DocumentsWithCommentsIcon
             className={`icon-image themed-negative ${activeNavTab}`}
-            onClick={()=>{
-              setIsDocumentView((prevState) => !prevState);
-            }}
+            onClick={()=> setIsDocumentView((prevState) => !prevState)}
           />
         </div>
         {/* The next line of code is commented out, but deliberately not removed,

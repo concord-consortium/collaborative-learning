@@ -42,7 +42,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
             user } = this.stores;
 
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
-    console.log("selectedTabIndex:", selectedTabIndex);
+    // console.log("selectedTabIndex:", selectedTabIndex);
     const resizePanelWidth = 6;
     const collapseTabWidth = 44;
     const resourceWidth = dividerPosition === kDividerMin
@@ -164,13 +164,13 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private handleSelectTab = (tabIndex: number) => {
-    console.log("handleSelectTab with tabIndex", tabIndex);
+    // console.log("handleSelectTab with tabIndex", tabIndex);
     const { tabs } = this.props;
     const { ui } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
       if (ui.activeNavTab !== tabSpec.tab) {
-        console.log("line 167");
+        // console.log("line 167");
         ui.setActiveNavTab(tabSpec.tab);
         ui.updateFocusDocument();
         const logParameters = {
@@ -182,7 +182,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
         // track this value in a member rather than state to avoid excessive renders
         this.topTabReset = tabSpec.tab;
         // must force refresh initially but not when value is reset
-        console.log("line 184 forceUpdate()");
+        // console.log("line 184 forceUpdate()");
         this.forceUpdate();
       }
     }

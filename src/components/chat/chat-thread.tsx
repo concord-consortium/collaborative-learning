@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {Dispatch, SetStateAction, useEffect, useState} from "react";
 import classNames from "classnames";
 import { UserModelType } from "../../models/stores/user";
 import { WithId } from "../../hooks/firestore-hooks";
@@ -22,12 +22,13 @@ interface IProps {
   onDeleteComment?: (commentId: string, commentContent: string) => void;
   focusDocument?: string;
   focusTileId?: string;
-  isDocumentView?: boolean;
+  isDocumentView: boolean;
+  setIsDocumentView: Dispatch<SetStateAction<boolean>>;
 }
 
 export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   onPostComment, onDeleteComment,
-  focusDocument, focusTileId, isDocumentView}) => {
+  focusDocument, focusTileId, isDocumentView, setIsDocumentView}) => {
   useEffect(() => {
     setExpandedThread(focusTileId || 'document');
   },[focusTileId]);
@@ -52,7 +53,11 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       setExpandedThread(clickedId || '');
     }
   };
-  const mockCurriculumDocument = { unit: "unit", problemDec: "1.1", section: "intro", path: "unit/1/1/intro" };
+
+  const handleDocumentClick = () => {
+    setIsDocumentView((prevState) => !prevState);
+  };
+
 
   //architecture question?
   //idea 1: make one state array - arrayToMap (line70), fill it with either chatThreads or
@@ -64,8 +69,12 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       {
         isDocumentView ?
         <>
-          <CommentedDocuments user={user} documentObj={document as CurriculumDocument} />
-          {/* {console.log("comment view \n array (chatThreads) is", chatThreads)} */}
+          <CommentedDocuments
+            user={user}
+            documentObj={document as CurriculumDocument}
+            handleDocumentClick={handleDocumentClick}
+          />
+          {console.log("comment view \n array (chatThreads) is", chatThreads)}
         </>
         :
         chatThreads?.map((commentThread: ChatCommentThread) => {

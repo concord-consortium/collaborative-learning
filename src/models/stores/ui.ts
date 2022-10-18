@@ -7,7 +7,6 @@ import { DocumentModelType } from "../document/document";
 import { LogEventName, Logger } from "../../lib/logger";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { ENavTab } from "../view/nav-tabs";
-import { tab } from "@testing-library/user-event/dist/tab";
 
 type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
 type StringDialogResolver = (value: string | PromiseLike<string>) => void;
@@ -27,7 +26,7 @@ type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 
 export const UIModel = types
   .model("UI", {
-    dividerPosition: kDividerMax,
+    dividerPosition: kDividerHalf,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kProblems,
     activeSectionIndex: types.maybe(types.number), //added
@@ -153,11 +152,11 @@ export const UIModel = types
 
       //added
       setSelectedSectionIndex(sectionSelected: string, sections: any){
-        console.log("sectionSelected", sectionSelected);
+        // console.log("sectionSelected", sectionSelected);
         // console.log("navTab", navTab);
         // const sections = navTab.sections;
         self.activeSectionIndex =  sections.findIndex((section: any) => section.type === sectionSelected);
-        console.log("our ActiveSectionTab is", self.activeSectionIndex);
+        // console.log("our ActiveSectionTab is", self.activeSectionIndex);
       },
       //
       setActiveStudentGroup(groupId: string) {

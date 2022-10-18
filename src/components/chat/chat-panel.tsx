@@ -98,6 +98,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
           focusDocument={focusDocument}
           focusTileId={focusTileId}
           isDocumentView={isDocumentView}
+          setIsDocumentView={setIsDocumentView}
         />
         : <div className="select-doc-message" data-testid="select-doc-message">
             Open a document to begin or view comment threads
