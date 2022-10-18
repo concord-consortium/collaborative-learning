@@ -1,5 +1,69 @@
 # Changelog
 
+## Version 3.1.0 - Oct 18, 2022
+
+Version 3.1.0 contains quite a few individual tile improvements and bug fixes as well as some larger changes to allow generating and viewing the history of a document and more visibility of comments.
+
+### Features/Improvements
+History Playback feature:
+- Work includes serialization, playback, auth, etc.
+- [#183340035](https://www.pivotaltracker.com/story/show/183340035),[#182819773](https://www.pivotaltracker.com/story/show/182819773), [#182819773](https://www.pivotaltracker.com/story/show/182819773) #1423, [#183340035](https://www.pivotaltracker.com/story/show/183340035), [#183291286](https://www.pivotaltracker.com/story/show/183291286), [#183469204](https://www.pivotaltracker.com/story/show/183469204) 
+
+Comments:
+- Show all document and tile comments in a list
+-  [#182565408](https://www.pivotaltracker.com/story/show/182565408), [#183182651](https://www.pivotaltracker.com/story/show/183182651), [#183455931](https://www.pivotaltracker.com/story/show/183455931) #1406, #1404 [#182565408](https://www.pivotaltracker.com/story/show/182565408), #1422 [#183182552](https://www.pivotaltracker.com/story/show/183182552), #1428 [#183447406](https://www.pivotaltracker.com/story/show/183447406), [#182565433](https://www.pivotaltracker.com/story/show/182565433)
+
+Tiles:
+- Delete Confirmation for Data tiles: #1391 [#183040970](https://www.pivotaltracker.com/story/show/183040970) [#182799776](https://www.pivotaltracker.com/story/show/182799776) [#183064080](https://www.pivotaltracker.com/story/show/183064080)
+- Titles for Drawing tiles: #1392 [#182774317](https://www.pivotaltracker.com/story/show/182774317)
+- Table text Wrapping: #1388 [#182601230](https://www.pivotaltracker.com/story/show/182601230), #1411, #1416, #1424
+- Paste images from clipboard: #1399 [#182812871](https://www.pivotaltracker.com/story/show/182812871), #1405 [#183327120](https://www.pivotaltracker.com/story/show/183327120)
+- Log text of text tiles:  #1396 [#182564260] (https://www.pivotaltracker.com/story/show/182564260)
+- Colors for variable cards: #1403 [#181735790](https://www.pivotaltracker.com/story/show/181735790)
+- Logging for data flow tool: #1419 [#183169893](https://www.pivotaltracker.com/story/show/183169893)
+- Variable chip sizing: #1418[#182352893](https://www.pivotaltracker.com/story/show/182352893)
+- Diagram tile toolbar: #1443
+
+Other:
+- Nav Panel open by default #1390 #1389 [#183081515](https://www.pivotaltracker.com/story/show/183081515)
+
+Curriculum Enhancements:
+- #1397 Bio4ArtNewStories
+- #1410 Bio4 personal
+- #1421 Stretching and Shrinking
+
+### Bug Fixes
+- Fix MST Issue with DataSets [#183523506](https://www.pivotaltracker.com/story/show/183523506)
+- Reduce size of bundle [#183101883](https://www.pivotaltracker.com/story/show/183101883)
+- Dataflow error handling #1412
+- Slate bug fix #1414
+- Delete keys captured when tile deleted [#183359479](https://www.pivotaltracker.com/story/show/183359479)
+- Don't show File menu if My work doesn't exist #1427 [#183316063](https://www.pivotaltracker.com/story/show/183316063)
+- Drawing selection bugs #1430 [#183235265](https://www.pivotaltracker.com/story/show/183235265), #1433 [#183457276](https://www.pivotaltracker.com/story/show/183457276)
+- Handle corrupt documents #1432 [#183356700](https://www.pivotaltracker.com/story/show/183356700)
+- MST dataset fixes [#183523506](https://www.pivotaltracker.com/story/show/183523506)
+
+### Asset Sizes
+|        File                   |    Size   |
+|-------------------------------|-----------|
+| 2.1M | vendor-main.2048c2e8.js |
+| 886K | Geometry.2acdd728.js |
+| 735K | Dataflow.7b0fe82c.js |
+| 611K | common-Diagram-SharedVariables.ae94f7b3.js |
+| 397K | index.2f810b939d662c464cda.js |
+| 86K | SharedVariables.e47d7d7d.js |
+| 84K | Table.d5e285a4.js |
+| 51K | common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.1c62df70.js |
+| 33K | common-SharedVariables-Drawing.96107f60.js |
+| 26K | common-Dataflow-Geometry.0bd31c83.js |
+| 26K | Drawing.f47d1726.js |
+| 18K | DataCard.797d1870.js |
+| 16K | Text.7e4ddd5d.js |
+| 16K | Image.a3400d7c.js |
+| 9.6K | Diagram.0ce29ffe.js |
+| 1.2K | Starter.b26bfa75.js |
+| 254B | SharedDataSet.98119794.js |
+
 ## Version 3.0.0 - August 26, 2022
 
 ### Features/Improvements
