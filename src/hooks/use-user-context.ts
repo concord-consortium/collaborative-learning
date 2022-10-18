@@ -18,12 +18,15 @@ export const getUserContext = (stores: IStores): IUserContext => {
 export const useUserContext = (): IUserContext => {
   const stores = useStores();
   const network = stores.user.network;
-  // The network of the user can change after a component 
-  // has been rendered, so getUserContext needs to be called
-  // again in this case.
-  // TODO: it'd be better if this was a MobX derived value then
-  // changes to any properties that make up the user context would 
-  // cause a re-render of observing components
+  // The network of the user gets loaded after the rest of the user information
+  // is loaded. So a component that is calling useUserContext might be rendered
+  // before the network is loaded. So getUserContext needs to be called again in
+  // this case. 
+  //
+  // TODO: It'd be better if the user context was a MobX view (derived value)
+  // then changes to any properties that make up the user context would cause a
+  // re-render of observing components. In that case we can get rid of the
+  // useMemo here.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => getUserContext(stores), [stores, network]);
 };
