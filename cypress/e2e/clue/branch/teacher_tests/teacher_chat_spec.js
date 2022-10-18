@@ -64,7 +64,6 @@ context('Chat Panel', () => {
       chatPanel.getToolTile().should('be.visible').should('have.css', 'background-color').and('eq', selectedChatBackground);
     });
     it('verify user can cancel a comment', () => {
-      // cy.pause();
       cy.openProblemSection("Introduction");
       const documentComment = "This comment is for the document.";
       cy.wait(2000);
