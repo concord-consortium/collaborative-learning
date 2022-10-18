@@ -261,8 +261,6 @@ it("records multiple history entries", async () => {
 
   expect(getSnapshot(changeDocument.history)).toEqual([
     updateFlag, action1, action2, action3, action4 ]);
-
-  expect(mockValidateCommentableDocument_v1).toBeCalled();
 });
 
 it("can replay the history entries", async () => {

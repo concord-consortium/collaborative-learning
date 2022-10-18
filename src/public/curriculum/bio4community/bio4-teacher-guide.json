@@ -41,36 +41,61 @@
               {
                 "tiles": [
                   {
-                    "id": "RwUFAD3vENPzXSNw",
+                    "id": "bU_abuyDQ1utxFFo",
+                    "title": "Text 1",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Here are resources you can choose to distribute to your students as they work their way through chapters. </p>",
-                        "<p>To make these available in the students&#x27; Resource Library tab, </p>",
-                        "<ul><li>drag the tile (link, image, text, etc.) into your own Workspace on the right, and </li><li>press the Publish button (rectangle with the up arrow)</li></ul>"
+                        "<p><strong>Below are the Resources for the current Chapter of the story and cumulative resources for the previous chapters. </strong>When you are ready for your students to have access to the resources for the current chapter, make them available in the students&#x27; Resource Library tab as follows:</p>",
+                        "<ol><li>Drag the tiles below into your Log on the right, placing them at the top (above the previous chapter&#x27;s resources). </li><li><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></li><li>Click the Publish button (blue rectangle with the up arrow, to the left of Log title)</li><li>Go to the Resource Library tab (pink) and delete your previously published resources, leaving only the newest published material</li></ol>",
+                        "<p>Your students will now see the cumulative Resources under their Resource Library tab.</p>"
                       ]
                     }
                   },
                   {
-                    "id": "19SEP20220952AM",
+                    "id": "hXuK-DHuwuXmx9Lz",
+                    "title": "Text 8",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>CHAPTER 1 SOURCES</h2>",
-                        "<p><strong>Evidence 1: </strong><a href='https://drive.google.com/file/d/1oNeWrCX6O7-u568L52az1E2dsafbVYIa/view'><strong>The Effects of Stress on the Heart</strong></a><strong> (video)</strong></p>"
+                        "<h2>CHAPTER 1 RESOURCES</h2>"
                       ]
                     }
                   },
+                  [
+                    {
+                      "id": "YcJHTQkBql9Rm5Ss",
+                      "title": "Text 1",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 1: <a href='https://youtu.be/9d__Qy0NaJk'>The Effects of Stress on the Heart</a> (video)</strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "XKBxVzPoEkDC-YQr",
+                      "title": "Effects of Stress Video",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/effectsofStress.png"
+                      }
+                    }
+                  ],
                   {
-                    "id": "AT1TvWsdcUJJeZtJ",
+                    "id": "QewT7EB_gx14gU0-",
+                    "title": "Text 6",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
+                        "<p><strong>Questions About Evidence 1, </strong><em><strong>The Effects of Stress on the Heart (video) </strong></em></p>",
                         "<p><strong></strong></p>",
-                        "<p><strong>Questions About Evidence 1: </strong></p>",
                         "<p>1. The subordinate monkey has: </p>",
                         "<p><strong>Less control </strong>  OR    <strong>More control    </strong>(underline your choice)</p>",
                         "<p></p>",
@@ -95,7 +120,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide</h2>"
                       ]
                     }
                   },                  
@@ -154,45 +179,139 @@
               {
                 "tiles": [
                   {
-                    "id": "Okh2XsLJPs9hOYOF",
+                    "id": "lPVRGOOHSGjE1y9p",
+                    "title": "Text 7",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>CHAPTER 1 SOURCES</h2>",
-                        "<p>Evidence 1: <a href='https://drive.google.com/file/d/1oNeWrCX6O7-u568L52az1E2dsafbVYIa/view'>The Effects of Stress on the Heart</a> (video)</p>"
+                        "<h2>CHAPTER 2 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "OtokwmPZWbmTVWIi",
+                      "title": "Text 5",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 2a: </strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/d/1YSXBIHHgoGicQuyuoH9gZ-80ioT_1hHPcJbaxsLLgks/edit?usp=sharing'>All the Fuss About Cholesterol</a> (blog post)</strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "rlxmohFtxdrShvw1",
+                      "title": "Blog Post",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/blogCholesterol.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "ve4OAvnDcW4-lz4H",
+                      "title": "Text 20",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 2b: </strong></p>",
+                          "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=heart'>Plaque Animation</a></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "F1AduVhRZwwaS7Gx",
+                      "title": "Plaque Animation",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/plaqueAnimation.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "_NFXdZimtFRe1jHW",
+                    "title": "Text 3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Questions About Evidence 2a, </strong><em><strong>All the Fuss About Cholesterol (blog post) </strong></em></p>",
+                        "<p>1. Our body can make all the cholesterol we need.  </p>",
+                        "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+                        "<p></p>",
+                        "<p> 2. Cholesterol is needed to build cells, make vitamins, and make hormones.  </p>",
+                        "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+                        "<p></p>",
+                        "<p>3. A cholesterol plaque can form in: </p>",
+                        "<ul><li><strong>A.  The liver        </strong></li><li><strong>B. Inside the blood vessel wall   </strong></li><li><strong>C. The stomach   </strong></li></ul>",
+                        "<p>(underline your choice)</p>",
+                        "<p></p>"
                       ]
                     }
                   },
                   {
-                    "id": "19SEP20220955AM",
+                    "id": "158aLY6zwDVG-iL1",
+                    "title": "Text 21",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>CHAPTER 2 SOURCES</h2>",
-                        "<strong>Evidence 2: </strong><a href='curriculum/bio4community/images/L4Heart Evidence2CholesterolBlog.pdf'><strong>All the Fuss About Cholesterol</strong></a><strong> (blog post)</strong>"
+                        "<p><strong>Questions About Evidence 2b, </strong><em><strong>Plaque Animation</strong></em></p>",
+                        "<p>1. Low long-term stress levels result in faster plaque formation.  </p>",
+                        "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+                        "<p></p>",
+                        "<p>2. The cells that are formed when immune cells “eat up” cholesterol are called ________.</p>",
+                        "<ul><li><strong>A.  Yellow cells</strong>      &nbsp; &nbsp; &nbsp; &nbsp;<strong>B. Foam cells</strong>      &nbsp; &nbsp; &nbsp;<strong>C. Red cells</strong></li></ul>",
+                        "<p>(underline or circle your choice)</p>",
+                        "<p></p>",
+                        "<p>3. When there is high cholesterol in diet more foam cells form.  </p>",
+                        "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+                        "<p></p>"
                       ]
                     }
                   },
                   {
-                    "id": "ct7CvbKW3Uukl4nA",
+                    "id": "hXuK-DHuwuXmx9Lz",
+                    "title": "Text 8",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Questions About Evidence 2:</strong>",
-                        "<ol><li >Our body can make all the cholesterol we need.  </li></ol>",
-                        "<ul><li ><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
-                        "<p></p>",
-                        "<p>           2. Cholesterol is needed to build cells, make vitamins, and make hormones.  </p>",
-                        "<ul><li ><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
-                        "<p></p>",
-                        "<p>            3. A cholesterol plaque can form in: </p>",
-                        "<ul><li ><strong>A.  The liver        B. Inside the blood vessel wall      C. The stomach   </strong>(underline your choice)</li></ul>"
+                        "<h2>CHAPTER 1 RESOURCES</h2>"
                       ]
                     }
-                  }
+                  },
+                  [
+                    {
+                      "id": "YcJHTQkBql9Rm5Ss",
+                      "title": "Text 1",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 1: <a href='https://youtu.be/9d__Qy0NaJk'>The Effects of Stress on the Heart</a> (video)</strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "XKBxVzPoEkDC-YQr",
+                      "title": "Effects of Stress Video",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/effectsofStress.png"
+                      }
+                    }
+                  ]
                 ],
                 "supports": []
               }
@@ -206,33 +325,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -261,42 +387,149 @@
               "content":
               {
                 "tiles": [
+                  {
+                    "id": "pJWMxrvtD-WqOCVt",
+                    "title": "Text 9",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 3 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
                     {
+                      "id": "K0BDbmfEe2EO8hlX",
+                      "title": "Text 15",
                       "content": {
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<h2>CHAPTER 1 SOURCES</h2>",
-                          "<p>Evidence 1: <a href='https://drive.google.com/file/d/1oNeWrCX6O7-u568L52az1E2dsafbVYIa/view'>The Effects of Stress on the Heart</a> (video)</p>",
-                          "<h2>CHAPTER 2 SOURCES</h2>",
-                          "<p>Evidence 2: <a href='curriculum/bio4community/images/L4Heart Evidence2CholesterolBlog.pdf'>All the Fuss About Cholesterol</a> (blog post)</p>",
-                          "<h2>CHAPTER 3 SOURCES</h2>",
-                          "<p>Evidence 3: <a href='curriculum/bio4community/images/L4Heart EvidenceBloodTestReport.pdf'>Rakesh Sharma Blood Test Report</a></p>"
+                          "<p><strong></strong></p>",
+                          "<p><strong>EVIDENCE 3:</strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/u/0/d/1wsHs1AqpJRZwwZwetX6H7daeN-8LVPSaa2PE2MJJY7c/edit'>Rakesh Sharma Blood Test Report</a></strong></p>",
+                          "<p></p>"
                         ]
                       }
                     },
                     {
-                      "id": "bio4TG01",
-                      "title": "R. Sharma Metabolic Panel",
+                      "id": "SugYDH2bCKsWhycl",
+                      "title": "Blood Test Report",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/bio4community/images/MetabolicPanel.jpg"
                       }
-                    },
+                    }
+                  ],
+                  {
+                    "id": "YsIWXIieIF54ukYg",
+                    "title": "Text 16",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Question About Evidence 3, </strong><em><strong>Rakesh Sharma Blood Test Report</strong></em></p>",
+                        "<p></p>",
+                        "<p>1. Rakesh’s cholesterol levels are? (underline your choice)</p>",
+                        "<ul><li><strong>A.  Low            B. Normal           C. High</strong></li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "lPVRGOOHSGjE1y9p",
+                    "title": "Text 7",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 2 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
                     {
+                      "id": "OtokwmPZWbmTVWIi",
+                      "title": "Text 5",
                       "content": {
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p><strong>Question About Evidence 3:</strong></p>",
-                          "<p></p>",
-                          "<p>1. Rakesh’s cholesterol levels are? (underline your choice)</p>",
-                          "<p><strong>A.  Low       B. Normal      C. High</strong></p>"
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 2a: </strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/d/1YSXBIHHgoGicQuyuoH9gZ-80ioT_1hHPcJbaxsLLgks/edit?usp=sharing'>All the Fuss About Cholesterol</a> (blog post)</strong></p>",
+                          "<p></p>"
                         ]
+                      }
+                    },
+                    {
+                      "id": "rlxmohFtxdrShvw1",
+                      "title": "Blog Post",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/blogCholesterol.png"
                       }
                     }
                   ],
-                  "supports": []
+                  [
+                    {
+                      "id": "ve4OAvnDcW4-lz4H",
+                      "title": "Text 20",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 2b: </strong></p>",
+                          "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=heart'>Plaque Animation</a></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "F1AduVhRZwwaS7Gx",
+                      "title": "Plaque Animation",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/plaqueAnimation.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "hXuK-DHuwuXmx9Lz",
+                    "title": "Text 8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 1 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "YcJHTQkBql9Rm5Ss",
+                      "title": "Text 1",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 1: <a href='https://youtu.be/9d__Qy0NaJk'>The Effects of Stress on the Heart</a> (video)</strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "XKBxVzPoEkDC-YQr",
+                      "title": "Effects of Stress Video",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/effectsofStress.png"
+                      }
+                    }
+                  ]
+                ],
+                "supports": []
               }
             },
             {
@@ -308,33 +541,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -363,41 +603,205 @@
               "content":
               {
                 "tiles": [
+                  {
+                    "id": "y6DybJtbDZRFCyHn",
+                    "title": "Text 11",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 4 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
                     {
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<p>Here are resources you can choose to distribute to your students as they work their way through chapters. To make these available in the Resource Library tab, drag the information (link, image, text, etc.) into your own Workspace and press the Publish button (rectangle with the up arrow).</p>"
-                          ]
-                        }
-                      },
-                      {
-                          "content": {
-                            "type": "Text",
-                            "format": "html",
-                            "text": [
-                              "<h2>CHAPTER 1 SOURCES</h2>",
-                              "<p>Evidence 1: <a href='https://drive.google.com/file/d/1oNeWrCX6O7-u568L52az1E2dsafbVYIa/view'>The Effects of Stress on the Heart</a> (video)</p>",
-                              "<h2>CHAPTER 2 SOURCES</h2>",
-                              "<p>Evidence 2: <a href='curriculum/bio4community/images/L4Heart Evidence2CholesterolBlog.pdf'>All the Fuss About Cholesterol</a> (blog post)</p>",
-                              "<h2>CHAPTER 3 SOURCES</h2>",
-                              "<p>Evidence 3: <a href='curriculum/bio4community/images/L4Heart EvidenceBloodTestReport.pdf'>Rakesh Sharma Blood Test Report</a></p>",
-                              "<h2>CHAPTER 4 SOURCES</h2>",
-                              "<p>Evidence 4: <a href='curriculum/bio4community/images/L4Heart Evidence4CortisolTestReport.pdf'>Saliva Stress Test Results</a></p>"
-                            ]
-                          }
-                      },
-                      {
-                        "id": "bio4TG02",
-                        "title": "R. Sharma Saliva Test",
-                        "content": {
-                          "type": "Image",
-                          "url": "curriculum/bio4community/images/SalivaTest.jpg"
-                        }
+                      "id": "PAQrqeJe7CWI7RXm",
+                      "title": "Text 17",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p></p>",
+                          "<p><strong>EVIDENCE 4a:</strong></p>",
+                          "<p><strong><a href='https://youtu.be/hmzYniXqc7k'>Saliva Stress Test Video</a></strong></p>"
+                        ]
                       }
+                    },
+                    {
+                      "id": "sA8hUUwRZPPtnxqJ",
+                      "title": "Stress Test Video",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/salivaVideo.png"
+                      }
+                    }
                   ],
-                  "supports": []
+                  [
+                    {
+                      "id": "d_TOGGHRK-thLI3k",
+                      "title": "Text 18",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p></p>",
+                          "<p><strong>EVIDENCE 4b:</strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/u/0/d/1rG8YHG9_qjX1ePlh7eGF33agObLBnxDTT9fH-0EQaLU/edit'>Saliva Stress Test Results</a></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "l5XnTQKXRgjoMVVb",
+                      "title": "Stress Test Results",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/SalivaTest.jpg"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "KjKMTddmVDKkoL9U",
+                    "title": "Text 22",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Question about Evidence 4a and 4b, </strong><em><strong>Saliva Stress Test Video </strong></em><strong>and</strong><em><strong> Saliva Stress Test Results</strong></em></p>",
+                        "<p>1. Rakesh’s cortisol levels are? (underline your choice)</p>",
+                        "<ul><li><strong>A. Low              B. Normal           C. High</strong></li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "pJWMxrvtD-WqOCVt",
+                    "title": "Text 9",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 3 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "K0BDbmfEe2EO8hlX",
+                      "title": "Text 15",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>EVIDENCE 3:</strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/u/0/d/1wsHs1AqpJRZwwZwetX6H7daeN-8LVPSaa2PE2MJJY7c/edit'>Rakesh Sharma Blood Test Report</a></strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "SugYDH2bCKsWhycl",
+                      "title": "Blood Test Report",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/MetabolicPanel.jpg"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "lPVRGOOHSGjE1y9p",
+                    "title": "Text 7",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 2 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "OtokwmPZWbmTVWIi",
+                      "title": "Text 5",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 2a: </strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/d/1YSXBIHHgoGicQuyuoH9gZ-80ioT_1hHPcJbaxsLLgks/edit?usp=sharing'>All the Fuss About Cholesterol</a> (blog post)</strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "rlxmohFtxdrShvw1",
+                      "title": "Blog Post",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/blogCholesterol.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "ve4OAvnDcW4-lz4H",
+                      "title": "Text 20",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 2b: </strong></p>",
+                          "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=heart'>Plaque Animation</a></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "F1AduVhRZwwaS7Gx",
+                      "title": "Plaque Animation",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/plaqueAnimation.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "hXuK-DHuwuXmx9Lz",
+                    "title": "Text 8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 1 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "YcJHTQkBql9Rm5Ss",
+                      "title": "Text 1",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 1: <a href='https://youtu.be/9d__Qy0NaJk'>The Effects of Stress on the Heart</a> (video)</strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "XKBxVzPoEkDC-YQr",
+                      "title": "Effects of Stress Video",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/effectsofStress.png"
+                      }
+                    }
+                  ]
+                ],
+                "supports": []
               }
             },
             {
@@ -409,33 +813,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -464,45 +875,314 @@
               "content":
               {
                 "tiles": [
+                  {
+                    "id": "HXNr2yCndseRnnWh",
+                    "title": "Text 13",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 5 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
                     {
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<p>Here are resources you can choose to distribute to your students as they work their way through chapters. To make these available in the Resource Library tab, drag the information (link, image, text, etc.) into your own Workspace and press the Publish button (rectangle with the up arrow).</p>"
-                          ]
-                        }
-                      },
-                      {
-                          "content": {
-                            "type": "Text",
-                            "format": "html",
-                            "text": [
-                              "<h2>CHAPTER 1 SOURCES</h2>",
-                              "<p>Evidence 1: <a href='https://drive.google.com/file/d/1oNeWrCX6O7-u568L52az1E2dsafbVYIa/view'>The Effects of Stress on the Heart</a> (video)</p>",
-                              "<h2>CHAPTER 2 SOURCES</h2>",
-                              "<p>Evidence 2: <a href='curriculum/bio4community/images/L4Heart Evidence2CholesterolBlog.pdf'>All the Fuss About Cholesterol</a> (blog post)</p>",
-                              "<h2>CHAPTER 3 SOURCES</h2>",
-                              "<p>Evidence 3: <a href='curriculum/bio4community/images/L4Heart EvidenceBloodTestReport.pdf'>Rakesh Sharma Blood Test Report</a></p>",
-                              "<h2>CHAPTER 4 SOURCES</h2>",
-                              "<p>Evidence 4: <a href='curriculum/bio4community/images/L4Heart Evidence4CortisolTestReport.pdf'>Saliva Stress Test Results</a></p>",
-                              "<h2>CHAPTER 5 SOURCES</h2>",
-                              "<p>Evidence 5: <a href='curriculum/bio4community/images/L4HeartEvidence5-1ConversationwithDrZeiders.pdf'>(5-1) Conversation with Dr. Zeiders</a> </p>",
-                              "<p>Evidence 6: <a href='curriculum/bio4community/images/L4HeartEvidence5-2MissingLinkReport.pdf'>(5-2) The Missing Link: Cholesterol, Cortisol, and Clogged Arteries</a> </p>",
-                              "<p>Evidence 7: <a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=heart'>Heart Animation</a></p>"
-                            ]
-                          }
-                      },
-                      {
-                        "id": "123324sdljfasdghhkq34",
-                        "title": "Email from Dr. Zeiders",
-                        "content": {
-                          "type": "Image",
-                          "url": "curriculum/bio4community/images/drZeiders.jpg"
-                        }
+                      "id": "D7OFiQenaZz4ogQJ",
+                      "title": "Text 19",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p></p>",
+                          "<p><strong>EVIDENCE 5a: </strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/u/0/d/1rsWBPn4qtwrYiLRBK_U7U0bNpk7f3Sm6x9bzvRVxtfw/edit'>Conversation with Dr. Zeiders</strong></a></p>",
+                          "<p></p>"
+                        ]
                       }
+                    },
+                    {
+                      "id": "u8mvhsCWtpoirIlT",
+                      "title": "Conversation with Dr. Z",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/drZ.png"
+                      }
+                    }
                   ],
-                  "supports": []
+                  [
+                    {
+                      "id": "KtQUBXVMVHhEVA3v",
+                      "title": "Text 34",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>EVIDENCE 5b: </strong></p>",
+                          "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=simulation&organ=heart'>Plaque Model Simulator</a></strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "gDtbD7PIMz9W1UuH",
+                      "title": "Plaque Model Simulator",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/plaqueModel1.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "JaBtNraITIPV9K5Y",
+                      "title": "Text 24",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p></p>",
+                          "<p><strong>EVIDENCE 5c: </strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/u/0/d/1f7rEE_0v3dTYeXRUMhvRVP0m8fcJbJhlPgQX5WbDIjE/edit'>Missing Link Report</a></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "D4MMkikv1pLGWkQM",
+                      "title": "Missing Link",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/cholesterolLink.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "NaV4HWpyfBFsV5Gr",
+                    "title": "Text 27",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Questions About Evidence 5b, </strong><em><strong>Plaque Model Simulator</strong></em></p>",
+                        "<p>1. When immune cell signaling is high it causes less immune cells to come into the lining and less sticky proteins to appear.  </p>",
+                        "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+                        "<p></p>",
+                        "<p>2. When cortisol levels are high but the cortisol is ignored this causes the plaque to form:</p>",
+                        "<ul><li><strong>Faster</strong>   OR  <strong>Slower</strong> ? (underline your choice)</li></ul>",
+                        "<p></p>",
+                        "<p>3. The sticky proteins: (underline your choice)</p>",
+                        "<ul><li>A.  allow cholesterol into the lining</li><li>B. allow immune cells into the lining</li><li>C. block the entry of immune cells into the lining</li><li>D. block the entry of cholesterol into the lining</li></ul>",
+                        "<p>(underline your choice)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "-iceRIPGa_y64nyD",
+                    "title": "Text 25",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Questions About Evidence 5a and 5c, </strong><em><strong>Conversation with Dr. Zeiders</strong></em><strong>  and </strong><em><strong>Missing Link Report</strong></em></p>",
+                        "<p><em></em></p>",
+                        "<p>1. Foam cells are:  (underline your choice)</p>",
+                        "<ul><li><strong>White blood cells</strong></li><li><strong>Red blood cells      </strong></li><li><strong>White blood cells after engulfing cholesterol </strong></li><p><strong></strong></p></ul>",
+                        "<p>2. Normally cortisol prevents immune cells from getting into the blood vessel and making the plaque bigger.  </p>",
+                        "<ul><li><strong>True</strong>   OR  <strong>False</strong> ?  (underline your choice)</li></ul>",
+                        "<p></p>",
+                        "<p>3. If cortisol is high for a long time the body starts to ignore it.  </p>",
+                        "<ul><li><strong>True</strong>   OR  <strong>False</strong> ?  (underline your choice)</li></ul>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "y6DybJtbDZRFCyHn",
+                    "title": "Text 11",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 4 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "PAQrqeJe7CWI7RXm",
+                      "title": "Text 17",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p></p>",
+                          "<p><strong>EVIDENCE 4a:</strong></p>",
+                          "<p><strong><a href='https://youtu.be/hmzYniXqc7k'>Saliva Stress Test Video</a></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "sA8hUUwRZPPtnxqJ",
+                      "title": "Stress Test Video",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/salivaVideo.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "d_TOGGHRK-thLI3k",
+                      "title": "Text 18",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p></p>",
+                          "<p><strong>EVIDENCE 4b:</strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/u/0/d/1rG8YHG9_qjX1ePlh7eGF33agObLBnxDTT9fH-0EQaLU/edit'>Saliva Stress Test Results</a></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "l5XnTQKXRgjoMVVb",
+                      "title": "Stress Test Results",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/SalivaTest.jpg"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "pJWMxrvtD-WqOCVt",
+                    "title": "Text 9",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 3 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "K0BDbmfEe2EO8hlX",
+                      "title": "Text 15",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>EVIDENCE 3:</strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/u/0/d/1wsHs1AqpJRZwwZwetX6H7daeN-8LVPSaa2PE2MJJY7c/edit'>Rakesh Sharma Blood Test Report</a></strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "SugYDH2bCKsWhycl",
+                      "title": "Blood Test Report",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/MetabolicPanel.jpg"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "lPVRGOOHSGjE1y9p",
+                    "title": "Text 7",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 2 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "OtokwmPZWbmTVWIi",
+                      "title": "Text 5",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 2a: </strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/d/1YSXBIHHgoGicQuyuoH9gZ-80ioT_1hHPcJbaxsLLgks/edit?usp=sharing'>All the Fuss About Cholesterol</a> (blog post)</strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "rlxmohFtxdrShvw1",
+                      "title": "Blog Post",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/blogCholesterol.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "ve4OAvnDcW4-lz4H",
+                      "title": "Text 20",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 2b: </strong></p>",
+                          "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=heart'>Plaque Animation</a></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "F1AduVhRZwwaS7Gx",
+                      "title": "Plaque Animation",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/plaqueAnimation.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "hXuK-DHuwuXmx9Lz",
+                    "title": "Text 8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 1 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "YcJHTQkBql9Rm5Ss",
+                      "title": "Text 1",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 1: <a href='https://youtu.be/9d__Qy0NaJk'>The Effects of Stress on the Heart</a> (video)</strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "XKBxVzPoEkDC-YQr",
+                      "title": "Effects of Stress Video",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/effectsofStress.png"
+                      }
+                    }
+                  ]
+                ],
+                "supports": []
               }
             },
             {
@@ -514,33 +1194,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -569,49 +1256,274 @@
               "content":
               {
                 "tiles": [
+                  {
+                    "id": "HXNr2yCndseRnnWh",
+                    "title": "Text 13",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 5 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
                     {
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<h2>CHAPTER 6 SOURCES</h2>"
-                          ]
-                        }
-                      },
-                    {
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<p>Here are resources you can choose to distribute to your students as they work their way through chapters. To make these available in the Resource Library tab, drag the information (link, image, text, etc.) into your own Workspace and press the Publish button (rectangle with the up arrow).</p>"
-                          ]
-                        }
-                      },
-                      {
-                          "content": {
-                            "type": "Text",
-                            "format": "html",
-                            "text": [
-                              "<h2>CHAPTER 1 SOURCES</h2>",
-                              "<p>Evidence 1: <a href='https://drive.google.com/file/d/1oNeWrCX6O7-u568L52az1E2dsafbVYIa/view'>The Effects of Stress on the Heart</a> (video)</p>",
-                              "<h2>CHAPTER 2 SOURCES</h2>",
-                              "<p>Evidence 2: <a href='curriculum/bio4community/images/L4Heart Evidence2CholesterolBlog.pdf'>All the Fuss About Cholesterol</a> (blog post)</p>",
-                              "<h2>CHAPTER 3 SOURCES</h2>",
-                              "<p>Evidence 3: <a href='curriculum/bio4community/images/L4Heart EvidenceBloodTestReport.pdf'>Rakesh Sharma Blood Test Report</a></p>",
-                              "<h2>CHAPTER 4 SOURCES</h2>",
-                              "<p>Evidence 4: <a href='curriculum/bio4community/images/L4Heart Evidence4CortisolTestReport.pdf'>Saliva Stress Test Results</a></p>",
-                              "<h2>CHAPTER 5 SOURCES</h2>",
-                              "<p>Evidence 5: <a href='curriculum/bio4community/images/L4HeartEvidence5-1ConversationwithDrZeiders.pdf'>(5-1) Conversation with Dr. Zeiders</a> </p>",
-                              "<p>Evidence 6: <a href='curriculum/bio4community/images/L4HeartEvidence5-2MissingLinkReport.pdf'>(5-2) The Missing Link: Cholesterol, Cortisol, and Clogged Arteries</a> </p>",
-                              "<p>Evidence 7: <a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=heart'>Heart Animation</a></p>",
-                              "<h2>CHAPTER 6 SOURCES</h2>",
-                              "<p>Evidence 8: <a href='https://bio4community.concord.org/branch/main/?mode=simulation&organ=heart'>Heart Model</a></p>"
-
-                            ]
-                          }
+                      "id": "D7OFiQenaZz4ogQJ",
+                      "title": "Text 19",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p></p>",
+                          "<p><strong>EVIDENCE 5a: </strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/u/0/d/1rsWBPn4qtwrYiLRBK_U7U0bNpk7f3Sm6x9bzvRVxtfw/edit'>Conversation with Dr. Zeiders</strong></a></p>",
+                          "<p></p>"
+                        ]
                       }
+                    },
+                    {
+                      "id": "u8mvhsCWtpoirIlT",
+                      "title": "Conversation with Dr. Z",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/drZ.png"
+                      }
+                    }
                   ],
-                  "supports": []
+                  [
+                    {
+                      "id": "KtQUBXVMVHhEVA3v",
+                      "title": "Text 34",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>EVIDENCE 5b: </strong></p>",
+                          "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=simulation&organ=heart'>Plaque Model Simulator</a></strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "gDtbD7PIMz9W1UuH",
+                      "title": "Plaque Model Simulator",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/plaqueModel1.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "JaBtNraITIPV9K5Y",
+                      "title": "Text 24",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p></p>",
+                          "<p><strong>EVIDENCE 5c: </strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/u/0/d/1f7rEE_0v3dTYeXRUMhvRVP0m8fcJbJhlPgQX5WbDIjE/edit'>Missing Link Report</a></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "D4MMkikv1pLGWkQM",
+                      "title": "Missing Link",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/cholesterolLink.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "y6DybJtbDZRFCyHn",
+                    "title": "Text 11",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 4 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "PAQrqeJe7CWI7RXm",
+                      "title": "Text 17",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p></p>",
+                          "<p><strong>EVIDENCE 4a:</strong></p>",
+                          "<p><strong><a href='https://youtu.be/hmzYniXqc7k'>Saliva Stress Test Video</a></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "sA8hUUwRZPPtnxqJ",
+                      "title": "Stress Test Video",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/salivaVideo.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "d_TOGGHRK-thLI3k",
+                      "title": "Text 18",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p></p>",
+                          "<p><strong>EVIDENCE 4b:</strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/u/0/d/1rG8YHG9_qjX1ePlh7eGF33agObLBnxDTT9fH-0EQaLU/edit'>Saliva Stress Test Results</a></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "l5XnTQKXRgjoMVVb",
+                      "title": "Stress Test Results",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/SalivaTest.jpg"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "pJWMxrvtD-WqOCVt",
+                    "title": "Text 9",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 3 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "K0BDbmfEe2EO8hlX",
+                      "title": "Text 15",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>EVIDENCE 3:</strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/u/0/d/1wsHs1AqpJRZwwZwetX6H7daeN-8LVPSaa2PE2MJJY7c/edit'>Rakesh Sharma Blood Test Report</a></strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "SugYDH2bCKsWhycl",
+                      "title": "Blood Test Report",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/MetabolicPanel.jpg"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "lPVRGOOHSGjE1y9p",
+                    "title": "Text 7",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 2 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "OtokwmPZWbmTVWIi",
+                      "title": "Text 5",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 2a: </strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/d/1YSXBIHHgoGicQuyuoH9gZ-80ioT_1hHPcJbaxsLLgks/edit?usp=sharing'>All the Fuss About Cholesterol</a> (blog post)</strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "rlxmohFtxdrShvw1",
+                      "title": "Blog Post",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/blogCholesterol.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "ve4OAvnDcW4-lz4H",
+                      "title": "Text 20",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 2b: </strong></p>",
+                          "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=heart'>Plaque Animation</a></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "F1AduVhRZwwaS7Gx",
+                      "title": "Plaque Animation",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/plaqueAnimation.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "hXuK-DHuwuXmx9Lz",
+                    "title": "Text 8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 1 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "YcJHTQkBql9Rm5Ss",
+                      "title": "Text 1",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong></strong></p>",
+                          "<p><strong>Evidence 1: <a href='https://youtu.be/9d__Qy0NaJk'>The Effects of Stress on the Heart</a> (video)</strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "XKBxVzPoEkDC-YQr",
+                      "title": "Effects of Stress Video",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/effectsofStress.png"
+                      }
+                    }
+                  ]
+                ],
+                "supports": []
               }
             },
             {
@@ -623,33 +1535,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  }, 
                   {
                     "content": {
                       "type": "Text",
@@ -725,33 +1644,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -821,33 +1747,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -917,33 +1850,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -1023,33 +1963,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -1131,33 +2078,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -1230,33 +2184,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -1332,33 +2293,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -1428,33 +2396,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  }, 
                   {
                     "content": {
                       "type": "Text",
@@ -1524,33 +2499,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  },
                   {
                     "content": {
                       "type": "Text",
@@ -1630,33 +2612,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  }, 
                   {
                     "content": {
                       "type": "Text",
@@ -1729,33 +2718,40 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Welcome to the Bio4Community CLUE Teacher Guide!</strong></p>"
+                        "<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"
                       ]
                     }
                   },                  
                   {
+                    "id": "YUvmY2iB3OJSUt1O",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
-                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
-                        "<p>To get started, create a class for each small group in the Concord portal. You will create an access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group at will. </p>"
+                        "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+                        "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+                        "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
                       ]
                     }
-                  },  
+                  },
                   {
+                    "id": "m654b9zgDW5cPX31",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>The Student Resource Library</strong></p>",
-                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+                        "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
                         "<p>To publish the Resource Library List for each Chapter: </p>",
-                        "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+                        "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+                        "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+                        "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
                       ]
                     }
-                  },  
+                  }, 
                   {
                     "content": {
                       "type": "Text",

@@ -85,7 +85,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
 
   public state: IState = {};
 
-  private tileRowDiv: HTMLElement | null;
+  public tileRowDiv: HTMLElement | null;
 
   public render() {
     const { model, typeClass } = this.props;
@@ -113,6 +113,10 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
 
   private getTile(tileId: string) {
     return this.props.tileMap.get(tileId) as ToolTileModelType | undefined;
+  }
+
+  public hasTile(tileId?: string) {
+    return tileId && this.props.model.hasTile(tileId);
   }
 
   private isTileRenderable(tileId: string) {

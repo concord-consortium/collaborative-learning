@@ -259,7 +259,7 @@ export const useDocumentHistory = (documentKeyOrSectionPath?: string, userId?: s
   const { isSuccess } = useCommentableDocument(documentKeyOrSectionPath, userId);
   const docPath = useCommentableDocumentPath(documentKeyOrSectionPath || "", userId);
   // docPath could in theory be an empty string which 
-  const queryPath = isSuccess && docPath ? `${docPath}/historyEntries` : "";
+  const queryPath = isSuccess && docPath ? `${docPath}/history` : "";
   const converter = historyEntryConverter;
   return useCollectionOrderedRealTimeQuery(queryPath, { converter, orderBy: "index" });
 };

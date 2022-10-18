@@ -1,24 +1,19 @@
 import classNames from "classnames";
 import { useCallback, useState } from "react";
-import { useCurrent } from "../../../hooks/use-current";
 import { TableContentModelType } from "../../../models/tools/table/table-content";
-import { ToolTileModelType } from "../../../models/tools/tool-tile";
 
-export const useModelDataSet = (model: ToolTileModelType) => {
-  const modelRef = useCurrent(model);
-  const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
-  const dataSet = useCurrent(getContent().dataSet);
+export const useModelDataSet = (content: TableContentModelType) => {
+  const dataSet = content.dataSet;
   const [columnChanges, setColumnChanges] = useState(0);
   const triggerColumnChange = useCallback(() => setColumnChanges(state => ++state), []);
   const [rowChanges, setRowChanges] = useState(0);
   const triggerRowChange = useCallback(() => setRowChanges(state => ++state), []);
 
   const setTableTitle = useCallback((title: string) => {
-    (title != null) && getContent().setTableName(title);
+    (title != null) && content.setTableName(title);
     triggerColumnChange();
-  }, [getContent, triggerColumnChange]);
+  }, [content, triggerColumnChange]);
 
-  const content = getContent();
   const className = classNames("rdg-light", { "show-expressions": content.hasExpressions });
 
   return { dataSet, columnChanges, triggerColumnChange, rowChanges, triggerRowChange,

@@ -132,6 +132,10 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     if (rowTile && rowTile.tileId) {
       ui.setSelectedTileId(rowTile.tileId);
       this.setState(state => ({ activeTool: state.defaultTool }));
+      // Scroll to the new tile once it has been added to the correct location
+      // We need to use a timeout because tiles are added in one spot, then moved elsewhere
+      // TODO When tiles are created in the right place, the timeout here should be removed
+      setTimeout(() => ui.setScrollTo(rowTile.tileId, document.key));
     }
   }
 

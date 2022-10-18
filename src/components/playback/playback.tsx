@@ -21,10 +21,6 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
   const { document, showPlaybackControls, onTogglePlaybackControls  } = props;
   const { activeNavTab } = useUIStore();
   const treeManager = document?.treeManagerAPI as Instance<typeof TreeManager>;
-  // FIXME-HISTORY: hack for always enabling playback. Story to fix this:
-  // https://www.pivotaltracker.com/story/show/183291329
-  //
-  // const history = treeManager?.document.history;
 
   const renderPlaybackToolbarButton = () => {
     const playbackToolbarButtonComponentStyle =
@@ -47,11 +43,6 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
 
   const actuallyShowPlaybackControls = showPlaybackControls && (historyLength !== undefined) && (historyLength > 0);
 
-  // const disablePlayback = history.length < 1;
-
-  // FIXME-HISTORY: HACK for now always enable playback so we can use the
-  // opening of the playback to trigger the load of the history.  Story to fix
-  // this: https://www.pivotaltracker.com/story/show/183291329
   const disablePlayback = false;
   const playbackComponentClass = classNames("playback-component", activeNavTab,
                                             {"show-control" : showPlaybackControls,
@@ -59,13 +50,8 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
   return (
     <div className={playbackComponentClass} data-testid="playback-component">
       {renderPlaybackToolbarButton()}
-      {actuallyShowPlaybackControls
-        // If we've found history, display the playback control
-        ? <PlaybackControlComponent treeManager={treeManager} />
-        : showPlaybackControls
-        // If we're loading the history or couldn't find any, display the loading component
-        ? <LoadDocumentHistory document={document} />
-        : ''}
+      {showPlaybackControls && <LoadDocumentHistory document={document} />}
+      {actuallyShowPlaybackControls && <PlaybackControlComponent treeManager={treeManager} />}
     </div>
   );
 });
