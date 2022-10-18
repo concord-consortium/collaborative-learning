@@ -22,7 +22,6 @@ interface PromisedCurriculumDocument extends CurriculumDocument {
 }
 
 export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleDocumentClick}) => {
-  // console.log("<CommentedDocuments> with args", documentObj, user)
   const [docsCommentedOn, setDocsCommentedOn] = useState<PromisedCurriculumDocument[]>();
   const [db] = useFirestore();
   const cDocsRef = db.collection("curriculum");
@@ -37,7 +36,6 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
   useEffect(() => {
 
     const unsubscribeFromDocs = cDocsInScopeRef.onSnapshot(querySnapshot => {
-      // console.log("querySnapshot.docs is", querySnapshot.docs);
       const docs = querySnapshot.docs.map(doc => {
         return (
           {

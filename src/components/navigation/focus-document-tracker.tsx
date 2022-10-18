@@ -23,13 +23,9 @@ interface IProps {
   navTabPanelElt: HTMLDivElement | null;
 }
 export const FocusDocumentTracker = observer(({ navTabPanelElt }: IProps) => {
-  // console.log("<FocusDocumentTracker with navTabPanelElt\n", navTabPanelElt);
   const ui = useUIStore();
   const prevUpdates = usePrevious(ui.focusDocUpdates);
   const prevTab = usePrevious(navTabPanelElt);
-
-  // console.log("focus-document-tracker.tsx > prevUpdates:\n", prevUpdates, "\n prevTab \n", prevTab);
-
 
   useEffect(() => {
     if (navTabPanelElt && ((prevTab !== navTabPanelElt) || (ui.focusDocUpdates !== prevUpdates))) {
@@ -56,16 +52,8 @@ export const FocusDocumentTracker = observer(({ navTabPanelElt }: IProps) => {
           const focusSec = elt.getAttribute("data-focus-section");
           focusDoc && (focusDocument = focusDoc);
           focusSec && (focusSection = focusSec);
-          // console.log("line 59, focusSection", focusSection);
-
         }
 
-        //this gets called again which sets it back to first section tab
-        // console.log("focus-document-tracker.tsx > useEffect() > ui.setFocusDocument() \n focusSection\n",
-        // focusSection, "\nfocusDocument\n", focusDocument);
-
-        // if flag is up
-        //! isDocumentViewMode
         ui.setFocusDocument(focusSection
                               ? `${focusDocument}/${focusSection}`
                               : focusDocument);

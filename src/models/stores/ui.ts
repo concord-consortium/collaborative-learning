@@ -146,25 +146,18 @@ export const UIModel = types
         self.error = null;
       },
       setActiveNavTab(tab: string) {
-        // console.log("ui.ts > setActiveNavTab with tab", tab);
         self.activeNavTab = tab;
       },
 
-      //added
-      setSelectedSectionIndex(sectionSelected: string, sections: any){
-        // console.log("sectionSelected", sectionSelected);
-        // console.log("navTab", navTab);
-        // const sections = navTab.sections;
+      setSelectedSectionIndex(sectionSelected: string, sections: any){ //this function returns the correct section index
         self.activeSectionIndex =  sections.findIndex((section: any) => section.type === sectionSelected);
-        // console.log("our ActiveSectionTab is", self.activeSectionIndex);
       },
-      //
+
       setActiveStudentGroup(groupId: string) {
         self.activeNavTab = ENavTab.kStudentWork;
         self.activeGroupId = groupId;
       },
       setSelectedTile(tile?: ToolTileModelType, options?: {append: boolean}) {
-        // console.log("ui.ts>setSelectedTile with tile\n", tile, "\n options \n", options);
         setOrAppendTileIdToSelection(tile && tile.id, options);
       },
       setSelectedTileId(tileId: string, options?: {append: boolean}) {
@@ -178,11 +171,9 @@ export const UIModel = types
       },
       closeDialog,
       setFocusDocument(documentKey?: string) {
-        // console.log("ui.ts > setFocusDocument", documentKey);
         self.focusDocument = documentKey;
       },
       updateFocusDocument() {
-        // console.log("ui.ts > updateFocusDocument");
         // increment counter to trigger observers to update
         ++self.focusDocUpdates;
       },

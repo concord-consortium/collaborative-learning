@@ -25,8 +25,6 @@ const kTabSectionBorderWidth = 2;
 
 export const ProblemTabContent: React.FC<IProps>
   = observer(({ context, sections, showSolutionsSwitch, selectedIndex }: IProps) => {
-  // console.log("<ProblemTabContent> with context", context);
-  // console.log("sections are", sections);
   const { isTeacher } = useUserStore();
   const ui = useUIStore();
   const problemPath = useProblemPathWithFacet(context);
@@ -47,9 +45,6 @@ export const ProblemTabContent: React.FC<IProps>
   }, [ui]);
 
   const handleTabClick = (titleArgButReallyType: string, typeArgButReallyTitle: string) => {
-    // console.log("problem-tab-content.tsx > handleTabClick with titleArgButReallyType", titleArgButReallyType,
-    // "typeArgButReallyTitle", typeArgButReallyTitle);
-
     // TODO: this function has its argument names reversed (see caller for details.)
     // We can't simply switch it, however, because that would introduce a breaking change
     // in the log event stream, so for now we just rename the arguments for clarity.
@@ -66,8 +61,7 @@ export const ProblemTabContent: React.FC<IProps>
     ui.toggleShowTeacherContent(!showTeacherContent);
     Logger.log(showTeacherContent ? LogEventName.HIDE_SOLUTIONS : LogEventName.SHOW_SOLUTIONS);
   };
-  // console.log("problem-tab-content > problemPath:", problemPath);
-  // console.log("context", context);
+
   return (
     <Tabs className={classNames("problem-tabs", context, chatBorder)}
           selectedTabClassName="selected"
@@ -77,10 +71,7 @@ export const ProblemTabContent: React.FC<IProps>
       <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
         <TabList className={classNames("tab-list", {"chat-open" : ui.showChatPanel})}>
           {sections?.map((section) => {
-            // console.log("problem-tab-content.tsx \nsections array\n", section);
-            // console.log("problem-tab-content.tsx> \n section.type:\n\n", section.type);
             const sectionTitle = getSectionTitle(section.type);
-            // console.log("prpoblem-tab-content.tsx \nsectionTitle\n\n", sectionTitle);
             return (
               <Tab className={classNames("prob-tab", context)} key={`section-${section.type}`}
                   onClick={() => handleTabClick(section.type, sectionTitle)} >

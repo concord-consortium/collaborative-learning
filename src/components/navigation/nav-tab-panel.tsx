@@ -37,12 +37,10 @@ export class NavTabPanel extends BaseComponent<IProps> {
 
   public render() {
     const { tabs, isResourceExpanded, isExpanderShown } = this.props;
-    // console.log("nav-tab-panel.tsx> render(), tabs:", tabs);
     const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
             user } = this.stores;
 
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
-    // console.log("selectedTabIndex:", selectedTabIndex);
     const resizePanelWidth = 6;
     const collapseTabWidth = 44;
     const resourceWidth = dividerPosition === kDividerMin
@@ -65,7 +63,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
           <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
             <div className="top-row">
               <TabList className="top-tab-list">
-                {/* {console.log("nav-tab-panel.tsx line 66 tabs", tabs)} */}
                 { tabs?.map((tabSpec, index) => {
                     const tabClass = `top-tab tab-${tabSpec.tab}
                                       ${selectedTabIndex === index ? "selected" : ""}`;
@@ -132,7 +129,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private renderDocuments = (tabSpec: NavTabSpec) => {
-    // console.log("nav-tab-panel.tsx > line 133 > renderDocuments with tabSpec:", tabSpec);
     const { ui: { showChatPanel } } = this.stores;
     const reset = tabSpec.tab === this.topTabReset;
     return (
@@ -154,7 +150,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
   private renderTeacherGuide = () => {
     const { user: { isTeacher }, teacherGuide } = this.stores;
     const sections = teacherGuide?.sections;
-    // console.log("commented-documents.tsx > renderTeacherGuide > sections", sections);
     return isTeacher && sections && (
       <ProblemTabContent
         context={ENavTab.kTeacherGuide}
@@ -164,13 +159,11 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private handleSelectTab = (tabIndex: number) => {
-    // console.log("handleSelectTab with tabIndex", tabIndex);
     const { tabs } = this.props;
     const { ui } = this.stores;
     if (tabs) {
       const tabSpec = tabs[tabIndex];
       if (ui.activeNavTab !== tabSpec.tab) {
-        // console.log("line 167");
         ui.setActiveNavTab(tabSpec.tab);
         ui.updateFocusDocument();
         const logParameters = {
@@ -182,7 +175,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
         // track this value in a member rather than state to avoid excessive renders
         this.topTabReset = tabSpec.tab;
         // must force refresh initially but not when value is reset
-        // console.log("line 184 forceUpdate()");
         this.forceUpdate();
       }
     }
