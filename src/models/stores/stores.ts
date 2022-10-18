@@ -73,7 +73,7 @@ export function createStores(params?: ICreateStores): IStores {
     ui: params?.ui || UIModel.create({
       problemWorkspace: {
         type: ProblemWorkspace,
-        mode: "1-up",
+        mode: "1-up"
       },
       learningLogWorkspace: {
         type: LearningLogWorkspace,

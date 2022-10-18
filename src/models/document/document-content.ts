@@ -403,7 +403,6 @@ export const DocumentContentModel = types
       const titleBase = getToolContentInfoById(tileContent.type)?.titleBase || tileContent.type;
       const getTitle = (tileId: string) => (self.getTile(tileId) as any)?.title;
       const newTitle = self.getUniqueTitle(tileContent.type, titleBase, getTitle);
-      console.log("models>documents> document-content.ts \n newTitle:", newTitle);
       return newTitle;
     }
   }))
