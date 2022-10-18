@@ -88,7 +88,7 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
               className={"document-box"}
               key={index}
               onClick={() => {
-                ui.setActiveNavTab(navTab); //open tab
+                ui.setActiveNavTab(navTab); //open correct NavTab
                 ui.setSelectedTile();
                 ui.setFocusDocument(doc.path);
                 switch (navTab){
@@ -100,12 +100,10 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
                     break;
                 }
                 handleDocumentClick();
-
-
               }}
             >
               <div className={"title"}>
-                { doc.title }
+                { doc.unit.toUpperCase() + " " + doc.problem + " " + doc.title}
               </div>
               <div className={"numComments"}>
                 {doc.numComments}

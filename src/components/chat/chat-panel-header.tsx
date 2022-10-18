@@ -1,7 +1,6 @@
 import { observer } from "mobx-react";
 import React, {Dispatch, SetStateAction} from "react";
 import ChatIcon from "../../assets/chat-icon.svg";
-import NotificationIcon from "../../assets/notifications-icon.svg";
 import DocumentsWithCommentsIcon  from "../../assets/documents-list-icon.svg";
 
 import "./chat-panel-header.scss";
@@ -17,12 +16,10 @@ interface IProps {
 
 export const ChatPanelHeader: React.FC<IProps> = observer(({activeNavTab, newCommentCount, onCloseChatPanel,
   isDocumentView, setIsDocumentView}) => {
-
   const renderNotification = () => {
     return (
       <div className="notification-toggle">
         <div className={`notification-icon themed-negative ${activeNavTab}`}>
-          {/* <NotificationIcon className={`icon-image themed-negative ${activeNavTab}`}/> */}
           <DocumentsWithCommentsIcon
             className={`icon-image themed-negative ${activeNavTab}`}
             onClick={()=> setIsDocumentView((prevState) => !prevState)}

@@ -68,14 +68,11 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
 
       {
         isDocumentView ?
-        <>
-          <CommentedDocuments
-            user={user}
-            documentObj={document as CurriculumDocument}
-            handleDocumentClick={handleDocumentClick}
-          />
-          {console.log("comment view \n array (chatThreads) is", chatThreads)}
-        </>
+        <CommentedDocuments
+          user={user}
+          documentObj={document as CurriculumDocument}
+          handleDocumentClick={handleDocumentClick}
+        />
         :
         chatThreads?.map((commentThread: ChatCommentThread) => {
           const title = commentThread.title || '';
@@ -85,16 +82,6 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
           const shouldBeFocused = commentThread.tileId === focusId;
           const Icon = commentThread.tileType && getToolContentInfoById(commentThread.tileType)?.Icon;
           const key= commentThread.tileId || "document";
-          // console.log("title:", title);
-          // console.log("shouldShowUserIcon", shouldShowUserIcon);
-          // console.log("numComments", numComments);
-          // console.log("shouldBeFocused", shouldBeFocused);
-          // console.log("Icon", Icon);
-          // console.log("key", key);
-          // console.log("------------------------");
-
-
-
           return (
             <div key={key}
               className={classNames("chat-thread", {
