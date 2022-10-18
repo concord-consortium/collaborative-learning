@@ -15,7 +15,6 @@ interface IProps {
   context?: string;   // ENavTab.kTeacherGuide for teacher guide, blank otherwise
   sections: SectionModelType[];
   showSolutionsSwitch: boolean;
-  selectedIndex?: number;
 }
 
 const kHeaderHeight = 55;
@@ -24,7 +23,7 @@ const kNavTabHeight = 34;
 const kTabSectionBorderWidth = 2;
 
 export const ProblemTabContent: React.FC<IProps>
-  = observer(({ context, sections, showSolutionsSwitch, selectedIndex }: IProps) => {
+  = observer(({ context, sections, showSolutionsSwitch}: IProps) => {
   const { isTeacher } = useUserStore();
   const ui = useUIStore();
   const problemPath = useProblemPathWithFacet(context);
@@ -70,14 +69,13 @@ export const ProblemTabContent: React.FC<IProps>
     >
       <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
         <TabList className={classNames("tab-list", {"chat-open" : ui.showChatPanel})}>
-          {sections?.map((section, index) => {
+          {sections?.map((section) => {
             const sectionTitle = getSectionTitle(section.type);
             return (
               <Tab
                 className={classNames("prob-tab", context)}
                 key={`section-${section.type}`}
                 onClick={() => handleTabClick(section.type, sectionTitle)}
-
               >
                 {sectionTitle}
               </Tab>
