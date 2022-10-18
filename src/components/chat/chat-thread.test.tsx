@@ -5,11 +5,19 @@ import { ENavTab } from "../../models/view/nav-tabs";
 import { ChatThread } from "./chat-thread";
 import { UserModelType } from "src/models/stores/user";
 
+const mockCurriculumDocument = { unit: "unit", problem: "1.1", section: "intro", path: "unit/1/1/intro" };
+const mockUseDocumentOrCurriculumMetadata = jest.fn((docKeyOrSectionPath: string) => {
+  return mockCurriculumDocument;
+});
+
 jest.mock("../../hooks/use-stores", () => ({
   useUIStore: () => ({
     showChatPanel: true,
     selectedTileIds: []
   }),
+  useDocumentOrCurriculumMetadata:
+  (docKeyOrSectionPath: string) => mockUseDocumentOrCurriculumMetadata(docKeyOrSectionPath),
+useNetworkDocumentKey: (documentKey: string) => `network_${documentKey}`,
   useTypeOfTileInDocumentOrCurriculum: () => "Text",
 }));
 
