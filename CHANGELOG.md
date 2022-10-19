@@ -44,6 +44,7 @@ Curriculum Enhancements:
 - MST dataset fixes [#183523506](https://www.pivotaltracker.com/story/show/183523506)
 
 ### Asset Sizes
+
 |        File                                                                           |    Size   |
 |---------------------------------------------------------------------------------------|-----------|
 | vendor-main.2048c2e8.js                                                               |      2.1M |
