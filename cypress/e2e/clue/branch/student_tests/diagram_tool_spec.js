@@ -21,5 +21,11 @@ context('Diagram Tool Tile', function () {
       diagramToolTile.getDiagramToolbarButton("button-dialog").should("exist");
       diagramToolTile.getDiagramToolbarButton("button-delete").should("exist");
     });
+    it("renders dialogs", () => {
+      diagramToolTile.getDiagramToolbarButton("button-dialog").click();
+      diagramToolTile.getDiagramDialog().should("exist");
+      diagramToolTile.getDiagramDialogCloseButton().click();
+      diagramToolTile.getDiagramDialog().should("not.exist");
+    });
   });
 });
