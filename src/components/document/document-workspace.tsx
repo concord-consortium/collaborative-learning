@@ -105,7 +105,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
     if ((defaultType === ProblemDocument) && autoSectionProblemDocuments) {
       // for problem documents, default content is a section header row and a placeholder tile
       // for each section that is present in the corresponding problem content
-      return createDefaultSectionedContent(problem.sections);
+      return createDefaultSectionedContent({ sections: problem.sections });
     }
     return defaultContent;
   }
