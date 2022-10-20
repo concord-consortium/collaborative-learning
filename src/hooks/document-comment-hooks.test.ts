@@ -120,7 +120,7 @@ describe("Document comment hooks", () => {
     beforeEach(() => resetMocks());
 
     it("should post comment successfully with optimistic update", () => {
-      const document = { contextId: "class-hash", uid: "user-id", type: "problem", key: "key" };
+      const document = { uid: "user-id", type: "problem", key: "key" };
       // useDocumentComments() fills the commentsQueryKeyMap
       renderHook(() => useDocumentComments(document.key));
       expect(mockHttpsCallable).toHaveBeenCalled();
@@ -143,7 +143,7 @@ describe("Document comment hooks", () => {
         const mutationResult = new Error("Failed");
         options?.onError?.(mutationResult, params, context);
       });
-      const document = { contextId: "class-hash", uid: "user-id", type: "problem", key: "key" };
+      const document = { uid: "user-id", type: "problem", key: "key" };
       // useDocumentComments() fills the commentsQueryKeyMap
       renderHook(() => useDocumentComments(document.key));
       const { result: postCommentResult } = renderHook(() => usePostDocumentComment());

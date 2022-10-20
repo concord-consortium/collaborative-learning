@@ -57,7 +57,7 @@ export interface IPartialValidateDocumentParams {
 const specValidateDocument = (overrides?: IPartialValidateDocumentParams): ICommentableDocumentParams => {
   return {
     context: specUserContext(overrides?.context),
-    document: { contextId: kClassHash, uid: kUserId, type: kDocumentType, key: kDocumentKey, ...overrides?.document }
+    document: { uid: kUserId, type: kDocumentType, key: kDocumentKey, ...overrides?.document }
   };
 };
 

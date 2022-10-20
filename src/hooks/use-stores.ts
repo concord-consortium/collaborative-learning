@@ -48,21 +48,8 @@ export function useDocumentFromStore(key?: string) {
 }
 
 export function useDocumentMetadataFromStore(key?: string): IDocumentMetadata | undefined {
-  const { documents, networkDocuments, user } = useStores();
-  // for local documents, the context is the user's classHash
-  let contextId = user.classHash;
-  let document = key ? documents.getDocument(key) : undefined;
-  let metadata = document ? { contextId, ...document.getMetadata() } : undefined;
-  if (!document) {
-    document = key ? networkDocuments?.getDocument(key) : undefined;
-    // for network documents, the context is the document's remoteContext
-    document && (contextId = document.remoteContext);
-    metadata = document ? { contextId, ...document.getMetadata() } : undefined;
-  }
-  return useMemo(() => {
-    return metadata || undefined;
-    // updating when the key changes is sufficient
-  }, [key]);  // eslint-disable-line react-hooks/exhaustive-deps
+  const document = useDocumentFromStore(key);
+  return document?.metadata;
 }
 
 export function useDocumentOrCurriculumMetadata(key?: string): IDocumentMetadata | ICurriculumMetadata | undefined {

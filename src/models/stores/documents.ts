@@ -206,7 +206,7 @@ export const DocumentsModel = types
         treeManager.setPropsForFirestoreSaving({
           firestore,
           userContext,
-          documentMetadata: { contextId: userContext.classHash, ...document.getMetadata()}
+          documentMetadata: document.metadata
         });
       
       } else {

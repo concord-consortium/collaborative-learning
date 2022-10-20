@@ -195,7 +195,7 @@ describe("document model", () => {
   });
 
   it("can get document metadata", () => {
-    expect(document.getMetadata()).toEqual({
+    expect(document.metadata).toEqual({
       type: ProblemDocument,
       uid: "1",
       key: "test",

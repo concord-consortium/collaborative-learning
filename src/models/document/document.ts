@@ -10,7 +10,9 @@ import {
 import { AppConfigModelType } from "../stores/app-config-model";
 import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
 import { UserStarModel, UserStarModelType } from "../tools/user-star";
-import { IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext } from "../../../functions/src/shared";
+import { 
+  IDocumentMetadata, IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext 
+} from "../../../functions/src/shared";
 import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
@@ -94,7 +96,7 @@ export const DocumentModel = Tree.named("Document")
     get hasContent() {
       return !!self.content;
     },
-    getMetadata() {
+    get metadata(): IDocumentMetadata {
       const { uid, type, key, createdAt, title, originDoc, properties } = self;
       return { uid, type, key, createdAt, title, originDoc, properties: properties.toJSON() };
     },
