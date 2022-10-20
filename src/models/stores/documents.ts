@@ -205,8 +205,7 @@ export const DocumentsModel = types
         const treeManager = document.treeManagerAPI as TreeManagerType;
         treeManager.setPropsForFirestoreSaving({
           firestore,
-          userContext,
-          documentMetadata: document.metadata
+          userContext
         });
       
       } else {

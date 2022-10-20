@@ -309,7 +309,7 @@ export const DocumentModel = Tree.named("Document")
       const manager = TreeManager.create({document: {}, undoStore: {}});
       self.treeManagerAPI = manager;
       self.treeMonitor = new TreeMonitor(self, manager, false);
-      manager.putTree(self.treeId, self);
+      manager.setMainDocument(self);
     },
     undoLastAction() {
       self.treeManagerAPI?.undoManager.undo();
