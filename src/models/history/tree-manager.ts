@@ -60,12 +60,6 @@ export const TreeManager = types
   currentHistoryIndex: 0,
   // getUserContext(stores)
   userContext: undefined as IUserContext | undefined,
-  // const { documents, user } = useStores();
-  // let contextId = user.classHash;
-  // let document = key ? documents.getDocument(key) : undefined;
-  // let metadata = document ? { contextId, ...document.getMetadata() } : undefined;
-  // If we have to handle networkDocuments then look at useDocumentMetadataFromStore
-  // to see how it constructs the metadata
   documentMetadata: undefined as IDocumentMetadata | undefined,
   firestore: undefined as Firestore | undefined
 }))
