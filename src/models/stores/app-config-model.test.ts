@@ -15,6 +15,7 @@ describe("ConfigurationManager", () => {
     docTimeStampPropertyName: "timeStamp",
     docDisplayIdPropertyName: "displayId",
     defaultDocumentTemplate: undefined,
+    planningTemplate: undefined,
     defaultLearningLogTitle: "Default LL Title",
     initialLearningLogTitle: "Initial LL Title",
     defaultLearningLogDocument: false,
@@ -47,6 +48,7 @@ describe("ConfigurationManager", () => {
     docTimeStampPropertyName: "dateStamp",
     docDisplayIdPropertyName: "displayIdName",
     defaultDocumentTemplate: undefined,
+    planningTemplate: undefined,
     defaultLearningLogTitle: "New Default LL Title",
     initialLearningLogTitle: "New Initial LL Title",
     defaultLearningLogDocument: true,
@@ -68,8 +70,8 @@ describe("ConfigurationManager", () => {
     settings: {}
   } as UnitConfiguration;
 
-  type SimpleProps = Exclude<keyof typeof defaults, "defaultDocumentTemplate" | "navTabs">;
-  const excludeProps = ["defaultDocumentTemplate", "navTabs"];
+  const excludeProps = ["defaultDocumentTemplate", "navTabs", "planningTemplate"];
+  type SimpleProps = Exclude<keyof typeof defaults, typeof excludeProps[number]>;
   const keys = Object.keys(defaults).filter(prop => !excludeProps.includes(prop)) as SimpleProps[];
 
   it("can be constructed with just defaults and return those defaults", () => {

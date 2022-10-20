@@ -1495,7 +1495,7 @@ describe("DocumentContentModel -- createDefaultSectionedContent", () => {
             SectionModel.create({ type: "foo" }),
             SectionModel.create({ type: "bar" })
           ];
-    const content = createDefaultSectionedContent(sections);
+    const content = createDefaultSectionedContent({ sections });
     expect(content.rowCount).toBe(4);
   });
 });

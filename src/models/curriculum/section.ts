@@ -1,5 +1,6 @@
 import { getParent, types } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
+import { IAuthoredTileContent } from "../document/document-content-import";
 import { ProblemModelType } from "./problem";
 import { SupportModel } from "./support";
 import { each } from "lodash";
@@ -11,6 +12,7 @@ export interface ISectionInfo {
   initials: string;
   title: string;
   placeholder?: string;
+  tiles?: IAuthoredTileContent[];
 }
 
 let gSuspendSectionContentParsing = 0;

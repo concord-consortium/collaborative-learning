@@ -209,7 +209,7 @@ describe("db", () => {
     stores.documents = createDocumentsModelWithRequiredDocuments([ProblemDocument, PlanningDocument]);
     stores.documents.resolveRequiredDocumentPromisesWithNull();
     await db.connect({appMode: "test", stores, dontStartListeners: true});
-    expect((await db.guaranteePlanningDocument([]))?.type).toBe(PlanningDocument);
+    expect((await db.guaranteePlanningDocument())?.type).toBe(PlanningDocument);
     expect(await stores.documents.requiredDocuments[PlanningDocument].promise).toEqual(newDocument);
     expect(await stores.documents.requiredDocuments[ProblemDocument].promise).toBeNull();
   });
@@ -236,7 +236,7 @@ describe("db", () => {
     });
 
     await jestSpyConsole("error", async spy => {
-      await db.guaranteePlanningDocument([]);
+      await db.guaranteePlanningDocument();
       expect(spy).toHaveBeenCalledTimes(1);
     });
 
