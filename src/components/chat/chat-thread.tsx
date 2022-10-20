@@ -120,7 +120,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
           );
         })
       }
-      {focusedItemHasNoComments  &&
+      {focusedItemHasNoComments  && !isDocumentView &&
         <div key={focusTileId ? focusTileId : "document"}
           className="chat-thread chat-thread-focused"
           data-testid="chat-thread">

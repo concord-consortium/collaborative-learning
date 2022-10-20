@@ -34,8 +34,7 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
   const stores = useStores();
 
   useEffect(() => {
-
-    const unsubscribeFromDocs = cDocsInScopeRef.onSnapshot(querySnapshot => {
+    const unsubscribeFromDocs = cDocsInScopeRef.onSnapshot(async querySnapshot => {
       const docs = querySnapshot.docs.map(doc => {
         return (
           {
@@ -47,18 +46,18 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
         );
       });
       const commentedDocs: PromisedCurriculumDocument[] = [];
-      docs.forEach((doc) => {
+
+      for (let doc of docs){
         const docCommentsRef = cDocsRef.doc(doc.id).collection("comments");
-        docCommentsRef.get().then((qs) => {
-          if (qs.empty === false){
-            //could look at qs size/length to find # of comments - qs.size
+        await docCommentsRef.get().then((qs) => {
+          if (qs.empty === false) {
             const firstCharPosition = doc.id.split("_", 4).join("_").length + 1; //first char after 4th _
             const sectionType =  doc.id.substring(firstCharPosition, doc.id.length);
             doc = {...doc, title: getSectionTitle(sectionType), numComments: qs.size};
             commentedDocs.push(doc as PromisedCurriculumDocument);
           }
         });
-      });
+      }
       setDocsCommentedOn(commentedDocs);
     });
     return () => unsubscribeFromDocs?.();
