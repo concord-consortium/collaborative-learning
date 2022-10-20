@@ -6,7 +6,7 @@
   "config": {
     "enableHistoryRoles": ["teacher"],
     "placeholderText": "Enter notes here",
-    "defaultStamps": [
+    "stamps": [
       {
         "url": "curriculum/moving-straight-ahead/stamps/plus.png",
         "width": 25,
@@ -1027,7 +1027,7 @@
           "config": {
             "planningTemplate": {
               "overview": {
-                "tiles": [  
+                "tiles": [
                   {
                     "id": "jp9Qts8S6wcfwbuB",
                     "title": "Text 1",
@@ -1681,7 +1681,7 @@
           "config": {
             "planningTemplate": {
               "overview": {
-                "tiles": [  
+                "tiles": [
                   {
                     "content": {
                       "type": "Text",
@@ -1991,7 +1991,7 @@
           "config": {
             "planningTemplate": {
               "overview": {
-                "tiles": [  
+                "tiles": [
                   {
                     "content": {
                       "type": "Text",
@@ -2624,7 +2624,7 @@
           "config": {
             "planningTemplate": {
               "overview": {
-                "tiles": [  
+                "tiles": [
                   {
                     "content": {
                       "type": "Text",
@@ -3290,7 +3290,7 @@
           "config": {
             "planningTemplate": {
               "overview": {
-                "tiles": [  
+                "tiles": [
                   {
                     "content": {
                       "type": "Text",
@@ -3785,7 +3785,7 @@
                       "text": [
                         "<h3>Situation A. Finding Scale Factors</h3>",
                         "Marta and her Friends make claims. For each claim, decide if it is correct? Explain why.",
-                        "<p><strong>Marta, Billie, and Zack's claims</strong></p>", 
+                        "<p><strong>Marta, Billie, and Zack's claims</strong></p>",
                         "Marta and Zack agree that rectangles J and L are similar. Marta says the lengths are growing by a factor of 2. Billie claims the lengths grow by 200%. Zack says the scale factor is ½.  Zack says the scale factor is ½. Who is correct?"
                       ]
                     }
@@ -3796,7 +3796,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>All are correct. Rectangles J and L are similar because each corresponding side length has the same ratio. </p>", 
+                        "<p>All are correct. Rectangles J and L are similar because each corresponding side length has the same ratio. </p>",
                         "<p>If you multiply ½ to each side length of rectangle J, then you will get rectangle L that is similar to J. In this way, the scale factor is ½. </p>",
                         "<p>If you multiply 2 to each side length of rectangle L, then you will get rectangle J that is similar to L. In this way, the scale factor is 2. </p>",
                         "<p>A scale factor is 2 is the same as growing by 200%.</p>"
@@ -3918,7 +3918,7 @@
           "config": {
             "planningTemplate": {
               "overview": {
-                "tiles": [  
+                "tiles": [
                   {
                     "content": {
                       "type": "Text",
@@ -4621,7 +4621,7 @@
           "config": {
             "planningTemplate": {
               "overview": {
-                "tiles": [  
+                "tiles": [
                   {
                     "content": {
                       "type": "Text",
@@ -5123,7 +5123,7 @@
           "config": {
             "planningTemplate": {
               "overview": {
-                "tiles": [  
+                "tiles": [
                   {
                     "content": {
                       "type": "Text",
@@ -5390,7 +5390,7 @@
                       "text": [
                         "<p>Recall from our work in the Comparing Quantities unit that a ratio is a comparison of two quantities such as two lengths. The rectangle around the original photo is about 10 centimeters tall and 8 centimeters wide. We can say</p>",
                         "For every 10 cm of height there are 8 cm of width.",
-                        "Or", 
+                        "Or",
                         "The ratio of height to width is 10 to 8.",
                         "<p>This table gives the ratios of height to width for the images.</p>"
                       ]
@@ -5814,7 +5814,7 @@
           "config": {
             "planningTemplate": {
               "overview": {
-                "tiles": [  
+                "tiles": [
                   {
                     "content": {
                       "type": "Text",
@@ -6217,7 +6217,7 @@
           "config": {
             "planningTemplate": {
               "overview": {
-                "tiles": [  
+                "tiles": [
                   {
                     "content": {
                       "type": "Text",
@@ -6790,7 +6790,7 @@
           "config": {
             "planningTemplate": {
               "overview": {
-                "tiles": [  
+                "tiles": [
                   {
                     "content": {
                       "type": "Text",
