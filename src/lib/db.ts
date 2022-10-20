@@ -301,14 +301,16 @@ export class DB {
     }
   }
 
-  public async guaranteePlanningDocument(sections: SectionModelType[]) {
-    const {documents} = this.stores;
+  public async guaranteePlanningDocument(sections?: SectionModelType[]) {
+    const {appConfig, documents} = this.stores;
 
     const requiredPlanningDocument = documents.requiredDocuments[PlanningDocument];
     if (requiredPlanningDocument) {
       const planningDocument = await requiredPlanningDocument.promise;
-      return planningDocument ||
-              this.createProblemOrPlanningDocument(PlanningDocument, createDefaultSectionedContent(sections));
+      if (planningDocument) return planningDocument;
+      const content = appConfig.planningTemplate;
+      const docContent = createDefaultSectionedContent({ sections, content });
+      return this.createProblemOrPlanningDocument(PlanningDocument, docContent);
     }
     else {
       console.error("ERROR: Can't determine required planning document without an appropriate promise!");

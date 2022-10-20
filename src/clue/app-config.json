@@ -270,6 +270,9 @@
     "example-no-section-problem-tab": {
       "content": "curriculum/example-curriculum/example-no-section-problem-tab.json"
     },
+    "example-template": {
+      "content": "curriculum/example-curriculum/example-template.json"
+    },
     "example-variables": {
       "content": "curriculum/example-curriculum/example-variables.json"
     },
