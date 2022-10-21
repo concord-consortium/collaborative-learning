@@ -1683,19 +1683,168 @@
               "overview": {
                 "tiles": [
                   {
+                    "id": "sIZcC115f0hld5F6",
+                    "title": "Text 1",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>This is default document content!</strong></p>"
+                        "<p><strong>Problem 1.2 Designing a Poster Using a Rubber Band Stretcher</strong></p>",
+                        "<p>The Problem begins in the Initial Challenge with the Mystery Club enlarging a flier into a poster to attract new members. In this context, students create a similar figure using rubber bands. They make a stretcher by tying two rubber bands together and use it to enlarge two different figures. In the What If Situations they compare how the general shape, line lengths, areas, perimeters, and angles are affected. This focuses students’ attention on the preservation of shape in similar figures.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "OofDBVkxxmi4iCAU",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p>The original figure and its image are s<em>imilar figures</em>  or scale drawings. For two similar figures, what characteristics and measures are the same?  Different? Explain how you know.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "DhPBFmxLwYzg871Z",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p>",
+                        "<p>Introduction Exploration </p>",
+                        "<p>Analysis</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "U4zPM-kEdZva43nt",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "JORy6R9PAUIhXmQz",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 1.2</p>",
+                        "<p>Super Sleuth (right-handed and left-handed versions)</p>",
+                        "<p>Rulers</p>",
+                        "<p>#16 rubber bands (2 per student)</p>",
+                        "<p>tape</p>",
+                        "<p>blank paper</p>",
+                        "<p>angle rulers or protractors</p>",
+                        "<p>transparencies, tracing    paper, patty paper (optional)</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "L53b6lzNnrAIqjpR",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>Individual or pairs</p>",
+                        "<p><strong>A</strong> #3-4</p>",
+                        "<p><strong>C </strong>#12-13</p>",
+                        "<p><strong>E</strong> #17-18</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.G.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.B</p>",
+                        "<p></p>"
                       ]
                     }
                   }
                 ]
               },
-              "launch": [  ],
-              "explore": [ ],
-              "summarize": [  ]
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "qlyBAqBWZazjjIO0",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>In launching this Problem, your goal is to understand what your students intuitively know about scaled drawings or similar figures. Students’ understanding will likely be based on the use of “similarity” in everyday situations. In addition, you will want to assess their measurement skills.</p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Members of the Mystery Club want to make a poster that shows their logo. To do this, they need to enlarge the logo on the flier they designed. Briefly discuss with students the desire to make a larger version of the original picture. Then tell them that you are going to demonstrate one method for doing so.</p>",
+                        "<p>You will need to demonstrate how to draw a figure using a rubber band stretcher, using a marker either on the board or on chart paper taped to the wall.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "0cgR8X-A-B-BPej5",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>As students work, suggest that their drawings will be more accurate if they hold the pencil vertically and keep the rubber band as close to the point of the pencil as possible.</p>",
+                        "<p>Remind students to trace the figure they are trying to copy with the knot, as they may be tempted to draw the object freehand. Accuracy is not the issue here, but students can get better drawings by being careful with the placement of the rubber bands on the pencil and the path of the knot on the figure</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What would happen if I made a three-band stretcher?</li><li>Do I get exactly the same drawing if I switch the ends of my two-band stretcher?</li></ul>",
+                        "<ul><li>How could we use something like the rubber band stretcher to make an image smaller than the original?</li></ul>",
+                        "<p><em>Teacher Moves: Agency, Identity, Ownership</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>As you are observing students working with the rubber band stretchers and comparing their drawings to the originals listen to how they are describing them. Students will worry about the drawing being “perfect”. Help them to focus on the mathematical changes from the original shape to the image they are creating. How do they describe the change in the lengths of the line segments? The areas? Have they noticed that the angle measures stay the same? Take note of students who have ways to describe what has changed and what has stayed the same so you can have them share this in the Summary discussion.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "toJhy2ktJuOQkLEm",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>﻿Teacher Moves: Compare Thinking</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES</p>",
+                        "<p>Have students share their findings about the image of the new figure as compared to the original figure.</p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p>The Summary needs to focus students onto the mathematics around the use of the rubber band stretcher.</p>",
+                        "<p>Suggested questions</p>",
+                        "<ul><li>How do the lengths of the line segments compare between the two figures?</li><li>How do the angles of the two figures compare?</li><li>Which comparison statements in What If Situation A can be written as ratio statements? </li><li>How does the area change from the original to the image?</li><li>The original and the image are similar figures. What do you think “mathematically similar” means?</li></ul>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>",
+                        "<p><strong>Note: </strong> The students measurements won’t be exact because the rubber band stretcher isn’t an exact tool. You may need to take a few measurements from students and then say something like, “It looks like the general shape of Super Sleuth is about the same. We are all getting the side lengths to about double, the angles seem to stay the same, the perimeter seems to about double and the area seems to do more than double.”  </p>"
+                      ]
+                    }
+                  }
+                ]
+              }
             }
           },
           "supports": []
@@ -2092,7 +2241,7 @@
                         "<p><strong>LAUNCH</strong></p>",
                         "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
                         "<p>Connecting back to the sixth-grade rational number Units, students explore scale factors of 75% and 150%.  During the discussions in Problem 1.2 you may have already introduced the term corresponding to talk about corresponding sides and angles of shapes. If you haven’t, use the Introduction to Problem 1.3 prior to presenting the challenge. </p>",
-                        "<p><em>Teacher Moves: Make Predictions</em></p>",
+                        "<p><em>T﻿eacher Moves: Make Predictions</em></p>",
                         "<p>PRESENTING THE CHALLENGE</p>",
                         "<p>Set up the photocopier context by talking with students about the rubber-band stretchers and other methods for enlarging figures.</p>",
                         "<p><strong>Suggested questions</strong></p>",
@@ -2120,7 +2269,7 @@
                         "<p><strong>Suggested questions</strong></p>",
                         "<ul><li>What is the measurement of the base of the triangle in the smaller figure?</li><li>How could you use a rubber band stretcher to increase something by 150%? </li></ul>",
                         "<p>Look for strategies that students use to compare features such as length and angles. </p>",
-                        "<p><em>Teacher Moves: Language</em></p>",
+                        "<p><em>T﻿eacher Moves: Language</em></p>",
                         "<p>PLANNING FOR THE SUMMARY</p>",
                         "<p>As you are circulating, listen for how students are answering the questions in the What If part? How are they describing the changes in the side lengths, area, and perimeter? Listen for their use of  “for every” statements that you can expand on in the Summary</p>"
                       ]
@@ -2769,31 +2918,6 @@
           "config": {
             "planningTemplate": {
               "overview": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>This is default document content!</strong></p>"
-                      ]
-                    }
-                  }
-                ]
-              }
-            }
-          },
-          "supports": [ ]
-        },
-        {
-          "description": "Problem 2.2",
-          "ordinal": 2,
-          "title": "SAS 2.2 Hats Off to the Wumps",
-          "subtitle": "Changing a Figure's Size and Location",
-          "sections": [
-            {
-              "type": "initialChallenge",
-              "content": {
                 "tiles": [
                   {
                     "id": "wG02htlUyzSBJWxj",
@@ -4381,46 +4505,6 @@
               "overview": {
                 "tiles": [
                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>This is default document content!</strong></p>"
-                      ]
-                    }
-                  }
-                ]
-              }
-            }
-          },
-          "supports": []
-        }
-      ],
-      "supports": [
-        {
-          "text": "What measurements change from one similar figure to another?"
-        },
-        {
-          "text": "How is the change related to the scale factor?"
-        }
-      ]
-    },
-    {
-      "description": "Investigation 3",
-      "ordinal": 3,
-      "title": "SAS Investigation 3 Scaling Perimeter and Area",
-      "problems": [
-        {
-          "description": "Problem 3.1",
-          "ordinal": 1,
-          "title": "SAS 3.1 Using Proportional Reasoning to Rep-tile",
-          "subtitle": "The Area Connection",
-          "sections": [
-             {
-              "type": "introduction",
-              "content": {
-                 "tiles": [
-                  {
                     "id": "GEDB7BqXw-MMz7fH",
                     "title": "Text 1",
                     "content": {
@@ -5906,34 +5990,6 @@
               "overview": {
                 "tiles": [
                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>This is default document content!</strong></p>"
-                      ]
-                    }
-                  }
-                ]
-              },
-              "launch": [  ],
-              "explore": [ ],
-              "summarize": [  ]
-            }
-          },
-          "supports": []
-        },
-        {
-          "description": "Problem 3.3",
-          "ordinal": 3,
-          "title": "SAS 3.3 Out of Reach",
-          "subtitle": "Finding Lengths with Similar Triangles",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": [
-                  {
                     "id": "4PakhPFIVp7pM7KN",
                     "title": "Text 1",
                     "content": {
@@ -6064,7 +6120,7 @@
                         "<p>Check to make sure that students are identifying the correct scale factor in the parts that give information about area. For example, in the Initial Challenge and Triangle X,  if the area of the sketched figure must be 16 times the area of the original figure, students must understand that the area grows by the square of the scale factor. So, in this case, the scale factor is 4.</p>",
                         "<p><strong>Suggested questions</strong></p>",
                         "<ul><li>Can using corresponding sides help you? </li><li>Can using corresponding angles help you? </li><li>What is the scale factor from one shape to the other? </li><li>What do we know about the relationship between scale factor and area change? </li></ul>",
-                        "<p><em>Teacher Moves: Selecting and Sequencing</em></p>",
+                        "<p><em>T﻿eacher Moves: Selecting and Sequencing</em></p>",
                         "<p>PLANNING FOR THE SUMMARY</p>",
                         "<p>As you are circulating during the summary select student work from the design criteria in the Initial Challenge to use for the summary discussion- select work that is correct and incorrect to help students work on justifying their ideas about scale factor and area relationships. Choose examples from the What If Situations to discuss how to use scale factor to find missing side lengths.</p>"
                       ]
@@ -6423,10 +6479,10 @@
                       "format": "html",
                       "text": [
                         "<p><strong>SUMMARIZE</strong></p>",
-                        "<p><em>Teacher Moves: Compare Thinking</em></p>",
+                        "<p><em>T﻿eacher Moves: Compare Thinking</em></p>",
                         "<p>SOLUTIONS AND STRATEGIES </p>",
                         "<p>When all groups have made their calculations, give each group a chance to share their work. If there are a variety of answers, ask the class why groups arrived at different answers. See if students can explain to others how to correct their work. This is a good opportunity to discuss accuracy and attending to precision with the class.</p>",
-                        "<p><em>Teacher Moves: Portrayal</em></p>",
+                        "<p><em>T﻿eacher Moves: Portrayal</em></p>",
                         "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
                         "<p><strong>Suggested questions</strong></p>",
                         "<ul><li>Describe the relationship between the perimeter of the smaller triangle and the perimeter of the larger triangle in the Initial Challenge? </li><li>Discuss What If Situation A and students’ thinking around Durrell’s suggestion.  </li><li>In What If Situation B, what order do you think these students located the key points and measure the segments and angles?  Explain your reasoning</li></ul>",
@@ -7098,23 +7154,6 @@
                 ]
               }
             }
-          ],
-          "config": {
-            "planningTemplate": {
-              "overview": {
-                "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>This is default document content!</strong></p>"
-                      ]
-                    }
-                  }
-                ]
-              }
-            }
           }
         },
         {
@@ -7634,7 +7673,7 @@
                         "<ul><li>Would a scale factor or ratio help you find the height? </li><li>How is this problem similar to Problem 4.1? </li><li>Do your measurements seem reasonable</li></ul>",
                         "<p></p>",
                         "<p>When students are working with the mirror method and/or shadow in What If Situation A monitor how they are making their measurements.  Remind them to walk backwards until they see the reflection of the top of the object in the mirror. Assist them with measuring from end to end on the shadow.</p>",
-                        "<p><em>Teacher Moves: Selecting and Sequencing</em></p>",
+                        "<p><em>T﻿eacher Moves: Selecting and Sequencing</em></p>",
                         "<p>PLANNING FOR THE SUMMARY</p>",
                         "<p>As you are circulating during the Explore find examples of students using scale factors or ratios to find the heights of the objects.  Use this student work in the summary discussion</p>"
                       ]
@@ -7654,7 +7693,7 @@
                         "<p>SUMMARIZE</p>",
                         "<p>SOLUTIONS AND STRATEGIES </p>",
                         "<p>Collect the students’ answers for each of the missing lengths.</p>",
-                        "<p><em>Teacher Moves: Compare Thinking</em></p>",
+                        "<p><em>T﻿eacher Moves: Compare Thinking</em></p>",
                         "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
                         "<p>The parallel lines of the rays can be used to show that the corresponding angles are equal. This was done in Shapes and Designs. In the Shapes Unit students find that they can only draw one (unique) triangle given three angle measures. This means that if two triangles have corresponding angles equal, then the figures are congruent and hence similar. Or you could choose to tell them that sun and shadows always produce similar triangles.</p>",
                         "<p>Suggested questions </p>",
@@ -8370,10 +8409,10 @@
                       "format": "html",
                       "text": [
                         "<p><strong>SUMMARIZE</strong></p>",
-                        "<p><em>Teacher Moves: Agency, Identity, Ownership</em></p>",
+                        "<p><em>T﻿eacher Moves: Agency, Identity, Ownership</em></p>",
                         "<p>SOLUTIONS AND STRATEGIES </p>",
                         "<p>Discuss the imposters they found in the Initial Challenge. Be sure to let different groups share their strategies. You want to have groups share different strategies, including internal ratios of adjacent sides, scale factor, and ratios of corresponding sides across the figures.</p>",
-                        "<p><em>Teacher Moves: Claim, Support, Question</em></p>",
+                        "<p><em>T﻿eacher Moves: Claim, Support, Question</em></p>",
                         "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
                         "<p><strong>Suggested questions</strong></p>",
                         "<ul><li>Do you have any What If questions? </li><li>How did you decide which one was the imposter?</li><li>Find the perimeter of one of the triangles in the Initial Challenge.</li><li>Which claims do you agree with in What If Situation A?</li><li>Look at the work from other groups for What If Situation B.  Do you agree with their sketches?  Why or Why not?</li></ul>",
