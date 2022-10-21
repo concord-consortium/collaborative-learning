@@ -9,7 +9,7 @@ import "./commented-documents.scss";
 interface IProps {
   documentObj: CurriculumDocument,
   user?: UserModelType
-  handleDocumentClick: () => void;
+  handleDocView: (() => void) | undefined;
 }
 
 // Not sure this is the best way to do this.  The issue, I think
@@ -21,7 +21,7 @@ interface PromisedCurriculumDocument extends CurriculumDocument {
   numComments?: number,
 }
 
-export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleDocumentClick}) => {
+export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleDocView}) => {
   const [docsCommentedOn, setDocsCommentedOn] = useState<PromisedCurriculumDocument[]>();
   const [db] = useFirestore();
   const cDocsRef = db.collection("curriculum");
@@ -96,7 +96,9 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
                     ui.setSelectedSectionIndex(doc.section, stores.teacherGuide?.sections);
                     break;
                 }
-                handleDocumentClick();
+                if (handleDocView !== undefined){
+                  handleDocView();
+                }
               }}
             >
               <div className={"title"}>

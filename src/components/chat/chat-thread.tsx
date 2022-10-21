@@ -1,16 +1,15 @@
-import React, {Dispatch, SetStateAction, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import classNames from "classnames";
 import { UserModelType } from "../../models/stores/user";
 import { WithId } from "../../hooks/firestore-hooks";
-import { useDocumentOrCurriculumMetadata, useUIStore } from "../../hooks/use-stores";
-import { CommentDocument, CurriculumDocument } from "../../lib/firestore-schema";
+import { useUIStore } from "../../hooks/use-stores";
+import { CommentDocument} from "../../lib/firestore-schema";
 import { CommentCard } from "./comment-card";
 import { getToolContentInfoById } from "../../models/tools/tool-content-info";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import {ChatCommentThread} from "./chat-comment-thread";
 import { ToolIconComponent } from "./tool-icon-component";
 import { ChatThreadToggle } from "./chat-thread-toggle";
-import { CommentedDocuments } from "./commented-documents";
 
 import "./chat-thread.scss";
 
@@ -23,16 +22,15 @@ interface IProps {
   focusDocument?: string;
   focusTileId?: string;
   isDocumentView?: boolean;
-  setIsDocumentView?: Dispatch<SetStateAction<boolean>>;
+  handleDocView?: () => void;
 }
 
 export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
-  onPostComment, onDeleteComment, focusDocument, focusTileId, isDocumentView, setIsDocumentView}) => {
+  onPostComment, onDeleteComment, focusDocument, focusTileId, isDocumentView, handleDocView}) => {
   useEffect(() => {
     setExpandedThread(focusTileId || 'document');
   },[focusTileId]);
 
-  const document = useDocumentOrCurriculumMetadata(focusDocument);
   // make focusId null if undefined so it can be compared with tileId below.
   const focusId = focusTileId === undefined ? null : focusTileId;
   const focusedItemHasNoComments = !chatThreads?.find(item => (item.tileId === focusId));
@@ -53,21 +51,9 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
     }
   };
 
-  const handleDocumentClick = () => {
-    if (setIsDocumentView !== undefined) setIsDocumentView((prevState) => !prevState);
-  };
-
   return (
     <div className="chat-list" data-testid="chat-list">
-
       {
-        isDocumentView ?
-        <CommentedDocuments
-          user={user}
-          documentObj={document as CurriculumDocument}
-          handleDocumentClick={handleDocumentClick}
-        />
-        :
         chatThreads?.map((commentThread: ChatCommentThread) => {
           const title = commentThread.title || '';
           const shouldShowUserIcon =

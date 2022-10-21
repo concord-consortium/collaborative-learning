@@ -1,4 +1,4 @@
-import React, { useCallback, useState} from "react";
+import React, { useCallback, useEffect, useState} from "react";
 import { ILogComment, Logger } from "../../lib/logger";
 import { UserModelType } from "../../models/stores/user";
 import { ChatPanelHeader } from "./chat-panel-header";
@@ -9,6 +9,8 @@ import {
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import {useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
+import { CommentedDocuments } from "./commented-documents";
+import { CurriculumDocument } from "../../lib/firestore-schema";
 
 import "./chat-panel.scss";
 
@@ -34,7 +36,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
   const postedComments = documentComments?.concat(commentsInDocumentOrder);
   const commentThreads = makeChatThreads(postedComments, content);
   const postCommentMutation = usePostDocumentComment();
-
 
   const postComment = useCallback((comment: string) => {
     if (focusDocument) {
@@ -76,6 +77,16 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
 
   //state - determines comments vs documentView
   const [isDocumentView, setIsDocumentView] = useState(false);
+  const [chatPanelTitle, setChatPanelTitle] = useState("Comments");
+
+  const handleDocumentClick = () => {
+    setIsDocumentView((prevState) => !prevState);
+    console.log("isDocumentView:", isDocumentView);
+  };
+
+  useEffect(()=>{ //switches title
+    setChatPanelTitle(isDocumentView ? "Documents" : "Comments");
+  }, [isDocumentView]);
 
 
   const newCommentCount = unreadComments?.length || 0;
@@ -85,10 +96,18 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         activeNavTab={activeNavTab}
         newCommentCount={newCommentCount}
         onCloseChatPanel={onCloseChatPanel}
-        isDocumentView = {isDocumentView}
-        setIsDocumentView={setIsDocumentView}
+        handleDocView={handleDocumentClick}
+        chatPanelTitle={chatPanelTitle}
       />
-      {focusDocument ?
+      {
+        isDocumentView ?
+        <CommentedDocuments
+          user={user}
+          documentObj={document as CurriculumDocument}
+          handleDocView={handleDocumentClick}
+        />
+        :
+        focusDocument ?
         <ChatThread
           user={user}
           activeNavTab={activeNavTab}
@@ -98,11 +117,13 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
           focusDocument={focusDocument}
           focusTileId={focusTileId}
           isDocumentView={isDocumentView}
-          setIsDocumentView={setIsDocumentView}
+          handleDocView={handleDocumentClick}
         />
-        : <div className="select-doc-message" data-testid="select-doc-message">
-            Open a document to begin or view comment threads
-          </div>
+        :
+        <div className="select-doc-message" data-testid="select-doc-message">
+          Open a document to begin or view comment threads
+        </div>
+
       }
     </div>
   );

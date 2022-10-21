@@ -10,19 +10,19 @@ interface IProps {
   activeNavTab: string;
   newCommentCount: number;
   onCloseChatPanel:(show:boolean) => void;
-  isDocumentView: boolean;
-  setIsDocumentView: Dispatch<SetStateAction<boolean>>;
+  handleDocView: () => void;
+  chatPanelTitle: string;
 }
 
 export const ChatPanelHeader: React.FC<IProps> = observer(({activeNavTab, newCommentCount, onCloseChatPanel,
-  isDocumentView, setIsDocumentView}) => {
+  handleDocView, chatPanelTitle}) => {
   const renderNotification = () => {
     return (
       <div className="notification-toggle">
         <div className={`notification-icon themed-negative ${activeNavTab}`}>
           <DocumentsWithCommentsIcon
             className={`icon-image themed-negative ${activeNavTab}`}
-            onClick={()=> setIsDocumentView((prevState) => !prevState)}
+            onClick={handleDocView}
           />
         </div>
         {/* The next line of code is commented out, but deliberately not removed,
@@ -35,7 +35,7 @@ export const ChatPanelHeader: React.FC<IProps> = observer(({activeNavTab, newCom
   return (
     <div className="chat-panel-header" data-testid="chat-panel-header">
       <ChatIcon className={`chat-icon themed ${activeNavTab} no-action`}/>
-      {isDocumentView ? "Documents" : "Comments"}
+      {chatPanelTitle}
       {renderNotification()}
       <button className={`chat-close-button themed ${activeNavTab}`}
               data-testid="chat-close-button"
