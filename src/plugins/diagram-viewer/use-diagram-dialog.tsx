@@ -1,45 +1,51 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import VariablesIcon from "../shared-variables/slate/variables.svg";
 import { useCustomModal } from "../../hooks/use-custom-modal";
+import { EditVariableDialogContent, updateVariable, VariableType } from "@concord-consortium/diagram-view";
 
 import './diagram-dialog.scss';
 
-interface IContentProps {
-  message: string;
-}
-const Content = ({ message }: IContentProps) => {
-  return (
-    <div className="diagram-dialog-content" >
-      { message }
-    </div>
-  );
-};
-
 interface IProps {
-  onAccept: () => void;
   onClose: () => void;
+  variable?: VariableType;
 }
-export const useDiagramDialog = ({ onAccept, onClose }: IProps) => {
+export const useDiagramDialog = ({ onClose, variable }: IProps) => {
+  const [name, setName] = useState(variable?.name || "");
+  const [notes, setNotes] = useState(variable?.description || "");
+  const [value, setValue] = useState(variable?.value?.toString() || "");
+  const [unit, setUnit] = useState(variable?.unit || "");
+
+  useEffect(() => {
+    if (variable) {
+      console.log("changing variable", variable);
+      setName(variable.name || "");
+      setNotes(variable.description || "");
+      setValue(variable.value?.toString() || "");
+      setUnit(variable.unit || "");
+    }
+  }, [variable]);
 
   const handleClick = () => {
-    onAccept();
+    if (variable) {
+      updateVariable({ variable, name, notes, value, unit });
+    }
   };
 
   const [showModal, hideModal] = useCustomModal({
     Icon: VariablesIcon,
     title: "Diagram Variables",
-    Content,
-    contentProps: { message: "One day, I'll be a real dialog!" },
+    Content: EditVariableDialogContent,
+    contentProps: {name, setName, notes, setNotes, value, setValue, unit, setUnit},
     buttons: [
       { label: "Cancel" },
       { label: "OK",
         isDefault: true,
-        isDisabled: false,
+        isDisabled: !variable,
         onClick: handleClick
       }
     ],
     onClose
-  }, []);
+  }, [name, notes, value, variable, unit]);
 
   return [showModal, hideModal];
 };

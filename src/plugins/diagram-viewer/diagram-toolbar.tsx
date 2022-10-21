@@ -7,6 +7,8 @@ import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { IFloatingToolbarProps, useFloatingToolbarLocation }
   from "../../components/tools/hooks/use-floating-toolbar-location";
 
+import { VariableType } from "@concord-consortium/diagram-view";
+
 import VariablesToolIcon from "../shared-variables/slate/variables.svg";
 import DeleteSelectionIcon from "../../assets/icons/delete/delete-selection-icon.svg";
 import "./diagram-toolbar.scss";
@@ -39,7 +41,7 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
   return SvgIcon
     ? <Tooltip title={title} {...tooltipOptions}>
         <button className={classNames("diagram-tool-button", { disabled, selected }, buttonClass)}
-            onClick={onClick} type="button">
+            disabled={disabled} onClick={onClick} type="button">
           <SvgIcon fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
         </button>
       </Tooltip>
@@ -48,11 +50,12 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
 
 interface IDialogButton {
   handleClick: () => void;
+  selectedVariable?: VariableType;
 }
-const DialogButton = ({ handleClick }: IDialogButton) => {
+const DialogButton = ({ handleClick, selectedVariable }: IDialogButton) => {
   return (
-    <SvgToolbarButton SvgIcon={VariablesToolIcon} buttonClass="button-dialog" title="variable-dialog"
-      onClick={handleClick} style={{fill: "#000000", strokeWidth: 0.1}} />
+    <SvgToolbarButton SvgIcon={VariablesToolIcon} buttonClass="button-dialog" disabled={!selectedVariable}
+      title="variable-dialog" onClick={handleClick} style={{fill: "#000000", strokeWidth: 0.1}} />
   );
 };
 
@@ -66,9 +69,10 @@ const DeleteButton = () => {
 
 interface IProps extends IFloatingToolbarProps {
   handleDialogClick: () => void;
+  selectedVariable?: VariableType;
 }
 export const DiagramToolbar: React.FC<IProps> = observer(({
-  documentContent, handleDialogClick, onIsEnabled, ...others
+  documentContent, handleDialogClick, onIsEnabled, selectedVariable, ...others
 }) => {
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
@@ -82,7 +86,7 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
     ? ReactDOM.createPortal(
         <div className={`diagram-toolbar ${enabled && location ? "enabled" : "disabled"}`}
             style={location} onMouseDown={e => e.stopPropagation()}>
-          <DialogButton handleClick={handleDialogClick} />
+          <DialogButton handleClick={handleDialogClick} selectedVariable={selectedVariable} />
           <DeleteButton />
         </div>, documentContent)
     : null;

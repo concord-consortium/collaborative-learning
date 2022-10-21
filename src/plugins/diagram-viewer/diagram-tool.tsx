@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { observer } from "mobx-react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { DiagramToolbar } from "./diagram-toolbar";
 import { DiagramContentModelType } from "./diagram-content";
@@ -10,15 +11,15 @@ import "@concord-consortium/diagram-view/dist/index.css";
 
 import "./diagram-tool.scss";
 
-export const DiagramToolComponent: React.FC<IToolTileProps> = (
+export const DiagramToolComponent: React.FC<IToolTileProps> = observer((
   { documentContent, model, onRegisterToolApi, onUnregisterToolApi, readOnly, scale, toolTile }
 ) => {
   const content = model.content as DiagramContentModelType;
 
   const [diagramDialogOpen, setDiagramDialogOpen] = useState(false);
   const [showDiagramDialog, hideDiagramDialog] = useDiagramDialog({
-    onAccept: () => console.log("Acceptable."),
-    onClose: () => setDiagramDialogOpen(false)
+    onClose: () => setDiagramDialogOpen(false),
+    variable: content.root.selectedNode?.variable
   });
   useEffect(() => {
     if (diagramDialogOpen) {
@@ -37,11 +38,12 @@ export const DiagramToolComponent: React.FC<IToolTileProps> = (
         handleDialogClick={() => setDiagramDialogOpen(true)}
         toolTile={toolTile}
         scale={scale}
+        selectedVariable={content.root.selectedNode?.variable}
         { ...toolbarProps }
       />
       <Diagram dqRoot={content.root} />
       <div className="qp-version">{`version: ${kQPVersion}`}</div>
     </div>
   );
-};
+});
 DiagramToolComponent.displayName = "DiagramToolComponent";
