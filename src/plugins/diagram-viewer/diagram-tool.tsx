@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { observer } from "mobx-react";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { DiagramToolbar } from "./diagram-toolbar";
@@ -16,18 +16,9 @@ export const DiagramToolComponent: React.FC<IToolTileProps> = observer((
 ) => {
   const content = model.content as DiagramContentModelType;
 
-  const [diagramDialogOpen, setDiagramDialogOpen] = useState(false);
-  const [showDiagramDialog, hideDiagramDialog] = useDiagramDialog({
-    onClose: () => setDiagramDialogOpen(false),
+  const [showDiagramDialog] = useDiagramDialog({
     variable: content.root.selectedNode?.variable
   });
-  useEffect(() => {
-    if (diagramDialogOpen) {
-      showDiagramDialog();
-    } else {
-      hideDiagramDialog();
-    }
-  }, [diagramDialogOpen, hideDiagramDialog, showDiagramDialog]);
 
   const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
   
@@ -35,7 +26,7 @@ export const DiagramToolComponent: React.FC<IToolTileProps> = observer((
     <div className="diagram-tool">
       <DiagramToolbar
         documentContent={documentContent}
-        handleDialogClick={() => setDiagramDialogOpen(true)}
+        handleDialogClick={() => showDiagramDialog()}
         toolTile={toolTile}
         scale={scale}
         selectedVariable={content.root.selectedNode?.variable}

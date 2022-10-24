@@ -1,33 +1,20 @@
-import React, { useEffect, useState } from "react";
+import { useMemo } from "react";
+import { getSnapshot } from "mobx-state-tree";
 import VariablesIcon from "../shared-variables/slate/variables.svg";
 import { useCustomModal } from "../../hooks/use-custom-modal";
-import { EditVariableDialogContent, updateVariable, VariableType } from "@concord-consortium/diagram-view";
+import { EditVariableDialogContent, updateVariable, Variable, VariableType } from "@concord-consortium/diagram-view";
 
 import './diagram-dialog.scss';
 
 interface IProps {
-  onClose: () => void;
   variable?: VariableType;
 }
-export const useDiagramDialog = ({ onClose, variable }: IProps) => {
-  const [name, setName] = useState(variable?.name || "");
-  const [notes, setNotes] = useState(variable?.description || "");
-  const [value, setValue] = useState(variable?.value?.toString() || "");
-  const [unit, setUnit] = useState(variable?.unit || "");
-
-  useEffect(() => {
-    if (variable) {
-      console.log("changing variable", variable);
-      setName(variable.name || "");
-      setNotes(variable.description || "");
-      setValue(variable.value?.toString() || "");
-      setUnit(variable.unit || "");
-    }
-  }, [variable]);
+export const useDiagramDialog = ({ variable }: IProps) => {
+  const variableClone = useMemo(() => Variable.create(variable ? getSnapshot(variable) : {}), [variable]);
 
   const handleClick = () => {
     if (variable) {
-      updateVariable({ variable, name, notes, value, unit });
+      updateVariable(variable, variableClone);
     }
   };
 
@@ -35,7 +22,7 @@ export const useDiagramDialog = ({ onClose, variable }: IProps) => {
     Icon: VariablesIcon,
     title: "Diagram Variables",
     Content: EditVariableDialogContent,
-    contentProps: {name, setName, notes, setNotes, value, setValue, unit, setUnit},
+    contentProps: { variable: variableClone },
     buttons: [
       { label: "Cancel" },
       { label: "OK",
@@ -43,9 +30,8 @@ export const useDiagramDialog = ({ onClose, variable }: IProps) => {
         isDisabled: !variable,
         onClick: handleClick
       }
-    ],
-    onClose
-  }, [name, notes, value, variable, unit]);
+    ]
+  }, [variable]);
 
   return [showModal, hideModal];
 };
