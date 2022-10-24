@@ -44,7 +44,7 @@ export const ProblemTabContent: React.FC<IProps>
       ui.updateFocusDocument();
     }
     setActiveIndex((prevState) => {
-      const newIndex = (findSelectedSectionIndex(focusDocument));
+      const newIndex = findSelectedSectionIndex(focusDocument);
       if (newIndex !== -1){
         return newIndex;
       } else {
