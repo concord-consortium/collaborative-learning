@@ -36,7 +36,6 @@ export const UIModel = types
     dividerPosition: kDividerHalf,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kProblems,
-    activeSectionIndex: types.maybe(types.number), //keeps track of which section we are in
     activeGroupId: "",
     selectedTileIds: types.array(types.string),
     selectedCommentId: types.maybe(types.string),
@@ -156,11 +155,6 @@ export const UIModel = types
       setActiveNavTab(tab: string) {
         self.activeNavTab = tab;
       },
-
-      setSelectedSectionIndex(sectionSelected: string, sections: any){ //this function returns the correct section index
-        self.activeSectionIndex =  sections.findIndex((section: any) => section.type === sectionSelected);
-      },
-
       setActiveStudentGroup(groupId: string) {
         self.activeNavTab = ENavTab.kStudentWork;
         self.activeGroupId = groupId;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useUIStore, useStores } from "../../hooks/use-stores";
+import { useUIStore} from "../../hooks/use-stores";
 import { useFirestore } from "../../hooks/firestore-hooks";
 import { CurriculumDocument } from "../../lib/firestore-schema";
 import { getSectionTitle } from "../../models/curriculum/section";
@@ -31,7 +31,6 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
     .where("problem", "==", problem)
     .where("network","==", user?.network);
   const ui = useUIStore();
-  const stores = useStores();
 
   useEffect(() => {
     const unsubscribeFromDocs = cDocsInScopeRef.onSnapshot(async querySnapshot => {
@@ -88,14 +87,6 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
                 ui.setActiveNavTab(navTab); //open correct NavTab
                 ui.setSelectedTile();
                 ui.setFocusDocument(doc.path);
-                switch (navTab){
-                  case "problems":
-                    ui.setSelectedSectionIndex(doc.section, stores.problem.sections);
-                    break;
-                  case "teacher-guide":
-                    ui.setSelectedSectionIndex(doc.section, stores.teacherGuide?.sections);
-                    break;
-                }
                 if (handleDocView !== undefined){
                   handleDocView();
                 }

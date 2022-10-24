@@ -81,7 +81,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
 
   const handleDocumentClick = () => {
     setIsDocumentView((prevState) => !prevState);
-    console.log("isDocumentView:", isDocumentView);
   };
 
   useEffect(()=>{ //switches title
