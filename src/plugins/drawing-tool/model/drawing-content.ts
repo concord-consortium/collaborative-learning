@@ -37,7 +37,7 @@ export const DrawingToolMetadataModel = ToolMetadataModel
   }));
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
 
-interface ObjectMap {
+export interface ObjectMap {
   [key: string]: DrawingObjectType|null;
 }
 

@@ -1,6 +1,7 @@
 import { getMembers, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
+import { ObjectMap } from "../model/drawing-content";
 import { BoundingBox, DefaultToolbarSettings, Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
 
@@ -10,6 +11,7 @@ export type ToolbarModalButton = "select" | "line" | "vector" | "rectangle" | "e
 // It is used to break the circular reference between DrawingContentModel
 // and the toolbar components.
 export interface IToolbarManager {
+  objectMap: ObjectMap;
   setSelectedButton(button: ToolbarModalButton): void;
   selectedButton: string;
   toolbarSettings: ToolbarSettings;

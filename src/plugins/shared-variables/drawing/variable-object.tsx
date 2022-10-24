@@ -1,16 +1,17 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React, { useContext, useRef } from "react";
+import { observer } from "mobx-react";
 import useResizeObserver from "use-resize-observer";
-import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, IToolbarButtonProps, typeField }
-  from "../../drawing-tool/objects/drawing-object";
+import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, IToolbarButtonProps, IToolbarManager,
+  typeField } from "../../drawing-tool/objects/drawing-object";
 import { Point } from "../../drawing-tool/model/drawing-basic-types";
 import { VariableChip } from "../slate/variable-chip";
-import { findVariable } from "./drawing-utils";
+import { getSelectedVariable, findVariable } from "./drawing-utils";
 import { useVariableDialog } from "./use-variable-dialog";
 import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
 import { SvgToolbarButton } from "../../drawing-tool/components/drawing-toolbar-buttons";
 import { DrawingContentModelContext } from "../../drawing-tool/components/drawing-content-context";
-import { observer } from "mobx-react";
+import { DrawingContentModelType } from "../../drawing-tool/model/drawing-content";
 
 export const VariableChipObject = DrawingObject.named("VariableObject")
   .props({
@@ -101,3 +102,29 @@ export function VariableChipToolbarButton(props: IToolbarButtonProps) {
   return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="variable"
     title="Variable" onClick={handleShowVariableDialog} />;
 }
+
+export class EditVariableTool extends DrawingTool {
+  constructor(drawingLayer: IDrawingLayer) {
+    super(drawingLayer);
+  }
+}
+
+interface IEditVariableButtonProps {
+  toolbarManager: IToolbarManager;
+}
+export const EditVariableButton = observer(({ toolbarManager }: IEditVariableButtonProps) => {
+  const selectedVariable = getSelectedVariable(toolbarManager as DrawingContentModelType);
+
+  // useEditVariableDialog(selectedVariable)
+  const [showVariableDialog] = useVariableDialog();
+
+  const disabled = !selectedVariable;
+  const onClick = () => {
+    if (!disabled) {
+      showVariableDialog();
+    }
+  };
+
+  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="variable" title="Edit Variable" 
+    onClick={onClick} disabled={disabled} />;
+});
