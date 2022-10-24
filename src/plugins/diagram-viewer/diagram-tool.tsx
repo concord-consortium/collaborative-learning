@@ -4,7 +4,7 @@ import { IToolTileProps } from "../../components/tools/tool-tile";
 import { DiagramToolbar } from "./diagram-toolbar";
 import { DiagramContentModelType } from "./diagram-content";
 import { kQPVersion } from "./diagram-types";
-import { useDiagramDialog } from "./use-diagram-dialog";
+import { useEditVariableDialog } from "./use-edit-variable-dialog";
 import { useToolbarToolApi } from "../../components/tools/hooks/use-toolbar-tool-api";
 import { Diagram } from "@concord-consortium/diagram-view";
 import "@concord-consortium/diagram-view/dist/index.css";
@@ -16,7 +16,7 @@ export const DiagramToolComponent: React.FC<IToolTileProps> = observer((
 ) => {
   const content = model.content as DiagramContentModelType;
 
-  const [showDiagramDialog] = useDiagramDialog({
+  const [showEditVariableDialog] = useEditVariableDialog({
     variable: content.root.selectedNode?.variable
   });
 
@@ -26,7 +26,7 @@ export const DiagramToolComponent: React.FC<IToolTileProps> = observer((
     <div className="diagram-tool">
       <DiagramToolbar
         documentContent={documentContent}
-        handleDialogClick={() => showDiagramDialog()}
+        handleDialogClick={() => showEditVariableDialog()}
         toolTile={toolTile}
         scale={scale}
         selectedVariable={content.root.selectedNode?.variable}

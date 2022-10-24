@@ -9,7 +9,7 @@ import './diagram-dialog.scss';
 interface IProps {
   variable?: VariableType;
 }
-export const useDiagramDialog = ({ variable }: IProps) => {
+export const useEditVariableDialog = ({ variable }: IProps) => {
   const variableClone = useMemo(() => Variable.create(variable ? getSnapshot(variable) : {}), [variable]);
 
   const handleClick = () => {
