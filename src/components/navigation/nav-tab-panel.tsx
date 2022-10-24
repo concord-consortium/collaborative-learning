@@ -39,7 +39,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const { tabs, isResourceExpanded, isExpanderShown } = this.props;
     const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
             user } = this.stores;
-    // console.log("navTabPanel render with focusDocument", focusDocument);
     const selectedTabIndex = tabs?.findIndex(t => t.tab === activeNavTab);
     const resizePanelWidth = 6;
     const collapseTabWidth = 44;
@@ -144,10 +143,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
 
   private renderProblem = () => {
     const { user: { isTeacher }, problem: { sections }, ui:{focusDocument}} = this.stores;
-    // console.log("line 147 this.stores - ", this.stores.ui.focusDocument);
-    // console.log("Line 148 with sections", sections);
-    // console.log("focusDocument", focusDocument);
-    // console.log("focusDocument type", typeof focusDocument);
     return (
       <ProblemTabContent
         sections={sections}
