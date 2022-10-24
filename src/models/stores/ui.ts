@@ -128,7 +128,6 @@ export const UIModel = types
       }
     };
 
-
     return {
       alert,
       prompt,
