@@ -142,25 +142,23 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private renderProblem = () => {
-    const { user: { isTeacher }, problem: { sections }, ui:{focusDocument}} = this.stores;
+    const { user: { isTeacher }, problem: { sections }} = this.stores;
     return (
       <ProblemTabContent
         sections={sections}
         showSolutionsSwitch={isTeacher}
-        focusDocument={focusDocument}
       />
     );
   };
 
   private renderTeacherGuide = () => {
-    const { user: { isTeacher }, teacherGuide, ui:{focusDocument} } = this.stores;
+    const { user: { isTeacher }, teacherGuide } = this.stores;
     const sections = teacherGuide?.sections;
     return isTeacher && sections && (
       <ProblemTabContent
         context={ENavTab.kTeacherGuide}
         sections={sections}
         showSolutionsSwitch={false}
-        focusDocument={focusDocument}
       />
     );
   };

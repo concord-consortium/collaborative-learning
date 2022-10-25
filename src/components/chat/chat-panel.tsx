@@ -116,7 +116,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
           focusDocument={focusDocument}
           focusTileId={focusTileId}
           isDocumentView={isDocumentView}
-          handleDocView={handleDocumentClick}
         />
         :
         <div className="select-doc-message" data-testid="select-doc-message">

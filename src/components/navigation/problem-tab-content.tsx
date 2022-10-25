@@ -15,7 +15,6 @@ interface IProps {
   context?: string;   // ENavTab.kTeacherGuide for teacher guide, blank otherwise
   sections: SectionModelType[];
   showSolutionsSwitch: boolean;
-  focusDocument?: string;
 }
 
 const kHeaderHeight = 55;
@@ -24,7 +23,7 @@ const kNavTabHeight = 34;
 const kTabSectionBorderWidth = 2;
 
 export const ProblemTabContent: React.FC<IProps>
-  = observer(({ context, sections, showSolutionsSwitch, focusDocument}: IProps) => {
+  = observer(({ context, sections, showSolutionsSwitch }: IProps) => {
   const { isTeacher } = useUserStore();
   const ui = useUIStore();
   const problemPath = useProblemPathWithFacet(context);
@@ -37,23 +36,28 @@ export const ProblemTabContent: React.FC<IProps>
                         : kHeaderHeight + kNavTabHeight + (2 * (kWorkspaceContentMargin + kTabSectionBorderWidth));
   const problemsPanelHeight = vh - headerOffset;
   const problemsPanelStyle = { height: problemsPanelHeight };
-  const [activeIndex, setActiveIndex] = useState(0);
+  // const [activeIndex, setActiveIndex] = useState(0); //used to display correct "section" or subtab
+  let activeIndex = findSelectedSectionIndex(ui.focusDocument);
+  console.log("line 41 activeIndex:", activeIndex);
+
 
   useEffect(() => {
     if (ui.activeNavTab === ENavTab.kProblems) {
       ui.updateFocusDocument();
     }
-    setActiveIndex((prevState) => {
-      const newIndex = findSelectedSectionIndex(focusDocument);
-      if (newIndex !== -1){
-        return newIndex;
-      } else {
-        return prevState;
-      }
-    });
-  }, [ui, focusDocument]);
+    // setActiveIndex((prevState) => {
+    //   const newIndex = findSelectedSectionIndex(ui.focusDocument);
+    //   if (newIndex !== -1) {
+    //     return newIndex;
+    //   } else {
+    //     return prevState;
+    //   }
+    // });
+
+  }, [ui, ui.focusDocument]);
 
   const handleTabClick = (titleArgButReallyType: string, typeArgButReallyTitle: string) => {
+    console.log("handleTabClick with args\n", titleArgButReallyType, typeArgButReallyTitle);
     // TODO: this function has its argument names reversed (see caller for details.)
     // We can't simply switch it, however, because that would introduce a breaking change
     // in the log event stream, so for now we just rename the arguments for clarity.
@@ -63,20 +67,30 @@ export const ProblemTabContent: React.FC<IProps>
     });
     ui.setSelectedTile();
     ui.updateFocusDocument();
-    findSelectedSectionIndex(focusDocument);
+    activeIndex = findSelectedSectionIndex(ui.focusDocument);
   };
 
-  const findSelectedSectionIndex = (fullPath: string | undefined) => {
+  function findSelectedSectionIndex(fullPath: string | undefined){
     if (fullPath !==undefined){
       const lastSlashPosition = fullPath.split("/", 3).join("_").length + 1;
       const sectionSelected =  fullPath.substring(lastSlashPosition, fullPath.length);
+      console.log("sectionSelected:", sectionSelected);
+      console.log("sections:", sections);
       const index =  sections.findIndex((section: any) => section.type === sectionSelected);
+      console.log("findSelectedSectionIndex > index:", index);
       return index;
+      // activeIndex = index;
     }
     else {
       return 0;
+      // activeIndex = 0;
     }
-  };
+  }
+
+  console.log("line 79");
+  // const activeIndex = findSelectedSectionIndex(ui.focusDocument);
+  console.log("activeIndex: ", activeIndex);
+
 
   const handleToggleSolutions = () => {
     ui.toggleShowTeacherContent(!showTeacherContent);
@@ -89,6 +103,7 @@ export const ProblemTabContent: React.FC<IProps>
           selectedIndex={activeIndex || 0}
           data-focus-document={problemPath}
     >
+      {console.log("problem-tab-content.tsx > ui.focusDocument", ui.focusDocument)}
       <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
         <TabList className={classNames("tab-list", {"chat-open" : ui.showChatPanel})}>
           {sections?.map((section, index) => {
@@ -99,7 +114,8 @@ export const ProblemTabContent: React.FC<IProps>
                 key={`section-${section.type}`}
                 onClick={() => {
                   handleTabClick(section.type, sectionTitle);
-                  setActiveIndex(index);
+                  // setActiveIndex(index);
+                  findSelectedSectionIndex(ui.focusDocument);
                 }}
               >
                 {sectionTitle}

@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import React, {Dispatch, SetStateAction} from "react";
+import React from "react";
 import ChatIcon from "../../assets/chat-icon.svg";
 import DocumentsWithCommentsIcon  from "../../assets/documents-list-icon.svg";
 
