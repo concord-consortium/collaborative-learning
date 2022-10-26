@@ -36,7 +36,9 @@ export const ProblemTabContent: React.FC<IProps>
                         : kHeaderHeight + kNavTabHeight + (2 * (kWorkspaceContentMargin + kTabSectionBorderWidth));
   const problemsPanelHeight = vh - headerOffset;
   const problemsPanelStyle = { height: problemsPanelHeight };
+  //per Scott's PR comments we should be using ui.focusDocument instead of keeping this local state [activeIndex]
   const [activeIndex, setActiveIndex] = useState(0); //used to display correct "section" or subtab
+
 
   useEffect(() => {
     if (ui.activeNavTab === ENavTab.kProblems) {
