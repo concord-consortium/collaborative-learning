@@ -63,7 +63,8 @@ const ModernUnitModel = types
     config: types.maybe(types.frozen<Partial<UnitConfiguration>>())
   })
   .volatile(self => ({
-    userListenerDisposer: null as IReactionDisposer | null
+    userListenerDisposer: null as IReactionDisposer | null,
+    facet: undefined as string | undefined,
   }))
   .actions(self => ({
     afterCreate() {
@@ -77,6 +78,9 @@ const ModernUnitModel = types
     },
     installUserListener(isTeacherFn: () => boolean, reactionFn: (isTeacher: boolean) => Promise<void>) {
       self.userListenerDisposer = reaction(isTeacherFn, reactionFn, { fireImmediately: true });
+    },
+    setFacet(facet: string) {
+      self.facet = facet;
     }
   }))
   .views(self => ({

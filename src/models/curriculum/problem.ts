@@ -40,11 +40,15 @@ const ModernProblemModel = types
     }
   }))
   .views(self => ({
-    get problemPath(): string {
+    get investigation(): InvestigationModelType {
       // getParent is called twice below because each direct parent is an array
-      const investigation = getParent(getParent(self)) as InvestigationModelType;
-      const unit = getParent(getParent(investigation)) as UnitModelType;
-      return buildProblemPath(unit.code, `${investigation.ordinal}`, `${self.ordinal}`);
+      return getParent(getParent(self)) as InvestigationModelType;
+    },
+  }))
+  .views(self => ({
+    get problemPath(): string {
+      const unit = self.investigation.unit;
+      return buildProblemPath(unit.code, `${self.investigation.ordinal}`, `${self.ordinal}`);
     }
   }));
 interface LegacySnapshot extends SnapshotIn<typeof LegacyProblemModel> {}

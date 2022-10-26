@@ -155,6 +155,8 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
       if (userContext.type === "teacher") {
         const guideJson = await getGuideJson(unitId, stores.appConfig);
         const unitGuide = guideJson && UnitModel.create(guideJson);
+        // Not sure if this should be "guide" or "teacher-guide", either ought to work
+        unitGuide?.setFacet("teacher-guide");
         const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
         stores.teacherGuide = teacherGuide;
       }
