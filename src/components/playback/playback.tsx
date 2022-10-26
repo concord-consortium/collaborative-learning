@@ -3,9 +3,8 @@ import { Instance } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import classNames from "classnames";
 import { useUIStore } from "../../hooks/use-stores";
-import { TreeManager } from "../../models/history//tree-manager";
+import { HistoryStatus, TreeManager } from "../../models/history//tree-manager";
 import { DocumentModelType } from "../../models/document/document";
-import { LoadDocumentHistory } from "./load-document-history";
 import { PlaybackControlComponent } from "./playback-control";
 import PlaybackIcon from "../../clue/assets/icons/playback/playback-icon.svg";
 
@@ -37,21 +36,23 @@ export const PlaybackComponent: React.FC<IProps> = observer((props: IProps) => {
     );
   };
 
-  // This should delay showing the playback controls until the history is actually
-  // loaded into documentToShow
-  const historyLength = treeManager.document.history.length;
-
-  const actuallyShowPlaybackControls = showPlaybackControls && (historyLength !== undefined) && (historyLength > 0);
-
   const disablePlayback = false;
   const playbackComponentClass = classNames("playback-component", activeNavTab,
                                             {"show-control" : showPlaybackControls,
                                               "disabled" : disablePlayback});
+
+  let playbackControls = null;
+  if (showPlaybackControls) {
+    playbackControls = treeManager.historyStatus === HistoryStatus.HISTORY_LOADED 
+      ? <PlaybackControlComponent treeManager={treeManager} />
+      : <div className="playback-controls loading">
+          {treeManager.historyStatusString}
+        </div>;
+  }
   return (
     <div className={playbackComponentClass} data-testid="playback-component">
       {renderPlaybackToolbarButton()}
-      {showPlaybackControls && <LoadDocumentHistory document={document} />}
-      {actuallyShowPlaybackControls && <PlaybackControlComponent treeManager={treeManager} />}
+      {playbackControls}
     </div>
   );
 });
