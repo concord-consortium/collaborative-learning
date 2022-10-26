@@ -59,7 +59,11 @@ export class NavTabPanel extends BaseComponent<IProps> {
         <div className={`nav-tab-panel ${showChatPanel ? "chat-open" : ""}`}
             ref={elt => this.navTabPanelElt = elt}>
           <FocusDocumentTracker navTabPanelElt={this.navTabPanelElt} />
-          <Tabs selectedIndex={selectedTabIndex} onSelect={this.handleSelectTab} forceRenderTabPanel={true}>
+          <Tabs
+            selectedIndex={selectedTabIndex}
+            onSelect={this.handleSelectTab}
+            forceRenderTabPanel={true}
+          >
             <div className="top-row">
               <TabList className="top-tab-list">
                 { tabs?.map((tabSpec, index) => {
@@ -138,11 +142,12 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private renderProblem = () => {
-    const { user: { isTeacher }, problem: { sections } } = this.stores;
+    const { user: { isTeacher }, problem: { sections }} = this.stores;
     return (
       <ProblemTabContent
         sections={sections}
-        showSolutionsSwitch={isTeacher}/>
+        showSolutionsSwitch={isTeacher}
+      />
     );
   };
 
@@ -153,7 +158,8 @@ export class NavTabPanel extends BaseComponent<IProps> {
       <ProblemTabContent
         context={ENavTab.kTeacherGuide}
         sections={sections}
-        showSolutionsSwitch={false}/>
+        showSolutionsSwitch={false}
+      />
     );
   };
 
