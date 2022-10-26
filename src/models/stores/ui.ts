@@ -175,11 +175,9 @@ export const UIModel = types
       },
       closeDialog,
       setFocusDocument(documentKey?: string) {
-        console.log("ui.ts > setFocusDocument with documentKey", documentKey);
         self.focusDocument = documentKey;
       },
       updateFocusDocument() {
-        console.log("ui.ts > updateFocusDocument");
         // increment counter to trigger observers to update
         ++self.focusDocUpdates;
       },
