@@ -9,10 +9,12 @@ import {
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import {useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
+import { useUserContext } from "../../hooks/use-user-context";
 import { CommentedDocuments } from "./commented-documents";
 import { CurriculumDocument } from "../../lib/firestore-schema";
 
 import "./chat-panel.scss";
+import { ICurriculumMetadata, IDocumentMetadata } from "functions/src/shared";
 
 interface IProps {
   user?: UserModelType;
@@ -22,8 +24,21 @@ interface IProps {
   onCloseChatPanel:(show:boolean) => void;
 }
 
+let storedDocument: IDocumentMetadata | ICurriculumMetadata; //bug when on refresh > My Work > Document View
+                                                             // because document is undefined.
+
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
+  // console.log("--------- < ChatPanel > ----------");
   const document = useDocumentOrCurriculumMetadata(focusDocument);
+  (function storeLastValidDocument(){ //this prevents crash when My Work > Document View
+    if (document !== undefined){
+      storedDocument = document;
+    }
+  })();
+
+  // console.log("focusDocument", focusDocument);
+  // console.log("document:", document);
+  // console.log("useUserContext():", useUserContext());
   const content = useCurriculumOrDocumentContent(focusDocument);
   const ordering = content?.getTilesInDocumentOrder();
   const { data: comments } = useDocumentComments(focusDocument);
@@ -89,8 +104,20 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
 
 
   const newCommentCount = unreadComments?.length || 0;
+  // console.log("\n");
+
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
+      {/* {console.log("------- < ChatPanel > render --------")} */}
+      {/* {console.log("user:", user)} */}
+      {/* {console.log("storedDocument:", storedDocument)} */}
+
+      {/* {console.log("documentObj:", document)} */}
+      {/* {console.log("handleDocView", handleDocumentClick)} */}
+      {/* {console.log("focusDocument:", focusDocument)} */}
+      {/* {console.log("\n")} */}
+
+
       <ChatPanelHeader
         activeNavTab={activeNavTab}
         newCommentCount={newCommentCount}
@@ -102,7 +129,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         isDocumentView ?
         <CommentedDocuments
           user={user}
-          documentObj={document as CurriculumDocument}
+          documentObj={storedDocument as unknown as CurriculumDocument}
           handleDocView={handleDocumentClick}
         />
         :

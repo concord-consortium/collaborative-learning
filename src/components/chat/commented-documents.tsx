@@ -22,6 +22,10 @@ interface PromisedCurriculumDocument extends CurriculumDocument {
 }
 
 export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleDocView}) => {
+  console.log("----- < CommentedDocuments > -----------");
+  console.log("documentObj:", documentObj);
+  console.log("user:", user);
+  console.log("handleDocView: ", handleDocView);
   const [docsCommentedOn, setDocsCommentedOn] = useState<PromisedCurriculumDocument[]>();
   const [db] = useFirestore();
   const cDocsRef = db.collection("curriculum");
