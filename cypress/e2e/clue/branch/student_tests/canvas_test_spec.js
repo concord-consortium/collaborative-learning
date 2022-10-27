@@ -308,26 +308,6 @@ context('Test Canvas', function () {
     });
   });
 
-  context.skip('Dragging elements from different locations to canvas', function () {
-    describe('Drag element from left nav', function () {
-      const dataTransfer = new DataTransfer;
-      // TODO: Unable to get elements
-      it('will drag image from resource panel to canvas', () => {
-        resourcesPanel.openResourcesPanel('Introduction');
-        resourcesPanel.getResourcesPanelExpandedSpace().find('.image-tool').first()
-          .trigger('dragstart', { dataTransfer });
-        cy.get('.single-workspace .canvas .document-content').first()
-          .trigger('drop', { force: true, dataTransfer });
-        resourcesPanel.getResourcesPanelExpandedSpace().find('.image-tool').first()
-          .trigger('dragend');
-        resourcesPanel.closeResourcesPanel('Introduction');
-        imageToolTile.getImageTile().first().should('exist');
-      });
-    });
-    //TODO add a test for dragging rightside canvas to the left side workspace
-
-  });
-
   context('delete elements from canvas', function () {
     before(() => {
       //star a document to verify delete
@@ -349,6 +329,50 @@ context('Test Canvas', function () {
       imageToolTile.getImageTile().should('not.exist');
       tableToolTile.getTableTile().should('not.exist');
     });
+  });
+
+  context('Dragging elements from different locations to canvas', function () {
+    describe('Drag element from left nav', function () {
+      const dataTransfer = new DataTransfer;
+      it('will drag image from resource panel to canvas', () => {
+        resourcesPanel.openTopTab('problems');
+        resourcesPanel.openBottomTab("Now What Do You Know?");
+        resourcesPanel.getResourcesPanelExpandedSpace().find('.image-tool').first()
+          .trigger('dragstart', { dataTransfer });
+        cy.get('.single-workspace .canvas .document-content').first()
+          .trigger('drop', { force: true, dataTransfer });
+        resourcesPanel.getResourcesPanelExpandedSpace().find('.image-tool').first()
+          .trigger('dragend');
+        imageToolTile.getImageTile().should('exist');
+        imageToolTile.getImageTile().find('.editable-tile-title-text').contains('Did You Know?: Images in computer graphics');
+        clueCanvas.deleteTile('image');
+      });
+      it('will maintain positioning when copying multiple tiles', () => {
+        resourcesPanel.openBottomTab("Initial Challenge");
+        const leftTile = type => cy.get(`.nav-tab-panel .problem-panel .${type}-tool-tile`);
+
+        // Select three table tiles on the left
+        leftTile('table').first().click({ shiftKey: true });
+        leftTile('table').eq(1).click({ shiftKey: true });
+        leftTile('table').eq(2).click({ shiftKey: true });
+
+        // Drag the selected copies to the workspace on the right
+        leftTile('table').eq(2).trigger('dragstart', { dataTransfer });
+        cy.get('.single-workspace .canvas .document-content').first()
+          .trigger('drop', { force: true, dataTransfer });
+
+        // Make sure the tiles were copied in the correct order
+        tableToolTile.getTableTile().first().find('.editable-header-cell').contains('Mug Wump');
+        tableToolTile.getTableTile().eq(1).find('.editable-header-cell').contains('Mug Wump Part 2');
+        tableToolTile.getTableTile().eq(2).find('.editable-header-cell').contains('Mug Wump Part 3');
+
+        // Clean up
+        clueCanvas.deleteTile('table');
+        clueCanvas.deleteTile('table');
+        clueCanvas.deleteTile('table');
+      });
+    });
+
   });
 
   context('delete workspaces', function () {
