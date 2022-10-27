@@ -23,7 +23,8 @@ import { SectionModelType } from "../curriculum/section";
 export interface INewTileOptions {
   locationInRow?: string;
   rowHeight?: number;
-  rowIndex?: number;
+  rowId?: string; // The id of the row to add the tile to
+  rowIndex?: number; // The position to add a new row
   title?: string;
 }
 
@@ -543,7 +544,7 @@ export const DocumentContentModel = types
         // by default, insert new tiles after last visible on screen
         o.rowIndex = self.defaultInsertRow;
       }
-      const row = self.getRowByIndex(o.rowIndex);
+      const row = o.rowId ? self.getRow(o.rowId) : self.getRowByIndex(o.rowIndex);
       if (row) {
         const indexInRow = o.locationInRow === "left" ? 0 : undefined;
         self.insertNewTileInRow(tile, row, indexInRow);
@@ -595,6 +596,7 @@ export const DocumentContentModel = types
       if (tiles.length > 0) {
         let rowDelta = -1;
         let lastRowIndex = -1;
+        let lastRowId = "";
         tiles.forEach(tile => {
           let result: INewRowTile | undefined;
           const parsedTile = safeJsonParse(tile.tileContent);
@@ -604,6 +606,7 @@ export const DocumentContentModel = types
               rowDelta++;
             }
             const tileOptions: INewTileOptions = {
+              rowId: lastRowId,
               rowIndex: rowIndex + rowDelta,
               title: parsedTile.title
             };
@@ -613,6 +616,7 @@ export const DocumentContentModel = types
             if (tile.rowIndex !== lastRowIndex) {
               result = self.addTileContentInNewRow(content, tileOptions);
               lastRowIndex = tile.rowIndex;
+              lastRowId = result.rowId;
             }
             else {
               result = self.addTileSnapshotInExistingRow({ content, title: parsedTile.title }, tileOptions);
@@ -906,6 +910,7 @@ export const DocumentContentModel = types
       self.moveTiles(tiles, rowInfo);
     },
     userCopyTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+      console.log(`userCopy`, tiles);
       const dropRow = (rowInfo.rowDropIndex != null) ? self.getRowByIndex(rowInfo.rowDropIndex) : undefined;
       const results = dropRow?.acceptTileDrop(rowInfo)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
