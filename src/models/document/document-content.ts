@@ -910,7 +910,6 @@ export const DocumentContentModel = types
       self.moveTiles(tiles, rowInfo);
     },
     userCopyTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
-      console.log(`userCopy`, tiles);
       const dropRow = (rowInfo.rowDropIndex != null) ? self.getRowByIndex(rowInfo.rowDropIndex) : undefined;
       const results = dropRow?.acceptTileDrop(rowInfo)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
