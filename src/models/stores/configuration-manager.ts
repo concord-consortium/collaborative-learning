@@ -59,10 +59,6 @@ export class ConfigurationManager implements UnitConfiguration {
     return this.getProp<UC["docDisplayIdPropertyName"]>("docDisplayIdPropertyName");
   }
 
-  get defaultDocumentTemplate() {
-    return this.getProp<UC["defaultDocumentTemplate"]>("defaultDocumentTemplate");
-  }
-
   get defaultLearningLogTitle() {
     return this.getProp<UC["defaultLearningLogTitle"]>("defaultLearningLogTitle");
   }
@@ -145,6 +141,14 @@ export class ConfigurationManager implements UnitConfiguration {
 
   get tools() {
     return this.getProp<UC["tools"]>("tools");
+  }
+
+  get defaultDocumentTemplate() {
+    return this.getProp<UC["defaultDocumentTemplate"]>("defaultDocumentTemplate");
+  }
+
+  get planningTemplate() {
+    return this.getProp<UC["planningTemplate"]>("planningTemplate");
   }
 
   get placeholderText() {

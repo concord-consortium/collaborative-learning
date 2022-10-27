@@ -79,7 +79,7 @@
               "type": "problem-documents",
               "dataTestHeader": "my-work-section-workspaces",
               "dataTestItem": "my-work-list-items",
-              "documentTypes": ["problem"],
+              "documentTypes": ["problem", "planning"],
               "properties": ["!isDeleted"],
               "addDocument": true
             },
@@ -192,6 +192,26 @@
       "placeholder": "Work on Task C here"
     }
   },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "plan": {
+        "initials": "PL",
+        "title": "Plan",
+        "placeholder": "Plan the work; work the plan"
+      },
+      "show": {
+        "initials": "SH",
+        "title": "Show",
+        "placeholder": "Show the work"
+      }
+    },
+    "sections": [
+      { "type": "plan" },
+      { "type": "show" }
+    ]
+  },
   "investigations": [
     {
       "description": "M2Studio Investigation Description",
@@ -203,7 +223,6 @@
           "ordinal": 1,
           "title": "Getting Started in M2Studio",
           "subtitle": "",
-          "disabled": [],
           "sections": [
             {
               "type": "help",
@@ -242,7 +261,7 @@
                         "<p>2. What do you need to know about the school in order to help the board?</p>",
                         "<p>a) List as many factors (<strong>key quantities and variables</strong>) as you can:</p>",
                         "<p></p>",
-                        "<p>b) Next to each factor above, write down where you can find out the information or what you would need to do to figure it out. \nExamples:</p>", 
+                        "<p>b) Next to each factor above, write down where you can find out the information or what you would need to do to figure it out. \nExamples:</p>",
                         "<p>- I need to know know how many pets the students have. --> I will conduct a survey to collect this information. </p>",
                         "<p>- I wonder how many books are at the library. --> Ask the librarian if they have this on record. </p>",
                         "<p>c) Bonus: Use the [v=] button to formally make the variables in line above. For example: [cats] or [books in the library] </p>"
@@ -340,13 +359,59 @@
                         "<p><em>Hint: If you need more space, click on the small triangle on the bottom right of the tile to make drag it down and make the tile bigger.</em></p>"
                       ]
                     }
-                  }                                  
+                  }
                 ]
               },
               "supports": []
             }
           ],
-          "supports": []
+          "supports": [],
+          "config": {
+            "planningTemplate": {
+              "show": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>This is top <em>Show</em> section content!</strong></p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>This is left <em>Show</em> section content!</strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>This is right <em>Show</em> section content!</strong></p>"
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>This is bottom <em>Show</em> section content!</strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         }
       ]
     }

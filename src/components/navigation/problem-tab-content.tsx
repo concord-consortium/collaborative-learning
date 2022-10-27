@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { useProblemPathWithFacet, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { getSectionTitle, SectionModelType } from "../../models/curriculum/section";
@@ -36,12 +36,24 @@ export const ProblemTabContent: React.FC<IProps>
                         : kHeaderHeight + kNavTabHeight + (2 * (kWorkspaceContentMargin + kTabSectionBorderWidth));
   const problemsPanelHeight = vh - headerOffset;
   const problemsPanelStyle = { height: problemsPanelHeight };
+  //per Scott's PR comments we should be using ui.focusDocument instead of keeping this local state [activeIndex]
+  const [activeIndex, setActiveIndex] = useState(0); //used to display correct "section" or subtab
+
 
   useEffect(() => {
     if (ui.activeNavTab === ENavTab.kProblems) {
       ui.updateFocusDocument();
     }
-  }, [ui]);
+    setActiveIndex((prevState) => {
+      const newIndex = findSelectedSectionIndex(ui.focusDocument);
+      if (newIndex !== -1) {
+        return newIndex;
+      } else {
+        return prevState;
+      }
+    });
+
+  }, [ui, ui.focusDocument]);
 
   const handleTabClick = (titleArgButReallyType: string, typeArgButReallyTitle: string) => {
     // TODO: this function has its argument names reversed (see caller for details.)
@@ -53,7 +65,19 @@ export const ProblemTabContent: React.FC<IProps>
     });
     ui.setSelectedTile();
     ui.updateFocusDocument();
-};
+  };
+
+  function findSelectedSectionIndex(fullPath: string | undefined){
+    if (fullPath !==undefined){
+      const lastSlashPosition = fullPath.split("/", 3).join("_").length + 1;
+      const sectionSelected =  fullPath.substring(lastSlashPosition, fullPath.length);
+      const index =  sections.findIndex((section: any) => section.type === sectionSelected);
+      return index;
+    }
+    else {
+      return 0;
+    }
+  }
 
   const handleToggleSolutions = () => {
     ui.toggleShowTeacherContent(!showTeacherContent);
@@ -61,15 +85,24 @@ export const ProblemTabContent: React.FC<IProps>
   };
 
   return (
-    <Tabs className={classNames("problem-tabs", context, chatBorder)} selectedTabClassName="selected"
-          data-focus-document={problemPath}>
+    <Tabs className={classNames("problem-tabs", context, chatBorder)}
+          selectedTabClassName="selected"
+          selectedIndex={activeIndex || 0}
+          data-focus-document={problemPath}
+    >
       <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
         <TabList className={classNames("tab-list", {"chat-open" : ui.showChatPanel})}>
-          {sections?.map((section) => {
+          {sections?.map((section, index) => {
             const sectionTitle = getSectionTitle(section.type);
             return (
-              <Tab className={classNames("prob-tab", context)} key={`section-${section.type}`}
-                  onClick={() => handleTabClick(section.type, sectionTitle)} >
+              <Tab
+                className={classNames("prob-tab", context)}
+                key={`section-${section.type}`}
+                onClick={() => {
+                  handleTabClick(section.type, sectionTitle);
+                  setActiveIndex(index);
+                }}
+              >
                 {sectionTitle}
               </Tab>
             );

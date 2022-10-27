@@ -195,7 +195,9 @@ describe("document model", () => {
   });
 
   it("can get document metadata", () => {
-    expect(document.getMetadata()).toEqual({
+    expect(document.metadata).toEqual({
+      // FIXME: the contextId was added here temporarily. See document.ts
+      contextId: "ignored",
       type: ProblemDocument,
       uid: "1",
       key: "test",

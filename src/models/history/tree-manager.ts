@@ -35,7 +35,6 @@ export interface CDocumentType extends Instance<typeof CDocument> {}
 
 interface IFirestoreSavingProps {
   userContext: IUserContext;
-  documentMetadata: IDocumentMetadata;
   firestore: Firestore;
 }
 
@@ -43,6 +42,11 @@ interface IFirestoreHistoryInfo {
   documentPath: string;
   lastEntryIndex: number;
   lastEntryId: string | null;
+}
+
+interface IMainDocument extends TreeAPI {
+  key: string;
+  metadata: IDocumentMetadata;
 }
 
 export const TreeManager = types
@@ -58,15 +62,8 @@ export const TreeManager = types
 .volatile(self => ({
   trees: {} as Record<string, TreeAPI>,
   currentHistoryIndex: 0,
-  // getUserContext(stores)
+  mainDocument: undefined as IMainDocument | undefined,
   userContext: undefined as IUserContext | undefined,
-  // const { documents, user } = useStores();
-  // let contextId = user.classHash;
-  // let document = key ? documents.getDocument(key) : undefined;
-  // let metadata = document ? { contextId, ...document.getMetadata() } : undefined;
-  // If we have to handle networkDocuments then look at useDocumentMetadataFromStore
-  // to see how it constructs the metadata
-  documentMetadata: undefined as IDocumentMetadata | undefined,
   firestore: undefined as Firestore | undefined
 }))
 .views((self) => ({
@@ -90,21 +87,21 @@ export const TreeManager = types
       getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
 
     // We'll need provide this context to the tree manager either through a MST env or volatile prop
-    const {userContext, documentMetadata, firestore} = self;
-    if (!userContext || !documentMetadata || !firestore || !userContext.uid) {
+    const {userContext, mainDocument, firestore} = self;
+    if (!userContext || !mainDocument || !firestore || !userContext.uid) {
       console.error("cannot record history entry because environment is not valid", 
-        {userContext, documentMetadata, firestore});
+        {userContext, mainDocument, firestore});
       throw new Error("cannot record history entry because environment is not valid");
     }
 
-    const networkDocKey = networkDocumentKey(userContext.uid, documentMetadata.key, userContext.network);
+    const networkDocKey = networkDocumentKey(userContext.uid, mainDocument.key, userContext.network);
     const documentPath = `documents/${networkDocKey}`;
     const documentRef = firestore.doc(documentPath);
     const docSnapshot = await documentRef.get();
     // create a document if necessary
     if (!docSnapshot.exists) {
       // FIXME-HISTORY: rename this function to validateFirestoreDocumentMetadata_v1
-      await validateCommentableDocument({context: userContext, document: documentMetadata});
+      await validateCommentableDocument({context: userContext, document: mainDocument.metadata});
     }
 
     // Query the last history entry to find its index and id
@@ -220,9 +217,8 @@ export const TreeManager = types
     self.document = cDoc;
   },
 
-  setPropsForFirestoreSaving({userContext, documentMetadata, firestore}: IFirestoreSavingProps) {
+  setPropsForFirestoreSaving({userContext, firestore}: IFirestoreSavingProps) {
     self.userContext = userContext;
-    self.documentMetadata = documentMetadata;
     self.firestore = firestore;  
   },
 
@@ -296,6 +292,11 @@ export const TreeManager = types
   }
 }))
 .actions((self) => ({
+  setMainDocument(document: IMainDocument) {
+    self.mainDocument = document;
+    self.putTree(document.key, document);
+  },
+
   updateSharedModel(historyEntryId: string, exchangeId: string, sourceTreeId: string, snapshot: any) {
     // Right now this can be called in 2 cases:
     // 1. when a user changes something in a tree which then updates the

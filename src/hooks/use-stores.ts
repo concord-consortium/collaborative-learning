@@ -48,21 +48,8 @@ export function useDocumentFromStore(key?: string) {
 }
 
 export function useDocumentMetadataFromStore(key?: string): IDocumentMetadata | undefined {
-  const { documents, networkDocuments, user } = useStores();
-  // for local documents, the context is the user's classHash
-  let contextId = user.classHash;
-  let document = key ? documents.getDocument(key) : undefined;
-  let metadata = document ? { contextId, ...document.getMetadata() } : undefined;
-  if (!document) {
-    document = key ? networkDocuments?.getDocument(key) : undefined;
-    // for network documents, the context is the document's remoteContext
-    document && (contextId = document.remoteContext);
-    metadata = document ? { contextId, ...document.getMetadata() } : undefined;
-  }
-  return useMemo(() => {
-    return metadata || undefined;
-    // updating when the key changes is sufficient
-  }, [key]);  // eslint-disable-line react-hooks/exhaustive-deps
+  const document = useDocumentFromStore(key);
+  return document?.metadata;
 }
 
 export function useDocumentOrCurriculumMetadata(key?: string): IDocumentMetadata | ICurriculumMetadata | undefined {
@@ -73,7 +60,7 @@ export function useDocumentOrCurriculumMetadata(key?: string): IDocumentMetadata
 }
 
 export function useCurriculumOrDocumentContent(key?: string):  DocumentContentModelType | undefined {
-  const curriculumContentFromPath = useCurriculumContentFromPath(key); 
+  const curriculumContentFromPath = useCurriculumContentFromPath(key);
   const documentContentFromKey = useDocumentFromStore(key)?.content;
   return isSectionPath(key) ? curriculumContentFromPath : documentContentFromKey;
 }
@@ -85,7 +72,7 @@ export function useCurriculumContentFromPath(key?: string): DocumentContentModel
     return teacherGuide && section ? teacherGuide.getSectionById(section)?.content : undefined;
   }
   return problem && section
-          ? problem.getSectionById(section)?.content 
+          ? problem.getSectionById(section)?.content
           : undefined;
 }
 export function useTypeOfTileInDocumentOrCurriculum(key?: string, tileId?: string) {
@@ -118,10 +105,10 @@ export function useNetworkDocuments(): DocumentsModelType {
 
 /**
  *
- * @param documentKey 
+ * @param documentKey
  * @param userId if this is passed the current user and their network is
  * ignored. This is useful for teachers to generate paths to student documents
- * @returns 
+ * @returns
  */
 export function useNetworkDocumentKey(documentKey: string, userId?: string) {
   const user = useUserStore();
