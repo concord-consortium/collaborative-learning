@@ -6,7 +6,7 @@ import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, IToo
   typeField } from "../../drawing-tool/objects/drawing-object";
 import { Point } from "../../drawing-tool/model/drawing-basic-types";
 import { VariableChip } from "../slate/variable-chip";
-import { getSelectedVariable, findVariable } from "./drawing-utils";
+import { findVariable } from "./drawing-utils";
 import { useVariableDialog } from "./use-variable-dialog";
 import { useEditVariableDialog } from "../../diagram-viewer/use-edit-variable-dialog";
 import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
@@ -86,6 +86,16 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
     );
   }
 );
+
+// If the only object selected is a variable chip, returns the variable associated with it.
+// Otherwise, returns undefined.
+const getSelectedVariable = (drawingContent: DrawingContentModelType) => {
+  const selectedId = drawingContent.selectedIds.length === 1 ? drawingContent.selectedIds[0] : "";
+  const selectedObject = drawingContent.objectMap[selectedId];
+  return selectedObject?.type === "variable"
+    ? findVariable(drawingContent, (selectedObject as VariableChipObjectType).variableId)
+    : undefined;
+};
 
 export class VariableDrawingTool extends DrawingTool {
   constructor(drawingLayer: IDrawingLayer) {

@@ -1,7 +1,6 @@
 import { getMembers, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { uniqueId } from "../../../utilities/js-utils";
 import { SelectionBox } from "../components/selection-box";
-import { ObjectMap } from "../model/drawing-content";
 import { BoundingBox, DefaultToolbarSettings, Point, ToolbarSettings } from "../model/drawing-basic-types";
 import { StampModelType } from "../model/stamp";
 
@@ -72,6 +71,10 @@ export interface DrawingObjectSnapshot extends SnapshotIn<typeof DrawingObject> 
 // Snapshots being passed to addNewDrawingObject need to have a type so the MST Union can figure out
 // what they are.  They do not need an id because object will add that when it is created
 export interface DrawingObjectSnapshotForAdd extends SnapshotIn<typeof DrawingObject> {type: string}
+
+export interface ObjectMap {
+  [key: string]: DrawingObjectType|null;
+}
 
 export const StrokedObject = DrawingObject.named("StrokedObject")
 .props({

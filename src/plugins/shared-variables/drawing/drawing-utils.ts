@@ -2,7 +2,6 @@ import { VariableType } from "@concord-consortium/diagram-view";
 import { getType } from "mobx-state-tree";
 import { DrawingContentModelType } from "../../drawing-tool/model/drawing-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
-import { VariableChipObjectType } from "./variable-object";
 
 function getSharedVariablesModel(drawingContent: DrawingContentModelType) {
   const sharedModelManager = drawingContent.tileEnv?.sharedModelManager;
@@ -72,13 +71,3 @@ export function findVariable(drawingContent: DrawingContentModelType, selectedVa
   const selectedVariable = variables.find(v => v.id === selectedVariableId);
   return selectedVariable;
 }
-
-// If the only object selected is a variable chip, returns the variable associated with it.
-// Otherwise, returns undefined.
-export const getSelectedVariable = (drawingContent: DrawingContentModelType) => {
-  const selectedId = drawingContent.selectedIds.length === 1 ? drawingContent.selectedIds[0] : "";
-  const selectedObject = drawingContent.objectMap[selectedId];
-  return selectedObject?.type === "variable"
-    ? findVariable(drawingContent, (selectedObject as VariableChipObjectType).variableId)
-    : undefined;
-};

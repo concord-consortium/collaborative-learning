@@ -9,7 +9,7 @@ import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
-  isStrokedObject, ToolbarModalButton } from "../objects/drawing-object";
+  isStrokedObject, ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
 import { LogEventName, Logger } from "../../../lib/logger";
 
 // track selection in metadata object so it is not saved to firebase but
@@ -36,10 +36,6 @@ export const DrawingToolMetadataModel = ToolMetadataModel
     }
   }));
 export type DrawingToolMetadataModelType = Instance<typeof DrawingToolMetadataModel>;
-
-export interface ObjectMap {
-  [key: string]: DrawingObjectType|null;
-}
 
 export interface DrawingObjectMove {
   id: string,
