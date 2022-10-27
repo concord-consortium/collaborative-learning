@@ -91,6 +91,7 @@ export const WorkspaceComponent: React.FC<IProps> = observer((props) => {
         onExpandWorkspace={toggleExpandWorkspace}
         onExpandResources={toggleExpandResources}
       />}
+      {/* {console.log("workspaceShown?:", workspaceShown)} */}
       {workspaceShown ? <DocumentWorkspaceComponent isExpanderShown={showExpanders} />
                       : <CollapsedWorkspaceTab
                           onExpandWorkspace={toggleExpandWorkspace}

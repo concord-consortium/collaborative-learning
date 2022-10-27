@@ -216,6 +216,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   private renderProblemTitleBar(type: string, hideButtons?: boolean) {
     const {problem, appMode, clipboard, user: { isTeacher }} = this.stores;
     const problemTitle = problem.title;
+    console.log("problemTitle:", problemTitle);
     const { document, workspace } = this.props;
     const isShared = document.visibility === "public";
     const showFileMenu = this.showFileMenu();
@@ -362,7 +363,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
           <div className="actions">
-            { showFileMenu && 
+            { showFileMenu &&
               <DocumentFileMenu document={document}
                 onOpenDocument={this.handleOpenDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}

@@ -180,7 +180,7 @@ export const DocumentsModel = types
   .actions((self) => {
     const add = (document: DocumentModelType) => {
       if (DEBUG_DOCUMENT) {
-        // eslint-disable-next-line no-console        
+        // eslint-disable-next-line no-console
         console.log("adding document to DocumentsModel", {
           key: document.key,
           title: document.title,
@@ -208,7 +208,7 @@ export const DocumentsModel = types
           userContext,
           documentMetadata: { contextId: userContext.classHash, ...document.getMetadata()}
         });
-      
+
       } else {
         console.warn("Document with the same key already exists");
       }

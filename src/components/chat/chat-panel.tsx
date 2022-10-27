@@ -30,7 +30,7 @@ let storedDocument: IDocumentMetadata | ICurriculumMetadata; //bug when on refre
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
   // console.log("--------- < ChatPanel > ----------");
   const document = useDocumentOrCurriculumMetadata(focusDocument);
-  (function storeLastValidDocument(){ //this prevents crash when My Work > Document View
+  (function storeLastValidDocument(){ //this prevents crash when My Work > Document View (after focusDocument set)
     if (document !== undefined){
       storedDocument = document;
     }

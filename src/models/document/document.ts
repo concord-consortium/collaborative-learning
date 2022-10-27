@@ -368,7 +368,7 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
       throw e;
     }
 
-    // Putting the error in an object like this prevents Chrome from expanding the 
+    // Putting the error in an object like this prevents Chrome from expanding the
     // error and taking up a bunch of console lines.
     console.error("Failed to load document", {docKey: snapshot.key, error: e});
 

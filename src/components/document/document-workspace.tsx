@@ -68,7 +68,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
             readOnly={true}
           />
         : this.renderComparisonPlaceholder();
-
+    {console.log("comparisonDocument:", comparisonDocument);}
     const Primary =
       <DocumentComponent
         document={primaryDocument}
