@@ -8,6 +8,7 @@ import { Point } from "../../drawing-tool/model/drawing-basic-types";
 import { VariableChip } from "../slate/variable-chip";
 import { getSelectedVariable, findVariable } from "./drawing-utils";
 import { useVariableDialog } from "./use-variable-dialog";
+import { useEditVariableDialog } from "../../diagram-viewer/use-edit-variable-dialog";
 import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
 import { SvgToolbarButton } from "../../drawing-tool/components/drawing-toolbar-buttons";
 import { DrawingContentModelContext } from "../../drawing-tool/components/drawing-content-context";
@@ -115,8 +116,7 @@ interface IEditVariableButtonProps {
 export const EditVariableButton = observer(({ toolbarManager }: IEditVariableButtonProps) => {
   const selectedVariable = getSelectedVariable(toolbarManager as DrawingContentModelType);
 
-  // useEditVariableDialog(selectedVariable)
-  const [showVariableDialog] = useVariableDialog();
+  const [showVariableDialog] = useEditVariableDialog({ variable: selectedVariable });
 
   const disabled = !selectedVariable;
   const onClick = () => {
