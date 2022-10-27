@@ -21,9 +21,10 @@ import { DocumentModelType, IDocumentEnvironment } from "./document";
 import { SectionModelType } from "../curriculum/section";
 
 export interface INewTileOptions {
+  locationInRow?: string;
   rowHeight?: number;
   rowIndex?: number;
-  locationInRow?: string;
+  title?: string;
 }
 
 export interface INewRowTile {
@@ -528,8 +529,8 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
-    addTileContentInNewRow(content: ToolContentModelType, options?: INewTileOptions, tileTitle?: string): INewRowTile {
-      const title = tileTitle || self.getNewTileTitle(content);
+    addTileContentInNewRow(content: ToolContentModelType, options?: INewTileOptions): INewRowTile {
+      const title = options?.title || self.getNewTileTitle(content);
       return self.addTileInNewRow(ToolTileModel.create({ title, content }), options);
     },
     addTileSnapshotInNewRow(snapshot: ToolTileSnapshotInType, options?: INewTileOptions): INewRowTile {
@@ -602,18 +603,19 @@ export const DocumentContentModel = types
             if (tile.rowIndex !== lastRowIndex) {
               rowDelta++;
             }
-            const rowOptions: INewTileOptions = {
-              rowIndex: rowIndex + rowDelta
+            const tileOptions: INewTileOptions = {
+              rowIndex: rowIndex + rowDelta,
+              title: parsedTile.title
             };
             if (tile.rowHeight) {
-              rowOptions.rowHeight = tile.rowHeight;
+              tileOptions.rowHeight = tile.rowHeight;
             }
             if (tile.rowIndex !== lastRowIndex) {
-              result = self.addTileContentInNewRow(content, rowOptions, parsedTile.title);
+              result = self.addTileContentInNewRow(content, tileOptions);
               lastRowIndex = tile.rowIndex;
             }
             else {
-              result = self.addTileSnapshotInExistingRow({ content, title: parsedTile.title }, rowOptions);
+              result = self.addTileSnapshotInExistingRow({ content, title: parsedTile.title }, tileOptions);
             }
           }
           results.push(result);
