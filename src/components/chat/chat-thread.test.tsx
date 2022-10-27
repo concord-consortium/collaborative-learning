@@ -5,11 +5,19 @@ import { ENavTab } from "../../models/view/nav-tabs";
 import { ChatThread } from "./chat-thread";
 import { UserModelType } from "src/models/stores/user";
 
+const mockCurriculumDocument = { unit: "unit", problem: "1.1", section: "intro", path: "unit/1/1/intro" };
+const mockUseDocumentOrCurriculumMetadata = jest.fn((docKeyOrSectionPath: string) => {
+  return mockCurriculumDocument;
+});
+
 jest.mock("../../hooks/use-stores", () => ({
   useUIStore: () => ({
     showChatPanel: true,
     selectedTileIds: []
   }),
+  useDocumentOrCurriculumMetadata:
+  (docKeyOrSectionPath: string) => mockUseDocumentOrCurriculumMetadata(docKeyOrSectionPath),
+useNetworkDocumentKey: (documentKey: string) => `network_${documentKey}`,
   useTypeOfTileInDocumentOrCurriculum: () => "Text",
 }));
 
@@ -55,7 +63,7 @@ describe("CommentThread", () => {
     expect(screen.getByText("Thread 2")).toBeInTheDocument();
     expect(screen.queryByTestId("chat-thread-user-icon")).not.toBeInTheDocument();
   });
-  
+
   it("Focused Thread has correct styling and shows correct comments and metadata", () => {
     const chatThreads =
       [makeFakeCommentThread("Thread 1", "abcd", "u3"), makeFakeCommentThread("Thread 2", "jkl", "u4")];
@@ -83,7 +91,7 @@ describe("CommentThread", () => {
     expect(screen.getByText("Thread 1 Comment 1")).toBeInTheDocument();
     expect(screen.getByText("Thread 1 Comment 2")).toBeInTheDocument();
 
-    // Thread 2 is collapsed. No comments. 
+    // Thread 2 is collapsed. No comments.
     expect(screen.queryByText("Thread 2")).toBeInTheDocument();
     expect(screen.queryByText("Thread 2 Comment")).not.toBeInTheDocument();
   });

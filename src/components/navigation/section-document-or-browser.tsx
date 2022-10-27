@@ -37,8 +37,9 @@ export interface ISubTabSpec {
   sections: NavTabSectionSpec[];
 }
 
-export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, selectedDocument, isChatOpen,
-    onSelectNewDocument, onSelectDocument, onTabClick }) => {
+export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, selectedDocument,
+  isChatOpen, onSelectNewDocument, onSelectDocument, onTabClick }) => {
+
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>();
   const [tabIndex, setTabIndex] = useState(0);
   const appConfigStore = useAppConfig();

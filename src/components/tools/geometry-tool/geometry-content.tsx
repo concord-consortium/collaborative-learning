@@ -185,8 +185,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         handlePaste: this.handlePaste,
         handleDuplicate: this.handleDuplicate,
         handleDelete: this.handleDelete,
-        handleUndo: this.handleUndo,
-        handleRedo: this.handleRedo,
         handleToggleVertexAngle: this.handleToggleVertexAngle,
         handleCreateLineLabel: this.handleCreateLineLabel,
         handleCreateMovableLine: this.handleCreateMovableLine,
@@ -778,14 +776,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const hash = objectHash(copiedObjects.map(obj => getSnapshot(obj)), { excludeKeys });
       this.pasteObjects({ pasteId: hash, isSameTile: true, objects: copiedObjects });
     }
-  };
-
-  private handleUndo = () => {
-    return true;
-  };
-
-  private handleRedo = () => {
-    return true;
   };
 
   private copySelectedObjects() {
