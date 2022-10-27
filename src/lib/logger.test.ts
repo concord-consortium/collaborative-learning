@@ -418,6 +418,130 @@ describe("authed logger", () => {
       Logger.logCommentEvent(deleteEventPayload);
     });
 
+    it("can log a EXPAND tile comment thread event", (done) => {
+      const document = createDocumentModel({
+        type: ProblemDocument,
+        uid: "1",
+        key: "source-document",
+        createdAt: 1,
+        content: {},
+        visibility: "public"
+      });
+      stores.documents.add(document);
+      const tile = ToolTileModel.create({ content: TextContentModel.create() });
+      const tileId = tile.id;
+      const documentKey = document.key;
+      const expandCommentPayload: ILogComment = {
+        focusDocumentId: document.key,
+        focusTileId: tile.id,
+        isFirst: false,
+        commentText: '',
+        action: "expand"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const expand = JSON.parse(req.body());
+        expect(expand.event).toBe("EXPAND_COMMENT_THREAD_FOR_TILE");
+        expect(expand.parameters.tileId).toBe(tileId);
+        expect(expand.parameters.documentKey).toBe(documentKey);
+        done();
+        return res.status(201);
+      });
+      Logger.logCommentEvent(expandCommentPayload);
+    });
+    
+    it("can log a COLLAPSE tile comment thread event", (done) => {
+      const document = createDocumentModel({
+        type: ProblemDocument,
+        uid: "1",
+        key: "source-document",
+        createdAt: 1,
+        content: {},
+        visibility: "public"
+      });
+      stores.documents.add(document);
+      const tile = ToolTileModel.create({ content: TextContentModel.create() });
+      const tileId = tile.id;
+      const documentKey = document.key;
+      const collapseCommentPayload: ILogComment = {
+        focusDocumentId: document.key,
+        focusTileId: tile.id,
+        isFirst: false,
+        commentText: '',
+        action: "collapse"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const expand = JSON.parse(req.body());
+        expect(expand.event).toBe("COLLAPSE_COMMENT_THREAD_FOR_TILE");
+        expect(expand.parameters.tileId).toBe(tileId);
+        expect(expand.parameters.documentKey).toBe(documentKey);
+        done();
+        return res.status(201);
+      });
+      Logger.logCommentEvent(collapseCommentPayload);
+    });
+    
+    it("can log a EXPAND document comment thread event", (done) => {
+      const document = createDocumentModel({
+        type: ProblemDocument,
+        uid: "1",
+        key: "source-document",
+        createdAt: 1,
+        content: {},
+        visibility: "public"
+      });
+      stores.documents.add(document);
+      const documentKey = document.key;
+      const expandCommentPayload: ILogComment = {
+        focusDocumentId: document.key,
+        focusTileId: undefined,
+        isFirst: false,
+        commentText: '',
+        action: "expand"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const expand = JSON.parse(req.body());
+        expect(expand.event).toBe("EXPAND_COMMENT_THREAD_FOR_DOCUMENT");
+        expect(expand.parameters.tileId).toBe(undefined);
+        expect(expand.parameters.documentKey).toBe(documentKey);
+        done();
+        return res.status(201);
+      });
+      Logger.logCommentEvent(expandCommentPayload);
+    });
+    
+    it("can log a COLLAPSE document comment thread event", (done) => {
+      const document = createDocumentModel({
+        type: ProblemDocument,
+        uid: "1",
+        key: "source-document",
+        createdAt: 1,
+        content: {},
+        visibility: "public"
+      });
+      stores.documents.add(document);
+      const documentKey = document.key;
+      const expandCommentPayload: ILogComment = {
+        focusDocumentId: document.key,
+        focusTileId: undefined,
+        isFirst: false,
+        commentText: '',
+        action: "collapse"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const expand = JSON.parse(req.body());
+        expect(expand.event).toBe("COLLAPSE_COMMENT_THREAD_FOR_DOCUMENT");
+        expect(expand.parameters.tileId).toBe(undefined);
+        expect(expand.parameters.documentKey).toBe(documentKey);
+        done();
+        return res.status(201);
+      });
+      Logger.logCommentEvent(expandCommentPayload);
+    });
+    
     it("can log tile creation in a document", (done) => {
       const document = createDocumentModel({
         type: ProblemDocument,
