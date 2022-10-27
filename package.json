@@ -102,9 +102,9 @@
   },
   "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
   "overrides": {
-    "mobx-state-tree": "@concord-consortium/mobx-state-tree",
-    "nanoid@<4.0.0": "^4.0.0",
-    "slate-react": "@concord-consortium/slate-react",
+    "mobx-state-tree": "npm:@concord-consortium/mobx-state-tree@5.1.5-cc.1",
+    
+    "slate-react": "npm:@concord-consortium/slate-react",
     "slate-react-placeholder": "@concord-consortium/slate-react-placeholder"
   },
   "devDependencies": {
@@ -193,7 +193,7 @@
     "xhr-mock": "^2.5.1"
   },
   "dependencies": {
-    "@concord-consortium/diagram-view": "^0.0.16",
+    "@concord-consortium/diagram-view": "^0.0.17",
     "@concord-consortium/mobx-state-tree": "5.1.5-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",
@@ -215,14 +215,14 @@
     "lodash": "^4.17.21",
     "mobx": "^6.6.1",
     "mobx-react": "^7.5.2",
-    "nanoid": "^4.0.0",
+    "nanoid": "^3.3.4",
     "object-hash": "^3.0.0",
     "patch-package": "^6.4.7",
     "query-string": "7.1.1",
     "rc-slider": "^10.0.1",
     "react": "^17.0.2",
     "react-chartjs-2": "^2.11.2",
-    "react-data-grid": "^7.0.0-canary.46",
+    "react-data-grid": "7.0.0-canary.46",
     "react-dom": "^17.0.2",
     "react-dom-factories": "^1.0.2",
     "react-modal": "^3.15.1",
