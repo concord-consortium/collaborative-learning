@@ -75,10 +75,10 @@ export const TreeManager = types
 })
 .volatile(self => ({
   trees: {} as Record<string, TreeAPI>,
-  // This name is deceiving. This property is the number of history entries
-  // that have been applied to the documents. So 0 means no history entries
-  // are applied.
-  currentHistoryIndex: 0 as number | undefined,
+  // The number of history entries that have been applied to the document.
+  // When replaying history this number can be less than the total number
+  // history entries (self.document.history.length)
+  numHistoryEventsApplied: 0 as number | undefined,
   loadingError: undefined as firebase.firestore.FirestoreError | undefined,
   mainDocument: undefined as IMainDocument | undefined,
   userContext: undefined as IUserContext | undefined,
@@ -103,27 +103,20 @@ export const TreeManager = types
     }
 
     const historyLength = self.document.history.length;
-    const {currentHistoryIndex} = self;
-    if (currentHistoryIndex === undefined) {
-      // We should be waiting for the query to figure out the last history entry.
+    const {numHistoryEventsApplied} = self;
+    if (numHistoryEventsApplied === undefined) {
+      // We are waiting for the query to figure out the last history entry.
       return HistoryStatus.FINDING_HISTORY_LENGTH;
     } else {
-      if (historyLength === 0 && currentHistoryIndex === 0) {
-        // Technically we are not loading the history at this point
-        // But we still don't want to show the playback controls
-        // TODO: change `treeManager.isLoading` to be something more descriptive 
+      if (historyLength === 0 && numHistoryEventsApplied === 0) {
         return HistoryStatus.NO_HISTORY;
       } else {
-        if (historyLength >= currentHistoryIndex) {
-          // FIXME: how do we address this????
-          // treeManager.setIsLoading(false);
-          // No message because the playback controls will be rendered instead
-          // setSuccessMessage(null); 
+        if (historyLength >= numHistoryEventsApplied) {
           return HistoryStatus.HISTORY_LOADED;
         } else {
-          // In this case, the currentHistoryIndex tells us that we have more history
+          // In this case, the numHistoryEventsApplied tells us that we have more history
           // entries, but they haven't been loaded yet for some reason.
-          // this might be an error.
+          // This might be an error, but more likely the history is still loading.
           return HistoryStatus.HISTORY_LOADING;
         }
       }
@@ -143,8 +136,8 @@ export const TreeManager = types
         return "History is loaded";
       case HistoryStatus.HISTORY_LOADING: {
         const historyLength = self.document.history.length;
-        const {currentHistoryIndex} = self;    
-        return `Loading history (${historyLength}/${currentHistoryIndex})`;
+        const {numHistoryEventsApplied} = self;    
+        return `Loading history (${historyLength}/${numHistoryEventsApplied})`;
       }
       default:
         return "Unknown history status";
@@ -247,8 +240,8 @@ export const TreeManager = types
     self.firestore = firestore;  
   },
 
-  setCurrentHistoryIndex(value: number){
-    self.currentHistoryIndex = value;
+  setNumHistoryEntriesApplied(value: number){
+    self.numHistoryEventsApplied = value;
   },
 
   putTree(treeId: string, tree: TreeAPI) {
@@ -316,26 +309,17 @@ export const TreeManager = types
     return entry;
   },
 
-  setCurrentHistoryIndexFromFirestore: flow(
-    function *setCurrentHistoryIndexFromFirestore(user: UserModelType, firestore: Firestore) {
-      // clear the currentHistoryIndex so it is obvious when it is filled in
-      self.currentHistoryIndex = undefined;
+  setNumHistoryEntriesAppliedFromFirestore: flow(
+    function *setNumHistoryEntriesAppliedFromFirestore(firestore: Firestore, docPath: string) {
+      // clear the numHistoryEventsApplied so it is obvious when it is filled in
+      self.numHistoryEventsApplied = undefined;
 
-      const documentKey = self.mainDocument?.key;
-      const userId = self.mainDocument?.uid;
-      if (!documentKey || !userId) {
-        console.warn("setCurrentHistoryIndexFromFirestore, requires a mainDocument");
-        return;
-      }
-
-      const network = userId === user.id ? user.network : undefined;
-      const docPath = getDocumentPath(userId, documentKey, network);
       const lastHistoryEntry = yield* toGenerator(getLastHistoryEntry(firestore, docPath));
       if (lastHistoryEntry) {
-        self.currentHistoryIndex = lastHistoryEntry.index + 1;
+        self.numHistoryEventsApplied = lastHistoryEntry.index + 1;
       } else {
         // If there is no entry then we have an empty document
-        self.currentHistoryIndex = 0;
+        self.numHistoryEventsApplied = 0;
       }
     }
   ),
@@ -343,8 +327,6 @@ export const TreeManager = types
 }))
 .actions((self) => ({
   mirrorHistoryFromFirestore(user: UserModelType, firestore: Firestore) {
-    self.setCurrentHistoryIndexFromFirestore(user, firestore);
-
     // FIXME-HISTORY: we should protect active documents so that if 
     // mirrorHistoryFromFirestore is accidentally called on their treeManager
     // we don't replace their history. Probably the best approach is
@@ -355,9 +337,14 @@ export const TreeManager = types
     const documentKey = self.mainDocument?.key;
     const userId = self.mainDocument?.uid;
     if (!documentKey || !userId) {
-      console.warn("setCurrentHistoryIndexFromFirestore, requires a mainDocument");
+      console.warn("mirrorHistoryFromFirestore, requires a mainDocument");
       return;
     }
+
+    const network = userId === user.id ? user.network : undefined;
+    const docPath = getDocumentPath(userId, documentKey, network);
+
+    self.setNumHistoryEntriesAppliedFromFirestore(firestore, docPath);
 
     // TODO: We are not checking if the parent document of the history entries actually
     // exists before getting the history collection below it. 
@@ -367,9 +354,6 @@ export const TreeManager = types
     // check what happens if history is opened on a document that doesn't
     // have a parent document.
     
-
-    const network = userId === user.id ? user.network : undefined;
-    const docPath = getDocumentPath(userId, documentKey, network);
     const query = firestore.collection(`${docPath}/history`)
       .orderBy("index")
       .withConverter(historyEntryConverter);
@@ -538,11 +522,11 @@ export const TreeManager = types
   }),
 
   goToHistoryEntry: flow(function* goToHistoryEntry(
-                                      newHistoryIndex: number) {
+                                      newHistoryPosition: number) {
     const trees = Object.values(self.trees);
 
-    if (newHistoryIndex === self.currentHistoryIndex) return;
-    if (self.currentHistoryIndex === undefined) return;
+    if (newHistoryPosition === self.numHistoryEventsApplied) return;
+    if (self.numHistoryEventsApplied === undefined) return;
     // Disable shared model syncing on all of the trees. This is
     // different than when the undo store applies patches because in
     // this case we are going to apply lots of history entries all at
@@ -560,14 +544,14 @@ export const TreeManager = types
     // startingIndex and endingIndex are so we don't add the currentHistoryEvent into patches
     // because we are going to assume that it has already been played, and we don't want to play it
     // again if we are going forward.
-    const direction = newHistoryIndex > self.currentHistoryIndex ? 1 : -1;
-    const startingIndex = direction === 1 ? self.currentHistoryIndex : self.currentHistoryIndex - 1;
-    const endingIndex = direction === 1 ? newHistoryIndex : newHistoryIndex - 1;
+    const direction = newHistoryPosition > self.numHistoryEventsApplied ? 1 : -1;
+    const startingIndex = direction === 1 ? self.numHistoryEventsApplied : self.numHistoryEventsApplied - 1;
+    const endingIndex = direction === 1 ? newHistoryPosition : newHistoryPosition - 1;
     for (let i=startingIndex; i !== endingIndex; i=i+direction) {
       const entry = self.document.history.at(i);
       for (const treeEntry of (entry?.records || [])) {
         const patches = treePatches[treeEntry.tree];
-        if (newHistoryIndex > self.currentHistoryIndex) {
+        if (newHistoryPosition > self.numHistoryEventsApplied) {
           patches?.push(...treeEntry.getPatches(HistoryOperation.Redo));
         } else {
           patches?.push(...treeEntry.getPatches(HistoryOperation.Undo));
@@ -601,12 +585,9 @@ export const TreeManager = types
     // and print a warning to the console.
     // One way might be using unique history_entry_ids that we mark as closed
     // after the finish call.
-    self.currentHistoryIndex = newHistoryIndex;
+    self.numHistoryEventsApplied = newHistoryPosition;
   }),
 
-  // Unlike currentHistoryIndex, the historyIndex here is index into
-  // history entry array. So a historyIndex of 0 means 
-  // "give me the first history entry"
   getHistoryEntry: (historyIndex: number) => {
     return self.document.history.at(historyIndex);
   }

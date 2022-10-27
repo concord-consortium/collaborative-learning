@@ -3,7 +3,7 @@ import ClueCanvas from "../../../../support/elements/clue/cCanvas";
 import TableToolTile from "../../../../support/elements/clue/TableToolTile";
 import DrawToolTile from "../../../../support/elements/clue/DrawToolTile";
 
-let dashboard = new TeacherDashboard();
+let dashboard = new TeacherDashboard;
 let clueCanvas = new ClueCanvas;
 let tableToolTile = new TableToolTile;
 let drawToolTile = new DrawToolTile;
@@ -36,7 +36,7 @@ context('History Playback', () => {
     clueCanvas.addTile('drawing');
     // give firestore some time to record this new history entry before we try
     // to find it.
-    // FIXME: really this is a bug, it shouldn't mater how quickly a user 
+    // FIXME: really this is a bug, it shouldn't matter how quickly a user 
     // opens the history controls. The code should know what the history entry is that
     // matches the document that it is displaying
     cy.wait(4000);
@@ -109,7 +109,7 @@ context('History Playback', () => {
       // Open playback controls
       cy.get('[data-testid="playback-component-button"]').click(); //open playback controls
 
-      // wait for the it to load
+      // wait for it to load
       cy.get('.rc-slider-horizontal').should('exist');
 
       tableToolTile.getTableTile('[data-test="subtab-workspaces"] .editable-document-content').should('exist');

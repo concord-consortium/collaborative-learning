@@ -32,7 +32,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const [markers, setMarkers] = useState<IMarkerProps[]>([]);
   // const [selectedMarkers, ] = useState<IMarkerProps[]>([]);
   const history = treeManager.document.history;
-  // The currentHistoryIndex should be set to the position of the history entry
+  // The numHistoryEntriesApplied should be set to the position of the history entry
   // that last "modified" the current document.
   //
   // Ideally the document would have some field that indicated its "history" id
@@ -41,13 +41,14 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   // by the history stuff, but it is being used to trigger document saves to Firebase
   // I think.  In some sense this is like a hash of the document content.
 
-  const { currentHistoryIndex } = treeManager;
-  const eventAtCurrentIndex = currentHistoryIndex === 0 || currentHistoryIndex === undefined
+  const {numHistoryEventsApplied} = treeManager;
+  // numHistoryEventsApplied can be 0 or undefined, the event is undefined in both cases
+  const currentHistoryEvent = !numHistoryEventsApplied
                                 ? undefined
-                                : treeManager.getHistoryEntry(currentHistoryIndex - 1);
-  const sliderValue = currentHistoryIndex === undefined ? 0 : currentHistoryIndex;
-  const eventCreatedTime = eventAtCurrentIndex?.created;
-  const playbackDisabled = treeManager.currentHistoryIndex === undefined || sliderValue === history.length;
+                                : treeManager.getHistoryEntry(numHistoryEventsApplied - 1);
+  const sliderValue = numHistoryEventsApplied === undefined ? 0 : numHistoryEventsApplied;
+  const eventCreatedTime = currentHistoryEvent?.created;
+  const playbackDisabled = numHistoryEventsApplied === undefined || sliderValue === history.length;
 
   const handlePlayPauseToggle = useCallback((playing?: boolean) => {
                                   setSliderPlaying(playing !== undefined ? playing : !sliderPlaying);
