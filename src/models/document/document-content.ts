@@ -528,8 +528,8 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
-    addTileContentInNewRow(content: ToolContentModelType, options?: INewTileOptions): INewRowTile {
-      const title = self.getNewTileTitle(content);
+    addTileContentInNewRow(content: ToolContentModelType, options?: INewTileOptions, tileTitle?: string): INewRowTile {
+      const title = tileTitle || self.getNewTileTitle(content);
       return self.addTileInNewRow(ToolTileModel.create({ title, content }), options);
     },
     addTileSnapshotInNewRow(snapshot: ToolTileSnapshotInType, options?: INewTileOptions): INewRowTile {
@@ -592,12 +592,16 @@ export const DocumentContentModel = types
     copyTilesIntoNewRows(tiles: IDragTileItem[], rowIndex: number) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
-        let rowDelta = 0;
+        let rowDelta = -1;
         let lastRowIndex = -1;
         tiles.forEach(tile => {
           let result: INewRowTile | undefined;
-          const content = safeJsonParse(tile.tileContent).content;
+          const parsedTile = safeJsonParse(tile.tileContent);
+          const content = parsedTile.content;
           if (content) {
+            if (tile.rowIndex !== lastRowIndex) {
+              rowDelta++;
+            }
             const rowOptions: INewTileOptions = {
               rowIndex: rowIndex + rowDelta
             };
@@ -605,14 +609,11 @@ export const DocumentContentModel = types
               rowOptions.rowHeight = tile.rowHeight;
             }
             if (tile.rowIndex !== lastRowIndex) {
-              result = self.addTileContentInNewRow(content, rowOptions);
-              if (lastRowIndex !== -1) {
-                rowDelta++;
-              }
+              result = self.addTileContentInNewRow(content, rowOptions, parsedTile.title);
               lastRowIndex = tile.rowIndex;
             }
             else {
-              result = self.addTileSnapshotInExistingRow({ content }, rowOptions);
+              result = self.addTileSnapshotInExistingRow({ content, title: parsedTile.title }, rowOptions);
             }
           }
           results.push(result);
