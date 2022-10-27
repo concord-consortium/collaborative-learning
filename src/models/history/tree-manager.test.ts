@@ -279,8 +279,8 @@ it("can replay the history entries", async () => {
   expect(tileContent.flag).toBe(true);
   expect(tileContent.actionText).toEqual("action 4");
 
-  manager.setCurrentHistoryIndex(manager.document.history.length);
-  expect(manager.currentHistoryIndex).toBe(5);
+  manager.setNumHistoryEntriesApplied(manager.document.history.length);
+  expect(manager.numHistoryEventsApplied).toBe(5);
 
   await manager.goToHistoryEntry(2);
   expect(tileContent.actionText).toBe("action 1");

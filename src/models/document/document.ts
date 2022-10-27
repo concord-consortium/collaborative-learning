@@ -1,4 +1,4 @@
-import { applySnapshot, types, Instance, SnapshotIn, getEnv, onAction, addDisposer } from "mobx-state-tree";
+import { applySnapshot, types, Instance, SnapshotIn, getEnv, onAction, addDisposer, destroy } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
@@ -310,6 +310,11 @@ export const DocumentModel = Tree.named("Document")
       self.treeManagerAPI = manager;
       self.treeMonitor = new TreeMonitor(self, manager, false);
       manager.setMainDocument(self);
+      // Clean up the manager when this document is destroyed this doesn't
+      // happen automatically because the manager is stored in volatile state.
+      // The manager needs to be destroyed so it can unsubscribe from firestore.
+      // Destroying it will probably also free up memory
+      addDisposer(self, () => destroy(manager));
     },
     undoLastAction() {
       self.treeManagerAPI?.undoManager.undo();
