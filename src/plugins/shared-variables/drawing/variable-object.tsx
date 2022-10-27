@@ -120,9 +120,7 @@ export const EditVariableButton = observer(({ toolbarManager }: IEditVariableBut
 
   const disabled = !selectedVariable;
   const onClick = () => {
-    if (!disabled) {
-      showVariableDialog();
-    }
+    showVariableDialog();
   };
 
   return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="variable" title="Edit Variable" 

@@ -43,7 +43,7 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
   return SvgIcon
     ? <Tooltip title={title} {...tooltipOptions}>
         <button className={buttonClasses({ disabled, selected, others: `button-${buttonClass}` })} 
-            onClick={onClick} type="button">
+            onClick={onClick} type="button" disabled={disabled} >
           <SvgIcon fill={fill} stroke={stroke} strokeWidth={strokeWidth}
               strokeDasharray={computeStrokeDashArray(strokeDashArray, strokeWidth)}/>
         </button>
