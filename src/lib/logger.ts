@@ -113,6 +113,10 @@ export enum LogEventName {
   ADD_RESPONSE_COMMENT_FOR_TILE,
   DELETE_COMMENT_FOR_DOCUMENT,
   DELETE_COMMENT_FOR_TILE,
+  EXPAND_COMMENT_FOR_DOCUMENT,
+  EXPAND_COMMENT_FOR_TILE,
+  COLLAPSE_COMMENT_FOR_DOCUMENT,
+  COLLAPSE_COMMENT_FOR_TILE,
   CHAT_PANEL_HIDE,
   CHAT_PANEL_SHOW,
 
@@ -164,7 +168,7 @@ interface ITeacherNetworkInfo {
   networkUsername?: string;
 }
 
-type CommentAction = "add" | "delete";  // | "edit"
+type CommentAction = "add" | "delete" | "expand" | "collapse";  // | "edit"
 export interface ILogComment {
   focusDocumentId: string;
   focusTileId?: string;
@@ -285,7 +289,13 @@ export class Logger {
                 : LogEventName.ADD_RESPONSE_COMMENT_FOR_DOCUMENT,
       delete: focusTileId
                 ? LogEventName.DELETE_COMMENT_FOR_TILE
-                : LogEventName.DELETE_COMMENT_FOR_DOCUMENT
+                : LogEventName.DELETE_COMMENT_FOR_DOCUMENT,
+      expand: focusTileId
+                ? LogEventName.EXPAND_COMMENT_FOR_TILE
+                : LogEventName.EXPAND_COMMENT_FOR_DOCUMENT,
+      collapse: focusTileId
+                ? LogEventName.COLLAPSE_COMMENT_FOR_TILE
+                : LogEventName.COLLAPSE_COMMENT_FOR_DOCUMENT
     };
     const event = eventMap[action];
 

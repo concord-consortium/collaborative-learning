@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import classNames from "classnames";
 import { UserModelType } from "../../models/stores/user";
+import { ILogComment, Logger } from "../../lib/logger";
 import { WithId } from "../../hooks/firestore-hooks";
 import { useUIStore } from "../../hooks/use-stores";
 import { CommentDocument} from "../../lib/firestore-schema";
@@ -48,6 +49,14 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       ui.setScrollTo(selectedTileId || '', focusDocument || '');
       setExpandedThread(clickedId || '');
     }
+    const eventPayload: ILogComment = {
+      focusDocumentId: focusDocument || '',
+      focusTileId,
+      isFirst: false, // We're not adding a comment so this is irrelevant
+      commentText: '', // This is about a thread not a single comment it doesn't make sense to log the text.
+      action: clickedId === expandedThread ? "collapse" : "expand"
+    };
+    Logger.logCommentEvent(eventPayload);
   };
 
   return (
