@@ -1826,7 +1826,7 @@
           ]
         },
         {
-          "description": "Problem 1.3",
+          "description": "Problem 2.3",
           "ordinal": 3,
           "title": "Estrella: Chapter 3",
           "subtitle": "",
@@ -1878,7 +1878,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Questions About Evidence 2</strong></p>",
+                        "<p><strong>Questions About Evidence 2- Stress and the Brain (blog post)</strong></p>",
                         "<p>1. Increased attention shifts means the person is getting distracted.  </p>",
                         "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
                         "<p></p>",
@@ -2003,7 +2003,7 @@
           ]
         },
         {
-          "description": "Problem 1.4",
+          "description": "Problem 2.4",
           "ordinal": 4,
           "title": "Estrella: Chapter 4",
           "subtitle": "",
@@ -2258,7 +2258,7 @@
           ]
         },
         {
-          "description": "Problem 1.5",
+          "description": "Problem 2.5",
           "ordinal": 5,
           "title": "Estrella: Chapter 5",
           "subtitle": "",
@@ -2594,7 +2594,7 @@
           ]
         },
         {
-          "description": "Problem 1.6",
+          "description": "Problem 2.6",
           "ordinal": 6,
           "title": "Estrella: Chapter 6",
           "subtitle": "",
@@ -2686,35 +2686,63 @@
               "content":
               {
                 "tiles": [
-                    {
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<h2>CHAPTER 1 SOURCES</h2>"
-                          ]
-                        }
-                    },
-                    {
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>Here are resources you can choose to distribute to your students as they work their way through chapters. To make these available in the Resource Library tab, drag the information (link, image, text, etc.) into your own Workspace and press the Publish button (rectangle with the up arrow).</p>"
-                        ]
-                      }
-                    },
-                    {
+                  {
+                    "id": "Uya5NTQdrhCsS75h",
+                    "title": "Text 6",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Evidence 1: </p>"
+                        "<h2>CHAPTER 1 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "0-DJ4p6CpLv5Un3B",
+                      "title": "Text 7",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 1:</strong></p>",
+                          "<p><strong><a href='https://docs.google.com/presentation/d/1lBRlHpv8bzUw3UVDo9L0mJteKqYmZbdOavF6W4dsl-k/edit?usp=sharing'>How Do You Get Sick?</a></strong></p>"            ]
+                      }
+                    },
+                    {
+                      "id": "NFCQvMe3T2H_Cmb5",
+                      "title": "Evidence 1",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/howdoyougetSickStill.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "AW9xGdNYhQrl137x",
+                    "title": "Text 8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Questions About Evidence 1:</strong></p>",
+                        "<p>1. Immune cells are:</p>",
+                        "<ul><li><strong>Red blood cells</strong>   OR    <strong>White blood cells</strong></li></ul>",
+                        "<p>(underline your choice)</p>",
+                        "<p></p>",
+                        "<p>2. Immune cells that engulf germs also send a signal to recruit (bring in) more immune cells .  </p>",
+                        "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? </li></ul>",
+                        "<p>(underline your choice)</p>",
+                        "<p></p>",
+                        "<p>3. Immune cells cause the cells of the lining to:</p>",
+                        "<ul><li><strong>A. Release less mucous    </strong></li><li><strong>B. Release more mucous       </strong></li><li><strong>C. Not change the amount of mucous    </strong>      </li></ul>",
+                        "<p>(underline your choice)</p>",
+                        "<p></p>",
+                        "<p></p>"
                       ]
                     }
                   }
-                  ],
-                  "supports": []
+                ]
               }
             },
             {
@@ -2788,36 +2816,135 @@
               "content":
               {
                 "tiles": [
+                  {
+                    "id": "EnV8K9C9uPUl3h3X",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 2 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
                     {
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<h2>CHAPTER 2 SOURCES</h2>"
-                          ]
-                        }
-                      },
-                    {
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<p>Here are resources you can choose to distribute to your students as they work their way through chapters. To make these available in the Resource Library tab, drag the information (link, image, text, etc.) into your own Workspace and press the Publish button (rectangle with the up arrow).</p>"
-                          ]
-                        }
-                      },
-                      {
+                      "id": "6fdXZgY4CIx8FzSN",
+                      "title": "Text 10",
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": [ 
-                          "<p>Evidence 1: </p>",
-                          "<p>Evidence 2:</p>"
+                        "text": [
+                          "<p><strong>EVIDENCE 2a: </strong></p>",
+                          "<p><strong><a href='https://youtu.be/RW-KF0nUm0M'>Stress and Sickness</a></strong></p>",
+                          "<p></p>"
                         ]
                       }
                     }
+                    ,
+                    {
+                      "id": "AiAfi8Vqh8_Pdbll",
+                      "title": "Stress and Sickness",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/stressSicknessStill.png"
+                      }
+                    }
                   ],
-                  "supports": []
+                  [
+                    {
+                      "id": "eD-Fkv2VoArYCEHc",
+                      "title": "Text 11",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 2b:</strong></p>",
+                          "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=nose'>Immune Response Animation</a></strong></p>",
+                          "<p></p>"
+                          
+                        ]
+                      }
+                    },
+                    {
+                      "id": "EI3_xCw2Q0IXbG2j",
+                      "title": "Immune Response Animation",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/immuneAnimation.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "43WX0u7-l-G71E3x",
+                    "title": "Text 12",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Questions About Evidence 2a</strong></p>",
+                        "<p></p>",
+                        "<p>1. Dr. Cohen’s study found that:</p>",
+                        "<ul><li><strong>A. People with less chronic stress caught fewer colds</strong></li><li><strong>B. People with less chronic stress caught more colds</strong></li><li><strong>C. Stress level did not impact how many colds people go</strong>t</li></ul>",
+                        "<p>(underline or circle your choice)</p>",
+                        "<p></p>",
+                        "<p>2. Chronic stress means stress that is ongoing and doesn’t stop.  </p>",
+                        "<p><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "62rDY7tSixSWFiz-",
+                    "title": "Text 13",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Questions About Evidence 2b</strong></p>",
+                        "<p></p>",
+                        "<p>1. When Stress Level and Amount of Bacteria are high, more mucus is made and the person feels sick.  </p>",
+                        "<p><strong>True</strong>   OR  <strong>False</strong> ?  (underline your choice)</p>",
+                        "<p></p>",
+                        "<p>2. The cells that engulf and kill germs are:</p>",
+                        "<ul><li><strong>A.  Immune cells      </strong></li><li><strong>B. Nose lining cells     </strong></li><li><strong>C. Mucus producing cells   </strong></li></ul>",
+                        "<p>(underline your choice)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Uya5NTQdrhCsS75h",
+                    "title": "Text 6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 1 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "0-DJ4p6CpLv5Un3B",
+                      "title": "Text 7",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 1:</strong></p>",
+                          "<p><strong><a href='https://docs.google.com/presentation/d/1lBRlHpv8bzUw3UVDo9L0mJteKqYmZbdOavF6W4dsl-k/edit?usp=sharing'>How Do You Get Sick?</a></strong></p>"            ]
+                      }
+                    },
+                    {
+                      "id": "NFCQvMe3T2H_Cmb5",
+                      "title": "Evidence 1",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/howdoyougetSickStill.png"
+                      }
+                    }
+                  ]
+                ]
               }
             },
             {
@@ -2891,36 +3018,170 @@
               "content":
               {
                 "tiles": [
+                  {
+                    "id": "P7cywW7v22bjGzlq",
+                    "title": "Text 4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 3 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
                     {
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<h2>CHAPTER 3 SOURCES</h2>"
-                          ]
-                        }
-                      },
-                    {
+                      "id": "McxRhk6D_82FLzKh",
+                      "title": "Text 9",
                       "content": {
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>Evidence 1: </p>",
-                          "<p>Evidence 2: </p>",
-                          "<p>Evidence 3: </p>"
+                          "<p><strong>EVIDENCE 3a: </strong></p>",
+                          "<p><strong><a href='https://youtu.be/hmzYniXqc7k'>Saliva Stress Test</a> (video)</strong></p>",
+                          "<p><strong></strong></p>"
                         ]
                       }
                     },
                     {
-                      "id": "bio4TG01",
-                      "title": " ",
+                      "id": "WnHmDnnBeFgaZH3T",
+                      "title": "Saliva Test Video",
                       "content": {
                         "type": "Image",
-                        "url": "curriculum/bio4community/images/asf.jpg"
+                        "url": "curriculum/bio4community/images/salivaVideo.png"
                       }
-                  }
+                    }
                   ],
-                  "supports": []
+                  [
+                    {
+                      "id": "P5TVoskQNXYOf-lH",
+                      "title": "Text 16",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 3b: </strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/d/1Rxnve30DYjjfNbwLtze7BEOzEiX_WanekCyop-YnL3M/edit?usp=sharing'>Saliva Stress Test Results</a></strong></p>",
+                          "<p><strong></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "DsILp2t6QJBvHj2R",
+                      "title": "Saliva Test Results",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/SalivaTest.jpg"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "7pD7eeoTO-y59Ev_",
+                    "title": "Text 17",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Questions About Evidence 3</strong></p>",
+                        "<p></p>",
+                        "<p>1. Felix’s cortisol levels are? </p>",
+                        "<ul><li><strong>A.  Low      </strong></li><li><strong>B. Normal        </strong></li><li><strong>C. High</strong></li></ul>",
+                        "<p>(underline your choice)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "EnV8K9C9uPUl3h3X",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 2 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "6fdXZgY4CIx8FzSN",
+                      "title": "Text 10",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 2a: </strong></p>",
+                          "<p><strong><a href='https://youtu.be/RW-KF0nUm0M'>Stress and Sickness</a></strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    }
+                    ,
+                    {
+                      "id": "AiAfi8Vqh8_Pdbll",
+                      "title": "Stress and Sickness",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/stressSicknessStill.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "eD-Fkv2VoArYCEHc",
+                      "title": "Text 11",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 2b:</strong></p>",
+                          "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=nose'>Immune Response Animation</a></strong></p>",
+                          "<p></p>"
+                          
+                        ]
+                      }
+                    },
+                    {
+                      "id": "EI3_xCw2Q0IXbG2j",
+                      "title": "Immune Response Animation",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/immuneAnimation.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "Uya5NTQdrhCsS75h",
+                    "title": "Text 6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 1 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "0-DJ4p6CpLv5Un3B",
+                      "title": "Text 7",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 1:</strong></p>",
+                          "<p><strong><a href='https://docs.google.com/presentation/d/1lBRlHpv8bzUw3UVDo9L0mJteKqYmZbdOavF6W4dsl-k/edit?usp=sharing'>How Do You Get Sick?</a></strong></p>"            ]
+                      }
+                    },
+                    {
+                      "id": "NFCQvMe3T2H_Cmb5",
+                      "title": "Evidence 1",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/howdoyougetSickStill.png"
+                      }
+                    }
+                  ]
+                ]
               }
             },
             {
@@ -2994,46 +3255,258 @@
               "content":
               {
                 "tiles": [
+                  {
+                    "id": "22u8jIT0zNWoa3Ty",
+                    "title": "Text 3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 4 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
                     {
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<h2>CHAPTER 4 SOURCES</h2>"
-                          ]
-                        }
-                      },
-                    {
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<p>Here are resources you can choose to distribute to your students as they work their way through chapters. To make these available in the Resource Library tab, drag the information (link, image, text, etc.) into your own Workspace and press the Publish button (rectangle with the up arrow).</p>"
-                          ]
-                        }
-                      },
-                      {
-                          "content": {
-                            "type": "Text",
-                            "format": "html",
-                            "text": [
-                              "<p>Evidence 1: </p>",
-                              "<p>Evidence 2:</p>",
-                              "<p>Evidence 3: </p>",
-                              "<p>Evidence 4: <a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=nose'>Nose Animation</a></p>"
-                            ]
-                          }
-                      },
-                      {
-                        "id": "bio4TG02",
-                        "title": "",
-                        "content": {
-                          "type": "Image",
-                          "url": "curriculum/bio4community/images/sdfasf.jpg"
-                        }
+                      "id": "J5AfQ1kHrlG17XT2",
+                      "title": "Text 14",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 4a:</strong></p>",
+                          "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=simulation&organ=nose'>Immune Response Simulator</a></strong></p>"
+                        ]
                       }
+                    }
+                    ,
+                    {
+                      "id": "AVZcCFvlkGGJ3zpT",
+                      "title": "Immune Response Simulation",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/immuneSimulator.png"
+                      }
+                    }
                   ],
-                  "supports": []
+                  [
+                    {
+                      "id": "uVGbOMRDLPkjYC5T",
+                      "title": "Text 18",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 4b:</strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/d/14fxaT4g1CkaBEAXpoMOF1FwzbCP1Beu-sc9lqQAhHT4/edit?usp=sharing'>Effect of Cortisol on the Immune System</a></strong> (Blog post)</p>",
+                          "<p></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    }
+                    ,
+                    {
+                      "id": "KE_Gbrbf1ZqBfH3o",
+                      "title": "Effect of Cortisol Blog",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/cortisolBlog.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "Y3Mku2bE2vtIp-a5",
+                    "title": "Text 21",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Questions About Evidence 4a</strong></p>",
+                        "<p></p>",
+                        "<p>1. When cortisol level is high, and cortisol is ignored (Response to Cortisol = Ignore) the runny nose lasts longer than otherwise.  </p>",
+                        "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+                        "<p></p>",
+                        "<p>2. How does immune cell recruitment affect mucus thickness? </p>",
+                        "<ul><li><strong>A. When there are a lot of immune cell recruited the mucus is more thick.  </strong></li><li><strong>B. When there are a lot of immune cell recruited the mucus is less thick. </strong></li><li><strong>C. Immune cell recruitment does affect the thickness of the mucus. </strong> </li></ul>",
+                        "<p></p>",
+                        "<p>If cortisol is ignored (Response to Cortisol = Ignore) more mucus is produced even when there are no more bacteria.    </p>",
+                        "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "bZ9lIci_gvGeGm5R",
+                    "title": "Text 20",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Questions About Evidence 4b</strong></p>",
+                        "<p><strong></strong></p>",
+                        "<p>1. We get a runny nose when we are sick because:</p>",
+                        "<ul><li><strong>A. The mucous is toxic to germs </strong></li><li><strong>B. The mucous washes out the germs</strong></li><li><strong>C. The mucous has nutrients that germs need</strong></li></ul>",
+                        "<p>(underline your choice)</p>",
+                        "<p></p>",
+                        "<p>2. Normally cortisol calms down the immune response once the threat is gone.  </p>",
+                        "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+                        "<p></p>",
+                        "<p>3. If cortisol is high for a long time the body starts to ignore it.  </p>",
+                        "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "P7cywW7v22bjGzlq",
+                    "title": "Text 4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 3 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "McxRhk6D_82FLzKh",
+                      "title": "Text 9",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 3a: </strong></p>",
+                          "<p><strong><a href='https://youtu.be/hmzYniXqc7k'>Saliva Stress Test</a> (video)</strong></p>",
+                          "<p><strong></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "WnHmDnnBeFgaZH3T",
+                      "title": "Saliva Test Video",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/salivaVideo.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "P5TVoskQNXYOf-lH",
+                      "title": "Text 16",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 3b: </strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/d/1Rxnve30DYjjfNbwLtze7BEOzEiX_WanekCyop-YnL3M/edit?usp=sharing'>Saliva Stress Test Results</a></strong></p>",
+                          "<p><strong></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "DsILp2t6QJBvHj2R",
+                      "title": "Saliva Test Results",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/SalivaTest.jpg"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "EnV8K9C9uPUl3h3X",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 2 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "6fdXZgY4CIx8FzSN",
+                      "title": "Text 10",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 2a: </strong></p>",
+                          "<p><strong><a href='https://youtu.be/RW-KF0nUm0M'>Stress and Sickness</a></strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    }
+                    ,
+                    {
+                      "id": "AiAfi8Vqh8_Pdbll",
+                      "title": "Stress and Sickness",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/stressSicknessStill.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "eD-Fkv2VoArYCEHc",
+                      "title": "Text 11",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 2b:</strong></p>",
+                          "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=nose'>Immune Response Animation</a></strong></p>",
+                          "<p></p>"
+                          
+                        ]
+                      }
+                    },
+                    {
+                      "id": "EI3_xCw2Q0IXbG2j",
+                      "title": "Immune Response Animation",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/immuneAnimation.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "Uya5NTQdrhCsS75h",
+                    "title": "Text 6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 1 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "0-DJ4p6CpLv5Un3B",
+                      "title": "Text 7",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 1:</strong></p>",
+                          "<p><strong><a href='https://docs.google.com/presentation/d/1lBRlHpv8bzUw3UVDo9L0mJteKqYmZbdOavF6W4dsl-k/edit?usp=sharing'>How Do You Get Sick?</a></strong></p>"            
+                        ]
+                      }
+                    },
+                    {
+                      "id": "NFCQvMe3T2H_Cmb5",
+                      "title": "Evidence 1",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/howdoyougetSickStill.png"
+                      }
+                    }
+                  ]
+                ]
               }
             },
             {
@@ -3107,39 +3580,223 @@
               "content":
               {
                 "tiles": [
+                  {
+                    "id": "sWnZaWYEwtBmb5YO",
+                    "title": "Text 2",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 5 RESOURCES <strong>- </strong>No new resources.</h2>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "22u8jIT0zNWoa3Ty",
+                    "title": "Text 3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 4 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
                     {
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<h2>CHAPTER 5 SOURCES</h2>"
-                          ]
-                        }
-                      },
-                    {
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<p>Here are resources you can choose to distribute to your students as they work their way through chapters. To make these available in the Resource Library tab, drag the information (link, image, text, etc.) into your own Workspace and press the Publish button (rectangle with the up arrow).</p>"
-                          ]
-                        }
-                      },
-                      {
-                          "content": {
-                            "type": "Text",
-                            "format": "html",
-                            "text": [
-                              "<p>Evidence 1:  </p>",
-                              "<p>Evidence 2: </p>",
-                              "<p>Evidence 3:  </p>",
-                              "<p>Evidence 4: <a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=nose'>Nose Animation</a></p>",
-                              "<p>Evidence 5: <a href='https://bio4community.concord.org/branch/main/?mode=simulation&organ=nose'>Nose Model</a></p>"
-                            ]
-                          }
+                      "id": "J5AfQ1kHrlG17XT2",
+                      "title": "Text 14",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 4a:</strong></p>",
+                          "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=simulation&organ=nose'>Immune Response Simulator</a></strong></p>"
+                        ]
                       }
+                    }
+                    ,
+                    {
+                      "id": "AVZcCFvlkGGJ3zpT",
+                      "title": "Immune Response Simulation",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/immuneSimulator.png"
+                      }
+                    }
                   ],
-                  "supports": []
+                  [
+                    {
+                      "id": "uVGbOMRDLPkjYC5T",
+                      "title": "Text 18",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 4b:</strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/d/14fxaT4g1CkaBEAXpoMOF1FwzbCP1Beu-sc9lqQAhHT4/edit?usp=sharing'>Effect of Cortisol on the Immune System</a></strong> (Blog post)</p>",
+                          "<p></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "KE_Gbrbf1ZqBfH3o",
+                      "title": "Effect of Cortisol Blog",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/cortisolBlog.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "P7cywW7v22bjGzlq",
+                    "title": "Text 4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 3 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "McxRhk6D_82FLzKh",
+                      "title": "Text 9",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 3a: </strong></p>",
+                          "<p><strong><a href='https://youtu.be/hmzYniXqc7k'>Saliva Stress Test</a> (video)</strong></p>",
+                          "<p><strong></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "WnHmDnnBeFgaZH3T",
+                      "title": "Saliva Test Video",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/salivaVideo.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "P5TVoskQNXYOf-lH",
+                      "title": "Text 16",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 3b: </strong></p>",
+                          "<p><strong><a href='https://docs.google.com/document/d/1Rxnve30DYjjfNbwLtze7BEOzEiX_WanekCyop-YnL3M/edit?usp=sharing'>Saliva Stress Test Results</a></strong></p>",
+                          "<p><strong></strong></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "DsILp2t6QJBvHj2R",
+                      "title": "Saliva Test Results",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/SalivaTest.jpg"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "EnV8K9C9uPUl3h3X",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 2 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "6fdXZgY4CIx8FzSN",
+                      "title": "Text 10",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 2a: </strong></p>",
+                          "<p><strong><a href='https://youtu.be/RW-KF0nUm0M'>Stress and Sickness</a></strong></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "AiAfi8Vqh8_Pdbll",
+                      "title": "Stress and Sickness",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/stressSicknessStill.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "eD-Fkv2VoArYCEHc",
+                      "title": "Text 11",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 2b:</strong></p>",
+                          "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=nose'>Immune Response Animation</a></strong></p>",
+                          "<p></p>"
+                          
+                        ]
+                      }
+                    },
+                    {
+                      "id": "EI3_xCw2Q0IXbG2j",
+                      "title": "Immune Response Animation",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/immuneAnimation.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "Uya5NTQdrhCsS75h",
+                    "title": "Text 6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>CHAPTER 1 RESOURCES</h2>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "0-DJ4p6CpLv5Un3B",
+                      "title": "Text 7",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>EVIDENCE 1:</strong></p>",
+                          "<p><strong><a href='https://docs.google.com/presentation/d/1lBRlHpv8bzUw3UVDo9L0mJteKqYmZbdOavF6W4dsl-k/edit?usp=sharing'>How Do You Get Sick?</a></strong></p>"            ]
+                      }
+                    },
+                    {
+                      "id": "NFCQvMe3T2H_Cmb5",
+                      "title": "Evidence 1",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/bio4community/images/howdoyougetSickStill.png"
+                      }
+                    }
+                  ]
+                ]
               }
             },
             {
