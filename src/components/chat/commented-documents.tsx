@@ -136,8 +136,12 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
 
             break;
           }
-          // types I have not accounted for :
-          //publication, learningLogPublication, personalPublication, supportPublication
+        //   // types I have not accounted for :
+        //   //publication, learningLogPublication, personalPublication, supportPublication
+        }
+        const temp = store.documents.getDocument(doc.key);
+        if (temp){
+          // const title = useDocumentCaption( store.documents.getDocument(doc.key))
         }
         const docCommentsRef = mDocsRef.doc(doc.id).collection("comments");
         promiseArr.push(docCommentsRef.get().then((qs)=>{

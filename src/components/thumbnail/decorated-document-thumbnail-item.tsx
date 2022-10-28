@@ -24,7 +24,9 @@ interface IProps {
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
 }
 
-function useDocumentCaption(document: DocumentModelType) {
+export function useDocumentCaption(document: DocumentModelType) {
+  console.log("------decorated-document-thumbnail-item.tsx---------");
+  console.log("[prop] document:", document);
   const appConfig = useAppConfig();
   const problem = useProblemStore();
   const classStore = useClassStore();
@@ -56,6 +58,10 @@ export const DecoratedDocumentThumbnailItem = observer(({
     const user = useUserStore();
     const dbStore = useDBStore();
     const tabName = tab.toLowerCase().replace(' ', '-');
+    console.log("-------- < DecoratedDocumentThumbnailItem  > --------");
+    // console.log("sectionDocument:", sectionDocument);
+    console.log("caption = useDocumentCaption(sectionDocument):", useDocumentCaption(sectionDocument));
+
     const caption = useDocumentCaption(sectionDocument);
 
     // sync delete a publication to firebase
