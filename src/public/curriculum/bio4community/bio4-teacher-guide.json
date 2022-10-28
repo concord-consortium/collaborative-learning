@@ -243,7 +243,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Questions About Evidence 2a, </strong><em><strong>All the Fuss About Cholesterol (blog post) </strong></em></p>",
+                        "<p><strong>Questions About Evidence 2a</strong><em><strong>All the Fuss About Cholesterol (blog post) </strong></em></p>",
                         "<p>1. Our body can make all the cholesterol we need.  </p>",
                         "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
                         "<p></p>",
@@ -2725,7 +2725,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Questions About Evidence 1:</strong></p>",
+                        "<p><strong>Questions About Evidence 1 - <em>How Do You Get Sick?</em></strong></p>",
                         "<p>1. Immune cells are:</p>",
                         "<ul><li><strong>Red blood cells</strong>   OR    <strong>White blood cells</strong></li></ul>",
                         "<p>(underline your choice)</p>",
@@ -2882,7 +2882,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Questions About Evidence 2a</strong></p>",
+                        "<p><strong>Questions About Evidence 2a - <em>Stress and Sickness</em></strong></p>",
                         "<p></p>",
                         "<p>1. Dr. Cohen’s study found that:</p>",
                         "<ul><li><strong>A. People with less chronic stress caught fewer colds</strong></li><li><strong>B. People with less chronic stress caught more colds</strong></li><li><strong>C. Stress level did not impact how many colds people go</strong>t</li></ul>",
@@ -2901,7 +2901,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Questions About Evidence 2b</strong></p>",
+                        "<p><strong>Questions About Evidence 2b - <em>Immune Response Animation</em></strong></p>",
                         "<p></p>",
                         "<p>1. When Stress Level and Amount of Bacteria are high, more mucus is made and the person feels sick.  </p>",
                         "<p><strong>True</strong>   OR  <strong>False</strong> ?  (underline your choice)</p>",
@@ -3082,7 +3082,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Questions About Evidence 3</strong></p>",
+                        "<p><strong>Questions About Evidence 3a and 3b - <em>Saliva Stress Test Video and Saliva Stress Test Results</em></strong></p>",
                         "<p></p>",
                         "<p>1. Felix’s cortisol levels are? </p>",
                         "<ul><li><strong>A.  Low      </strong></li><li><strong>B. Normal        </strong></li><li><strong>C. High</strong></li></ul>",
@@ -3321,7 +3321,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Questions About Evidence 4a</strong></p>",
+                        "<p><strong>Questions About Evidence 4a - <em>Immune Response Simulator</em></strong></p>",
                         "<p></p>",
                         "<p>1. When cortisol level is high, and cortisol is ignored (Response to Cortisol = Ignore) the runny nose lasts longer than otherwise.  </p>",
                         "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
@@ -3342,7 +3342,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Questions About Evidence 4b</strong></p>",
+                        "<p><strong>Questions About Evidence 4b - <em> Effect of Cortisol on the Immune System (Blog post)</em></strong></p>",
                         "<p><strong></strong></p>",
                         "<p>1. We get a runny nose when we are sick because:</p>",
                         "<ul><li><strong>A. The mucous is toxic to germs </strong></li><li><strong>B. The mucous washes out the germs</strong></li><li><strong>C. The mucous has nutrients that germs need</strong></li></ul>",
