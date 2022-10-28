@@ -4,6 +4,7 @@ import { useFirestore } from "../../hooks/firestore-hooks";
 import { CurriculumDocument, DocumentDocument } from "../../lib/firestore-schema";
 import { getSectionTitle } from "../../models/curriculum/section";
 import { UserModelType } from "../../models/stores/user";
+import { useDocumentCaption } from "../thumbnail/decorated-document-thumbnail-item";
 import "./commented-documents.scss";
 interface IProps {
   documentObj: CurriculumDocument,
@@ -97,6 +98,7 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
             type: doc.data().type,
             numComments: 0,
             title: "temp",
+            key: doc.data().key,
             ...doc.data()
           }
         );
@@ -117,16 +119,23 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
           case "personal":
             title = doc.title;
             break;
-          case "publication":
+          case "publication":{
             console.log("----case publication------");
             console.log("publication doc", doc);
-            console.log(store.documents.getDocument);
-            console.log(store.documents.getNextLearningLogTitle);
+            console.log("store.documents.getDocument", store.documents.getDocument(doc.key));
+            const temp =  store.documents.getDocument(doc.key);
+
+            // if (temp){
+            //   useDocumentCaption(temp);
+            // }
+            //create a functional component that gets passed in store.documents.getDoc(doc.key)
+            //  console.log(store.documents.getNextLearningLogTitle);
             console.log(store.documents.getNextOtherDocumentTitle);
             console.log(store.documents.getNextPersonalDocumentTitle);
             console.log("----end case publication------");
 
             break;
+          }
           // types I have not accounted for :
           //publication, learningLogPublication, personalPublication, supportPublication
         }
@@ -199,7 +208,7 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
           console.log("doc.title line 197:", doc.title);
           console.log("doc:", doc);
           return (
-            <div
+            <div  //turn into FC
               className={"document-box"}
               key={index}
               onClick={()=>{
