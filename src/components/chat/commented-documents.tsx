@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useStores, useUIStore} from "../../hooks/use-stores";
+import { useDocumentFromStore, useStores, useUIStore} from "../../hooks/use-stores";
 import { useFirestore } from "../../hooks/firestore-hooks";
 import { CurriculumDocument, DocumentDocument } from "../../lib/firestore-schema";
 import { getSectionTitle } from "../../models/curriculum/section";
 import { UserModelType } from "../../models/stores/user";
+import { DocumentModelType } from "../../models/document/document";
 import { useDocumentCaption } from "../thumbnail/decorated-document-thumbnail-item";
 import "./commented-documents.scss";
 interface IProps {
@@ -19,8 +20,13 @@ interface PromisedCurriculumDocument extends CurriculumDocument {
 interface PromisedDocumentDocument extends DocumentDocument {
   id?: string,
   numComments?: number,
-  title: string
+  title?: string
 }
+
+//bugs:
+//- #1 upon load go to  MyWork or ClassWork tab > CommentsView> DocumentsView ---- crashes
+// - #2 upon load (not on MyWork or ClassWork tab) > CommentsView > DocumentsView > then go to MyWork or ClassWork tab
+    //-- then click on a Document -- crashes
 
 export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleDocView}) => {
   console.log("----- < CommentedDocuments > -----------");
@@ -41,10 +47,12 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
   const [myWorkDocuments, setMyWorkDocuments] = useState<PromisedDocumentDocument[]>();
   const mDocsRef = db.collection("documents");
   const mDocsInScopeRef = mDocsRef
-    .where("network", "==", user?.network); //do we want to filter by demo class 1?
-    // .where("context_id", "==", "democlass1");
+    .where("network", "==", user?.network);  //option 1
+    // .where("network", "==", user?.network) //option 2
+    // .where("context_id", "==", "democlass1");//
   const ui = useUIStore();
   const store = useStores();
+
 
   //------Curriculum Documents--------
   useEffect(() => {
@@ -88,10 +96,9 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
   // ------MyWork/ClassWork--------
   useEffect(() => {
     //-------promise.all -----------
-    const t0 = performance.now();
+    // const t0 = performance.now();
     const unsubscribeFromDocs = mDocsInScopeRef.onSnapshot(querySnapshot=>{
       const docs = querySnapshot.docs.map(doc =>{ //convert each element of docs to an object
-        console.log("line 103 doc:", doc.data());
         return (
           {
             id: doc.id,
@@ -106,47 +113,10 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
       const commentedDocs: PromisedDocumentDocument[]= [];
       const promiseArr: Promise<void>[]=[];
       for (let doc of docs){
-        let title: string;
-        console.log("line 118 doc.type:", doc.type);
-        switch (doc.type){
-          case "problem":
-            title = store.problem.title;
-            break;
-          case "planning":
-            title = `${store.problem.title}: Planning`;
-            break;
-          case "learningLog":
-          case "personal":
-            title = doc.title;
-            break;
-          case "publication":{
-            console.log("----case publication------");
-            console.log("publication doc", doc);
-            console.log("store.documents.getDocument", store.documents.getDocument(doc.key));
-            const temp =  store.documents.getDocument(doc.key);
-
-            // if (temp){
-            //   useDocumentCaption(temp);
-            // }
-            //create a functional component that gets passed in store.documents.getDoc(doc.key)
-            //  console.log(store.documents.getNextLearningLogTitle);
-            console.log(store.documents.getNextOtherDocumentTitle);
-            console.log(store.documents.getNextPersonalDocumentTitle);
-            console.log("----end case publication------");
-
-            break;
-          }
-        //   // types I have not accounted for :
-        //   //publication, learningLogPublication, personalPublication, supportPublication
-        }
-        const temp = store.documents.getDocument(doc.key);
-        if (temp){
-          // const title = useDocumentCaption( store.documents.getDocument(doc.key))
-        }
         const docCommentsRef = mDocsRef.doc(doc.id).collection("comments");
         promiseArr.push(docCommentsRef.get().then((qs)=>{
           if (qs.empty === false){
-            doc = {...doc, title, numComments: qs.size};
+            doc = {...doc, numComments: qs.size};
             commentedDocs.push(doc as PromisedDocumentDocument);
           }
         }));
@@ -155,12 +125,12 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
       Promise.all(promiseArr).then(()=>{
         setMyWorkDocuments(commentedDocs);
       }).then(()=>{
-        const t1 = performance.now();
-        console.log("useEffect 2: commentedDocs", commentedDocs);
-        console.log("useEffect 2 t1:", t1);
-        console.log(`Call to useEffect2 took ${t1 - t0} milliseconds.`);
+        // const t1 = performance.now();
+        // console.log("useEffect 2: commentedDocs", commentedDocs);
+        // console.log("useEffect 2 t1:", t1);
+        // console.log(`Call to useEffect2 took ${t1 - t0} milliseconds.`);
       });
-      console.log("-------end useEffect 2---------");
+      // console.log("-------end useEffect 2---------");
     });
     return () => unsubscribeFromDocs?.();
   },[]);
@@ -175,7 +145,6 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
         docsCommentedOn &&
         (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => {
           let navTab: string;
-          console.log("doc.id line 163", doc.id);
           if (doc.id?.includes("guide")){
             navTab = "teacher-guide";
           }
@@ -208,28 +177,30 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
       {
         myWorkDocuments &&
         (myWorkDocuments).map((doc: PromisedDocumentDocument, index: number) =>{
-          console.log("doc.id line 196:", doc.id);
-          console.log("doc.title line 197:", doc.title);
-          console.log("doc:", doc);
-          return (
-            <div  //turn into FC
-              className={"document-box"}
-              key={index}
-              onClick={()=>{
-                console.log("clicked a mywork/classwork doc");
-                console.log("line 200", doc.title);
-                //is it true that mywork tab only holds Problem, Planning, Personal (you make), Learning?
-                //class work holds .... publication, learningLogPublication, personalPublication, supportPublication?
-              }}
-            >
-              <div className={"title"}>
-                {doc.title}
-              </div>
-              <div className={"numComments"}>
-                {doc.numComments}
-              </div>
-            </div>
-          );
+          // console.log("doc.id line 196:", doc.id);
+          // console.log("doc.title line 197:", doc.title);
+          // console.log("doc:", doc);
+          const sectionDoc =  store.documents.getDocument(doc.key);
+          const fullSectionDoc = store.networkDocuments.getDocument(doc.key);
+
+          if (sectionDoc){
+            return (
+              <MyWorkDocuments
+                key={index}
+                doc={doc}
+                index={index}
+                sectionDoc={sectionDoc}
+              />
+              // <>
+              // </>
+            );
+          }
+          else {
+            console.log("undefined doc:", doc);
+            console.log("but what about useDocumentFromStore:", fullSectionDoc);
+            //^ returned 16 (all entries) undefined for DemoClass1, teacher
+          }
+
         })
 
       }
@@ -238,3 +209,58 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
 
   );
 };
+
+interface JProps {
+  doc: any,
+  index: number,
+  sectionDoc: DocumentModelType,
+}
+
+export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc}) => {
+  const store = useStores();
+
+  if (index===0){
+    console.log( "-------START-----------");
+  }
+  console.log("-----<MyWorkDocument> -----", doc, index);
+  let title;
+  title =  useDocumentCaption(sectionDoc as DocumentModelType) + ` | ${doc.key}  | ----- ${doc.type}`;
+
+  if (!title){
+    title = `***  | ${doc.title}  | ${doc.key} |  ------  ${doc.type}`;
+    if (doc.type === "problem"){
+      console.log("----case Problems-----");
+      console.log("line 215 doc with key:", doc.key);
+      // console.log("useDocumentCaption returns", useDocumentCaption(sectionDoc as DocumentModelType));
+      console.log( "line 215 store.problem:", store.problem);
+    }
+    if (doc.type ==="publication"){
+      console.log("----case Publications----");
+      console.log( "store.problem", store.problem);
+      console.log( "store.documents", store.documents);
+      console.log( "store.networkDocuments", store.networkDocuments);
+      console.log( "store:", store);
+
+
+    }
+  }
+  return (
+    <div
+      className={"document-box"}
+      onClick={()=>{
+        console.log("clicked a mywork/classwork doc");
+      }}
+    >
+      <div className={"title"}>
+        {title}
+      </div>
+      <div className={"numComments"}>
+        {doc.numComments}
+      </div>
+    </div>
+  );
+
+};
+
+  //   // types I have not accounted for :
+  //   //publication, learningLogPublication, personalPublication, supportPublication

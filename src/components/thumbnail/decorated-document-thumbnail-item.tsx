@@ -26,12 +26,15 @@ interface IProps {
 
 export function useDocumentCaption(document: DocumentModelType) {
   console.log("------decorated-document-thumbnail-item.tsx---------");
-  console.log("[prop] document:", document);
+  console.log("with document.key:", document.key);
+
+  // console.log("[prop] document:", document);
   const appConfig = useAppConfig();
   const problem = useProblemStore();
   const classStore = useClassStore();
   const user = useUserStore();
   const { type, uid } = document;
+  console.log("gets here");
   const pubVersion = document.pubVersion;
   const teacher = useFirestoreTeacher(uid, user.network || "");
   if (type === SupportPublication) {
@@ -62,7 +65,7 @@ export const DecoratedDocumentThumbnailItem = observer(({
     // console.log("sectionDocument:", sectionDocument);
     console.log("caption = useDocumentCaption(sectionDocument):", useDocumentCaption(sectionDocument));
 
-    const caption = useDocumentCaption(sectionDocument);
+    const caption = useDocumentCaption(sectionDocument) + sectionDocument.key;
 
     // sync delete a publication to firebase
     useDocumentSyncToFirebase(user, dbStore.firebase, sectionDocument, true);
