@@ -273,10 +273,7 @@ export class Logger {
     Logger.log(event, parameters);
   }
   
-  public static logHistoryEvent(historyLogInfo: ILogHistory) {
-    const document = this._instance.stores.documents.getDocument(historyLogInfo.documentId) ||
-      this._instance.stores.networkDocuments.getDocument(historyLogInfo.documentId);
-    
+  public static logHistoryEvent(historyLogInfo: ILogHistory) { 
     const eventMap: Record<HistoryAction, LogEventName> = {
       showControls: LogEventName.HISTORY_SHOW_CONTROLS,
       hideControls: LogEventName.HISTORY_HIDE_CONTROLS,

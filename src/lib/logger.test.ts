@@ -260,6 +260,7 @@ describe("authed logger", () => {
       mockXhr.post(/.*/, (req, res) => {
         const historyRequest = JSON.parse(req.body());
         expect(historyRequest.event).toBe("HISTORY_SHOW_CONTROLS");
+        expect(historyRequest.parameters.documentKey).toBe(documentKey);
         done();
         return res.status(201);
       });
@@ -310,6 +311,7 @@ describe("authed logger", () => {
 
       mockXhr.post(/.*/, (req, res) => {
         const historyRequest = JSON.parse(req.body());
+        expect(historyRequest.event).toBe("HISTORY_PLAYBACK_STOP");
         done();
         return res.status(201);
       });
