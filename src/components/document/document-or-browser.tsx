@@ -22,7 +22,7 @@ interface IDocumentOrBrowserProps extends IEditableDocumentContentProps {
   onSelectDocument?: (document: DocumentModelType) => void;
 }
 export const DocumentOrBrowser: React.FC<IDocumentOrBrowserProps> = props => {
-  console.log("----- < DocumentOrBrowser>--------- ");
+  console.log("----- < DocumentOrBrowser>--------- with props.onSelectDocument ", props.onSelectDocument);
 
   const { showBrowser, tabSpec, document, onSelectNewDocument, onSelectDocument, ...others } = props;
   return showBrowser && tabSpec

@@ -40,8 +40,8 @@ export interface ISubTabSpec {
 export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, selectedDocument,
   isChatOpen, onSelectNewDocument, onSelectDocument, onTabClick }) => {
   // console.log("------ < SectionDocumentOrBrowser > ---------");
-  // console.log("props", tabSpec, reset, selectedDocument, isChatOpen, onSelectDocument, onSelectDocument, onTabClick);
-
+  console.log("section-document-or-browser.tsx > props\n onSelectNewDocument: ", onSelectNewDocument,
+  "\n onSelectDocument:", onSelectDocument);
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>();
   const [tabIndex, setTabIndex] = useState(0);
   const appConfigStore = useAppConfig();
@@ -72,6 +72,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   const documentsPanelStyle = { height: documentsPanelHeight };
   const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : "";
   const handleTabClick = useCallback((title: string, type?: string) => {
+    console.log("section-document-or-browser.tsx > handleTabClick with\n title:", title, "\n type:", type);
+
     setReferenceDocument(undefined);
     ui.updateFocusDocument();
     ui.setSelectedTile();
@@ -106,6 +108,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   };
 
   const handleSelectDocument = (document: DocumentModelType) => {
+    console.log("section-document-or-browser.tsx > handleSelectDocument with document arg:", document);
     if (!document.hasContent && document.isRemote) {
       loadDocumentContent(document);
     }
@@ -207,6 +210,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   };
 
   const showPlayback = user.type ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
+  console.log("line 213...referenceDocument is:", referenceDocument);
   const documentView = referenceDocument && !referenceDocument?.getProperty("isDeleted") &&
     <div>
       <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>

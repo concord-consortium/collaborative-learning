@@ -85,6 +85,8 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
 export const DocumentCollectionByType = observer(({ topTab, tab, section, index, numSections=0, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
+  console.log("-----documents-type-collection.tsx------map---");
+
   const appConfigStore = useAppConfig();
   const classStore = useClassStore();
   const documents = useLocalDocuments();
@@ -101,6 +103,7 @@ export const DocumentCollectionByType = observer(({ topTab, tab, section, index,
   const isBottomPanel = index > 0 && index === numSections - 1;
 
   function handleNewDocumentClick() {
+    console.log("CLICK! handleNewDocumentClick line 104");
     onSelectNewDocument?.(section.documentTypes[0]);
   }
   const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName, {"top-panel": isTopPanel});
@@ -118,12 +121,18 @@ export const DocumentCollectionByType = observer(({ topTab, tab, section, index,
       <div className={listClass}>
         {showNewDocumentThumbnail &&
           <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
+        {console.log("sectionDocs:", sectionDocs)}
 
-        {sectionDocs.map(document => {
+        {sectionDocs.map((document, i) => {
+          console.log("line 125: document:", document, "\n document.key:", document.key, "\n index:", i);
+
           const documentContext = getDocumentContext(document);
           return (
             <DocumentContextReact.Provider key={document.key} value={documentContext}>
-              <DecoratedDocumentThumbnailItem section={section} sectionDocument={document} tab={tab}
+              <DecoratedDocumentThumbnailItem
+                section={section}
+                sectionDocument={document}
+                tab={tab}
                 scale={scale} selectedDocument={selectedDocument}
                 onSelectDocument={onSelectDocument}
                 onDocumentDragStart={onDocumentDragStart}

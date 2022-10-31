@@ -25,16 +25,14 @@ interface IProps {
 }
 
 export function useDocumentCaption(document: DocumentModelType) {
-  console.log("------decorated-document-thumbnail-item.tsx---------");
-  console.log("with document.key:", document.key);
-
+  // console.log("------decorated-document-thumbnail-item.tsx---------");
+  // console.log("with document.key:", document.key);
   // console.log("[prop] document:", document);
   const appConfig = useAppConfig();
   const problem = useProblemStore();
   const classStore = useClassStore();
   const user = useUserStore();
   const { type, uid } = document;
-  console.log("gets here");
   const pubVersion = document.pubVersion;
   const teacher = useFirestoreTeacher(uid, user.network || "");
   if (type === SupportPublication) {
@@ -58,13 +56,13 @@ export const DecoratedDocumentThumbnailItem = observer(({
   section, sectionDocument, tab, scale, selectedDocument,
   onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
 }: IProps) => {
+    console.log("------<DecoratedDocumentThumbnail Item > ------------");
+    // console.log("sectionDocument:", sectionDocument);
+    // console.log("caption = useDocumentCaption(sectionDocument):", useDocumentCaption(sectionDocument));
+
     const user = useUserStore();
     const dbStore = useDBStore();
     const tabName = tab.toLowerCase().replace(' ', '-');
-    console.log("-------- < DecoratedDocumentThumbnailItem  > --------");
-    // console.log("sectionDocument:", sectionDocument);
-    console.log("caption = useDocumentCaption(sectionDocument):", useDocumentCaption(sectionDocument));
-
     const caption = useDocumentCaption(sectionDocument) + sectionDocument.key;
 
     // sync delete a publication to firebase
@@ -74,6 +72,8 @@ export const DecoratedDocumentThumbnailItem = observer(({
     useLastSupportViewTimestamp(section.type === "teacher-supports");
 
     function handleDocumentClick() {
+      console.log("DOCUMENT CLICKED!!!!");
+      console.log("onSelectDocument?", onSelectDocument, "\n with sectionDocument: ", sectionDocument);
       onSelectDocument?.(sectionDocument);
       (section.type === "teacher-supports") && user.setLastSupportViewTimestamp(Date.now());
     }

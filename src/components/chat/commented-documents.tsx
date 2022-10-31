@@ -6,6 +6,7 @@ import { getSectionTitle } from "../../models/curriculum/section";
 import { UserModelType } from "../../models/stores/user";
 import { DocumentModelType } from "../../models/document/document";
 import { useDocumentCaption } from "../thumbnail/decorated-document-thumbnail-item";
+import { ENavTab } from "../../models/view/nav-tabs";
 import "./commented-documents.scss";
 interface IProps {
   documentObj: CurriculumDocument,
@@ -30,9 +31,6 @@ interface PromisedDocumentDocument extends DocumentDocument {
 
 export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleDocView}) => {
   console.log("----- < CommentedDocuments > -----------");
-  // console.log("documentObj:", documentObj);
-  // console.log("user:", user);
-  // console.log("handleDocView:", handleDocView);
   const [docsCommentedOn, setDocsCommentedOn] = useState<PromisedCurriculumDocument[]>();
   const [db] = useFirestore();
   const cDocsRef = db.collection("curriculum");
@@ -56,7 +54,6 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
 
   //------Curriculum Documents--------
   useEffect(() => {
-    // console.log("---in useEffect 1-----");
     // const t0 = performance.now();
     const unsubscribeFromDocs = cDocsInScopeRef.onSnapshot(querySnapshot => {
       const docs = querySnapshot.docs.map(doc => {
@@ -146,10 +143,10 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
         (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => {
           let navTab: string;
           if (doc.id?.includes("guide")){
-            navTab = "teacher-guide";
+            navTab = ENavTab.kTeacherGuide;
           }
           else {
-            navTab = "problems";
+            navTab = ENavTab.kProblems;
           }
           return (
             <div
@@ -177,12 +174,8 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
       {
         myWorkDocuments &&
         (myWorkDocuments).map((doc: PromisedDocumentDocument, index: number) =>{
-          // console.log("doc.id line 196:", doc.id);
-          // console.log("doc.title line 197:", doc.title);
-          // console.log("doc:", doc);
           const sectionDoc =  store.documents.getDocument(doc.key);
           const fullSectionDoc = store.networkDocuments.getDocument(doc.key);
-
           if (sectionDoc){
             return (
               <MyWorkDocuments
@@ -191,22 +184,17 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
                 index={index}
                 sectionDoc={sectionDoc}
               />
-              // <>
-              // </>
             );
           }
           else {
-            console.log("undefined doc:", doc);
-            console.log("but what about useDocumentFromStore:", fullSectionDoc);
-            //^ returned 16 (all entries) undefined for DemoClass1, teacher
+            console.log("NO SECTION DOC");
+            console.log("src > hooks > use-stores.ts try useDocumentFromStore", fullSectionDoc);
           }
 
         })
 
       }
     </div>
-
-
   );
 };
 
@@ -217,38 +205,40 @@ interface JProps {
 }
 
 export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc}) => {
+  const ui = useUIStore();
   const store = useStores();
-
-  if (index===0){
-    console.log( "-------START-----------");
+  console.log("-------- <MyWorkDocuments >----------");
+  let navTab: string;
+  const myWorkTypes = ["problem", "planning", "learningLog", "personal"];
+  const classWorkTypes = ["publication", "learningLogPublication", "personalPublication", "supportPublication"];
+  for (let i = 0; i < 4; i++){
+    if (doc.type === myWorkTypes[i]){
+      navTab = ENavTab.kMyWork;
+    }
+    if (doc.type === classWorkTypes[i]){
+      navTab = ENavTab.kClassWork;
+    }
   }
+
+
   console.log("-----<MyWorkDocument> -----", doc, index);
   let title;
   title =  useDocumentCaption(sectionDoc as DocumentModelType) + ` | ${doc.key}  | ----- ${doc.type}`;
 
   if (!title){
     title = `***  | ${doc.title}  | ${doc.key} |  ------  ${doc.type}`;
-    if (doc.type === "problem"){
-      console.log("----case Problems-----");
-      console.log("line 215 doc with key:", doc.key);
-      // console.log("useDocumentCaption returns", useDocumentCaption(sectionDoc as DocumentModelType));
-      console.log( "line 215 store.problem:", store.problem);
-    }
-    if (doc.type ==="publication"){
-      console.log("----case Publications----");
-      console.log( "store.problem", store.problem);
-      console.log( "store.documents", store.documents);
-      console.log( "store.networkDocuments", store.networkDocuments);
-      console.log( "store:", store);
-
-
-    }
   }
+
+
   return (
     <div
       className={"document-box"}
       onClick={()=>{
         console.log("clicked a mywork/classwork doc");
+        ui.setActiveNavTab(navTab); //open correct NavTab
+        ui.setSelectedTile();
+        console.log("doc.path:", doc.path);
+        ui.setFocusDocument(doc.path);
       }}
     >
       <div className={"title"}>
