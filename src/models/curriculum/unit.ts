@@ -7,6 +7,7 @@ import {
 } from "./section";
 import { resumeSupportContentParsing, SupportModel, suspendSupportContentParsing } from "./support";
 import { StampModel } from "../../plugins/drawing-tool/model/stamp";
+import { getAssetUrl } from "../../utilities/asset-utils";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { NavTabsConfigModel } from "../stores/nav-tabs";
 import { SettingsMstType } from "../stores/settings";
@@ -148,7 +149,7 @@ function getUnitSpec(unitId: string | undefined, appConfig: AppConfigModelType) 
 export function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType) {
   const unitSpec = getUnitSpec(unitId, appConfig);
   const unitUrl = unitSpec?.content;
-  return fetch(unitUrl!)
+  return fetch(getAssetUrl(unitUrl!))
           .then(response => {
             if (response.ok) {
               return response.json();
@@ -166,7 +167,7 @@ export function getGuideJson(unitId: string | undefined, appConfig: AppConfigMod
   const unitSpec = getUnitSpec(unitId, appConfig);
   const guideUrl = unitSpec?.guide;
   if (!guideUrl) return;
-  return fetch(guideUrl)
+  return fetch(getAssetUrl(guideUrl))
           .then(response => {
             if (response.ok) {
               return response.json();

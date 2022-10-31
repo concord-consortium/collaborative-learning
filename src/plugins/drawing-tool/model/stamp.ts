@@ -1,4 +1,5 @@
 import { Instance, types } from "mobx-state-tree";
+import { getAssetUrl } from "../../../utilities/asset-utils";
 
 export const StampModel = types
   .model("Stamp", {
@@ -7,11 +8,13 @@ export const StampModel = types
     height: types.number
   })
   .preProcessSnapshot(snapshot => {
-    // The set of available stamps is saved with each drawing tool instance (why?).
+    // The set of available stamps is saved with each drawing tool instance.
     // Thus, we have to convert from pre-webpack/assets reform paths to curriculum
     // paths on loading documents.
-    const newUrl = snapshot.url.replace("assets/tools/drawing-tool/stamps",
-                                        "curriculum/moving-straight-ahead/stamps");
+    const newUrl = getAssetUrl(
+      snapshot.url.replace("assets/tools/drawing-tool/stamps",
+                           "curriculum/moving-straight-ahead/stamps")
+    );
     return newUrl && (newUrl !== snapshot.url)
             ? { ...snapshot, ...{ url: newUrl } }
             : snapshot;

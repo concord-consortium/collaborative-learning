@@ -2,6 +2,7 @@ import { types, Instance, SnapshotIn, clone, getSnapshot, flow } from "mobx-stat
 import {
   getImageDimensions, IImageDimensions, ISimpleImage, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
 } from "../utilities/image-utils";
+import { getAssetUrl } from "../utilities/asset-utils";
 import { DB } from "../lib/db";
 import placeholderImage from "../assets/image_placeholder.png";
 
@@ -403,11 +404,14 @@ export const localAssetsImagesHandler: IImageHandler = {
   },
 
   async store(url: string) {
-                    // convert original curriculum image paths
-    const _url = url.replace("assets/curriculum", "curriculum")
-                    // convert original drawing tool stamp paths
-                    .replace("assets/tools/drawing-tool/stamps",
-                             "curriculum/moving-straight-ahead/stamps");
+    
+    const _url = getAssetUrl(
+      // convert original curriculum image paths
+      url.replace("assets/curriculum", "curriculum")
+        // convert original drawing tool stamp paths
+         .replace("assets/tools/drawing-tool/stamps",
+                  "curriculum/moving-straight-ahead/stamps")
+    );
     return { contentUrl: _url, displayUrl: _url, success: true  };
   }
 };

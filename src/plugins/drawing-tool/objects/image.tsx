@@ -127,6 +127,14 @@ export class StampDrawingTool extends DrawingTool {
     if (stamp) {
       const stampImage: ImageObjectSnapshotForAdd = {
         type: "image",
+        // Note: these stamp urls will be absolute, for a production release
+        // they will point at the stamp image for the version of the release
+        // However the image object will use the ImageMap to store this image
+        // in firebase so it is "owned" by the document that is using it. 
+        // So even if the version (or branch during testing) goes away the 
+        // drawing should still be fine.
+        // TODO: this should be tested, it depends on whether CORS is configured
+        // correctly for the collaborative-learning.concord.org CloudFront
         url: stamp.url,
         x: start.x - (stamp.width / 2),
         y: start.y - (stamp.height / 2),
