@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import classNames from "classnames";
 import { UserModelType } from "../../models/stores/user";
+import { ILogComment, Logger } from "../../lib/logger";
 import { WithId } from "../../hooks/firestore-hooks";
 import { useUIStore } from "../../hooks/use-stores";
 import { CommentDocument} from "../../lib/firestore-schema";
@@ -37,6 +38,16 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   const ui = useUIStore();
 
   const handleThreadClick = (clickedId: string | null) => {
+    // Do the logging before we change expandedThread so we can tell whether the thread was expanded or collapsed.
+    const eventPayload: ILogComment = {
+      focusDocumentId: focusDocument || '',
+      focusTileId:  clickedId && clickedId !== "document" ? clickedId : undefined, // clicks on document do not have a focusTile
+      isFirst: false, // We're not adding a comment so this is irrelevant
+      commentText: '', // This is about a thread not a single comment it doesn't make sense to log the text.
+      action: clickedId === expandedThread ? "collapse" : "expand"
+    };
+    Logger.logCommentEvent(eventPayload);
+   
     if (clickedId === expandedThread) {
       // We're closing the thread so clear out expanded thread.
       // The tile should stay selected though.
