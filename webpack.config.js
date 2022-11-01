@@ -17,6 +17,15 @@ const rollbarSnippet = fs.readFileSync(path.join(__dirname, rollbarSnippetPath),
 //   https://github.com/concord-consortium/s3-deploy-action/blob/main/README.md#top-branch-example
 const DEPLOY_PATH = process.env.DEPLOY_PATH;
 
+const baseHtmlPluginConfig = {
+  template: 'src/index.html',
+  favicon: 'src/public/favicon.ico',
+  templateParameters: {
+    rollbarSnippet,
+    ...packageJson.config
+  }
+};
+
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
 
@@ -221,24 +230,14 @@ module.exports = (env, argv) => {
         ignoreOrder: true
       }),
       new HtmlWebpackPlugin({
+        ...baseHtmlPluginConfig,
         filename: 'index.html',
-        template: 'src/index.html',
-        favicon: 'src/public/favicon.ico',
         publicPath: '.',
-        templateParameters: {
-          rollbarSnippet,
-          ...packageJson.config
-        }
       }),
       ...(DEPLOY_PATH ? [new HtmlWebpackPlugin({
+        ...baseHtmlPluginConfig,
         filename: 'index-top.html',
-        template: 'src/index.html',
-        favicon: 'src/public/favicon.ico',
         publicPath: DEPLOY_PATH,
-        templateParameters: {
-          rollbarSnippet,
-          ...packageJson.config
-        }
       })] : []),
       new CopyWebpackPlugin({
         patterns: [
