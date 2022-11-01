@@ -1060,13 +1060,14 @@
                     }
                   },
                   {
-                    "id": "dxLQcaXFlfi5Rsg5",
+                    "id": "i934HJ5Rc66DTKFU",
+                    "title": "Text 1",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>6. Publish (see image above) your work to the class</strong></p>",
-                        "<p>You can choose one member of your group to publish a summary of the group&#x27;s work, or you may each publish.  When you publish, your workspace will appear under the pink &quot;Class Work&quot; tab (right-hand side of CLUE).</p>",
+                        "<p>You can choose one member of your group to publish a summary of the group&#x27;s work, or you may each publish.  When you publish, your workspace will appear under the pink &quot;Class Work&quot; tab (left-hand side of CLUE).</p>",
                         "<p>Watch your teacher model this.</p>"
                       ]
                     }
