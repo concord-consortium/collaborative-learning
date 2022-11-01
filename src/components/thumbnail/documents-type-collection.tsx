@@ -85,7 +85,8 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
 export const DocumentCollectionByType = observer(({ topTab, tab, section, index, numSections=0, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
-  console.log("-----documents-type-collection.tsx------map---");
+  console.log("------------documents-type-collection.tsx ------------");
+  console.log("section:", section);
 
   const appConfigStore = useAppConfig();
   const classStore = useClassStore();
@@ -103,7 +104,7 @@ export const DocumentCollectionByType = observer(({ topTab, tab, section, index,
   const isBottomPanel = index > 0 && index === numSections - 1;
 
   function handleNewDocumentClick() {
-    console.log("CLICK! handleNewDocumentClick line 104");
+    // console.log("CLICK! handleNewDocumentClick line 104");
     onSelectNewDocument?.(section.documentTypes[0]);
   }
   const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName, {"top-panel": isTopPanel});
@@ -121,10 +122,10 @@ export const DocumentCollectionByType = observer(({ topTab, tab, section, index,
       <div className={listClass}>
         {showNewDocumentThumbnail &&
           <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
-        {console.log("sectionDocs:", sectionDocs)}
+        {/* {console.log("sectionDocs:", sectionDocs)} */}
 
         {sectionDocs.map((document, i) => {
-          console.log("line 125: document:", document, "\n document.key:", document.key, "\n index:", i);
+          // console.log("line 125: document:", document, "\n document.key:", document.key, "\n index:", i);
 
           const documentContext = getDocumentContext(document);
           return (

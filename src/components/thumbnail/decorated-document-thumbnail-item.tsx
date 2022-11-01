@@ -56,7 +56,7 @@ export const DecoratedDocumentThumbnailItem = observer(({
   section, sectionDocument, tab, scale, selectedDocument,
   onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
 }: IProps) => {
-    console.log("------<DecoratedDocumentThumbnail Item > ------------");
+    // console.log("------<DecoratedDocumentThumbnail Item > ------------");
     // console.log("sectionDocument:", sectionDocument);
     // console.log("caption = useDocumentCaption(sectionDocument):", useDocumentCaption(sectionDocument));
 
@@ -72,8 +72,8 @@ export const DecoratedDocumentThumbnailItem = observer(({
     useLastSupportViewTimestamp(section.type === "teacher-supports");
 
     function handleDocumentClick() {
-      console.log("DOCUMENT CLICKED!!!!");
-      console.log("onSelectDocument?", onSelectDocument, "\n with sectionDocument: ", sectionDocument);
+      // console.log("decorated-document-thumbnail-item > handleDocumentClick()");
+      // console.log("onSelectDocument?:\n", onSelectDocument, "\n with sectionDocument: ", sectionDocument);
       onSelectDocument?.(sectionDocument);
       (section.type === "teacher-supports") && user.setLastSupportViewTimestamp(Date.now());
     }

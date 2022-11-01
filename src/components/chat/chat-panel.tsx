@@ -14,7 +14,7 @@ import { CommentedDocuments } from "./commented-documents";
 import { CurriculumDocument } from "../../lib/firestore-schema";
 
 import "./chat-panel.scss";
-import { ICurriculumMetadata, IDocumentMetadata } from "functions/src/shared";
+// import { ICurriculumMetadata, IDocumentMetadata } from "functions/src/shared";
 
 interface IProps {
   user?: UserModelType;
@@ -24,17 +24,13 @@ interface IProps {
   onCloseChatPanel:(show:boolean) => void;
 }
 
-let storedDocument: IDocumentMetadata | ICurriculumMetadata; //bug when on refresh > My Work > Document View
-                                                             // because document is undefined.
+
 
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
   // console.log("--------- < ChatPanel > ----------");
-  const document = useDocumentOrCurriculumMetadata(focusDocument);
-  (function storeLastValidDocument(){ //this prevents crash when My Work > Document View (after focusDocument set)
-    if (document !== undefined){
-      storedDocument = document;
-    }
-  })();
+  // console.log("focusDocument:", focusDocument);
+  const document = useDocumentOrCurriculumMetadata(focusDocument || "sas/0/1/introduction"); //prevents crash
+  //need to change because it won't be universal for other curriculums
 
   // console.log("focusDocument", focusDocument);
   // console.log("document:", document);
@@ -110,7 +106,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
       {/* {console.log("------- < ChatPanel > render --------")} */}
       {/* {console.log("user:", user)} */}
-      {/* {console.log("storedDocument:", storedDocument)} */}
 
       {/* {console.log("documentObj:", document)} */}
       {/* {console.log("handleDocView", handleDocumentClick)} */}
@@ -125,11 +120,15 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         handleDocView={handleDocumentClick}
         chatPanelTitle={chatPanelTitle}
       />
+      {/* {console.log("chat-panel.tsx line 128: focusDocument:", focusDocument)} */}
+      {/* {console.log("chat-panel.tsx line 129: document:", document)} */}
+
       {
         isDocumentView ?
         <CommentedDocuments
           user={user}
-          documentObj={storedDocument as unknown as CurriculumDocument}
+          documentObj={document as unknown as CurriculumDocument}
+          // documentObj={storedDocument as unknown as CurriculumDocument}
           handleDocView={handleDocumentClick}
         />
         :

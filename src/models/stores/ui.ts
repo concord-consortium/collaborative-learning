@@ -3,7 +3,7 @@ import { debounce } from "lodash";
 import { AppConfigModelType } from "./app-config-model";
 import { kDividerHalf, kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
-import { DocumentModelType } from "../document/document";
+import { DocumentModel, DocumentModelType } from "../document/document";
 import { LogEventName, Logger } from "../../lib/logger";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { ENavTab } from "../view/nav-tabs";
@@ -52,7 +52,9 @@ export const UIModel = types
     focusDocUpdates: 0,
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
-    teacherPanelKey: types.maybe(types.string)
+    teacherPanelKey: types.maybe(types.string),
+    // referenceDocument: types.maybe(DocumentModel)
+    selectedCommentedDocument:  types.maybe(DocumentModel)
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
@@ -66,6 +68,9 @@ export const UIModel = types
     },
     get workspaceShown () {
       return self.dividerPosition < kDividerMax;
+    },
+    get fetchSelectedCommentedDocument(){
+      return self.selectedCommentedDocument;
     }
   }))
   .actions((self) => {
@@ -179,6 +184,7 @@ export const UIModel = types
         self.focusDocument = documentKey;
       },
       updateFocusDocument() {
+        console.log("in updateFocusDocument");
         // increment counter to trigger observers to update
         ++self.focusDocUpdates;
       },
@@ -198,6 +204,10 @@ export const UIModel = types
       },
       setTeacherPanelKey(key: string) {
         self.teacherPanelKey = key;
+      },
+      setSelectedCommentedDocument(document?: DocumentModelType){
+        console.log("setSelectedCommentedDocument \n with document:", document);
+        self.selectedCommentedDocument= document;
       }
     };
   });

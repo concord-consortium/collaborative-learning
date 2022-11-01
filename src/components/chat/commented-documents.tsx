@@ -24,13 +24,9 @@ interface PromisedDocumentDocument extends DocumentDocument {
   title?: string
 }
 
-//bugs:
-//- #1 upon load go to  MyWork or ClassWork tab > CommentsView> DocumentsView ---- crashes
-// - #2 upon load (not on MyWork or ClassWork tab) > CommentsView > DocumentsView > then go to MyWork or ClassWork tab
-    //-- then click on a Document -- crashes
 
 export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleDocView}) => {
-  console.log("----- < CommentedDocuments > -----------");
+  // console.log("----- < CommentedDocuments > -----------");
   const [docsCommentedOn, setDocsCommentedOn] = useState<PromisedCurriculumDocument[]>();
   const [db] = useFirestore();
   const cDocsRef = db.collection("curriculum");
@@ -207,7 +203,7 @@ interface JProps {
 export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc}) => {
   const ui = useUIStore();
   const store = useStores();
-  console.log("-------- <MyWorkDocuments >----------");
+  // console.log("-------- <MyWorkDocuments >----------");
   let navTab: string;
   const myWorkTypes = ["problem", "planning", "learningLog", "personal"];
   const classWorkTypes = ["publication", "learningLogPublication", "personalPublication", "supportPublication"];
@@ -221,7 +217,7 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc}) => {
   }
 
 
-  console.log("-----<MyWorkDocument> -----", doc, index);
+  // console.log("-----<MyWorkDocument> -----", doc, index);
   let title;
   title =  useDocumentCaption(sectionDoc as DocumentModelType) + ` | ${doc.key}  | ----- ${doc.type}`;
 
@@ -234,10 +230,12 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc}) => {
     <div
       className={"document-box"}
       onClick={()=>{
-        console.log("clicked a mywork/classwork doc");
+        console.log("\n clicked a mywork/classwork doc");
         ui.setActiveNavTab(navTab); //open correct NavTab
         ui.setSelectedTile();
-        console.log("doc.path:", doc.path);
+        console.log("sectionDoc:", sectionDoc);
+        ui.setSelectedCommentedDocument(sectionDoc);
+        // console.log("doc.path:", doc.path);
         ui.setFocusDocument(doc.path);
       }}
     >

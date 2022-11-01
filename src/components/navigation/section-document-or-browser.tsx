@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { observer } from "mobx-react";
 import { useQueryClient } from 'react-query';
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { DocumentModelType } from "../../models/document/document";
@@ -39,16 +40,36 @@ export interface ISubTabSpec {
 
 export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, selectedDocument,
   isChatOpen, onSelectNewDocument, onSelectDocument, onTabClick }) => {
-  // console.log("------ < SectionDocumentOrBrowser > ---------");
-  console.log("section-document-or-browser.tsx > props\n onSelectNewDocument: ", onSelectNewDocument,
-  "\n onSelectDocument:", onSelectDocument);
-  const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>();
+  console.log("\n--------- < SectionDocumentOrBrowser > ---------");
+  // console.log("selectedDocument:", selectedDocument);
+  // console.log("onSelectNewDocument:", onSelectNewDocument);
+  // console.log("onSelectDocument:", onSelectDocument);
+  // console.log("tabSpec:", tabSpec.label.toUpperCase());
+  const ui = useUIStore();
+  console.log("line 48 fetch ui.selectedCommentedDocument:", ui.fetchSelectedCommentedDocument);
+
+  const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>(); //original
+  // const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>(); //added
+  console.log("line 52 ui.selectedCommentedDocument:", ui.selectedCommentedDocument);
+  // if (ui.selectedCommentedDocument !== undefined){ //this needs to trigger when ui.selectedComment triggers
+  //   console.log("inside if");
+  //   setReferenceDocument(ui.selectedCommentedDocument);
+  // }
+
+
+
+
+  // useEffect(()=>{
+  //   console.log("trigger useEffect ui.selectedCommentedDocument:\n", ui.selectedCommentedDocument);
+  // },[ui.selectedCommentedDocument]);
+
+
+
   const [tabIndex, setTabIndex] = useState(0);
   const appConfigStore = useAppConfig();
   const problemStore = useProblemStore();
   const context = useUserContext();
   const queryClient = useQueryClient();
-  const ui = useUIStore();
   const user = useUserStore();
   const classStore = useClassStore();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
@@ -70,11 +91,11 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
                         : kHeaderHeight + kNavTabHeight + (2 * (kWorkspaceContentMargin + kTabSectionBorderWidth));
   const documentsPanelHeight = vh - headerOffset;
   const documentsPanelStyle = { height: documentsPanelHeight };
-  const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : "";
+  const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : ""; //original
+  // const sectionClass = ui.referenceDocument?.type === "learningLog" ? "learning-log" : "";
   const handleTabClick = useCallback((title: string, type?: string) => {
-    console.log("section-document-or-browser.tsx > handleTabClick with\n title:", title, "\n type:", type);
-
-    setReferenceDocument(undefined);
+    setReferenceDocument(undefined); //original
+    // ui.setReferenceDocument(undefined);
     ui.updateFocusDocument();
     ui.setSelectedTile();
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
@@ -108,12 +129,18 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   };
 
   const handleSelectDocument = (document: DocumentModelType) => {
-    console.log("section-document-or-browser.tsx > handleSelectDocument with document arg:", document);
+    console.log("\n ------ section-document-or-browser.tsx > ---------\n handleSelectDocument with document: \n",
+    document);
+    // console.log("what is tabSpec.label?: ", tabSpec.label);
     if (!document.hasContent && document.isRemote) {
       loadDocumentContent(document);
     }
-    setReferenceDocument(document);
+    setReferenceDocument(document); //original
     ui.updateFocusDocument();
+    setTimeout(()=>{
+      // console.log("HERE: referenceDocument:", referenceDocument);
+    },1000);
+
     const logEvent = document.isRemote
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
       : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
@@ -127,6 +154,11 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   function handleEditClick(document: DocumentModelType) {
     ui.problemWorkspace.setPrimaryDocument(document);
   }
+
+  // if (referenceDocument){
+  //   console.log("line 143!!!!");
+  //   handleSelectDocument(referenceDocument);
+  // }
 
   // TODO: this edit button is confusing when the history is being viewed. It
   // opens the original document for editing, not some old version of the
@@ -168,14 +200,33 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
       });
   };
 
-  const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
+  // interface JProps {
+  //   selectedCommentedDocument?: DocumentModelType,
+  //   subTab: ISubTabSpec,
+  // }
+
+  // const renderDocumentBrowserView = observer(({selectedCommentedDocument = ui.selectedCommentedDocument,
+  //   subTab: ISubTabSpec}: JProps) => { //added
+  const renderDocumentBrowserView = (subTab: ISubTabSpec) => {//original
+
+    // console.log("renderDocumentBrowserView, with subTab:", subTab);
     const classHash = classStore.classHash;
     return (
       <div>
-        { subTab.sections.map((section: any, index: any) => {
+        {
+          subTab.sections.map((section: any, index: any) => {
+            console.log(`-----------${section.title} index: ${index}-----------`);
+            console.log("renderDocumentBrowserView > subTab:", subTab, tabSpec.label);
+            console.log("subTab.sections.map:", subTab.sections);
             const _handleDocumentStarClick = section.showStarsForUser(user)
               ? handleDocumentStarClick
               : undefined;
+            console.log("**selectedDocument:", selectedDocument);
+            console.log("**referenceDocument:", referenceDocument);
+            // console.log("ui.selectedCommentedDocument:", ui.selectedCommentedDocument); //return to this
+            // if (index === 0){
+              // setReferenceDocument(ui.selectedCommentedDocument);
+            // }
             return (
               <DocumentCollectionByType
                 key={`${section.type}_${index}`}
@@ -185,6 +236,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
                 index={index}
                 numSections={subTab.sections.length}
                 scale={kNavItemScale}
+                // selectedDocument={selectedDocument || referenceDocument?.key ||
+                //   ui.selectedCommentedDocument?.key}//added
                 selectedDocument={selectedDocument || referenceDocument?.key}
                 onSelectNewDocument={onSelectNewDocument}
                 onSelectDocument={onSelectDocument || handleSelectDocument}
@@ -195,7 +248,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
             );
           })
         }
-        { user.isNetworkedTeacher &&
+        {
+          user.isNetworkedTeacher &&
           <NetworkDocumentsSection
             currentClassHash={classHash}
             currentTeacherName={user.name}
@@ -204,26 +258,34 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
             problemTitle={problemStore.title}
             scale={kNavItemScale}
             onSelectDocument={handleSelectDocument}
-          />}
+          />
+        }
       </div>
     );
   };
 
+  // });//added
+
   const showPlayback = user.type ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
-  console.log("line 213...referenceDocument is:", referenceDocument);
-  const documentView = referenceDocument && !referenceDocument?.getProperty("isDeleted") &&
+  const documentView = referenceDocument && !referenceDocument?.getProperty("isDeleted") && //original
+  // const documentView = ui.referenceDocument && !ui.referenceDocument?.getProperty("isDeleted") &&
     <div>
       <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
         <div className={`document-title`}>
           {getDocumentDisplayTitle(referenceDocument, appConfigStore, problemStore)}
+          {/* {getDocumentDisplayTitle(ui.referenceDocument, appConfigStore, problemStore)} */}
+
         </div>
         {(!referenceDocument.isRemote)
-            && editButton(tabSpec.tab, sectionClass, referenceDocument)}
+        // {(!ui.referenceDocument.isRemote)
+            && editButton(tabSpec.tab, sectionClass,referenceDocument)}
+            {/* // && editButton(tabSpec.tab, sectionClass,ui.referenceDocument)} */}
       </div>
       <EditableDocumentContent
         mode={"1-up"}
         isPrimary={false}
-        document={referenceDocument}
+        document={referenceDocument} //original
+        // document={ui.referenceDocument}
         readOnly={true}
         showPlayback={showPlayback}
       />
