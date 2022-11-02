@@ -56,9 +56,11 @@ export const DecoratedDocumentThumbnailItem = observer(({
   section, sectionDocument, tab, scale, selectedDocument,
   onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
 }: IProps) => {
-    // console.log("------<DecoratedDocumentThumbnail Item > ------------");
-    // console.log("sectionDocument:", sectionDocument);
-    // console.log("caption = useDocumentCaption(sectionDocument):", useDocumentCaption(sectionDocument));
+    console.log("------<DecoratedDocumentThumbnail Item > ------------");
+    console.log("tab:", tab);
+    console.log("section:", section);
+    console.log("sectionDocument:", sectionDocument);
+    console.log("caption = useDocumentCaption(sectionDocument):", useDocumentCaption(sectionDocument));
 
     const user = useUserStore();
     const dbStore = useDBStore();

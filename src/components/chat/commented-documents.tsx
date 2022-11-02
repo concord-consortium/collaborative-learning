@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useDocumentFromStore, useStores, useUIStore} from "../../hooks/use-stores";
+import { useStores, useUIStore} from "../../hooks/use-stores";
 import { useFirestore } from "../../hooks/firestore-hooks";
 import { CurriculumDocument, DocumentDocument } from "../../lib/firestore-schema";
 import { getSectionTitle } from "../../models/curriculum/section";
@@ -113,13 +113,8 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
 
       Promise.all(promiseArr).then(()=>{
         setMyWorkDocuments(commentedDocs);
-      }).then(()=>{
-        // const t1 = performance.now();
-        // console.log("useEffect 2: commentedDocs", commentedDocs);
-        // console.log("useEffect 2 t1:", t1);
-        // console.log(`Call to useEffect2 took ${t1 - t0} milliseconds.`);
       });
-      // console.log("-------end useEffect 2---------");
+
     });
     return () => unsubscribeFromDocs?.();
   },[]);
@@ -229,7 +224,7 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handl
         ui.setActiveNavTab(navTab); //open correct NavTab
         ui.setSelectedTile();
         console.log("sectionDoc:", sectionDoc);
-        ui.setSelectedCommentedDocument(sectionDoc.key); //sectionDoc is type DocumentModelType
+        ui.setSelectedCommentedDocument(sectionDoc.key);
         ui.setFocusDocument(doc.key);
         if (handleDocView !== undefined){
           handleDocView();

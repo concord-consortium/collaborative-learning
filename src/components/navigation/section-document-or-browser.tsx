@@ -92,10 +92,14 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
   },[ui]);
 
   useEffect(()=>{
+    console.log("section-document-or-browser.tsx /n >trigger UseEffect");
     const selectedSection = tabSpec.tab === "supports" ? ENavTabSectionType.kTeacherSupports : undefined;
+    console.log("section-document-or-browser.tsx /n >selectedSection:", selectedSection);
     if (selectedSection) {
       const selectedIndex = tabSpec.sections?.findIndex(spec => spec.type === selectedSection);
+      console.log("section-document-or-browser.tsx /n selectedIndex:", selectedIndex);
       if (selectedIndex != null) {
+        console.log("in line 102");
         setTabIndex(selectedIndex);
       }
     }
@@ -241,24 +245,19 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
   };
 
   const showPlayback = user.type ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
-  const documentView = referenceDocument && !referenceDocument?.getProperty("isDeleted") && //original
+  const documentView = referenceDocument && !referenceDocument?.getProperty("isDeleted") &&
     <div>
       <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
         <div className={`document-title`}>
           {getDocumentDisplayTitle(referenceDocument, appConfigStore, problemStore)}
-          {/* {getDocumentDisplayTitle(ui.referenceDocument, appConfigStore, problemStore)} */}
-
         </div>
         {(!referenceDocument.isRemote)
-        // {(!ui.referenceDocument.isRemote)
             && editButton(tabSpec.tab, sectionClass,referenceDocument)}
-            {/* // && editButton(tabSpec.tab, sectionClass,ui.referenceDocument)} */}
       </div>
       <EditableDocumentContent
         mode={"1-up"}
         isPrimary={false}
         document={referenceDocument} //original
-        // document={ui.referenceDocument}
         readOnly={true}
         showPlayback={showPlayback}
       />
@@ -269,7 +268,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
       <Tabs
         className={`document-tabs ${navTabSpec?.tab} ${isChatOpen ? "chat-open" : ""}`}
         forceRenderTabPanel={true}
-        onSelect={handleTabSelect}
+        onSelect={handleTabSelect} //handleTabSelect
         selectedIndex={tabIndex}
         selectedTabClassName="selected"
       >

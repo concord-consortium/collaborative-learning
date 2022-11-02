@@ -15,7 +15,6 @@ import { CurriculumDocument } from "../../lib/firestore-schema";
 
 import "./chat-panel.scss";
 import { ICurriculumMetadata, IDocumentMetadata, isCurriculumMetadata } from "../../../functions/src/shared";
-// import { ICurriculumMetadata, IDocumentMetadata } from "functions/src/shared";
 
 interface IProps {
   user?: UserModelType;
