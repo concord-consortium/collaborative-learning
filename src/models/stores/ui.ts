@@ -3,7 +3,7 @@ import { debounce } from "lodash";
 import { AppConfigModelType } from "./app-config-model";
 import { kDividerHalf, kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
-import { DocumentModel, DocumentModelType } from "../document/document";
+import { DocumentModelType } from "../document/document";
 import { LogEventName, Logger } from "../../lib/logger";
 import { ToolTileModelType } from "../tools/tool-tile";
 import { ENavTab } from "../view/nav-tabs";
@@ -33,8 +33,8 @@ type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 
 export const UIModel = types
   .model("UI", {
-    // dividerPosition: kDividerHalf,
-    dividerPosition: kDividerMax,
+    dividerPosition: kDividerHalf,
+    // dividerPosition: kDividerMax,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kProblems,
     activeGroupId: "",
@@ -53,8 +53,7 @@ export const UIModel = types
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string),
-    // referenceDocument: types.maybe(DocumentModel)
-    selectedCommentedDocument:  types.maybe(DocumentModel)
+    selectedCommentedDocument: types.maybe(types.string),//key of selected commented MyWork/ClassWork doc
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
@@ -69,9 +68,6 @@ export const UIModel = types
     get workspaceShown () {
       return self.dividerPosition < kDividerMax;
     },
-    get fetchSelectedCommentedDocument(){
-      return self.selectedCommentedDocument;
-    }
   }))
   .actions((self) => {
     const alert = (textOrOpts: string | UIDialogModelSnapshotWithoutType, title?: string) => {
@@ -184,7 +180,7 @@ export const UIModel = types
         self.focusDocument = documentKey;
       },
       updateFocusDocument() {
-        console.log("in updateFocusDocument");
+        console.log("ui.ts > updateFocusDocument");
         // increment counter to trigger observers to update
         ++self.focusDocUpdates;
       },
@@ -205,9 +201,9 @@ export const UIModel = types
       setTeacherPanelKey(key: string) {
         self.teacherPanelKey = key;
       },
-      setSelectedCommentedDocument(document?: DocumentModelType){
-        console.log("setSelectedCommentedDocument \n with document:", document);
-        self.selectedCommentedDocument= document;
+      setSelectedCommentedDocument(key: string){
+        console.log("set selectedCommentedDocument to new document key", key);
+        self.selectedCommentedDocument = key;
       }
     };
   });

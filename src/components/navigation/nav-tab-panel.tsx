@@ -132,7 +132,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
   };
 
   private renderDocuments = (tabSpec: NavTabSpec) => {
-    // console.log("nav-tab-panel.tsx > renderDocuments with tabSpec", tabSpec);
     const { ui: { showChatPanel } } = this.stores;
     const reset = tabSpec.tab === this.topTabReset;
     return (

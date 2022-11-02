@@ -27,30 +27,32 @@ interface PromisedDocumentDocument extends DocumentDocument {
 
 export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleDocView}) => {
   // console.log("----- < CommentedDocuments > -----------");
-  const [docsCommentedOn, setDocsCommentedOn] = useState<PromisedCurriculumDocument[]>();
+  // console.log("\t documentObj:", documentObj);
+  // console.log("\t user:", user);
+  // console.log("\t handleDocView:", handleDocView);
   const [db] = useFirestore();
+  const { unit, problem } = documentObj;
+  const ui = useUIStore();
+  const store = useStores();
+
+  //Problem + "Teacher - Guide"
+  const [docsCommentedOn, setDocsCommentedOn] = useState<PromisedCurriculumDocument[]>();
   const cDocsRef = db.collection("curriculum");
-  const { unit, problem } = documentObj ;
   const cDocsInScopeRef = cDocsRef
     .where("unit", "==", unit)
     .where("problem", "==", problem)
     .where("network","==", user?.network);
 
-
-  //MyWork/ClassWork
+  //"MyWork"/"ClassWork"
   const [myWorkDocuments, setMyWorkDocuments] = useState<PromisedDocumentDocument[]>();
   const mDocsRef = db.collection("documents");
   const mDocsInScopeRef = mDocsRef
     .where("network", "==", user?.network);  //option 1
     // .where("network", "==", user?.network) //option 2
     // .where("context_id", "==", "democlass1");//
-  const ui = useUIStore();
-  const store = useStores();
-
 
   //------Curriculum Documents--------
   useEffect(() => {
-    // const t0 = performance.now();
     const unsubscribeFromDocs = cDocsInScopeRef.onSnapshot(querySnapshot => {
       const docs = querySnapshot.docs.map(doc => {
         return (
@@ -77,19 +79,13 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
       }
       Promise.all(promiseArr).then((results)=>{
         setDocsCommentedOn(commentedDocs);
-      }).then(()=>{
-        // const t1 = performance.now();
-        // console.log(`Call to useEffect1 took ${t1 - t0} milliseconds.`);
       });
-      // console.log("-------end useEffect 1----------");
     });
     return () => unsubscribeFromDocs?.();
   },[]);
 
   // ------MyWork/ClassWork--------
   useEffect(() => {
-    //-------promise.all -----------
-    // const t0 = performance.now();
     const unsubscribeFromDocs = mDocsInScopeRef.onSnapshot(querySnapshot=>{
       const docs = querySnapshot.docs.map(doc =>{ //convert each element of docs to an object
         return (
@@ -151,6 +147,7 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
               onClick={() => {
                 ui.setActiveNavTab(navTab); //open correct NavTab
                 ui.setSelectedTile();
+                console.log("Problem - teacher-guide clicked\n docPath set to:", doc.path);
                 ui.setFocusDocument(doc.path);
                 if (handleDocView !== undefined){
                   handleDocView();
@@ -179,6 +176,7 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
                 doc={doc}
                 index={index}
                 sectionDoc={sectionDoc}
+                handleDocView={handleDocView}
               />
             );
           }
@@ -186,7 +184,6 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
             console.log("NO SECTION DOC");
             console.log("src > hooks > use-stores.ts try useDocumentFromStore", fullSectionDoc);
           }
-
         })
 
       }
@@ -198,12 +195,13 @@ interface JProps {
   doc: any,
   index: number,
   sectionDoc: DocumentModelType,
+  handleDocView: (() => void) | undefined,
+
 }
 
-export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc}) => {
-  const ui = useUIStore();
-  const store = useStores();
+export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handleDocView}) => {
   // console.log("-------- <MyWorkDocuments >----------");
+  const ui = useUIStore();
   let navTab: string;
   const myWorkTypes = ["problem", "planning", "learningLog", "personal"];
   const classWorkTypes = ["publication", "learningLogPublication", "personalPublication", "supportPublication"];
@@ -215,9 +213,6 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc}) => {
       navTab = ENavTab.kClassWork;
     }
   }
-
-
-  // console.log("-----<MyWorkDocument> -----", doc, index);
   let title;
   title =  useDocumentCaption(sectionDoc as DocumentModelType) + ` | ${doc.key}  | ----- ${doc.type}`;
 
@@ -225,18 +220,20 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc}) => {
     title = `***  | ${doc.title}  | ${doc.key} |  ------  ${doc.type}`;
   }
 
-
   return (
     <div
       className={"document-box"}
       onClick={()=>{
+        console.log("***********");
         console.log("\n clicked a mywork/classwork doc");
         ui.setActiveNavTab(navTab); //open correct NavTab
         ui.setSelectedTile();
         console.log("sectionDoc:", sectionDoc);
-        ui.setSelectedCommentedDocument(sectionDoc);
-        // console.log("doc.path:", doc.path);
-        ui.setFocusDocument(doc.path);
+        ui.setSelectedCommentedDocument(sectionDoc.key); //sectionDoc is type DocumentModelType
+        ui.setFocusDocument(doc.key);
+        if (handleDocView !== undefined){
+          handleDocView();
+        }
       }}
     >
       <div className={"title"}>
@@ -249,6 +246,3 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc}) => {
   );
 
 };
-
-  //   // types I have not accounted for :
-  //   //publication, learningLogPublication, personalPublication, supportPublication

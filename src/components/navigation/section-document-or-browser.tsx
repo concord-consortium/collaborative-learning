@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { observer } from "mobx-react";
+
 import { useQueryClient } from 'react-query';
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { DocumentModelType } from "../../models/document/document";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { ENavTabSectionType, NavTabSectionSpec, NavTabSpec } from "../../models/view/nav-tabs";
 import { EditableDocumentContent } from "../document/editable-document-content";
-import { useAppConfig, useClassStore, useProblemStore, useUIStore, useUserStore } from "../../hooks/use-stores";
+import { useAppConfig, useClassStore, useProblemStore, useStores,
+  useUIStore, useUserStore } from "../../hooks/use-stores";
 import { Logger, LogEventName } from "../../lib/logger";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentCollectionByType } from "../thumbnail/documents-type-collection";
@@ -15,6 +16,7 @@ import { NetworkDocumentsSection } from "./network-documents-section";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 
 import "./section-document-or-browser.sass";
+import { observer } from "mobx-react";
 
 const kNavItemScale = 0.11;
 const kHeaderHeight = 55;
@@ -38,34 +40,20 @@ export interface ISubTabSpec {
   sections: NavTabSectionSpec[];
 }
 
-export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, selectedDocument,
+export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, reset, selectedDocument,
   isChatOpen, onSelectNewDocument, onSelectDocument, onTabClick }) => {
   console.log("\n--------- < SectionDocumentOrBrowser > ---------");
-  // console.log("selectedDocument:", selectedDocument);
+  console.log("tabSpec:", tabSpec);
+  console.log("tabSpec.label:", tabSpec.label.toUpperCase());
+  console.log("selectedDocument:", selectedDocument);
   // console.log("onSelectNewDocument:", onSelectNewDocument);
   // console.log("onSelectDocument:", onSelectDocument);
-  // console.log("tabSpec:", tabSpec.label.toUpperCase());
   const ui = useUIStore();
-  console.log("line 48 fetch ui.selectedCommentedDocument:", ui.fetchSelectedCommentedDocument);
+  const store = useStores();
 
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>(); //original
-  // const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>(); //added
-  console.log("line 52 ui.selectedCommentedDocument:", ui.selectedCommentedDocument);
-  // if (ui.selectedCommentedDocument !== undefined){ //this needs to trigger when ui.selectedComment triggers
-  //   console.log("inside if");
-  //   setReferenceDocument(ui.selectedCommentedDocument);
-  // }
-
-
-
-
-  // useEffect(()=>{
-  //   console.log("trigger useEffect ui.selectedCommentedDocument:\n", ui.selectedCommentedDocument);
-  // },[ui.selectedCommentedDocument]);
-
-
-
   const [tabIndex, setTabIndex] = useState(0);
+  console.log(" line 55 tabIndex:", tabIndex);
   const appConfigStore = useAppConfig();
   const problemStore = useProblemStore();
   const context = useUserContext();
@@ -84,6 +72,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
       subTabs.push({ label: section.title, sections: [section] });
     }
   });
+  console.log("line 75 subTabs:", subTabs);
   const hasSubTabs = subTabs.length > 1;
   const vh = window.innerHeight;
   const headerOffset = hasSubTabs
@@ -92,10 +81,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   const documentsPanelHeight = vh - headerOffset;
   const documentsPanelStyle = { height: documentsPanelHeight };
   const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : ""; //original
-  // const sectionClass = ui.referenceDocument?.type === "learningLog" ? "learning-log" : "";
   const handleTabClick = useCallback((title: string, type?: string) => {
     setReferenceDocument(undefined); //original
-    // ui.setReferenceDocument(undefined);
     ui.updateFocusDocument();
     ui.setSelectedTile();
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
@@ -123,24 +110,27 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
     }
   }, [handleTabClick, reset, tabSpec.label]);
 
+  useEffect(()=>{
+    console.log("useEffect triggered, setReferenceDocument to:", ui.selectedCommentedDocument);
+    if (ui.selectedCommentedDocument){
+      const newDoc = store.documents.getDocument(ui.selectedCommentedDocument);
+      setReferenceDocument(newDoc);
+    }
+  },[store.documents, ui.selectedCommentedDocument]);
+
   const handleTabSelect = (tabidx: number) => {
     setTabIndex(tabidx);
     ui.updateFocusDocument();
   };
 
   const handleSelectDocument = (document: DocumentModelType) => {
-    console.log("\n ------ section-document-or-browser.tsx > ---------\n handleSelectDocument with document: \n",
-    document);
-    // console.log("what is tabSpec.label?: ", tabSpec.label);
+    // console.log("\n section-document-or-browser.tsx > \n handleSelectDocument with document: \n",
+    // document);
     if (!document.hasContent && document.isRemote) {
       loadDocumentContent(document);
     }
-    setReferenceDocument(document); //original
+    setReferenceDocument(document);
     ui.updateFocusDocument();
-    setTimeout(()=>{
-      // console.log("HERE: referenceDocument:", referenceDocument);
-    },1000);
-
     const logEvent = document.isRemote
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
       : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
@@ -154,11 +144,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   function handleEditClick(document: DocumentModelType) {
     ui.problemWorkspace.setPrimaryDocument(document);
   }
-
-  // if (referenceDocument){
-  //   console.log("line 143!!!!");
-  //   handleSelectDocument(referenceDocument);
-  // }
 
   // TODO: this edit button is confusing when the history is being viewed. It
   // opens the original document for editing, not some old version of the
@@ -199,34 +184,27 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
         }
       });
   };
-
-  // interface JProps {
-  //   selectedCommentedDocument?: DocumentModelType,
-  //   subTab: ISubTabSpec,
-  // }
-
-  // const renderDocumentBrowserView = observer(({selectedCommentedDocument = ui.selectedCommentedDocument,
-  //   subTab: ISubTabSpec}: JProps) => { //added
   const renderDocumentBrowserView = (subTab: ISubTabSpec) => {//original
-
-    // console.log("renderDocumentBrowserView, with subTab:", subTab);
+    console.log("-----renderDocumentBrowserView, with subTab:", subTab);
     const classHash = classStore.classHash;
     return (
       <div>
+        {console.log("subTab:", subTab)}
+        {console.log("subTab.sections", subTab.sections)}
+        {console.log("subTab.sections[0].dataTestHeader:", subTab.sections[0].dataTestHeader)}
         {
           subTab.sections.map((section: any, index: any) => {
             console.log(`-----------${section.title} index: ${index}-----------`);
-            console.log("renderDocumentBrowserView > subTab:", subTab, tabSpec.label);
-            console.log("subTab.sections.map:", subTab.sections);
+            // console.log("section", section);
             const _handleDocumentStarClick = section.showStarsForUser(user)
               ? handleDocumentStarClick
               : undefined;
-            console.log("**selectedDocument:", selectedDocument);
-            console.log("**referenceDocument:", referenceDocument);
-            // console.log("ui.selectedCommentedDocument:", ui.selectedCommentedDocument); //return to this
-            // if (index === 0){
-              // setReferenceDocument(ui.selectedCommentedDocument);
-            // }
+            // console.log("**selectedDocument:", selectedDocument);
+            // console.log("**referenceDocument:", referenceDocument);
+            // console.log("returning <DocumentCollectionByType> with \n onSelectDocument: ", onSelectDocument,
+            // "\n handleSelectDocument:", handleSelectDocument, "\n\n");
+
+            //in order
             return (
               <DocumentCollectionByType
                 key={`${section.type}_${index}`}
@@ -236,8 +214,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
                 index={index}
                 numSections={subTab.sections.length}
                 scale={kNavItemScale}
-                // selectedDocument={selectedDocument || referenceDocument?.key ||
-                //   ui.selectedCommentedDocument?.key}//added
                 selectedDocument={selectedDocument || referenceDocument?.key}
                 onSelectNewDocument={onSelectNewDocument}
                 onSelectDocument={onSelectDocument || handleSelectDocument}
@@ -264,11 +240,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
     );
   };
 
-  // });//added
-
   const showPlayback = user.type ? appConfigStore.enableHistoryRoles.includes(user.type) : false;
   const documentView = referenceDocument && !referenceDocument?.getProperty("isDeleted") && //original
-  // const documentView = ui.referenceDocument && !ui.referenceDocument?.getProperty("isDeleted") &&
     <div>
       <div className={`document-header ${tabSpec.tab} ${sectionClass}`} onClick={() => ui.setSelectedTile()}>
         <div className={`document-title`}>
@@ -317,6 +290,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
         </div>
         <div className="documents-panel" style={documentsPanelStyle}>
           {subTabs.map((subTab, index) => {
+            console.log("line 291: index: ", index);
             const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
             return (
               <TabPanel key={`subtab-${subTab.label}`} data-test={`subtab-${sectionTitle}`}>
@@ -331,4 +305,4 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
       </Tabs>
     </div>
   );
-};
+});

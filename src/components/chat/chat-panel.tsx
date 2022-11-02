@@ -9,11 +9,12 @@ import {
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import {useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
-import { useUserContext } from "../../hooks/use-user-context";
+// import { useUserContext } from "../../hooks/use-user-context";
 import { CommentedDocuments } from "./commented-documents";
 import { CurriculumDocument } from "../../lib/firestore-schema";
 
 import "./chat-panel.scss";
+import { ICurriculumMetadata, IDocumentMetadata, isCurriculumMetadata } from "../../../functions/src/shared";
 // import { ICurriculumMetadata, IDocumentMetadata } from "functions/src/shared";
 
 interface IProps {
@@ -24,13 +25,15 @@ interface IProps {
   onCloseChatPanel:(show:boolean) => void;
 }
 
-
-
+let storedDocument: IDocumentMetadata | ICurriculumMetadata;
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
-  // console.log("--------- < ChatPanel > ----------");
-  // console.log("focusDocument:", focusDocument);
+  console.log("--------- < ChatPanel > ----------");
+  console.log("focusDocument:", focusDocument);
+  console.log("***useDoc or Curr (focusDocument):", useDocumentOrCurriculumMetadata(focusDocument));
   const document = useDocumentOrCurriculumMetadata(focusDocument || "sas/0/1/introduction"); //prevents crash
-  //need to change because it won't be universal for other curriculums
+  if ( isCurriculumMetadata(document)){ //we always pass storedDocument into <CommentedDocuments>
+    storedDocument = document;
+  }
 
   // console.log("focusDocument", focusDocument);
   // console.log("document:", document);
@@ -100,7 +103,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
 
 
   const newCommentCount = unreadComments?.length || 0;
-  // console.log("\n");
 
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
@@ -111,8 +113,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       {/* {console.log("handleDocView", handleDocumentClick)} */}
       {/* {console.log("focusDocument:", focusDocument)} */}
       {/* {console.log("\n")} */}
-
-
       <ChatPanelHeader
         activeNavTab={activeNavTab}
         newCommentCount={newCommentCount}
@@ -127,8 +127,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         isDocumentView ?
         <CommentedDocuments
           user={user}
-          documentObj={document as unknown as CurriculumDocument}
-          // documentObj={storedDocument as unknown as CurriculumDocument}
+          documentObj={storedDocument as unknown as CurriculumDocument}
           handleDocView={handleDocumentClick}
         />
         :

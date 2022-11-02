@@ -85,8 +85,10 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
 export const DocumentCollectionByType = observer(({ topTab, tab, section, index, numSections=0, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
-  console.log("------------documents-type-collection.tsx ------------");
+  console.log("------------ < DocumentCollectionByType > ------------");
+  console.log(" topTab: ", topTab);
   console.log("section:", section);
+  console.log("numSections:", numSections);
 
   const appConfigStore = useAppConfig();
   const classStore = useClassStore();
@@ -104,7 +106,7 @@ export const DocumentCollectionByType = observer(({ topTab, tab, section, index,
   const isBottomPanel = index > 0 && index === numSections - 1;
 
   function handleNewDocumentClick() {
-    // console.log("CLICK! handleNewDocumentClick line 104");
+    console.log("CLICK! handleNewDocumentClick line 104");
     onSelectNewDocument?.(section.documentTypes[0]);
   }
   const tabPanelDocumentSectionClass = classNames("tab-panel-documents-section", tabName, {"top-panel": isTopPanel});
