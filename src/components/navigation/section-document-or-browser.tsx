@@ -42,10 +42,10 @@ export interface ISubTabSpec {
 
 export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, reset, selectedDocument,
   isChatOpen, onSelectNewDocument, onSelectDocument, onTabClick }) => {
-  console.log("\n--------- < SectionDocumentOrBrowser > ---------");
-  console.log("tabSpec:", tabSpec);
-  console.log("tabSpec.label:", tabSpec.label.toUpperCase());
-  console.log("selectedDocument:", selectedDocument);
+  // console.log("\n\n\n--------- < SectionDocumentOrBrowser > ---------");
+  // console.log("tabSpec:", tabSpec);
+  // console.log("tabSpec.label:", tabSpec.label.toUpperCase());
+  // console.log("selectedDocument:", selectedDocument);
   // console.log("onSelectNewDocument:", onSelectNewDocument);
   // console.log("onSelectDocument:", onSelectDocument);
   const ui = useUIStore();
@@ -53,7 +53,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
 
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>(); //original
   const [tabIndex, setTabIndex] = useState(0);
-  console.log(" line 55 tabIndex:", tabIndex);
+  // console.log(" line 55 tabIndex:", tabIndex);
   const appConfigStore = useAppConfig();
   const problemStore = useProblemStore();
   const context = useUserContext();
@@ -64,6 +64,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
   const subTabs: ISubTabSpec[] = [];
   // combine sections with matching titles into a single tab with sub-sections
   tabSpec.sections?.forEach(section => {
+    // console.log("line 67 section [within sections within tabSpec]:", section);
     const found = subTabs.findIndex(tab => tab.label === section.title);
     if (found >= 0) {
       subTabs[found].sections.push(section);
@@ -72,7 +73,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
       subTabs.push({ label: section.title, sections: [section] });
     }
   });
-  console.log("line 75 subTabs:", subTabs);
+  // console.log("line 75 subTabs:", subTabs);
   const hasSubTabs = subTabs.length > 1;
   const vh = window.innerHeight;
   const headerOffset = hasSubTabs
@@ -94,12 +95,12 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
   useEffect(()=>{
     console.log("section-document-or-browser.tsx /n >trigger UseEffect");
     const selectedSection = tabSpec.tab === "supports" ? ENavTabSectionType.kTeacherSupports : undefined;
-    console.log("section-document-or-browser.tsx /n >selectedSection:", selectedSection);
+    // console.log("section-document-or-browser.tsx /n >selectedSection:", selectedSection);
     if (selectedSection) {
       const selectedIndex = tabSpec.sections?.findIndex(spec => spec.type === selectedSection);
-      console.log("section-document-or-browser.tsx /n selectedIndex:", selectedIndex);
+      // console.log("section-document-or-browser.tsx /n selectedIndex:", selectedIndex);
       if (selectedIndex != null) {
-        console.log("in line 102");
+        // console.log("in line 102");
         setTabIndex(selectedIndex);
       }
     }
@@ -115,7 +116,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
   }, [handleTabClick, reset, tabSpec.label]);
 
   useEffect(()=>{
-    console.log("useEffect triggered, setReferenceDocument to:", ui.selectedCommentedDocument);
+    // console.log("useEffect triggered, setReferenceDocument to:", ui.selectedCommentedDocument);
     if (ui.selectedCommentedDocument){
       const newDoc = store.documents.getDocument(ui.selectedCommentedDocument);
       setReferenceDocument(newDoc);
@@ -170,6 +171,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
   };
 
   const handleDocumentDragStart = (e: React.DragEvent<HTMLDivElement>, document: DocumentModelType) => {
+    // console.log("section-document-or-browser.tsx \n > handleDocumentDragStart");
     e.dataTransfer.setData(DocumentDragKey, document.key);
   };
 
@@ -189,26 +191,25 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
       });
   };
   const renderDocumentBrowserView = (subTab: ISubTabSpec) => {//original
-    console.log("-----renderDocumentBrowserView, with subTab:", subTab);
+    console.log(`\n\n-----renderDocumentBrowserView --------navTab: ${tabSpec.label}------`);
     const classHash = classStore.classHash;
     return (
       <div>
-        {console.log("subTab:", subTab)}
+        {console.log("line 197 subTab:", subTab)}
         {console.log("subTab.sections", subTab.sections)}
-        {console.log("subTab.sections[0].dataTestHeader:", subTab.sections[0].dataTestHeader)}
+        {/* {console.log("subTab.sections[0].dataTestHeader:", subTab.sections[0].dataTestHeader)} */}
         {
           subTab.sections.map((section: any, index: any) => {
-            console.log(`-----------${section.title} index: ${index}-----------`);
-            // console.log("section", section);
+            console.log(`----------inside map---- for ${section.title} index: ${index}-----------`);
+            console.log(`inside map with section: `, section);
             const _handleDocumentStarClick = section.showStarsForUser(user)
               ? handleDocumentStarClick
               : undefined;
-            // console.log("**selectedDocument:", selectedDocument);
-            // console.log("**referenceDocument:", referenceDocument);
+            console.log("**selectedDocument:", selectedDocument);
+            console.log("**referenceDocument:", referenceDocument);
             // console.log("returning <DocumentCollectionByType> with \n onSelectDocument: ", onSelectDocument,
             // "\n handleSelectDocument:", handleSelectDocument, "\n\n");
 
-            //in order
             return (
               <DocumentCollectionByType
                 key={`${section.type}_${index}`}
@@ -289,7 +290,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
         </div>
         <div className="documents-panel" style={documentsPanelStyle}>
           {subTabs.map((subTab, index) => {
-            console.log("line 291: index: ", index);
+            // console.log("line 291: subTab: ", subTab);
+            // console.log("line 291: index: ", index);
             const sectionTitle = subTab.label.toLowerCase().replace(' ', '-');
             return (
               <TabPanel key={`subtab-${subTab.label}`} data-test={`subtab-${sectionTitle}`}>
