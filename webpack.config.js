@@ -11,6 +11,21 @@ const path = require('path');
 const rollbarSnippetPath = './node_modules/rollbar/dist/rollbar.snippet.js';
 const rollbarSnippet = fs.readFileSync(path.join(__dirname, rollbarSnippetPath), { encoding: 'utf8' }).trim();
 
+// DEPLOY_PATH is set by the s3-deploy-action its value will be:
+// `branch/[branch-name]/` or `version/[tag-name]/`
+// See the following documentation for more detail:
+//   https://github.com/concord-consortium/s3-deploy-action/blob/main/README.md#top-branch-example
+const DEPLOY_PATH = process.env.DEPLOY_PATH;
+
+const baseHtmlPluginConfig = {
+  template: 'src/index.html',
+  favicon: 'src/public/favicon.ico',
+  templateParameters: {
+    rollbarSnippet,
+    ...packageJson.config
+  }
+};
+
 module.exports = (env, argv) => {
   const devMode = argv.mode !== 'production';
 
@@ -215,13 +230,15 @@ module.exports = (env, argv) => {
         ignoreOrder: true
       }),
       new HtmlWebpackPlugin({
+        ...baseHtmlPluginConfig,
         filename: 'index.html',
-        template: 'src/index.html',
-        templateParameters: {
-          rollbarSnippet,
-          ...packageJson.config
-        }
+        publicPath: '.',
       }),
+      ...(DEPLOY_PATH ? [new HtmlWebpackPlugin({
+        ...baseHtmlPluginConfig,
+        filename: 'index-top.html',
+        publicPath: DEPLOY_PATH,
+      })] : []),
       new CopyWebpackPlugin({
         patterns: [
           {from: 'src/public'}

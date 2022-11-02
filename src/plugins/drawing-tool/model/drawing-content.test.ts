@@ -5,7 +5,6 @@ import {
 } from "./drawing-content";
 import { kDrawingToolID } from "./drawing-types";
 import { DefaultToolbarSettings } from "./drawing-basic-types";
-import { StampModel } from "./stamp";
 import { AppConfigModel } from "../../../models/stores/app-config-model";
 import { ImageObject } from "../objects/image";
 import { RectangleObject, RectangleObjectSnapshot, RectangleObjectSnapshotForAdd, 
@@ -32,19 +31,6 @@ describe("computeStrokeDashArray", () => {
     expect(computeStrokeDashArray("dashed")).toBe("0,0");
     expect(computeStrokeDashArray("dashed", 0)).toBe("0,0");
     expect(computeStrokeDashArray("dashed", 1)).toBe("3,3");
-  });
-});
-
-describe("StampModel", () => {
-  it("should migrate urls", () => {
-    // handles empty urls
-    expect(StampModel.create({ url: "", width: 10, height: 10 }).url).toBe("");
-    // most urls are unchanged
-    expect(StampModel.create({ url: "curriculum/foo/stamps", width: 10, height: 10 }).url)
-      .toBe("curriculum/foo/stamps");
-    // old-style urls are migrated
-    expect(StampModel.create({ url: "assets/tools/drawing-tool/stamps", width: 10, height: 10 }).url)
-      .toBe("curriculum/moving-straight-ahead/stamps");
   });
 });
 

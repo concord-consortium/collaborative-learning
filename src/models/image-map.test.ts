@@ -1,10 +1,10 @@
 import { autorun, runInAction, when } from "mobx";
-import { applySnapshot, destroy, protect, unprotect } from "mobx-state-tree";
+import { applySnapshot, destroy, getSnapshot, protect, unprotect } from "mobx-state-tree";
 import { externalUrlImagesHandler, localAssetsImagesHandler,
         firebaseRealTimeDBImagesHandler, firebaseStorageImagesHandler,
         IImageHandler, ImageMapEntry, ImageMapModel, ImageMapModelType, 
         EntryStatus, IImageHandlerStoreOptions, 
-        IImageHandlerStoreResult, ImageMapEntryType} from "./image-map";
+        IImageHandlerStoreResult, ImageMapEntryType, ImageMapEntrySnapshot} from "./image-map";
 import { parseFirebaseImageUrl } from "../../functions/src/shared-utils";
 import { DB } from "../lib/db";
 import * as ImageUtils from "../utilities/image-utils";
@@ -565,6 +565,91 @@ describe("ImageMap", () => {
         // I think these happen because the imageEntry is changed or the ImageMap is changed
         // How many time this runs isn't really important as long as it isn't excessive
         expect(countOfAutorun).toBeLessThan(10);
+      });
+    });
+  });
+
+  describe("getImageEntry", () => {
+    it("limits the number times it retries entries that have failed", () => {
+      const mockHandler: any = {
+        async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
+          return {
+            displayUrl: placeholderImage, 
+            success: false};
+        }
+      };
+      jest.spyOn(sImageMap, "getHandler").mockImplementation((url: string) => mockHandler);
+      const mockUrl = "fake-url-for-retry-test";
+
+      let countOfAutorun = 0;
+      let imageEntry: ImageMapEntryType | undefined;
+      let displayUrl: string | undefined; 
+      let lastStatus: EntryStatus | undefined;
+      const imageEntries: (ImageMapEntrySnapshot | null)[] = [];
+      const disposer = autorun(() => {
+        // This is a pattern that an observing component could use to display an
+        // image entry. Without a retry limit in the ImageMap, in certain cases
+        // this would loop forever This is because the status is flipping
+        // between PendingStorage and Error.
+
+        // The imageEntry is saved before and after the call to illustrate what is
+        // changing on each time through the autorun loop
+        imageEntries.push(imageEntry ? getSnapshot(imageEntry) : null);
+        imageEntry = sImageMap.getImageEntry(mockUrl);
+        imageEntries.push(imageEntry ? getSnapshot(imageEntry) : null);
+
+        // This displayURL is what the the observing component would use to
+        // render the image.  
+        displayUrl = imageEntry?.displayUrl;
+        
+        // **This line is important.** 
+        // Without this line, there will be no looping. This line tells MobX the
+        // autorun should be re-run whenever the status changes. The status is
+        // being checked above, but only if imageEntry already exists. So the
+        // first time through the autorun the status is not checked above.
+        lastStatus = imageEntry?.status;
+
+        countOfAutorun++;
+        if (countOfAutorun > 15) {
+          // Stop the loop if it is out of control
+          // The autorun might get run extra times if the getImage or getCachedImage makes changes
+          // to the image entry, this is why the limit is 15 instead of something lower
+          disposer();
+        }
+      });  
+
+      return new Promise(resolve => setTimeout(resolve, 500))
+      .then(() => {
+        // Make sure the autorun is disposed so it doesn't continue to watch for changes
+        disposer();
+        expect(imageEntry?.retries).toBe(2);
+        expect(lastStatus).toBe(EntryStatus.Error);
+        expect(displayUrl).toBe(placeholderImage);
+        expect(imageEntries).toEqual([
+          // autorun #1 no imageEntry, then one that is pendingStorage
+          null,
+          { displayUrl: placeholderImage, retries: 0, status: "pendingStorage" },
+
+          // autorun #2 error'd imageEntry, then one that is retrying with pendingStorage
+          { displayUrl: placeholderImage, retries: 0, status: "error" },
+          { displayUrl: placeholderImage, retries: 1, status: "pendingStorage" },
+
+          // autorun #3 triggered by async update of internal ImageMap state
+          { displayUrl: placeholderImage, retries: 1, status: "pendingStorage" },
+          { displayUrl: placeholderImage, retries: 1, status: "pendingStorage" },
+
+          // autorun #4 error'd imageEntry, then one that is retrying with pendingStorage
+          { displayUrl: placeholderImage, retries: 1, status: "error" },
+          { displayUrl: placeholderImage, retries: 2, status: "pendingStorage" },
+
+          // autorun #5 triggered by async update of internal ImageMap state
+          { displayUrl: placeholderImage, retries: 2, status: "pendingStorage" },
+          { displayUrl: placeholderImage, retries: 2, status: "pendingStorage" },
+
+          // autorun #6 error'd imageEntry, then one that does not retry
+          { displayUrl: placeholderImage, retries: 2, status: "error" },
+          { displayUrl: placeholderImage, retries: 2, status: "error" },
+        ]);
       });
     });
   });
