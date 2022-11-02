@@ -3,8 +3,9 @@ import { when } from "mobx";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { SharedModel, SharedModelType } from "./shared-model";
 import { SharedModelDocumentManager } from "./shared-model-document-manager";
-import { registerSharedModelInfo, registerToolContentInfo } from "./tool-content-info";
-import { ITileEnvironment, ToolContentModel } from "./tool-types";
+import { registerSharedModelInfo } from "./shared-model-registry";
+import { registerToolContentInfo } from "../tools/tool-content-info";
+import { ITileEnvironment, ToolContentModel } from "../tools/tool-types";
 import { DocumentContentModel } from "../document/document-content";
 import { createDocumentModel, DocumentModelType } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
@@ -85,7 +86,7 @@ registerSharedModelInfo({
 const TestTile = ToolContentModel
   .named("TestTile")
   .props({
-    type: "TestTile", 
+    type: "TestTile",
     updateCount: 0,
     something: 0
   })
@@ -122,7 +123,7 @@ describe("SharedModelDocumentManager", () => {
   it("handles setDocument with an empty doc", () => {
     const doc = DocumentContentModel.create();
     const manager = new SharedModelDocumentManager();
-    manager.setDocument(doc);    
+    manager.setDocument(doc);
   });
 
   it("is ready when there is a document", () => {
@@ -163,7 +164,7 @@ describe("SharedModelDocumentManager", () => {
       key: "test",
       content: doc as any
     });
-    
+
     // Enable the tree monitor so changes to the shared model trigger the update.
     docModel.treeMonitor!.enabled = true;
 
@@ -171,7 +172,7 @@ describe("SharedModelDocumentManager", () => {
   }
 
   it("calls tileContent#updateAfterSharedModelChanges when the shared model changes", async () => {
-    const {doc, docModel} = setupDocument();    
+    const {doc, docModel} = setupDocument();
     const toolTile = doc.tileMap.get("t1");
     assertIsDefined(toolTile);
     const tileContent = toolTile.content as TestTileType;
@@ -202,13 +203,13 @@ describe("SharedModelDocumentManager", () => {
 
     // We call an async action on the tile
     // Then while the async action is running we change the sharedModel
-    // In the end 'updateAfterSharedModelChanges' should only be called 
+    // In the end 'updateAfterSharedModelChanges' should only be called
     // one time. This isn't critical because it shouldn't break anything
-    // if 'updateAfterSharedModelChanges' is called twice. It is just 
+    // if 'updateAfterSharedModelChanges' is called twice. It is just
     // inefficient and can make debugging confusing if it does.
     //
-    // This is a tricky case because the middleware recording changes to 
-    // the shared model will have 2 'recordAction' functions going at the 
+    // This is a tricky case because the middleware recording changes to
+    // the shared model will have 2 'recordAction' functions going at the
     // same time. Only the one started by the shared model change should
     // actually cause 'updateAfterSharedModelChanges' to be called.
     const doSomethingPromise = tileContent.doSomethingAsync();
@@ -239,7 +240,7 @@ describe("SharedModelDocumentManager", () => {
         }
       }
     });
-    
+
     const toolTile = doc.tileMap.get("t1");
     assertIsDefined(toolTile);
     const tileContent = toolTile.content as TestTileType;
@@ -454,7 +455,7 @@ describe("SharedModelDocumentManager", () => {
       // Just make sure a valid call works without warning
       const result3 = manager.getTileSharedModels(tileContent);
       expect(spy).not.toHaveBeenCalled();
-      expect(result3).toHaveLength(1);      
+      expect(result3).toHaveLength(1);
     });
   });
 
@@ -545,7 +546,7 @@ describe("SharedModelDocumentManager", () => {
     await expectUpdateToBeCalledTimes(tileContent2, 1);
     // The existing tile's update function shouldn't be called
     await expectUpdateToBeCalledTimes(tileContent1, 2);
-    
+
     // now both tile's update functions should be called when the shared
     // model changes
     sharedModel.setValue("something2");
@@ -752,18 +753,18 @@ describe("SharedModelDocumentManager", () => {
       manager.removeTileSharedModel(tileContent, sharedModel);
       expect(spy).toHaveBeenCalled();
       spy.mockClear();
-  
+
       manager.setDocument(doc);
-  
+
       const notAttachedTileContent = TestTile.create({});
       manager.removeTileSharedModel(notAttachedTileContent, sharedModel);
       expect(spy).toHaveBeenCalled();
       spy.mockClear();
-  
+
       const notAttachedSharedModel = TestSharedModel.create({});
       manager.removeTileSharedModel(tileContent, notAttachedSharedModel);
       expect(spy).toHaveBeenCalled();
-      spy.mockClear();  
+      spy.mockClear();
     });
   });
 
@@ -876,7 +877,7 @@ describe("SharedModelDocumentManager", () => {
 // So it would look more like:
 // spyUpdate1 = mstActionSpy(tileContent1, 'updateAfterSharedModelChanges');
 // expect(spyUpdate1).toBeCalledWithin(100);
-// function expectActionToBeCalled(object, actionName, timeout = 100) 
+// function expectActionToBeCalled(object, actionName, timeout = 100)
 // This would be tricky because onAction has to be added to the root, so we'd need
 // get the root of the object, then get the path of the object then wait for
 // an action on this object at this path.

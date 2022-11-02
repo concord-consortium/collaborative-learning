@@ -2,7 +2,7 @@ import { castArray, difference, each, size as _size, union } from "lodash";
 import { reaction } from "mobx";
 import { addDisposer, applySnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { Optional } from "utility-types";
-import { SharedDataSet, SharedDataSetType } from "../shared-data-set";
+import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId } from "../table-link-types";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
@@ -31,7 +31,8 @@ import {
   isVertexAngle, isVisibleEdge, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin,
   kGeometryDefaultHeight, kGeometryDefaultPixelsPerUnit, kGeometryDefaultWidth, toObj
 } from "./jxg-types";
-import { ISharedModelManager, SharedModelType } from "../shared-model";
+import { SharedModelType } from "../../shared/shared-model";
+import { ISharedModelManager } from "../../shared/shared-model-manager";
 import { getToolTileModel, setTileTitleFromContent } from "../tool-tile";
 import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";

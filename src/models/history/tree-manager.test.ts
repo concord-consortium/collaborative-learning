@@ -1,8 +1,9 @@
 import { getSnapshot, getType, Instance, types } from "mobx-state-tree";
 import { IToolTileProps } from "src/components/tools/tool-tile";
-import { SharedModel, SharedModelType } from "../tools/shared-model";
+import { SharedModel, SharedModelType } from "../shared/shared-model";
+import { registerSharedModelInfo } from "../shared/shared-model-registry";
 import { ToolContentModel } from "../tools/tool-types";
-import { registerSharedModelInfo, registerToolContentInfo } from "../tools/tool-content-info";
+import { registerToolContentInfo } from "../tools/tool-content-info";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
 import { createDocumentModel } from "../document/document";
 import { ProblemDocument } from "../document/document-types";

@@ -1,8 +1,9 @@
 import { action, computed, makeObservable, observable } from "mobx";
 import { getParentOfType, hasParentOfType, IAnyStateTreeNode } from "mobx-state-tree";
 import { DocumentContentModelType } from "../document/document-content";
-import { ISharedModelManager, SharedModelType, SharedModelUnion } from "./shared-model";
-import { ToolTileModel } from "./tool-tile";
+import { SharedModelType } from "./shared-model";
+import { ISharedModelManager, SharedModelUnion } from "./shared-model-manager";
+import { ToolTileModel } from "../tools/tool-tile";
 
 
 function getToolTile(tileContentModel: IAnyStateTreeNode){

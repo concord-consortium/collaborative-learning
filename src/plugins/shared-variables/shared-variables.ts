@@ -1,6 +1,6 @@
 import { destroy, Instance, types } from "mobx-state-tree";
 import { Variable, VariableType } from "@concord-consortium/diagram-view";
-import { SharedModel } from "../../models/tools/shared-model";
+import { SharedModel } from "../../models/shared/shared-model";
 
 export const kSharedVariablesID = "SharedVariables";
 

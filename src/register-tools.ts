@@ -12,13 +12,13 @@ const gToolRegistration: Record<string, () => void> = {
   "Drawing": () => import(/* webpackChunkName: "Drawing" */"./plugins/drawing-tool/drawing-registration"),
   "Geometry": () => Promise.all([
     import(/* webpackChunkName: "Geometry" */"./models/tools/geometry/geometry-registration"),
-    import(/* webpackChunkName: "SharedDataSet" */"./models/tools/shared-data-set-registration")
+    import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
   ]),
   "Image": () => import(/* webpackChunkName: "Image" */"./models/tools/image/image-registration"),
   "Starter": () => import(/* webpackChunkName: "Starter" */"./plugins/starter/starter-registration"),
   "Table": () => Promise.all([
     import(/* webpackChunkName: "Table" */"./models/tools/table/table-registration"),
-    import(/* webpackChunkName: "SharedDataSet" */"./models/tools/shared-data-set-registration")
+    import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
   ]),
   "Text": () => import(/* webpackChunkName: "Text" */"./models/tools/text/text-registration")
 };

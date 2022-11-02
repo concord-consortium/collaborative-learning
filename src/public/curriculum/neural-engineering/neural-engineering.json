@@ -17,8 +17,8 @@
     },
     "learningLog": {
       "labels": {
-        "1": "KWL Journal",
-        "n": "KWL Journals"
+        "1": "Learning Journal",
+        "n": "Learning Journals"
       }
     },
     "toolbar": [
@@ -151,7 +151,7 @@
               "addDocument": true
             },
             {
-              "title": "KWL Journals",
+              "title": "Learning Journal",
               "type": "learning-logs",
               "dataTestHeader": "learning-log-section",
               "documentTypes": ["learningLog"],
@@ -196,7 +196,7 @@
       "initials": "RF",
       "title": "Reflection",
       "type": "problem-documents",
-      "placeholder": "Write up conclusions from your experiment. Fill out your KWL Journal on the My Work tab and capture the parts of your work you want to remember for next class there. "
+      "placeholder": "Write up conclusions from your experiment. Document these in the Learning Journal on the My Work tab and capture the parts of your work you want to remember for next class there. "
     }
   },
   "planningDocument": {
@@ -209,26 +209,14 @@
         "placeholder": "Add some tiles here"
       },
       "launch": {
-        "initials": "LC",
-        "title": "Launch",
-        "placeholder": "Add some tiles here"
-      },
-      "explore": {
-        "initials": "EX",
-        "title": "Explore",
-        "placeholder": "Add some tiles here"
-      },
-      "summarize": {
-        "initials": "SM",
-        "title": "Summarize",
+        "initials": "IS",
+        "title": "Instructional Sequence",
         "placeholder": "Add some tiles here"
       }
     },
     "sections": [
       { "type": "overview" },
-      { "type": "launch" },
-      { "type": "explore" },
-      { "type": "summarize" }
+      { "type": "launch" }
     ]
   },
   "investigations": [
@@ -300,13 +288,17 @@
                       ]
                     }
                   },
-                  [{
+                  [
+                    {
+                    "layout": {
+                      "height": 350
+                    },
                     "id": "UWnx52iyDldW2ClX",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Introduction to tile types</p>",
+                        "<h3>Introduction to tile types</h3>",
                         "<p>Try to make a text tile in your <strong>Workspace</strong> on the right (press the menu button with the letter A on it). Write down some things you hope to learn in this Neural Engineering unit.</p>",
                         "<p><strong>Tip</strong>: by hovering your mouse over the tile menu you will see the function of each tile. </p>",
                         "<p>Now insert an image into your workspace. You can upload using the button or you can drag images from your desktop. Describe in your workspace how you might use images to document your work.</p>",
@@ -319,7 +311,7 @@
                     "title": "CLUE Tile Menu",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/neural-engineering/images/ToolBar.jpeg"
+                      "url": "curriculum/neural-engineering/images/Toolbar.jpg"
                     }
                   }],
                   {
@@ -335,41 +327,144 @@
                         "<p>Blocks can be:</p>",
                         "<p>1.  Inputs (e.g., a temperatue sensor). These are the blue-ish blocks. </p>",
                         "<p>2. Processing blocks (e.g., &quot;Math&quot; or &quot;Logic&quot;). These are the green-ish blocks. </p>",
-                        "<p>3. Outputs (e.g., a light bulb). These are the organge blocks.   </p>",
-                        "<p>Try to make one of your own Dataflow program that adds two numbers. What are the different ways that you see the result of the program?</p>"
+                        "<p>3. Outputs (e.g., a light bulb). These are the orange blocks.   </p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "qJGEu4HEmBOtRZLq",
+                      "title": "Text 2",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Sensor blocks </strong></p>",
+                          "<p>Sensor blocks, the first choice on the Dataflow menu, allow you to put a stream of data into your program. Choose a sensor from the top dropdown menu. You will see a variety of quantities you can measure. </p>",
+                          "<p>If you don&#x27;t have a real, physical sensor handy, you can pick a set of demo data from the second dropdown menu. The selection menu will let you pick your physical EMG sensors for this class when the time is right, but for now you can use any sensor type you want and set the data to a demo set.</p>",
+                          "<p>When you pick a sensor type and a specific (real or demo) sensor, you will immediately see a stream of readings and units in the readout box. If you want to see a little history of values, tap the graph icon. The time spacing on this graph is controlled by the Sampling Rate at the top of the Dataflow tile.</p>",
+                          "<p></p>",
+                          "<p>Input blocks, like the Sensor block, have only one output dot which you connect to other blocks in the program. All are shades of blue.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "bynl36tarAYaqVVe",
+                      "title": "Sensor Block",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/neural-engineering/images/sensorBlocks.png",
+                        "filename": "curriculum/neural-engineering/images/sensorBlocks.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "NwbdYJUxduDPBwhu",
+                      "title": "Text 4",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>Math and Logic Blocks</strong></p>",
+                          "<p>Once you have data in your program, you will want to change it to do what you need. Green blocks are processing blocks that take one or more inputs on the left and have a single output on the right. </p>",
+                          "<p></p>",
+                          "<p>Here are shown Math and Logic blocks. The dropdown allows you to pick the algebraic or comparison operation you desire to perform on the two input data streams. The equivalent written expression is shown in the output box.</p>",
+                          "<p></p>",
+                          "<p>As soon as two data streams are connected to the input dots, the block will immediately perform it&#x27;s set operation and send the result to the output dot. If you want to see a history of calculated values, tap the graph icon.</p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "NTHsAaRftydhRGAE",
+                      "title": "Math and Logic Blocks",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/neural-engineering/images/mathLogicBlocks.png",
+                        "filename": "curriculum/neural-engineering/images/mathLogicBlocks.png"
+                      }
+                    }
+                  ],
+                  [
+                    {
+                      "id": "gB4Xd3Rb0R2IRbCj",
+                      "title": "Text 5",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p><strong>O﻿utput Blocks</strong></p>",
+                          "<p>P﻿rograms that manipulate data output a series of numbers. Those numbers can be a result on their own, or they can be used to control devices. Dataflow has both demo outputs and the ability to hook up to a physical output if you have one handy.</p>",
+                          "<p></p>",
+                          "<p>S﻿elect a type of output device, either real or demo, from the dropdown menu on the block. Demo outputs will display a picture of the device and an animation of it working according to inputs. Live outputs will prompt you to select a live connected device.</p>",
+                          "<p></p>",
+                          "<p>D﻿emo outputs are typically controlled by binary values, 1 = on  or 0 = off, and sometimes by extended values if more states are needed to control the output device. Different outputs have different rules for handling inputs that are not one of the special values such as 1 or 0.</p>",
+                          "<p></p>",
+                          "<p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "u1VN1OFIJCvsiWE9",
+                      "title": "Output Blocks",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/neural-engineering/images/outputBlocks.png",
+                        "filename": "curriculum/neural-engineering/images/outputBlocks.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "758mGzn3UXzxTTSB",
+                    "title": "Text 3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Try to make your own Dataflow program that adds two numbers. What are the different ways that you see the result of the program?</p>"
                       ]
                     }
                   },
                   {
-                    "id": "tXgvW073k6HcUl8L",
-                    "title": "Dataflow 1",
+                    "id": "qp3ALL5BqFvvnji8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The following Dataflow program is supposed to monitor the outside temperature and remind you to water your lawn when the temperature is above 30 degrees celsius.  However, the program is not working well. Can you drag it into your workspace and fix it? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "gX3nceoKGZrxqjmR",
+                    "title": "Monitor Temperature",
                     "content": {
                       "type": "Dataflow",
                       "programDataRate": 1000,
                       "programZoom": {
                         "dx": 0,
                         "dy": 0,
-                        "scale": 1.0973154362416124
+                        "scale": 1
                       },
                       "program": {
                       "values": {
-                        "3277": {"currentValues": {}},
-                        "3282": {"currentValues": {}},
-                        "3289": {"currentValues": {"nodeValue": 20}},
-                        "3299": {"currentValues": {"nodeValue": 0}}
+                        "3313": {"currentValues": {}},
+                        "3322": {"currentValues": {}},
+                        "3327": {"currentValues": {"nodeValue": 0}},
+                        "3337": {"currentValues": {"nodeValue": 0}}
                       },
                       "id": "dataflow@0.1.0",
                       "nodes": {
-                        "3277": {
-                          "id": 3277,
+                        "3313": {
+                          "id": 3313,
                           "name": "Sensor",
-                          "x": 33.25769467309609,
-                          "y": 53.21068692833138,
+                          "x": 63.114284774256284,
+                          "y": 70.57511609798658,
                           "inputs": {},
                           "outputs": {
                             "num": {
                               "connections": {
-                                "3282-undefined-num1": {"node": 3282, "input": "num1", "data": {}}
+                                "3322-undefined-num1": {"node": 3322, "input": "num1", "data": {}}
                               }
                             }
                           },
@@ -377,69 +472,58 @@
                             "plot": false,
                             "type": "temperature",
                             "sensor": "00001-VIR",
-                            "virtual": true,
-                            "inputKeys": []
+                            "virtual": true
                           }
                         },
-                        "3282": {
-                          "id": 3282,
+                        "3322": {
+                          "id": 3322,
                           "name": "Logic",
-                          "x": 298.3169265484828,
-                          "y": 64.47449592314013,
+                          "x": 291.7448738557753,
+                          "y": 110.95676741266041,
                           "inputs": {
                             "num1": {
                               "connections": {
-                                "3277-num-undefined": {"node": 3277, "output": "num", "data": {}}
+                                "3313-num-undefined": {"node": 3313, "output": "num", "data": {}}
                               }
                             },
-                            "num2": {
-                              "connections": {
-                                "3289-num-undefined": {"node": 3289, "output": "num", "data": {}}
-                              }
-                            }
+                            "num2": {"connections": {}}
                           },
                           "outputs": {
                             "num": {
                               "connections": {
-                                "3299-undefined-nodeValue": {
-                                  "node": 3299,
+                                "3337-undefined-nodeValue": {
+                                  "node": 3337,
                                   "input": "nodeValue",
                                   "data": {}
                                 }
                               }
                             }
                           },
-                          "data": {"plot": false, "logicOperator": "Greater Than", "inputKeys": []}
+                          "data": {"plot": false, "logicOperator": "Greater Than"}
                         },
-                        "3289": {
-                          "id": 3289,
+                        "3327": {
+                          "id": 3327,
                           "name": "Number",
-                          "x": 106.42448613897218,
-                          "y": 270.9982112393583,
+                          "x": 51.9244629467631,
+                          "y": 286.68177936593975,
                           "inputs": {},
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3282-undefined-num2": {"node": 3282, "input": "num2", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {"plot": false, "nodeValueUnits": "", "inputKeys": []}
+                          "outputs": {"num": {"connections": {}}},
+                          "data": {"plot": false, "nodeValueUnits": ""}
                         },
-                        "3299": {
-                          "id": 3299,
+                        "3337": {
+                          "id": 3337,
                           "name": "Demo Output",
-                          "x": 568.3546131675333,
-                          "y": 65.78549269957654,
+                          "x": 551.8805820907344,
+                          "y": 140.5773811102751,
                           "inputs": {
                             "nodeValue": {
                               "connections": {
-                                "3282-num-undefined": {"node": 3282, "output": "num", "data": {}}
+                                "3322-num-undefined": {"node": 3322, "output": "num", "data": {}}
                               }
                             }
                           },
                           "outputs": {},
-                          "data": {"outputType": "Light Bulb", "demoOutput": 0, "inputKeys": []}
+                          "data": {"outputType": "Light Bulb", "demoOutput": 0}
                         }
                       }
                     }
@@ -459,7 +543,7 @@
                   },
                   {
                     "id": "H8UPWfxYHAlWuaV8",
-                    "title": "UI Buttons",
+                    "title": "Sharing and Editing Buttons",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/UIbuttons.jpg",
@@ -504,9 +588,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Throughout the neural engineering unit, you will keep a learning journal called a KWL Journal (KWL stands for Know, Wonder, and Learn). </p>",
+                        "<p>Throughout the neural engineering unit, you will keep a learning journal called a Learning Journal. </p>",
                         "<p>At the end of each lesson, you will be asked to add a journal entry to track your learning throughout the unit. </p>",
-                        "<p>To start your journal, click on &quot;My Work&quot; &gt;&gt; &quot;KWL Journals&quot;</p>",
+                        "<p>To start your journal, click on &quot;My Work&quot; &gt;&gt; &quot;Learning Journals&quot;</p>",
                         "<p>Click on &quot;My First Learning Log&quot; and click &quot;Edit&quot; in the top right of the pane.</p>",
                         "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions. </p>"
                       ]
@@ -557,22 +641,23 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Lesson 1.1 - Student Guide</strong></p>",
-                        "<p><u><strong>Introduction</strong></u></p>",
                         "<p><strong>Overview: </strong></p>",
-                        "<p>In this lesson, you will be introduced to emerging robotics technology that helps people with neurological conditions or missing limbs.</p>",
+                        "<p>In this lesson, you will be introduced to emerging technology that helps people with neurological conditions or missing limbs.</p>",
                         "<p><strong>Learning Objectives: </strong></p>",
                         "<p>This activity is intended to help you come up with questions about how body systems interact with one another and with technology. We will explore these questions throughout the unit. </p>"
                       ]
                     }
                   },
                   {
-                    "id": "xA3ibkzFAO5iG7pU",
-                    "title": "Tilly with bionic arms: Credit: https://openbionics.com/bionic-tilly/",
+                    "id": "bj5dqEB0okmYf9qy",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/Lesson1img1.jpeg",
-                      "filename": "curriculum/neural-engineering/images/Lesson1img1.jpeg"
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>To start off, please drag the following tile into your workspace and answer these questions:</p>",
+                        "<p>1) What do you know about bionic arms? (e.g., what do they look like, why people might use them, in what ways are they connected to the person’s body, how do they work)</p>",
+                        "<p>2) If you were tasked to design a bionic arm, what do you think the people who use them would like in terms of appearance and function?</p>"
+                      ]
                     }
                   }
                 ]
@@ -583,144 +668,39 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "7585vTDxl5wzHNQB",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><u><strong>Activities</strong></u></p>",
-                        "<p><strong>Experiment with Energy Sticks</strong></p>",
-                        "<p>Working with your classmates, explore the behavior of energy sticks. You may try the following: </p>",
-                        "<ul><li>Have one person touch both ends of the energy sticks. </li><li>Have two people touch an end of the energy stick while holding hands. </li><li>Get a group of students to hold hands in a circle. Put the energy stick between two of the students. Does it turn on?</li><li>Give one pair in the circuit something to hold between them (e.g.,  a metal key or a pencil). Do these objects conduct or insulate?</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "oA_UsTa2B_g6LJ2H",
-                    "title": "Student holding an energy stick",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/Lesson1img2.png",
-                      "filename": "curriculum/neural-engineering/images/Lesson1img2.png"
-                    }
-                  },
-                  {
-                    "id": "m0tifT2uQB1mvKEL",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Create a text tile in your worksheet by clicking on the A icon and describe what you have observed. </p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "3IjoPVc-MA3bHMRU",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>Program a Light Bulb to Turn On and Off</strong></p>",
-                        "<p>We can use a computer program to turn lights on and off in the same way you just did with the energy sticks. </p>",
-                        "<p>Here is a very simple program that turns a light bulb on and off based on a timer:</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "3IjoPVc-MA3bHMRU",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>Program a Light Bulb to Turn On and Off</strong></p>",
-                        "<p>We can use a computer program to turn lights on and off in the same way you just did with the energy sticks. </p>",
-                        "<p>Here is a very simple program that turns a light bulb on and off based on a timer:</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "EJevZwyg4GvrIh2z",
-                    "title": "Dataflow 1",
-                    "content": {
-                      "type": "Dataflow",
-                      "programDataRate": 1000,
-                      "programZoom": {
-                        "dx": 0,
-                        "dy": 0,
-                        "scale": 0.9597151675995521
-                      },
-                      "program": {
-                      "values": {
-                        "95": {"currentValues": {"nodeValue": 0}},
-                        "98": {"currentValues": {"nodeValue": 0}}
-                      },
-                      "id": "dataflow@0.1.0",
-                      "nodes": {
-                        "95": {
-                          "id": 95,
-                          "name": "Timer",
-                          "x": 19.98323554065379,
-                          "y": 5,
-                          "inputs": {},
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "98-undefined-nodeValue": {
-                                  "node": 98,
-                                  "input": "nodeValue",
-                                  "data": {}
-                                }
-                              }
-                            }
-                          },
-                          "data": {
-                            "plot": false,
-                            "timeOnUnits": "sec",
-                            "timeOn": 2,
-                            "timeOffUnits": "sec",
-                            "timeOff": 5,
-                            "inputKeys": []
-                          }
-                        },
-                        "98": {
-                          "id": 98,
-                          "name": "Demo Output",
-                          "x": 335.51164572175264,
-                          "y": 12.038349825235073,
-                          "inputs": {
-                            "nodeValue": {
-                              "connections": {
-                                "95-num-undefined": {"node": 95, "output": "num", "data": {}}
-                              }
-                            }
-                          },
-                          "outputs": {},
-                          "data": {"outputType": "Light Bulb", "demoOutput": 0, "inputKeys": []}
-                        }
-                      }
-                    }
-                    }
-                  },
-                  {
-                    "id": "wOSMFUGfijiejbu1",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Recreate this program in your worksheet by pressing the DataFlow tile button .  You will need to add a timer and a demo output and connect them. </p>",
-                        "<p>Then, instead of a timer, use a generator to control the light bulb. To do so, delete the timer and add a generator. Select the &quot;Square&quot; option and add some logic to make the light bulb only turn on when the generated signal is over 0.5. </p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "kqaHDaV8PBw5LeEi",
+                    "id": "EqKYUNT3JvLoOuzP",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Meet Tilly</strong></p>",
                         "<p>Tilly is a real-life bionic teen.  At only 15 months old, Tilly had both her hands amputated at the wrist because of a very rare infection. For years she used basic silicon arms, but in 2018 she became the first child in the UK to have bionic arms. These high-tech, 3D printed arms give Tilly a much fuller range of movement. In class, you will watch a video about Tilly,  who is now a model, public speaker and make-up vlogger. In the video, Tilly showcases her colorful arm cases, before applying a full face of make-up - and trying out a new edgy look. </p>",
-                        "<p>This <a href='https://www.youtube.com/watch?v=q2MjTcmLuIQ'>video</a> received over 2M views on YouTube! You can read more about Tilly <a href='https://openbionics.com/bionic-tilly/'>here</a></p>"
+                        "<p>This <a href='https://www.youtube.com/watch?v=q2MjTcmLuIQ'>video</a> received over 2M views on YouTube! You can read more about Tilly <a href='https://openbionics.com/bionic-tilly/'>here</a></p>",
+                        "<p>While watching the video, think about the following questions: (drag these questions into your workspace so you are ready to answer them after watching the video):</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "9k2YhXILrCaG09h7",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>- How does the bionic lower arm appear to be physically attached to Tilly’s upper arm?</p>",
+                        "<p>- How does Tilly control her bionic arm?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ULWVknRyAIhw-jUC",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>How does Tilly control her bionic arms?</strong></p>",
+                        "<p>Create a model on paper or a whiteboard or in a drawing tile that explains how Tilly&#x27;s bionic arms work. If you worked on paper or a whiteboard, take a picture of your model and upload it to your workspace in an image tile. </p>",
+                        "<p><strong>Reflection</strong></p>",
+                        "<p>At the end of the activity, please record your current thinking and learning in your Learning journal (see Reflection tab). </p>"
                       ]
                     }
                   }
@@ -737,16 +717,15 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Reflection</strong></u></p>",
-                        "<p>As you recall, throughout the neural engineering unit, you will keep a learning journal called a KWL Journal (KWL stands for Know, Wonder, and Learn). </p>",
-                        "<p>To access your journal, click on &quot;My Work&quot; &gt;&gt; &quot;KWL Journals&quot;</p>",
+                        "<p>As you recall, throughout the neural engineering unit, you will keep a learning journal.</p>",
+                        "<p>To access your journal, click on &quot;My Work&quot; &gt;&gt; &quot;Learning Journals&quot;</p>",
                         "<p>Click on &quot;My First Learning Log&quot; and click &quot;Edit&quot; .</p>",
                         "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>"
                       ]
                     }
                   },
                   {
-                    "id": "hR3cMwt35vT0bYp_",
+                    "id": "YMXYngGJlN6ss7na",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -754,13 +733,11 @@
                         "<p><strong>Lesson 1.1 Journal Entry</strong></p>",
                         "<p>1. Today&#x27;s date:</p>",
                         "<p>2. Today&#x27;s topic:</p>",
-                        "<p>3. What did you already know about bionic arms before today&#x27;s activity?</p>",
-                        "<p>4. What are the main things that you learned today about bionic arms?</p>",
-                        "<p>5. What questions do you have about bionic arms?</p>",
-                        "<p>6. What questions would you like to ask Tilly (the teen with the bionic arms from the video)?</p>"
+                        "<p>3. Based on the video and the class discussion, please describe your current understanding of how bionic arms work. </p>",
+                        "<p>4. What questions would you like to ask Tilly (the teen with the bionic arms from the video)?</p>"
                       ]
                     }
-                  }           
+                  }        
                 ]
               }
             }
@@ -779,39 +756,38 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "Lz8ZihJNzSdsXYeA",
+                    "id": "M7NOi4drS5LYJ3qz",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>Objective</h2>",
-                        "<p>During this lesson, we will measure their own reaction times, construct a model to communicate their current understanding, and investigate how neurological conditions could impact limb movement.  </p>"
+                        "<p>In this lesson, you will learn about electrical signals in the human body, measure your reaction time, and develop a model to explain how body systems interact during limb movement. This will help you understand how bionic arms work (like the ones used by <a href='https://www.youtube.com/watch?v=q2MjTcmLuIQ&amp;t=1s'>Tilly</a>). </p>",
+                        "<p><strong>Learning Objective</strong></p>",
+                        "<p>By the end of this activity, you will be able to explain what body systems are involved in limb movement and how they interact with one another. </p>",
+                        "<p><strong>Do Now</strong></p>",
+                        "<p>Working with your classmates, explore the behavior of energy sticks. You may try the following: </p>",
+                        "<p>1) Have one person touch both ends of the energy sticks.</p>",
+                        "<p>2) Have two people touch the energy stick while holding hands. </p>",
+                        "<p>3) Get a group of students to hold hands in a circle. Put the energy stick between two of the students. Does it turn on?</p>",
+                        "<p>4) Give one pair of students something to hold between them (e.g.,  a metal key or a pencil). Do these objects conduct or insulate?</p>"
                       ]
                     }
                   },
                   {
-                    "id": "FmgJSnxA7SxkJeR4",
+                    "id": "nI77bXEWPDtKRtS2",
+                    "title": "Energy Sticks (image source: Amazon)",
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Let&#x27;s measure our reaction times!</p>",
-                        "<h2>DISCUSS</h2>",
-                        "<p>Let&#x27;s discuss how fast human limbs can react in day-to-day life (e.g., the time it takes to start crossing the street once the light changes to green). Some questions you could think about are: </p>",
-                        "<ul><li>What affects limb reaction time (RT)? </li><li>Why is time to react important?   </li></ul>",
-                        "<p>Document your thoughts in your workspace</p>"
-                      ]
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/Lesson1img2.png"
                     }
                   },
                   {
-                    "id": "35r8SVP84iR1ZIy6",
+                    "id": "nxwHzbnk-MnuuPyd",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>WATCH</h2>",
-                        "<p>Please watch <a href='https://www.youtube.com/watch?v=gJEuT3aKcMI&amp;ab_channel=NationalPhysicalLaboratory'>this video</a> to explore what reaction time is all about.</p>",
-                        "<p>Document in your worksheet what you learned in the video.</p>"
+                        "<p>In your workspace, answer the following question:  How can energy sticks help us understand how Tilly&#x27;s bionic arms work?</p>"
                       ]
                     }
                   }
@@ -823,100 +799,203 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "NNXlh9c9artERQGA",
+                    "id": "mmCGD7TNgByT8ylv",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>TRY</h2>",
-                        "<p>Please pair up with a friend and measure your reaction times using your dominant and non-dominant hands.  </p>",
-                        "<p>Please follow the <a href='https://www.npl.co.uk/skills-learning/measurement-at-home/reaction-time/mah12-reaction-time-worksheet.aspx'>instructions video</a> here.</p>",
-                        "<p>You can drag the data tables into your workspace to record your scores (You can also print out <a href='https://www.npl.co.uk/getattachment/skills-learning/Measurement-at-home/Reaction-Time/MAH12-reaction-time-RESULTS-SHEET-final.pdf.aspx?lang=en-GBbut)'>the form</a>). </p>",
-                        "<p>Use the lookup table to convert drop distance (in cm) to time (in thousands of a second).</p>"
+                        "<p><strong>Program a Light Bulb to Turn On and Off</strong></p>",
+                        "<p>We can use a computer program to turn lights on and off in the same way you just did with the energy sticks. </p>",
+                        "<p>Here is a very simple program that turns a light bulb on and off based on a timer:</p>"
                       ]
                     }
                   },
                   {
-                    "id": "1BYp7cHST9gJtA_X",
+                    "id": "KTt3F0BDHQIy_q9o",
+                    "title": "Timer Controlled Lightbulb",
                     "content": {
-                      "type": "Table",
-                      "name": "Reaction Time Look Up Table",
-                      "columns": [
-                        {"name":"distance (cm)","values":["5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","28","29","30"]},
-                        {"name":"time (ms)","values":["101","111","120","128","136","143","150","156","163","169","175","181","186","192","197","202","207","212","217","221","226","235","239","243","247"]}
+                      "type": "Dataflow",
+                      "programDataRate": 1000,
+                      "programZoom": {
+                        "dx": 0,
+                        "dy": 0,
+                        "scale": 1.3973154362416127
+                      },
+                      "program": {
+                      "values": {
+                        "3": {"currentValues": {"nodeValue": 0}},
+                        "5": {"currentValues": {"nodeValue": 0}}
+                      },
+                      "id": "dataflow@0.1.0",
+                      "nodes": {
+                        "3": {
+                          "id": 3,
+                          "name": "Timer",
+                          "x": 13.327721929811837,
+                          "y": 78.80637617101036,
+                          "inputs": {},
+                          "outputs": {
+                            "num": {
+                              "connections": {
+                                "5-undefined-nodeValue": {
+                                  "node": 5,
+                                  "input": "nodeValue",
+                                  "data": {}
+                                }
+                              }
+                            }
+                          },
+                          "data": {
+                            "plot": false,
+                            "timeOnUnits": "sec",
+                            "timeOn": 5,
+                            "timeOffUnits": "sec",
+                            "timeOff": 5
+                          }
+                        },
+                        "5": {
+                          "id": 5,
+                          "name": "Demo Output",
+                          "x": 308.8563084366732,
+                          "y": 117.96238923739458,
+                          "inputs": {
+                            "nodeValue": {
+                              "connections": {
+                                "3-num-undefined": {"node": 3, "output": "num", "data": {}}
+                              }
+                            }
+                          },
+                          "outputs": {},
+                          "data": {"outputType": "Light Bulb", "demoOutput": 0}
+                        }
+                      }
+                    }
+                    }
+                  },
+                  {
+                    "id": "E_FBVtB8YmRI-PrO",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Drag this program to your workspace and modify it in the following way: instead of a timer, use a generator to control the light bulb. To do so, delete the timer and add a generator. Select the &quot;Square&quot; option and add some logic to make the light bulb only turn on when the generated signal is over 0.5. </p>"
                       ]
                     }
                   },
                   {
-                    "id": "ZxBuIjyxogi-XXSt",
+                    "id": "YG4F_eF_sf5xRTaY",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Measure your reaction time</strong></p>",
+                        "<p>How long does it take you to react to signals, such as a changing street crossing sign or catching a ball? </p>",
+                        "<p>As explained in the <a href=' https://www.youtube.com/watch?v=gJEuT3aKcMI'>video</a> that you watched in class, you will work with a partner to measure your reaction time, comparing your dominant and non-dominant hand. Do you expect to observe a difference in reaction time between your two hands?</p>",
+                        "<p>To find out, follow these steps:</p>",
+                        "<p>1. Decide who is the Dropper and who is the Catcher.</p>",
+                        "<p>2. The catcher should extend their <strong>dominant</strong> hand (the hand used for writing) with the index finger and thumb about 1 cm apart. The dropper should hold the ruler at the top such that catcher has their thumb and index fingers on either side of the zero cm mark.</p>",
+                        "<p>3. When the catcher says they are ready. the dropper should count up, in their head, to a number between 3 and 5 (use a different number each time). When the number is reached, they drop the ruler.</p>",
+                        "<p>4. Catcher catches the ruler as fast as they can. Ignore any times the ruler falls on the ground. </p>",
+                        "<p>5. Enter the ruler cm value closest to Catcher’s pinch point in the table below (you should first drag the table to your worksheet). </p>",
+                        "<p>6. Repeat steps 2-5 five times.</p>",
+                        "<p>7. Repeat the process with the catcher&#x27;s <strong>non-dominant</strong> hand. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "t6WGDE4bXbZiFY18",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Results Table </strong></p>",
-                        "<p>Drag these tables into your Workspace and fill them in to record and calculate your results </p>",
-                        "<p>* indicates final results</p>"
+                        "<p>Drag these tables into your Workspace and use them to record and calculate your results.</p>"
                       ]
                     }
                   },
                   [
                     {
-                      "id": "2rK0jCTtMYmIvJvd",
+                      "id": "PLU-GBhowTU1JCQx",
                       "content": {
                         "type": "Table",
                         "name": "Dominant Hand",
                         "columns": [
-                          {"name":"Result","values":["1","2","3","4","5","Shortest, s*","Longest, l*","Range (l - s)","Average"]},
-                          {"name":"Distance (cm)","values":["","","","","","","","",""]},
-                          {"name":"Time (ms)","values":["","","","","","","","",""]}
+                          {"name":"Result","width": 80,"values":["1","2","3","4","5","Shortest (s)","Longest (l)","Range (l - s)","Average"]},
+                          {"name":"Distance (cm)","width": 90,"values":["","","","","","","","",""]},
+                          {"name":"Time (ms)","width": 90,"values":["","","","","","","","",""]}
                         ]
                       }
                     },
                     {
-                      "id": "mza_fc5jHgKTb6qP",
+                      "id": "CwAr5X7907oa2lHB",
                       "content": {
                         "type": "Table",
-                        "name": "Dominant Hand",
+                        "name": "Non-Dominant Hand",
                         "columns": [
-                          {"name":"Result","values":["1","2","3","4","5","Shortest, s*","Longest, l*","Range (l - s)","Average"]},
-                          {"name":"Distance (cm)","values":["","","","","","","","",""]},
-                          {"name":"Time (ms)","values":["","","","","","","","",""]}
+                          {"name":"Result","width": 80,"values":["1","2","3","4","5","Shortest (s)","Longest (l)","Range (l - s)","Average"]},
+                          {"name":"Distance (cm)","width": 90,"values":["","","","","","","","",""]},
+                          {"name":"Time (ms)","width": 90,"values":["","","","","","","","",""]}
                         ]
                       }
                     }
                   ],
                   {
-                    "id": "3f_osWTr5fwnrfJr",
+                    "id": "0OF_cK5_L_qGX9-6",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>If your teacher has provided a Google sheet, please enter your data there to compute the class average. </p>"
+                        "<p>Use the table below to convert drop distance (in cm) to time (in milliseconds, which is thousands of a second):</p>"
                       ]
                     }
                   },
                   {
-                    "display": "teacher",
-                    "id": "Ihzs4bMO9tXxINor",
+                    "id": "X9ptLq-bG2EiGRWN",
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>You may wish to create a Google sheet for your class to calculate the average scores for all students. Create a text region in a CLUE worksheet and put a link to the sheet.</p>"
+                      "type": "Table",
+                      "name": "Reaction Time Look Up Table",
+                      "columns": [
+                        {"name":"distance (cm)","width": 120, "values":["5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","28","29","30"]},
+                        {"name":"time (ms)","width": 120, "values":["101","111","120","128","136","143","150","156","163","169","175","181","186","192","197","202","207","212","217","221","226","235","239","243","247"]}
                       ]
                     }
                   },
                   {
-                    "id": "wbEJRxki1UB_W979",
+                    "id": "JbUupMvRge3gzTsN",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>TRY (Optional)</strong></p>",
-                        "<p>Please take a video of yourself catching an object and play it in slow motion. Please watch the <a href='https://www.youtube.com/watch?v=3XM-4Qavh5k&amp;ab_channel=Distort'>example video</a>. </p>",
+                        "<p>Discuss the following questions with your partner and enter your answers in your workspace:</p>",
+                        "<p>1. Why were you asked to measure your reaction time five times with each hand?</p>",
+                        "<p>2. What factors affect our reaction time?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "JsvQJqP1wapfHCyt",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Extension activity</strong></p>",
+                        "<p>With your partner, take a video of one of you catching an object and play it in slow motion.</p>",
                         "<p>On iPhone: Go into the camera and click “Slo-mo” to take slow motion video</p>",
                         "<p>On Android: Go into the camera, click “video” and then select “slow motion” option.</p>",
-                        "Document the links to your videos in your workspace and share them with your class."
+                        "<p>What did you observe when watching the slow motion videos? Please document your observation in your worksheet. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "vQNxXhP0yeYb6bGi",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Making models</strong></p>",
+                        "<p>With a group of 2-3 other students, make a list of all body systems that affect reaction time. With these body systems in mind, make an illustrated (drawing) and annotated (text) model of the sequence of events occurring during the time at which the ruler was falling. You can use a drawing tile to make your model within your workspace or draw the model on paper/whiteboard and then upload a picture to your workspace. Be prepared to share your thinking during a whole class discussion. </p>",
+                        "<p><strong>Reflection</strong></p>",
+                        "<p>At the end of the activity, please record your current thinking and learning in your Learning journal (see Reflection tab). </p>"
                       ]
                     }
                   }
@@ -928,77 +1007,30 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "5cEQW-ch80mPQMdc",
+                    "id": "It3Z2npmOo0ov-JL",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>DISCUSS</h2>",
-                        "<p>Once one member from each group shares their model, please compare and contrast the models to identify what is similar and different and document these in your worksheet. You can use text, drawings, or any other representation that helps you talk about your model. </p>"
+                        "<p>Please load your Learning Journal (&quot;My Work&quot; &gt;&gt; &quot;Learning Journal&quot;). </p>",
+                        "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>"
                       ]
                     }
                   },
-                  [
-                    {
-                      "id": "XdQL1jg78GYES2eS",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p><strong>Similarities</strong></p>",
-                          "<p></p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "aDq_vUwOpPFto6pu",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p><strong>Differences</strong></p>",
-                          "<p></p>"
-                        ]
-                      }
-                    }
-                  ],
                   {
-                    "id": "hLmzvTkgayYVU_PU",
+                    "id": "ZONlY5CgomZkjkx_",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>After the Investigating how injury to different parts of the nervous system might impact limb movement group work (I am not sure how to structure these because the lesson will be jumping from group work to class work and class work to group work):</p>",
-                        "<h2>SHARE</h2>",
-                        "<p>Each group will share their findings for the question of how injury to different parts of the nervous system might impact limb movement.  For this section, you can share your screen in group view (rectangle icon in the upper right of the screen). Or you can publish to Class Work (rectangle with up arrow in the upper left of the screen) and ask others to look at your model on their computers while one member of the group shares the group&#x27;s results. </p>"
+                        "<p><strong>Lesson 1.2 Journal Entry</strong></p>",
+                        "<p>1. Today&#x27;s date:</p>",
+                        "<p>2. Today&#x27;s topic:</p>",
+                        "<p>3. How do body systems and their interaction help us respond quickly to stimuli?</p>",
+                        "<p>4. How would your reaction time be affected if you used bionic arms like Tilly? Why?</p>"
                       ]
                     }
-                  },
-                  {
-                    "id": "pC1DYCIgCcBCcfiq",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<h2>KWL JOURNAL</h2>",
-                        "<p>You will keep a journal of what you have learned throughout these lessons. Begin or Open a KWL Journal either from the File menu or from the My Work tab. Record today's date. Then drag the table below into your journal and fill it out.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "VX0fplHGo5DQbZPK",
-                    "content": {
-                      "type": "Table",
-                      "name": "After each activity, please record what you know, wonder, and learn about the topic.",
-                      "columns": [
-                        {"name":"Date","values":["","",""]},
-                        {"name":"Today's Topic","values":["","",""]},
-                        {"name":"Know","values":["","",""]},
-                        {"name":"Wonder","values":["","",""]},
-                        {"name":"Learn","values":["","",""]}
-                      ]
-                    }
-                  }  
+                  }
                 ]
               }
             }
@@ -1029,6 +1061,17 @@
                     }
                   },
                   {
+                    "id": "7ya4R1wIYZnjlebp",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Do Now</strong></p>",
+                        "<p>What do you already know about how the nervous system controls movement? Add a text tile in your workspace and answer this question.  </p>"
+                      ]
+                    }
+                  },
+                  {
                     "id": "msAcurKPDmjIhMnE",
                     "title": "Spine [Credit: Montana DPHHS]",
                     "content": {
@@ -1055,7 +1098,7 @@
                         "<p>The nervous system has two main parts</p>",
                         "<p><strong>Central nervous system</strong>: Consists of the brain and spinal cord. </p>",
                         "<p><strong>Peripheral nervous system</strong>: Consists of nerves that branch out from the brain and spinal cord all over your body. </p>",
-                        "<p>Annotate the parts of the nervous system in the following image:</p>"
+                        "<p>Annotate the parts of the nervous system in the following image by adding a text tile to your workspace and indicating what part of the nervous system is marked by each number.  Then, think about how each part of the nervous system might be involved in controlling limb movement. Note: you can also drag images into drawing tiles so you can write on top of them.</p>"
                       ]
                     }
                   },
@@ -1069,18 +1112,17 @@
                     }
                   },
                   {
-                    "id": "lNfXazNoNZ6jm3ec",
+                    "id": "lJ3td0Z3BqgQsVYS",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Lesson 1.3 Journal Entry</strong></p>",
-                        "<p>1. Today&#x27;s date:</p>",
-                        "<p>2. Today&#x27;s topic:</p>",
-                        "<p>3. What did you already know about the nervous system before today&#x27;s activity?</p>",
-                        "<p>4. What are the main things that you learned today about the nervous system?</p>",
-                        "<p>5. What questions do you have about the nervous system?</p>",
-                        "<p>6. Do you think that Tilly&#x27;s nervous system works differently because of her condition? Please explain your answer</p>"
+                        "<p><strong>How does nerve injury affect movement? </strong></p>",
+                        "<p>In the next activity, you will investigate how injury to different parts of the nervous system might impact limb movement. Your team may choose or  be assigned to explore one of the following injuries:</p>",
+                        "<ul><li><a href='https://theconversation.com/how-our-brain-controls-movement-and-makes-new-connections-when-parts-are-damaged-63520#:~:text=The%20brain%27s%20motor%20system%20is,and%20movement%20of%20specific%20muscles'>Brain Injury</a></li><li><a href='https://uihc.org/health-topics/how-does-spinal-cord-work'>Spinal Cord Injury</a></li><li><a href='https://orthoinfo.aaos.org/en/diseases--conditions/nerve-injuries/'>Peripheral Nerve Injury</a></li></ul>",
+                        "<p>In your workspace, summarize in your own words how the injury that you read about could impact limb movement.</p>", 
+                        "<p><strong>Reflection</strong></p>",
+                        "<p>Please record your current thinking and learning in your Learning Journal (see Reflection tab). </p>"
                       ]
                     }
                   },
@@ -1123,21 +1165,6 @@
                       }
                     }
                     }
-                  },
-                  {
-                    "id": "lJ3td0Z3BqgQsVYS",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>How does nerve injury affect movement? </strong></p>",
-                        "<p>In the next activity, you will investigate how injury to different parts of the nervous system might impact limb movement. Your team may choose or  be assigned to explore one of the following injuries:</p>",
-                        "<ul><li><a href='https://theconversation.com/how-our-brain-controls-movement-and-makes-new-connections-when-parts-are-damaged-63520#:~:text=The%20brain%27s%20motor%20system%20is,and%20movement%20of%20specific%20muscles'>Brain Injury</a></li><li><a href='https://uihc.org/health-topics/how-does-spinal-cord-work'>Spinal Cord Injury</a></li><li><a href='https://orthoinfo.aaos.org/en/diseases--conditions/nerve-injuries/'>Peripheral Nerve Injury</a></li></ul>",
-                        "<p>Next, load the rection time model that you created in the previous lesson (Lesson 1.2) and mark the location of the injury that you read about.  Add a text tile below the model and explain how injury to that part of the nervous system would impact someone&#x27;s reaction time (would it make it longer or shorter and why?). </p>",
-                        "<p><strong>Reflection</strong></p>",
-                        "<p>Please record your current thinking and learning in your KWL journal (see Reflection tab). </p>"
-                      ]
-                    }
                   }
                 ]
               }
@@ -1152,14 +1179,13 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><u><strong>Reflection tab:</strong></u></p>",
-                        "<p>Please load your KWL journal (&quot;My Work&quot; &gt;&gt; &quot;KWL Journals&quot;). </p>",
+                        "<p>Please load your Learning journal (&quot;My Work&quot; &gt;&gt; &quot;Learning Journals&quot;). </p>",
                         "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>"
                       ]
                     }
                   },
                   {
-                    "id": "lNfXazNoNZ6jm3ec",
+                    "id": "NzUHmnvCP0UID0gM",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -1167,10 +1193,8 @@
                         "<p><strong>Lesson 1.3 Journal Entry</strong></p>",
                         "<p>1. Today&#x27;s date:</p>",
                         "<p>2. Today&#x27;s topic:</p>",
-                        "<p>3. What did you already know about the nervous system before today&#x27;s activity?</p>",
-                        "<p>4. What are the main things that you learned today about the nervous system?</p>",
-                        "<p>5. What questions do you have about the nervous system?</p>",
-                        "<p>6. Do you think that Tilly&#x27;s nervous system works differently because of her condition? Please explain your answer</p>"
+                        "<p>3. How would your daily life be affected by the injury that your group has explored?</p>",
+                        "<p>4. Of the three injury types that had been discussed (brain, spinal cord, peripheral nerve), which injury type best characterizes Tilly’s condition?  </p>"
                       ]
                     }
                   }
@@ -1210,6 +1234,18 @@
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/Lesson1_4img1.png",
                       "filename": "curriculum/neural-engineering/images/Lesson1_4img1.png"
+                    }
+                  },
+                  {
+                    "id": "-rSXitCykW7FD_q2",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>D﻿o Now</strong></p>",
+                        "<p>Drag and drop the following tile into your workspace and answer the following question:</p>",
+                        "<p>What do you already know about how muscles contract?</p>"
+                      ]
                     }
                   }
                 ]
@@ -1318,6 +1354,7 @@
                   [
                     {
                       "id": "Twbv6PU3nxhlG4qd",
+                      "title": "SpikeRecorder App",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/neural-engineering/images/5.jpg",
@@ -1330,7 +1367,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>The icon for the Backyard Brains Spike Recorder app in the app store.</p>"
+                          "<p>A computer desktop with the Backyard Brains Spike Recorder app.</p>"
                         ]
                       }
                     }
@@ -1351,37 +1388,20 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p>One (1) 9 V Battery and a hand grip (optional). </p>"
+                          "<p>One hand grip (optional)</p>"
                         ]
                       }
                     }
                   ],
-                  {
-                    "id": "UycXde31wVAn6h4h",
-                    "title": "Battery power to Arduino",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/7.jpg",
-                      "filename": "curriculum/neural-engineering/images/7.jpg"
-                    }
-                  },
                   {
                     "id": "hRL2PzfJH5u7ohJD",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
+                        "<h3>Proceedure</h3>",
                         "<p>1. Connect the Arduino board to your computer using the blue USB cable.</p>"
                       ]
-                    }
-                  },
-                  {
-                    "id": "qa3UEw13ZY0pNRWJ",
-                    "title": "Connect Arduino to Computer",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/8.jpg",
-                      "filename": "curriculum/neural-engineering/images/8.jpg"
                     }
                   },
                   {
@@ -1441,52 +1461,55 @@
                       "filename": "curriculum/neural-engineering/images/11.jpg"
                     }
                   },
-                  [
-                    {
-                      "id": "Mo17A3If3LtSFuUG",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>5. Open the Backyard Brains Spike Recorder App on your phone. Your screen should look similar to this:</p>",
-                          "<p> </p>",
-                          "<p>Pinch to change the time scale (horizontal axis) to 1.5 - 2 seconds. You can also change the y-axis scale if needed.  </p>",
-                          "<p> </p>",
-                          "<p>Hold the hand grip and squeeze it (or just make a fist if you don’t have a hand grip). How does the display changes when you use your arm muscles?</p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "nHcjmx6S8pJ4HydI",
-                      "title": "Backyard Brains App",
-                      "content": {
-                        "type": "Image",
-                        "url": "curriculum/neural-engineering/images/12.jpg",
-                        "filename": "curriculum/neural-engineering/images/12.jpg"
-                      }
+                  {
+                    "id": "Mo17A3If3LtSFuUG",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>5. Open the Backyard Brains Spike Recorder App on your computer. Click on the gear icon at the top left corner of the screen. Click on the 'Connect' button just below 'Select Port' (you may need to make the app window larger to view this option).</p>" 
+                      ]
                     }
-                  ],
+                  },
+                  {
+                    "id": "gy5LjOQMM03K1ezq",
+                    "title": "Setting up the SpikeRecoder App",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/filter.png",
+                      "filename": "curriculum/neural-engineering/images/filter.png"
+                    }
+                  },
+                  {
+                    "id": "BfEcsBHvG1mVwV4H",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The signals that you see on the screen reflect your muscle electrical activity.  Change the time scale of your signal to ~1 second by scrolling up/down. You can also use the “+” and “-­” buttons you to change the vertical scale.</p>",
+                        "<p>Hold the hand grip and squeeze it (or just make a fist) - how does the display change?&quot;</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "nHcjmx6S8pJ4HydI",
+                    "title": "Backyard Brains App",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/12.png",
+                      "filename": "curriculum/neural-engineering/images/12.png"
+                    }
+                  },
                   {
                     "id": "7NWg1JOva6MjHeUC",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Now, it is time to reflect on the activity as a group! Use this space to discuss: </p>",
+                        "<h3>EMG Experiment</h3>",
+                        "<p>Now it is time to explore your EMG muscle activity. With your group, select 3 of the following research questions and answer them in your workspace. Make sure to include screenshots from the Spike Recorder App as evidence and describe what is shown in each image. (Screenshots can be copied and pasted into image or drawing tiles in your workspace.)</p>",
                         "<ul><li>How does muscle activity vary between one’s dominant vs. non-dominant hand? </li><li>How does muscle activity vary between different muscles (e.g., forearm vs. forehead muscles)?</li><li>How does muscle activity vary between <a href='https://www.google.com/url?q=https://www.bbc.co.uk/bitesize/guides/zct2hv4/revision/2%23:~:text%3DIn%2520an%2520antagonistic%2520muscle%2520pair,lengthening%2520is%2520called%2520the%2520antagonist.&amp;sa=D&amp;source=docs&amp;ust=1656487065696941&amp;usg=AOvVaw3V0NsK35zz-BzcJKzU5B1m'>agonist and antagonist muscles</a>? </li><li>What happens when we activate our hand muscles for an extended period of time using a <a href='https://backyardbrains.com/experiments/rateoffatigue'>hand gripper</a>?</li><li>Can you predict who’s going to win an arm-wrestling contest based on the contestants’ muscle activity?</li></ul>",
-                        "<p>Please document your observations in your team&#x27;s EMG journal."
-                      ]
-                    }
-                  },
-                  {
-                    "id": "WuopQlrpwqmWttBz",
-                    "content": {
-                      "type": "Table",
-                      "name": "EMG Journal",
-                      "columns": [
-                        {"name":"Question","values":["How does muscle activity vary between one’s dominant vs. non-dominant hand? ","How does muscle activity vary between different muscles (e.g., forearm vs. forehead muscles)?","How does muscle activity vary between agonist and antagonist muscles? (see here)","What happens when one activates their arm muscles for an extended period of time using a hand gripper (see here)?","Can you predict who would win an arm wrestling contest based on the contestants’ muscle activity?","Additional questions I have:"]},
-                        {"name":"Claim (a statement in response to question, supported by evidence)","values":["Compared to the dominant hand, the non-dominant hand’s muscle activity….","","","","",""]},
-                        {"name":"Evidence (may insert screen shots or images of illustrations)","values":["","","","","",""]}
+                        "<p>Please document your observations in your Workspace."
                       ]
                     }
                   },
@@ -1497,7 +1520,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Reflection</strong></p>",
-                        "<p>Please record your current thinking and learning in your KWL journal (see Reflection tab). </p>"
+                        "<p>Please record your current thinking and learning in your Learning Journal (see Reflection tab). </p>"
                       ]
                     }
                   }
@@ -1514,7 +1537,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Please load your KWL journal (&quot;My Work&quot; &gt;&gt; &quot;KWL Journals&quot;). </p>",
+                        "<p>Please load your Learning Journal (&quot;My Work&quot; &gt;&gt; &quot;Learning Journal&quot;). </p>",
                         "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>"
                       ]
                     }
@@ -1528,9 +1551,8 @@
                         "<p><strong>Lesson 1.4 Journal Entry</strong></p>",
                         "<p>1. Today&#x27;s date:</p>",
                         "<p>2. Today&#x27;s topic:</p>",
-                        "<p>3. What did you already know about muscle activity before today&#x27;s activity?</p>",
-                        "<p>4. What are the main things that you learned today about muscle activity?</p>",
-                        "<p>5. What questions do you have about muscle activity?</p>"
+                        "<p>3. What connections do you see between today's activity and Tilly's bionic arms?</p>",
+                        "<p>4. What questions do you have about EMG?</p>"
                       ]
                     }
                   }

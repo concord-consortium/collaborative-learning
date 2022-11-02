@@ -1,5 +1,5 @@
+import { registerSharedModelInfo } from "../../models/shared/shared-model-registry";
 import { registerTextPluginInfo } from "../../models/tools/text/text-plugin-info";
-import { registerSharedModelInfo } from "../../models/tools/tool-content-info";
 import { kSharedVariablesID, SharedVariables } from "./shared-variables";
 import VariablesToolIcon from "./slate/variables.svg";
 import { VariablesPlugin } from "./slate/variables-plugin";
@@ -45,5 +45,3 @@ registerDrawingToolInfo({
   toolClass: VariableDrawingTool,
   buttonComponent: VariableChipToolbarButton
 });
-
-

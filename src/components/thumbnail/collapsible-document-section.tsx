@@ -112,3 +112,4 @@ export const CollapsibleDocumentsSection: React.FC<IProps> = observer(
     </div>
   );
 });
+CollapsibleDocumentsSection.displayName = "CollapsibleDocumentsSection";

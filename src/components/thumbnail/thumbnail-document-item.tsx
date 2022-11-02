@@ -21,7 +21,7 @@ interface IProps {
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
 }
 
-export const ThumbnailDocumentItem = observer((props: IProps) => {
+export const ThumbnailDocumentItem: React.FC<IProps> = observer((props: IProps) => {
   const { dataTestName, canvasContext, document, scale, captionText, isSelected, onIsStarred,
           onDocumentClick, onDocumentDragStart, onDocumentStarClick,
           onDocumentDeleteClick } = props;
@@ -78,6 +78,7 @@ export const ThumbnailDocumentItem = observer((props: IProps) => {
     </div>
   );
 });
+ThumbnailDocumentItem.displayName = "ThumbnailDocumentItem";
 
 /*
  * DocumentStar
