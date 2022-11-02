@@ -16,6 +16,7 @@ import {
 import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT } from "../../lib/debug";
 import { DocumentError } from "./document-error";
+import { Logger } from "../../lib/logger";
 
 import "./canvas.sass";
 
@@ -184,7 +185,8 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       if (prevState.historyDocumentCopy) {
         destroy(prevState.historyDocumentCopy);
       }
-
+      Logger.logHistoryEvent({documentId: this.props.document?.key || '',
+        action: showPlaybackControls ? "showControls": "hideControls" });
       return {
         showPlaybackControls,
         historyDocumentCopy

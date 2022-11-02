@@ -133,6 +133,12 @@ export enum LogEventName {
 
   TEACHER_NETWORK_EXPAND_DOCUMENT_SECTION,
   TEACHER_NETWORK_COLLAPSE_DOCUMENT_SECTION,
+
+  HISTORY_SHOW_CONTROLS,
+  HISTORY_HIDE_CONTROLS,
+  HISTORY_PLAYBACK_START,
+  HISTORY_PLAYBACK_STOP,
+  HISTORY_PLAYBACK_SEEK
 }
 
 // This is the form the log events take
@@ -175,6 +181,15 @@ export interface ILogComment {
   isFirst?: boolean; // only used with "add"
   commentText: string;
   action: CommentAction;
+}
+
+type HistoryAction = "showControls" | "hideControls" | "playStart" | "playStop" | "playSeek";
+export interface ILogHistory {
+  documentId: string;
+  historyEventId?: string;  // The id of the history entry where the action took place. Used for start, stop and seek.
+  historyIndex?: number; // Index into history array. Used for start, stop, seek.
+  historyLength?: number; // Used for start, stop, seek
+  action: HistoryAction;
 }
 
 export class Logger {
@@ -256,6 +271,38 @@ export class Logger {
     // log the facet and section separately; they're embedded in the path, but could be useful independently
     const parameters = { curriculum, curriculumFacet: facet, curriculumSection: section, ...params };
     Logger.log(event, parameters);
+  }
+  
+  public static logHistoryEvent(historyLogInfo: ILogHistory) { 
+    const eventMap: Record<HistoryAction, LogEventName> = {
+      showControls: LogEventName.HISTORY_SHOW_CONTROLS,
+      hideControls: LogEventName.HISTORY_HIDE_CONTROLS,
+      playStart: LogEventName.HISTORY_PLAYBACK_START,
+      playStop: LogEventName.HISTORY_PLAYBACK_STOP,
+      playSeek: LogEventName.HISTORY_PLAYBACK_SEEK
+    };
+    const event = eventMap[historyLogInfo.action];
+    if (isSectionPath(historyLogInfo.documentId)) {
+      Logger.logCurriculumEvent(event, historyLogInfo.documentId,
+        { historyLength: historyLogInfo.historyLength,
+          historyIndex: historyLogInfo.historyIndex,
+          historyEventId: historyLogInfo.historyEventId
+        });
+    }
+    else {
+      const document = this._instance.stores.documents.getDocument(historyLogInfo.documentId)
+                        || this._instance.stores.networkDocuments.getDocument(historyLogInfo.documentId);
+      if (document) {
+        Logger.logDocumentEvent(event, document, 
+          { historyLength: historyLogInfo.historyLength,
+            historyIndex: historyLogInfo.historyIndex,
+            historyEventId: historyLogInfo.historyEventId
+          });
+      }
+      else {
+        console.warn("Warning: couldn't log history event for document:", historyLogInfo.documentId);
+      }
+    }  
   }
 
   public static logDocumentEvent(event: LogEventName, document: DocumentModelType, params?: Record<string, any>) {

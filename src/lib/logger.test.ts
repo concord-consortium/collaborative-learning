@@ -1,5 +1,5 @@
 import mockXhr from "xhr-mock";
-import { Logger, LogEventName, ILogComment } from "./logger";
+import { Logger, LogEventName, ILogComment, ILogHistory } from "./logger";
 import { createDocumentModel, DocumentModelType } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
 import { InvestigationModel } from "../models/curriculum/investigation";
@@ -212,6 +212,130 @@ describe("authed logger", () => {
 
   });
 
+  describe ("log history events", () => {
+    const addDocument = (key: string) => {
+      const document = createDocumentModel({
+        type: ProblemDocument,
+        uid: "1",
+        key,
+        createdAt: 1,
+        content: {},
+        visibility: "public"
+      });
+      stores.documents.add(document);
+    };
+
+    it("logs event with history metadata", (done) => {
+      const documentKey = "source-document";
+      addDocument(documentKey);
+      const historyPayload: ILogHistory = {
+        documentId: documentKey,
+        historyIndex: 12,
+        historyLength: 99,
+        historyEventId: "history-id",
+        action: "playStart"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const historyRequest = JSON.parse(req.body());
+        expect(historyRequest.event).toBe("HISTORY_PLAYBACK_START");
+        expect(historyRequest.parameters.documentKey).toBe(documentKey);
+        expect(historyRequest.parameters.historyEventId).toBe("history-id");
+        expect(historyRequest.parameters.historyLength).toBe(99);
+        expect(historyRequest.parameters.historyIndex).toBe(12);        
+        done();
+        return res.status(201);
+      });
+      Logger.logHistoryEvent(historyPayload);
+    });
+
+    it("logs showControl Event", (done) => {
+      const documentKey = "source-document";
+      addDocument(documentKey);
+      const historyPayload: ILogHistory = {
+        documentId: documentKey,
+        action: "showControls"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const historyRequest = JSON.parse(req.body());
+        expect(historyRequest.event).toBe("HISTORY_SHOW_CONTROLS");
+        expect(historyRequest.parameters.documentKey).toBe(documentKey);
+        done();
+        return res.status(201);
+      });
+      Logger.logHistoryEvent(historyPayload);
+    });
+
+    it("logs showControl Event", (done) => {
+      const documentKey = "source-document";
+      addDocument(documentKey);
+      const historyPayload: ILogHistory = {
+        documentId: documentKey,
+        action: "hideControls"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const historyRequest = JSON.parse(req.body());
+        expect(historyRequest.event).toBe("HISTORY_HIDE_CONTROLS");
+        done();
+        return res.status(201);
+      });
+      Logger.logHistoryEvent(historyPayload);
+    });
+    
+    it("logs playStart Event", (done) => {
+      const documentKey = "source-document";
+      addDocument(documentKey);
+      const historyPayload: ILogHistory = {
+        documentId: documentKey,
+        action: "playStart"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const historyRequest = JSON.parse(req.body());
+        expect(historyRequest.event).toBe("HISTORY_PLAYBACK_START");
+        done();
+        return res.status(201);
+      });
+      Logger.logHistoryEvent(historyPayload);
+    });
+
+    it("logs playEnd Event", (done) => {
+      const documentKey = "source-document";
+      addDocument(documentKey);
+      const historyPayload: ILogHistory = {
+        documentId: documentKey,
+        action: "playStop"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const historyRequest = JSON.parse(req.body());
+        expect(historyRequest.event).toBe("HISTORY_PLAYBACK_STOP");
+        done();
+        return res.status(201);
+      });
+      Logger.logHistoryEvent(historyPayload);
+    });
+
+    it("logs playSeek Event", (done) => {
+      const documentKey = "source-document";
+      addDocument(documentKey);
+      const historyPayload: ILogHistory = {
+        documentId: documentKey,
+        action: "playSeek"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const historyRequest = JSON.parse(req.body());
+        expect(historyRequest.event).toBe("HISTORY_PLAYBACK_SEEK");
+        done();
+        return res.status(201);
+      });
+      Logger.logHistoryEvent(historyPayload);
+    });
+  });
+  
   describe ("log comment events", () => {
     const addDocument = (key: string)=> {
       const document = createDocumentModel({
