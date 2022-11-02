@@ -1,8 +1,9 @@
 import { flow, getSnapshot, getType, Instance, types } from "mobx-state-tree";
 import { IToolTileProps } from "src/components/tools/tool-tile";
-import { SharedModel, SharedModelType } from "../tools/shared-model";
+import { SharedModel, SharedModelType } from "../shared/shared-model";
+import { registerSharedModelInfo } from "../shared/shared-model-registry";
 import { ToolContentModel } from "../tools/tool-types";
-import { registerSharedModelInfo, registerToolContentInfo } from "../tools/tool-content-info";
+import { registerToolContentInfo } from "../tools/tool-content-info";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
 import { createDocumentModel } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
@@ -68,7 +69,7 @@ const TestTileChild = types.model("TestTileChild", {
 const TestTile = ToolContentModel
   .named("TestTile")
   .props({
-    type: "TestTile", 
+    type: "TestTile",
     text: types.maybe(types.string),
     flag: types.maybe(types.boolean),
     counter: 0,
@@ -88,7 +89,7 @@ const TestTile = ToolContentModel
     },
   }))
   .actions(self => ({
-    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {    
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       self.updateCount++;
       const sharedModelValue = self.sharedModel?.value;
       self.text = sharedModelValue ? sharedModelValue + "-tile" : undefined;
@@ -97,7 +98,7 @@ const TestTile = ToolContentModel
       self.flag = _flag;
     },
     setFlagWithoutUndo(_flag: boolean){
-      withoutUndo();      
+      withoutUndo();
       self.flag = _flag;
     },
     updateCounterAsync: flow(function *updateCounterAsync(){
@@ -154,7 +155,7 @@ const defaultDocumentContent = {
 function setupDocument(initialContent? : DocumentContentSnapshotType) {
   const docContentSnapshot = initialContent || defaultDocumentContent;
   const docContent = DocumentContentModel.create(docContentSnapshot);
-  
+
   // This is needed to setup the tree monitor and shared model manager
   const docModel = createDocumentModel({
     uid: "1",
@@ -175,22 +176,22 @@ function setupDocument(initialContent? : DocumentContentSnapshotType) {
 }
 
 const setFlagTrueEntry = {
-  action: "/content/tileMap/t1/content/setFlag", 
-  created: expect.any(Number), 
+  action: "/content/tileMap/t1/content/setFlag",
+  created: expect.any(Number),
   id: expect.any(String),
   records: [
-    { action: "/content/tileMap/t1/content/setFlag", 
+    { action: "/content/tileMap/t1/content/setFlag",
       inversePatches: [
         { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined}
-      ], 
+      ],
       patches: [
         { op: "replace", path: "/content/tileMap/t1/content/flag", value: true}
-      ], 
+      ],
       tree: "test"
-    }, 
-  ], 
-  state: "complete", 
-  tree: "test", 
+    },
+  ],
+  state: "complete",
+  tree: "test",
   undoable: true
 };
 
@@ -203,28 +204,28 @@ it("records a tile change as one history event with one TreeRecordEntry", async 
   await expectEntryToBeComplete(manager, 1);
   const changeDocument = manager.document as Instance<typeof CDocument>;
 
-  expect(getSnapshot(changeDocument.history)).toEqual([ 
-    setFlagTrueEntry 
+  expect(getSnapshot(changeDocument.history)).toEqual([
+    setFlagTrueEntry
   ]);
-});  
+});
 
 const undoEntry = {
-  action: "undo", 
-  created: expect.any(Number), 
+  action: "undo",
+  created: expect.any(Number),
   id: expect.any(String),
   records: [
     { action: "/applyPatchesFromManager",
       inversePatches: [
         { op: "replace", path: "/content/tileMap/t1/content/flag", value: true}
-      ], 
+      ],
       patches: [
         { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined}
-      ], 
+      ],
       tree: "test"
-    }, 
-  ], 
-  state: "complete", 
-  tree: "manager", 
+    },
+  ],
+  state: "complete",
+  tree: "manager",
   undoable: false
 };
 
@@ -243,29 +244,29 @@ it("can undo a tile change", async () => {
   expect(tileContent.flag).toBeUndefined();
 
   const changeDocument = manager.document as Instance<typeof CDocument>;
-  expect(getSnapshot(changeDocument.history)).toEqual([ 
+  expect(getSnapshot(changeDocument.history)).toEqual([
     setFlagTrueEntry,
     undoEntry
   ]);
-});  
+});
 
 const redoEntry = {
-  action: "redo", 
-  created: expect.any(Number), 
+  action: "redo",
+  created: expect.any(Number),
   id: expect.any(String),
   records: [
     { action: "/applyPatchesFromManager",
       inversePatches: [
         { op: "replace", path: "/content/tileMap/t1/content/flag", value: undefined}
-      ], 
+      ],
       patches: [
         { op: "replace", path: "/content/tileMap/t1/content/flag", value: true}
-      ], 
+      ],
       tree: "test"
-    }, 
-  ], 
-  state: "complete", 
-  tree: "manager", 
+    },
+  ],
+  state: "complete",
+  tree: "manager",
   undoable: false
 };
 
@@ -289,12 +290,12 @@ it("can redo a tile change", async () => {
   expect(tileContent.flag).toBe(true);
 
   const changeDocument = manager.document as Instance<typeof CDocument>;
-  expect(getSnapshot(changeDocument.history)).toEqual([ 
+  expect(getSnapshot(changeDocument.history)).toEqual([
     setFlagTrueEntry,
     undoEntry,
     redoEntry
   ]);
-});  
+});
 
 
 it("records a async tile change as one history event with one TreeRecordEntry", async () => {
@@ -306,30 +307,30 @@ it("records a async tile change as one history event with one TreeRecordEntry", 
   await expectEntryToBeComplete(manager, 1);
   const changeDocument = manager.document as Instance<typeof CDocument>;
 
-  expect(getSnapshot(changeDocument.history)).toEqual([ 
+  expect(getSnapshot(changeDocument.history)).toEqual([
     {
-      action: "/content/tileMap/t1/content/updateCounterAsync", 
-      created: expect.any(Number), 
+      action: "/content/tileMap/t1/content/updateCounterAsync",
+      created: expect.any(Number),
       id: expect.any(String),
       records: [
-        { action: "/content/tileMap/t1/content/updateCounterAsync", 
+        { action: "/content/tileMap/t1/content/updateCounterAsync",
           inversePatches: [
             { op: "replace", path: "/content/tileMap/t1/content/counter", value: 0},
             { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1}
-          ], 
+          ],
           patches: [
             { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1},
             { op: "replace", path: "/content/tileMap/t1/content/counter", value: 2}
-          ], 
+          ],
           tree: "test"
-        }, 
-      ], 
-      state: "complete", 
-      tree: "test", 
+        },
+      ],
+      state: "complete",
+      tree: "test",
       undoable: true
-    } 
+    }
   ]);
-}); 
+});
 
 it("records a async tile change and an interleaved history event with 2 entries", async () => {
   const {tileContent, manager} = setupDocument();
@@ -344,31 +345,31 @@ it("records a async tile change and an interleaved history event with 2 entries"
   await expectEntryToBeComplete(manager, 2);
   const changeDocument = manager.document as Instance<typeof CDocument>;
 
-  expect(getSnapshot(changeDocument.history)).toEqual([ 
+  expect(getSnapshot(changeDocument.history)).toEqual([
     setFlagTrueEntry,
     {
-      action: "/content/tileMap/t1/content/updateCounterAsync", 
-      created: expect.any(Number), 
+      action: "/content/tileMap/t1/content/updateCounterAsync",
+      created: expect.any(Number),
       id: expect.any(String),
       records: [
-        { action: "/content/tileMap/t1/content/updateCounterAsync", 
+        { action: "/content/tileMap/t1/content/updateCounterAsync",
           inversePatches: [
             { op: "replace", path: "/content/tileMap/t1/content/counter", value: 0},
             { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1}
-          ], 
+          ],
           patches: [
             { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1},
             { op: "replace", path: "/content/tileMap/t1/content/counter", value: 2}
-          ], 
+          ],
           tree: "test"
-        }, 
-      ], 
-      state: "complete", 
-      tree: "test", 
+        },
+      ],
+      state: "complete",
+      tree: "test",
       undoable: true
-    } 
+    }
   ]);
-}); 
+});
 
 it("can skip adding an action to the undo list", async () => {
   const {tileContent, manager, undoStore} = setupDocument();
@@ -384,7 +385,7 @@ it("can skip adding an action to the undo list", async () => {
   expect(tileContent.flag).toBe(true);
 
   const changeDocument = manager.document as Instance<typeof CDocument>;
-  expect(getSnapshot(changeDocument.history)).toEqual([ 
+  expect(getSnapshot(changeDocument.history)).toEqual([
     // override the action name of the initialUpdateEntry
     {
       ...setFlagTrueEntry,
@@ -462,14 +463,14 @@ it("will print a warning and still add the action to the undo list if any child 
         id: "t1",
         content: {
           type: "TestTile",
-          child: { 
+          child: {
             value: "initial child value"
           }
         },
       }
-    }  
+    }
   };
-  
+
   const {tileContent, manager, undoStore} = setupDocument(documentWithTileChild);
 
   jestSpyConsole("warn", spy => {
@@ -488,26 +489,26 @@ it("will print a warning and still add the action to the undo list if any child 
 
   const changeDocument = manager.document as Instance<typeof CDocument>;
 
-  expect(getSnapshot(changeDocument.history)).toEqual([ 
+  expect(getSnapshot(changeDocument.history)).toEqual([
     {
-      action: "/content/tileMap/t1/content/setChildValue", 
-      created: expect.any(Number), 
+      action: "/content/tileMap/t1/content/setChildValue",
+      created: expect.any(Number),
       id: expect.any(String),
       records: [
-        { action: "/content/tileMap/t1/content/setChildValue", 
+        { action: "/content/tileMap/t1/content/setChildValue",
           inversePatches: [
-            { op: "replace", path: "/content/tileMap/t1/content/child/value", 
+            { op: "replace", path: "/content/tileMap/t1/content/child/value",
               value: "initial child value"}
-          ], 
+          ],
           patches: [
-            { op: "replace", path: "/content/tileMap/t1/content/child/value", 
+            { op: "replace", path: "/content/tileMap/t1/content/child/value",
               value: "new child value"}
-          ], 
+          ],
           tree: "test"
-        }, 
-      ], 
-      state: "complete", 
-      tree: "test", 
+        },
+      ],
+      state: "complete",
+      tree: "test",
       undoable: true
     }
   ]);
@@ -523,7 +524,7 @@ it("records undoable actions that happen in the middle async actions which are n
   await wait(1);
 
   tileContent.setFlag(true);
-  
+
   await updateCounterPromise;
 
   // Make sure the entries are recorded
@@ -535,27 +536,27 @@ it("records undoable actions that happen in the middle async actions which are n
   expect(tileContent.counter).toBe(2);
 
   const changeDocument = manager.document as Instance<typeof CDocument>;
-  expect(getSnapshot(changeDocument.history)).toEqual([ 
+  expect(getSnapshot(changeDocument.history)).toEqual([
     setFlagTrueEntry,
     {
-      action: "/content/tileMap/t1/content/updateCounterWithoutUndoAsync", 
-      created: expect.any(Number), 
+      action: "/content/tileMap/t1/content/updateCounterWithoutUndoAsync",
+      created: expect.any(Number),
       id: expect.any(String),
       records: [
-        { action: "/content/tileMap/t1/content/updateCounterWithoutUndoAsync", 
+        { action: "/content/tileMap/t1/content/updateCounterWithoutUndoAsync",
           inversePatches: [
             { op: "replace", path: "/content/tileMap/t1/content/counter", value: 0},
             { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1}
-          ], 
+          ],
           patches: [
             { op: "replace", path: "/content/tileMap/t1/content/counter", value: 1},
             { op: "replace", path: "/content/tileMap/t1/content/counter", value: 2}
-          ], 
+          ],
           tree: "test"
-        }, 
-      ], 
-      state: "complete", 
-      tree: "test", 
+        },
+      ],
+      state: "complete",
+      tree: "test",
       undoable: false
     }
   ]);
@@ -564,8 +565,8 @@ it("records undoable actions that happen in the middle async actions which are n
 
 /**
  * Remove the Jest `expect.any(Number)` on created, and provide a real id.
- * @param entry 
- * @returns 
+ * @param entry
+ * @returns
  */
 function makeRealHistoryEntry(entry: any): HistoryEntrySnapshot {
   const realEntry = cloneDeep(entry);
@@ -580,8 +581,8 @@ it("can replay the history entries", async () => {
     // document state so we can test creating a document's content complete from
     // scratch.
     const {tileContent, manager} = setupDocument();
-        
-    // Add the history entries used in the tests above so we can replay them all at 
+
+    // Add the history entries used in the tests above so we can replay them all at
     // the same time.
     const history = [
       makeRealHistoryEntry(setFlagTrueEntry),
@@ -596,35 +597,35 @@ it("can replay the history entries", async () => {
     // The history should not change after it is replayed
     const changeDocument = manager.document as Instance<typeof CDocument>;
     expect(getSnapshot(changeDocument.history)).toEqual(history);
-  
+
 });
 
-const initialSharedModelUpdateEntry = { 
-  action: "/content/sharedModelMap/sm1/sharedModel/setValue", 
-  created: expect.any(Number), 
+const initialSharedModelUpdateEntry = {
+  action: "/content/sharedModelMap/sm1/sharedModel/setValue",
+  created: expect.any(Number),
   id: expect.any(String),
   records: [
-    { action: "/handleSharedModelChanges", 
+    { action: "/handleSharedModelChanges",
       inversePatches: [
         { op: "replace", path: "/content/tileMap/t1/content/text", value: undefined}
-      ], 
+      ],
       patches: [
         { op: "replace", path: "/content/tileMap/t1/content/text", value: "something-tile"}
-      ], 
+      ],
       tree: "test"
-    }, 
-    { action: "/content/sharedModelMap/sm1/sharedModel/setValue", 
+    },
+    { action: "/content/sharedModelMap/sm1/sharedModel/setValue",
       inversePatches: [
         { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: undefined}
-      ], 
+      ],
       patches: [
         { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: "something"}
-      ], 
+      ],
       tree: "test"
     }
-  ], 
-  state: "complete", 
-  tree: "test", 
+  ],
+  state: "complete",
+  tree: "test",
   undoable: true
 };
 
@@ -637,37 +638,37 @@ it("records a shared model change as one history event with two TreeRecordEntrie
   await expectEntryToBeComplete(manager, 1);
 
   const changeDocument = manager.document;
-  expect(getSnapshot(changeDocument.history)).toEqual([ 
-    initialSharedModelUpdateEntry 
+  expect(getSnapshot(changeDocument.history)).toEqual([
+    initialSharedModelUpdateEntry
   ]);
-});  
+});
 
 const undoSharedModelEntry = {
-  action: "undo", 
-  created: expect.any(Number), 
+  action: "undo",
+  created: expect.any(Number),
   id: expect.any(String),
   records: [
     { action: "/applyPatchesFromManager",
       inversePatches: [
         { op: "replace", path: "/content/tileMap/t1/content/text", value: "something-tile"}
-      ], 
+      ],
       patches: [
         { op: "replace", path: "/content/tileMap/t1/content/text", value: undefined}
-      ], 
+      ],
       tree: "test"
-    }, 
-    { action: "/applyPatchesFromManager", 
+    },
+    { action: "/applyPatchesFromManager",
       inversePatches: [
         { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: "something"}
-      ], 
+      ],
       patches: [
         { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: undefined}
-      ], 
+      ],
       tree: "test"
     }
-  ], 
-  state: "complete", 
-  tree: "manager", 
+  ],
+  state: "complete",
+  tree: "manager",
   undoable: false
 };
 
@@ -691,38 +692,38 @@ it("can undo a shared model change", async () => {
   expect(sharedModel.value).toBeUndefined();
 
   const changeDocument = manager.document;
-  expect(getSnapshot(changeDocument.history)).toEqual([ 
+  expect(getSnapshot(changeDocument.history)).toEqual([
     initialSharedModelUpdateEntry,
     undoSharedModelEntry
   ]);
 });
 
 const redoSharedModelEntry = {
-  action: "redo", 
-  created: expect.any(Number), 
+  action: "redo",
+  created: expect.any(Number),
   id: expect.any(String),
   records: [
     { action: "/applyPatchesFromManager",
       inversePatches: [
         { op: "replace", path: "/content/tileMap/t1/content/text", value: undefined}
-      ], 
+      ],
       patches: [
         { op: "replace", path: "/content/tileMap/t1/content/text", value: "something-tile"}
-      ], 
+      ],
       tree: "test"
-    }, 
-    { action: "/applyPatchesFromManager", 
+    },
+    { action: "/applyPatchesFromManager",
       inversePatches: [
         { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: undefined}
-      ], 
+      ],
       patches: [
         { op: "replace", path: "/content/sharedModelMap/sm1/sharedModel/value", value: "something"}
-      ], 
+      ],
       tree: "test"
     }
-  ], 
-  state: "complete", 
-  tree: "manager", 
+  ],
+  state: "complete",
+  tree: "manager",
   undoable: false
 };
 
@@ -753,7 +754,7 @@ it("can redo a shared model change", async () => {
   expect(tileContent.text).toBe("something-tile");
 
   const changeDocument = manager.document;
-  expect(getSnapshot(changeDocument.history)).toEqual([ 
+  expect(getSnapshot(changeDocument.history)).toEqual([
     initialSharedModelUpdateEntry,
     undoSharedModelEntry,
     redoSharedModelEntry
@@ -766,8 +767,8 @@ it("can replay history entries that include shared model changes", async () => {
   // document state so we can test creating a document's content complete from
   // scratch.
   const {tileContent, sharedModel, manager} = setupDocument();
-  
-  // Add the history entries used in the tests above so we can replay them all at 
+
+  // Add the history entries used in the tests above so we can replay them all at
   // the same time.
   const history = [
     makeRealHistoryEntry(initialSharedModelUpdateEntry),
@@ -800,7 +801,7 @@ it("can track the addition of a new shared model", async () => {
       }
     }
   });
-  
+
   const sharedModelManager = tileContent.tileEnv?.sharedModelManager;
   const newSharedModel = TestSharedModel.create({value: "new model"});
   const sharedModelId = newSharedModel.id;
@@ -809,7 +810,7 @@ it("can track the addition of a new shared model", async () => {
   await expectEntryToBeComplete(manager, 3);
 
   const changeDocument = manager.document;
-  expect(getSnapshot(changeDocument.history)).toEqual([ 
+  expect(getSnapshot(changeDocument.history)).toEqual([
     {
       action: "/content/addSharedModel",
       created: expect.any(Number),
@@ -818,7 +819,7 @@ it("can track the addition of a new shared model", async () => {
         {
           action: "/content/addSharedModel",
           inversePatches: [
-            { op: "remove", path: `/content/sharedModelMap/${sharedModelId}` } 
+            { op: "remove", path: `/content/sharedModelMap/${sharedModelId}` }
           ],
           patches: [
             {
@@ -871,7 +872,7 @@ it("can track the addition of a new shared model", async () => {
         {
           action: "/content/tileMap/t1/content/updateAfterSharedModelChanges",
           inversePatches: [
-            { 
+            {
               op: "replace", path: "/content/tileMap/t1/content/text",
               value: undefined
             }
@@ -904,8 +905,8 @@ async function expectEntryToBeComplete(manager: Instance<typeof TreeManager>, le
   let timedOut = false;
   try {
     await when(
-      () => changeDocument.history.length >= length && changeDocument.history.at(length-1)?.state === "complete", 
-      {timeout: 100});  
+      () => changeDocument.history.length >= length && changeDocument.history.at(length-1)?.state === "complete",
+      {timeout: 100});
   } catch (e) {
     timedOut = true;
   }

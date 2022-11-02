@@ -7,7 +7,7 @@ import {
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tool-content-info";
 import { ToolContentModel } from "../tool-types";
-import { SharedModelType } from "../shared-model";
+import { SharedModelType } from "../../shared/shared-model";
 import { getAllTextPluginInfos } from "./text-plugin-info";
 
 export const kTextToolID = "Text";
@@ -96,7 +96,7 @@ export const TextContentModel = ToolContentModel
   .actions(self => ({
     updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
       getAllTextPluginInfos().forEach(pluginInfo => {
-        pluginInfo?.updateTextContentAfterSharedModelChanges?.(self, sharedModel); 
+        pluginInfo?.updateTextContentAfterSharedModelChanges?.(self, sharedModel);
       });
     }
   }));
