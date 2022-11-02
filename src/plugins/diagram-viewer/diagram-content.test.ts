@@ -2,7 +2,8 @@ import { castToSnapshot, IAnyStateTreeNode, IAnyType, isAlive, onSnapshot, types
 import { when } from "mobx";
 import { createDiagramContent, defaultDiagramContent,
   DiagramContentModel, DiagramContentModelType } from "./diagram-content";
-import { ISharedModelManager, SharedModelType } from "../../models/tools/shared-model";
+import { SharedModelType } from "../../models/shared/shared-model";
+import { ISharedModelManager } from "../../models/shared/shared-model-manager";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 
 const TestContainer = types.model("TestContainer", {

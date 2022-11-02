@@ -1,8 +1,9 @@
 import { getSnapshot, getType, Instance, types } from "mobx-state-tree";
 import { IToolTileProps } from "src/components/tools/tool-tile";
-import { SharedModel, SharedModelType } from "../tools/shared-model";
+import { SharedModel, SharedModelType } from "../shared/shared-model";
+import { registerSharedModelInfo } from "../shared/shared-model-registry";
 import { ToolContentModel } from "../tools/tool-types";
-import { registerSharedModelInfo, registerToolContentInfo } from "../tools/tool-content-info";
+import { registerToolContentInfo } from "../tools/tool-content-info";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
 import { createDocumentModel } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
@@ -279,8 +280,8 @@ it("can replay the history entries", async () => {
   expect(tileContent.flag).toBe(true);
   expect(tileContent.actionText).toEqual("action 4");
 
-  manager.setCurrentHistoryIndex(manager.document.history.length);
-  expect(manager.currentHistoryIndex).toBe(5);
+  manager.setNumHistoryEntriesApplied(manager.document.history.length);
+  expect(manager.numHistoryEventsApplied).toBe(5);
 
   await manager.goToHistoryEntry(2);
   expect(tileContent.actionText).toBe("action 1");

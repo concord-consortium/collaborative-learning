@@ -8,6 +8,7 @@ import { DocumentContentComponent } from "./document-content";
 import { createDocumentModel, ContentStatus, DocumentModelType } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
 import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
+import { TreeManagerType } from "../../models/history/tree-manager";
 import { PlaybackComponent } from "../playback/playback";
 import {
   IToolApi, IToolApiInterface, IToolApiMap, ToolApiInterfaceContext, EditableToolApiInterfaceRefContext
@@ -15,6 +16,7 @@ import {
 import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT } from "../../lib/debug";
 import { DocumentError } from "./document-error";
+import { Logger } from "../../lib/logger";
 
 import "./canvas.sass";
 
@@ -110,7 +112,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     } else if (documentContent) {
       return (
         <>
-          <DocumentContentComponent content={documentContent}
+          <DocumentContentComponent key={showPlaybackControls ? "history" : "main"} content={documentContent}
                                     documentId={documentToShow?.key}
                                     {...{typeClass, viaTeacherDashboard, ...others}} />
           {overlay}
@@ -183,7 +185,8 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       if (prevState.historyDocumentCopy) {
         destroy(prevState.historyDocumentCopy);
       }
-
+      Logger.logHistoryEvent({documentId: this.props.document?.key || '',
+        action: showPlaybackControls ? "showControls": "hideControls" });
       return {
         showPlaybackControls,
         historyDocumentCopy
@@ -198,6 +201,10 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       if (DEBUG_DOCUMENT) {
         (window as any).currentHistoryDocument = docCopy;
       }
+      const treeManager = docCopy.treeManagerAPI as TreeManagerType;
+      const firestore = this.stores.db.firestore;
+      const user = this.stores.user;
+      treeManager.mirrorHistoryFromFirestore(user, firestore);
       return docCopy;
     }
   };

@@ -37,8 +37,6 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
       "cmd-c": handlers.handleCopy,
       "cmd-x": handlers.handleCut,
       "cmd-v": handlers.handlePaste,
-      "cmd-z": handlers.handleUndo,
-      "cmd-shift-z": handlers.handleRedo,
     });
     setActionHandlers(handlers);
   };

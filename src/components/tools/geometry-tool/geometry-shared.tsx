@@ -17,8 +17,6 @@ export interface IActionHandlers extends IToolbarActionHandlers {
   handleCut: () => void;
   handleCopy: () => void;
   handlePaste: () => void;
-  handleUndo: () => void;
-  handleRedo: () => void;
 }
 
 export type IGeometryProps = IToolTileProps;
