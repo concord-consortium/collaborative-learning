@@ -10,8 +10,11 @@ interface IProps {
   onSelectStamp: () => void;
 }
 export const StampButton: React.FC<IProps> = observer(({ stamp, isSelected, onSelectStamp }) => {
-  gImageMap.getImage(stamp.url);
-  const entry = gImageMap.getCachedImage(stamp.url);
+
+  // TODO if stamps can be uploaded by users and shared with tiles that care about
+  // filenames, then we need to start storing the file name in the stamp and passing
+  // it through to getImageEntry
+  const entry = gImageMap.getImageEntry(stamp.url);
   return (
     <div className={classNames("stamp-button", { select: isSelected })} onClick={() => onSelectStamp()}>
       <img src={entry?.displayUrl} draggable="false" />

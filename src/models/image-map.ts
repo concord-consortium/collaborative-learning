@@ -334,7 +334,20 @@ export const ImageMapModel = types
 
       return storingPromise;
     })
+  }))
+  .views(self => ({
+    getImageEntry(url?: string, options?: IImageBaseOptions) {
+      if (!url) {
+        console.warn("ImageMap#getImageEntry called with a falsy URL", url);
+        return undefined;
+      }
+
+      self.getImage(url, options);
+      return self.getCachedImage(url);
+    }
+
   }));
+
 export type ImageMapModelType = Instance<typeof ImageMapModel>;
 
 /*

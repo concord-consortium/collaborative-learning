@@ -3,7 +3,7 @@ import React, { useCallback } from "react";
 import { observer } from "mobx-react";
 import { autorun } from "mobx";
 import { Tooltip } from "react-tippy";
-import { EntryStatus, gImageMap } from "../../../models/image-map";
+import { gImageMap } from "../../../models/image-map";
 import { DrawingObject, DrawingObjectSnapshot, DrawingTool, IDrawingComponentProps, IDrawingLayer,
   IToolbarButtonProps, typeField } from "./drawing-object";
 import { Point } from "../model/drawing-basic-types";
@@ -37,14 +37,7 @@ export const ImageObject = DrawingObject.named("ImageObject")
       return {nw, se};
     },
     get displayUrl() {
-      let entry = gImageMap.getCachedImage(self.url);
-      // Note: this was causing an infinite loop when loading the image failed.
-      // The ImageMap was updated so it would limit the number times it would
-      // retry fetching an image, and this has stopped the infinite loop.
-      if (!entry || entry.status === EntryStatus.Error) {
-        gImageMap.getImage(self.url, {filename: self.filename});
-        entry = gImageMap.getCachedImage(self.url);
-      }
+      const entry = gImageMap.getImageEntry(self.url, {filename: self.filename});
       // TODO we could return a spinner image if the entry is storing or computing dimensions
       return entry?.displayUrl || (placeholderImage as string);
     },
@@ -177,8 +170,10 @@ export const StampToolbarButton: React.FC<IToolbarButtonProps> = observer(({
     return null;
   }
 
-  gImageMap.getImage(currentStamp.url);
-  const entry = gImageMap.getCachedImage(currentStamp.url);
+  // TODO if stamps can be uploaded by users and shared with tiles that care about
+  // filenames, then we need to start storing the file name in the stamp and passing
+  // it through to getImageEntry
+  const entry = gImageMap.getImageEntry(currentStamp.url);
 
   return (
     <Tooltip title="Stamp" {...tooltipOptions}>
