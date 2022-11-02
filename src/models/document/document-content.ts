@@ -16,7 +16,8 @@ import { Logger, LogEventName } from "../../lib/logger";
 import { IDragTileItem } from "../../models/tools/tool-tile";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
-import { SharedModel, SharedModelType, SharedModelUnion } from "../tools/shared-model";
+import { SharedModel, SharedModelType } from "../shared/shared-model";
+import { SharedModelUnion } from "../shared/shared-model-manager";
 import { DocumentModelType, IDocumentEnvironment } from "./document";
 import { SectionModelType } from "../curriculum/section";
 

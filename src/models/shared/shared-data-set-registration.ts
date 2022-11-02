@@ -1,5 +1,5 @@
 import { kSharedDataSetType, SharedDataSet } from "./shared-data-set";
-import { registerSharedModelInfo } from "./tool-content-info";
+import { registerSharedModelInfo } from "./shared-model-registry";
 
 registerSharedModelInfo({
   type: kSharedDataSetType,

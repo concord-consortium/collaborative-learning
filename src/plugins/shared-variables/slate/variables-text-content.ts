@@ -1,7 +1,7 @@
 import { VariableType } from "@concord-consortium/diagram-view";
 import { getType } from "mobx-state-tree";
 import { Inline } from "slate";
-import { SharedModelType } from "../../../models/tools/shared-model";
+import { SharedModelType } from "../../../models/shared/shared-model";
 import { TextContentModelType } from "../../../models/tools/text/text-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 
@@ -34,7 +34,7 @@ export function getOrFindSharedModel(textContent: TextContentModelType) {
     // not be ready yet
     const sharedModelManager = textContent.tileEnv?.sharedModelManager;
     if (!sharedModelManager || !sharedModelManager.isReady) {
-      // In this case we can't do anything. 
+      // In this case we can't do anything.
       // Print a warning because it should be unusual
       console.warn("shared model manager isn't available");
       return;
@@ -56,7 +56,7 @@ export function getOrFindSharedModel(textContent: TextContentModelType) {
       // Rather than creating the shared variables model here, it would be
       // better to do it like the diagram-content.ts does.  It basically waits
       // for the sharedModelManager to be ready in a MobX reaction and then adds
-      // the shared variables model when it is ready. 
+      // the shared variables model when it is ready.
       //
       // With that approach getVariables could just be a view that doesn't
       // modify any state.
@@ -72,10 +72,10 @@ export function getOrFindSharedModel(textContent: TextContentModelType) {
 
 export function updateAfterSharedModelChanges(
     textContent: TextContentModelType, sharedModel?: SharedModelType) {
-  
+
   const {editor} = textContent;
-  
-  // Look for chips in the document (editor.value) 
+
+  // Look for chips in the document (editor.value)
   // If any of these chips reference variables that no long exist, delete
   // them from the document.
   if (!editor) {
