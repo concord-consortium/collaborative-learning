@@ -51,7 +51,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const eventCreatedTime = currentHistoryEvent?.created;
   const playbackDisabled = numHistoryEventsApplied === undefined || sliderValue === history.length;
 
-  const handlePlayPauseToggle = useCallback((playing?: boolean) => {
+  const handlePlayPauseToggle = (playing?: boolean) => {
     const playStatus = playing !== undefined ? playing : !sliderPlaying;
     Logger.logHistoryEvent({
       documentId: treeManager.mainDocument?.key || '',
@@ -61,7 +61,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
       action: playStatus ? "playStart": "playStop",
     });
     setSliderPlaying(playStatus);
-  },[sliderPlaying, sliderValue]);
+  };
 
   useEffect(() => {
     if (sliderPlaying) {
