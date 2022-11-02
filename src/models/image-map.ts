@@ -404,15 +404,12 @@ export const localAssetsImagesHandler: IImageHandler = {
   },
 
   async store(url: string) {
-    
-    const _url = getAssetUrl(
-      // convert original curriculum image paths
-      url.replace("assets/curriculum", "curriculum")
-        // convert original drawing tool stamp paths
-         .replace("assets/tools/drawing-tool/stamps",
-                  "curriculum/moving-straight-ahead/stamps")
-    );
-    return { contentUrl: _url, displayUrl: _url, success: true  };
+                    // convert original curriculum image paths
+    const _url = url.replace("assets/curriculum", "curriculum")
+                    // convert original drawing tool stamp paths
+                    .replace("assets/tools/drawing-tool/stamps",
+                             "curriculum/moving-straight-ahead/stamps");
+    return { contentUrl: _url, displayUrl: getAssetUrl(_url), success: true  };
   }
 };
 

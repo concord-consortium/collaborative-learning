@@ -127,14 +127,10 @@ export class StampDrawingTool extends DrawingTool {
     if (stamp) {
       const stampImage: ImageObjectSnapshotForAdd = {
         type: "image",
-        // Note: these stamp urls will be absolute, for a production release
-        // they will point at the stamp image for the version of the release
-        // However the image object will use the ImageMap to store this image
-        // in firebase so it is "owned" by the document that is using it. 
-        // So even if the version (or branch during testing) goes away the 
-        // drawing should still be fine.
-        // TODO: this should be tested, it depends on whether CORS is configured
-        // correctly for the collaborative-learning.concord.org CloudFront
+        // Note: the stamp.url used to be converted by the Stamp snapshot pre
+        // processor. This is no longer the case. To safely use this url it
+        // should be passed to the ImageMap and the displayUrl of the returned
+        // entry should be used.
         url: stamp.url,
         x: start.x - (stamp.width / 2),
         y: start.y - (stamp.height / 2),
@@ -147,7 +143,7 @@ export class StampDrawingTool extends DrawingTool {
   }
 }
 
-export const StampToolbarButton: React.FC<IToolbarButtonProps> = ({
+export const StampToolbarButton: React.FC<IToolbarButtonProps> = observer(({
   toolbarManager, togglePaletteState, clearPaletteState
 }) => {
   const tooltipOptions = useTooltipOptions();
@@ -177,17 +173,23 @@ export const StampToolbarButton: React.FC<IToolbarButtonProps> = ({
     }
   };
 
+  if (!currentStamp) {
+    return null;
+  }
+
+  gImageMap.getImage(currentStamp.url);
+  const entry = gImageMap.getCachedImage(currentStamp.url);
+
   return (
-    currentStamp
-      ? <Tooltip title="Stamp" {...tooltipOptions}>
-          <div className={buttonClasses({ modalButton, selected })} {...handlers}>
-            <img src={currentStamp.url} draggable="false" />
-            {stampCount > 1 &&
-              <div className="expand-collapse" onClick={handleExpandCollapseClick}>
-                <SmallCornerTriangle />
-              </div>}
-          </div>
-        </Tooltip>
-      : null
+    <Tooltip title="Stamp" {...tooltipOptions}>
+      <div className={buttonClasses({ modalButton, selected })} {...handlers}>
+        <img src={entry?.displayUrl} draggable="false" />
+        {stampCount > 1 &&
+          <div className="expand-collapse" onClick={handleExpandCollapseClick}>
+            <SmallCornerTriangle />
+          </div>}
+      </div>
+    </Tooltip>
   );
-};
+});
+StampToolbarButton.displayName = "StampToolbarButton";
