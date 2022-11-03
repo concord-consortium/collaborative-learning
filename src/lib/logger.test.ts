@@ -1,4 +1,5 @@
 import mockXhr from "xhr-mock";
+import { getSnapshot } from "mobx-state-tree";
 import { Logger, LogEventName, ILogComment, ILogHistory } from "./logger";
 import { createDocumentModel, DocumentModelType } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
@@ -14,7 +15,6 @@ import { IDragTileItem, ToolTileModel } from "../models/tools/tool-tile";
 import { createSingleTileContent } from "../utilities/test-utils";
 import { ProblemModel, ProblemModelType } from "../models/curriculum/problem";
 import { DocumentContentModel } from "../models/document/document-content";
-import { getSnapshot } from "mobx-state-tree";
 
 
 import { UIModel } from "../models/stores/ui";
