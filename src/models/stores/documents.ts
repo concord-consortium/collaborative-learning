@@ -46,9 +46,7 @@ export const DocumentsModel = types
   }))
   .views(self => ({
     getDocument(documentKey: string) {
-      return self.all.find((document) => {
-        return document.key === documentKey;
-      });
+      return self.all.find((document) => document.key === documentKey);
     },
 
     byType(type: DocumentType) {
