@@ -345,16 +345,23 @@ export class Logger {
                 : LogEventName.COLLAPSE_COMMENT_THREAD_FOR_DOCUMENT
     };
     const event = eventMap[action];
-
+    let tileType = undefined;
     if (isSectionPath(focusDocumentId)) {
-      Logger.logCurriculumEvent(event, focusDocumentId, { tileId: focusTileId, commentText });
+      if (focusTileId) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [unit, facet, investigation, problem, section] = parseSectionPath(focusDocumentId) || [];
+        const curriculumStore = facet === "guide" ?  this._instance.stores.teacherGuide : this._instance.stores.problem;
+        tileType = curriculumStore?.getSectionById(section)?.content?.getTileType(focusTileId);
+      }
+      Logger.logCurriculumEvent(event, focusDocumentId, { tileId: focusTileId, tileType, commentText });
     }
     else {
       const document = this._instance.stores.documents.getDocument(focusDocumentId)
                         || this._instance.stores.networkDocuments.getDocument(focusDocumentId);
       if (document) {
+        tileType = focusTileId ? document.content?.getTileType(focusTileId) : undefined;
         Logger.logDocumentEvent(event,
-          document, { tileId: focusTileId, commentText });
+          document, { tileId: focusTileId, tileType, commentText });
       }
       else {
         console.warn("Warning: couldn't log comment event for document:", focusDocumentId);
