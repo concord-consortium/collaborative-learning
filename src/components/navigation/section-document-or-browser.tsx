@@ -70,7 +70,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
                         : kHeaderHeight + kNavTabHeight + (2 * (kWorkspaceContentMargin + kTabSectionBorderWidth));
   const documentsPanelHeight = vh - headerOffset;
   const documentsPanelStyle = { height: documentsPanelHeight };
-  const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : ""; //original
+  const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : "";
   const handleTabClick = useCallback((title: string, type?: string) => {
     setReferenceDocument(undefined);
     ui.updateFocusDocument();
@@ -210,7 +210,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
         }
       });
   };
-  const renderDocumentBrowserView = (subTab: ISubTabSpec) => {//original
+  const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
     const classHash = classStore.classHash;
     return (
       <div>
@@ -267,7 +267,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
       <EditableDocumentContent
         mode={"1-up"}
         isPrimary={false}
-        document={referenceDocument} //original
+        document={referenceDocument}
         readOnly={true}
         showPlayback={showPlayback}
       />
