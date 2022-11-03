@@ -94,5 +94,5 @@ jobs:
           # Parameters to GHActions have to be strings, so a regular yaml array cannot
           # be used. Instead the `|` turns the following lines into a string
           topBranches: |
-            ["main", "s3-deploy-action"]
+            ["master"]
 
