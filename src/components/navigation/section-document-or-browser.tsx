@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-
+import { observer } from "mobx-react";
 import { useQueryClient } from 'react-query';
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { DocumentModelType } from "../../models/document/document";
@@ -16,7 +16,6 @@ import { NetworkDocumentsSection } from "./network-documents-section";
 import EditIcon from "../../clue/assets/icons/edit-right-icon.svg";
 
 import "./section-document-or-browser.sass";
-import { observer } from "mobx-react";
 
 const kNavItemScale = 0.11;
 const kHeaderHeight = 55;
@@ -93,14 +92,10 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
   },[ui]);
 
   useEffect(()=>{
-    console.log("section-document-or-browser.tsx /n >trigger UseEffect");
     const selectedSection = tabSpec.tab === "supports" ? ENavTabSectionType.kTeacherSupports : undefined;
-    // console.log("section-document-or-browser.tsx /n >selectedSection:", selectedSection);
     if (selectedSection) {
       const selectedIndex = tabSpec.sections?.findIndex(spec => spec.type === selectedSection);
-      // console.log("section-document-or-browser.tsx /n selectedIndex:", selectedIndex);
       if (selectedIndex != null) {
-        // console.log("in line 102");
         setTabIndex(selectedIndex);
       }
     }
@@ -108,25 +103,63 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
   },[]);
 
   useEffect(()=>{
-    if (reset) {
-      // setTimeout to avoid infinite render issues
+    if (reset) {  // setTimeout to avoid infinite render issues
       reset();
       setTimeout(() => handleTabClick(tabSpec.label));
     }
   }, [handleTabClick, reset, tabSpec.label]);
 
   useEffect(()=>{
-    // console.log("useEffect triggered, setReferenceDocument to:", ui.selectedCommentedDocument);
+    //This useEffect sets the correct sectionTab (Workspace, Starred, Learning Log) when you select
+    //on a commented doc in document view
+
+    //Since <SectionDocOrBrowser> is rendered twice for My Work and ClassWork
+    //isActiveTab keeps track of if the selected  doc is part of the active nav tab
+    const isActiveTab =  ui.activeNavTab === tabSpec.label.toLowerCase().replace(' ', '-');
+
+    function setNewTabIndex(key: string, navTab: string ){
+      const doc = store.documents.getDocument(key);
+      if (navTab === "Class Work") {
+        if (doc?.type === "learningLogPublication"){
+          return 1;
+        }
+        else {
+          if (isActiveTab){
+            return 0;
+          }
+        }
+      }
+      if (navTab === "My Work"){
+        if (doc?.type === "learningLog"){
+          return 2;
+        }
+        else {
+          if (isActiveTab){
+            return 0;
+          }
+        }
+      }
+    }
     if (ui.selectedCommentedDocument){
       const newDoc = store.documents.getDocument(ui.selectedCommentedDocument);
-      setReferenceDocument(newDoc);
+      if (isActiveTab) {
+        setReferenceDocument(newDoc);
+      }
+      const newIndex = setNewTabIndex(ui.selectedCommentedDocument, tabSpec.label);
+      if (newIndex !== undefined) {
+        setTabIndex(newIndex);
+      }
     }
-  },[store.documents, ui.selectedCommentedDocument]);
+  // if ui.activeNavTab is in dependency array, it will not remember last saved section subTab
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[store.documents, tabSpec.label, ui.selectedCommentedDocument]);
 
   const handleTabSelect = (tabidx: number) => {
     setTabIndex(tabidx);
     ui.updateFocusDocument();
   };
+
+
 
   const handleSelectDocument = (document: DocumentModelType) => {
     // console.log("\n section-document-or-browser.tsx > \n handleSelectDocument with document: \n",
@@ -191,22 +224,22 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
       });
   };
   const renderDocumentBrowserView = (subTab: ISubTabSpec) => {//original
-    console.log(`\n\n-----renderDocumentBrowserView --------navTab: ${tabSpec.label}------`);
+    // console.log(`\n\n-----renderDocumentBrowserView --------navTab: ${tabSpec.label}------`);
     const classHash = classStore.classHash;
     return (
       <div>
-        {console.log("line 197 subTab:", subTab)}
-        {console.log("subTab.sections", subTab.sections)}
+        {/* {console.log("line 197 subTab:", subTab)} */}
+        {/* {console.log("subTab.sections", subTab.sections)} */}
         {/* {console.log("subTab.sections[0].dataTestHeader:", subTab.sections[0].dataTestHeader)} */}
         {
           subTab.sections.map((section: any, index: any) => {
-            console.log(`----------inside map---- for ${section.title} index: ${index}-----------`);
-            console.log(`inside map with section: `, section);
+            // console.log(`----------inside map---- for ${section.title} index: ${index}-----------`);
+            // console.log(`inside map with section: `, section);
             const _handleDocumentStarClick = section.showStarsForUser(user)
               ? handleDocumentStarClick
               : undefined;
-            console.log("**selectedDocument:", selectedDocument);
-            console.log("**referenceDocument:", referenceDocument);
+            // console.log("**selectedDocument:", selectedDocument);
+            // console.log("**referenceDocument:", referenceDocument);
             // console.log("returning <DocumentCollectionByType> with \n onSelectDocument: ", onSelectDocument,
             // "\n handleSelectDocument:", handleSelectDocument, "\n\n");
 
@@ -266,6 +299,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
 
   return (
     <div className="document-tab-content">
+      {console.log(`rendering ${tabSpec.label} tab with tabIndex: ${tabIndex}`)}
       <Tabs
         className={`document-tabs ${navTabSpec?.tab} ${isChatOpen ? "chat-open" : ""}`}
         forceRenderTabPanel={true}

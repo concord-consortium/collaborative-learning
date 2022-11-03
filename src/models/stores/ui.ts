@@ -180,7 +180,7 @@ export const UIModel = types
         self.focusDocument = documentKey;
       },
       updateFocusDocument() {
-        console.log("ui.ts > updateFocusDocument");
+        // console.log("ui.ts > updateFocusDocument");
         // increment counter to trigger observers to update
         ++self.focusDocUpdates;
       },

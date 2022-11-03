@@ -85,10 +85,10 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
 export const DocumentCollectionByType = observer(({ topTab, tab, section, index, numSections=0, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
-  console.log(`\n------------ < DocumentCollectionByType > -------index: ${index}-----`);
-  console.log(" topTab: ", topTab);
-  console.log("section:", section);
-  console.log("numSections:", numSections);
+  // console.log(`\n------------ < DocumentCollectionByType > -------index: ${index}-----`);
+  // console.log(" topTab: ", topTab);
+  // console.log("section:", section);
+  // console.log("numSections:", numSections);
 
   const appConfigStore = useAppConfig();
   const classStore = useClassStore();
@@ -102,7 +102,7 @@ export const DocumentCollectionByType = observer(({ topTab, tab, section, index,
       return classStore.isTeacher(document.uid);
     },[classStore]);
   const sectionDocs: DocumentModelType[] = getSectionDocs(section, documents, user, isTeacherDocument);
-  console.log("sectionDocs:", sectionDocs);
+  // console.log("sectionDocs:", sectionDocs);
   const isTopPanel = index === 0 && numSections > 1;
   const isBottomPanel = index > 0 && index === numSections - 1;
 
@@ -125,17 +125,17 @@ export const DocumentCollectionByType = observer(({ topTab, tab, section, index,
       <div className={listClass}>
         {showNewDocumentThumbnail &&
           <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
-        {console.log("line 128 sectionDocs:", sectionDocs)}
+        {/* {console.log("line 128 sectionDocs:", sectionDocs)} */}
 
         {sectionDocs.map((document, i) => {
-          console.log("\n\n!!!!!----inside map - documents-type-collection.tsx >sectionDocs.map-------");
-          console.log("line 125: document:", document, "\n document.key:", document.key, "\n index:", i);
+          // console.log("\n\n!!!!!----inside map - documents-type-collection.tsx >sectionDocs.map-------");
+          // console.log("line 125: document:", document, "\n document.key:", document.key, "\n index:", i);
 
           const documentContext = getDocumentContext(document);
-          console.log("---document where topTab is: ", topTab);
-          console.log("---document where tab is: ", tab);
+          // console.log("---document where topTab is: ", topTab);
+          // console.log("---document where tab is: ", tab);
 
-          console.log("line 134:documentContext: ", documentContext);
+          // console.log("line 134:documentContext: ", documentContext);
           return (
             <DocumentContextReact.Provider key={document.key} value={documentContext}>
               <DecoratedDocumentThumbnailItem

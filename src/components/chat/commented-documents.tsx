@@ -163,7 +163,6 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
         myWorkDocuments &&
         (myWorkDocuments).map((doc: PromisedDocumentDocument, index: number) =>{
           const sectionDoc =  store.documents.getDocument(doc.key);
-          const fullSectionDoc = store.networkDocuments.getDocument(doc.key);
           if (sectionDoc){
             return (
               <MyWorkDocuments
@@ -176,8 +175,8 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
             );
           }
           else {
-            console.log("NO SECTION DOC");
-            console.log("src > hooks > use-stores.ts try useDocumentFromStore", fullSectionDoc);
+            // console.log("NO SECTION DOC");
+            // console.log("src > hooks > use-stores.ts try useDocumentFromStore", fullSectionDoc);
           }
         })
 
@@ -219,11 +218,13 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handl
     <div
       className={"document-box"}
       onClick={()=>{
-        console.log("***********");
-        console.log("\n clicked a mywork/classwork doc");
+        console.log("\n***********");
+        // console.log("\n clicked a mywork/classwork doc");
         ui.setActiveNavTab(navTab); //open correct NavTab
         ui.setSelectedTile();
-        console.log("sectionDoc:", sectionDoc);
+        // console.log("sectionDoc:", sectionDoc);
+        // console.log("************\n\n");
+
         ui.setSelectedCommentedDocument(sectionDoc.key);
         ui.setFocusDocument(doc.key);
         if (handleDocView !== undefined){

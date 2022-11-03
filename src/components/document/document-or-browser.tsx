@@ -6,7 +6,8 @@ import { ENavTab, ENavTabSectionType, NavTabSpec } from "../../models/view/nav-t
 import { SectionDocumentOrBrowser } from "../navigation/section-document-or-browser";
 import { EditableDocumentContent, IProps as IEditableDocumentContentProps } from "./editable-document-content";
 
-function getSectionForDocument(document: DocumentModelType) {
+export function getSectionForDocument(document: DocumentModelType) {
+  console.log("document-or-browser.tsx > getSectionForDocument");
   const kDocTypeToSection: Record<string, ENavTabSectionType> = {
     [ProblemDocument]: ENavTabSectionType.kProblemDocuments,
     [PersonalDocument]: ENavTabSectionType.kPersonalDocuments,

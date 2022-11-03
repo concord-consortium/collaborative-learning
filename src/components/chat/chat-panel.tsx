@@ -26,9 +26,9 @@ interface IProps {
 
 let storedDocument: IDocumentMetadata | ICurriculumMetadata;
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
-  console.log("--------- < ChatPanel > ----------");
-  console.log("focusDocument:", focusDocument);
-  console.log("***useDoc or Curr (focusDocument):", useDocumentOrCurriculumMetadata(focusDocument));
+  // console.log("--------- < ChatPanel > ----------");
+  // console.log("focusDocument:", focusDocument);
+  // console.log("***useDoc or Curr (focusDocument):", useDocumentOrCurriculumMetadata(focusDocument));
   const document = useDocumentOrCurriculumMetadata(focusDocument || "sas/0/1/introduction"); //prevents crash
   if ( isCurriculumMetadata(document)){ //we always pass storedDocument into <CommentedDocuments>
     storedDocument = document;

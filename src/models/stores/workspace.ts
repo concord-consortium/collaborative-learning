@@ -23,14 +23,12 @@ export const WorkspaceModel = types
   })
   .actions((self) => {
     const setPrimaryDocument = (document?: DocumentModelType) => {
-      console.log("workspace.ts > line 26 > setPrimaryDocument");
       self.primaryDocumentKey = document && document.key;
       if (document) {
         Logger.logDocumentEvent(LogEventName.VIEW_SHOW_DOCUMENT, document);
       }
     };
     const setComparisonDocument = (document?: DocumentModelType | GroupVirtualDocument) => {
-      console.log("workspace.ts line 32 > setComparisonDocument");
       self.comparisonDocumentKey = document && document.key;
       if (document && !(document instanceof GroupVirtualDocument)) {
         Logger.logDocumentEvent(LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT, document);
