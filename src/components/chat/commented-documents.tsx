@@ -6,6 +6,7 @@ import { getSectionTitle } from "../../models/curriculum/section";
 import { UserModelType } from "../../models/stores/user";
 import { DocumentModelType } from "../../models/document/document";
 import { useDocumentCaption } from "../thumbnail/decorated-document-thumbnail-item";
+import DocumentIcon from "../../assets/icons/document-icon.svg";
 import { ENavTab } from "../../models/view/nav-tabs";
 import "./commented-documents.scss";
 interface IProps {
@@ -124,7 +125,7 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
   }
 
   return (
-    <div>
+    <div className="commented-document-list">
       {
         docsCommentedOn &&
         (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => {
@@ -137,7 +138,7 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
           }
           return (
             <div
-              className={"document-box"}
+            className={`document-box ${navTab}`}
               key={index}
               onClick={() => {
                 ui.setActiveNavTab(navTab); //open correct NavTab
@@ -149,6 +150,9 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
                 }
               }}
             >
+              <div className="document-type-icon">
+                <DocumentIcon/>
+              </div>
               <div className={"title"}>
                 { doc.unit.toUpperCase() + " " + doc.problem + " " + doc.title}
               </div>
@@ -197,7 +201,7 @@ interface JProps {
 export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handleDocView}) => {
   // console.log("-------- <MyWorkDocuments >----------");
   const ui = useUIStore();
-  let navTab: string;
+  let navTab: string ='';
   const myWorkTypes = ["problem", "planning", "learningLog", "personal"];
   const classWorkTypes = ["publication", "learningLogPublication", "personalPublication", "supportPublication"];
   for (let i = 0; i < 4; i++){
@@ -209,15 +213,15 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handl
     }
   }
   let title;
-  title =  useDocumentCaption(sectionDoc as DocumentModelType) + ` | ${doc.key}  | ----- ${doc.type}`;
+  title =  useDocumentCaption(sectionDoc as DocumentModelType);
 
   if (!title){
-    title = `***  | ${doc.title}  | ${doc.key} |  ------  ${doc.type}`;
+    title = `${doc.title}`;
   }
 
   return (
     <div
-      className={"document-box"}
+      className={`document-box my-work-document ${navTab}`}
       onClick={()=>{
         console.log("***********");
         console.log("\n clicked a mywork/classwork doc");
@@ -231,6 +235,9 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handl
         }
       }}
     >
+      <div className="document-type-icon">
+        <DocumentIcon/>
+      </div>
       <div className={"title"}>
         {title}
       </div>
