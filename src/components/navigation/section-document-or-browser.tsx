@@ -72,7 +72,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
   const documentsPanelStyle = { height: documentsPanelHeight };
   const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : ""; //original
   const handleTabClick = useCallback((title: string, type?: string) => {
-    setReferenceDocument(undefined); //original
+    setReferenceDocument(undefined);
     ui.updateFocusDocument();
     ui.setSelectedTile();
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
