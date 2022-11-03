@@ -28,7 +28,7 @@ let storedDocument: IDocumentMetadata | ICurriculumMetadata;
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
 
   const document = useDocumentOrCurriculumMetadata(focusDocument);
-  if ( isCurriculumMetadata(document)){ //we always pass storedDocument into <CommentedDocuments>
+  if ( isCurriculumMetadata(document)){ //we always pass storedDocument (never undefined) into <CommentedDocuments>
     storedDocument = document;
   }
   const content = useCurriculumOrDocumentContent(focusDocument);
