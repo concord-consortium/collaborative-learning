@@ -118,7 +118,7 @@ export const DocumentCollectionByType = observer(({ topTab, tab, section, index,
       <div className={listClass}>
         {showNewDocumentThumbnail &&
           <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
-        {sectionDocs.map((document, i) => {
+        {sectionDocs.map((document) => {
           const documentContext = getDocumentContext(document);
           return (
             <DocumentContextReact.Provider key={document.key} value={documentContext}>

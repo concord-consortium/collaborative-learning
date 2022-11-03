@@ -11,7 +11,7 @@ import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import {useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
 import { CommentedDocuments } from "./commented-documents";
 import { CurriculumDocument } from "../../lib/firestore-schema";
-import { ICurriculumMetadata, IDocumentMetadata, isCurriculumMetadata } from "../../../functions/src/shared";
+import { ICurriculumMetadata, isCurriculumMetadata } from "../../../functions/src/shared";
 
 import "./chat-panel.scss";
 
@@ -23,14 +23,23 @@ interface IProps {
   onCloseChatPanel:(show:boolean) => void;
 }
 
-let storedDocument: IDocumentMetadata | ICurriculumMetadata;
+let storedDocument: ICurriculumMetadata;
 
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
+  // console.log("-------------chat-panel.tsx----------------- ");
+  // console.log("focusDocument: ", focusDocument);
+  // console.log("user:", user);
+  // console.log("activeNavTab:", activeNavTab);
+  const document = useDocumentOrCurriculumMetadata(focusDocument || "sas/0/1/introduction");
+  // const document = useDocumentOrCurriculumMetadata(focusDocument);
 
-  const document = useDocumentOrCurriculumMetadata(focusDocument);
   if ( isCurriculumMetadata(document)){ //we always pass storedDocument (never undefined) into <CommentedDocuments>
+    console.log("line 37");
     storedDocument = document;
   }
+  // console.log("storedDocument: ", storedDocument);
+  // console.log("------------------------------ ");
+
   const content = useCurriculumOrDocumentContent(focusDocument);
   const ordering = content?.getTilesInDocumentOrder();
   const { data: comments } = useDocumentComments(focusDocument);

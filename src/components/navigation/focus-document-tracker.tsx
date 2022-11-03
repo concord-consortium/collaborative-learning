@@ -23,6 +23,8 @@ interface IProps {
   navTabPanelElt: HTMLDivElement | null;
 }
 export const FocusDocumentTracker = observer(({ navTabPanelElt }: IProps) => {
+  console.log("------focus-document-tracker-------:");
+
   const ui = useUIStore();
   const prevUpdates = usePrevious(ui.focusDocUpdates);
   const prevTab = usePrevious(navTabPanelElt);
@@ -31,8 +33,11 @@ export const FocusDocumentTracker = observer(({ navTabPanelElt }: IProps) => {
     if (navTabPanelElt && ((prevTab !== navTabPanelElt) || (ui.focusDocUpdates !== prevUpdates))) {
       // set a timer to allow rendering to complete
       setTimeout(() => {
+        console.log("setTimeOut");
         let focusDocument: string | undefined;
         let focusSection: string | undefined;
+        console.log("focusDocument:", focusDocument);
+        console.log("focusSection:", focusSection);
 
         // find elements at a point below the rows of tab headers
         const bounds = navTabPanelElt.getBoundingClientRect();

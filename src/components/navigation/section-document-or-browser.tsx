@@ -41,6 +41,8 @@ export interface ISubTabSpec {
 
 export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, reset, selectedDocument,
   isChatOpen, onSelectNewDocument, onSelectDocument, onTabClick }) => {
+  // console.log("------<SectionDocumentOrBrowser>---------- ");
+  // console.log("tabSpec.label", tabSpec.label);
   const ui = useUIStore();
   const store = useStores();
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>();
@@ -107,7 +109,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
     //isActiveTab keeps track of if the selected  doc is part of the active nav tab
     const isActiveTab =  ui.activeNavTab === tabSpec.label.toLowerCase().replace(' ', '-');
 
-    function setNewTabIndex(key: string, navTab: string ){
+    function getNewTabIndex(key: string, navTab: string ){
       const doc = store.documents.getDocument(key);
       if (navTab === "Class Work") {
         if (doc?.type === "learningLogPublication"){
@@ -135,7 +137,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
       if (isActiveTab) {
         setReferenceDocument(newDoc);
       }
-      const newIndex = setNewTabIndex(ui.selectedCommentedDocument, tabSpec.label);
+      const newIndex = getNewTabIndex(ui.selectedCommentedDocument, tabSpec.label);
       if (newIndex !== undefined) {
         setTabIndex(newIndex);
       }
@@ -219,6 +221,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
             const _handleDocumentStarClick = section.showStarsForUser(user)
               ? handleDocumentStarClick
               : undefined;
+            // console.log("section-document-or-browser >\n subTab.sections.map > \n referenceDocument:",
+            // referenceDocument);
             return (
               <DocumentCollectionByType
                 key={`${section.type}_${index}`}
@@ -262,7 +266,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
           {getDocumentDisplayTitle(referenceDocument, appConfigStore, problemStore)}
         </div>
         {(!referenceDocument.isRemote)
-            && editButton(tabSpec.tab, sectionClass,referenceDocument)}
+            && editButton(tabSpec.tab, sectionClass, referenceDocument)}
       </div>
       <EditableDocumentContent
         mode={"1-up"}
@@ -278,7 +282,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
       <Tabs
         className={`document-tabs ${navTabSpec?.tab} ${isChatOpen ? "chat-open" : ""}`}
         forceRenderTabPanel={true}
-        onSelect={handleTabSelect} //handleTabSelect
+        onSelect={handleTabSelect}
         selectedIndex={tabIndex}
         selectedTabClassName="selected"
       >
