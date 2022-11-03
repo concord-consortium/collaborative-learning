@@ -8,9 +8,9 @@ import { DocumentModelType } from "../../models/document/document";
 import { useDocumentCaption } from "../thumbnail/decorated-document-thumbnail-item";
 import { ENavTab } from "../../models/view/nav-tabs";
 import "./commented-documents.scss";
+import { getProblemOrdinal } from "../../models/stores/stores";
 
 interface IProps {
-  documentObj: CurriculumDocument,
   user?: UserModelType
   handleDocView: (() => void) | undefined;
 }
@@ -25,11 +25,12 @@ interface PromisedDocumentDocument extends DocumentDocument {
   title?: string
 }
 
-export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleDocView}) => {
+export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   const [db] = useFirestore();
-  const { unit, problem } = documentObj;
   const ui = useUIStore();
   const store = useStores();
+  const problem =  getProblemOrdinal(store);
+  const unit = store.unit.code;
 
   //"Problem"/"Teacher-Guide"
   const [docsCommentedOn, setDocsCommentedOn] = useState<PromisedCurriculumDocument[]>();
@@ -112,10 +113,6 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
     });
     return () => unsubscribeFromDocs?.();
   },[]);
-
-  if (!documentObj){
-    return <>loading</>;
-  }
 
   return (
     <div>

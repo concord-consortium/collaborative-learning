@@ -41,8 +41,6 @@ export interface ISubTabSpec {
 
 export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, reset, selectedDocument,
   isChatOpen, onSelectNewDocument, onSelectDocument, onTabClick }) => {
-  // console.log("------<SectionDocumentOrBrowser>---------- ");
-  // console.log("tabSpec.label", tabSpec.label);
   const ui = useUIStore();
   const store = useStores();
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>();
@@ -75,6 +73,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
   const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : "";
   const handleTabClick = useCallback((title: string, type?: string) => {
     setReferenceDocument(undefined);
+    ui.setSelectedCommentedDocument(undefined);
     ui.updateFocusDocument();
     ui.setSelectedTile();
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
@@ -142,10 +141,10 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
         setTabIndex(newIndex);
       }
     }
+
   // if ui.activeNavTab is in dependency array, it will not remember last saved section subTab
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[store.documents, tabSpec.label, ui.selectedCommentedDocument]);
-
   const handleTabSelect = (tabidx: number) => {
     setTabIndex(tabidx);
     ui.updateFocusDocument();
@@ -158,6 +157,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
       loadDocumentContent(document);
     }
     setReferenceDocument(document);
+    ui.setSelectedCommentedDocument(undefined);
     ui.updateFocusDocument();
     const logEvent = document.isRemote
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
@@ -221,8 +221,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
             const _handleDocumentStarClick = section.showStarsForUser(user)
               ? handleDocumentStarClick
               : undefined;
-            // console.log("section-document-or-browser >\n subTab.sections.map > \n referenceDocument:",
-            // referenceDocument);
             return (
               <DocumentCollectionByType
                 key={`${section.type}_${index}`}

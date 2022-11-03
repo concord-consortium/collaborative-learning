@@ -37,7 +37,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
   }
 
   public render() {
-    // console.log("------nav-tab-panel.tsx-------");
     const { tabs, isResourceExpanded, isExpanderShown } = this.props;
     const { ui: { activeNavTab, dividerPosition, focusDocument, showChatPanel, selectedTileIds },
             user } = this.stores;
@@ -94,7 +93,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
               }
             </div>
             { tabs?.map((tabSpec) => {
-                // console.log("in map: tabSpec:", tabSpec);
                 return (
                   <TabPanel key={tabSpec.tab}>
                     {this.renderTabContent(tabSpec)}
@@ -103,8 +101,6 @@ export class NavTabPanel extends BaseComponent<IProps> {
               })
             }
           </Tabs>
-          {/* {console.log("focusDocument:", focusDocument)} */}
-          {/* {console.log("tabs:", tabs)} */}
           {showChatPanel &&
             <ChatPanel user={user} activeNavTab={activeNavTab} focusDocument={focusDocument} focusTileId={focusTileId}
                         onCloseChatPanel={this.handleShowChatColumn} />}
@@ -175,6 +171,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
       const tabSpec = tabs[tabIndex];
       if (ui.activeNavTab !== tabSpec.tab) {
         ui.setActiveNavTab(tabSpec.tab);
+        ui.setSelectedCommentedDocument(undefined);
         ui.updateFocusDocument();
         const logParameters = {
           tab_name: tabSpec.tab.toString()
