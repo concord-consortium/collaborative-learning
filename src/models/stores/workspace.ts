@@ -51,7 +51,6 @@ export const WorkspaceModel = types
       },
 
       setAvailableDocument(document?: DocumentModelType) {
-        console.log("stores > workspace.ts > setAvailableDocument");
         if (self.comparisonVisible) {
           setComparisonDocument(document);
         }

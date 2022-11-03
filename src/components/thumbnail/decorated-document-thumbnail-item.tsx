@@ -25,9 +25,6 @@ interface IProps {
 }
 
 export function useDocumentCaption(document: DocumentModelType) {
-  // console.log("------decorated-document-thumbnail-item.tsx---------");
-  // console.log("with document.key:", document.key);
-  // console.log("[prop] document:", document);
   const appConfig = useAppConfig();
   const problem = useProblemStore();
   const classStore = useClassStore();
@@ -56,16 +53,10 @@ export const DecoratedDocumentThumbnailItem = observer(({
   section, sectionDocument, tab, scale, selectedDocument,
   onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
 }: IProps) => {
-    // console.log("------<DecoratedDocumentThumbnail Item > ------------");
-    // console.log("tab:", tab);
-    // console.log("section:", section);
-    // console.log("sectionDocument:", sectionDocument);
-    // console.log("caption = useDocumentCaption(sectionDocument):", useDocumentCaption(sectionDocument));
-
     const user = useUserStore();
     const dbStore = useDBStore();
     const tabName = tab.toLowerCase().replace(' ', '-');
-    const caption = useDocumentCaption(sectionDocument) + sectionDocument.key;
+    const caption = useDocumentCaption(sectionDocument);
 
     // sync delete a publication to firebase
     useDocumentSyncToFirebase(user, dbStore.firebase, sectionDocument, true);
@@ -74,8 +65,6 @@ export const DecoratedDocumentThumbnailItem = observer(({
     useLastSupportViewTimestamp(section.type === "teacher-supports");
 
     function handleDocumentClick() {
-      // console.log("decorated-document-thumbnail-item > handleDocumentClick()");
-      // console.log("onSelectDocument?:\n", onSelectDocument, "\n with sectionDocument: ", sectionDocument);
       onSelectDocument?.(sectionDocument);
       (section.type === "teacher-supports") && user.setLastSupportViewTimestamp(Date.now());
     }

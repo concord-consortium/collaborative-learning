@@ -34,7 +34,6 @@ type UIDialogModelSnapshotWithoutType = Omit<UIDialogModelSnapshot, "type">;
 export const UIModel = types
   .model("UI", {
     dividerPosition: kDividerHalf,
-    // dividerPosition: kDividerMax,
     error: types.maybeNull(types.string),
     activeNavTab: ENavTab.kProblems,
     activeGroupId: "",
@@ -180,7 +179,6 @@ export const UIModel = types
         self.focusDocument = documentKey;
       },
       updateFocusDocument() {
-        // console.log("ui.ts > updateFocusDocument");
         // increment counter to trigger observers to update
         ++self.focusDocUpdates;
       },
@@ -202,7 +200,6 @@ export const UIModel = types
         self.teacherPanelKey = key;
       },
       setSelectedCommentedDocument(key: string){
-        console.log("set selectedCommentedDocument to new document key", key);
         self.selectedCommentedDocument = key;
       }
     };

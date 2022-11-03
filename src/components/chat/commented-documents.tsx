@@ -8,6 +8,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { useDocumentCaption } from "../thumbnail/decorated-document-thumbnail-item";
 import { ENavTab } from "../../models/view/nav-tabs";
 import "./commented-documents.scss";
+
 interface IProps {
   documentObj: CurriculumDocument,
   user?: UserModelType
@@ -24,18 +25,13 @@ interface PromisedDocumentDocument extends DocumentDocument {
   title?: string
 }
 
-
 export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleDocView}) => {
-  // console.log("----- < CommentedDocuments > -----------");
-  // console.log("\t documentObj:", documentObj);
-  // console.log("\t user:", user);
-  // console.log("\t handleDocView:", handleDocView);
   const [db] = useFirestore();
   const { unit, problem } = documentObj;
   const ui = useUIStore();
   const store = useStores();
 
-  //Problem + "Teacher - Guide"
+  //"Problem"/"Teacher-Guide"
   const [docsCommentedOn, setDocsCommentedOn] = useState<PromisedCurriculumDocument[]>();
   const cDocsRef = db.collection("curriculum");
   const cDocsInScopeRef = cDocsRef
@@ -47,9 +43,7 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
   const [myWorkDocuments, setMyWorkDocuments] = useState<PromisedDocumentDocument[]>();
   const mDocsRef = db.collection("documents");
   const mDocsInScopeRef = mDocsRef
-    .where("network", "==", user?.network);  //option 1
-    // .where("network", "==", user?.network) //option 2
-    // .where("context_id", "==", "democlass1");//
+    .where("network", "==", user?.network);
 
   //------Curriculum Documents--------
   useEffect(() => {
@@ -142,7 +136,6 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
               onClick={() => {
                 ui.setActiveNavTab(navTab); //open correct NavTab
                 ui.setSelectedTile();
-                console.log("Problem - teacher-guide clicked\n docPath set to:", doc.path);
                 ui.setFocusDocument(doc.path);
                 if (handleDocView !== undefined){
                   handleDocView();
@@ -174,10 +167,6 @@ export const CommentedDocuments: React.FC<IProps> = ({documentObj, user, handleD
               />
             );
           }
-          else {
-            // console.log("NO SECTION DOC");
-            // console.log("src > hooks > use-stores.ts try useDocumentFromStore", fullSectionDoc);
-          }
         })
 
       }
@@ -194,7 +183,6 @@ interface JProps {
 }
 
 export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handleDocView}) => {
-  // console.log("-------- <MyWorkDocuments >----------");
   const ui = useUIStore();
   let navTab: string;
   const myWorkTypes = ["problem", "planning", "learningLog", "personal"];
@@ -207,24 +195,14 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handl
       navTab = ENavTab.kClassWork;
     }
   }
-  let title;
-  title =  useDocumentCaption(sectionDoc as DocumentModelType) + ` | ${doc.key}  | ----- ${doc.type}`;
-
-  if (!title){
-    title = `***  | ${doc.title}  | ${doc.key} |  ------  ${doc.type}`;
-  }
+  const title =  useDocumentCaption(sectionDoc as DocumentModelType);
 
   return (
     <div
       className={"document-box"}
       onClick={()=>{
-        console.log("\n***********");
-        // console.log("\n clicked a mywork/classwork doc");
         ui.setActiveNavTab(navTab); //open correct NavTab
         ui.setSelectedTile();
-        // console.log("sectionDoc:", sectionDoc);
-        // console.log("************\n\n");
-
         ui.setSelectedCommentedDocument(sectionDoc.key);
         ui.setFocusDocument(doc.key);
         if (handleDocView !== undefined){
@@ -240,5 +218,4 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handl
       </div>
     </div>
   );
-
 };

@@ -6,8 +6,7 @@ import { ENavTab, ENavTabSectionType, NavTabSpec } from "../../models/view/nav-t
 import { SectionDocumentOrBrowser } from "../navigation/section-document-or-browser";
 import { EditableDocumentContent, IProps as IEditableDocumentContentProps } from "./editable-document-content";
 
-export function getSectionForDocument(document: DocumentModelType) {
-  console.log("document-or-browser.tsx > getSectionForDocument");
+function getSectionForDocument(document: DocumentModelType) {
   const kDocTypeToSection: Record<string, ENavTabSectionType> = {
     [ProblemDocument]: ENavTabSectionType.kProblemDocuments,
     [PersonalDocument]: ENavTabSectionType.kPersonalDocuments,
@@ -24,7 +23,6 @@ interface IDocumentOrBrowserProps extends IEditableDocumentContentProps {
 }
 
 export const DocumentOrBrowser: React.FC<IDocumentOrBrowserProps> = props => {
-  // console.log("----- < DocumentOrBrowser>--------- with props.onSelectDocument ", props.onSelectDocument);
   const { showBrowser, tabSpec, document, onSelectNewDocument, onSelectDocument, ...others } = props;
   return showBrowser && tabSpec
           ? <SectionDocumentOrBrowser tabSpec={tabSpec}

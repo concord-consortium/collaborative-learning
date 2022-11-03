@@ -47,8 +47,6 @@ export const DocumentsModel = types
   .views(self => ({
     getDocument(documentKey: string) {
       return self.all.find((document) => {
-        // console.log("----documents.ts---------getDocumentsFunction---");
-        // console.log("document.key", document.key, "documentKey", documentKey);
         return document.key === documentKey;
       });
     },

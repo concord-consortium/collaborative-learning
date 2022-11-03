@@ -9,12 +9,11 @@ import {
 } from "../../hooks/document-comment-hooks";
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import {useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
-// import { useUserContext } from "../../hooks/use-user-context";
 import { CommentedDocuments } from "./commented-documents";
 import { CurriculumDocument } from "../../lib/firestore-schema";
+import { ICurriculumMetadata, IDocumentMetadata, isCurriculumMetadata } from "../../../functions/src/shared";
 
 import "./chat-panel.scss";
-import { ICurriculumMetadata, IDocumentMetadata, isCurriculumMetadata } from "../../../functions/src/shared";
 
 interface IProps {
   user?: UserModelType;
@@ -25,18 +24,13 @@ interface IProps {
 }
 
 let storedDocument: IDocumentMetadata | ICurriculumMetadata;
+
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
-  // console.log("--------- < ChatPanel > ----------");
-  // console.log("focusDocument:", focusDocument);
-  // console.log("***useDoc or Curr (focusDocument):", useDocumentOrCurriculumMetadata(focusDocument));
-  const document = useDocumentOrCurriculumMetadata(focusDocument || "sas/0/1/introduction"); //prevents crash
+
+  const document = useDocumentOrCurriculumMetadata(focusDocument);
   if ( isCurriculumMetadata(document)){ //we always pass storedDocument into <CommentedDocuments>
     storedDocument = document;
   }
-
-  // console.log("focusDocument", focusDocument);
-  // console.log("document:", document);
-  // console.log("useUserContext():", useUserContext());
   const content = useCurriculumOrDocumentContent(focusDocument);
   const ordering = content?.getTilesInDocumentOrder();
   const { data: comments } = useDocumentComments(focusDocument);
@@ -88,8 +82,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       : undefined;
   }, [commentsPath, deleteCommentMutation, focusDocument, focusTileId]);
 
-  //state - determines comments vs documentView
-  const [isDocumentView, setIsDocumentView] = useState(false);
+  const [isDocumentView, setIsDocumentView] = useState(false); // switches between "Comments View" vs "Document View"
   const [chatPanelTitle, setChatPanelTitle] = useState("Comments");
 
   const handleDocumentClick = () => {
@@ -100,18 +93,10 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     setChatPanelTitle(isDocumentView ? "Documents" : "Comments");
   }, [isDocumentView]);
 
-
   const newCommentCount = unreadComments?.length || 0;
 
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
-      {/* {console.log("------- < ChatPanel > render --------")} */}
-      {/* {console.log("user:", user)} */}
-
-      {/* {console.log("documentObj:", document)} */}
-      {/* {console.log("handleDocView", handleDocumentClick)} */}
-      {/* {console.log("focusDocument:", focusDocument)} */}
-      {/* {console.log("\n")} */}
       <ChatPanelHeader
         activeNavTab={activeNavTab}
         newCommentCount={newCommentCount}
@@ -119,9 +104,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         handleDocView={handleDocumentClick}
         chatPanelTitle={chatPanelTitle}
       />
-      {/* {console.log("chat-panel.tsx line 128: focusDocument:", focusDocument)} */}
-      {/* {console.log("chat-panel.tsx line 129: document:", document)} */}
-
       {
         isDocumentView ?
         <CommentedDocuments
