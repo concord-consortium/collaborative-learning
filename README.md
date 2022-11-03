@@ -34,7 +34,7 @@ You can view the status of all the branch and tag deploys [here](https://github.
 
 The production release is available at `https://collaborative-learning.concord.org`.
 
-Production releases are done using a manually GitHub Actions workflow. You specify which tag you want to release to production and the workflow copies that tags `index-top.html` to `https://collaborative-learning.concord.org/index.html`.
+Production releases are done using a manual GitHub Actions workflow. You specify which tag you want to release to production and the workflow copies that tag's `index-top.html` to `https://collaborative-learning.concord.org/index.html`.
 
 See [docs/deploy.md](docs/deploy.md) for more details.
 

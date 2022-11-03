@@ -50,7 +50,7 @@ Note: there is a `publicPath` configuration option for the `HtmlWebpackPlugin`. 
 
 When running in the regular dev server, you won't see errors when using hard coded paths. 
 
-Typically, hard coded paths will only work if you are using `CopyWebpackPlugin`. This is because these assets need to be copied into the `dist` folder. With import statements the assets are copied for you. If you remove the `CopyWebpackPlugin` you will likely see errors when using the dev server, so you can find the places that need to fixed.
+Typically, hard coded paths will only work if you are using `CopyWebpackPlugin`. This is because these assets need to be copied into the `dist` folder. With import statements the assets are copied for you. If you remove the `CopyWebpackPlugin` you will likely see errors when using the dev server, so you can find the places that need to be fixed.
 
 If you need to continue referencing files without using import, you can find these issues and test fixes for them locally using the following npm scripts:
 - **`build:top-test`** builds the project into the `top-test/specific/release` folder and copies `top-test/specific/release/index-top.html` to `top-test/index-top.html`.
