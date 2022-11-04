@@ -3,7 +3,9 @@ import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { StampModel, StampModelType } from "./stamp";
 import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tools/tool-content-info";
-import { ToolMetadataModel, ToolContentModel, toolContentModelHooks } from "../../../models/tools/tool-types";
+import { ToolMetadataModel } from "../../../models/tools/tool-metadata";
+import { toolModelHooks } from "../../../models/tools/tool-model-hooks";
+import { ToolContentModel } from "../../../models/tools/tool-types";
 import { kDrawingStateVersion, kDrawingToolID } from "./drawing-types";
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
@@ -114,7 +116,7 @@ export const DrawingContentModel = ToolContentModel
       return stringify({type, objects}, {maxLength: 200});
     }
   }))
-  .actions(self => toolContentModelHooks({
+  .actions(self => toolModelHooks({
     doPostCreate(metadata) {
       self.metadata = metadata as DrawingToolMetadataModelType;
     },

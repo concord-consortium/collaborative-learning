@@ -3,8 +3,10 @@ import { addDisposer, getType, Instance, types } from "mobx-state-tree";
 import { kDataCardToolID, kDefaultLabel, kDefaultLabelPrefix } from "./data-card-types";
 import { withoutUndo } from "../../models/history/tree-monitor";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tools/tool-content-info";
+import { ToolMetadataModelType } from "../../models/tools/tool-metadata";
+import { toolModelHooks } from "../../models/tools/tool-model-hooks";
 import { getToolTileModel, setTileTitleFromContent } from "../../models/tools/tool-tile";
-import { ToolContentModel, ToolMetadataModelType, toolContentModelHooks } from "../../models/tools/tool-types";
+import { ToolContentModel } from "../../models/tools/tool-types";
 import {
   addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet, DataSet
 } from "../../models/data/data-set";
@@ -121,7 +123,7 @@ export const DataCardContentModel = ToolContentModel
       ].join("\n");
     }
   }))
-  .actions(self => toolContentModelHooks({
+  .actions(self => toolModelHooks({
     doPostCreate(metadata: ToolMetadataModelType){
       self.metadata = metadata;
     }

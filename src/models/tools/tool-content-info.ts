@@ -1,5 +1,6 @@
 import { FunctionComponent, SVGProps } from "react";
-import { ToolContentModel, ToolContentModelType, ToolMetadataModel } from "./tool-types";
+import { ToolMetadataModel } from "./tool-metadata";
+import { ToolContentModel, ToolContentModelType } from "./tool-types";
 import { IToolTileProps } from "../../components/tools/tool-tile";
 import { AppConfigModelType } from "../stores/app-config-model";
 

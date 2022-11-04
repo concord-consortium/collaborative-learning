@@ -1,9 +1,11 @@
 import { types, Instance, applySnapshot, getSnapshot } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
 import stringify from "json-stringify-pretty-compact";
-import { ToolContentModel, ToolMetadataModelType, toolContentModelHooks } from "../../../models/tools/tool-types";
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { ITileExportOptions } from "../../../models/tools/tool-content-info";
+import { ToolMetadataModelType } from "../../../models/tools/tool-metadata";
+import { toolModelHooks } from "../../../models/tools/tool-model-hooks";
+import { ToolContentModel } from "../../../models/tools/tool-types";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { getToolTileModel, setTileTitleFromContent } from "../../../models/tools/tool-tile";
 
@@ -71,7 +73,7 @@ export const DataflowContentModel = ToolContentModel
       ].join("\n");
     }
   }))
-  .actions(self => toolContentModelHooks({
+  .actions(self => toolModelHooks({
     doPostCreate(metadata: ToolMetadataModelType){
       self.metadata = metadata;
     }
