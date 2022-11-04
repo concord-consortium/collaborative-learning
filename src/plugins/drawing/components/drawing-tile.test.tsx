@@ -1,14 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { IToolApi } from "../../../components/tiles/tile-api";
-import { ToolTileModel } from "../../../models/tiles/tile-model";
+import { ITileApi } from "../../../components/tiles/tile-api";
+import { TileModel } from "../../../models/tiles/tile-model";
 import { Provider } from "mobx-react";
 import { specStores } from "../../../models/stores/spec-stores";
 import { ModalProvider } from "react-modal-hook";
 import { createDrawingContent } from "../model/drawing-content";
 import DrawingToolComponent from "./drawing-tile";
 
-// The starter tile needs to be registered so the ToolTileModel.create
+// The starter tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
 import "../drawing-registration";
 
@@ -18,13 +18,13 @@ describe("DrawingToolComponent", () => {
   const stores = specStores();
 
   const content = createDrawingContent();
-  const model = ToolTileModel.create({content});
+  const model = TileModel.create({content});
   model.setTitle('A Title for Testing');
   render(<div className="document-content" data-testid="document-content"/>);
   const documentContent = screen.getByTestId("document-content");
 
   const defaultProps = {
-    toolTile: null,
+    tileElt: null,
     context: "",
     docId: "",
     documentContent,
@@ -45,10 +45,10 @@ describe("DrawingToolComponent", () => {
     onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number): void => {
       throw new Error("Function not implemented.");
     },
-    onRegisterToolApi: (toolApi: IToolApi, facet?: string): void => {
+    onRegisterTileApi: (toolApi: ITileApi, facet?: string): void => {
       // throw new Error("Function not implemented.");
     },
-    onUnregisterToolApi: (facet?: string): void => {
+    onUnregisterTileApi: (facet?: string): void => {
       // throw new Error("Function not implemented.");
     }
   };

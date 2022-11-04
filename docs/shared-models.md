@@ -1,11 +1,11 @@
 # Shared Models
-Tiles can share state through "shared models". 
+Tiles can share state through "shared models".
 
 ## Shared Model Type
 A shared model is a MobX State Tree (MST) object. Its type should "extend" the `SharedModel` type. The shared model should have an `id` and a `type` field. The `id` field is provided by the generic `SharedModel` type. The `type` field should be overridden to be a string literal that is unique. The name of shared model is a good string to use for the type field. So for example if the shared model is defined with `SharedVariables = SharedModel.named("SharedVariables")` then its type field should be `"SharedVariables"`.
 
 ## sharedModelManager
-Tiles that want to use shared models should access them through their content model. A tile's content model can access the `sharedModelManager` with `self.tileEnv?.sharedModelManager`. 
+Tiles that want to use shared models should access them through their content model. A tile's content model can access the `sharedModelManager` with `self.tileEnv?.sharedModelManager`.
 
 The tile can use this manager to:
 - look for an existing shared model at the document level: `findFirstSharedModelByType`.
@@ -25,10 +25,10 @@ The API of the sharedModelManager is described by [ISharedModelManager](../src/m
     1. make sure the sharedModelManager is ready
     2. check if there is a container shared model and it is linked to the tile, if so skip steps 3 and 4.
     3. if there is no container shared model create one
-    4. link this container shared model to the tile, this will also add it to the container if it wasn't already there. 
+    4. link this container shared model to the tile, this will also add it to the container if it wasn't already there.
     5. Do any setup tasks needed with the shared model.
 
-This logic is put in a MobX reaction so that it will be automatically re-run when the environment or available shared models changes. When the tile is first created and attached, it is not part of the document yet, so its environment will not have the sharedModelManager. 
+This logic is put in a MobX reaction so that it will be automatically re-run when the environment or available shared models changes. When the tile is first created and attached, it is not part of the document yet, so its environment will not have the sharedModelManager.
 
 The pattern above is followed by `diagram-content.ts`.  The variables text tool plugin also uses a shared model, but in that case it doesn't create the shared model if it doesn't exist. So the variables text tool plugin doesn't use a reaction as described above.
 
@@ -50,5 +50,4 @@ The shared models are stored/contained at the document level in a `sharedModelMa
 
 The document level `sharedModelMap` is a map of shared model ids to `SharedModelEntry` objects. Each `SharedModelEntry` has a shared model and an array of tiles that are using this shared model. This relationship between shared models and tiles is called a shared model link in other places in the documentation.
 
-Note: one reason for the `SharedModelEntry` indirection is due to the behavior of MST. Using `types.map(types.late(...))` does not work in MST. The late type is evaluated immediately in this case. Putting an object in between was the best approach I could find to deal with this. So now it is `types.map(types.model({sharedModel: types.late(...)}))`. This is similar to how tiles are handled because they have the `ToolTileModel` between them and the document.
-
+Note: one reason for the `SharedModelEntry` indirection is due to the behavior of MST. Using `types.map(types.late(...))` does not work in MST. The late type is evaluated immediately in this case. Putting an object in between was the best approach I could find to deal with this. So now it is `types.map(types.model({sharedModel: types.late(...)}))`. This is similar to how tiles are handled because they have the `TileModel` between them and the document.

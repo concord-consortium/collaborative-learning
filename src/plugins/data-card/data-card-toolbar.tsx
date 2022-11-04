@@ -7,7 +7,7 @@ import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../components/tiles/hooks/use-floating-toolbar-location";
 import { DataCardContentModelType } from "./data-card-content";
-import { ToolTileModelType } from "../../models/tiles/tile-model";
+import { ITileModel } from "../../models/tiles/tile-model";
 import { ImageUploadButton } from "../../components/tiles/image/image-toolbar";
 import { DeleteAttrIconButton } from "./components/add-remove-icons";
 import { EditFacet } from "./data-card-types";
@@ -15,7 +15,7 @@ import { EditFacet } from "./data-card-types";
 import "./data-card-toolbar.scss";
 
 interface IProps extends IFloatingToolbarProps {
-  model: ToolTileModelType;
+  model: ITileModel;
   currEditAttrId: string;
   currEditFacet: EditFacet;
   setImageUrlToAdd: (url: string) => void;
@@ -23,7 +23,7 @@ interface IProps extends IFloatingToolbarProps {
 }
 
 export const DataCardToolbar: React.FC<IProps> = observer(({
-  model, documentContent, toolTile, currEditAttrId, currEditFacet,
+  model, documentContent, tileElt, currEditAttrId, currEditFacet,
   onIsEnabled, setImageUrlToAdd, handleDeleteValue, ...others
   }: IProps) => {
 
@@ -32,7 +32,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
     const enabled = onIsEnabled();
     const location = useFloatingToolbarLocation({
       documentContent,
-      toolTile,
+      tileElt,
       toolbarHeight: 34,
       toolbarTopOffset: 2,
       enabled,

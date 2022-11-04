@@ -5,7 +5,7 @@ import { kDividerHalf, kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-t
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { LogEventName, Logger } from "../../lib/logger";
-import { ToolTileModelType } from "../tiles/tile-model";
+import { ITileModel } from "../tiles/tile-model";
 import { ENavTab } from "../view/nav-tabs";
 
 type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
@@ -58,7 +58,7 @@ export const UIModel = types
     defaultLeftNavExpanded: false,
   }))
   .views((self) => ({
-    isSelectedTile(tile: ToolTileModelType) {
+    isSelectedTile(tile: ITileModel) {
       return self.selectedTileIds.indexOf(tile.id) !== -1;
     },
     get navTabContentShown () {
@@ -159,7 +159,7 @@ export const UIModel = types
         self.activeNavTab = ENavTab.kStudentWork;
         self.activeGroupId = groupId;
       },
-      setSelectedTile(tile?: ToolTileModelType, options?: {append: boolean}) {
+      setSelectedTile(tile?: ITileModel, options?: {append: boolean}) {
         setOrAppendTileIdToSelection(tile && tile.id, options);
       },
       setSelectedTileId(tileId: string, options?: {append: boolean}) {
@@ -208,7 +208,7 @@ export const UIModel = types
 export type UIModelType = typeof UIModel.Type;
 export type UIDialogModelType = typeof UIDialogModel.Type;
 
-export function selectTile(ui: UIModelType, model: ToolTileModelType, isExtending?: boolean) {
+export function selectTile(ui: UIModelType, model: ITileModel, isExtending?: boolean) {
   ui.setSelectedTile(model, { append: !!isExtending });
 }
 

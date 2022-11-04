@@ -1,31 +1,31 @@
 import { Provider } from "mobx-react";
 import React from "react";
 import { act, createEvent, fireEvent, render, screen } from "@testing-library/react";
-import { IToolApiInterface, ToolApiInterfaceContext } from "./tile-api";
-import { ToolTileComponent } from "./tile-component";
+import { ITileApiInterface, TileApiInterfaceContext } from "./tile-api";
+import { TileComponent } from "./tile-component";
 import { specStores } from "../../models/stores/spec-stores";
-import { ToolTileModel } from "../../models/tiles/tile-model";
+import { TileModel } from "../../models/tiles/tile-model";
 import { UnknownContentModel } from "../../models/tiles/tile-types";
 
 // required before tile creation
 import "../../register-tiles";
 
-describe("ToolTile Component", () => {
+describe("TileComponent", () => {
 
   it("renders unknown tile successfully", () => {
 
     const stores = specStores();
     const mockHandleTileResize = jest.fn();
-    const mockToolApi: IToolApiInterface = {
+    const mockToolApi: ITileApiInterface = {
       register: jest.fn(),
       unregister: jest.fn(),
-      getToolApi: () => ({
+      getTileApi: () => ({
         handleTileResize: mockHandleTileResize
       }),
       forEach: jest.fn()
     };
     const tileContentModel = UnknownContentModel.create();
-    const toolTileModel = ToolTileModel.create({ content: tileContentModel });
+    const toolTileModel = TileModel.create({ content: tileContentModel });
 
     const onResizeRow = jest.fn();
     const onSetCanAcceptDrop = jest.fn();
@@ -35,8 +35,8 @@ describe("ToolTile Component", () => {
 
     render(
       <Provider stores={stores}>
-        <ToolApiInterfaceContext.Provider value={mockToolApi}>
-          <ToolTileComponent
+        <TileApiInterfaceContext.Provider value={mockToolApi}>
+          <TileComponent
             context="context"
             docId="docId"
             documentContent={null}
@@ -48,7 +48,7 @@ describe("ToolTile Component", () => {
             onRequestUniqueTitle={onRequestUniqueTitle}
             onRequestRowHeight={onRequestRowHeight}
             />
-        </ToolApiInterfaceContext.Provider>
+        </TileApiInterfaceContext.Provider>
       </Provider>
     );
     expect(screen.getByTestId("tool-tile")).toBeInTheDocument();

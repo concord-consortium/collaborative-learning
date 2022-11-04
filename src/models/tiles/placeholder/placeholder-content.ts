@@ -1,9 +1,9 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
-import { ToolContentModel } from "../tile-types";
+import { TileContentModel } from "../tile-types";
 
 export const kPlaceholderToolID = "Placeholder";
 
-export const PlaceholderContentModel = ToolContentModel
+export const PlaceholderContentModel = TileContentModel
   .named("PlaceholderContent")
   .props({
     type: types.optional(types.literal(kPlaceholderToolID), kPlaceholderToolID),

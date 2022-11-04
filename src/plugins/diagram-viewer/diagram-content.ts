@@ -3,11 +3,11 @@ import { getSnapshot, types, Instance, destroy, SnapshotIn,
 import { reaction } from "mobx";
 import { DQRoot, DQNode } from "@concord-consortium/diagram-view";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tiles/tile-content-info";
-import { ToolContentModel } from "../../models/tiles/tile-types";
+import { TileContentModel } from "../../models/tiles/tile-types";
 import { kDiagramToolID, kDiagramToolStateVersion } from "./diagram-types";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 
-export const DiagramContentModel = ToolContentModel
+export const DiagramContentModel = TileContentModel
   .named("DiagramTool")
   .props({
     type: types.optional(types.literal(kDiagramToolID), kDiagramToolID),

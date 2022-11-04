@@ -4,7 +4,7 @@ import { ITileExportOptions } from "../../models/tiles/tile-content-info";
 
 export type TileResizeEntry = Optional<ResizeObserverEntry,
                                         "borderBoxSize" | "contentBoxSize" | "devicePixelContentBoxSize">;
-export interface IToolApi {
+export interface ITileApi {
   getTitle?: () => string | undefined;
   hasSelection?: () => boolean;
   deleteSelection?: () => void;
@@ -19,17 +19,17 @@ export interface IToolApi {
   handleTileResize?: (entry: TileResizeEntry) => void;
 }
 
-export interface IToolApiInterface {
-  register: (id: string, toolApi: IToolApi) => void;
+export interface ITileApiInterface {
+  register: (id: string, toolApi: ITileApi) => void;
   unregister: (id: string) => void;
-  getToolApi: (id: string) => IToolApi;
-  forEach: (callback: (api: IToolApi) => void) => void;
+  getTileApi: (id: string) => ITileApi;
+  forEach: (callback: (api: ITileApi) => void) => void;
 }
 
-export type IToolApiMap = Record<string, IToolApi>;
+export type ITileApiMap = Record<string, ITileApi>;
 
-export const ToolApiInterfaceContext = createContext<IToolApiInterface | null>(null);
+export const TileApiInterfaceContext = createContext<ITileApiInterface | null>(null);
 
 // set by the canvas and used by the toolbar
-export type EditableToolApiInterfaceRef = React.MutableRefObject<IToolApiInterface | null>;
-export const EditableToolApiInterfaceRefContext = createContext<EditableToolApiInterfaceRef | null>(null);
+export type EditableTileApiInterfaceRef = React.MutableRefObject<ITileApiInterface | null>;
+export const EditableTileApiInterfaceRefContext = createContext<EditableTileApiInterfaceRef | null>(null);

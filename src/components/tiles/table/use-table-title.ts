@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef } from "react";
-import { ToolTileModelType } from "../../../models/tiles/tile-model";
 import { useCurrent } from "../../../hooks/use-current";
 import { IGridContext } from "./table-types";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";

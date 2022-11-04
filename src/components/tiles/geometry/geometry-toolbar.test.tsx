@@ -14,7 +14,7 @@ describe("GeometryToolbar", () => {
 
     render(
       <GeometryToolbar content={content} documentContent={documentContent} onIsEnabled={() => true}
-        onRegisterToolApi={() => null} onUnregisterToolApi={() => null} />
+        onRegisterTileApi={() => null} onUnregisterTileApi={() => null} />
     );
     expect(screen.getByTestId("geometry-toolbar")).toBeInTheDocument();
   });

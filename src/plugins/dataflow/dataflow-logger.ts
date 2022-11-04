@@ -13,7 +13,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
       nodeTypes: [n.name],
       nodeIds: [n.id]
     };
-    Logger.logToolChange(logEventName, operation, change, tileId);
+    Logger.logTileChange(logEventName, operation, change, tileId);
   }
 
   else if (payload instanceof Connection){
@@ -29,7 +29,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
       connectionInputNodeId: inputNode.id,
       connectionInputNodeType: inputNode.name
     };
-    Logger.logToolChange(logEventName, operation, change, tileId);
+    Logger.logTileChange(logEventName, operation, change, tileId);
   }
 
   else if (payload instanceof Control){
@@ -45,7 +45,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
         value: (ctrl as any).props.value,
         units: (ctrl as any).props.currentUnits || ""
       };
-      Logger.logToolChange(logEventName, operation, change, tileId);
+      Logger.logTileChange(logEventName, operation, change, tileId);
     }
   }
 
@@ -59,7 +59,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
         targetType: 'program',
         programTitle: payload.programTitleValue
       };
-      Logger.logToolChange(logEventName, operation, change, tileId);
+      Logger.logTileChange(logEventName, operation, change, tileId);
     }
 
    else if (changeProperties.includes("sensorTypeValue")){
@@ -70,7 +70,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
         selectItem: "sensorType",
         value: payload.sensorTypeValue
       };
-      Logger.logToolChange(logEventName, operation, change, tileId);
+      Logger.logTileChange(logEventName, operation, change, tileId);
     }
 
     else if (changeProperties.includes("sensorDataOptionValue")){
@@ -81,8 +81,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
         selectItem: "sensorDataOption",
         value: payload.sensorDataOptionValue
       };
-      Logger.logToolChange(logEventName, operation, change, tileId);
+      Logger.logTileChange(logEventName, operation, change, tileId);
     }
   }
 }
-

@@ -1,4 +1,4 @@
-import { IToolTileProps } from "../tile-component";
+import { ITileProps } from "../tile-component";
 import { HotKeyHandler } from "../../../utilities/hot-keys";
 
 export interface IToolbarActionHandlers {
@@ -19,4 +19,4 @@ export interface IActionHandlers extends IToolbarActionHandlers {
   handlePaste: () => void;
 }
 
-export type IGeometryProps = IToolTileProps;
+export type IGeometryProps = ITileProps;

@@ -2,11 +2,11 @@ import React from "react";
 import { BaseComponent } from "../../base";
 import { getSectionPlaceholder } from "../../../models/curriculum/section";
 import { PlaceholderContentModelType } from "../../../models/tiles/placeholder/placeholder-content";
-import { IToolTileProps } from "../tile-component";
+import { ITileProps } from "../tile-component";
 
 import "./placeholder-tile.sass";
 
-export default class PlaceholderToolComponent extends BaseComponent<IToolTileProps> {
+export default class PlaceholderTileComponent extends BaseComponent<ITileProps> {
   public render() {
     return (
       <div className="placeholder-tool" onMouseDown={this.handleMouseDown} >

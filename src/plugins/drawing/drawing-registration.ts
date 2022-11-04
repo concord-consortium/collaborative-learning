@@ -1,16 +1,16 @@
-import { registerToolComponentInfo } from "../../models/tiles/tile-component-info";
-import { registerToolContentInfo } from "../../models/tiles/tile-content-info";
+import { registerTileComponentInfo } from "../../models/tiles/tile-component-info";
+import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { DrawingContentModel, DrawingToolMetadataModel, defaultDrawingContent } from "./model/drawing-content";
 import { kDrawingToolID, kDrawingDefaultHeight } from "./model/drawing-types";
 import DrawingToolComponent from "./components/drawing-tile";
 import DrawingToolIcon from "../../clue/assets/icons/draw-tool.svg";
 import { DrawingMigrator } from "./model/drawing-migrator";
 
-registerToolContentInfo({
+registerTileContentInfo({
   id: kDrawingToolID,
   titleBase: "Drawing",
   // TODO: maybe there is a better way to do this kind of casting?
-  //   The issue is that modelClass prop has a type of `typeof ToolContentModel`,
+  //   The issue is that modelClass prop has a type of `typeof TileContentModel`,
   //   That type is pretty restrictive and doesn't accommodate the return of
   //   types.snapshotProcessor. There might be a better way to get a
   //   typescript type for a MST "Class" which is less restrictive
@@ -21,9 +21,9 @@ registerToolContentInfo({
   defaultContent: defaultDrawingContent
 });
 
-registerToolComponentInfo({
+registerTileComponentInfo({
   id: kDrawingToolID,
   Component: DrawingToolComponent,
-  toolTileClass: "drawing-tool-tile",
+  tileEltClass: "drawing-tool-tile",
   Icon: DrawingToolIcon
 });

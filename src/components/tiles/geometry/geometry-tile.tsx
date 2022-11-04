@@ -7,7 +7,7 @@ import { useTileSelectionPointerEvents } from "./use-tile-selection-pointer-even
 import { useUIStore } from "../../../hooks/use-stores";
 import { useCurrent } from "../../../hooks/use-current";
 import { useForceUpdate } from "../hooks/use-force-update";
-import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
+import { useToolbarTileApi } from "../hooks/use-toolbar-tile-api";
 import { useTableLinking } from "./use-table-linking";
 import { HotKeys } from "../../../utilities/hot-keys";
 
@@ -16,8 +16,8 @@ import "./geometry-tile.sass";
 const _GeometryToolComponent: React.FC<IGeometryProps> = ({
   model, readOnly, ...others
 }) => {
-  const { documentId, documentContent, toolTile, scale, onRequestTilesOfType,
-    onRegisterToolApi, onUnregisterToolApi } = others;
+  const { documentId, documentContent, tileElt, scale, onRequestTilesOfType,
+    onRegisterTileApi, onUnregisterTileApi } = others;
   const modelRef = useCurrent(model);
   const domElement = useRef<HTMLDivElement>(null);
   const content = model.content as GeometryContentModelType;
@@ -48,7 +48,7 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
     domElement
   );
   const enabled = !readOnly && !!board && !!actionHandlers;
-  const toolbarProps = useToolbarToolApi({ id: model.id, enabled, onRegisterToolApi, onUnregisterToolApi });
+  const toolbarProps = useToolbarTileApi({ id: model.id, enabled, onRegisterTileApi, onUnregisterTileApi });
   const { isLinkEnabled, showLinkTableDialog } =
     useTableLinking({ documentId, model, onRequestTilesOfType, actionHandlers });
   // We must listen for pointer events because we want to get the events before
@@ -63,7 +63,7 @@ const _GeometryToolComponent: React.FC<IGeometryProps> = ({
           onMouseUpCapture={handlePointerUp}
           onKeyDown={e => hotKeys.current.dispatch(e)} >
 
-      <GeometryToolbar documentContent={documentContent} toolTile={toolTile} scale={scale}
+      <GeometryToolbar documentContent={documentContent} tileElt={tileElt} scale={scale}
         board={board} content={content} handlers={actionHandlers} {...toolbarProps} />
       <GeometryContentWrapper model={model} readOnly={readOnly} {...others}
         onSetBoard={setBoard} onSetActionHandlers={handleSetHandlers}

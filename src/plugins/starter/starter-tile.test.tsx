@@ -1,21 +1,21 @@
 import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { IToolApi } from "../../components/tiles/tile-api";
-import { ToolTileModel } from "../../models/tiles/tile-model";
+import { ITileApi } from "../../components/tiles/tile-api";
+import { TileModel } from "../../models/tiles/tile-model";
 import { defaultStarterContent } from "./starter-content";
 import { StarterToolComponent } from "./starter-tile";
 
-// The starter tile needs to be registered so the ToolTileModel.create
+// The starter tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
 import "./starter-registration";
 
 describe("StarterToolComponent", () => {
   const content = defaultStarterContent();
-  const model = ToolTileModel.create({content});
+  const model = TileModel.create({content});
 
   const defaultProps = {
-    toolTile: null,
+    tileElt: null,
     context: "",
     docId: "",
     documentContent: null,
@@ -35,10 +35,10 @@ describe("StarterToolComponent", () => {
     onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number): void => {
       throw new Error("Function not implemented.");
     },
-    onRegisterToolApi: (toolApi: IToolApi, facet?: string): void => {
+    onRegisterTileApi: (toolApi: ITileApi, facet?: string): void => {
       throw new Error("Function not implemented.");
     },
-    onUnregisterToolApi: (facet?: string): void => {
+    onUnregisterTileApi: (facet?: string): void => {
       throw new Error("Function not implemented.");
     }
   };

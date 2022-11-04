@@ -1,11 +1,11 @@
-import { ToolMetadataModel } from "./tile-metadata";
-import { ToolContentModel, ToolContentModelType } from "./tile-types";
+import { TileMetadataModel } from "./tile-metadata";
+import { TileContentModel, ITileContentModel } from "./tile-types";
 import { AppConfigModelType } from "../stores/app-config-model";
 
 export interface IDMap {
   [id: string]: string;
 }
-export type ToolTileModelContentSnapshotPostProcessor =
+export type TileContentModelSnapshotPostProcessor =
               (content: any, idMap: IDMap, asTemplate?: boolean) => any;
 
 export interface IDefaultContentOptions {
@@ -18,40 +18,40 @@ export interface IDefaultContentOptions {
   appConfig?: AppConfigModelType;
 }
 
-export interface IToolContentInfo {
+export interface ITileContentInfo {
   id: string;
-  modelClass: typeof ToolContentModel;
-  defaultContent: (options?: IDefaultContentOptions) => ToolContentModelType;
+  modelClass: typeof TileContentModel;
+  defaultContent: (options?: IDefaultContentOptions) => ITileContentModel;
   titleBase?: string;
-  metadataClass?: typeof ToolMetadataModel;
+  metadataClass?: typeof TileMetadataModel;
   addSidecarNotes?: boolean;
   defaultHeight?: number;
   exportNonDefaultHeight?: boolean;
-  snapshotPostProcessor?: ToolTileModelContentSnapshotPostProcessor;
+  snapshotPostProcessor?: TileContentModelSnapshotPostProcessor;
 }
 
-const gToolContentInfoMapById: Record<string, IToolContentInfo> = {};
+const gTileContentInfoMap: Record<string, ITileContentInfo> = {};
 
-export function registerToolContentInfo(toolContentInfo: IToolContentInfo) {
+export function registerTileContentInfo(toolContentInfo: ITileContentInfo) {
   // toLowerCase() for legacy support of tool names
-  gToolContentInfoMapById[toolContentInfo.id.toLowerCase()] = toolContentInfo;
+  gTileContentInfoMap[toolContentInfo.id.toLowerCase()] = toolContentInfo;
 }
 
 // ToolContent id, e.g. kDrawingToolID, kGeometryToolID, etc.
 // undefined is supported so callers do not need to check the id before passing
 // it in.
-export function getToolContentInfoById(id?: string) {
+export function getTileContentInfo(id?: string) {
   // toLowerCase() for legacy support of tool names
-  return id ? gToolContentInfoMapById[id.toLowerCase()] : undefined;
+  return id ? gTileContentInfoMap[id.toLowerCase()] : undefined;
 }
 
-export function getToolContentModels() {
-  return Object.values(gToolContentInfoMapById).map(info => info.modelClass);
+export function getTileContentModels() {
+  return Object.values(gTileContentInfoMap).map(info => info.modelClass);
 }
 
-export function getToolIds() {
+export function getTileTypeIds() {
   // the keys are toLowerCased(), so we look up the actual id
-  return Object.values(gToolContentInfoMapById).map(info => info.id);
+  return Object.values(gTileContentInfoMap).map(info => info.id);
 }
 
 export interface ITileExportOptions {

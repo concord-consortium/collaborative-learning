@@ -6,8 +6,8 @@ import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId } from "../table-link-types";
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
-import { ToolMetadataModel } from "../tile-metadata";
-import { toolModelHooks } from "../tile-model-hooks";
+import { TileMetadataModel } from "../tile-metadata";
+import { tileModelHooks } from "../tile-model-hooks";
 import { ICreateRowsProperties, IRowProperties, ITableChange } from "../table/table-change";
 import { canonicalizeValue } from "../table/table-model-types";
 import { convertModelToChanges, exportGeometryJson } from "./geometry-migrate";
@@ -34,7 +34,7 @@ import {
 } from "./jxg-types";
 import { SharedModelType } from "../../shared/shared-model";
 import { ISharedModelManager } from "../../shared/shared-model-manager";
-import { getToolTileModel, setTileTitleFromContent } from "../tile-model";
+import { getTileModel, setTileTitleFromContent } from "../tile-model";
 import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
 import { Logger, LogEventName } from "../../../lib/logger";
@@ -71,7 +71,7 @@ export interface IAxisLabels {
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
-export const GeometryMetadataModel = ToolMetadataModel
+export const GeometryMetadataModel = TileMetadataModel
   .named("GeometryMetadata")
   .props({
     disabled: types.array(types.string),
@@ -173,7 +173,7 @@ export const GeometryContentModel = GeometryBaseContentModel
   }))
   .views(self => ({
     get title(): string | undefined {
-      return getToolTileModel(self)?.title;
+      return getTileModel(self)?.title;
     },
     getObject(id: string) {
       return self.objects.get(id);
@@ -312,7 +312,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     }
   }))
-  .actions(self => toolModelHooks({
+  .actions(self => tileModelHooks({
     doPostCreate(metadata) {
       self.metadata = metadata as GeometryMetadataModelType;
     }
@@ -983,7 +983,7 @@ export const GeometryContentModel = GeometryBaseContentModel
         loggedChangeProps.properties = Array.from(change.properties);
       }
       delete loggedChangeProps.operation;
-      Logger.logToolChange(LogEventName.GRAPH_TOOL_CHANGE, change.operation,
+      Logger.logTileChange(LogEventName.GRAPH_TOOL_CHANGE, change.operation,
         loggedChangeProps, self.metadata ? self.metadata.id : "");
 
       return result;

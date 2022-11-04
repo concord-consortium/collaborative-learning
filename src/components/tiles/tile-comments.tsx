@@ -1,6 +1,6 @@
 import React from "react";
 import { observer, inject } from "mobx-react";
-import { ToolApiInterfaceContext } from "./tile-api";
+import { TileApiInterfaceContext } from "./tile-api";
 import { BaseComponent } from "../base";
 import { TileCommentsModelType, TileCommentModelType } from "../../models/tiles/tile-comments";
 
@@ -15,8 +15,8 @@ interface IProps {
 @observer
 export class TileCommentsComponent extends BaseComponent<IProps> {
 
-  static contextType = ToolApiInterfaceContext;
-  declare context: React.ContextType<typeof ToolApiInterfaceContext>;
+  static contextType = TileApiInterfaceContext;
+  declare context: React.ContextType<typeof TileApiInterfaceContext>;
 
   public render() {
     const { user } = this.stores;
@@ -67,14 +67,14 @@ export class TileCommentsComponent extends BaseComponent<IProps> {
   private handleHover = (selectionInfo?: string) => () => {
     const { model } = this.props;
     const toolApiInterface = this.context;
-    const toolApi = toolApiInterface?.getToolApi(model.tileId);
+    const toolApi = toolApiInterface?.getTileApi(model.tileId);
     selectionInfo && toolApi?.setSelectionHighlight?.(selectionInfo, true);
   };
 
   private handleLeave = (selectionInfo?: string) => () => {
     const { model } = this.props;
     const toolApiInterface = this.context;
-    const toolApi = toolApiInterface?.getToolApi(model.tileId);
+    const toolApi = toolApiInterface?.getTileApi(model.tileId);
     selectionInfo && toolApi?.setSelectionHighlight?.(selectionInfo, false);
   };
 

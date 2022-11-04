@@ -21,7 +21,7 @@ interface IProps extends IFloatingToolbarProps {
 }
 
 export const GeometryToolbar: React.FC<IProps> = observer(({
-  documentContent, toolTile, board, content, handlers, onIsEnabled, ...others
+  documentContent, tileElt, board, content, handlers, onIsEnabled, ...others
 }) => {
   const {
     handleCreateComment, handleCreateMovableLine, handleDelete, handleDuplicate,
@@ -30,7 +30,7 @@ export const GeometryToolbar: React.FC<IProps> = observer(({
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
                     documentContent,
-                    toolTile,
+                    tileElt,
                     toolbarHeight: 38,
                     toolbarTopOffset: 2,
                     enabled,

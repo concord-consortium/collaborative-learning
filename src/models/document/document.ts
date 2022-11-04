@@ -358,10 +358,10 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
       if (!document.content || !call.path?.match(/\/content\/tileMap\//)) {
         return;
       }
-      const toolTileId = call.path?.match(/\/content\/tileMap\/([^/]*)/)?.[1];
-      if (toolTileId) {
-        const toolTile = document.content.tileMap.get(toolTileId);
-        toolTile?.onTileAction(call);
+      const tileTypeId = call.path?.match(/\/content\/tileMap\/([^/]*)/)?.[1];
+      if (tileTypeId) {
+        const tile = document.content.tileMap.get(tileTypeId);
+        tile?.onTileAction(call);
       }
     }));
     if (document.content) {

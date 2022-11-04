@@ -2,10 +2,10 @@ import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn, getType, getEnv, getParent } from "mobx-state-tree";
 import { PlaceholderContentModel } from "../tiles/placeholder/placeholder-content";
 import { kTextToolID } from "../tiles/text/text-content";
-import { getToolContentInfoById, IDocumentExportOptions } from "../tiles/tile-content-info";
-import { ToolContentModelType } from "../tiles/tile-types";
+import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
+import { ITileContentModel } from "../tiles/tile-types";
 import {
-  IDragTileItem, ToolTileModel, ToolTileModelType, ToolTileSnapshotInType, ToolTileSnapshotOutType
+  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut
 } from "../tiles/tile-model";
 import {
   TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
@@ -63,17 +63,17 @@ export interface ITileCountsPerSection {
 // `src/models/mst.test.ts`
 export const SharedModelEntry = types.model("SharedModelEntry", {
   sharedModel: SharedModelUnion,
-  provider: types.safeReference(ToolTileModel, {acceptsUndefined: true}),
-  tiles: types.array(types.safeReference(ToolTileModel, {acceptsUndefined: false}))
+  provider: types.safeReference(TileModel, {acceptsUndefined: true}),
+  tiles: types.array(types.safeReference(TileModel, {acceptsUndefined: false}))
 })
 .actions(self => ({
-  addTile(toolTile: ToolTileModelType, isProvider?: boolean) {
-    isProvider && (self.provider = toolTile);
-    self.tiles.push(toolTile);
+  addTile(tile: ITileModel, isProvider?: boolean) {
+    isProvider && (self.provider = tile);
+    self.tiles.push(tile);
   },
-  removeTile(toolTile: ToolTileModelType) {
-    (toolTile.id === self.provider?.id) && (self.provider = undefined);
-    self.tiles.remove(toolTile);
+  removeTile(tile: ITileModel) {
+    (tile.id === self.provider?.id) && (self.provider = undefined);
+    self.tiles.remove(tile);
   }
 }));
 export type SharedModelEntryType = Instance<typeof SharedModelEntry>;
@@ -82,7 +82,7 @@ export const DocumentContentModel = types
   .model("DocumentContent", {
     rowMap: types.map(TileRowModel),
     rowOrder: types.array(types.string),
-    tileMap: types.map(ToolTileModel),
+    tileMap: types.map(TileModel),
     // The keys to this map should be the id of the shared model
     sharedModelMap: types.map(SharedModelEntry),
   })
@@ -115,7 +115,7 @@ export const DocumentContentModel = types
       get contentId() {
         return contentId;
       },
-      get firstTile(): ToolTileModelType | undefined {
+      get firstTile(): ITileModel | undefined {
         for (const rowId of self.rowOrder) {
           const row = rowId ? self.rowMap.get(rowId) : undefined;
           const tileId = row?.getTileIdAtIndex(0);
@@ -126,7 +126,7 @@ export const DocumentContentModel = types
       getTile(tileId: string) {
         return tileId ? self.tileMap.get(tileId) : undefined;
       },
-      getTileContent(tileId: string): ToolContentModelType | undefined {
+      getTileContent(tileId: string): ITileContentModel | undefined {
         return self.tileMap.get(tileId)?.content;
       },
       getTileType(tileId: string) {
@@ -201,7 +201,7 @@ export const DocumentContentModel = types
         const tileIdMap: { [id: string]: string } = {};
 
         snapshot.tileMap = (tileMap => {
-          const _tileMap: { [id: string]: ToolTileSnapshotOutType } = {};
+          const _tileMap: { [id: string]: ITileModelSnapshotOut } = {};
           each(tileMap, (tile, id) => {
             tileIdMap[id] = tile.id = uniqueId();
             _tileMap[tile.id] = tile;
@@ -220,7 +220,7 @@ export const DocumentContentModel = types
         // TODO: Give the shared models new ids
 
         each(snapshot.tileMap, tile => {
-          getToolContentInfoById(tile.content.type)
+          getTileContentInfo(tile.content.type)
             ?.snapshotPostProcessor?.(tile.content, tileIdMap, asTemplate);
         });
 
@@ -302,7 +302,7 @@ export const DocumentContentModel = types
       return tiles;
     },
     getTilesInSection(sectionId: string) {
-      const tiles: ToolTileModelType[] = [];
+      const tiles: ITileModel[] = [];
       const rows = self.getRowsInSection(sectionId);
       rows.forEach(row => {
         row.tiles
@@ -341,7 +341,7 @@ export const DocumentContentModel = types
       if (!row?.height) return;
       // we only export heights for specific tiles configured to do so
       const tileType = self.getTileType(tileId);
-      const tileContentInfo = getToolContentInfoById(tileType);
+      const tileContentInfo = getTileContentInfo(tileType);
       if (!tileContentInfo?.exportNonDefaultHeight) return;
       // we only export heights when they differ from the default height for the tile
       const defaultHeight = tileContentInfo.defaultHeight;
@@ -411,8 +411,8 @@ export const DocumentContentModel = types
     }
   }))
   .views(self => ({
-    getNewTileTitle(tileContent: ToolContentModelType) {
-      const titleBase = getToolContentInfoById(tileContent.type)?.titleBase || tileContent.type;
+    getNewTileTitle(tileContent: ITileContentModel) {
+      const titleBase = getTileContentInfo(tileContent.type)?.titleBase || tileContent.type;
       const getTitle = (tileId: string) => (self.getTile(tileId) as any)?.title;
       const newTitle = self.getUniqueTitle(tileContent.type, titleBase, getTitle);
       return newTitle;
@@ -449,7 +449,7 @@ export const DocumentContentModel = types
       self.rowOrder.remove(rowId);
       self.rowMap.delete(rowId);
     },
-    insertNewTileInRow(tile: ToolTileModelType, row: TileRowModelType, tileIndexInRow?: number) {
+    insertNewTileInRow(tile: ITileModel, row: TileRowModelType, tileIndexInRow?: number) {
       row.insertTileInRow(tile, tileIndexInRow);
       self.tileMap.put(tile);
     },
@@ -469,7 +469,7 @@ export const DocumentContentModel = types
     addSectionHeaderRow(sectionId: string) {
       self.insertRow(TileRowModel.create({ isSectionHeader: true, sectionId }));
     },
-    addNewTileInNewRowAtIndex(tile: ToolTileModelType, rowIndex: number) {
+    addNewTileInNewRowAtIndex(tile: ITileModel, rowIndex: number) {
       const row = TileRowModel.create({});
       self.insertRow(row, rowIndex);
       self.insertNewTileInRow(tile, row);
@@ -493,7 +493,7 @@ export const DocumentContentModel = types
       if ((beforeRow && beforeRow.isSectionHeader) && (!afterRow || afterRow.isSectionHeader)) {
         const beforeSectionId = beforeRow.sectionId;
         const content = PlaceholderContentModel.create({sectionId: beforeSectionId});
-        const tile = ToolTileModel.create({ content });
+        const tile = TileModel.create({ content });
         self.addNewTileInNewRowAtIndex(tile, rowIndex);
       }
     },
@@ -515,7 +515,7 @@ export const DocumentContentModel = types
         self.addPlaceholderRowIfAppropriate(i);
       }
     },
-    addTileInNewRow(tile: ToolTileModelType, options?: INewTileOptions): INewRowTile {
+    addTileInNewRow(tile: ITileModel, options?: INewTileOptions): INewRowTile {
       const o = options || {};
       if (o.rowIndex === undefined) {
         // by default, insert new tiles after last visible on screen
@@ -530,15 +530,15 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
-    addTileContentInNewRow(content: ToolContentModelType, options?: INewTileOptions): INewRowTile {
+    addTileContentInNewRow(content: ITileContentModel, options?: INewTileOptions): INewRowTile {
       const title = options?.title || self.getNewTileTitle(content);
-      return self.addTileInNewRow(ToolTileModel.create({ title, content }), options);
+      return self.addTileInNewRow(TileModel.create({ title, content }), options);
     },
-    addTileSnapshotInNewRow(snapshot: ToolTileSnapshotInType, options?: INewTileOptions): INewRowTile {
-      return self.addTileInNewRow(ToolTileModel.create(snapshot), options);
+    addTileSnapshotInNewRow(snapshot: ITileModelSnapshotIn, options?: INewTileOptions): INewRowTile {
+      return self.addTileInNewRow(TileModel.create(snapshot), options);
     },
-    addTileSnapshotInExistingRow(snapshot: ToolTileSnapshotInType, options: INewTileOptions): INewRowTile | undefined {
-      const tile = ToolTileModel.create(snapshot);
+    addTileSnapshotInExistingRow(snapshot: ITileModelSnapshotIn, options: INewTileOptions): INewRowTile | undefined {
+      const tile = TileModel.create(snapshot);
       const o = options || {};
       if (o.rowIndex === undefined) {
         // by default, insert new tiles after last visible on screen
@@ -752,7 +752,7 @@ export const DocumentContentModel = types
         // for historical reasons, this function initially places new rows at
         // the end of the content and then moves them to the desired location.
         const addTileOptions = { rowIndex: self.rowCount };
-        const contentInfo = getToolContentInfoById(toolId);
+        const contentInfo = getTileContentInfo(toolId);
         if (!contentInfo) return;
 
         const documentEnv = getEnv(self)?.documentEnv as IDocumentEnvironment | undefined;
@@ -765,9 +765,9 @@ export const DocumentContentModel = types
         if (addSidecarNotes) {
           const { rowId } = tileInfo;
           const row = self.rowMap.get(rowId);
-          const textContentInfo = getToolContentInfoById(kTextToolID);
+          const textContentInfo = getTileContentInfo(kTextToolID);
           if (row && textContentInfo) {
-            const tile = ToolTileModel.create({ content: textContentInfo.defaultContent() });
+            const tile = TileModel.create({ content: textContentInfo.defaultContent() });
             self.insertNewTileInRow(tile, row, 1);
             tileInfo.additionalTileIds = [ tile.id ];
           }

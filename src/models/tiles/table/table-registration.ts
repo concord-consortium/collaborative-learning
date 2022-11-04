@@ -1,12 +1,12 @@
-import { registerToolComponentInfo } from "../tile-component-info";
-import { registerToolContentInfo } from "../tile-content-info";
+import { registerTileComponentInfo } from "../tile-component-info";
+import { registerTileContentInfo } from "../tile-content-info";
 import {
   kTableToolID, TableContentModel, TableMetadataModel, kTableDefaultHeight, defaultTableContent
 } from "./table-content";
 import TableToolComponent from "../../../components/tiles/table/table-tile";
 import TableToolIcon from "../../../clue/assets/icons/table-tool.svg";
 
-registerToolContentInfo({
+registerTileContentInfo({
   id: kTableToolID,
   titleBase: "Table",
   modelClass: TableContentModel,
@@ -15,9 +15,9 @@ registerToolContentInfo({
   defaultContent: defaultTableContent
 });
 
-registerToolComponentInfo({
+registerTileComponentInfo({
   id: kTableToolID,
   Component: TableToolComponent,
-  toolTileClass: "table-tool-tile",
+  tileEltClass: "table-tool-tile",
   Icon: TableToolIcon
 });

@@ -4,7 +4,7 @@ import { getParent, getSnapshot, getType,
 import { GeometryContentModelType } from "./geometry/geometry-content";
 import { isPlaceholderContent } from "./placeholder/placeholder-content";
 import { ITileExportOptions } from "./tile-content-info";
-import { findMetadata, ToolContentModelType, ToolContentUnion } from "./tile-types";
+import { findMetadata, ITileContentModel, TileContentUnion } from "./tile-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 import { StringBuilder } from "../../utilities/string-builder";
@@ -26,38 +26,37 @@ export interface IDragTiles {
   items: IDragTileItem[];
 }
 
-export function cloneTileSnapshotWithoutId(tile: ToolTileModelType) {
+export function cloneTileSnapshotWithoutId(tile: ITileModel) {
   const { id, display, ...copy } = cloneDeep(getSnapshot(tile));
   return copy;
 }
 
-export function cloneTileSnapshotWithNewId(tile: ToolTileModelType, newId?: string) {
+export function cloneTileSnapshotWithNewId(tile: ITileModel, newId?: string) {
   const content = tile.content.tileSnapshotForCopy;
   const { id, display, ...copy } = cloneDeep(getSnapshot(tile));
   return { id: newId || uniqueId(), ...copy, content };
 }
 
-export function getToolTileModel(toolContentModel: ToolContentModelType) {
+export function getTileModel(toolContentModel: ITileContentModel) {
   try {
     const parent = getParent(toolContentModel);
-    return getType(parent).name === "ToolTile" ? parent as ToolTileModelType : undefined;
+    return getType(parent).name === "TileModel" ? parent as ITileModel : undefined;
   } catch (e) {
     console.warn(`Unable to find tool tile for content ${toolContentModel}`);
     return undefined;
   }
 }
 
-export function getTileTitleFromContent(toolContentModel: ToolContentModelType) {
-  return getToolTileModel(toolContentModel)?.title;
+export function getTileTitleFromContent(toolContentModel: ITileContentModel) {
+  return getTileModel(toolContentModel)?.title;
 }
 
-export function setTileTitleFromContent(toolContentModel: ToolContentModelType, title: string) {
-  const toolTile = getToolTileModel(toolContentModel);
-  toolTile?.setTitle(title);
+export function setTileTitleFromContent(toolContentModel: ITileContentModel, title: string) {
+  getTileModel(toolContentModel)?.setTitle(title);
 }
 
-export const ToolTileModel = types
-  .model("ToolTile", {
+export const TileModel = types
+  .model("TileModel", {
     // if not provided, will be generated
     id: types.optional(types.identifier, () => uniqueId()),
     // all tiles can have a title
@@ -65,7 +64,7 @@ export const ToolTileModel = types
     // whether to restrict display to certain users
     display: DisplayUserTypeEnum,
     // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel", ...
-    content: ToolContentUnion
+    content: TileContentUnion
   })
   .preProcessSnapshot(snapshot => {
     // Move the title up to handle legacy geometry tiles
@@ -145,6 +144,6 @@ export const ToolTileModel = types
     }
   }));
 
-export type ToolTileModelType = Instance<typeof ToolTileModel>;
-export type ToolTileSnapshotInType = SnapshotIn<typeof ToolTileModel>;
-export type ToolTileSnapshotOutType = SnapshotOut<typeof ToolTileModel>;
+export interface ITileModel extends Instance<typeof TileModel> {}
+export interface ITileModelSnapshotIn extends SnapshotIn<typeof TileModel> {}
+export interface ITileModelSnapshotOut extends SnapshotOut<typeof TileModel> {}

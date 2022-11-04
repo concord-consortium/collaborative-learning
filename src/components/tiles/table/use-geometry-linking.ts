@@ -6,12 +6,12 @@ import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
 import {
   addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
 } from "../../../models/tiles/table-links";
-import { ToolTileModelType } from "../../../models/tiles/tile-model";
+import { ITileModel } from "../../../models/tiles/tile-model";
 import { useLinkGeometryDialog } from "./use-link-geometry-dialog";
 
 interface IProps {
   documentId?: string;
-  model: ToolTileModelType;
+  model: ITileModel;
   hasLinkableRows: boolean;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
   onLinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
@@ -42,7 +42,7 @@ export const useGeometryLinking = ({
 };
 
 interface IUseLinkableGeometryTilesProps {
-  model: ToolTileModelType;
+  model: ITileModel;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
 }
 const useLinkableGeometryTiles = ({ model, onRequestTilesOfType }: IUseLinkableGeometryTilesProps) => {

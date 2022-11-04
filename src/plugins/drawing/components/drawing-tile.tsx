@@ -1,9 +1,9 @@
 import classNames from "classnames";
 import React, { useEffect, useState, useRef } from "react";
-import { IToolTileProps } from "../../../components/tiles/tile-component";
+import { ITileProps } from "../../../components/tiles/tile-component";
 import { ToolbarView } from "./drawing-toolbar";
 import { DrawingLayerView } from "./drawing-layer";
-import { useToolbarToolApi } from "../../../components/tiles/hooks/use-toolbar-tool-api";
+import { useToolbarTileApi } from "../../../components/tiles/hooks/use-toolbar-tile-api";
 import { DrawingContentModelType } from "../model/drawing-content";
 import { useCurrent } from "../../../hooks/use-current";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -16,10 +16,10 @@ import { HotKeys } from "../../../utilities/hot-keys";
 import { pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import "./drawing-tile.scss";
 
-type IProps = IToolTileProps;
+type IProps = ITileProps;
 
 const DrawingToolComponent: React.FC<IProps> = (props) => {
-  const { documentContent, toolTile, model, readOnly, scale, onRegisterToolApi, onUnregisterToolApi } = props;
+  const { documentContent, tileElt, model, readOnly, scale, onRegisterTileApi, onUnregisterTileApi } = props;
   const contentRef = useCurrent(model.content as DrawingContentModelType);
   const [imageUrlToAdd, setImageUrlToAdd] = useState("");
   const hotKeys = useRef(new HotKeys());
@@ -28,7 +28,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     if (!readOnly) {
       contentRef.current.reset();
     }
-    onRegisterToolApi({
+    onRegisterTileApi({
       exportContentAsTileJson: (options?: ITileExportOptions) => {
         return contentRef.current.exportJson(options);
       },
@@ -55,7 +55,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     contentRef.current.deleteObjects(contentRef.current.selectedIds);
   };
 
-  const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
+  const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
   const getTitle  = () => {
     return model.title || "";
   };
@@ -86,7 +86,7 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
         <ToolbarView
           model={model}
           documentContent={documentContent}
-          toolTile={toolTile}
+          tileElt={tileElt}
           scale={scale}
           setImageUrlToAdd={setImageUrlToAdd}
           {...toolbarProps}

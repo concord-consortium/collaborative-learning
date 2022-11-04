@@ -2,17 +2,17 @@ import { useEffect, useState } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { getToolbarLocation, IGetToolbarLocationBaseArgs } from "../../utilities/tile-utils";
 import { TileResizeEntry } from "../tile-api";
-import { IRegisterToolApiProps } from "../tile-component";
+import { IRegisterTileApiProps } from "../tile-component";
 import { useForceUpdate } from "./use-force-update";
 
-export interface IFloatingToolbarProps extends IRegisterToolApiProps {
+export interface IFloatingToolbarProps extends IRegisterTileApiProps {
   documentContent?: HTMLElement | null;
-  toolTile?: HTMLElement | null;
+  tileElt?: HTMLElement | null;
   scale?: number;
   onIsEnabled: () => boolean;
 }
 
-interface IFloatingToolbarArgs extends IRegisterToolApiProps, IGetToolbarLocationBaseArgs {
+interface IFloatingToolbarArgs extends IRegisterTileApiProps, IGetToolbarLocationBaseArgs {
   enabled: boolean;
   paletteHeight?: number;
 }
@@ -22,16 +22,16 @@ interface IFloatingToolbarArgs extends IRegisterToolApiProps, IGetToolbarLocatio
  * toolbar relative to its associated tile.
  */
 export const useFloatingToolbarLocation = ({
-        onRegisterToolApi, onUnregisterToolApi,
-        documentContent, toolTile, enabled, paletteHeight, ...others
+        onRegisterTileApi, onUnregisterTileApi,
+        documentContent, tileElt, enabled, paletteHeight, ...others
       }: IFloatingToolbarArgs) => {
 
   const [tileOffset, setTileOffset] = useState<{ left: number, bottom: number }>({ left: 0, bottom: 0 });
   const forceUpdate = useForceUpdate();
-  const enabledRef = useCurrent(enabled && !!documentContent && !!toolTile);
+  const enabledRef = useCurrent(enabled && !!documentContent && !!tileElt);
 
   useEffect(() => {
-    onRegisterToolApi({
+    onRegisterTileApi({
       handleDocumentScroll: () => {
         enabledRef.current && forceUpdate();
       },
@@ -40,12 +40,12 @@ export const useFloatingToolbarLocation = ({
         setTileOffset({ left: contentRect.left, bottom: contentRect.bottom });
       }
     }, "layout");
-    return () => onUnregisterToolApi("layout");
+    return () => onUnregisterTileApi("layout");
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { left, top, spaceBelow } = getToolbarLocation({
                           documentContent,
-                          toolTile,
+                          tileElt,
                           toolLeft: tileOffset.left,
                           toolBottom: tileOffset.bottom,
                           ...others

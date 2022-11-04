@@ -4,14 +4,14 @@ import { observer, inject } from "mobx-react";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
-import { getToolComponentInfo } from "../../models/tiles/tile-component-info";
-import { getToolContentInfoById } from "../../models/tiles/tile-content-info";
+import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
+import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import {
-  cloneTileSnapshotWithNewId, IDragTileItem, IDragTiles, ToolTileModelType
+  cloneTileSnapshotWithNewId, IDragTileItem, IDragTiles, ITileModel
 } from "../../models/tiles/tile-model";
 import { BaseComponent } from "../base";
-import PlaceholderToolComponent from "./placeholder/placeholder-tile";
-import { IToolApi, TileResizeEntry, ToolApiInterfaceContext } from "./tile-api";
+import PlaceholderTileComponent from "./placeholder/placeholder-tile";
+import { ITileApi, TileResizeEntry, TileApiInterfaceContext } from "./tile-api";
 import { HotKeys } from "../../utilities/hot-keys";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
@@ -54,10 +54,10 @@ export function extractDragTileType(dataTransfer: DataTransfer) {
 }
 
 /**
- * These props are used both by the ToolTileComponent and the components provided by the
+ * These props are used both by the TileComponent and the components provided by the
  * individual tools.
  */
-interface IToolTileBaseProps {
+interface ITileBaseProps {
   context: string;
   documentId?: string;  // permanent id (key) of the containing document
   docId: string;  // ephemeral contentId for the DocumentContent
@@ -66,7 +66,7 @@ interface IToolTileBaseProps {
   scale?: number;
   widthPct?: number;
   height?: number;
-  model: ToolTileModelType;
+  model: ITileModel;
   readOnly?: boolean;
   onResizeRow: (e: React.DragEvent<HTMLDivElement>) => void;
   onSetCanAcceptDrop: (tileId?: string) => void;
@@ -75,16 +75,16 @@ interface IToolTileBaseProps {
   onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number) => void;
 }
 
-export interface IRegisterToolApiProps {
-  onRegisterToolApi: (toolApi: IToolApi, facet?: string) => void;
-  onUnregisterToolApi: (facet?: string) => void;
+export interface IRegisterTileApiProps {
+  onRegisterTileApi: (tileApi: ITileApi, facet?: string) => void;
+  onUnregisterTileApi: (facet?: string) => void;
 }
 
-export interface IToolTileProps extends IToolTileBaseProps, IRegisterToolApiProps {
-  toolTile: HTMLElement | null;
+export interface ITileProps extends ITileBaseProps, IRegisterTileApiProps {
+  tileElt: HTMLElement | null;
 }
 
-interface IProps extends IToolTileBaseProps {
+interface IProps extends ITileBaseProps {
 }
 
 interface IDragTileButtonProps {
@@ -128,10 +128,10 @@ defaultDragImage.src = dragPlaceholderImage;
 
 @inject("stores")
 @observer
-export class ToolTileComponent extends BaseComponent<IProps, IState> {
+export class TileComponent extends BaseComponent<IProps, IState> {
 
-  static contextType = ToolApiInterfaceContext;
-  declare context: React.ContextType<typeof ToolApiInterfaceContext>;
+  static contextType = TileApiInterfaceContext;
+  declare context: React.ContextType<typeof TileApiInterfaceContext>;
 
   private modelId: string;
   private domElement: HTMLDivElement | null;
@@ -190,11 +190,11 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { model, readOnly, isUserResizable, widthPct } = this.props;
     const { hoverTile } = this.state;
     const { appConfig, ui } = this.stores;
-    const { Component: ToolComponent, toolTileClass } = getToolComponentInfo(model.content.type) || {};
-    const isPlaceholderTile = ToolComponent === PlaceholderToolComponent;
+    const { Component, tileEltClass } = getTileComponentInfo(model.content.type) || {};
+    const isPlaceholderTile = Component === PlaceholderTileComponent;
     const isTileSelected = ui.isSelectedTile(model);
     const tileSelectedForComment = isTileSelected && ui.showChatPanel;
-    const classes = classNames("tool-tile", model.display, toolTileClass, {
+    const classes = classNames("tool-tile", model.display, tileEltClass, {
                       placeholder: isPlaceholderTile,
                       readonly: readOnly,
                       hovered: this.state.hoverTile,
@@ -224,33 +224,33 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
           onMouseEnter={isDraggable ? e => this.setState({ hoverTile: true }) : undefined}
           onMouseLeave={isDraggable ? e => this.setState({ hoverTile: false }) : undefined}
           onKeyDown={this.handleKeyDown}
-          onDragStart={this.handleToolDragStart}
+          onDragStart={this.handleTileDragStart}
           onDragEnd={this.triggerResizeHandler}
           draggable={true}
       >
         {this.renderLinkIndicators()}
         {dragTileButton}
         {resizeTileButton}
-        {this.renderTile(ToolComponent)}
+        {this.renderTile(Component)}
         {this.renderTileComments()}
       </div>
     );
   }
 
-  private renderTile(ToolComponent: any) {
+  private renderTile(Component?: React.ComponentType<ITileProps>) {
     const tileId = this.props.model.id;
-    return ToolComponent != null
-            ? <ToolComponent
-                key={tileId} toolTile={this.domElement} {...this.props}
-                onRegisterToolApi={this.handleRegisterToolApi}
-                onUnregisterToolApi={this.handleUnregisterToolApi} />
+    return Component != null
+            ? <Component
+                key={tileId} tileElt={this.domElement} {...this.props}
+                onRegisterTileApi={this.handleRegisterTileApi}
+                onUnregisterTileApi={this.handleUnregisterTileApi} />
             : null;
   }
 
   private renderLinkIndicators() {
     const { model } = this.props;
     const toolApiInterface = this.context;
-    const toolApi = toolApiInterface?.getToolApi(model.id);
+    const toolApi = toolApiInterface?.getTileApi(model.id);
     const clientTableLinks = toolApi?.getLinkedTables?.();
     return clientTableLinks
             ? clientTableLinks.map((id, index) => {
@@ -271,14 +271,14 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private getToolResizeHandler = () => {
+  private getTileResizeHandler = () => {
     const { model } = this.props;
     const toolApiInterface = this.context;
-    return toolApiInterface?.getToolApi(`${model.id}[layout]`)?.handleTileResize ||
-            toolApiInterface?.getToolApi(model.id)?.handleTileResize;
+    return toolApiInterface?.getTileApi(`${model.id}[layout]`)?.handleTileResize ||
+            toolApiInterface?.getTileApi(model.id)?.handleTileResize;
   };
 
-  private handleRegisterToolApi = (toolApi: IToolApi, facet?: string) => {
+  private handleRegisterTileApi = (toolApi: ITileApi, facet?: string) => {
     const id = facet ? `${this.modelId}[${facet}]` : this.modelId;
     const toolApiInterface = this.context;
     toolApiInterface?.register(id, toolApi);
@@ -286,14 +286,14 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     this.forceUpdate();
   };
 
-  private handleUnregisterToolApi = (facet?: string) => {
+  private handleUnregisterTileApi = (facet?: string) => {
     const id = facet ? `${this.modelId}[${facet}]` : this.modelId;
     const toolApiInterface = this.context;
     toolApiInterface?.unregister(id);
   };
 
   private handleResizeDebounced = debounce((entry: ResizeObserverEntry) => {
-    this.getToolResizeHandler()?.(entry);
+    this.getTileResizeHandler()?.(entry);
   }, 100);
 
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -314,7 +314,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
 
     // Select the tile if the tool doesn't handle the selection itself
-    if (!getToolComponentInfo(model.content.type)?.tileHandlesOwnSelection) {
+    if (!getTileComponentInfo(model.content.type)?.tileHandlesOwnSelection) {
       ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
     }
   };
@@ -346,7 +346,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     return true;
   };
 
-  private handleToolDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+  private handleTileDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     // tile dragging can be disabled globally via appConfig
     if (this.stores.appConfig.disableTileDrags) {
       e.preventDefault();
@@ -370,9 +370,9 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
     // set the drag data
     const { model, docId } = this.props;
-    const ToolComponent = getToolComponentInfo(model.content.type)?.Component;
+    const Component = getTileComponentInfo(model.content.type)?.Component;
     // can't drag placeholder tiles
-    if (ToolComponent === PlaceholderToolComponent) {
+    if (Component === PlaceholderTileComponent) {
       e.preventDefault();
       return;
     }
@@ -442,7 +442,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
         const rowHeight = row?.height;
         const tileIndex = row?.tiles.findIndex(t => t.tileId === tileId) || 0;
         const clonedTile = cloneTileSnapshotWithNewId(srcTile, idMap[srcTile.id]);
-        getToolContentInfoById(clonedTile.content.type)?.snapshotPostProcessor?.(clonedTile.content, idMap);
+        getTileContentInfo(clonedTile.content.type)?.snapshotPostProcessor?.(clonedTile.content, idMap);
         dragTileItems.push({
           rowIndex, rowHeight, tileIndex,
           tileId: srcTile.id,
@@ -456,7 +456,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
   }
 
   private triggerResizeHandler = () => {
-    const handler = this.getToolResizeHandler();
+    const handler = this.getTileResizeHandler();
     if (this.domElement && handler) {
       const bounds = this.domElement.getBoundingClientRect();
       const kBorderSize = 4;

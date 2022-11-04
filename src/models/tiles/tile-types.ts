@@ -1,13 +1,13 @@
 import { getEnv, getSnapshot, Instance, types } from "mobx-state-tree";
 import { SharedModelType } from "../shared/shared-model";
 import { ISharedModelManager } from "../shared/shared-model-manager";
-import { getToolContentModels, getToolContentInfoById } from "./tile-content-info";
-import { ToolMetadataModelType } from "./tile-metadata";
-import { toolModelHooks } from "./tile-model-hooks";
+import { getTileContentModels, getTileContentInfo } from "./tile-content-info";
+import { ITileMetadataModel } from "./tile-metadata";
+import { tileModelHooks } from "./tile-model-hooks";
 
 /**
  * A dynamic union of tool/tile content models. Its typescript type is
- * `ToolContentModel`.
+ * `TileContentModel`.
  *
  * This uses MST's `late()`. It appears that `late()` runs the first time the
  * union is actually used by MST. For example to deserialize a snapshot or to
@@ -15,12 +15,12 @@ import { toolModelHooks } from "./tile-model-hooks";
  * happen after all necessary tiles are registered.
  *
  * By default a late type like this will have a type of `any`. All types in this
- * late union extend ToolContentModel, so it is overridden to be
- * ToolContentModel. This doesn't affect the MST runtime types.
+ * late union extend TileContentModel, so it is overridden to be
+ * TileContentModel. This doesn't affect the MST runtime types.
  */
-export const ToolContentUnion = types.late<typeof ToolContentModel>(() => {
-  const contentModels = getToolContentModels();
-  return types.union({ dispatcher: toolFactory }, ...contentModels) as typeof ToolContentModel;
+export const TileContentUnion = types.late<typeof TileContentModel>(() => {
+  const contentModels = getTileContentModels();
+  return types.union({ dispatcher: toolFactory }, ...contentModels) as typeof TileContentModel;
 });
 
 export const kUnknownToolID = "Unknown";
@@ -30,9 +30,9 @@ export interface ITileEnvironment {
 }
 
 // Generic "super class" of all tool content models
-export const ToolContentModel = types.model("ToolContentModel", {
+export const TileContentModel = types.model("TileContentModel", {
     // The type field has to be optional because the typescript type created from the sub models
-    // is an intersection ('&') of this ToolContentModel and the sub model.  If this was just:
+    // is an intersection ('&') of this TileContentModel and the sub model.  If this was just:
     //   type: types.string
     // then typescript has errors because the intersection logic means the type field is
     // required when creating a content model. And in many cases these tool content models
@@ -41,8 +41,8 @@ export const ToolContentModel = types.model("ToolContentModel", {
     // It could be changed to
     //   type: types.maybe(types.string)
     // Because of the intersection it would still mean the sub models would do the right thing,
-    // but if someone looks at this definition of ToolContentModel, it implies the wrong thing.
-    // It might also cause problems when code is working with a generic of ToolContentModel
+    // but if someone looks at this definition of TileContentModel, it implies the wrong thing.
+    // It might also cause problems when code is working with a generic of TileContentModel
     // that code couldn't assume that `model.type` is defined.
     //
     // Since this is optional, it needs a default value, and Unknown seems like the
@@ -86,12 +86,12 @@ export const ToolContentModel = types.model("ToolContentModel", {
     }
   }))
   // Add an empty api so the api methods can be used on this generic type
-  .actions(self => toolModelHooks({}));
+  .actions(self => tileModelHooks({}));
 
-export interface ToolContentModelType extends Instance<typeof ToolContentModel> {}
+export interface ITileContentModel extends Instance<typeof TileContentModel> {}
 
 interface IPrivate {
-  metadata: Record<string, ToolMetadataModelType>;
+  metadata: Record<string, ITileMetadataModel>;
 }
 
 export const _private: IPrivate = {
@@ -99,16 +99,16 @@ export const _private: IPrivate = {
 };
 
 export function isToolType(type: string) {
-  return !!getToolContentInfoById(type);
+  return !!getTileContentInfo(type);
 }
 
 export function toolFactory(snapshot: any) {
   const toolType: string | undefined = snapshot?.type;
-  return getToolContentInfoById(toolType)?.modelClass || UnknownContentModel;
+  return getTileContentInfo(toolType)?.modelClass || UnknownContentModel;
 }
 
 export function findMetadata(type: string, id: string) {
-  const MetadataType = getToolContentInfoById(type)?.metadataClass;
+  const MetadataType = getTileContentInfo(type)?.metadataClass;
   if (!MetadataType) return;
 
   if (!_private.metadata[id]) {
@@ -118,15 +118,15 @@ export function findMetadata(type: string, id: string) {
 }
 
 // The UnknownContentModel has to be defined in this tool-types module because it both
-// "extends" ToolContentModel and UnknownContentModel is used by the toolFactory function
+// "extends" TileContentModel and UnknownContentModel is used by the toolFactory function
 // above. Because of this it is a kind of circular dependency.
 // If UnknownContentModel is moved to its own module this circular dependency causes an error.
 // If they are in the same module then this isn't a problem.
 //
 // There is a still an "unknown-content" module, so that module can
 // register the tool without adding a circular dependency on tool-content-info here.
-export const UnknownContentModel = ToolContentModel
-  .named("UnknownTool")
+export const UnknownContentModel = TileContentModel
+  .named("UnknownContentModel")
   .props({
     type: types.optional(types.literal(kUnknownToolID), kUnknownToolID),
     original: types.maybe(types.string)
@@ -141,4 +141,4 @@ export const UnknownContentModel = ToolContentModel
             : snapshot;
   });
 
-export interface UnknownContentModelType extends Instance<typeof UnknownContentModel> {}
+export interface IUnknownContentModel extends Instance<typeof UnknownContentModel> {}

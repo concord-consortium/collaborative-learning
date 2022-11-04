@@ -11,7 +11,7 @@ import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType, LearningLogWorksp
 import { defaultGeometryContent } from "../models/tiles/geometry/geometry-content";
 import { JXGChange } from "../models/tiles/geometry/jxg-changes";
 import { TextContentModel } from "../models/tiles/text/text-content";
-import { IDragTileItem, ToolTileModel } from "../models/tiles/tile-model";
+import { IDragTileItem, TileModel } from "../models/tiles/tile-model";
 import { createSingleTileContent } from "../utilities/test-utils";
 import { ProblemModel, ProblemModelType } from "../models/curriculum/problem";
 import { DocumentContentModel } from "../models/document/document-content";
@@ -21,8 +21,8 @@ import { UIModel } from "../models/stores/ui";
 import { ENavTab } from "../models/view/nav-tabs";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTools } from "../register-tiles";
-registerTools(["Geometry", "Text"]);
+import { registerTiles } from "../register-tiles";
+registerTiles(["Geometry", "Text"]);
 
 const investigation = InvestigationModel.create({
   ordinal: 1,
@@ -497,7 +497,7 @@ describe("authed logger", () => {
     it("can log a DELETE tile comment event", (done) => {
       const documentKey = "source-document";
       addDocumentWithTile(documentKey);
-      const tile = ToolTileModel.create({ content: TextContentModel.create() });
+      const tile = TileModel.create({ content: TextContentModel.create() });
       const tileId = tile.id;
       const commentText = "TeSt";
       const deleteEventPayload: ILogComment = {
@@ -523,7 +523,7 @@ describe("authed logger", () => {
     it("can log a EXPAND tile comment thread event", (done) => {
       const documentKey = "source-document";
       addDocumentWithTile(documentKey);
-      const tile = ToolTileModel.create({ content: TextContentModel.create() });
+      const tile = TileModel.create({ content: TextContentModel.create() });
       const tileId = tile.id;
       const expandCommentPayload: ILogComment = {
         focusDocumentId: documentKey,
@@ -547,7 +547,7 @@ describe("authed logger", () => {
     it("can log a COLLAPSE tile comment thread event", (done) => {
       const documentKey = "source-document";
       addDocumentWithTile(documentKey);
-      const tile = ToolTileModel.create({ content: TextContentModel.create() });
+      const tile = TileModel.create({ content: TextContentModel.create() });
       const tileId = tile.id;
       const collapseCommentPayload: ILogComment = {
         focusDocumentId: documentKey,
@@ -639,7 +639,7 @@ describe("authed logger", () => {
     });
 
     it("can log tile creation", (done) => {
-      const tile = ToolTileModel.create({ content: TextContentModel.create() });
+      const tile = TileModel.create({ content: TextContentModel.create() });
 
       mockXhr.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
@@ -753,7 +753,7 @@ describe("authed logger", () => {
 
   describe("Tile changes", () => {
     it("can log tile change events", (done) => {
-      const tile = ToolTileModel.create({ content: defaultGeometryContent() });
+      const tile = TileModel.create({ content: defaultGeometryContent() });
       const change: JXGChange = { operation: "create", target: "point" };
 
       mockXhr.post(/.*/, (req, res) => {
@@ -769,7 +769,7 @@ describe("authed logger", () => {
         return res.status(201);
       });
 
-      Logger.logToolChange(LogEventName.GRAPH_TOOL_CHANGE, "create", change, tile.id);
+      Logger.logTileChange(LogEventName.GRAPH_TOOL_CHANGE, "create", change, tile.id);
     });
   });
 

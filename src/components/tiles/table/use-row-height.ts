@@ -7,13 +7,13 @@ import { measureTextLines } from "../hooks/use-measure-text";
 import { defaultFont } from "../../constants";
 import { IAttribute } from "../../../models/data/attribute";
 import { IDataSet } from "../../../models/data/data-set";
-import { ToolTileModelType } from "../../../models/tiles/tile-model";
+import { ITileModel } from "../../../models/tiles/tile-model";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 
 interface IUseRowHeight {
   dataSet: IDataSet;
   measureColumnWidth: (attr: IAttribute) => number;
-  model: ToolTileModelType;
+  model: ITileModel;
 }
 export const useRowHeight = ({ dataSet, measureColumnWidth, model }: IUseRowHeight) => {
   const modelRef = useCurrent(model);

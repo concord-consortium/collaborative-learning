@@ -1,10 +1,10 @@
 import { getSnapshot, getType, Instance, types } from "mobx-state-tree";
-import { IToolTileProps } from "src/components/tiles/tile-component";
+import { ITileProps } from "src/components/tiles/tile-component";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { registerSharedModelInfo } from "../shared/shared-model-registry";
-import { ToolContentModel } from "../tiles/tile-types";
-import { registerToolComponentInfo } from "../tiles/tile-component-info";
-import { registerToolContentInfo } from "../tiles/tile-content-info";
+import { TileContentModel } from "../tiles/tile-types";
+import { registerTileComponentInfo } from "../tiles/tile-component-info";
+import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
 import { createDocumentModel } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
@@ -32,7 +32,7 @@ registerSharedModelInfo({
   modelClass: TestSharedModel
 });
 
-const TestTile = ToolContentModel
+const TestTile = TileContentModel
   .named("TestTile")
   .props({
     type: "TestTile",
@@ -68,21 +68,21 @@ const TestTile = ToolContentModel
   }));
 interface TestTileType extends Instance<typeof TestTile> {}
 
-const TestTileComponent: React.FC<IToolTileProps> = () => {
+const TestTileComponent: React.FC<ITileProps> = () => {
   throw new Error("Component not implemented.");
 };
 
-registerToolContentInfo({
+registerTileContentInfo({
   id: "TestTile",
   modelClass: TestTile,
   defaultContent(options) {
     return TestTile.create();
   }
 });
-registerToolComponentInfo({
+registerTileComponentInfo({
   id: "TestTile",
   Component: TestTileComponent,
-  toolTileClass: "test-tile"
+  tileEltClass: "test-tile"
 });
 
 function setupDocument(initialContent? : DocumentContentSnapshotType) {

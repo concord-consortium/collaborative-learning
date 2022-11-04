@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
-import { ToolTileModel } from "../../../models/tiles/tile-model";
+import { TileModel } from "../../../models/tiles/tile-model";
 import { DrawingContentModelType } from "../model/drawing-content";
 import { DrawingLayerView } from "./drawing-layer";
 import { DrawingToolDeletion, DrawingToolMove } from "../model/drawing-types";
@@ -11,7 +11,7 @@ import { EllipseObjectSnapshot } from "../objects/ellipse";
 import { ImageObjectSnapshot } from "../objects/image";
 import { DrawingMigrator } from "../model/drawing-migrator";
 
-// The drawing tile needs to be registered so the ToolTileModel.create
+// The drawing tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
 import "../drawing-registration";
 
@@ -19,7 +19,7 @@ let content, drawingLayerProps, drawingLayer;
 
 const getDrawingObject = (objectContent: DrawingContentModelType) => {
   drawingLayerProps = {
-    model: ToolTileModel.create({content: objectContent}),
+    model: TileModel.create({content: objectContent}),
     onSetCanAcceptDrop: (tileId?: string) => {
       throw new Error("Function not implemented.");
     }

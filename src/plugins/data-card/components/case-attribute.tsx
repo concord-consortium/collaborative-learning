@@ -2,7 +2,7 @@ import { observer } from "mobx-react";
 import classNames from "classnames";
 import React, { useEffect, useState } from "react";
 import { gImageMap } from "../../../models/image-map";
-import { ToolTileModelType } from "../../../models/tiles/tile-model";
+import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultLabel, EditFacet } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
@@ -11,7 +11,7 @@ import { useCautionAlert } from "../../../components/utilities/use-caution-alert
 import '../data-card-tile.scss';
 
 interface IProps {
-  model: ToolTileModelType;
+  model: ITileModel;
   caseId?: string;
   attrKey: string;
   currEditAttrId: string;

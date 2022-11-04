@@ -9,7 +9,7 @@ jest.mock("../../../lib/logger", () => {
   return {
     ...(jest.requireActual("../../../lib/logger") as any),
     Logger: {
-      logToolChange: jest.fn()
+      logTileChange: jest.fn()
     }
   };
 });

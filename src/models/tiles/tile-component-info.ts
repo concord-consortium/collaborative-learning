@@ -1,32 +1,32 @@
 import React, { SVGProps } from "react";
-import { IToolTileProps } from "../../components/tiles/tile-component";
+import { ITileProps } from "../../components/tiles/tile-component";
 
-export interface IToolComponentInfo {
+export interface ITileComponentInfo {
   id: string;
-  Component: React.ComponentType<IToolTileProps>;
-  toolTileClass: string;
+  Component: React.ComponentType<ITileProps>;
+  tileEltClass: string;
   Icon?: React.FC<SVGProps<SVGSVGElement>>;
   /**
-   * By default the tool tile wrapper ToolTileComponent will handle the selection of the
+   * By default the tool tile wrapper TileComponent will handle the selection of the
    * the tile when it gets a mouse down or touch start.
    *
    * If the tool wants to manage its own selection by calling ui.setSelectedTile,
-   * it should set tileHandlesOwnSelection to true. This will prevent ToolTileComponent
+   * it should set tileHandlesOwnSelection to true. This will prevent TileComponent
    * from trying to set the selection.
    */
   tileHandlesOwnSelection?: boolean;
 }
 
-const gToolComponentInfoMap = new Map<string, IToolComponentInfo>();
+const gTileComponentInfoMap = new Map<string, ITileComponentInfo>();
 
-export function registerToolComponentInfo(toolComponentInfo: IToolComponentInfo) {
+export function registerTileComponentInfo(tileComponentInfo: ITileComponentInfo) {
   // toLowerCase() for legacy support of tool names
-  gToolComponentInfoMap.set(toolComponentInfo.id.toLowerCase(), toolComponentInfo);
+  gTileComponentInfoMap.set(tileComponentInfo.id.toLowerCase(), tileComponentInfo);
 }
 
 // Tool id, e.g. kDrawingToolID, kGeometryToolID, etc.
 // undefined is supported so callers do not need to check the id before passing it in
-export function getToolComponentInfo(id?: string) {
+export function getTileComponentInfo(id?: string) {
   // toLowerCase() for legacy support of tool names
-  return id ? gToolComponentInfoMap.get(id.toLowerCase()) : undefined;
+  return id ? gTileComponentInfoMap.get(id.toLowerCase()) : undefined;
 }

@@ -6,7 +6,7 @@ import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
 import { requestGeometryLinkToTable, requestGeometryUnlinkFromTable } from "../../../models/tiles/table-links";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { isLinkableValue } from "../../../models/tiles/table/table-model-types";
-import { ToolTileModelType } from "../../../models/tiles/tile-model";
+import { ITileModel } from "../../../models/tiles/tile-model";
 import { uniqueId, uniqueName } from "../../../utilities/js-utils";
 import { TColumn, TRow } from "./table-types";
 
@@ -25,7 +25,7 @@ export interface IContentChangeHandlers {
 }
 
 interface IProps {
-  model: ToolTileModelType;
+  model: ITileModel;
   dataSet: IDataSet;
   rows: TRow[];
   readOnly?: boolean;

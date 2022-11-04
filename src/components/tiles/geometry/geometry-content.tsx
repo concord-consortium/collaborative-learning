@@ -203,7 +203,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     this.initializeContent();
 
-    this.props.onRegisterToolApi({
+    this.props.onRegisterTileApi({
       getTitle: () => this.getContent().title,
       hasSelection: () => {
         const geometryContent = this.props.model.content as GeometryContentModelType;
@@ -322,7 +322,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       setTimeout(() => this.destroyBoard());
     }
 
-    this.props.onUnregisterToolApi();
+    this.props.onUnregisterTileApi();
 
     this._isMounted = false;
   }

@@ -1,13 +1,13 @@
 import { observer } from "mobx-react";
 import React from "react";
-import { ToolTileModelType } from "../../../models/tiles/tile-model";
+import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { CaseAttribute } from "./case-attribute";
 import { EditFacet } from "../data-card-types";
 
 interface IProps {
   caseIndex: any;
-  model: ToolTileModelType;
+  model: ITileModel;
   totalCases: number;
   readOnly?: boolean;
   imageUrlToAdd?: string;

@@ -1,21 +1,21 @@
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
-import { IToolTileProps } from "../../components/tiles/tile-component";
+import { ITileProps } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
 import { DataCardContentModelType } from "./data-card-content";
 import { DataCardRows } from "./components/data-card-rows";
 import { DataCardToolbar } from "./data-card-toolbar";
-import { useToolbarToolApi } from "../../components/tiles/hooks/use-toolbar-tool-api";
+import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
 import { EditFacet } from "./data-card-types";
 
 import "./data-card-tile.scss";
 
-export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) => {
-  const { model, onRequestUniqueTitle, readOnly, documentContent, toolTile, onRegisterToolApi,
-            onUnregisterToolApi } = props;
+export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
+  const { model, onRequestUniqueTitle, readOnly, documentContent, tileElt, onRegisterTileApi,
+            onUnregisterTileApi } = props;
   const content = model.content as DataCardContentModelType;
   const ui = useUIStore();
   const isTileSelected = ui.selectedTileIds.findIndex(id => id === content.metadata.id) >= 0;
@@ -149,12 +149,12 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
   const addCardClasses = classNames("add-card", "teal-bg", { hidden: !shouldShowAddCase });
   const removeCardClasses = classNames("remove-card", { hidden: !shouldShowDeleteCase });
 
-  const toolbarProps = useToolbarToolApi(
+  const toolbarProps = useToolbarTileApi(
     {
       id: model.id,
       enabled: !readOnly, // "enabled" is "visible"
-      onRegisterToolApi,
-      onUnregisterToolApi
+      onRegisterTileApi,
+      onUnregisterTileApi
     }
   );
 
@@ -168,7 +168,7 @@ export const DataCardToolComponent: React.FC<IToolTileProps> = observer((props) 
       <DataCardToolbar
         model={model}
         documentContent={documentContent}
-        toolTile={toolTile}
+        tileElt={tileElt}
         currEditAttrId={currEditAttrId}
         currEditFacet={currEditFacet}
         setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}

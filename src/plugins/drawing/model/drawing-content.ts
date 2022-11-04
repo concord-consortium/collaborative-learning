@@ -3,9 +3,9 @@ import { clone } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { StampModel, StampModelType } from "./stamp";
 import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tiles/tile-content-info";
-import { ToolMetadataModel } from "../../../models/tiles/tile-metadata";
-import { toolModelHooks } from "../../../models/tiles/tile-model-hooks";
-import { ToolContentModel } from "../../../models/tiles/tile-types";
+import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
+import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
+import { TileContentModel } from "../../../models/tiles/tile-types";
 import { kDrawingStateVersion, kDrawingToolID } from "./drawing-types";
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
@@ -16,7 +16,7 @@ import { LogEventName, Logger } from "../../../lib/logger";
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
-export const DrawingToolMetadataModel = ToolMetadataModel
+export const DrawingToolMetadataModel = TileMetadataModel
   .named("DrawingToolMetadata")
   .props({
     selectedButton: "select",
@@ -44,7 +44,7 @@ export interface DrawingObjectMove {
   destination: {x: number, y: number}
 }
 
-export const DrawingContentModel = ToolContentModel
+export const DrawingContentModel = TileContentModel
   .named("DrawingTool")
   .props({
     type: types.optional(types.literal(kDrawingToolID), kDrawingToolID),
@@ -116,15 +116,15 @@ export const DrawingContentModel = ToolContentModel
       return stringify({type, objects}, {maxLength: 200});
     }
   }))
-  .actions(self => toolModelHooks({
+  .actions(self => tileModelHooks({
     doPostCreate(metadata) {
       self.metadata = metadata as DrawingToolMetadataModelType;
     },
     onTileAction(call) {
       const {name, ...loggedChangeProps} = call;
-      // TODO: logToolChange includes an explicit DrawingToolLogEvent
+      // TODO: logTileChange includes an explicit DrawingToolLogEvent
       // this isn't a good pattern to support generic plugins logging events
-      Logger.logToolChange(LogEventName.DRAWING_TOOL_CHANGE, name,
+      Logger.logTileChange(LogEventName.DRAWING_TOOL_CHANGE, name,
         loggedChangeProps, self.metadata?.id ?? "");
     }
   }))

@@ -4,11 +4,11 @@ import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { TileLayoutModelType, TileRowModelType } from "../../models/document/tile-row";
 import { isShowingTeacherContent } from "../../models/stores/stores";
-import { getToolContentInfoById } from "../../models/tiles/tile-content-info";
-import { ToolTileModelType } from "../../models/tiles/tile-model";
+import { getTileContentInfo } from "../../models/tiles/tile-content-info";
+import { ITileModel } from "../../models/tiles/tile-model";
 import { SectionHeader } from "../tiles/section-header";
-import { ToolApiInterfaceContext } from "../tiles/tile-api";
-import { ToolTileComponent, dragTileSrcDocId } from "../tiles/tile-component";
+import { TileApiInterfaceContext } from "../tiles/tile-api";
+import { TileComponent, dragTileSrcDocId } from "../tiles/tile-component";
 
 import "./tile-row.sass";
 
@@ -80,8 +80,8 @@ interface IState {
 @observer
 export class TileRowComponent extends BaseComponent<IProps, IState> {
 
-  static contextType = ToolApiInterfaceContext;
-  declare context: React.ContextType<typeof ToolApiInterfaceContext>;
+  static contextType = TileApiInterfaceContext;
+  declare context: React.ContextType<typeof TileApiInterfaceContext>;
 
   public state: IState = {};
 
@@ -112,7 +112,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   }
 
   private getTile(tileId: string) {
-    return this.props.tileMap.get(tileId) as ToolTileModelType | undefined;
+    return this.props.tileMap.get(tileId) as ITileModel | undefined;
   }
 
   public hasTile(tileId?: string) {
@@ -133,13 +133,13 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
     return this.props.model.getContentHeight((tileId: string) => {
       // if the tile has a specific content height, use it
       const toolApiInterface = this.context;
-      const toolApi = toolApiInterface?.getToolApi(tileId);
+      const toolApi = toolApiInterface?.getTileApi(tileId);
       const contentHeight = toolApi?.getContentHeight?.();
       if (contentHeight) return contentHeight;
       // otherwise, use the default height for this type of tile
       const tile = this.getTile(tileId);
       const tileType = tile?.content.type;
-      const contentInfo = getToolContentInfoById(tileType);
+      const contentInfo = getTileContentInfo(tileType);
       if (contentInfo?.defaultHeight) return contentInfo.defaultHeight;
     });
   }
@@ -151,7 +151,7 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
       const tileModel = this.getTile(tileRef.tileId);
       const tileWidthPct = this.getTileWidth(tileRef.tileId, tiles);
       return tileModel
-              ? <ToolTileComponent key={tileModel.id} model={tileModel}
+              ? <TileComponent key={tileModel.id} model={tileModel}
                                     widthPct={tileWidthPct} height={rowHeight}
                                     isUserResizable={model.isUserResizable}
                                     onResizeRow={this.handleStartResizeRow}

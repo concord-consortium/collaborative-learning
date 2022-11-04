@@ -1,7 +1,7 @@
 import { getSnapshot } from "mobx-state-tree";
-import { kDefaultMinWidth, ToolTileModel } from "./tile-model";
-import { kUnknownToolID, UnknownContentModelType } from "./tile-types";
-import { getToolIds, getToolContentInfoById } from "./tile-content-info";
+import { kDefaultMinWidth, TileModel } from "./tile-model";
+import { kUnknownToolID, IUnknownContentModel } from "./tile-types";
+import { getTileTypeIds, getTileContentInfo } from "./tile-content-info";
 
 // Define the built in tool ids explicitly as strings.
 // Strings are used because importing the tool id constant could trigger a
@@ -21,24 +21,24 @@ const builtInToolIds = [
 ];
 
 // This is needed so we can check which tools are registered below
-import { registerTools } from "../../register-tiles";
-registerTools(builtInToolIds);
+import { registerTiles } from "../../register-tiles";
+registerTiles(builtInToolIds);
 
-describe("ToolTileModel", () => {
+describe("TileModel", () => {
 
   // Add any dynamically registered tools to the list
   // currently there are no dynamically registered tools, but in the future hopefully
   // there will be at least one example of this
-  const registeredToolIds = getToolIds();
+  const registeredTileTypeIds = getTileTypeIds();
 
   // Remove the duplicates.
-  const uniqueToolIds = new Set([...registeredToolIds, ...builtInToolIds]);
+  const uniqueTileTypes = new Set([...registeredTileTypeIds, ...builtInToolIds]);
 
-  uniqueToolIds.forEach(toolID => {
+  uniqueTileTypes.forEach(toolID => {
     // It would be useful to extend this with additional tests verifying that tiles
     // and their content info follow the right patterns
     it(`supports the tool: ${toolID}`, () => {
-      const toolDefaultContent = getToolContentInfoById(toolID)?.defaultContent;
+      const toolDefaultContent = getTileContentInfo(toolID)?.defaultContent;
 
       assertIsDefined(toolDefaultContent);
 
@@ -50,19 +50,18 @@ describe("ToolTileModel", () => {
         content.originalType = "foo";
       }
 
-      let toolTile = ToolTileModel.create({
-                      content: toolDefaultContent()
+      let tile = TileModel.create({
+                      content: getSnapshot(toolDefaultContent())
                     });
-      expect(toolTile.content.type).toBe(toolID);
+      expect(tile.content.type).toBe(toolID);
 
       // can create/recognize snapshots of each type of tool
-      const snapshot: any = getSnapshot(toolTile);
+      const snapshot: any = getSnapshot(tile);
       expect(snapshot.content.type).toBe(toolID);
 
       // can create tool tiles with correct tool from snapshot
-      toolTile = ToolTileModel.create(snapshot);
-      expect(toolTile.content.type).toBe(toolID);
-
+      tile = TileModel.create(snapshot);
+      expect(tile.content.type).toBe(toolID);
     });
   });
 
@@ -70,24 +69,24 @@ describe("ToolTileModel", () => {
     const type = "foo";
     const content: any = { type, bar: "baz" };
     const contentStr = JSON.stringify(content);
-    let toolTile = ToolTileModel.create({ content });
-    expect(toolTile.content.type).toBe(kUnknownToolID);
-    const toolContent: UnknownContentModelType = toolTile.content as any;
+    let tile = TileModel.create({ content });
+    expect(tile.content.type).toBe(kUnknownToolID);
+    const toolContent: IUnknownContentModel = tile.content as any;
     expect(toolContent.original).toBe(contentStr);
 
-    toolTile = ToolTileModel.create(getSnapshot(toolTile));
-    expect(toolTile.content.type).toBe(kUnknownToolID);
+    tile = TileModel.create(getSnapshot(tile));
+    expect(tile.content.type).toBe(kUnknownToolID);
   });
 
   it("returns appropriate defaults for minWidth and maxWidth", () => {
-    const toolTile = ToolTileModel.create({
+    const tile = TileModel.create({
                         content: {
                           type: "foo" as any,
                           bar: "baz"
                         } as any
                       });
-    expect(toolTile.minWidth).toBe(kDefaultMinWidth);
-    expect(toolTile.maxWidth).toBeUndefined();
+    expect(tile.minWidth).toBe(kDefaultMinWidth);
+    expect(tile.maxWidth).toBeUndefined();
   });
 
 });

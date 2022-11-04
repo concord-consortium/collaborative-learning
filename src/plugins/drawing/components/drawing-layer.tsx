@@ -4,7 +4,7 @@ import { clone, isAlive, getSnapshot } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { extractDragTileType, kDragTileContent } from "../../../components/tiles/tile-component";
 import { DrawingContentModelType, DrawingObjectMove } from "../model/drawing-content";
-import { ToolTileModelType } from "../../../models/tiles/tile-model";
+import { ITileModel } from "../../../models/tiles/tile-model";
 import { safeJsonParse } from "../../../utilities/js-utils";
 import { ImageContentSnapshotOutType } from "../../../models/tiles/image/image-content";
 import { gImageMap } from "../../../models/image-map";
@@ -26,7 +26,7 @@ interface DrawingToolMap {
 }
 
 interface DrawingLayerViewProps {
-  model: ToolTileModelType;
+  model: ITileModel;
   readOnly?: boolean;
   scale?: number;
   onSetCanAcceptDrop: (tileId?: string) => void;

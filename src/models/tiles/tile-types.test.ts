@@ -2,8 +2,8 @@ import { isToolType } from "./tile-types";
 import { kTextToolID } from "./text/text-content";
 
 // This is needed so isToolType knows about the text tool
-import { registerTools } from "../../register-tiles";
-registerTools([kTextToolID]);
+import { registerTiles } from "../../register-tiles";
+registerTiles([kTextToolID]);
 
 describe("ToolTypes", () => {
 

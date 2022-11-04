@@ -11,10 +11,10 @@ import { debouncedSelectTile } from "../../../models/stores/ui";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { TextToolbarComponent } from "./text-toolbar";
-import { IToolApi, TileResizeEntry } from "../tile-api";
-import { IToolTileProps } from "../tile-component";
+import { ITileApi, TileResizeEntry } from "../tile-api";
+import { ITileProps } from "../tile-component";
 import { getTextPluginInstances, getTextPluginIds } from "../../../models/tiles/text/text-plugin-info";
-import { LogEventName, Logger, SimpleToolLogEvent } from "../../../lib/logger";
+import { LogEventName, Logger, SimpleTileLogEvent } from "../../../lib/logger";
 
 import "./text-tile.sass";
 
@@ -85,14 +85,14 @@ interface IState {
 
 @inject("stores")
 @observer
-export default class TextToolComponent extends BaseComponent<IToolTileProps, IState> {
+export default class TextToolComponent extends BaseComponent<ITileProps, IState> {
   public state: IState = {};
   private disposers: IReactionDisposer[];
   private prevText: any;
   private textToolDiv: HTMLElement | null;
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
-  private toolbarToolApi: IToolApi | undefined;
+  private toolbarToolApi: ITileApi | undefined;
   private plugins: HtmlSerializablePlugin[] | undefined;
   private textOnFocus: string | string [] | undefined;
 
@@ -154,7 +154,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
       }
     ));
 
-    this.props.onRegisterToolApi({
+    this.props.onRegisterTileApi({
       exportContentAsTileJson: () => {
         return this.getContent().exportJson();
       },
@@ -177,7 +177,7 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
   }
 
   public render() {
-    const { documentContent, toolTile, readOnly, scale } = this.props;
+    const { documentContent, tileElt, readOnly, scale } = this.props;
     const { value: editorValue, selectedButtons } = this.state;
     const { appConfig: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
@@ -198,13 +198,13 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
         onMouseDown={this.handleMouseDownInWrapper}>
         <TextToolbarComponent
           documentContent={documentContent}
-          toolTile={toolTile}
+          tileElt={tileElt}
           scale={scale}
           selectedButtons={selectedButtons || []}
           editor={this.editor}
           onIsEnabled={this.handleIsEnabled}
-          onRegisterToolApi={this.handleRegisterToolApi}
-          onUnregisterToolApi={this.handleUnregisterToolApi}
+          onRegisterTileApi={this.handleRegisterToolApi}
+          onUnregisterTileApi={this.handleUnregisterToolApi}
         />
         <SlateEditor
           className={classes}
@@ -222,13 +222,13 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     );
   }
 
-  private handleRegisterToolApi = (toolApi: IToolApi) => {
+  private handleRegisterToolApi = (toolApi: ITileApi) => {
     this.toolbarToolApi = toolApi;
 
     // call resize handler immediately with current size
-    const { toolTile } = this.props;
-    toolTile && this.tileContentRect &&
-      this.toolbarToolApi?.handleTileResize?.({ target: toolTile, contentRect: this.tileContentRect });
+    const { tileElt } = this.props;
+    tileElt && this.tileContentRect &&
+      this.toolbarToolApi?.handleTileResize?.({ target: tileElt, contentRect: this.tileContentRect });
   };
 
   private handleUnregisterToolApi = () => {
@@ -307,8 +307,8 @@ export default class TextToolComponent extends BaseComponent<IToolTileProps, ISt
     this.setState({ editing: false });
     // If the text has changed since the editor was focused, log the new text.
     if (this.getContent().text !== this.textOnFocus) {
-      const change:SimpleToolLogEvent = {args:[{text: this.getContent().text}]};
-      Logger.logToolChange(LogEventName.TEXT_TOOL_CHANGE, 'update', change, this.props.model.id);
+      const change:SimpleTileLogEvent = {args:[{text: this.getContent().text}]};
+      Logger.logTileChange(LogEventName.TEXT_TOOL_CHANGE, 'update', change, this.props.model.id);
     }
   };
 

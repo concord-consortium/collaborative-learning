@@ -1,21 +1,21 @@
-import { registerToolComponentInfo } from "../tile-component-info";
-import { registerToolContentInfo } from "../tile-content-info";
+import { registerTileComponentInfo } from "../tile-component-info";
+import { registerTileContentInfo } from "../tile-content-info";
 import { kPlaceholderToolID, PlaceholderContentModel } from "./placeholder-content";
-import PlaceholderToolComponent from "../../../components/tiles/placeholder/placeholder-tile";
+import PlaceholderTileComponent from "../../../components/tiles/placeholder/placeholder-tile";
 
 function defaultPlaceholderContent() {
   return PlaceholderContentModel.create();
 }
 
-registerToolContentInfo({
+registerTileContentInfo({
   id: kPlaceholderToolID,
   modelClass: PlaceholderContentModel,
   defaultContent: defaultPlaceholderContent
 });
 
-registerToolComponentInfo({
+registerTileComponentInfo({
   id: kPlaceholderToolID,
-  Component: PlaceholderToolComponent,
-  toolTileClass: "placeholder-tile",
+  Component: PlaceholderTileComponent,
+  tileEltClass: "placeholder-tile",
   tileHandlesOwnSelection: true
 });

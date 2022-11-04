@@ -3,11 +3,11 @@ import { cloneDeep } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import { ToolMetadataModelType } from "../../../models/tiles/tile-metadata";
-import { toolModelHooks } from "../../../models/tiles/tile-model-hooks";
-import { ToolContentModel } from "../../../models/tiles/tile-types";
+import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
+import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
+import { TileContentModel } from "../../../models/tiles/tile-types";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
-import { getToolTileModel, setTileTitleFromContent } from "../../../models/tiles/tile-model";
+import { getTileModel, setTileTitleFromContent } from "../../../models/tiles/tile-model";
 
 export const kDataflowToolID = "Dataflow";
 
@@ -25,7 +25,7 @@ const ProgramZoom = types.model({
 export type ProgramZoomType = typeof ProgramZoom.Type;
 export const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
 
-export const DataflowContentModel = ToolContentModel
+export const DataflowContentModel = TileContentModel
   .named("DataflowTool")
   .props({
     type: types.optional(types.literal(kDataflowToolID), kDataflowToolID),
@@ -34,7 +34,7 @@ export const DataflowContentModel = ToolContentModel
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .volatile(self => ({
-    metadata: undefined as any as ToolMetadataModelType
+    metadata: undefined as any as ITileMetadataModel
   }))
   .views(self => ({
     programWithoutRecentValues() {
@@ -52,7 +52,7 @@ export const DataflowContentModel = ToolContentModel
   }))
   .views(self => ({
     get title() {
-      return getToolTileModel(self)?.title;
+      return getTileModel(self)?.title;
     },
     get isUserResizable() {
       return true;
@@ -73,8 +73,8 @@ export const DataflowContentModel = ToolContentModel
       ].join("\n");
     }
   }))
-  .actions(self => toolModelHooks({
-    doPostCreate(metadata: ToolMetadataModelType){
+  .actions(self => tileModelHooks({
+    doPostCreate(metadata: ITileMetadataModel){
       self.metadata = metadata;
     }
   }))

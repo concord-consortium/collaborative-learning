@@ -11,7 +11,7 @@ import { transformCurriculumImageUrl } from "../../models/tiles/image/image-impo
 import { TreeManagerType } from "../../models/history/tree-manager";
 import { PlaybackComponent } from "../playback/playback";
 import {
-  IToolApi, IToolApiInterface, IToolApiMap, ToolApiInterfaceContext, EditableToolApiInterfaceRefContext
+  ITileApi, ITileApiInterface, ITileApiMap, TileApiInterfaceContext, EditableTileApiInterfaceRefContext
 } from "../tiles/tile-api";
 import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT } from "../../lib/debug";
@@ -45,27 +45,27 @@ interface IState {
 @observer
 export class CanvasComponent extends BaseComponent<IProps, IState> {
 
-  private toolApiMap: IToolApiMap = {};
-  private toolApiInterface: IToolApiInterface;
+  private toolApiMap: ITileApiMap = {};
+  private toolApiInterface: ITileApiInterface;
   private hotKeys: HotKeys = new HotKeys();
 
-  static contextType = EditableToolApiInterfaceRefContext;
-  declare context: React.ContextType<typeof EditableToolApiInterfaceRefContext>;
+  static contextType = EditableTileApiInterfaceRefContext;
+  declare context: React.ContextType<typeof EditableTileApiInterfaceRefContext>;
 
   constructor(props: IProps) {
     super(props);
 
     this.toolApiInterface = {
-      register: (id: string, toolApi: IToolApi) => {
+      register: (id: string, toolApi: ITileApi) => {
         this.toolApiMap[id] = toolApi;
       },
       unregister: (id: string) => {
         delete this.toolApiMap[id];
       },
-      getToolApi: (id: string) => {
+      getTileApi: (id: string) => {
         return this.toolApiMap[id];
       },
-      forEach: (callback: (api: IToolApi) => void) => {
+      forEach: (callback: (api: ITileApi) => void) => {
         each(this.toolApiMap, api => callback(api));
       }
     };
@@ -87,13 +87,13 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
       this.context.current = this.toolApiInterface;
     }
     return (
-      <ToolApiInterfaceContext.Provider value={this.toolApiInterface}>
+      <TileApiInterfaceContext.Provider value={this.toolApiInterface}>
         <div key="canvas" className="canvas" data-test="canvas" onKeyDown={this.handleKeyDown}>
           {this.renderContent()}
           {this.renderDebugInfo()}
           {this.renderOverlayMessage()}
         </div>
-      </ToolApiInterfaceContext.Provider>
+      </TileApiInterfaceContext.Provider>
     );
   }
 

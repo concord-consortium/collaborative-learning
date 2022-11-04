@@ -6,10 +6,10 @@ import { WithId } from "../../hooks/firestore-hooks";
 import { useUIStore } from "../../hooks/use-stores";
 import { CommentDocument} from "../../lib/firestore-schema";
 import { CommentCard } from "./comment-card";
-import { getToolComponentInfo } from "../../models/tiles/tile-component-info";
+import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import {ChatCommentThread} from "./chat-comment-thread";
-import { ToolIconComponent } from "./tile-icon-component";
+import { TileIconComponent } from "./tile-icon-component";
 import { ChatThreadToggle } from "./chat-thread-toggle";
 
 import "./chat-thread.scss";
@@ -71,7 +71,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
             commentThread.comments.some((comment: WithId<CommentDocument>) => user?.id === comment.uid);
           const numComments = commentThread.comments.length;
           const shouldBeFocused = commentThread.tileId === focusId;
-          const Icon = commentThread.tileType && getToolComponentInfo(commentThread.tileType)?.Icon;
+          const Icon = commentThread.tileType && getTileComponentInfo(commentThread.tileType)?.Icon;
           const key= commentThread.tileId || "document";
           return (
             <div key={key}
@@ -127,7 +127,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
               <div className="comment-card-header comment-select" data-testid="comment-card-header">
                 <div className="comment-card-header-icon" data-testid="comment-card-header-icon">
                   <div data-testid="chat-thread-tile-type">
-                    <ToolIconComponent documentKey={focusDocument} tileId={focusTileId}/>
+                    <TileIconComponent documentKey={focusDocument} tileId={focusTileId}/>
                   </div>
                 </div>
               </div>

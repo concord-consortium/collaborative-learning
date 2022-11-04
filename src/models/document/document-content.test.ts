@@ -12,8 +12,8 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTools } from "../../register-tiles";
-registerTools(["Drawing", "Geometry", "Image", "Table", "Text"]);
+import { registerTiles } from "../../register-tiles";
+registerTiles(["Drawing", "Geometry", "Image", "Table", "Text"]);
 
 // mock uniqueId so we can recognize auto-generated IDs
 jest.mock("../../utilities/js-utils", () => {

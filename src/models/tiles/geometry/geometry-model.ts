@@ -3,7 +3,7 @@ import { applySnapshot, getSnapshot, getType, Instance, SnapshotIn, types } from
 import { kDefaultBoardModelInputProps, kGeometryToolID } from "./geometry-types";
 import { uniqueId } from "../../../utilities/js-utils";
 import { typeField } from "../../../utilities/mst-utils";
-import { ToolContentModel } from "../tile-types";
+import { TileContentModel } from "../tile-types";
 import { ESegmentLabelOption, JXGChange, JXGPositionProperty } from "./jxg-changes";
 import { imageChangeAgent } from "./jxg-image";
 import { movableLineChangeAgent } from "./jxg-movable-line";
@@ -341,7 +341,7 @@ export type GeometryObjectModelUnion = CommentModelType | ImageModelType | Movab
                                         PolygonModelType | VertexAngleModelType;
 
 // Define the shape of the geometry content without the views/actions, etc. to avoid circular references
-export const GeometryBaseContentModel = ToolContentModel
+export const GeometryBaseContentModel = TileContentModel
   .named("GeometryBaseContent")
   .props({
     type: types.optional(types.literal(kGeometryToolID), kGeometryToolID),

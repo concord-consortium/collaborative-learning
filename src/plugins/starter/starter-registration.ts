@@ -1,20 +1,20 @@
-import { registerToolComponentInfo } from "../../models/tiles/tile-component-info";
-import { registerToolContentInfo } from "../../models/tiles/tile-content-info";
+import { registerTileComponentInfo } from "../../models/tiles/tile-component-info";
+import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { kStarterDefaultHeight, kStarterToolID } from "./starter-types";
 import StarterToolIcon from "./starter-icon.svg";
 import { StarterToolComponent } from "./starter-tile";
 import { defaultStarterContent, StarterContentModel } from "./starter-content";
 
-registerToolContentInfo({
+registerTileContentInfo({
   id: kStarterToolID,
   modelClass: StarterContentModel,
   defaultContent: defaultStarterContent,
   defaultHeight: kStarterDefaultHeight
 });
 
-registerToolComponentInfo({
+registerTileComponentInfo({
   id: kStarterToolID,
   Component: StarterToolComponent,
-  toolTileClass: "starter-tool-tile",
+  tileEltClass: "starter-tool-tile",
   Icon: StarterToolIcon
 });

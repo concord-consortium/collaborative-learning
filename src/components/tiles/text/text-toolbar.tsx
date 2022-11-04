@@ -5,7 +5,7 @@ import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { TextToolbarButton } from "./text-toolbar-button";
 import { useTextToolDialog } from "./text-tile-dialog";
-import { IRegisterToolApiProps } from "../tile-component";
+import { IRegisterTileApiProps } from "../tile-component";
 import { getTextPluginInfo } from "../../../models/tiles/text/text-plugin-info";
 // TODO: This should be exported by slate-editor, and we should import it from there.
 // Currently it is not listed as a direct dependency of CLUE.
@@ -28,7 +28,7 @@ interface IButtonDef {
   toolTip: string;   // Text for the button's tool-tip.
 }
 
-interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
+interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
   selectedButtons: string[];
   editor?: Editor;
 }

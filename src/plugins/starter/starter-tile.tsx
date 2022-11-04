@@ -1,10 +1,10 @@
 import { observer } from "mobx-react";
 import React from "react";
-import { IToolTileProps } from "../../components/tiles/tile-component";
+import { ITileProps } from "../../components/tiles/tile-component";
 import { StarterContentModelType } from "./starter-content";
 import "./starter-tile.scss";
 
-export const StarterToolComponent: React.FC<IToolTileProps> = observer((props) => {
+export const StarterToolComponent: React.FC<ITileProps> = observer((props) => {
   // Note: capturing the content here and using it in handleChange() below may run the risk
   // of encountering a stale closure issue depending on the order in which content changes,
   // component renders, and calls to handleChange() occur. See the PR discussion at

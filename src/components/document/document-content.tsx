@@ -8,9 +8,9 @@ import { BaseComponent, IBaseProps } from "../base";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
 import { DocumentContentModelType, IDragToolCreateInfo, IDropRowInfo } from "../../models/document/document-content";
-import { getToolContentInfoById } from "../../models/tiles/tile-content-info";
+import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import { IDragTiles } from "../../models/tiles/tile-model";
-import { ToolApiInterfaceContext } from "../tiles/tile-api";
+import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tiles/tile-component";
 import { safeJsonParse } from "../../utilities/js-utils";
 
@@ -46,8 +46,8 @@ const kDragUpdateInterval = 50;
 @observer
 export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
-  static contextType = ToolApiInterfaceContext;
-  declare context: React.ContextType<typeof ToolApiInterfaceContext>;
+  static contextType = TileApiInterfaceContext;
+  declare context: React.ContextType<typeof TileApiInterfaceContext>;
 
   public state: IState = {};
 
@@ -236,15 +236,15 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const toolApiInterface = this.context;
     if (!content || !tileType || !toolApiInterface) return [];
     const tilesOfType = content.getTilesOfType(tileType);
-    return tilesOfType.map(id => ({ id, title: toolApiInterface.getToolApi(id)?.getTitle?.() }));
+    return tilesOfType.map(id => ({ id, title: toolApiInterface.getTileApi(id)?.getTitle?.() }));
   };
 
   private handleRequestUniqueTitle = (tileId: string) => {
     const { content } = this.props;
     const toolApiInterface = this.context;
     const tileType = content?.getTile(tileId)?.content.type;
-    const titleBase = getToolContentInfoById(tileType)?.titleBase;
-    const getTileTitle = (_tileId: string) => toolApiInterface?.getToolApi?.(_tileId)?.getTitle?.();
+    const titleBase = getTileContentInfo(tileType)?.titleBase;
+    const getTileTitle = (_tileId: string) => toolApiInterface?.getTileApi?.(_tileId)?.getTitle?.();
     return tileType && titleBase && content?.getUniqueTitle(tileType, titleBase, getTileTitle);
   };
 

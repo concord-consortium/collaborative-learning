@@ -1,24 +1,24 @@
 import {
   DataflowContentModel, defaultDataflowContent, kDataflowDefaultHeight, kDataflowToolID
 } from "./model/dataflow-content";
-import { registerToolComponentInfo } from "../../models/tiles/tile-component-info";
-import { registerToolContentInfo } from "../../models/tiles/tile-content-info";
-import { ToolMetadataModel } from "../../models/tiles/tile-metadata";
+import { registerTileComponentInfo } from "../../models/tiles/tile-component-info";
+import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
+import { TileMetadataModel } from "../../models/tiles/tile-metadata";
 import DataflowToolComponent from "./components/dataflow-tile";
 import DataflowToolIcon from "./assets/program.svg";
 
-registerToolContentInfo({
+registerTileContentInfo({
   id: kDataflowToolID,
   titleBase: "Program",
   modelClass: DataflowContentModel,
-  metadataClass: ToolMetadataModel,
+  metadataClass: TileMetadataModel,
   defaultHeight: kDataflowDefaultHeight,
   defaultContent: defaultDataflowContent
 });
 
-registerToolComponentInfo({
+registerTileComponentInfo({
   id: kDataflowToolID,
   Component: DataflowToolComponent,
-  toolTileClass: "dataflow-tool-tile",
+  tileEltClass: "dataflow-tool-tile",
   Icon: DataflowToolIcon
 });

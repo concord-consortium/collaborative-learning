@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import ReactDataGrid from "react-data-grid";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { exportTableContentAsJson } from "../../../models/tiles/table/table-export";
-import { IToolTileProps } from "../tile-component";
+import { ITileProps } from "../tile-component";
 import { getTableContentHeight } from "./table-utils";
 import { EditableTableTitle } from "./editable-table-title";
 import { TableToolbar } from "./table-toolbar";
@@ -26,15 +26,15 @@ import { useToolApi } from "./use-tile-api";
 import { useRowHeight } from "./use-row-height";
 import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
-import { useToolbarToolApi } from "../hooks/use-toolbar-tool-api";
+import { useToolbarTileApi } from "../hooks/use-toolbar-tile-api";
 import { lightenColor } from "../../../utilities/color-utils";
 
 import "./table-tile.scss";
 
 // observes row selection from shared selection store
-const TableToolComponent: React.FC<IToolTileProps> = observer(({
-  documentId, documentContent, toolTile, model, readOnly, height, scale,
-  onRequestRowHeight, onRequestTilesOfType, onRequestUniqueTitle, onRegisterToolApi, onUnregisterToolApi
+const TableToolComponent: React.FC<ITileProps> = observer(({
+  documentId, documentContent, tileElt, model, readOnly, height, scale,
+  onRequestRowHeight, onRequestTilesOfType, onRequestUniqueTitle, onRegisterTileApi, onUnregisterTileApi
 }) => {
   // Gather data from the model
   const modelRef = useCurrent(model);
@@ -172,7 +172,7 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     return exportTableContentAsJson(content.metadata, dataSet, content.columnWidth);
   }, [dataSet, content]);
   useToolApi({ content: getContent(), getTitle, getContentHeight, exportContentAsTileJson,
-                onRegisterToolApi, onUnregisterToolApi });
+                onRegisterTileApi, onUnregisterTileApi });
 
   useEffect(() => {
     if (containerRef.current && linkColors) {
@@ -198,10 +198,10 @@ const TableToolComponent: React.FC<IToolTileProps> = observer(({
     return () => disposer();
   });
 
-  const toolbarProps = useToolbarToolApi({ id: model.id, enabled: !readOnly, onRegisterToolApi, onUnregisterToolApi });
+  const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
   return (
     <div className="table-tool">
-      <TableToolbar documentContent={documentContent} toolTile={toolTile} {...toolbarProps}
+      <TableToolbar documentContent={documentContent} tileElt={tileElt} {...toolbarProps}
                     onSetExpression={showExpressionsDialog} scale={scale}/>
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
         <EditableTableTitle className="table-title" readOnly={readOnly} showLinkButton={showLinkButton}

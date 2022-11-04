@@ -6,13 +6,13 @@ import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
 import {
   addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
 } from "../../../models/tiles/table-links";
-import { ToolTileModelType } from "../../../models/tiles/tile-model";
+import { ITileModel } from "../../../models/tiles/tile-model";
 import { useLinkTableDialog } from "./use-link-table-dialog";
 import { IToolbarActionHandlers } from "./geometry-shared";
 
 interface IProps {
   documentId?: string;
-  model: ToolTileModelType;
+  model: ITileModel;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
   actionHandlers?: IToolbarActionHandlers;
 }
@@ -40,7 +40,7 @@ export const useTableLinking = ({documentId, model, onRequestTilesOfType, action
 };
 
 interface IUseLinkableTableTilesProps {
-  model: ToolTileModelType;
+  model: ITileModel;
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
 }
 const useLinkableTableTiles = ({ onRequestTilesOfType }: IUseLinkableTableTilesProps) => {

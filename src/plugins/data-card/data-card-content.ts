@@ -3,10 +3,10 @@ import { addDisposer, getType, Instance, types } from "mobx-state-tree";
 import { kDataCardToolID, kDefaultLabel, kDefaultLabelPrefix } from "./data-card-types";
 import { withoutUndo } from "../../models/history/tree-monitor";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
-import { ToolMetadataModelType } from "../../models/tiles/tile-metadata";
-import { toolModelHooks } from "../../models/tiles/tile-model-hooks";
-import { getToolTileModel, setTileTitleFromContent } from "../../models/tiles/tile-model";
-import { ToolContentModel } from "../../models/tiles/tile-types";
+import { ITileMetadataModel } from "../../models/tiles/tile-metadata";
+import { tileModelHooks } from "../../models/tiles/tile-model-hooks";
+import { getTileModel, setTileTitleFromContent } from "../../models/tiles/tile-model";
+import { TileContentModel } from "../../models/tiles/tile-types";
 import {
   addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet, DataSet
 } from "../../models/data/data-set";
@@ -28,20 +28,20 @@ export function defaultDataCardContent(props?: IDefaultContentOptions): DataCard
   return content;
 }
 
-export const DataCardContentModel = ToolContentModel
+export const DataCardContentModel = TileContentModel
   .named("DataCardTool")
   .props({
     type: types.optional(types.literal(kDataCardToolID), kDataCardToolID),
     caseIndex: 0
   })
   .volatile(self => ({
-    metadata: undefined as any as ToolMetadataModelType,
+    metadata: undefined as any as ITileMetadataModel,
     // used as fallback when shared model isn't available
     emptyDataSet: DataSet.create()
   }))
   .views(self => ({
     get title(): string | undefined {
-      return getToolTileModel(self)?.title;
+      return getTileModel(self)?.title;
     },
     get sharedModel() {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
@@ -123,8 +123,8 @@ export const DataCardContentModel = ToolContentModel
       ].join("\n");
     }
   }))
-  .actions(self => toolModelHooks({
-    doPostCreate(metadata: ToolMetadataModelType){
+  .actions(self => tileModelHooks({
+    doPostCreate(metadata: ITileMetadataModel){
       self.metadata = metadata;
     }
   }))

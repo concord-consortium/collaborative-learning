@@ -9,7 +9,7 @@ import { useDocumentContext } from "../../hooks/use-document-context";
 import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
 import { useGroupsStore, useStores } from "../../hooks/use-stores";
 import { ToolbarComponent } from "../toolbar";
-import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from "../tiles/tile-api";
+import { EditableTileApiInterfaceRef, EditableTileApiInterfaceRefContext } from "../tiles/tile-api";
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { ToolbarModelType } from "../../models/stores/problem-configuration";
@@ -100,7 +100,7 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const { isNetworkedTeacher } = user;
 
   // set by the canvas and used by the toolbar
-  const editableToolApiInterfaceRef: EditableToolApiInterfaceRef = useRef(null);
+  const editableTileApiInterfaceRef: EditableTileApiInterfaceRef = useRef(null);
 
   const isReadOnly = !isPrimary || readOnly || document.isPublished;
   const isShowingToolbar = toolbar?.length && !isReadOnly;
@@ -113,14 +113,14 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   useDocumentSyncToFirebase(user, firebase, document, readOnly);
   return (
     <DocumentContextReact.Provider value={documentContext}>
-      <EditableToolApiInterfaceRefContext.Provider value={editableToolApiInterfaceRef}>
+      <EditableTileApiInterfaceRefContext.Provider value={editableTileApiInterfaceRef}>
         <div key="editable-document" className={editableDocContentClass}
               data-focus-document={document.key} >
           {isShowingToolbar && <DocumentToolbar document={document} toolbar={toolbar} />}
           {isShowingToolbar && <div className="canvas-separator"/>}
           <DocumentCanvas readOnly={isReadOnly} {...{mode, isPrimary, document, showPlayback}} />
         </div>
-      </EditableToolApiInterfaceRefContext.Provider>
+      </EditableTileApiInterfaceRefContext.Provider>
     </DocumentContextReact.Provider>
   );
 };

@@ -3,9 +3,9 @@ import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
 import { DataflowProgram } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
-import { ToolTileModelType } from "../../../models/tiles/tile-model";
+import { ITileModel } from "../../../models/tiles/tile-model";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
-import { IToolTileProps } from "../../../components/tiles/tile-component";
+import { ITileProps } from "../../../components/tiles/tile-component";
 import { EditableTileTitle } from "../../../components/tiles/editable-tile-title";
 import { DataflowContentModelType } from "../model/dataflow-content";
 import { measureText } from "../../../components/tiles/hooks/use-measure-text";
@@ -15,8 +15,8 @@ import { dataflowLogEvent } from "../dataflow-logger";
 
 import "./dataflow-tile.scss";
 
-interface IProps extends IToolTileProps{
-  model: ToolTileModelType;
+interface IProps extends ITileProps{
+  model: ITileModel;
   readOnly?: boolean;
   height?: number;
 }
@@ -62,7 +62,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   }
 
   public componentDidMount() {
-    this.props.onRegisterToolApi({
+    this.props.onRegisterTileApi({
       getTitle: () => {
         return this.getTitle();
       },

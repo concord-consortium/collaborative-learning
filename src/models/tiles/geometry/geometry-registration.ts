@@ -1,12 +1,12 @@
-import { registerToolComponentInfo } from "../tile-component-info";
-import { registerToolContentInfo } from "../tile-content-info";
+import { registerTileComponentInfo } from "../tile-component-info";
+import { registerTileContentInfo } from "../tile-content-info";
 import { GeometryContentModel, GeometryMetadataModel, defaultGeometryContent } from "./geometry-content";
 import { kGeometryToolID } from "./geometry-types";
 import { kGeometryDefaultHeight } from "./jxg-types";
 import GeometryToolComponent from "../../../components/tiles/geometry/geometry-tile";
 import GeometryToolIcon from "../../../clue/assets/icons/graph-tool.svg";
 
-registerToolContentInfo({
+registerTileContentInfo({
   id: kGeometryToolID,
   titleBase: "Graph",
   modelClass: GeometryContentModel,
@@ -17,10 +17,10 @@ registerToolContentInfo({
   defaultContent: defaultGeometryContent
 });
 
-registerToolComponentInfo({
+registerTileComponentInfo({
   id: kGeometryToolID,
   Component: GeometryToolComponent,
-  toolTileClass: "geometry-tool-tile",
+  tileEltClass: "geometry-tool-tile",
   tileHandlesOwnSelection: true,
   Icon: GeometryToolIcon
 });

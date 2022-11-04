@@ -3,7 +3,7 @@ import LinkGraphIcon from "../../../clue/assets/icons/table/link-graph-icon.svg"
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
-import { ToolTileModelType } from "../../../models/tiles/tile-model";
+import { ITileModel } from "../../../models/tiles/tile-model";
 
 import "./link-geometry-dialog.scss";
 
@@ -50,7 +50,7 @@ const Content: React.FC<IContentProps>
 
 interface IProps {
   geometryTiles: ITileLinkMetadata[];
-  model: ToolTileModelType;
+  model: ITileModel;
   onLinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
   onUnlinkGeometryTile: (geomTileInfo: ITileLinkMetadata) => void;
 }

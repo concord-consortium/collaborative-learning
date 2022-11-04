@@ -2,7 +2,7 @@
 import "./models/tiles/unknown-content";
 import "./models/tiles/placeholder/placeholder-registration";
 
-const gToolRegistration: Record<string, () => void> = {
+const gTileRegistration: Record<string, () => void> = {
   "DataCard": () => import(/* webpackChunkName: "DataCard" */"./plugins/data-card/data-card-registration"),
   "Dataflow": () => import(/* webpackChunkName: "Dataflow" */"./plugins/dataflow/dataflow-registration"),
   "Diagram": () => Promise.all([
@@ -23,6 +23,6 @@ const gToolRegistration: Record<string, () => void> = {
   "Text": () => import(/* webpackChunkName: "Text" */"./models/tiles/text/text-registration")
 };
 
-export function registerTools(toolIds: string[]) {
-  return Promise.all(toolIds.map(toolId => gToolRegistration[toolId]?.()));
+export function registerTiles(tileTypeIds: string[]) {
+  return Promise.all(tileTypeIds.map(id => gTileRegistration[id]?.()));
 }

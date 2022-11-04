@@ -2,21 +2,21 @@ import { useEffect, useMemo } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { getLinkedTableIndex } from "../../../models/tiles/table-links";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
-import { IToolApi } from "../tile-api";
+import { ITileApi } from "../tile-api";
 
 interface IProps {
   content: TableContentModelType;
   getTitle: () => string | undefined;
   getContentHeight: () => number | undefined;
   exportContentAsTileJson: () => string;
-  onRegisterToolApi: (toolApi: IToolApi, facet?: string | undefined) => void;
-  onUnregisterToolApi: (facet?: string | undefined) => void;
+  onRegisterTileApi: (toolApi: ITileApi, facet?: string | undefined) => void;
+  onUnregisterTileApi: (facet?: string | undefined) => void;
 }
 export const useToolApi = ({
-  content, getTitle, getContentHeight, exportContentAsTileJson, onRegisterToolApi, onUnregisterToolApi
+  content, getTitle, getContentHeight, exportContentAsTileJson, onRegisterTileApi, onUnregisterTileApi
 }: IProps) => {
   const contentRef = useCurrent(content);
-  const toolApi: IToolApi = useMemo(() => ({
+  const toolApi: ITileApi = useMemo(() => ({
     getTitle,
     getContentHeight,
     exportContentAsTileJson,
@@ -31,7 +31,7 @@ export const useToolApi = ({
   }), [exportContentAsTileJson, getContentHeight, getTitle, contentRef]);
 
   useEffect(() => {
-    onRegisterToolApi(toolApi);
-    return () => onUnregisterToolApi();
-  }, [onRegisterToolApi, onUnregisterToolApi, toolApi]);
+    onRegisterTileApi(toolApi);
+    return () => onUnregisterTileApi();
+  }, [onRegisterTileApi, onUnregisterTileApi, toolApi]);
 };

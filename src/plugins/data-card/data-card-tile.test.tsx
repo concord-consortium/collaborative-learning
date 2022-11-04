@@ -1,12 +1,12 @@
 import React from "react";
 import { render } from "@testing-library/react";
 import { ModalProvider } from "@concord-consortium/react-modal-hook";
-import { IToolApi } from "../../components/tiles/tile-api";
-import { ToolTileModel } from "../../models/tiles/tile-model";
+import { ITileApi } from "../../components/tiles/tile-api";
+import { TileModel } from "../../models/tiles/tile-model";
 import { defaultDataCardContent } from "./data-card-content";
 import { DataCardToolComponent } from "./data-card-tile";
 
-// The data card tile needs to be registered so the ToolTileModel.create
+// The data card tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
 import "./data-card-registration";
 
@@ -18,10 +18,10 @@ jest.mock("../../hooks/use-stores", () => ({
 
 describe("DataCardToolComponent", () => {
   const content = defaultDataCardContent();
-  const model = ToolTileModel.create({content});
+  const model = TileModel.create({content});
 
   const defaultProps = {
-    toolTile: null,
+    tileElt: null,
     context: "",
     docId: "",
     documentContent: null,
@@ -42,10 +42,10 @@ describe("DataCardToolComponent", () => {
     onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number): void => {
       throw new Error("Function not implemented.");
     },
-    onRegisterToolApi: (toolApi: IToolApi, facet?: string): void => {
+    onRegisterTileApi: (toolApi: ITileApi, facet?: string): void => {
       // throw new Error("Function not implemented.");
     },
-    onUnregisterToolApi: (facet?: string): void => {
+    onUnregisterTileApi: (facet?: string): void => {
       throw new Error("Function not implemented.");
     }
   };

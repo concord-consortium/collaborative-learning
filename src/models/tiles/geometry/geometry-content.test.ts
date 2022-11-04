@@ -15,11 +15,11 @@ import {
   isBoard, isComment, isFreePoint, isImage, isLine, isMovableLine, isPoint, isPolygon,
   isText, kGeometryDefaultPixelsPerUnit, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin
 } from "./jxg-types";
-import { ToolTileModel, ToolTileModelType } from "../tile-model";
+import { TileModel, ITileModel } from "../tile-model";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTools } from "../../../register-tiles";
-registerTools(["Geometry"]);
+import { registerTiles } from "../../../register-tiles";
+registerTiles(["Geometry"]);
 
 // Need to mock this so the placeholder that is added to the cache
 // has dimensions
@@ -36,7 +36,7 @@ jest.mock("../../../lib/logger", () => {
   return {
     ...(jest.requireActual("../../../lib/logger") as any),
     Logger: {
-      logToolChange: jest.fn()
+      logTileChange: jest.fn()
     }
   };
 });
@@ -137,9 +137,9 @@ describe("GeometryContent", () => {
 
   function createTileAndBoard(
       configContent?: (content: GeometryContentModelType) => void):
-      { tile: ToolTileModelType, board: JXG.Board } {
+      { tile: ITileModel, board: JXG.Board } {
     const { content, board } = createContentAndBoard(configContent);
-    const tile = ToolTileModel.create({ content: getSnapshot(content) });
+    const tile = TileModel.create({ content: getSnapshot(content) });
     return { tile, board };
   }
 
@@ -148,7 +148,7 @@ describe("GeometryContent", () => {
     destroy(content);
   }
 
-  function destroyTileAndBoard(tile: ToolTileModelType, board?: JXG.Board) {
+  function destroyTileAndBoard(tile: ITileModel, board?: JXG.Board) {
     if (board) (tile.content as GeometryContentModelType).destroyBoard(board);
     destroy(tile);
   }

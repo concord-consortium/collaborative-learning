@@ -7,8 +7,8 @@ import { BaseComponent } from "../../base";
 import { EmptyImagePrompt } from "./empty-image-prompt";
 import { ImageToolbar } from "./image-toolbar";
 import { ImageComponent } from "./image-component";
-import { IToolApi, TileResizeEntry } from "../tile-api";
-import { IToolTileProps } from "../tile-component";
+import { ITileApi, TileResizeEntry } from "../tile-api";
+import { ITileProps } from "../tile-component";
 import { measureText } from "../hooks/use-measure-text";
 import { IDocumentContext } from "../../../models/document/document-types";
 import { debouncedSelectTile } from "../../../models/stores/ui";
@@ -26,7 +26,7 @@ import { pasteClipboardImage } from "../../../utilities/clipboard-utils";
 
 import "./image-tile.sass";
 
-type IProps = IToolTileProps;
+type IProps = ITileProps;
 
 interface IState {
   isLoading?: boolean;
@@ -54,7 +54,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   // give each component instance a unique id
   private imageToolId = ++nextImageToolId;
   private _isMounted = false;
-  private toolbarToolApi: IToolApi | undefined;
+  private toolbarToolApi: ITileApi | undefined;
   private resizeObserver: ResizeObserver;
   private imageElt: HTMLDivElement | null;
   private updateImage = (url: string, filename?: string) => {
@@ -110,7 +110,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
     });
     this.imageElt && this.resizeObserver.observe(this.imageElt);
 
-    this.props.onRegisterToolApi({
+    this.props.onRegisterTileApi({
       getTitle: () => {
         return this.getTitle();
       },
@@ -145,7 +145,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { documentContent, toolTile, readOnly, scale } = this.props;
+    const { documentContent, tileElt, readOnly, scale } = this.props;
     const { isLoading, imageEntry } = this.state;
     const showEmptyImagePrompt = !this.getContent().hasValidImage;
 
@@ -172,10 +172,10 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         >
           {isLoading && <div className="loading-spinner" />}
           <ImageToolbar
-            onRegisterToolApi={(toolApi: IToolApi) => this.toolbarToolApi = toolApi}
-            onUnregisterToolApi={() => this.toolbarToolApi = undefined}
+            onRegisterTileApi={(toolApi: ITileApi) => this.toolbarToolApi = toolApi}
+            onUnregisterTileApi={() => this.toolbarToolApi = undefined}
             documentContent={documentContent}
-            toolTile={toolTile}
+            tileElt={tileElt}
             scale={scale}
             onIsEnabled={this.handleIsEnabled}
             onUploadImageFile={this.handleUploadImageFile}

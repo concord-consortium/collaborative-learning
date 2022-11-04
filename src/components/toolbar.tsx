@@ -6,10 +6,10 @@ import { DocumentModelType } from "../models/document/document";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
 import { ToolbarModelType } from "../models/stores/problem-configuration";
 import { ToolButtonModelType } from "../models/tiles/tool-button";
-import { getToolContentInfoById, IToolContentInfo } from "../models/tiles/tile-content-info";
+import { getTileContentInfo, ITileContentInfo } from "../models/tiles/tile-content-info";
 import { DeleteButton } from "./delete-button";
 import { IToolButtonProps, ToolButtonComponent } from "./tool-button";
-import { EditableToolApiInterfaceRefContext } from "./tiles/tile-api";
+import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
 import { kDragTileCreate  } from "./tiles/tile-component";
 
 import "./toolbar.sass";
@@ -28,8 +28,8 @@ interface IState {
 @observer
 export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
-  static contextType = EditableToolApiInterfaceRefContext;
-  declare context: React.ContextType<typeof EditableToolApiInterfaceRefContext>;
+  static contextType = EditableTileApiInterfaceRefContext;
+  declare context: React.ContextType<typeof EditableTileApiInterfaceRefContext>;
 
   private showDeleteTilesConfirmationAlert?: () => void;
 
@@ -58,7 +58,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           this.handleDelete();
           break;
         default:
-          this.handleAddToolTile(tool);
+          this.handleAddTile(tool);
           break;
       }
     };
@@ -67,7 +67,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       this.setState({ activeTool: isActive && (tool !== defaultTool) ? tool : defaultTool });
     };
     const handleDragTool = (e: React.DragEvent<HTMLDivElement>, tool: ToolButtonModelType) => {
-      this.handleDragNewToolTile(tool, e);
+      this.handleDragNewTile(tool, e);
     };
     const renderToolButtons = (toolbarModel: ToolbarModelType) => {
       const { ui: { selectedTileIds } } = this.stores;
@@ -108,19 +108,19 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     document.content?.showPendingInsertHighlight(false);
   };
 
-  private getUniqueTitle(toolContentInfo: IToolContentInfo) {
+  private getUniqueTitle(toolContentInfo: ITileContentInfo) {
     const toolApiInterface = this.context?.current;
     if (!toolApiInterface) return;
     const { document } = this.props;
     const { id, titleBase } = toolContentInfo;
-    const getTileTitle = (tileId: string) => toolApiInterface?.getToolApi(tileId)?.getTitle?.();
+    const getTileTitle = (tileId: string) => toolApiInterface?.getTileApi(tileId)?.getTitle?.();
     return titleBase && document.getUniqueTitle(id, titleBase, getTileTitle);
   }
 
-  private handleAddToolTile(tool: ToolButtonModelType) {
+  private handleAddTile(tool: ToolButtonModelType) {
     const { document } = this.props;
     const { ui } = this.stores;
-    const toolContentInfo = getToolContentInfoById(tool.id);
+    const toolContentInfo = getTileContentInfo(tool.id);
     if (!toolContentInfo) return;
 
     const newTileOptions: IDocumentContentAddTileOptions = {
@@ -157,7 +157,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     let didDeleteInteriorSelection = false;
     const { ui } = this.stores;
     ui.selectedTileIds.forEach(tileId => {
-      const toolApi = toolApiInterface?.getToolApi(tileId);
+      const toolApi = toolApiInterface?.getTileApi(tileId);
       // if there is selected content inside the selected tile, delete it first
       if (toolApi?.hasSelection?.()) {
         toolApi.deleteSelection?.();
@@ -183,11 +183,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     });
   };
 
-  private handleDragNewToolTile = (tool: ToolButtonModelType, e: React.DragEvent<HTMLDivElement>) => {
+  private handleDragNewTile = (tool: ToolButtonModelType, e: React.DragEvent<HTMLDivElement>) => {
     // remove hover-insert highlight when we start a tile drag
     this.removeDropRowHighlight();
 
-    const toolContentInfo = getToolContentInfoById(tool.id);
+    const toolContentInfo = getTileContentInfo(tool.id);
     if (toolContentInfo) {
       const dragInfo: IDragToolCreateInfo =
         { toolId: tool.id, title: this.getUniqueTitle(toolContentInfo) };

@@ -1,10 +1,10 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { exportImageTileSpec, isLegacyImageTileImport, convertLegacyImageTile } from "./image-import-export";
 import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info";
-import { ToolMetadataModelType } from "../tile-metadata";
-import { toolModelHooks } from "../tile-model-hooks";
-import { getToolTileModel, setTileTitleFromContent } from "../tile-model";
-import { ToolContentModel } from "../tile-types";
+import { ITileMetadataModel } from "../tile-metadata";
+import { tileModelHooks } from "../tile-model-hooks";
+import { getTileModel, setTileTitleFromContent } from "../tile-model";
+import { TileContentModel } from "../tile-types";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
@@ -15,7 +15,7 @@ export function defaultImageContent(options?: IDefaultContentOptions) {
   return ImageContentModel.create({url: options?.url || placeholderImage});
 }
 
-export const ImageContentModel = ToolContentModel
+export const ImageContentModel = TileContentModel
   .named("ImageTool")
   .props({
     type: types.optional(types.literal(kImageToolID), kImageToolID),
@@ -23,7 +23,7 @@ export const ImageContentModel = ToolContentModel
     filename: types.maybe(types.string),
   })
   .volatile(self => ({
-    metadata: undefined as any as ToolMetadataModelType
+    metadata: undefined as any as ITileMetadataModel
   }))
   .preProcessSnapshot(snapshot => {
     return isLegacyImageTileImport(snapshot)
@@ -32,7 +32,7 @@ export const ImageContentModel = ToolContentModel
   })
   .views(self => ({
     get title() {
-      return getToolTileModel(self)?.title;
+      return getTileModel(self)?.title;
     },
     get isUserResizable() {
       return true;
@@ -47,8 +47,8 @@ export const ImageContentModel = ToolContentModel
       return exportImageTileSpec(self.url, self.filename, options);
     }
   }))
-  .actions(self => toolModelHooks({
-      doPostCreate(metadata: ToolMetadataModelType) {
+  .actions(self => tileModelHooks({
+      doPostCreate(metadata: ITileMetadataModel) {
         self.metadata = metadata;
       },
   }))

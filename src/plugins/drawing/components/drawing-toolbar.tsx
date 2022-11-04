@@ -9,16 +9,16 @@ import {
   IFloatingToolbarProps, useFloatingToolbarLocation
 } from "../../../components/tiles/hooks/use-floating-toolbar-location";
 import { ImageUploadButton } from "../../../components/tiles/image/image-toolbar";
-import { IRegisterToolApiProps } from "../../../components/tiles/tile-component";
+import { IRegisterTileApiProps } from "../../../components/tiles/tile-component";
 import { DrawingContentModelType } from "../model/drawing-content";
 import { gImageMap } from "../../../models/image-map";
-import { ToolTileModelType } from "../../../models/tiles/tile-model";
+import { ITileModel } from "../../../models/tiles/tile-model";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { IPaletteState, IToolbarButtonProps, kClosedPalettesState, PaletteKey } from "../objects/drawing-object";
 import { getDrawingToolButtonComponent } from "./drawing-object-manager";
 
-interface IProps extends IFloatingToolbarProps, IRegisterToolApiProps {
-  model: ToolTileModelType;
+interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
+  model: ITileModel;
   setImageUrlToAdd: (url: string) => void;
 }
 

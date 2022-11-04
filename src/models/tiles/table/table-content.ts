@@ -7,9 +7,9 @@ import {
   convertChangesToSnapshot, convertImportToSnapshot, convertLegacyDataSet, isTableImportSnapshot
 } from "./table-import";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
-import { ToolMetadataModel } from "../tile-metadata";
-import { toolModelHooks } from "../tile-model-hooks";
-import { ToolContentModel } from "../tile-types";
+import { TileMetadataModel } from "../tile-metadata";
+import { tileModelHooks } from "../tile-model-hooks";
+import { TileContentModel } from "../tile-types";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SharedModelType } from "../../shared/shared-model";
@@ -38,7 +38,7 @@ export function defaultTableContent(props?: IDefaultContentOptions) {
                           } as SnapshotIn<typeof TableContentModel>);
 }
 
-export const TableMetadataModel = ToolMetadataModel
+export const TableMetadataModel = TileMetadataModel
   .named("TableMetadata")
   .props({
     expressions: types.map(types.string),
@@ -144,7 +144,7 @@ export const TableMetadataModel = ToolMetadataModel
   }));
 export interface TableMetadataModelType extends Instance<typeof TableMetadataModel> {}
 
-export const TableContentModel = ToolContentModel
+export const TableContentModel = TileContentModel
   .named("TableContent")
   .props({
     type: types.optional(types.literal(kTableToolID), kTableToolID),
@@ -233,7 +233,7 @@ export const TableContentModel = ToolContentModel
       return false;
     }
   }))
-  .actions(self => toolModelHooks({
+  .actions(self => tileModelHooks({
     doPostCreate(metadata) {
       self.metadata = metadata as TableMetadataModelType;
     }
@@ -244,7 +244,7 @@ export const TableContentModel = ToolContentModel
     },
     logChange(change: ITableChange) {
       const toolId = self.metadata?.id || "";
-      Logger.logToolChange(LogEventName.TABLE_TOOL_CHANGE, change.action, change, toolId);
+      Logger.logTileChange(LogEventName.TABLE_TOOL_CHANGE, change.action, change, toolId);
     }
   }))
   .actions(self => ({

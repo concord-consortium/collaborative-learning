@@ -3,7 +3,7 @@ import { DataGridHandle } from "react-data-grid";
 import { useCurrent } from "../../../hooks/use-current";
 import { ICase, IDataSet } from "../../../models/data/data-set";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
-import { ToolTileModelType } from "../../../models/tiles/tile-model";
+import { ITileModel } from "../../../models/tiles/tile-model";
 import { uniqueId } from "../../../utilities/js-utils";
 import { formatValue } from "./cell-formatter";
 import { TColumn, TPosition, TRow } from "./table-types";
@@ -17,7 +17,7 @@ const isCellSelectable = (position: TPosition, columns: TColumn[], readOnly: boo
 
 interface IUseDataSet {
   gridRef: React.RefObject<DataGridHandle>;
-  model: ToolTileModelType;
+  model: ITileModel;
   dataSet: IDataSet;
   triggerColumnChange: () => void;
   rowChanges: number;

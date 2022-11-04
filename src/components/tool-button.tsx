@@ -45,10 +45,10 @@ export const ToolButtonComponent: React.FC<IToolButtonProps> =
     onDragStart(e, toolButton);
   };
 
-  const toolTileClass = id.toLowerCase();
+  const tileEltClass = id.toLowerCase();
   return (
-    <div className={classNames("tool", toolTileClass, { active: isActive }, isDisabled ? "disabled" : "enabled")}
-        data-testid={`tool-${toolTileClass}`}
+    <div className={classNames("tool", tileEltClass, { active: isActive }, isDisabled ? "disabled" : "enabled")}
+        data-testid={`tool-${tileEltClass}`}
         key={id}
         title={title}
         onMouseDown={handleMouseDown}

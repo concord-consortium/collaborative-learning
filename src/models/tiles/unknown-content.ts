@@ -1,21 +1,21 @@
-import { registerToolComponentInfo } from "./tile-component-info";
-import { registerToolContentInfo } from "./tile-content-info";
-import { kUnknownToolID, UnknownContentModel, UnknownContentModelType } from "./tile-types";
-import PlaceholderToolComponent from "../../components/tiles/placeholder/placeholder-tile";
+import { registerTileComponentInfo } from "./tile-component-info";
+import { registerTileContentInfo } from "./tile-content-info";
+import { kUnknownToolID, UnknownContentModel, IUnknownContentModel } from "./tile-types";
+import PlaceholderTileComponent from "../../components/tiles/placeholder/placeholder-tile";
 
-export function defaultContent(): UnknownContentModelType {
+export function defaultContent(): IUnknownContentModel {
   return UnknownContentModel.create();
 }
 
-registerToolContentInfo({
+registerTileContentInfo({
   id: kUnknownToolID,
   modelClass: UnknownContentModel,
   defaultContent
 });
 
-registerToolComponentInfo({
+registerTileComponentInfo({
   id: kUnknownToolID,
-  Component: PlaceholderToolComponent,
-  toolTileClass: "placeholder-tile",
+  Component: PlaceholderTileComponent,
+  tileEltClass: "placeholder-tile",
   tileHandlesOwnSelection: true
 });

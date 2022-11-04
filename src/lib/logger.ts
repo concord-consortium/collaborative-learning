@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
 import { getSnapshot } from "mobx-state-tree";
 import { Optional } from "utility-types";
-import { ToolTileModelType } from "../models/tiles/tile-model";
+import { ITileModel } from "../models/tiles/tile-model";
 import { IStores } from "../models/stores/stores";
 import { UserModelType } from "../models/stores/user";
 import { InvestigationModelType } from "../models/curriculum/investigation";
@@ -142,7 +142,7 @@ export enum LogEventName {
 }
 
 // This is the form the log events take
-export interface SimpleToolLogEvent {
+export interface SimpleTileLogEvent {
   path?: string;
   args?: Array<any>;
 }
@@ -153,8 +153,8 @@ export interface DataflowProgramChange extends Record<string,any>{
   nodeIds?: number[],
 }
 
-type LoggableToolChangeEvent =  Optional<JXGChange, "operation"> |
-                                SimpleToolLogEvent |
+type LoggableTileChangeEvent =  Optional<JXGChange, "operation"> |
+                                SimpleTileLogEvent |
                                 Optional<ITableChange, "action"> |
                                 DataflowProgramChange;
 
@@ -220,7 +220,7 @@ export class Logger {
     sendToLoggingService(logMessage, this._instance.stores.user);
   }
 
-  public static logTileEvent(event: LogEventName, tile?: ToolTileModelType, metaData?: TileLoggingMetadata,
+  public static logTileEvent(event: LogEventName, tile?: ITileModel, metaData?: TileLoggingMetadata,
     commentText?: string) {
     if (!this._instance) return;
 
@@ -369,10 +369,10 @@ export class Logger {
     }
   }
 
-  public static logToolChange(
+  public static logTileChange(
     eventName: LogEventName,
     operation: string,
-    change: LoggableToolChangeEvent,
+    change: LoggableTileChangeEvent,
     toolId: string,
     method?: LogEventMethod)
   {

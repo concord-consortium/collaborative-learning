@@ -10,7 +10,7 @@ import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";
 import { DB } from "../../lib/db";
 import { getUserContext } from "../../hooks/use-user-context";
-import { registerTools } from "../../register-tiles";
+import { registerTiles } from "../../register-tiles";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
 import { DocumentsModelType, DocumentsModel, createDocumentsModelWithRequiredDocuments } from "./documents";
@@ -126,7 +126,7 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   // load/initialize the necessary tools
   const { toolbar = [], tools = [] } = stores.appConfig;
   const unitToolIds = new Set([...toolbar.map(tool => tool.id), ...tools]);
-  await registerTools([...unitToolIds]);
+  await registerTiles([...unitToolIds]);
 
   // read the unit content with full contents now that we have tools
   stores.unit = UnitModel.create(unitJson);

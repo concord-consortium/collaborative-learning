@@ -6,7 +6,7 @@ import {
   deserializeValueFromLegacy, Editor, htmlToSlate, serializeValueToLegacy, slateToHtml, textToSlate
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tile-content-info";
-import { ToolContentModel } from "../tile-types";
+import { TileContentModel } from "../tile-types";
 import { SharedModelType } from "../../shared/shared-model";
 import { getAllTextPluginInfos } from "./text-plugin-info";
 
@@ -18,7 +18,7 @@ export function defaultTextContent() {
 
 const MarkdownSerializer = new Markdown();
 
-export const TextContentModel = ToolContentModel
+export const TextContentModel = TileContentModel
   .named("TextTool")
   .props({
     type: types.optional(types.literal(kTextToolID), kTextToolID),

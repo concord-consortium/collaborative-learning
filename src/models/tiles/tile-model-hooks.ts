@@ -1,19 +1,19 @@
 import { ISerializedActionCall } from "mobx-state-tree";
-import { ToolMetadataModelType } from "./tile-metadata";
+import { ITileMetadataModel } from "./tile-metadata";
 
-export interface IToolModelHooks {
+export interface ITileModelHooks {
   /**
    * This is called after the wrapper around the content model is created. This wrapper is
-   * a ToolTileModel. This should only be called once.
+   * a TileModel. This should only be called once.
    *
    * @param metadata an instance of this model's metadata it might be shared by
    * multiple instances of the model if the document of this model is open in
    * more than one place.
    */
-  doPostCreate(metadata: ToolMetadataModelType): void,
+  doPostCreate(metadata: ITileMetadataModel): void,
 
   /**
-   * This is called for any action that is called on the wrapper (ToolTile) or one of
+   * This is called for any action that is called on the wrapper (TileModel) or one of
    * its children. It can be used for logging or internal monitoring of action calls.
    */
   onTileAction(call: ISerializedActionCall): void,
@@ -35,7 +35,7 @@ export interface IToolModelHooks {
  * A TypeScript helper method for adding hooks to a content model. It should be
  * used like:
  * ```
- * .actions(self => toolContentModelHooks({
+ * .actions(self => tileModelHooks({
  *   // add your hook functions here
  * }))
  * ```
@@ -43,9 +43,9 @@ export interface IToolModelHooks {
  * @returns the hook functions in a literal object format that is compatible
  * with the ModelActions type of MST
  */
-export function toolModelHooks(clientHooks: Partial<IToolModelHooks>) {
-  const hooks: IToolModelHooks = {
-    doPostCreate(metadata: ToolMetadataModelType) {
+export function tileModelHooks(clientHooks: Partial<ITileModelHooks>) {
+  const hooks: ITileModelHooks = {
+    doPostCreate(metadata: ITileMetadataModel) {
       // no-op
     },
     onTileAction(call: ISerializedActionCall) {
