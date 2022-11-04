@@ -1,5 +1,5 @@
 import { getEnv, Instance, SnapshotOut, types } from "mobx-state-tree";
-import { getToolContentInfoById } from "./tool-content-info";
+import { getToolComponentInfo } from "./tool-component-info";
 
 const BaseToolButtonModel = types.model("BaseToolButton", {
   id: types.string, // toolId in the case of tool buttons
@@ -34,7 +34,7 @@ const TileToolButtonModel = BaseToolButtonModel.named("TileToolButtonModel")
   .actions(self => ({
     initialize() {
       if (!self.Icon) {
-        const info = getToolContentInfoById(self.id);
+        const info = getToolComponentInfo(self.id);
         info?.Icon && (self.Icon = info.Icon);
       }
     }

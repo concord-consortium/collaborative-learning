@@ -1,7 +1,5 @@
-import { FunctionComponent, SVGProps } from "react";
 import { ToolMetadataModel } from "./tool-metadata";
 import { ToolContentModel, ToolContentModelType } from "./tool-types";
-import { IToolTileProps } from "../../components/tools/tool-tile";
 import { AppConfigModelType } from "../stores/app-config-model";
 
 export interface IDMap {
@@ -20,30 +18,16 @@ export interface IDefaultContentOptions {
   appConfig?: AppConfigModelType;
 }
 
-type ToolComponentType = React.ComponentType<IToolTileProps>;
-
 export interface IToolContentInfo {
   id: string;
   modelClass: typeof ToolContentModel;
   defaultContent: (options?: IDefaultContentOptions) => ToolContentModelType;
-  Component: ToolComponentType;
-  toolTileClass: string;
-  Icon?: FunctionComponent<SVGProps<SVGSVGElement>>;
   titleBase?: string;
   metadataClass?: typeof ToolMetadataModel;
   addSidecarNotes?: boolean;
   defaultHeight?: number;
   exportNonDefaultHeight?: boolean;
   snapshotPostProcessor?: ToolTileModelContentSnapshotPostProcessor;
-  /**
-   * By default the tool tile wrapper ToolTileComponent will handle the selection of the
-   * the tile when it gets a mouse down or touch start.
-   *
-   * If the tool wants to manage its own selection by calling ui.setSelectedTile,
-   * it should set tileHandlesOwnSelection to true. This will prevent ToolTileComponent
-   * from trying to set the selection.
-   */
-  tileHandlesOwnSelection?: boolean;
 }
 
 const gToolContentInfoMapById: Record<string, IToolContentInfo> = {};

@@ -1,3 +1,4 @@
+import { registerToolComponentInfo } from "../tool-component-info";
 import { registerToolContentInfo } from "../tool-content-info";
 import { GeometryContentModel, GeometryMetadataModel, defaultGeometryContent } from "./geometry-content";
 import { kGeometryToolID } from "./geometry-types";
@@ -13,7 +14,11 @@ registerToolContentInfo({
   addSidecarNotes: true,
   defaultHeight: kGeometryDefaultHeight,
   exportNonDefaultHeight: true,
-  defaultContent: defaultGeometryContent,
+  defaultContent: defaultGeometryContent
+});
+
+registerToolComponentInfo({
+  id: kGeometryToolID,
   Component: GeometryToolComponent,
   toolTileClass: "geometry-tool-tile",
   tileHandlesOwnSelection: true,

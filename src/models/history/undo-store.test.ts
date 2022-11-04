@@ -3,6 +3,7 @@ import { IToolTileProps } from "src/components/tools/tool-tile";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { registerSharedModelInfo } from "../shared/shared-model-registry";
 import { ToolContentModel } from "../tools/tool-types";
+import { registerToolComponentInfo } from "../tools/tool-component-info";
 import { registerToolContentInfo } from "../tools/tool-content-info";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
 import { createDocumentModel } from "../document/document";
@@ -127,7 +128,10 @@ registerToolContentInfo({
   modelClass: TestTile,
   defaultContent(options) {
     return TestTile.create();
-  },
+  }
+});
+registerToolComponentInfo({
+  id: "TestTile",
   Component: TestTileComponent,
   toolTileClass: "test-tile"
 });

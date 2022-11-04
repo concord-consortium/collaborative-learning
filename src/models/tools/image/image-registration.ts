@@ -1,3 +1,4 @@
+import { registerToolComponentInfo } from "../tool-component-info";
 import { registerToolContentInfo } from "../tool-content-info";
 import { ToolMetadataModel } from "../tool-metadata";
 import { kImageToolID, ImageContentModel, defaultImageContent } from "./image-content";
@@ -9,7 +10,11 @@ registerToolContentInfo({
   titleBase: "Image",
   modelClass: ImageContentModel,
   metadataClass: ToolMetadataModel,
-  defaultContent: defaultImageContent,
+  defaultContent: defaultImageContent
+});
+
+registerToolComponentInfo({
+  id: kImageToolID,
   Component: ImageToolComponent,
   toolTileClass: "image-tool-tile",
   tileHandlesOwnSelection: true,
