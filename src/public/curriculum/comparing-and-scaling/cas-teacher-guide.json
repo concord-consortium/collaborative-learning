@@ -2626,6 +2626,7 @@
                 },
                 {
                   "id": "N8ujiuxvF0u53GMX",
+                  "title": "Tony's Rate",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_TonysRateGreen.png"
@@ -2643,6 +2644,7 @@
                 },
                 {
                   "id": "oy2bl6hQtuqXnImu",
+                  "title": "Tony's Bigger Rate",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_TonysRateRed.png"
@@ -2677,6 +2679,7 @@
                 },
                 {
                   "id": "8MAaGdjloCyTjtmW",
+                  "title": "Selma's Proportion",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_SelmasProportion.png"
@@ -2752,6 +2755,7 @@
                 },
                 {
                   "id": "LjcMdqM9i-6UbkFa",
+                  "title": "Royal Pizza",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalsPizza_1.png"
@@ -2769,6 +2773,7 @@
                 },
                 {
                   "id": "0XCwM8r-rAw8INlG",
+                  "title": "Royal 2",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalsPizza_2.png"
@@ -2786,6 +2791,7 @@
                 },
                 {
                   "id": "RDVZBV79R_ELgW0B",
+                  "title": "Royal 3",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalsPizza_3.png"
@@ -2824,6 +2830,7 @@
                 },
                 {
                   "id": "xjY7xvHNGQKDeQzY",
+                  "title": "Royal Proportion",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalPizzaProportion_1.png"
@@ -2841,6 +2848,7 @@
                 },
                 {
                   "id": "TNLC-882X1CqfgQf",
+                  "title": "Royal Proportion 2",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalPizzaProportion_2.png"
@@ -2985,6 +2993,7 @@
                 },
                 {
                   "id": "9XdclT3sClizHTm3",
+                  "title": "Example 1",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example1.png"
@@ -2992,6 +3001,7 @@
                 },
                 {
                   "id": "zF8Cmwc8GTutsr9g",
+                  "title": "Example 2",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example2.png"
@@ -2999,6 +3009,7 @@
                 },
                 {
                   "id": "nQy0_T8Va21tYUiq",
+                  "title": "Example 3",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example3.png"
@@ -3006,6 +3017,7 @@
                 },
                 {
                   "id": "Yd-WRhXZx30rh4If",
+                  "title": "Example 4",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example4.png"
@@ -3547,6 +3559,7 @@
                   },
                   {
                     "id": "tZIbjzd9TpG8VgjQ",
+                    "title": "Table Reasoning",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-3_TableReasoning.png"
@@ -3661,6 +3674,7 @@
                   [
                     {
                       "id": "hLX-yEKDcR36QXif",
+                      "title": "Little Giant 1",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_2-3_LittleGiantStore_1.png"
@@ -3668,6 +3682,7 @@
                     },
                     {
                       "id": "ZZXAbF4pFSNVn6l5",
+                      "title": "Little Giant 2",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_2-3_LittleGiantStore_2.png"
@@ -3687,6 +3702,7 @@
                   [
                     {
                       "id": "UfjyujhivqFFk_2-",
+                      "title": "Food Fresh 1",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_2-3_FoodFreshStore_1.png"
@@ -3694,6 +3710,7 @@
                     },
                     {
                       "id": "Xgz8CJ9rdaSSZ6HL",
+                      "title": "Food Fresh 2",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_2-3_FoodFreshStore_2.png"
@@ -3928,6 +3945,7 @@
                   },
                   {
                     "id": "b9WmGoNP-Klup8yi",
+                    "title": "Suri's Strategy 1",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy1_Suri.png"
@@ -3945,6 +3963,7 @@
                   },
                   {
                     "id": "TSiu71rHmEXu3f5L",
+                    "title": "Suri's Strategy 2",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy1_Suri_2.png"
@@ -3963,6 +3982,7 @@
                   },
                   {
                     "id": "MYpi4MtsSfUsZcEf",
+                    "title": "Zane's Strategy 1",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy2_Zane.png"
@@ -3980,6 +4000,7 @@
                   },
                   {
                     "id": "WcGHtJahPlTxAGo1",
+                    "title": "Zane's Strategy 2",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy2_Zane_2.png"
@@ -3998,6 +4019,7 @@
                   },
                   {
                     "id": "veM-AS4OzsHcTb-3",
+                    "title": "Julia's Strategy 1",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy3_Julia.png"
@@ -4015,6 +4037,7 @@
                   },
                   {
                     "id": "sZCW4-BMJ1Nhomxs",
+                    "title": "Julia's Strategy 2",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy3_Julia_2.png"
@@ -4033,6 +4056,7 @@
                   },
                   {
                     "id": "v4o0ERRz6fpQBQQw",
+                    "title": "Kelly's Strategy 1",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy4_Kelly.png"
@@ -4050,6 +4074,7 @@
                   },
                   {
                     "id": "cS9XsNeVfrq7kgUa",
+                    "title": "Kelly's Strategy 2",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy4_Kelly_2.png"
@@ -4247,6 +4272,7 @@
                   },
                   {
                     "id": "infU52s0aCyf8k8K",
+                    "title": "Proportion",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_SituationC_Proportion.png"
@@ -4264,6 +4290,7 @@
                   },
                   {
                     "id": "YvJBj2hffEXEMfgz",
+                    "title": "Tape Diagram",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_SituationC_TapeDiagram.png"
