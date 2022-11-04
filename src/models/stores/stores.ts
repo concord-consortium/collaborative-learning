@@ -13,8 +13,7 @@ import { getUserContext } from "../../hooks/use-user-context";
 import { registerTools } from "../../register-tools";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
-import { DocumentsModelType, createDocumentsModelWithRequiredDocuments, 
-  createNetworkDocumentsModel } from "./documents";
+import { DocumentsModelType, DocumentsModel, createDocumentsModelWithRequiredDocuments } from "./documents";
 import { LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument } from "../document/document-types";
 import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
 import { ClipboardModel, ClipboardModelType } from "./clipboard";
@@ -85,7 +84,7 @@ export function createStores(params?: ICreateStores): IStores {
     class: params?.class || ClassModel.create({ name: "Null Class", classHash: "" }),
     db: params?.db || new DB(),
     documents: params?.documents || createDocumentsModelWithRequiredDocuments(requiredDocumentTypes),
-    networkDocuments: params?.networkDocuments || createNetworkDocumentsModel(),
+    networkDocuments: params?.networkDocuments || DocumentsModel.create({}),
     unit: params?.unit || UnitModel.create({code: "NULL", title: "Null Unit"}),
     demo: params?.demo || DemoModel.create({name: demoName, class: {id: "0", name: "Null Class"}}),
     showDemoCreator: params?.showDemoCreator || false,
