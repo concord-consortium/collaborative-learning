@@ -10,7 +10,6 @@ import {
 import { useDeleteDocument } from "../../hooks/firestore-hooks";
 import {useCurriculumOrDocumentContent, useDocumentOrCurriculumMetadata } from "../../hooks/use-stores";
 import { CommentedDocuments } from "./commented-documents";
-import { CurriculumDocument } from "../../lib/firestore-schema";
 
 import "./chat-panel.scss";
 
@@ -21,6 +20,7 @@ interface IProps {
   focusTileId?: string;
   onCloseChatPanel:(show:boolean) => void;
 }
+
 
 export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument, focusTileId, onCloseChatPanel }) => {
   const document = useDocumentOrCurriculumMetadata(focusDocument);
@@ -75,8 +75,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
       : undefined;
   }, [commentsPath, deleteCommentMutation, focusDocument, focusTileId]);
 
-  //state - determines comments vs documentView
-  const [isDocumentView, setIsDocumentView] = useState(false);
+  const [isDocumentView, setIsDocumentView] = useState(false); // switches between "Comments View" vs "Document View"
   const [chatPanelTitle, setChatPanelTitle] = useState("Comments");
 
   const handleDocumentClick = () => {
@@ -87,8 +86,8 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
     setChatPanelTitle(isDocumentView ? "Documents" : "Comments");
   }, [isDocumentView]);
 
-
   const newCommentCount = unreadComments?.length || 0;
+
   return (
     <div className={`chat-panel ${activeNavTab}`} data-testid="chat-panel">
       <ChatPanelHeader
@@ -102,7 +101,6 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         isDocumentView ?
         <CommentedDocuments
           user={user}
-          documentObj={document as CurriculumDocument}
           handleDocView={handleDocumentClick}
         />
         :

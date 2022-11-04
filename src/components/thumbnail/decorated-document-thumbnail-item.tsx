@@ -24,7 +24,7 @@ interface IProps {
   onDocumentDeleteClick?: (document: DocumentModelType) => void;
 }
 
-function useDocumentCaption(document: DocumentModelType) {
+export function useDocumentCaption(document: DocumentModelType) {
   const appConfig = useAppConfig();
   const problem = useProblemStore();
   const classStore = useClassStore();

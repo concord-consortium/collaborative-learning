@@ -362,7 +362,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
           <div className="actions">
-            { showFileMenu && 
+            { showFileMenu &&
               <DocumentFileMenu document={document}
                 onOpenDocument={this.handleOpenDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}

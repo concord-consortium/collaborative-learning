@@ -51,7 +51,8 @@ export const UIModel = types
     focusDocUpdates: 0,
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
-    teacherPanelKey: types.maybe(types.string)
+    teacherPanelKey: types.maybe(types.string),
+    selectedCommentedDocument: types.maybe(types.string),//key of selected commented MyWork/ClassWork doc
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
@@ -65,7 +66,7 @@ export const UIModel = types
     },
     get workspaceShown () {
       return self.dividerPosition < kDividerMax;
-    }
+    },
   }))
   .actions((self) => {
     const alert = (textOrOpts: string | UIDialogModelSnapshotWithoutType, title?: string) => {
@@ -197,6 +198,9 @@ export const UIModel = types
       },
       setTeacherPanelKey(key: string) {
         self.teacherPanelKey = key;
+      },
+      setSelectedCommentedDocument(key: string | undefined){
+        self.selectedCommentedDocument = key ;
       }
     };
   });

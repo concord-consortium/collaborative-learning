@@ -27,6 +27,7 @@ interface IProps {
 
 export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   onPostComment, onDeleteComment, focusDocument, focusTileId, isDocumentView}) => {
+
   useEffect(() => {
     setExpandedThread(focusTileId || 'document');
   },[focusTileId]);
