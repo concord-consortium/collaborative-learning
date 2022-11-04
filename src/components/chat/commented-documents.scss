@@ -1,18 +1,82 @@
 @import "../vars";
-.document-box{
-  width: 100%;
-  height: 20px;
-  border: 1px solid black;
-  font-size: small;
-  display: flex;
-  justify-content: space-between;
-  .title{
-
-  }
-  .numComments{
-
+.commented-document-list {
+  max-height: calc(100vh - (#{$header-height} + #{$problem-header-height} + #{$workspace-content-margin} * 2));
+  overflow-y: auto;
+  .document-box {
+    max-height: 51px;
+    margin: 2px;
+    padding: 0 2px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: $charcoal-light-6;
+    color: $charcoal;
+    border: solid 1px #979797;
+    &:hover {
+      background-color: $charcoal-light-4;
+    }
+    &:active {
+      background-color: $charcoal-light-3;
+    }
+    &.problems {
+      background-color: $problem-orange-light-7;
+      &:hover {
+        background-color: $problem-orange-light-5;
+      }
+      &:active {
+        background-color: $problem-orange-light-4;
+      }
+    }
+    &.teacher-guide {
+      background-color: $learninglog-green-light-7;
+      &:hover {
+        background-color: $learninglog-green-light-5;
+      }
+      &:active {
+        background-color: $learninglog-green-light-4;
+      }
+    }
+    &.class-work {
+      background-color: $classwork-purple-light-7;
+      &:hover {
+        background-color: $classwork-purple-light-5;
+      }
+      &:active {
+        background-color: $classwork-purple-light-4;
+      }
+    }
+    &.my-work {
+      background-color: $workspace-teal-light-6;
+      &:hover {
+        background-color: $workspace-teal-light-4;
+      }
+      &:active {
+        background-color: $workspace-teal-light-3;
+      }
+    }
+    .title{
+      line-height: 1.29;
+      flex-grow: 1;
+      flex-basis: 130px;
+      margin: 0 5px;
+    }
+    .document-type-icon {
+      align-self: flex-start;
+      svg {
+        width: 18px;
+        height: 16.5px;
+      }
+    }
+    .numComments {
+      align-self: flex-start;
+      width: 24px;
+      margin: 3px 2px 2px;
+      padding: 1px 6px 2px;
+      border-radius: 7.5px;
+      background-color: white;
+      text-align: center;
+      font-size: 10px;
+    }
   }
 }
-
-
-
