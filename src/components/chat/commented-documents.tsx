@@ -7,6 +7,7 @@ import { UserModelType } from "../../models/stores/user";
 import { DocumentModelType } from "../../models/document/document";
 import { useDocumentCaption } from "../thumbnail/decorated-document-thumbnail-item";
 import { ENavTab } from "../../models/view/nav-tabs";
+import DocumentIcon from "../../assets/icons/document-icon.svg";
 import "./commented-documents.scss";
 import { getProblemOrdinal } from "../../models/stores/stores";
 
@@ -115,7 +116,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   },[]);
 
   return (
-    <div>
+    <div className="commented-document-list">
       {
         docsCommentedOn &&
         (docsCommentedOn).map((doc: PromisedCurriculumDocument, index:number) => {
@@ -128,7 +129,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
           }
           return (
             <div
-              className={"document-box"}
+              className={`document-box ${navTab}`}
               key={index}
               onClick={() => {
                 ui.setActiveNavTab(navTab); //open correct NavTab
@@ -139,6 +140,9 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
                 }
               }}
             >
+              <div className="document-type-icon">
+                <DocumentIcon/>
+              </div>
               <div className={"title"}>
                 { doc.unit.toUpperCase() + " " + doc.problem + " " + doc.title}
               </div>
@@ -181,7 +185,7 @@ interface JProps {
 
 export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handleDocView}) => {
   const ui = useUIStore();
-  let navTab: string;
+  let navTab: string = '';
   const myWorkTypes = ["problem", "planning", "learningLog", "personal"];
   const classWorkTypes = ["publication", "learningLogPublication", "personalPublication", "supportPublication"];
   for (let i = 0; i < 4; i++){
@@ -196,7 +200,7 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handl
 
   return (
     <div
-      className={"document-box"}
+      className={`document-box my-work-document ${navTab}`}
       onClick={()=>{
         ui.setActiveNavTab(navTab); //open correct NavTab
         ui.setSelectedTile();
@@ -207,6 +211,9 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handl
         }
       }}
     >
+      <div className="document-type-icon">
+        <DocumentIcon/>
+      </div>
       <div className={"title"}>
         {title}
       </div>
