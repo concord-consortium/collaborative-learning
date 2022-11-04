@@ -34,6 +34,11 @@ export interface IRequiredDocumentPromise {
   isResolved: boolean;
 }
 
+enum DocumentsModelKind {
+  CLASS,
+  NETWORK
+}
+
 export const DocumentsModel = types
   .model("Documents", {
   })
@@ -42,6 +47,7 @@ export const DocumentsModel = types
     userContext: undefined as IUserContext | undefined,
     firestore: undefined as Firestore | undefined,
     requiredDocuments: {} as Record<string, IRequiredDocumentPromise>,
+    kind: DocumentsModelKind.CLASS,
     all: observable<DocumentModelType>([])
   }))
   .views(self => ({
@@ -174,14 +180,17 @@ export const DocumentsModel = types
     },
     setFirestore(firestore: Firestore) {
       self.firestore = firestore;
+    },
+    setKind(type: DocumentsModelKind) {
+      self.kind = type;
     }
-
   }))
   .actions((self) => {
     const add = (document: DocumentModelType) => {
       if (DEBUG_DOCUMENT) {
-        // eslint-disable-next-line no-console        
-        console.log("adding document to DocumentsModel", {
+        // eslint-disable-next-line no-console
+        const kindStr = DocumentsModelKind[self.kind];
+        console.log(`adding document to DocumentsModel(${kindStr})`, {
           key: document.key,
           title: document.title,
           uid: document.uid,
@@ -195,7 +204,13 @@ export const DocumentsModel = types
           documentEnv.appConfig = self.appConfig;
         }
 
-        const {firestore, userContext} = self;
+        const {kind, firestore, userContext} = self;
+
+        if (kind === DocumentsModelKind.NETWORK) {
+          // The network documents don't save their history so there is no 
+          // need to update the treeManager
+          return;
+        }
 
         if (!firestore || !userContext) {
           console.warn("Adding document before firestore and userContext is available");
@@ -291,5 +306,11 @@ export type DocumentsModelType = typeof DocumentsModel.Type;
 export function createDocumentsModelWithRequiredDocuments(requiredTypes: string[]) {
   const documents = DocumentsModel.create();
   documents.addRequiredDocumentPromises(requiredTypes);
+  return documents;
+}
+
+export function createNetworkDocumentsModel() {
+  const documents = DocumentsModel.create();
+  documents.setKind(DocumentsModelKind.NETWORK);
   return documents;
 }
