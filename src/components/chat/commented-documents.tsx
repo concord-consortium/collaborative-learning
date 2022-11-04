@@ -185,7 +185,7 @@ interface JProps {
 
 export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handleDocView}) => {
   const ui = useUIStore();
-  let navTab: string = '';
+  let navTab = '';
   const myWorkTypes = ["problem", "planning", "learningLog", "personal"];
   const classWorkTypes = ["publication", "learningLogPublication", "personalPublication", "supportPublication"];
   for (let i = 0; i < 4; i++){
