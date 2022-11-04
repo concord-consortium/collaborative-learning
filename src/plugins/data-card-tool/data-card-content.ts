@@ -8,8 +8,8 @@ import { ToolContentModel, ToolMetadataModelType, toolContentModelHooks } from "
 import {
   addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet, DataSet
 } from "../../models/data/data-set";
-import { SharedDataSet, SharedDataSetType } from "../../models/tools/shared-data-set";
-import { SharedModelType } from "../../models/tools/shared-model";
+import { SharedDataSet, SharedDataSetType } from "../../models/shared/shared-data-set";
+import { SharedModelType } from "../../models/shared/shared-model";
 import { uniqueId, uniqueTitle } from "../../utilities/js-utils";
 
 export function defaultDataSet() {

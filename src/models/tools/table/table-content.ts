@@ -9,8 +9,8 @@ import {
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tool-content-info";
 import { ToolMetadataModel, ToolContentModel, toolContentModelHooks } from "../tool-types";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
-import { SharedDataSet, SharedDataSetType } from "../shared-data-set";
-import { SharedModelType } from "../shared-model";
+import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
+import { SharedModelType } from "../../shared/shared-model";
 import { kMinColumnWidth } from "../../../components/tools/table-tool/table-types";
 import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-utils";
 import { Logger, LogEventName } from "../../../lib/logger";

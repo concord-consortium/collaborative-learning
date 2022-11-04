@@ -4,8 +4,16 @@ class ResourcesPanel{
         cy.get('.top-tab.tab-'+tab).click();
     }
 
+    openBottomTab(tabName) {
+        cy.get('.prob-tab').contains(tabName).click();
+    }
+
     getPrimaryWorkspaceTab(tab){
         return cy.get('.top-tab.tab-'+tab);
+    }
+
+    getResourcesPanelExpandedSpace() {
+        return cy.get('.nav-tab-panel .problem-panel .canvas');
     }
 
     openPrimaryWorkspaceTab(tab){

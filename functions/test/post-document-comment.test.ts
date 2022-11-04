@@ -61,7 +61,7 @@ export interface IPartialPostCommentParams {
 const specPostDocumentComment = (overrides?: IPartialPostCommentParams): IPostDocumentCommentParams => {
   return {
     context: specUserContext(overrides?.context),
-    document: { contextId: kClassHash, uid: kUserId, type: kDocumentType, key: kDocumentKey, ...overrides?.document },
+    document: { uid: kUserId, type: kDocumentType, key: kDocumentKey, ...overrides?.document },
     comment: { content: kComment1, ...overrides?.comment }
   };
 };

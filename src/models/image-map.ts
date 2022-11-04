@@ -2,6 +2,7 @@ import { types, Instance, SnapshotIn, clone, getSnapshot, flow } from "mobx-stat
 import {
   getImageDimensions, IImageDimensions, ISimpleImage, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
 } from "../utilities/image-utils";
+import { getAssetUrl } from "../utilities/asset-utils";
 import { DB } from "../lib/db";
 import placeholderImage from "../assets/image_placeholder.png";
 
@@ -333,7 +334,20 @@ export const ImageMapModel = types
 
       return storingPromise;
     })
+  }))
+  .views(self => ({
+    getImageEntry(url?: string, options?: IImageBaseOptions) {
+      if (!url) {
+        console.warn("ImageMap#getImageEntry called with a falsy URL", url);
+        return undefined;
+      }
+
+      self.getImage(url, options);
+      return self.getCachedImage(url);
+    }
+
   }));
+
 export type ImageMapModelType = Instance<typeof ImageMapModel>;
 
 /*
@@ -408,7 +422,7 @@ export const localAssetsImagesHandler: IImageHandler = {
                     // convert original drawing tool stamp paths
                     .replace("assets/tools/drawing-tool/stamps",
                              "curriculum/moving-straight-ahead/stamps");
-    return { contentUrl: _url, displayUrl: _url, success: true  };
+    return { contentUrl: _url, displayUrl: getAssetUrl(_url), success: true  };
   }
 };
 

@@ -51,8 +51,12 @@
     }
 
     &.disabled {
-      opacity: 25%;
+      background-color: #fafafa;
       cursor: default;
+
+      svg {
+        opacity: 25%;
+      }
     }
   }
 }

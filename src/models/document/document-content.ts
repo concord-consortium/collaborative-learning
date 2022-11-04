@@ -16,14 +16,17 @@ import { Logger, LogEventName } from "../../lib/logger";
 import { IDragTileItem } from "../../models/tools/tool-tile";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
-import { SharedModel, SharedModelType, SharedModelUnion } from "../tools/shared-model";
+import { SharedModel, SharedModelType } from "../shared/shared-model";
+import { SharedModelUnion } from "../shared/shared-model-manager";
 import { DocumentModelType, IDocumentEnvironment } from "./document";
 import { SectionModelType } from "../curriculum/section";
 
 export interface INewTileOptions {
-  rowHeight?: number;
-  rowIndex?: number;
   locationInRow?: string;
+  rowHeight?: number;
+  rowId?: string; // The id of the row to add the tile to
+  rowIndex?: number; // The position to add a new row
+  title?: string;
 }
 
 export interface INewRowTile {
@@ -529,7 +532,7 @@ export const DocumentContentModel = types
   }))
   .actions(self => ({
     addTileContentInNewRow(content: ToolContentModelType, options?: INewTileOptions): INewRowTile {
-      const title = self.getNewTileTitle(content);
+      const title = options?.title || self.getNewTileTitle(content);
       return self.addTileInNewRow(ToolTileModel.create({ title, content }), options);
     },
     addTileSnapshotInNewRow(snapshot: ToolTileSnapshotInType, options?: INewTileOptions): INewRowTile {
@@ -542,7 +545,7 @@ export const DocumentContentModel = types
         // by default, insert new tiles after last visible on screen
         o.rowIndex = self.defaultInsertRow;
       }
-      const row = self.getRowByIndex(o.rowIndex);
+      const row = o.rowId ? self.getRow(o.rowId) : self.getRowByIndex(o.rowIndex);
       if (row) {
         const indexInRow = o.locationInRow === "left" ? 0 : undefined;
         self.insertNewTileInRow(tile, row, indexInRow);
@@ -592,27 +595,32 @@ export const DocumentContentModel = types
     copyTilesIntoNewRows(tiles: IDragTileItem[], rowIndex: number) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
-        let rowDelta = 0;
+        let rowDelta = -1;
         let lastRowIndex = -1;
+        let lastRowId = "";
         tiles.forEach(tile => {
           let result: INewRowTile | undefined;
-          const content = safeJsonParse(tile.tileContent).content;
+          const parsedTile = safeJsonParse(tile.tileContent);
+          const content = parsedTile.content;
           if (content) {
-            const rowOptions: INewTileOptions = {
-              rowIndex: rowIndex + rowDelta
+            if (tile.rowIndex !== lastRowIndex) {
+              rowDelta++;
+            }
+            const tileOptions: INewTileOptions = {
+              rowId: lastRowId,
+              rowIndex: rowIndex + rowDelta,
+              title: parsedTile.title
             };
             if (tile.rowHeight) {
-              rowOptions.rowHeight = tile.rowHeight;
+              tileOptions.rowHeight = tile.rowHeight;
             }
             if (tile.rowIndex !== lastRowIndex) {
-              result = self.addTileContentInNewRow(content, rowOptions);
-              if (lastRowIndex !== -1) {
-                rowDelta++;
-              }
+              result = self.addTileContentInNewRow(content, tileOptions);
               lastRowIndex = tile.rowIndex;
+              lastRowId = result.rowId;
             }
             else {
-              result = self.addTileSnapshotInExistingRow({ content }, rowOptions);
+              result = self.addTileSnapshotInExistingRow({ content, title: parsedTile.title }, tileOptions);
             }
           }
           results.push(result);

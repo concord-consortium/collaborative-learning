@@ -26,9 +26,10 @@ Notes on dependencies, particularly reasons for not updating to their latest ver
 |firebase            |8.10.1         |9.9.3         |Version 9 requires substantial migration; attempted update with `compat` imports failed.|
 |immutable           |3.8.2          |4.1.0         |Major version update not attempted; only required by legacy slate versions.          |
 |jsxgraph            |1.4.4          |1.4.5         |1.4.5 broke scaled rendering, e.g. in 4-up views                                     |
-|mob-state-tree      |5.1.5          |5.1.6         |Latest version changes TS types for arrays which broke a number of our models.       |
+|mob-state-tree      |5.1.5-cc.1     |5.1.6         |We are using a concord fork which fixes a bug. Additionally latest version changes TS types for arrays which broke a number of our models.|
+|nanoid              |3.3.4          |4.0.0         |v4 switched to ESM and dependencies such as postcss break with v4                    |
 |react               |17.0.2         |18.2.0        |React 18                                                                             |
 |react-chartjs-2     |2.11.2         |4.3.1         |Major version update not attempted; may not be used any more (was used by Dataflow)  |
-|react-data-grid     |7.0.0-canary.46|7.0.0-beta.16 |Canary.47 changed the RowFormatter props requiring some additional refactoring. Note that `beta` versions come after `canary` versions.|
+|react-data-grid     |7.0.0-canary.46|7.0.0-beta.16 |Canary.47 changed the RowFormatter props requiring some additional refactoring. Note that `beta` versions come after `canary` versions. We are patching react-data-grid and our patch only applies to 7.0.0-canary.46|
 |react-dom           |17.0.2         |18.2.0        |React 18                                                                             |
 |react-tabs          |3.2.3          |5.1.0         |Version 4 not attempted; Version 5 requires React 18                                 |

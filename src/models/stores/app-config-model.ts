@@ -68,6 +68,7 @@ export const AppConfigModel = types
     get docTimeStampPropertyName() { return self.configMgr.docTimeStampPropertyName; },
     get docDisplayIdPropertyName() { return self.configMgr.docDisplayIdPropertyName; },
     get hasDefaultDocumentTemplate() { return !!self.configMgr.defaultDocumentTemplate; },
+    get planningTemplate() { return self.configMgr.planningTemplate; },
     get defaultLearningLogTitle() { return self.configMgr.defaultLearningLogTitle; },
     get initialLearningLogTitle() { return self.configMgr.initialLearningLogTitle; },
     get defaultLearningLogDocument() { return self.configMgr.defaultLearningLogDocument; },

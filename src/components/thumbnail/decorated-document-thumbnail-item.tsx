@@ -49,7 +49,7 @@ export function useDocumentCaption(document: DocumentModelType) {
 }
 
 // observes teacher names via useDocumentCaption()
-export const DecoratedDocumentThumbnailItem = observer(({
+export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
   section, sectionDocument, tab, scale, selectedDocument,
   onSelectDocument, onDocumentDragStart, onDocumentStarClick, onDocumentDeleteClick
 }: IProps) => {
@@ -110,3 +110,4 @@ export const DecoratedDocumentThumbnailItem = observer(({
       />
     );
 });
+DecoratedDocumentThumbnailItem.displayName = "DecoratedDocumentThumbnailItem";

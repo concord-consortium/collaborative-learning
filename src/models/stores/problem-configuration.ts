@@ -15,6 +15,7 @@ export interface ProblemConfiguration {
   // required tools that aren't in the toolbar can be specified here
   tools?: string[];
   defaultDocumentTemplate?: IAuthoredDocumentContent;
+  planningTemplate?: Record<string, IAuthoredDocumentContent>;
   placeholderText: string;
   stamps: SnapshotIn<typeof StampModel>[];
   settings: SnapshotIn<typeof SettingsMstType>;

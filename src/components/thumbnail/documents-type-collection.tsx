@@ -82,7 +82,8 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
   return sectDocs;
 }
 
-export const DocumentCollectionByType = observer(({ topTab, tab, section, index, numSections=0, scale, selectedDocument,
+export const DocumentCollectionByType: React.FC<IProps> = observer(({ 
+                                  topTab, tab, section, index, numSections=0, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
   const appConfigStore = useAppConfig();
@@ -140,6 +141,7 @@ export const DocumentCollectionByType = observer(({ topTab, tab, section, index,
     </div>
   );
 });
+DocumentCollectionByType.displayName = "DocumentCollectionByType";
 
 interface INewDocumentThumbnailProps {
   label?: string;

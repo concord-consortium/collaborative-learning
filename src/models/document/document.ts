@@ -1,4 +1,4 @@
-import { applySnapshot, types, Instance, SnapshotIn, getEnv, onAction, addDisposer } from "mobx-state-tree";
+import { applySnapshot, types, Instance, SnapshotIn, getEnv, onAction, addDisposer, destroy } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
@@ -10,14 +10,16 @@ import {
 import { AppConfigModelType } from "../stores/app-config-model";
 import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
 import { UserStarModel, UserStarModelType } from "../tools/user-star";
-import { IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext } from "../../../functions/src/shared";
+import {
+  IDocumentMetadata, IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext
+} from "../../../functions/src/shared";
 import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
 import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { Tree } from "../history/tree";
 import { TreeMonitor } from "../history/tree-monitor";
-import { ISharedModelDocumentManager, SharedModelDocumentManager } from "../tools/shared-model-document-manager";
+import { ISharedModelDocumentManager, SharedModelDocumentManager } from "../shared/shared-model-document-manager";
 import { ITileEnvironment } from "../tools/tool-types";
 import { TreeManager } from "../history/tree-manager";
 import { ESupportType } from "../curriculum/support";
@@ -94,9 +96,15 @@ export const DocumentModel = Tree.named("Document")
     get hasContent() {
       return !!self.content;
     },
-    getMetadata() {
+    get metadata(): IDocumentMetadata {
       const { uid, type, key, createdAt, title, originDoc, properties } = self;
-      return { uid, type, key, createdAt, title, originDoc, properties: properties.toJSON() };
+      // FIXME: the contextId was added here temporarily. This metadata is sent
+      // up to the Firestore functions. The new functions do not require the
+      // contextId. However the old functions do. The old functions were just
+      // ignoring this contextId. So the contextId is added here so the client
+      // code can work with the old functions.
+      return { contextId: "ignored", uid, type, key, createdAt, title,
+        originDoc, properties: properties.toJSON() } as IDocumentMetadata;
     },
     getProperty(key: string) {
       return self.properties.get(key);
@@ -301,7 +309,12 @@ export const DocumentModel = Tree.named("Document")
       const manager = TreeManager.create({document: {}, undoStore: {}});
       self.treeManagerAPI = manager;
       self.treeMonitor = new TreeMonitor(self, manager, false);
-      manager.putTree(self.treeId, self);
+      manager.setMainDocument(self);
+      // Clean up the manager when this document is destroyed this doesn't
+      // happen automatically because the manager is stored in volatile state.
+      // The manager needs to be destroyed so it can unsubscribe from firestore.
+      // Destroying it will probably also free up memory
+      addDisposer(self, () => destroy(manager));
     },
     undoLastAction() {
       self.treeManagerAPI?.undoManager.undo();

@@ -151,8 +151,8 @@
                           "text": [
                             "<p><u><strong>Launch (Getting Started)</strong></u></p>",
                             "<p><u>Connecting to Prior Knowledge</u></p>",
-                            "<p>Use the Introduction to Investigation 1 to remind students of the mathematics in the Grade 6 Comparing Quantities Unit, including ratios, equivalent ratios, and unit rate. Review the definition of a ratio and the many ways that ratios can be written. (PROBLEM SOLVING)</p>",
-                            "<p>Writing a ratio in fraction form notation is new to students. Fraction form notation was not used in Grade 6, in order to scaffold student understanding as they learn to separate the differences between ratios and fractions.</p>",
+                            "<p>Use the Introduction to Investigation 1 to remind students of the mathematics in the Grade 6 Comparing Quantities Unit, including ratios, equivalent ratios, and unit rate. Review the definition of a ratio and the many ways that ratios can be written. (PROBLEM SOLVING) ACE Problem #16 can also be used to remind students of the work they did in 6th grade.</p>",
+                            "<p>Writing a ratio in fraction form notation is new to students. Fraction form notation was not used in Grade 6, in order to scaffold student understanding as they learn to separate the differences between ratios and fractions. </p>",
                             "<p>Discuss and show examples of ratio statements as a comparison between two quantities. Discuss the various notations of ratios.</p>"
                           ]
                         }
@@ -179,47 +179,11 @@
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<p>2 green cupcakes and 3 white cupcakes</p>"
-                          ]
-                        }
-                      },
-                      {
-                        "id": "4vsAM1tnGN4lb4xz",
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<p>⤸ x2                                       ⤸ x2</p>"
-                          ]
-                        }
-                      },
-                      {
-                        "id": "dxL9mzvDdchTTgO3",
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<p>4 green cupcakes and 6 white cupcakes</p>"
-                          ]
-                        }
-                      },
-                      {
-                        "id": "m-aCa1BCk3ReCL0V",
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<p>⤸ x3                                       ⤸ x 3</p>"
-                          ]
-                        }
-                      },
-                      {
-                        "id": "3scIIJ6b5VvPIerV",
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<p>12 green cupcakes and 18 white cupcakes</p>"
+                            "2 green cupcakes and 3 white cupcakes",
+                            "⤸ x2                                       ⤸ x2",
+                            "4 green cupcakes and 6 white cupcakes",
+                            "⤸ x3                                       ⤸ x 3",
+                            "12 green cupcakes and 18 white cupcakes"
                           ]
                         }
                       },
@@ -239,7 +203,7 @@
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<p><strong>Suggested Questions</strong></p>",
+                            "<p><strong>Suggested questions</strong></p>",
                             "<ul><li>Have you ever been in a situation where you had to share work with other people? (Student answers will vary. Some may mention home; some may mention other places.)</li><li>We are going to look at two students on a camping trip who have to make orange juice. They have to share this task. Have you ever made orange juice or any kind of drink from a mix? (Student answers will vary. Some may have made juice or used the concentrated mix that squirts into water to flavor it.)</li><li>Arvin and Mariah do not have a lot of experience making orange juice. They have to use orange juice concentrate and water. What is a drink concentrate? (Students may say that it is a something that is a strong flavor and has to be mixed with water so you can drink it. Some students may not have any experience with using a concentrate.)</li></ul>"
                           ]
                         }
@@ -293,7 +257,7 @@
                           "text": [
                             "<p><em>To Launch Day 2</em></p>",
                             "<p></p>",
-                            "<p>You might have students think about and discuss as a class the strategies not already presented by your students. Alternately, you can have different groups work on the different strategies in the What If Situations. This would allow you to assign groups to use strategies very different from their own for solving the Initial Challenge. This is an opportunity to provide for individual needs by have students work on strategies that can push their thinking in new directions. Also, the strategies in the What If review some of the concepts that students studied in the Grade 6 <em>Comparing Quantities</em> Unit. <strong>Learning Aid 1.1: Strategies</strong> can be used when students are working on the What If Situations.</p>"
+                            "<p>You might have students think about and discuss as a class the strategies not already presented by your students. Alternately, you can have different groups work on the different strategies in the What If Situations. This would allow you to assign groups to use strategies very different from their own for solving the Initial Challenge. This is an opportunity to provide for individual needs by have students work on strategies that can push their thinking in new directions. (PORTRAYAL) Also, the strategies in the What If review some of the concepts that students studied in the Grade 6 <em>Comparing Quantities</em> Unit. <strong>Learning Aid 1.1: Strategies</strong> can be used when students are working on the What If Situations.</p>"
                           ]
                         }
                       }
@@ -317,7 +281,7 @@
                       "<p></p>",
                       "<p>As students work on the Initial Challenge, circulate and ask them questions. If a group has a conjecture about most and least orangey, ask them to explain why.</p>",
                       "<p></p>",
-                      "<p>Some students will puzzle over how to begin. After giving students some time to try a few ideas, you might suggest that students just begin by comparing two recipes rather than all four at once.</p>"
+                      "<p>Some students will puzzle over how to begin. After giving students some time to try a few ideas, you might suggest that students just begin by comparing two recipes rather than all four at once. (PROBLEM SOLVING ENVIRONMENT)</p>"
                     ]
                   }
                 },
@@ -351,8 +315,6 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><em>What If Questions</em></p>",
-                      "<p></p>",
                       "<p>As groups analyze the student thinking in the What If, circulate and listen to the justification for agreeing with the strategies. Also, note how students are seeing the connections between the mathematical thinking in the strategies.</p>",
                       "<ul><li>Begin by asking students, What do you notice and wonder about the strategies in the What If?</li><li>Is this group using a part to part or part to whole way of thinking about the recipes?</li><li>Is this group using a strategy similar to something we talked about yesterday?</li><li>Is this group using a strategy similar to something you did in Stretching and Shrinking or from the Grade 6 Comparing Quantities Unit?</li></ul>",
                       "<p></p>"
@@ -377,7 +339,8 @@
                     "format": "html",
                     "text": [
                       "<p><em>Now What Do You Know?</em></p>",
-                      "<p><em>Describe some strategies for solving problems that involve ratios.</em></p>"
+                      "<p><em>Describe some strategies for solving problems that involve ratios.</em></p>",
+                      "<p>(As you are circulating during the Explore select student work to use in the summary.  Look for a variety of strategies to discuss and make connections.  Find examples of part-to-part and part-to-whole thinking.  Look for students using fractions, percents, unit rates, etc.)</p>"
                     ]
                   }
                 }
@@ -399,7 +362,7 @@
                         "<p></p>",
                         "<p>Have groups display their work. Then have students do a Gallery Walk to look at all of the work from other groups. Ask them what they notice and wonder about the strategies used by their classmates.</p>",
                         "<p></p>",
-                        "<p>The summary on the first day should be a time for students to share their ideas and to tell why they think their ideas make sense as they answered the Initial Challenge. As a class, discuss the strategies and solutions for the determining which juice is the most orangey flavor.</p>",
+                        "<p>The summary on the first day should be a time for students to share their ideas and to tell why they think their ideas make sense as they answered the Initial Challenge. . (AGENCY, IDENTITY, OWNERSHIP) As a class, discuss the strategies and solutions for the determining which juice is the most orangey flavor.</p>",
                         "<p></p>",
                         "<p>You want the students to leave this Problem having experienced several problem-solving strategies, including an emphasis on ratios. The suggested questions will help students think about what they’ve learned.</p>"
                       ]
@@ -433,7 +396,6 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Strategies for Part to Part Ratios</strong></p>",
-                        "<p><strong></strong></p>",
                         "<ul><li>Scaling up each ratio to the same number of parts for one of the quantities. This would look very much like “Common Denominator” or “Common Numerator” thinking.</li><li>Unit Rate – scaling each ratio to have one of the quantities equal to 1. For example, 1 concentrate to x water or x concentrate to 1 water.</li><li>Drawing pictures to show how much water for each cup of concentrate is in each mix. The goal is to partition the water so that each cup of concentrate gets the same amount of water.</li></ul>"
                       ]
                     }
@@ -450,6 +412,7 @@
                   },
                   {
                     "id": "PLgiuNAJawP6ccTs",
+                    "title": "Mix A",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_1-1_WaterConcentrateMixA.png"
@@ -467,6 +430,7 @@
                   },
                   {
                     "id": "StztPqniplE7h5D5",
+                    "title": "Mix B",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_1-1_WaterConcentrateMixB.png"
@@ -484,6 +448,7 @@
                   },
                   {
                     "id": "nQFQQzF2giX2nSIH",
+                    "title": "Mix C",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_1-1_WaterConcentrateMixC.png"
@@ -501,6 +466,7 @@
                   },
                   {
                     "id": "h6uyBJCZhZgZqlfl",
+                    "title": "Mix D",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_1-1_WaterConcentrateMixD.png"
@@ -524,8 +490,6 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Strategies Part to Whole Ratios</strong></p>",
-                        "<p></p>",
-                        "<p></p>",
                         "<ul><li>Scaling up each ratio to the same number of parts for one of the quantities. This would look very much like “Common Denominator” or “Common Numerator” thinking.</li><li>Percent of water and/or concentrate in mixes – scaling each ratio to have one of the quantities equal to 100.</li><li>Unit Rate – scaling each ratio to have one of the quantities equal to 1.</li></ul>",
                         "<p>For example, 1 concentrate to x total cups.</p>",
                         "<p></p>",
@@ -600,6 +564,7 @@
                   [
                     {
                       "id": "k127x4JfR_WW_pLh",
+                      "title": "Recipe C",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_1-1_RecipeC.png"
@@ -607,6 +572,7 @@
                     },
                     {
                       "id": "XXPOPixjDcfuSCaN",
+                      "title": "Recipe X",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_1-1_RecipeX.png"
@@ -772,7 +738,7 @@
                           "<p></p>",
                           "<p>If you did not discuss part to part and part to whole ratios in the Summarize of Problem 1.1, discuss the two forms of a ratio with your students now. Students learned about part to part and part to whole ratios in <em>Comparing Quantities</em>. (TIME) <strong>Teaching Aid 1.2: Ratio Type Notation</strong> may be used to emphasize part to part and part to whole relationships.</p>",
                           "<p></p>",
-                          "<p>Students were introduced to writing ratios in fraction form in <em>Stretching and Shrinking</em>. This Problem brings the form back, so students have flexibility in the notation used for expressing ratios. It is important for students to begin to differentiate between fractions and ratios written in fraction form. For example, (2c.concentrate)/(3c.water) is not the same as saying 2/3 of the mix is concentrate.  However, (2c.concentrate)/(5c.juice) can be thought of as saying 2/5  of the juice is concentrate. A part to whole situation can be a ratio if we are looking at the relationship between the two quantities – there are 2 cups of concentrate in every 5 cups of juice. It can be a fraction if we are looking at the portion of the juice that is concentrate 2/5  of the juice is concentrate.</p>",
+                          "<p>Students were introduced to writing ratios in fraction form in <em>Stretching and Shrinking</em>. This Problem brings the form back, so students have flexibility in the notation used for expressing ratios. It is important for students to begin to differentiate between fractions and ratios written in fraction form. For example, (2c.concentrate)/(3c.water) is not the same as saying 2/3 of the mix is concentrate.  However, (2c.concentrate)/(5c.juice) can be thought of as saying 2/5 of the juice is concentrate. A part to whole situation can be a ratio if we are looking at the relationship between the two quantities – there are 2 cups of concentrate in every 5 cups of juice. It can be a fraction if we are looking at the portion of the juice that is concentrate 2/5  of the juice is concentrate.</p>",
                           "<p></p>",
                           "<p>Also, finding equivalence for fractions and ratios can have very different results.</p>"
                         ]
@@ -793,6 +759,7 @@
                     },
                     {
                       "id": "3TSlr2OaAI5Bs7g3",
+                      "title": "Equivalent fractions",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentFractions.png"
@@ -813,6 +780,7 @@
                     },
                     {
                       "id": "qR7SH7s_7iLvN0iW",
+                      "title": "Equivalent ratios",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios.png"
@@ -832,6 +800,7 @@
                     },
                     {
                       "id": "58inAcv6DHGRYSS8",
+                      "title": "Larger = 1.5x smaller",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios2.png"
@@ -849,6 +818,7 @@
                     },
                     {
                       "id": "8P7RAW-4XzVezgO_",
+                      "title": "Visualize 2/3 Ratios",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios3.png"
@@ -865,34 +835,16 @@
                       }
                     },
                     {
-                      "id": "6dgjvZlkKwxVvadu",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>2 for every 3</p>"
-                        ]
-                      }
-                    },
-                    {
                       "id": "Nj7msMv-AyVMghOo",
+                      "title": "2 for every 3",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios4.png"
                       }
                     },
                     {
-                      "id": "pEcyFyWQrbFIEg8g",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>6 for every 9</p>"
-                        ]
-                      }
-                    },
-                    {
                       "id": "LtFs9ZJUnmpMqrMA",
+                      "title": "6 for every 9",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios5.png"
@@ -914,7 +866,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p><strong>Suggested Questions</strong></p>",
+                          "<p><strong>Suggested questions</strong></p>",
                           "<ul><li>How are these fraction forms of ratios the same as or different from fractions? (Student  answers might include: Same: The form looks the same with one number over another number. Both are multiplicative relationships. Finding equivalent fractions and scaling ratios seems a lot the same. Different: Fractions are numbers and ratios are a comparison of two numbers. Fractions are always part to whole relationships of a quantity while ratios can be part to part or part to whole comparisons of two quantities. When we find equivalent fractions, we find different names for the same amount. When we find equivalent ratios, the amount may change but the relationship between the amounts stays the same.)</li></ul>"
                         ]
                       }
@@ -937,7 +889,7 @@
                         "type": "Text",
                         "format": "html",
                         "text": [
-                          "<p><strong>Suggested Questions</strong></p>",
+                          "<p><strong>Suggested questions</strong></p>",
                           "<ul><li>Arvin and Mariah are thinking about the supplies they need to make batches of juice. Does each recipe serve the same number of people? (No. Recipe A serves 5 people. Recipe B serves 14 people. Recipe C serves 3 people. Recipe D serves 8 people.)</li><li>Does this change how you will find the number of batches for each recipe? (Answers will vary. Some students may change strategies based on the numbers in the recipe. This is something to revisit in the Summary.)</li></ul>"
                         ]
                       }
@@ -978,7 +930,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Suggested Questions</strong></p>",
+                        "<p><strong>Suggested questions</strong></p>",
                         "<ul><li>Are you using the recipe as part-to-part or part-to-whole comparison? How did you decide? (Answers will vary depending on which question of the Problem you are looking at.)</li><li>Did you scale up a ratio? How did you decide what to multiply by? How do you know that the relationship between the ingredients is still correct? (Answers may vary, depending on the recipe. The relationship should still be correct since you are taking multiples of a recipe. Doing this will maintain the relationship between the quantities.)</li><li>How can you tell if two ratios are equivalent? (Two ratios are equivalent if you can get one ratio from the other by multiplying [or dividing] by a scale factor).</li><li>How could scaling help solve a problem? How can you decide on a scale factor to use? (Scaling could give you easier numbers to work with. You can decide on a scale factor by finding a common factor or common multiple.)</li></ul>"
                       ]
                     }
@@ -1022,7 +974,8 @@
                       "format": "html",
                       "text": [
                         "<p><em>Now What Do You Know?</em></p>",
-                        "<p><em>How do the strategies you used in this problem compare to those used in Problem 1.1?</em></p>"
+                        "<p><em>How do the strategies you used in this problem compare to those used in Problem 1.1?</em></p>",
+                        "<p>(Look for student work examples to show using scaling strategies- rate tables, unit rates, proportions, etc.)</p>"
                       ]
                     }
                   }
@@ -1071,6 +1024,7 @@
                       },
                       {
                         "id": "YrXXlAMqExFdnKkH",
+                        "title": "Visual summary of Recipe A",
                         "content": {
                           "type": "Image",
                           "url": "curriculum/comparing-and-scaling/images/TG_1-2_SummarizeRecipeA.png"
@@ -1122,16 +1076,18 @@
                       },
                       {
                         "id": "wMJAuYlkA9cWB7mh",
+                        "title": "Examples of Adia's ratio table",
                         "content": {
                           "type": "Image",
-                          "url": "curriculum/comparing-and-scaling/images/TG_1-2_Adia1_350w.jpg"
+                          "url": "curriculum/comparing-and-scaling/images/TG_1-2_Adia1.png"
                         }
                       },
                       {
                         "id": "DJfbnjwn6o2ZR4rT",
+                        "title": "Examples of Adia's ratio expressions",
                         "content": {
                           "type": "Image",
-                          "url": "curriculum/comparing-and-scaling/images/TG_1-2_Adia2_350w.jpg"
+                          "url": "curriculum/comparing-and-scaling/images/TG_1-2_Adia2.png"
                         }
                       },
                       {
@@ -1146,6 +1102,7 @@
                       },
                       {
                         "id": "5aeM-Cn6pxB4ESiJ",
+                        "title": "Labeling Quantities",
                         "content": {
                           "type": "Image",
                           "url": "curriculum/comparing-and-scaling/images/TG_1-2_Adia3_350w.jpg"
@@ -1163,16 +1120,10 @@
                       },
                       {
                         "id": "JZkJqtiLtp2ITCQZ",
+                        "title": "Scaling in tables",
                         "content": {
                           "type": "Image",
                           "url": "curriculum/comparing-and-scaling/images/TG_1-2_Adia3_350w.jpg"
-                        }
-                      },
-                      {
-                        "id": "JZkJqtiLtp2ITCQZ",
-                        "content": {
-                          "type": "Image",
-                          "url": "curriculum/comparing-and-scaling/images/TG_1-2_Adia4_350w.jpg"
                         }
                       },
                       {
@@ -1371,7 +1322,8 @@
                         "format": "html",
                         "text": [
                           "<p><em>Now What Do You Know?</em></p>",
-                          "<p><em>How are proportions like other strategies that you have used to solve ratio problems? How are they different?</em></p>"
+                          "<p><em>How are proportions like other strategies that you have used to solve ratio problems? How are they different?</em></p>",
+                          "<p>(As you are circulating during the Explore listen for students using the language of equivalent ratios and then how they use that to write and solve proportions.  Find different examples of how students looked at the relationships in each context to compare- equivalent ratios, ratio tables, unit rates and proportions.)</p>"
                         ]
                       }
                     }
@@ -1434,9 +1386,9 @@
                   "id": "BRo_3iDYbGoMlhhs",
                   "content": {
                     "type": "Table",
-                    "name": "Table 1",
+                    "name": "Reading Speeds",
                     "columns": [
-                      {"name":"Minutes","values":["3","30","60","90","120","125"]},
+                      {"name":"Minutes","width":100,"values":["3","30","60","90","120","125"]},
                       {"name":"Words","values":["480","4800","9600","14400","19200","20000"]}
                     ]
                   }
@@ -1782,6 +1734,7 @@
                 [
                   {
                     "id": "lZzMVPIQlHGNKNI4",
+                    "title": "Large Table",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group1LargeTable.png"
@@ -1789,6 +1742,7 @@
                   },
                   {
                     "id": "cF7EL9S7l6pLy7IC",
+                    "title": "Small Table",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group1SmallTable.png"
@@ -1819,6 +1773,7 @@
                 [
                   {
                     "id": "c4M0UpgTasB0uTj4",
+                    "title": "4 Groups of 2 Share with 2 people",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group2LargeTable.png"
@@ -1826,6 +1781,7 @@
                   },
                   {
                     "id": "EE9xKvJ_GINm9bO6",
+                    "title": "3 Groups of 2 Share with 2 people",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group2SmallTable.png"
@@ -1842,22 +1798,6 @@
                     ]
                   }
                 },
-                [
-                  {
-                    "id": "c4M0UpgTasB0uTj4",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group2LargeTable2.png"
-                    }
-                  },
-                  {
-                    "id": "EE9xKvJ_GINm9bO6",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group2SmallTable2.png"
-                    }
-                  }
-                ],
                 {
                   "id": "d9hIjlauLHNMKUfF",
                   "content": {
@@ -1911,6 +1851,7 @@
                 [
                   {
                     "id": "SrrU5yU-fdtM6Yi7",
+                    "title": "8 slices in 3 pizzas",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3SmallTable.png"
@@ -1918,6 +1859,7 @@
                   },
                   {
                     "id": "j8dhTU7Zk4cUXLEk",
+                    "title": "8 slices Pizza 1",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable1st.png"
@@ -1959,6 +1901,7 @@
                   },
                   {
                     "id": "_MdYhg2ssHbsLPi-",
+                    "title": "8 slices Pizza 2",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable2nd.png"
@@ -1990,6 +1933,7 @@
                 [
                   {
                     "id": "TDa8wkmqgVIQUSTS",
+                    "title": "8 slices Pizza 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -2000,6 +1944,7 @@
                   },
                   {
                     "id": "yMHPpaDgzLzETAa3",
+                    "title": "Group 3 Large Table",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable3rd.png"
@@ -2041,6 +1986,7 @@
                   },
                   {
                     "id": "P1kEZWx9JAIgEO6q",
+                    "title": "2 slices Pizza 4",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable4th.png"
@@ -2103,6 +2049,7 @@
                 },
                 {
                   "id": "Pp4kfbosYfLAniaS",
+                  "title": "Unit Rate",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group4.png"
@@ -2119,10 +2066,29 @@
                   }
                 },
                 {
-                  "id": "jsETUBZJHs3fZLHK",
+                  "id": "Atn3Tasasdfdffsdahj8KghQgK",
                   "content": {
-                    "type": "Image",
-                    "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy2Group4.png"
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "Explaining the Rate Calculation",
+                      "4 pizzas for 10 people",
+                      "⤸ ÷10             ⤸ ÷10",
+                      "0.4 pizzas for 1 person"
+                    ]
+                  }
+                },
+                {
+                  "id": "Atasfn3Tasj8KghQgK",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "Explaining the Rate Calculation",
+                      "3 pizzas for 8 people",
+                      "⤸ ÷8             ⤸ ÷8",
+                      "0.375 pizzas for 1 person"
+                    ]
                   }
                 },
                 {
@@ -2138,6 +2104,7 @@
                 },
                 {
                   "id": "vU2oIyB-CcMBLAGc",
+                  "title": "Least Common Multiple",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy2Group5.png"
@@ -2165,6 +2132,7 @@
                 },
                 {
                   "id": "D8g0eoWLYx4cowha",
+                  "title": "Example Percentage of Pizza Calculation",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-1_GROUP6.png"
@@ -2180,22 +2148,30 @@
                     ]
                   }
                 },
-                [
-                  {
-                    "id": "AlrNhgeN-02TfS6d",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy2Group6_1.png"
-                    }
-                  },
-                  {
-                    "id": "ZCsIKcCTWRXkiAiS",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy2Group6_2.png"
-                    }
+                {
+                  "id": "AtF0n3Thj8Kg092df4",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "4 pizzas for 10 people",
+                      "⤸ x10                ⤸ x10",
+                      "40 pizzas for 100 people"
+                    ]
                   }
-                ],
+                },
+                {
+                  "id": "AtF0n3Tasdffsdahj8KghQgK",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "3 pizzas for 8 people",
+                      "⤸ x12.5             ⤸ x12.5",
+                      "37.5 pizzas for 100 people"
+                    ]
+                  }
+                },
                 {
                   "id": "Lx5jU0XVyGvK5kzE",
                   "content": {
@@ -2218,6 +2194,7 @@
                 },
                 {
                   "id": "8uEZKoukxO1Z_WOR",
+                  "title": "Slices per person",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-1_GROUP7.png"
@@ -2236,29 +2213,8 @@
                 },
                 [
                   {
-                    "id": "p-nWEe6fmFr6yD-3",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Large Table</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "5MUPf7JyGL1l8CY0",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Small Table</p>"
-                      ]
-                    }
-                  }
-                ],
-                [
-                  {
                     "id": "tjIC_4JTDVYGmlCK",
+                    "title": "Large Table",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group8_LargeTable.png"
@@ -2266,6 +2222,7 @@
                   },
                   {
                     "id": "w4IpojoW8OyNOtqV",
+                    "title": "Small Table",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group8_SmallTable.png"
@@ -2378,6 +2335,7 @@
                 [
                   {
                     "id": "h9G4YdAe65yZebLc",
+                    "title": "10 people to 4 pizzas",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy3Group10_1.png"
@@ -2385,6 +2343,7 @@
                   },
                   {
                     "id": "KLw2FGBCP2kqBODW",
+                    "title": "8 people to 3 pizzas",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy3Group10_2.png"
@@ -2410,7 +2369,6 @@
                     "format": "html",
                     "text": [
                       "<p><u>Making the Mathematics Explicit</u></p>",
-                      "<p>For the Initial Challenge</p>",
                       "<p>During the discussion of strategies, have students begin sorting their work into similar kinds of thinking. They should begin to see that there are two ways to think about this situation:</p>",
                       "<ul><li>How much pizza for a fixed number of people.</li><li>How many people share a fixed number of pizzas.</li></ul>",
                       "<p></p>",
@@ -2668,6 +2626,7 @@
                 },
                 {
                   "id": "N8ujiuxvF0u53GMX",
+                  "title": "Tony's Rate",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_TonysRateGreen.png"
@@ -2685,6 +2644,7 @@
                 },
                 {
                   "id": "oy2bl6hQtuqXnImu",
+                  "title": "Tony's Bigger Rate",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_TonysRateRed.png"
@@ -2719,6 +2679,7 @@
                 },
                 {
                   "id": "8MAaGdjloCyTjtmW",
+                  "title": "Selma's Proportion",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_SelmasProportion.png"
@@ -2794,6 +2755,7 @@
                 },
                 {
                   "id": "LjcMdqM9i-6UbkFa",
+                  "title": "Royal Pizza",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalsPizza_1.png"
@@ -2811,6 +2773,7 @@
                 },
                 {
                   "id": "0XCwM8r-rAw8INlG",
+                  "title": "Royal 2",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalsPizza_2.png"
@@ -2828,6 +2791,7 @@
                 },
                 {
                   "id": "RDVZBV79R_ELgW0B",
+                  "title": "Royal 3",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalsPizza_3.png"
@@ -2866,6 +2830,7 @@
                 },
                 {
                   "id": "xjY7xvHNGQKDeQzY",
+                  "title": "Royal Proportion",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalPizzaProportion_1.png"
@@ -2883,6 +2848,7 @@
                 },
                 {
                   "id": "TNLC-882X1CqfgQf",
+                  "title": "Royal Proportion 2",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalPizzaProportion_2.png"
@@ -3027,6 +2993,7 @@
                 },
                 {
                   "id": "9XdclT3sClizHTm3",
+                  "title": "Example 1",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example1.png"
@@ -3034,6 +3001,7 @@
                 },
                 {
                   "id": "zF8Cmwc8GTutsr9g",
+                  "title": "Example 2",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example2.png"
@@ -3041,6 +3009,7 @@
                 },
                 {
                   "id": "nQy0_T8Va21tYUiq",
+                  "title": "Example 3",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example3.png"
@@ -3048,6 +3017,7 @@
                 },
                 {
                   "id": "Yd-WRhXZx30rh4If",
+                  "title": "Example 4",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example4.png"
@@ -3589,6 +3559,7 @@
                   },
                   {
                     "id": "tZIbjzd9TpG8VgjQ",
+                    "title": "Table Reasoning",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_2-3_TableReasoning.png"
@@ -3703,6 +3674,7 @@
                   [
                     {
                       "id": "hLX-yEKDcR36QXif",
+                      "title": "Little Giant 1",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_2-3_LittleGiantStore_1.png"
@@ -3710,6 +3682,7 @@
                     },
                     {
                       "id": "ZZXAbF4pFSNVn6l5",
+                      "title": "Little Giant 2",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_2-3_LittleGiantStore_2.png"
@@ -3729,6 +3702,7 @@
                   [
                     {
                       "id": "UfjyujhivqFFk_2-",
+                      "title": "Food Fresh 1",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_2-3_FoodFreshStore_1.png"
@@ -3736,6 +3710,7 @@
                     },
                     {
                       "id": "Xgz8CJ9rdaSSZ6HL",
+                      "title": "Food Fresh 2",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/comparing-and-scaling/images/TG_2-3_FoodFreshStore_2.png"
@@ -3970,6 +3945,7 @@
                   },
                   {
                     "id": "b9WmGoNP-Klup8yi",
+                    "title": "Suri's Strategy 1",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy1_Suri.png"
@@ -3987,6 +3963,7 @@
                   },
                   {
                     "id": "TSiu71rHmEXu3f5L",
+                    "title": "Suri's Strategy 2",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy1_Suri_2.png"
@@ -4005,6 +3982,7 @@
                   },
                   {
                     "id": "MYpi4MtsSfUsZcEf",
+                    "title": "Zane's Strategy 1",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy2_Zane.png"
@@ -4022,6 +4000,7 @@
                   },
                   {
                     "id": "WcGHtJahPlTxAGo1",
+                    "title": "Zane's Strategy 2",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy2_Zane_2.png"
@@ -4040,6 +4019,7 @@
                   },
                   {
                     "id": "veM-AS4OzsHcTb-3",
+                    "title": "Julia's Strategy 1",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy3_Julia.png"
@@ -4057,6 +4037,7 @@
                   },
                   {
                     "id": "sZCW4-BMJ1Nhomxs",
+                    "title": "Julia's Strategy 2",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy3_Julia_2.png"
@@ -4075,6 +4056,7 @@
                   },
                   {
                     "id": "v4o0ERRz6fpQBQQw",
+                    "title": "Kelly's Strategy 1",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy4_Kelly.png"
@@ -4092,6 +4074,7 @@
                   },
                   {
                     "id": "cS9XsNeVfrq7kgUa",
+                    "title": "Kelly's Strategy 2",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy4_Kelly_2.png"
@@ -4289,6 +4272,7 @@
                   },
                   {
                     "id": "infU52s0aCyf8k8K",
+                    "title": "Proportion",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_SituationC_Proportion.png"
@@ -4306,6 +4290,7 @@
                   },
                   {
                     "id": "YvJBj2hffEXEMfgz",
+                    "title": "Tape Diagram",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_SituationC_TapeDiagram.png"
@@ -5571,8 +5556,8 @@
                       "type": "Table",
                       "name": "Leaky Faucet Experiment",
                       "columns": [
-                        {"name":"Number of Seconds","values":["0","5","10","15","20","25","30","35","40","45","50","55","60"]},
-                        {"name":"Amount of Water (ml)","values":["0","5","9","14","18","24","29","35","41","43","49","55","61"]}
+                        {"name":"Number of Seconds","width": 100,"values":["0","5","10","15","20","25","30","35","40","45","50","55","60"]},
+                        {"name":"Amount of Water (ml)","width": 100,"values":["0","5","9","14","18","24","29","35","41","43","49","55","61"]}
                       ]
                     }
                   },
@@ -5595,6 +5580,7 @@
                   },
                   {
                     "id": "q-O-yKv9q1-33AGK",
+                    "title": "Scaling by 3",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-4_CartersIdea.png"
@@ -5616,12 +5602,13 @@
                   },
                   {
                     "id": "ML3sAJ6ptdcLJxkG",
+                    "title": "Rate Table",
                     "content": {
                       "type": "Table",
-                      "name": "Table 1",
+                      "name": "Rate Table",
                       "columns": [
-                        {"name":"Number of Seconds","values":["0","5","10","15","20","25","30","35","40","45","50","55","60"]},
-                        {"name":"Amount of Water (ml)","values":["0","5","9","14","18","24","29","35","41","43","49","55","61"]}
+                        {"name":"Number of Seconds","width": 100,"values":["0","5","10","15","20","25","30","35","40","45","50","55","60"]},
+                        {"name":"Amount of Water (ml)","width": 100,"values":["0","5","9","14","18","24","29","35","41","43","49","55","61"]}
                       ]
                     }
                   },
@@ -5639,6 +5626,7 @@
                   },
                   {
                     "id": "HdBpYhBqGXFh_gfJ",
+                    "title": "Water calculation per minute",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-4_AlansIdea.png"
@@ -5662,6 +5650,7 @@
                   },
                   {
                     "id": "ifgWmc750ng9qlZ_",
+                    "title": "Water calculation per hour",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-4_ScarlettsIdea_1.png"
@@ -5669,6 +5658,7 @@
                   },
                   {
                     "id": "n9UZDt8uoDapLTFU",
+                    "title": "Water calculation per day",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-4_ScarlettsIdea_2.png"

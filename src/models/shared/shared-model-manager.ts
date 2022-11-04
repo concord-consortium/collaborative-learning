@@ -1,51 +1,7 @@
-import { IAnyStateTreeNode, Instance, types } from "mobx-state-tree";
-import { uniqueId } from "../../utilities/js-utils";
-// TODO: This is a circular import, tool-content-info also imports SharedModel from here
-// This can be fixed by splitting shared-models into 2 files. One of those files will have
-// SharedModel, SharedModelType in it. Those objects don't need tool-content-info, and it is
-// those objects that are used by tool-content-info
-// This same refactoring can be applied to tool-types to eliminate a circular import there.
-import { getSharedModelClasses, getSharedModelInfoByType } from "./tool-content-info";
 
-export const kUnknownSharedModel = "unknownSharedModel";
-
-// Generic "super class" of all shared models
-export const SharedModel = types.model("SharedModel", {
-  // The type field has to be optional because the typescript type created from the sub models
-  // is an intersection ('&') of this SharedModel and the sub model.  If this was just:
-  //   type: types.string
-  // then typescript has errors because the intersection logic means the type field is
-  // required when creating a shared model. And we don't want to require the
-  // type when creating the shared model. This might be solvable by using the
-  // mst snapshot preprocessor to add the type.
-  //
-  // It could be changed to
-  //   type: types.maybe(types.string)
-  // Because of the intersection it would still mean the sub models would do the right thing,
-  // but if someone looks at this definition of SharedModel, it implies the wrong thing.
-  // It might also cause problems when code is working with a generic of SharedModel
-  // that code couldn't assume that `model.type` is defined.
-  //
-  // Since this is optional, it needs a default value, and Unknown seems like the
-  // best option for this.
-  //
-  // Perhaps there is some better way to define this so that there would be an error
-  // if a sub type does not override it.
-  type: types.optional(types.string, kUnknownSharedModel),
-
-  // if not provided, will be generated
-  id: types.optional(types.identifier, () => uniqueId()),
-})
-.volatile(self => ({
-  indexOfType: -1
-}))
-.actions(self => ({
-  setIndexOfType(index: number) {
-    self.indexOfType = index;
-  }
-}));
-
-export interface SharedModelType extends Instance<typeof SharedModel> {}
+import { IAnyStateTreeNode, types } from "mobx-state-tree";
+import { kUnknownSharedModel, SharedModel, SharedModelType } from "./shared-model";
+import { getSharedModelClasses, getSharedModelInfoByType } from "./shared-model-registry";
 
 export function sharedModelFactory(snapshot: any) {
   const sharedModelType: string | undefined = snapshot?.type;

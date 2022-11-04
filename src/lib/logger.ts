@@ -113,6 +113,10 @@ export enum LogEventName {
   ADD_RESPONSE_COMMENT_FOR_TILE,
   DELETE_COMMENT_FOR_DOCUMENT,
   DELETE_COMMENT_FOR_TILE,
+  EXPAND_COMMENT_THREAD_FOR_DOCUMENT,
+  EXPAND_COMMENT_THREAD_FOR_TILE,
+  COLLAPSE_COMMENT_THREAD_FOR_DOCUMENT,
+  COLLAPSE_COMMENT_THREAD_FOR_TILE,
   CHAT_PANEL_HIDE,
   CHAT_PANEL_SHOW,
 
@@ -129,6 +133,12 @@ export enum LogEventName {
 
   TEACHER_NETWORK_EXPAND_DOCUMENT_SECTION,
   TEACHER_NETWORK_COLLAPSE_DOCUMENT_SECTION,
+
+  HISTORY_SHOW_CONTROLS,
+  HISTORY_HIDE_CONTROLS,
+  HISTORY_PLAYBACK_START,
+  HISTORY_PLAYBACK_STOP,
+  HISTORY_PLAYBACK_SEEK
 }
 
 // This is the form the log events take
@@ -164,13 +174,22 @@ interface ITeacherNetworkInfo {
   networkUsername?: string;
 }
 
-type CommentAction = "add" | "delete";  // | "edit"
+type CommentAction = "add" | "delete" | "expand" | "collapse";  // | "edit"
 export interface ILogComment {
   focusDocumentId: string;
   focusTileId?: string;
   isFirst?: boolean; // only used with "add"
   commentText: string;
   action: CommentAction;
+}
+
+type HistoryAction = "showControls" | "hideControls" | "playStart" | "playStop" | "playSeek";
+export interface ILogHistory {
+  documentId: string;
+  historyEventId?: string;  // The id of the history entry where the action took place. Used for start, stop and seek.
+  historyIndex?: number; // Index into history array. Used for start, stop, seek.
+  historyLength?: number; // Used for start, stop, seek
+  action: HistoryAction;
 }
 
 export class Logger {
@@ -253,6 +272,38 @@ export class Logger {
     const parameters = { curriculum, curriculumFacet: facet, curriculumSection: section, ...params };
     Logger.log(event, parameters);
   }
+  
+  public static logHistoryEvent(historyLogInfo: ILogHistory) { 
+    const eventMap: Record<HistoryAction, LogEventName> = {
+      showControls: LogEventName.HISTORY_SHOW_CONTROLS,
+      hideControls: LogEventName.HISTORY_HIDE_CONTROLS,
+      playStart: LogEventName.HISTORY_PLAYBACK_START,
+      playStop: LogEventName.HISTORY_PLAYBACK_STOP,
+      playSeek: LogEventName.HISTORY_PLAYBACK_SEEK
+    };
+    const event = eventMap[historyLogInfo.action];
+    if (isSectionPath(historyLogInfo.documentId)) {
+      Logger.logCurriculumEvent(event, historyLogInfo.documentId,
+        { historyLength: historyLogInfo.historyLength,
+          historyIndex: historyLogInfo.historyIndex,
+          historyEventId: historyLogInfo.historyEventId
+        });
+    }
+    else {
+      const document = this._instance.stores.documents.getDocument(historyLogInfo.documentId)
+                        || this._instance.stores.networkDocuments.getDocument(historyLogInfo.documentId);
+      if (document) {
+        Logger.logDocumentEvent(event, document, 
+          { historyLength: historyLogInfo.historyLength,
+            historyIndex: historyLogInfo.historyIndex,
+            historyEventId: historyLogInfo.historyEventId
+          });
+      }
+      else {
+        console.warn("Warning: couldn't log history event for document:", historyLogInfo.documentId);
+      }
+    }  
+  }
 
   public static logDocumentEvent(event: LogEventName, document: DocumentModelType, params?: Record<string, any>) {
     const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.isRemote
@@ -285,19 +336,32 @@ export class Logger {
                 : LogEventName.ADD_RESPONSE_COMMENT_FOR_DOCUMENT,
       delete: focusTileId
                 ? LogEventName.DELETE_COMMENT_FOR_TILE
-                : LogEventName.DELETE_COMMENT_FOR_DOCUMENT
+                : LogEventName.DELETE_COMMENT_FOR_DOCUMENT,
+      expand: focusTileId
+                ? LogEventName.EXPAND_COMMENT_THREAD_FOR_TILE
+                : LogEventName.EXPAND_COMMENT_THREAD_FOR_DOCUMENT,
+      collapse: focusTileId
+                ? LogEventName.COLLAPSE_COMMENT_THREAD_FOR_TILE
+                : LogEventName.COLLAPSE_COMMENT_THREAD_FOR_DOCUMENT
     };
     const event = eventMap[action];
-
+    let tileType = undefined;
     if (isSectionPath(focusDocumentId)) {
-      Logger.logCurriculumEvent(event, focusDocumentId, { tileId: focusTileId, commentText });
+      if (focusTileId) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [unit, facet, investigation, problem, section] = parseSectionPath(focusDocumentId) || [];
+        const curriculumStore = facet === "guide" ?  this._instance.stores.teacherGuide : this._instance.stores.problem;
+        tileType = curriculumStore?.getSectionById(section)?.content?.getTileType(focusTileId);
+      }
+      Logger.logCurriculumEvent(event, focusDocumentId, { tileId: focusTileId, tileType, commentText });
     }
     else {
       const document = this._instance.stores.documents.getDocument(focusDocumentId)
                         || this._instance.stores.networkDocuments.getDocument(focusDocumentId);
       if (document) {
+        tileType = focusTileId ? document.content?.getTileType(focusTileId) : undefined;
         Logger.logDocumentEvent(event,
-          document, { tileId: focusTileId, commentText });
+          document, { tileId: focusTileId, tileType, commentText });
       }
       else {
         console.warn("Warning: couldn't log comment event for document:", focusDocumentId);

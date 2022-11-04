@@ -120,6 +120,8 @@ context('Shared Variables', function () {
   });
 
   describe("Drawing tile", () => {
+    const diagramTile = () => cy.get(".diagram-tool");
+    const drawTile = () => drawToolTile.getDrawTile().last();
     it("verify Insert Variable dialog opens on variable button click in drawing tile", () => {
       clueCanvas.addTile('drawing');
       cy.get("[data-original-title=Variable").click();
@@ -130,19 +132,35 @@ context('Shared Variables', function () {
       });
     });
     it("verify variables appears in draw tool", () => {
-      drawToolTile.getDrawTile().last().find('.drawing-variable:contains("VarC")').should('have.length', 1);
+      drawTile().find('.drawing-variable:contains("VarC")').should('have.length', 1);
     });
     it("verify changes in diagram view propagates to draw tool", () => {
-      cy.get(".diagram-tool").find(".variable-info.name[value=VarC]");
-      cy.get(".diagram-tool").find(".variable-info.name[value=VarC]").type('Var D');
-      drawToolTile.getDrawTile().last().find('.drawing-variable:contains("VarCVar D")').should('exist');
+      diagramTile().find(".variable-info.name[value=VarC]");
+      diagramTile().find(".variable-info.name[value=VarC]").type('Var D');
+      drawTile().find('.drawing-variable:contains("VarCVar D")').should('exist');
+    });
+    it("verify edit variable dialog works", () => {
+      const editVariableButton = () => cy.get(`[data-original-title="Edit Variable"]`).find("button");
+      const customModal = () => cy.get(".custom-modal");
+      drawToolTile.getDrawTile().last().click();
+      editVariableButton().should("exist");
+      editVariableButton().should("be.disabled");
+      drawTile().find('.drawing-variable:contains("VarC")').click();
+      editVariableButton().should("be.enabled");
+      customModal().should("not.exist");
+      editVariableButton().click();
+      customModal().should("exist");
+      cy.get("#evd-units").type("util");
+      customModal().find(".modal-button").last().click();
+      customModal().should("not.exist");
+      diagramTile().find(".variable-info.unit[value=util]").should("exist");
     });
     it('deletes variable chip in draw tool', () => {
-      drawToolTile.getDrawTile().last().click();
+      drawTile().click();
       drawToolTile.getDrawToolSelect().click();
-      drawToolTile.getDrawTile().last().find('.drawing-variable:contains("VarC")').click();
+      drawTile().find('.drawing-variable:contains("VarC")').click();
       drawToolTile.getDrawToolDelete().click();
-      drawToolTile.getDrawTile().last().find('.drawing-variable:contains("VarCVar D")').should('not.exist');
+      drawTile().find('.drawing-variable:contains("VarCVar D")').should('not.exist');
     });
     it("verify create new variable", () => {
       cy.get("[data-original-title=Variable").click();
@@ -152,8 +170,8 @@ context('Shared Variables', function () {
         cy.get("#variable-value-input").type("5.432{enter}");
         cy.findByRole("button", {name: "OK"}).click();
       });
-      drawToolTile.getDrawTile().last().find('.drawing-variable:contains("Var E")').should('have.length', 1);
-      drawToolTile.getDrawTile().last().find('.drawing-variable:contains("5.432")').should('have.length', 1);
+      drawTile().find('.drawing-variable:contains("Var E")').should('have.length', 1);
+      drawTile().find('.drawing-variable:contains("5.432")').should('have.length', 1);
 
     });
   });
