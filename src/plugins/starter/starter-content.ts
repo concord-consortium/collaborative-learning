@@ -1,5 +1,5 @@
 import { types, Instance } from "mobx-state-tree";
-import { ToolContentModel } from "../../models/tools/tool-types";
+import { ToolContentModel } from "../../models/tiles/tile-types";
 import { kStarterToolID } from "./starter-types";
 
 export function defaultStarterContent(): StarterContentModelType {

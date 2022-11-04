@@ -2,7 +2,7 @@ import { cloneDeep } from "lodash";
 import { getSnapshot } from "mobx-state-tree";
 import { SectionModelType } from "../curriculum/section";
 import { DisplayUserType } from "../stores/user-types";
-import { ToolTileSnapshotInType } from "../tools/tool-tile";
+import { ToolTileSnapshotInType } from "../tiles/tile-model";
 import { DocumentContentModel, DocumentContentModelType, INewTileOptions } from "./document-content";
 
 /*

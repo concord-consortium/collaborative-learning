@@ -9,7 +9,7 @@ import { useDocumentContext } from "../../hooks/use-document-context";
 import { useDocumentSyncToFirebase } from "../../hooks/use-document-sync-to-firebase";
 import { useGroupsStore, useStores } from "../../hooks/use-stores";
 import { ToolbarComponent } from "../toolbar";
-import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from "../tools/tool-api";
+import { EditableToolApiInterfaceRef, EditableToolApiInterfaceRefContext } from "../tiles/tile-api";
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
 import { ToolbarModelType } from "../../models/stores/problem-configuration";

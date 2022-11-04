@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import Modal from "react-modal";
 import { ModalProvider } from "react-modal-hook";
-import { ToolButtonModel } from "../models/tools/tool-button";
+import { ToolButtonModel } from "../models/tiles/tool-button";
 import { DeleteButton } from "./delete-button";
 
 describe("DeleteButton", () => {

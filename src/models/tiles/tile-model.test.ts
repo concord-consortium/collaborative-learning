@@ -1,0 +1,93 @@
+import { getSnapshot } from "mobx-state-tree";
+import { kDefaultMinWidth, ToolTileModel } from "./tile-model";
+import { kUnknownToolID, UnknownContentModelType } from "./tile-types";
+import { getToolIds, getToolContentInfoById } from "./tile-content-info";
+
+// Define the built in tool ids explicitly as strings.
+// Strings are used because importing the tool id constant could trigger a
+// registration of the tool. The tools will all be registered due to the
+// registerTools below.
+// The tools are listed instead of just using getToolIds (see below) in order to
+// make sure all of these built in tools get registered correctly as expected.
+const builtInToolIds = [
+  "Unknown",
+  "Placeholder",
+  "Table",
+  "Geometry",
+  "Image",
+  "Text",
+  "Drawing",
+  "Diagram"
+];
+
+// This is needed so we can check which tools are registered below
+import { registerTools } from "../../register-tiles";
+registerTools(builtInToolIds);
+
+describe("ToolTileModel", () => {
+
+  // Add any dynamically registered tools to the list
+  // currently there are no dynamically registered tools, but in the future hopefully
+  // there will be at least one example of this
+  const registeredToolIds = getToolIds();
+
+  // Remove the duplicates.
+  const uniqueToolIds = new Set([...registeredToolIds, ...builtInToolIds]);
+
+  uniqueToolIds.forEach(toolID => {
+    // It would be useful to extend this with additional tests verifying that tiles
+    // and their content info follow the right patterns
+    it(`supports the tool: ${toolID}`, () => {
+      const toolDefaultContent = getToolContentInfoById(toolID)?.defaultContent;
+
+      assertIsDefined(toolDefaultContent);
+
+      // can create a model with each type of tool
+      const content: any = { type: toolID };
+
+      // UnknownToolModel has required property
+      if (toolID === kUnknownToolID) {
+        content.originalType = "foo";
+      }
+
+      let toolTile = ToolTileModel.create({
+                      content: toolDefaultContent()
+                    });
+      expect(toolTile.content.type).toBe(toolID);
+
+      // can create/recognize snapshots of each type of tool
+      const snapshot: any = getSnapshot(toolTile);
+      expect(snapshot.content.type).toBe(toolID);
+
+      // can create tool tiles with correct tool from snapshot
+      toolTile = ToolTileModel.create(snapshot);
+      expect(toolTile.content.type).toBe(toolID);
+
+    });
+  });
+
+  it("returns UnknownToolModel for unrecognized snapshots", () => {
+    const type = "foo";
+    const content: any = { type, bar: "baz" };
+    const contentStr = JSON.stringify(content);
+    let toolTile = ToolTileModel.create({ content });
+    expect(toolTile.content.type).toBe(kUnknownToolID);
+    const toolContent: UnknownContentModelType = toolTile.content as any;
+    expect(toolContent.original).toBe(contentStr);
+
+    toolTile = ToolTileModel.create(getSnapshot(toolTile));
+    expect(toolTile.content.type).toBe(kUnknownToolID);
+  });
+
+  it("returns appropriate defaults for minWidth and maxWidth", () => {
+    const toolTile = ToolTileModel.create({
+                        content: {
+                          type: "foo" as any,
+                          bar: "baz"
+                        } as any
+                      });
+    expect(toolTile.minWidth).toBe(kDefaultMinWidth);
+    expect(toolTile.maxWidth).toBeUndefined();
+  });
+
+});

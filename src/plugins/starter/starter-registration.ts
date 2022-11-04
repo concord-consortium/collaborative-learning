@@ -1,8 +1,8 @@
-import { registerToolComponentInfo } from "../../models/tools/tool-component-info";
-import { registerToolContentInfo } from "../../models/tools/tool-content-info";
+import { registerToolComponentInfo } from "../../models/tiles/tile-component-info";
+import { registerToolContentInfo } from "../../models/tiles/tile-content-info";
 import { kStarterDefaultHeight, kStarterToolID } from "./starter-types";
 import StarterToolIcon from "./starter-icon.svg";
-import { StarterToolComponent } from "./starter-tool";
+import { StarterToolComponent } from "./starter-tile";
 import { defaultStarterContent, StarterContentModel } from "./starter-content";
 
 registerToolContentInfo({

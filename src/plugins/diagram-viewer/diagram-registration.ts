@@ -1,8 +1,8 @@
-import { registerToolComponentInfo } from "../../models/tools/tool-component-info";
-import { registerToolContentInfo } from "../../models/tools/tool-content-info";
+import { registerToolComponentInfo } from "../../models/tiles/tile-component-info";
+import { registerToolContentInfo } from "../../models/tiles/tile-content-info";
 import { kDiagramDefaultHeight, kDiagramToolID } from "./diagram-types";
 import { defaultDiagramContent, DiagramContentModel } from "./diagram-content";
-import { DiagramToolComponent } from "./diagram-tool";
+import { DiagramToolComponent } from "./diagram-tile";
 import DiagramToolIcon from "./src/assets/program.svg";
 import { DiagramMigrator } from "./diagram-migrator";
 

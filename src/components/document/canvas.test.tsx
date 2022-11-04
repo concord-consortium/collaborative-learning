@@ -9,7 +9,7 @@ import { specStores } from "../../models/stores/spec-stores";
 import { createSingleTileContent } from "../../utilities/test-utils";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTools } from "../../register-tools";
+import { registerTools } from "../../register-tiles";
 import { ModalProvider } from "react-modal-hook";
 registerTools(["Text"]);
 

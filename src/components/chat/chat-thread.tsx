@@ -6,10 +6,10 @@ import { WithId } from "../../hooks/firestore-hooks";
 import { useUIStore } from "../../hooks/use-stores";
 import { CommentDocument} from "../../lib/firestore-schema";
 import { CommentCard } from "./comment-card";
-import { getToolComponentInfo } from "../../models/tools/tool-component-info";
+import { getToolComponentInfo } from "../../models/tiles/tile-component-info";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import {ChatCommentThread} from "./chat-comment-thread";
-import { ToolIconComponent } from "./tool-icon-component";
+import { ToolIconComponent } from "./tile-icon-component";
 import { ChatThreadToggle } from "./chat-thread-toggle";
 
 import "./chat-thread.scss";

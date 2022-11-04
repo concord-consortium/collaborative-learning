@@ -8,10 +8,10 @@ import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores, createStores } from "../models/stores/stores";
 import { UserModel } from "../models/stores/user";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType, LearningLogWorkspace } from "../models/stores/workspace";
-import { defaultGeometryContent } from "../models/tools/geometry/geometry-content";
-import { JXGChange } from "../models/tools/geometry/jxg-changes";
-import { TextContentModel } from "../models/tools/text/text-content";
-import { IDragTileItem, ToolTileModel } from "../models/tools/tool-tile";
+import { defaultGeometryContent } from "../models/tiles/geometry/geometry-content";
+import { JXGChange } from "../models/tiles/geometry/jxg-changes";
+import { TextContentModel } from "../models/tiles/text/text-content";
+import { IDragTileItem, ToolTileModel } from "../models/tiles/tile-model";
 import { createSingleTileContent } from "../utilities/test-utils";
 import { ProblemModel, ProblemModelType } from "../models/curriculum/problem";
 import { DocumentContentModel } from "../models/document/document-content";
@@ -21,7 +21,7 @@ import { UIModel } from "../models/stores/ui";
 import { ENavTab } from "../models/view/nav-tabs";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTools } from "../register-tools";
+import { registerTools } from "../register-tiles";
 registerTools(["Geometry", "Text"]);
 
 const investigation = InvestigationModel.create({
@@ -201,7 +201,7 @@ describe("authed logger", () => {
         sections: [{
           type: "introduction",
           content: getSnapshot(content),
-        }] 
+        }]
       })
     });
 
@@ -260,7 +260,7 @@ describe("authed logger", () => {
         expect(historyRequest.parameters.documentKey).toBe(documentKey);
         expect(historyRequest.parameters.historyEventId).toBe("history-id");
         expect(historyRequest.parameters.historyLength).toBe(99);
-        expect(historyRequest.parameters.historyIndex).toBe(12);        
+        expect(historyRequest.parameters.historyIndex).toBe(12);
         done();
         return res.status(201);
       });
@@ -301,7 +301,7 @@ describe("authed logger", () => {
       });
       Logger.logHistoryEvent(historyPayload);
     });
-    
+
     it("logs playStart Event", (done) => {
       const documentKey = "source-document";
       addDocument(documentKey);
@@ -353,7 +353,7 @@ describe("authed logger", () => {
       Logger.logHistoryEvent(historyPayload);
     });
   });
-  
+
   describe ("log comment events", () => {
     const addDocumentWithTile = (key: string)=> {
       const document = createDocumentModel({
@@ -370,7 +370,7 @@ describe("authed logger", () => {
       });
       stores.documents.add(document);
     };
-  
+
     it("can log an ADD a document initial comment event", (done) => {
       const documentKey = "source-document";
       addDocumentWithTile(documentKey);
@@ -418,7 +418,7 @@ describe("authed logger", () => {
 
       Logger.logCommentEvent(addEventPayload);
     });
-  
+
     it("can log an ADD a document response comment event", (done) => {
       const documentKey = "source-document";
       addDocumentWithTile(documentKey);
@@ -543,7 +543,7 @@ describe("authed logger", () => {
       });
       Logger.logCommentEvent(expandCommentPayload);
     });
-    
+
     it("can log a COLLAPSE tile comment thread event", (done) => {
       const documentKey = "source-document";
       addDocumentWithTile(documentKey);
@@ -567,7 +567,7 @@ describe("authed logger", () => {
       });
       Logger.logCommentEvent(collapseCommentPayload);
     });
-    
+
     it("can log a EXPAND document comment thread event", (done) => {
       const documentKey = "source-document";
       addDocumentWithTile(documentKey);
@@ -589,7 +589,7 @@ describe("authed logger", () => {
       });
       Logger.logCommentEvent(expandCommentPayload);
     });
-    
+
     it("can log a COLLAPSE document comment thread event", (done) => {
       const documentKey = "source-document";
       addDocumentWithTile(documentKey);
@@ -659,7 +659,7 @@ describe("authed logger", () => {
 
       Logger.logTileEvent(LogEventName.CREATE_TILE, tile);
     });
-    
+
     it("can log tile creation in a document", (done) => {
       const document = createDocumentModel({
         type: ProblemDocument,

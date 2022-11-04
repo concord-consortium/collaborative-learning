@@ -4,11 +4,11 @@ import { observer, inject } from "mobx-react";
 import { BaseComponent } from "../base";
 import { TileLayoutModelType, TileRowModelType } from "../../models/document/tile-row";
 import { isShowingTeacherContent } from "../../models/stores/stores";
-import { getToolContentInfoById } from "../../models/tools/tool-content-info";
-import { ToolTileModelType } from "../../models/tools/tool-tile";
-import { SectionHeader } from "../tools/section-header";
-import { ToolApiInterfaceContext } from "../tools/tool-api";
-import { ToolTileComponent, dragTileSrcDocId } from "../tools/tool-tile";
+import { getToolContentInfoById } from "../../models/tiles/tile-content-info";
+import { ToolTileModelType } from "../../models/tiles/tile-model";
+import { SectionHeader } from "../tiles/section-header";
+import { ToolApiInterfaceContext } from "../tiles/tile-api";
+import { ToolTileComponent, dragTileSrcDocId } from "../tiles/tile-component";
 
 import "./tile-row.sass";
 

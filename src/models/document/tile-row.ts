@@ -1,5 +1,5 @@
 import { types, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
-import { ToolTileModelType } from "../tools/tool-tile";
+import { ToolTileModelType } from "../tiles/tile-model";
 import { IDropRowInfo } from "../document/document-content";
 import { uniqueId } from "../../utilities/js-utils";
 import { withoutUndo } from "../history/tree-monitor";

@@ -5,12 +5,12 @@ import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document/document";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
 import { ToolbarModelType } from "../models/stores/problem-configuration";
-import { ToolButtonModelType } from "../models/tools/tool-button";
-import { getToolContentInfoById, IToolContentInfo } from "../models/tools/tool-content-info";
+import { ToolButtonModelType } from "../models/tiles/tool-button";
+import { getToolContentInfoById, IToolContentInfo } from "../models/tiles/tile-content-info";
 import { DeleteButton } from "./delete-button";
 import { IToolButtonProps, ToolButtonComponent } from "./tool-button";
-import { EditableToolApiInterfaceRefContext } from "./tools/tool-api";
-import { kDragTileCreate  } from "./tools/tool-tile";
+import { EditableToolApiInterfaceRefContext } from "./tiles/tile-api";
+import { kDragTileCreate  } from "./tiles/tile-component";
 
 import "./toolbar.sass";
 

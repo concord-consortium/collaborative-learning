@@ -1,12 +1,12 @@
 import { destroy, Instance, types, getEnv, flow, SnapshotIn } from "mobx-state-tree";
 import { when } from "mobx";
-import { IToolTileProps } from "../../components/tools/tool-tile";
+import { IToolTileProps } from "../../components/tiles/tile-component";
 import { SharedModel, SharedModelType } from "./shared-model";
 import { SharedModelDocumentManager } from "./shared-model-document-manager";
 import { registerSharedModelInfo } from "./shared-model-registry";
-import { registerToolComponentInfo } from "../tools/tool-component-info";
-import { registerToolContentInfo } from "../tools/tool-content-info";
-import { ITileEnvironment, ToolContentModel } from "../tools/tool-types";
+import { registerToolComponentInfo } from "../tiles/tile-component-info";
+import { registerToolContentInfo } from "../tiles/tile-content-info";
+import { ITileEnvironment, ToolContentModel } from "../tiles/tile-types";
 import { DocumentContentModel } from "../document/document-content";
 import { createDocumentModel, DocumentModelType } from "../document/document";
 import { ProblemDocument } from "../document/document-types";

@@ -1,11 +1,11 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { ToolButtonModel } from "../models/tools/tool-button";
+import { ToolButtonModel } from "../models/tiles/tool-button";
 import { ToolButtonComponent } from "./tool-button";
 
 // This is needed so the icon for the text tool can be found
-import "../register-tools";
+import "../register-tiles";
 
 describe("ToolButtonComponent", () => {
 

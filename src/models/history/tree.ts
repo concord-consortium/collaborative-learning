@@ -2,7 +2,7 @@ import { types, IJsonPatch, applyPatch, resolvePath, getSnapshot, flow } from "m
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentContentModelType } from "../document/document-content";
 import { SharedModelType } from "../shared/shared-model";
-import { ToolTileModelType } from "../tools/tool-tile";
+import { ToolTileModelType } from "../tiles/tile-model";
 import { TreeManagerAPI } from "./tree-manager-api";
 import { TreeMonitor } from "./tree-monitor";
 

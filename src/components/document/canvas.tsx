@@ -7,12 +7,12 @@ import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
 import { createDocumentModel, ContentStatus, DocumentModelType } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
-import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
+import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { TreeManagerType } from "../../models/history/tree-manager";
 import { PlaybackComponent } from "../playback/playback";
 import {
   IToolApi, IToolApiInterface, IToolApiMap, ToolApiInterfaceContext, EditableToolApiInterfaceRefContext
-} from "../tools/tool-api";
+} from "../tiles/tile-api";
 import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT } from "../../lib/debug";
 import { DocumentError } from "./document-error";
@@ -38,7 +38,7 @@ interface IProps {
 
 interface IState {
   historyDocumentCopy?: DocumentModelType;
-  showPlaybackControls: boolean;  
+  showPlaybackControls: boolean;
 }
 
 @inject("stores")
@@ -78,7 +78,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
 
     this.state = {
       showPlaybackControls: false,
-    };   
+    };
   }
 
   public render() {
@@ -179,7 +179,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   private handleTogglePlaybackControlComponent = () => {
     this.setState((prevState, props) => {
       const showPlaybackControls = !prevState.showPlaybackControls;
-      const historyDocumentCopy = showPlaybackControls ? 
+      const historyDocumentCopy = showPlaybackControls ?
         this.createHistoryDocumentCopy() : undefined;
 
       if (prevState.historyDocumentCopy) {
@@ -191,7 +191,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
         showPlaybackControls,
         historyDocumentCopy
       };
-    });    
+    });
   };
 
   private createHistoryDocumentCopy = () => {

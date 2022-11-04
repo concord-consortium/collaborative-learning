@@ -7,13 +7,13 @@ import { PersonalDocument, PlanningDocument, ProblemDocument } from "../models/d
 import { specStores } from "../models/stores/spec-stores";
 import { IStores } from "../models/stores/stores";
 import { UserModel } from "../models/stores/user";
-import { TextContentModelType } from "../models/tools/text/text-content";
-import { ToolTileModelType } from "../models/tools/tool-tile";
+import { TextContentModelType } from "../models/tiles/text/text-content";
+import { ToolTileModelType } from "../models/tiles/tile-model";
 import { createSingleTileContent } from "../utilities/test-utils";
 import * as UrlParams from "../utilities/url-params";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTools } from "../register-tools";
+import { registerTools } from "../register-tiles";
 registerTools(["Text"]);
 
 const mockDatabase = jest.fn();

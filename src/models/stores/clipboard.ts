@@ -1,6 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
 import { IStores } from "./stores";
-import { ToolContentModelType } from "../tools/tool-types";
+import { ToolContentModelType } from "../tiles/tile-types";
 import { uniqueId } from "../../utilities/js-utils";
 
 export const kTypeText = "text";

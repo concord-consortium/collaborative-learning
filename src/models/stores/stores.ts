@@ -10,7 +10,7 @@ import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";
 import { DB } from "../../lib/db";
 import { getUserContext } from "../../hooks/use-user-context";
-import { registerTools } from "../../register-tools";
+import { registerTools } from "../../register-tiles";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
 import { DocumentsModelType, DocumentsModel, createDocumentsModelWithRequiredDocuments } from "./documents";

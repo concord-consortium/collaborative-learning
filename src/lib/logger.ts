@@ -1,14 +1,14 @@
 import { v4 as uuid } from "uuid";
 import { getSnapshot } from "mobx-state-tree";
 import { Optional } from "utility-types";
-import { ToolTileModelType } from "../models/tools/tool-tile";
+import { ToolTileModelType } from "../models/tiles/tile-model";
 import { IStores } from "../models/stores/stores";
 import { UserModelType } from "../models/stores/user";
 import { InvestigationModelType } from "../models/curriculum/investigation";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { DocumentModelType } from "../models/document/document";
-import { JXGChange } from "../models/tools/geometry/jxg-changes";
-import { ITableChange } from "../models/tools/table/table-change";
+import { JXGChange } from "../models/tiles/geometry/jxg-changes";
+import { ITableChange } from "../models/tiles/table/table-change";
 import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
 import { isSectionPath, parseSectionPath } from "../../functions/src/shared";
@@ -272,8 +272,8 @@ export class Logger {
     const parameters = { curriculum, curriculumFacet: facet, curriculumSection: section, ...params };
     Logger.log(event, parameters);
   }
-  
-  public static logHistoryEvent(historyLogInfo: ILogHistory) { 
+
+  public static logHistoryEvent(historyLogInfo: ILogHistory) {
     const eventMap: Record<HistoryAction, LogEventName> = {
       showControls: LogEventName.HISTORY_SHOW_CONTROLS,
       hideControls: LogEventName.HISTORY_HIDE_CONTROLS,
@@ -293,7 +293,7 @@ export class Logger {
       const document = this._instance.stores.documents.getDocument(historyLogInfo.documentId)
                         || this._instance.stores.networkDocuments.getDocument(historyLogInfo.documentId);
       if (document) {
-        Logger.logDocumentEvent(event, document, 
+        Logger.logDocumentEvent(event, document,
           { historyLength: historyLogInfo.historyLength,
             historyIndex: historyLogInfo.historyIndex,
             historyEventId: historyLogInfo.historyEventId
@@ -302,7 +302,7 @@ export class Logger {
       else {
         console.warn("Warning: couldn't log history event for document:", historyLogInfo.documentId);
       }
-    }  
+    }
   }
 
   public static logDocumentEvent(event: LogEventName, document: DocumentModelType, params?: Record<string, any>) {

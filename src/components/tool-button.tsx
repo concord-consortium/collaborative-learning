@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import React from "react";
-import { ToolButtonModelType } from "../models/tools/tool-button";
+import { ToolButtonModelType } from "../models/tiles/tool-button";
 
 export interface IButtonProps {
   toolButton: ToolButtonModelType;

@@ -1,19 +1,18 @@
 import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn, getType, getEnv, getParent } from "mobx-state-tree";
-import { PlaceholderContentModel } from "../tools/placeholder/placeholder-content";
-import { kTextToolID } from "../tools/text/text-content";
-import { getToolContentInfoById, IDocumentExportOptions } from "../tools/tool-content-info";
-import { ToolContentModelType } from "../tools/tool-types";
+import { PlaceholderContentModel } from "../tiles/placeholder/placeholder-content";
+import { kTextToolID } from "../tiles/text/text-content";
+import { getToolContentInfoById, IDocumentExportOptions } from "../tiles/tile-content-info";
+import { ToolContentModelType } from "../tiles/tile-types";
 import {
-  ToolTileModel, ToolTileModelType, ToolTileSnapshotInType, ToolTileSnapshotOutType
-} from "../tools/tool-tile";
+  IDragTileItem, ToolTileModel, ToolTileModelType, ToolTileSnapshotInType, ToolTileSnapshotOutType
+} from "../tiles/tile-model";
 import {
   TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
 } from "../document/tile-row";
 import { migrateSnapshot } from "./document-content-import";
 import { IDocumentAddTileOptions } from "./document-types";
 import { Logger, LogEventName } from "../../lib/logger";
-import { IDragTileItem } from "../../models/tools/tool-tile";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModel, SharedModelType } from "../shared/shared-model";

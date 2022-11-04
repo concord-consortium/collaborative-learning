@@ -1,10 +1,10 @@
 import { UIModel, UIModelType, UIDialogModelType } from "./ui";
 import { ProblemWorkspace, LearningLogWorkspace } from "./workspace";
-import { ToolTileModel } from "../tools/tool-tile";
-import { TextContentModel } from "../tools/text/text-content";
+import { ToolTileModel } from "../tiles/tile-model";
+import { TextContentModel } from "../tiles/text/text-content";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTools } from "../../register-tools";
+import { registerTools } from "../../register-tiles";
 registerTools(["Text"]);
 
 describe("ui model", () => {

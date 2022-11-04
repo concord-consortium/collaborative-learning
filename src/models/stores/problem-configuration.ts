@@ -1,7 +1,7 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { IAuthoredDocumentContent } from "../document/document-content-import";
-import { StampModel } from "../../plugins/drawing-tool/model/stamp";
-import { ToolButtonModel } from "../tools/tool-button";
+import { StampModel } from "../../plugins/drawing/model/stamp";
+import { ToolButtonModel } from "../tiles/tool-button";
 import { SettingsMstType } from "./settings";
 
 // Probably this should be changed to something more complex

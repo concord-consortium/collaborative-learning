@@ -3,7 +3,7 @@ import { getParentOfType, hasParentOfType, IAnyStateTreeNode } from "mobx-state-
 import { DocumentContentModelType } from "../document/document-content";
 import { SharedModelType } from "./shared-model";
 import { ISharedModelManager, SharedModelUnion } from "./shared-model-manager";
-import { ToolTileModel } from "../tools/tool-tile";
+import { ToolTileModel } from "../tiles/tile-model";
 
 
 function getToolTile(tileContentModel: IAnyStateTreeNode){

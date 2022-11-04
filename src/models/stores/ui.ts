@@ -5,7 +5,7 @@ import { kDividerHalf, kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-t
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { LogEventName, Logger } from "../../lib/logger";
-import { ToolTileModelType } from "../tools/tool-tile";
+import { ToolTileModelType } from "../tiles/tile-model";
 import { ENavTab } from "../view/nav-tabs";
 
 type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
