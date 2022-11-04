@@ -6,7 +6,8 @@ import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId } from "../table-link-types";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
-import { toolContentModelHooks, ToolMetadataModel } from "../tool-types";
+import { ToolMetadataModel } from "../tool-metadata";
+import { toolModelHooks } from "../tool-model-hooks";
 import { ICreateRowsProperties, IRowProperties, ITableChange } from "../table/table-change";
 import { canonicalizeValue } from "../table/table-model-types";
 import { convertModelToChanges, exportGeometryJson } from "./geometry-migrate";
@@ -311,7 +312,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     }
   }))
-  .actions(self => toolContentModelHooks({
+  .actions(self => toolModelHooks({
     doPostCreate(metadata) {
       self.metadata = metadata as GeometryMetadataModelType;
     }

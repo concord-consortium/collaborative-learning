@@ -7,7 +7,9 @@ import {
   convertChangesToSnapshot, convertImportToSnapshot, convertLegacyDataSet, isTableImportSnapshot
 } from "./table-import";
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tool-content-info";
-import { ToolMetadataModel, ToolContentModel, toolContentModelHooks } from "../tool-types";
+import { ToolMetadataModel } from "../tool-metadata";
+import { toolModelHooks } from "../tool-model-hooks";
+import { ToolContentModel } from "../tool-types";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SharedModelType } from "../../shared/shared-model";
@@ -231,7 +233,7 @@ export const TableContentModel = ToolContentModel
       return false;
     }
   }))
-  .actions(self => toolContentModelHooks({
+  .actions(self => toolModelHooks({
     doPostCreate(metadata) {
       self.metadata = metadata as TableMetadataModelType;
     }

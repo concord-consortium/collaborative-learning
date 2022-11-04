@@ -1,8 +1,10 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { exportImageTileSpec, isLegacyImageTileImport, convertLegacyImageTile } from "./image-import-export";
 import { ITileExportOptions, IDefaultContentOptions } from "../tool-content-info";
+import { ToolMetadataModelType } from "../tool-metadata";
+import { toolModelHooks } from "../tool-model-hooks";
 import { getToolTileModel, setTileTitleFromContent } from "../tool-tile";
-import { toolContentModelHooks, ToolContentModel, ToolMetadataModelType } from "../tool-types";
+import { ToolContentModel } from "../tool-types";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
@@ -45,7 +47,7 @@ export const ImageContentModel = ToolContentModel
       return exportImageTileSpec(self.url, self.filename, options);
     }
   }))
-  .actions(self => toolContentModelHooks({
+  .actions(self => toolModelHooks({
       doPostCreate(metadata: ToolMetadataModelType) {
         self.metadata = metadata;
       },
