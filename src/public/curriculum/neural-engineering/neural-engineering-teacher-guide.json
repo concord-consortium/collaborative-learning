@@ -407,7 +407,7 @@
                             "<p>- Why does this matter to scientists, physicians, physical therapists, athletic trainers, and/or biomedical engineers?</p>",
                             "<p>- How may gathering EMG data inform the design of a device that can help people with neurological conditions or missing limbs?</p>",
                             "<p><strong><em>10 minutes</em></strong></p>",
-                            "<p>A﻿sk students to post a reflection in their learning journals. Encourage students to apply what they noticed in the EMG activities, insights that were sparked by the discussion, and any new knowledge or wonderings they may have. </p>",
+                            "<p>Ask students to post a reflection in their learning journals. Encourage students to apply what they noticed in the EMG activities, insights that were sparked by the discussion, and any new knowledge or wonderings they may have. </p>",
                             "<p>Inform students that in the next activity they will apply and expand their knowledge of  EMG and begin to explore the use of a simple robotic arm. This will help them explain how bionic arms work.</p>",
                             "<h3>Lesson Resources</h3>"
                           ]
@@ -464,7 +464,7 @@
                               "<p>Dataflow programs; Learning Journals</p>",
                               "<p><strong>Materials</strong></p>",
                               "<p>For each group of 3-4 students:</p>",
-                              "<ul><li><a href='https://backyardbrains.com/products/clawbundle'>The Claw Kit</a> [<strong>LINK</strong>: ]</li><li>Hand <a href='https://www.amazon.com/Edisalute-smartinlife-Strengthener-Gripper-Grippers/dp/B01MXHXSNP/ref=sr_1_5?crid=1U94UEC7O4HFK&amp;keywords=hand+grip&amp;qid=1660235040&amp;s=sporting-goods&amp;sprefix=hand+gri%2Csporting%2C222&amp;sr=1-5'>gripper</a></li><li>A computer </li><li>6 plastic cups </li></ul>",
+                              "<ul><li><a href='https://backyardbrains.com/products/clawbundle'>The Claw Kit</a></li><li>Hand <a href='https://www.amazon.com/Edisalute-smartinlife-Strengthener-Gripper-Grippers/dp/B01MXHXSNP/ref=sr_1_5?crid=1U94UEC7O4HFK&amp;keywords=hand+grip&amp;qid=1660235040&amp;s=sporting-goods&amp;sprefix=hand+gri%2Csporting%2C222&amp;sr=1-5'>gripper</a></li><li>A computer </li><li>6 plastic cups </li></ul>",
                               "<p><strong>Preparation</strong></p>",
                               "<p>Before class you will need to upload the following <a href='https://github.com/concord-consortium/collaborative-learning/blob/master/src/plugins/dataflow-tool/arduino/ccemgfsr/ccemgfsr.ino'>Arduino sketch</a> on each Arduino board.</p>"
                             ]
@@ -485,20 +485,22 @@
                             "format": "html",
                             "text": [
                               "<p><strong>Instructional Sequence</strong></p>",
-                              "<p><em>5 minutes</em></p>",
+                              "<p><strong><em>5 minutes</em></strong></p>",
                               "<p>Inform students that in today’s activity they will apply and expand their knowledge of EMG and begin to explore the use of a simple bionic arm. This will help them explain how bionic arms work, as well as inform their modification of the simple bionic arm.</p>",
                               "<p>Consider noting specific students’ questions recorded in their Learning Journals if the questions are related to wondering about the application of EMG in the design of bionic arms or biomedical devices.</p>",
-                              "<p><em>30 minutes</em></p>",
-                              "<p>Assign students to teams composed of 3-4 classmates. Ask teams to follow the instructions in the student-facing lesson to aqcuire and display EMG signals from their muscles.</p>",
+                              "<p><strong><em>45 minutes</em></strong></p>",
+                              "<p>Assign students to teams composed of 3-4 classmates. Ask students to follow the instructions in the student-facing lesson to: </p>",
+                              "<ol><li>Design a Dataflow program to make the gripper open and close; </li><li>Design a Dataflow program that reads EMG data and controls a simulated gripper; </li><li>Design a Dataflow program that reads EMG data and controls a physical gripper.</li></ol>",
+                              "<p>Assign students to teams composed of 3-4 classmates. Ask students to follow the instructions in the student-facing lesson to: (1) design a Dataflow program to make the gripper open and close; (2) Design a Dataflow program that reads EMG data and controls a simulated gripper; (3) Design a Dataflow program that reads EMG data and controls a physical gripper.</p>",
                               "<p>Once students have set up the claw, ask them to explore how they can make it work better by:</p>",
                               "<p>Changing the locations of the electrodes. For example, students may have more success controlling the claw by placing the EMG electrodes on the fleshy part below their pinky and the reference electrode by their thumb. </p>",
                               "<p>Changing the sensitivity of the device by pressing the gray button the Muscle SpikerShield. </p>",
-                              "<p>Grasping objects of different sizes/weights. </p>",
-                              "<p><em>20 minutes</em></p>",
+                              "<p>Grasping objects of different sizes/weights. Challenge students to stack 6 plastic cups using the gripper. Which team can do that most quickly? </p>",
+                              "<p><strong><em>20 minutes</em></strong></p>",
                               "<p>In their team, ask students to evaluate the strengths and weaknesses of the EMG-controlled claw and summarize their ideas in a table format. Then, ask them to discuss how the design of the claw can be improved and sketch out their ideas. Remind students of the young woman who was portrayed in the video at the opening of the unit and think about how the claw can serve her in her day-to-day life.</p>",
-                              "<p><em>20 minutes</em></p>",
+                              "<p><strong><em>20 minutes</em></strong></p>",
                               "<p>Facilitate a class discussion as to how the gripper could be improved or modified (e.g., adding touch receptors, using a stronger servomotor, reshaping the tips of the grabber). </p>",
-                              "<p><em>5 minutes</em></p>",
+                              "<p><strong><em>5 minutes</em></strong></p>",
                               "<p>Using their Learning Journals, ask each student to revise what they know, wonder, and learned about bionic arms. </p>",
                               "<p><strong>Lesson Resources</strong></p>",
                               "<p><a href='https://www.twi-global.com/technical-knowledge/faqs/engineering-design-process'>Engineering design process</a></p>"
