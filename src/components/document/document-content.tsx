@@ -225,26 +225,26 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleScroll = throttle((e: React.UIEvent<HTMLDivElement>) => {
-    const toolApiInterface = this.context;
+    const tileApiInterface = this.context;
     const xScroll = this.domElement?.scrollLeft || 0;
     const yScroll = this.domElement?.scrollTop || 0;
-    toolApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
+    tileApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
   }, 50);
 
   private handleRequestTilesOfType = (tileType: string) => {
     const { content } = this.props;
-    const toolApiInterface = this.context;
-    if (!content || !tileType || !toolApiInterface) return [];
+    const tileApiInterface = this.context;
+    if (!content || !tileType || !tileApiInterface) return [];
     const tilesOfType = content.getTilesOfType(tileType);
-    return tilesOfType.map(id => ({ id, title: toolApiInterface.getTileApi(id)?.getTitle?.() }));
+    return tilesOfType.map(id => ({ id, title: tileApiInterface.getTileApi(id)?.getTitle?.() }));
   };
 
   private handleRequestUniqueTitle = (tileId: string) => {
     const { content } = this.props;
-    const toolApiInterface = this.context;
+    const tileApiInterface = this.context;
     const tileType = content?.getTile(tileId)?.content.type;
     const titleBase = getTileContentInfo(tileType)?.titleBase;
-    const getTileTitle = (_tileId: string) => toolApiInterface?.getTileApi?.(_tileId)?.getTitle?.();
+    const getTileTitle = (_tileId: string) => tileApiInterface?.getTileApi?.(_tileId)?.getTitle?.();
     return tileType && titleBase && content?.getUniqueTitle(tileType, titleBase, getTileTitle);
   };
 

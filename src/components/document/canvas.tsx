@@ -46,7 +46,7 @@ interface IState {
 export class CanvasComponent extends BaseComponent<IProps, IState> {
 
   private toolApiMap: ITileApiMap = {};
-  private toolApiInterface: ITileApiInterface;
+  private tileApiInterface: ITileApiInterface;
   private hotKeys: HotKeys = new HotKeys();
 
   static contextType = EditableTileApiInterfaceRefContext;
@@ -55,9 +55,9 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   constructor(props: IProps) {
     super(props);
 
-    this.toolApiInterface = {
-      register: (id: string, toolApi: ITileApi) => {
-        this.toolApiMap[id] = toolApi;
+    this.tileApiInterface = {
+      register: (id: string, tileApi: ITileApi) => {
+        this.toolApiMap[id] = tileApi;
       },
       unregister: (id: string) => {
         delete this.toolApiMap[id];
@@ -84,10 +84,10 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   public render() {
     if (this.context && !this.props.readOnly) {
       // update the editable api interface used by the toolbar
-      this.context.current = this.toolApiInterface;
+      this.context.current = this.tileApiInterface;
     }
     return (
-      <TileApiInterfaceContext.Provider value={this.toolApiInterface}>
+      <TileApiInterfaceContext.Provider value={this.tileApiInterface}>
         <div key="canvas" className="canvas" data-test="canvas" onKeyDown={this.handleKeyDown}>
           {this.renderContent()}
           {this.renderDebugInfo()}

@@ -86,7 +86,7 @@ interface ITileBaseProps {
 }
 
 export interface IRegisterTileApiProps {
-  onRegisterTileApi: (toolApi: ITileApi, facet?: string) => void;
+  onRegisterTileApi: (tileApi: ITileApi, facet?: string) => void;
   onUnregisterTileApi: (facet?: string) => void;
 }
 
@@ -119,7 +119,7 @@ export interface ITileApi {
 A `ITileApiInterface` allows tiles to register/unregister their support of the `ITileApi` and to potentially access the `ITileApi` of other tiles.
 ```typescript
 export interface ITileApiInterface {
-  register: (id: string, toolApi: ITileApi) => void;
+  register: (id: string, tileApi: ITileApi) => void;
   unregister: (id: string) => void;
   getTileApi: (id: string) => ITileApi;
   forEach: (callback: (api: ITileApi) => void) => void;
@@ -134,7 +134,7 @@ export const TileApiInterfaceContext = createContext<ITileApiInterface | null>(n
 Functions to register and unregister tile API functions are passed to tile components via props from `TileComponent`:
 ```typescript
 export interface IRegisterTileApiProps {
-  onRegisterTileApi: (toolApi: ITileApi, facet?: string) => void;
+  onRegisterTileApi: (tileApi: ITileApi, facet?: string) => void;
   onUnregisterTileApi: (facet?: string) => void;
 }
 ```
@@ -150,9 +150,9 @@ this.props.onRegisterTileApi({
 
 When a component needs to access a function in the tile API, we can access the `TileApiInterfaceContext`, get the tile API using `getTileApi`, and then access functions in the tile API:
 ```typescript
-const toolApiInterface = this.context;
-const toolApi = toolApiInterface?.getTileApi(this.modelId);
-toolApi?.exportContentAsTileJson?.(tileContents);
+const tileApiInterface = this.context;
+const tileApi = tileApiInterface?.getTileApi(this.modelId);
+tileApi?.exportContentAsTileJson?.(tileContents);
 ```
 ### Facet
 

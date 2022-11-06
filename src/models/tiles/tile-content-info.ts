@@ -32,9 +32,9 @@ export interface ITileContentInfo {
 
 const gTileContentInfoMap: Record<string, ITileContentInfo> = {};
 
-export function registerTileContentInfo(toolContentInfo: ITileContentInfo) {
+export function registerTileContentInfo(tileContentInfo: ITileContentInfo) {
   // toLowerCase() for legacy support of tool names
-  gTileContentInfoMap[toolContentInfo.type.toLowerCase()] = toolContentInfo;
+  gTileContentInfoMap[tileContentInfo.type.toLowerCase()] = tileContentInfo;
 }
 
 // ToolContent type, e.g. kDrawingTileType, kGeometryTileType, etc.

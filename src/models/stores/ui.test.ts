@@ -4,7 +4,7 @@ import { TileModel } from "../tiles/tile-model";
 import { TextContentModel } from "../tiles/text/text-content";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTileTypes } from "../../register-tiles";
+import { registerTileTypes } from "../../register-tile-types";
 registerTileTypes(["Text"]);
 
 describe("ui model", () => {

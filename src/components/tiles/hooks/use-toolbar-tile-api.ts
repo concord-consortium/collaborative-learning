@@ -6,7 +6,7 @@ import { ITileApi, TileResizeEntry } from "../tile-api";
 export interface IUseToolbarToolApi {
   id: string;
   enabled: boolean;
-  onRegisterTileApi: (toolApi: ITileApi, facet?: string) => void;
+  onRegisterTileApi: (tileApi: ITileApi, facet?: string) => void;
   onUnregisterTileApi: (facet?: string) => void;
 }
 
@@ -41,8 +41,8 @@ export const useToolbarTileApi = (
   });
 
   return useMemo(() => ({
-    onRegisterTileApi: (toolApi: ITileApi) => {
-      toolbarToolApi.current = toolApi;
+    onRegisterTileApi: (tileApi: ITileApi) => {
+      toolbarToolApi.current = tileApi;
     },
     onUnregisterTileApi: () => {
       toolbarToolApi.current = undefined;

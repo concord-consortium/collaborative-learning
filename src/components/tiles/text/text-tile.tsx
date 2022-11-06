@@ -89,10 +89,10 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   public state: IState = {};
   private disposers: IReactionDisposer[];
   private prevText: any;
-  private textToolDiv: HTMLElement | null;
+  private textTileDiv: HTMLElement | null;
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
-  private toolbarToolApi: ITileApi | undefined;
+  private toolbarTileApi: ITileApi | undefined;
   private plugins: HtmlSerializablePlugin[] | undefined;
   private textOnFocus: string | string [] | undefined;
 
@@ -159,12 +159,12 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         return this.getContent().exportJson();
       },
       handleDocumentScroll: (x: number, y: number) => {
-        this.toolbarToolApi?.handleDocumentScroll?.(x, y);
+        this.toolbarTileApi?.handleDocumentScroll?.(x, y);
       },
       handleTileResize: (entry: TileResizeEntry) => {
         const { x, y, width, height, top, left, bottom, right } = entry.contentRect;
         this.tileContentRect = { x, y, width, height, top, left, bottom, right, toJSON: () => "" };
-        this.toolbarToolApi?.handleTileResize?.(entry);
+        this.toolbarTileApi?.handleTileResize?.(entry);
       }
     });
 
@@ -194,7 +194,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       // which is used for cypress tests and other purposes.
       <div className={`text-tool-wrapper ${readOnly ? "" : "editable"}`}
         data-testid="text-tool-wrapper"
-        ref={elt => this.textToolDiv = elt}
+        ref={elt => this.textTileDiv = elt}
         onMouseDown={this.handleMouseDownInWrapper}>
         <TextToolbarComponent
           documentContent={documentContent}
@@ -222,17 +222,17 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     );
   }
 
-  private handleRegisterToolApi = (toolApi: ITileApi) => {
-    this.toolbarToolApi = toolApi;
+  private handleRegisterToolApi = (tileApi: ITileApi) => {
+    this.toolbarTileApi = tileApi;
 
     // call resize handler immediately with current size
     const { tileElt } = this.props;
     tileElt && this.tileContentRect &&
-      this.toolbarToolApi?.handleTileResize?.({ target: tileElt, contentRect: this.tileContentRect });
+      this.toolbarTileApi?.handleTileResize?.({ target: tileElt, contentRect: this.tileContentRect });
   };
 
   private handleUnregisterToolApi = () => {
-    this.toolbarToolApi = undefined;
+    this.toolbarTileApi = undefined;
   };
 
   private handleIsEnabled = () => {
@@ -291,7 +291,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const { ui } = this.stores;
     const { model, readOnly } = this.props;
     const isExtendingSelection = hasSelectionModifier(e);
-    const isWrapperClick = e.target === this.textToolDiv;
+    const isWrapperClick = e.target === this.textTileDiv;
     if (readOnly || isWrapperClick || isExtendingSelection) {
       isWrapperClick && this.editor?.focus();
       ui.setSelectedTile(model, { append: isExtendingSelection });

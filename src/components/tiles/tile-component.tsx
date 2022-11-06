@@ -249,9 +249,9 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
   private renderLinkIndicators() {
     const { model } = this.props;
-    const toolApiInterface = this.context;
-    const toolApi = toolApiInterface?.getTileApi(model.id);
-    const clientTableLinks = toolApi?.getLinkedTables?.();
+    const tileApiInterface = this.context;
+    const tileApi = tileApiInterface?.getTileApi(model.id);
+    const clientTableLinks = tileApi?.getLinkedTables?.();
     return clientTableLinks
             ? clientTableLinks.map((id, index) => {
                 return <LinkIndicatorComponent key={id} id={id} index={index} />;
@@ -273,23 +273,23 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
   private getTileResizeHandler = () => {
     const { model } = this.props;
-    const toolApiInterface = this.context;
-    return toolApiInterface?.getTileApi(`${model.id}[layout]`)?.handleTileResize ||
-            toolApiInterface?.getTileApi(model.id)?.handleTileResize;
+    const tileApiInterface = this.context;
+    return tileApiInterface?.getTileApi(`${model.id}[layout]`)?.handleTileResize ||
+            tileApiInterface?.getTileApi(model.id)?.handleTileResize;
   };
 
-  private handleRegisterTileApi = (toolApi: ITileApi, facet?: string) => {
+  private handleRegisterTileApi = (tileApi: ITileApi, facet?: string) => {
     const id = facet ? `${this.modelId}[${facet}]` : this.modelId;
-    const toolApiInterface = this.context;
-    toolApiInterface?.register(id, toolApi);
+    const tileApiInterface = this.context;
+    tileApiInterface?.register(id, tileApi);
     // trigger initial render
     this.forceUpdate();
   };
 
   private handleUnregisterTileApi = (facet?: string) => {
     const id = facet ? `${this.modelId}[${facet}]` : this.modelId;
-    const toolApiInterface = this.context;
-    toolApiInterface?.unregister(id);
+    const tileApiInterface = this.context;
+    tileApiInterface?.unregister(id);
   };
 
   private handleResizeDebounced = debounce((entry: ResizeObserverEntry) => {

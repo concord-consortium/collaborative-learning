@@ -45,7 +45,7 @@ describe("DrawingToolComponent", () => {
     onRequestRowHeight: (tileId: string, height?: number, deltaHeight?: number): void => {
       throw new Error("Function not implemented.");
     },
-    onRegisterTileApi: (toolApi: ITileApi, facet?: string): void => {
+    onRegisterTileApi: (tileApi: ITileApi, facet?: string): void => {
       // throw new Error("Function not implemented.");
     },
     onUnregisterTileApi: (facet?: string): void => {

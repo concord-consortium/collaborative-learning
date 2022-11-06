@@ -20,7 +20,7 @@ export interface ITileApi {
 }
 
 export interface ITileApiInterface {
-  register: (id: string, toolApi: ITileApi) => void;
+  register: (id: string, tileApi: ITileApi) => void;
   unregister: (id: string) => void;
   getTileApi: (id: string) => ITileApi;
   forEach: (callback: (api: ITileApi) => void) => void;

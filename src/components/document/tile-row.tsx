@@ -132,9 +132,9 @@ export class TileRowComponent extends BaseComponent<IProps, IState> {
   private getContentHeight() {
     return this.props.model.getContentHeight((tileId: string) => {
       // if the tile has a specific content height, use it
-      const toolApiInterface = this.context;
-      const toolApi = toolApiInterface?.getTileApi(tileId);
-      const contentHeight = toolApi?.getContentHeight?.();
+      const tileApiInterface = this.context;
+      const tileApi = tileApiInterface?.getTileApi(tileId);
+      const contentHeight = tileApi?.getContentHeight?.();
       if (contentHeight) return contentHeight;
       // otherwise, use the default height for this type of tile
       const tile = this.getTile(tileId);

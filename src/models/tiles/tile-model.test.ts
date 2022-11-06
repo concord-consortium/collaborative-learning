@@ -21,7 +21,7 @@ const builtInTileTypes = [
 ];
 
 // This is needed so we can check which tools are registered below
-import { registerTileTypes } from "../../register-tiles";
+import { registerTileTypes } from "../../register-tile-types";
 registerTileTypes(builtInTileTypes);
 
 describe("TileModel", () => {

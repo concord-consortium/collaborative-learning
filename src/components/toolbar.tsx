@@ -108,24 +108,24 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     document.content?.showPendingInsertHighlight(false);
   };
 
-  private getUniqueTitle(toolContentInfo: ITileContentInfo) {
-    const toolApiInterface = this.context?.current;
-    if (!toolApiInterface) return;
+  private getUniqueTitle(tileContentInfo: ITileContentInfo) {
+    const tileApiInterface = this.context?.current;
+    if (!tileApiInterface) return;
     const { document } = this.props;
-    const { type, titleBase } = toolContentInfo;
-    const getTileTitle = (tileId: string) => toolApiInterface?.getTileApi(tileId)?.getTitle?.();
+    const { type, titleBase } = tileContentInfo;
+    const getTileTitle = (tileId: string) => tileApiInterface?.getTileApi(tileId)?.getTitle?.();
     return titleBase && document.getUniqueTitle(type, titleBase, getTileTitle);
   }
 
   private handleAddTile(tool: IToolbarButtonModel) {
     const { document } = this.props;
     const { ui } = this.stores;
-    const toolContentInfo = getTileContentInfo(tool.id);
-    if (!toolContentInfo) return;
+    const tileContentInfo = getTileContentInfo(tool.id);
+    if (!tileContentInfo) return;
 
     const newTileOptions: IDocumentContentAddTileOptions = {
-            title: this.getUniqueTitle(toolContentInfo),
-            addSidecarNotes: !!toolContentInfo?.addSidecarNotes,
+            title: this.getUniqueTitle(tileContentInfo),
+            addSidecarNotes: !!tileContentInfo?.addSidecarNotes,
             insertRowInfo: { rowInsertIndex: document.content?.defaultInsertRow ?? 0 }
           };
     const rowTile = document.addTile(tool.id, newTileOptions);
@@ -152,15 +152,15 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDelete() {
-    const toolApiInterface = this.context?.current;
-    if (!toolApiInterface) return;
+    const tileApiInterface = this.context?.current;
+    if (!tileApiInterface) return;
     let didDeleteInteriorSelection = false;
     const { ui } = this.stores;
     ui.selectedTileIds.forEach(tileId => {
-      const toolApi = toolApiInterface?.getTileApi(tileId);
+      const tileApi = tileApiInterface?.getTileApi(tileId);
       // if there is selected content inside the selected tile, delete it first
-      if (toolApi?.hasSelection?.()) {
-        toolApi.deleteSelection?.();
+      if (tileApi?.hasSelection?.()) {
+        tileApi.deleteSelection?.();
         didDeleteInteriorSelection = true;
       }
     });
@@ -187,10 +187,10 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     // remove hover-insert highlight when we start a tile drag
     this.removeDropRowHighlight();
 
-    const toolContentInfo = getTileContentInfo(tool.id);
-    if (toolContentInfo) {
+    const tileContentInfo = getTileContentInfo(tool.id);
+    if (tileContentInfo) {
       const dragInfo: IDragToolCreateInfo =
-        { toolId: tool.id, title: this.getUniqueTitle(toolContentInfo) };
+        { toolId: tool.id, title: this.getUniqueTitle(tileContentInfo) };
       e.dataTransfer.setData(kDragTileCreate, JSON.stringify(dragInfo));
     }
   };

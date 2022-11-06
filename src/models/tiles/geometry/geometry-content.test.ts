@@ -18,7 +18,7 @@ import {
 import { TileModel, ITileModel } from "../tile-model";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTileTypes } from "../../../register-tiles";
+import { registerTileTypes } from "../../../register-tile-types";
 registerTileTypes(["Geometry"]);
 
 // Need to mock this so the placeholder that is added to the cache

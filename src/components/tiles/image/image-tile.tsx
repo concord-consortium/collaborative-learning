@@ -172,7 +172,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
         >
           {isLoading && <div className="loading-spinner" />}
           <ImageToolbar
-            onRegisterTileApi={(toolApi: ITileApi) => this.toolbarToolApi = toolApi}
+            onRegisterTileApi={(tileApi: ITileApi) => this.toolbarToolApi = tileApi}
             onUnregisterTileApi={() => this.toolbarToolApi = undefined}
             documentContent={documentContent}
             tileElt={tileElt}

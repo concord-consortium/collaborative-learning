@@ -10,7 +10,7 @@ import { specStores } from "../models/stores/spec-stores";
 import { ToolbarComponent } from "./toolbar";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import "../register-tiles";
+import "../register-tile-types";
 
 describe("ToolbarComponent", () => {
 

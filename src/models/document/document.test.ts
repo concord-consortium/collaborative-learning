@@ -5,7 +5,7 @@ import { createSingleTileContent } from "../../utilities/test-utils";
 import { TextContentModelType } from "../tiles/text/text-content";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTileTypes } from "../../register-tiles";
+import { registerTileTypes } from "../../register-tile-types";
 registerTileTypes(["Geometry", "Text"]);
 
 const mockUserContext = { appMode: "authed", classHash: "class-1" };

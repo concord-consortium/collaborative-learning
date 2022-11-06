@@ -12,7 +12,7 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTileTypes } from "../../register-tiles";
+import { registerTileTypes } from "../../register-tile-types";
 registerTileTypes(["Drawing", "Geometry", "Image", "Table", "Text"]);
 
 // mock uniqueId so we can recognize auto-generated IDs

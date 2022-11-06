@@ -9,14 +9,14 @@ interface IProps {
   getTitle: () => string | undefined;
   getContentHeight: () => number | undefined;
   exportContentAsTileJson: () => string;
-  onRegisterTileApi: (toolApi: ITileApi, facet?: string | undefined) => void;
+  onRegisterTileApi: (tileApi: ITileApi, facet?: string | undefined) => void;
   onUnregisterTileApi: (facet?: string | undefined) => void;
 }
 export const useToolApi = ({
   content, getTitle, getContentHeight, exportContentAsTileJson, onRegisterTileApi, onUnregisterTileApi
 }: IProps) => {
   const contentRef = useCurrent(content);
-  const toolApi: ITileApi = useMemo(() => ({
+  const tileApi: ITileApi = useMemo(() => ({
     getTitle,
     getContentHeight,
     exportContentAsTileJson,
@@ -31,7 +31,7 @@ export const useToolApi = ({
   }), [exportContentAsTileJson, getContentHeight, getTitle, contentRef]);
 
   useEffect(() => {
-    onRegisterTileApi(toolApi);
+    onRegisterTileApi(tileApi);
     return () => onUnregisterTileApi();
-  }, [onRegisterTileApi, onUnregisterTileApi, toolApi]);
+  }, [onRegisterTileApi, onUnregisterTileApi, tileApi]);
 };

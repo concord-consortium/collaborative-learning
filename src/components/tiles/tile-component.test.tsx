@@ -8,7 +8,7 @@ import { TileModel } from "../../models/tiles/tile-model";
 import { UnknownContentModel } from "../../models/tiles/tile-types";
 
 // required before tile creation
-import "../../register-tiles";
+import "../../register-tile-types";
 
 describe("TileComponent", () => {
 

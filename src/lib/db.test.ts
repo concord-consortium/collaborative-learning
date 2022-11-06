@@ -13,7 +13,7 @@ import { createSingleTileContent } from "../utilities/test-utils";
 import * as UrlParams from "../utilities/url-params";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTileTypes } from "../register-tiles";
+import { registerTileTypes } from "../register-tile-types";
 registerTileTypes(["Text"]);
 
 const mockDatabase = jest.fn();

@@ -5,7 +5,7 @@ import { ToolbarButtonModel } from "../models/tiles/toolbar-button";
 import { ToolbarButtonComponent } from "./toolbar-button";
 
 // This is needed so the icon for the text tool can be found
-import "../register-tiles";
+import "../register-tile-types";
 
 describe("ToolButtonComponent", () => {
 
