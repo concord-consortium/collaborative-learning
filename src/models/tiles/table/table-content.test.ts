@@ -1,4 +1,4 @@
-import { defaultTableContent, kTableToolID, TableContentModel, TableMetadataModel } from "./table-content";
+import { defaultTableContent, kTableTileType, TableContentModel, TableMetadataModel } from "./table-content";
 import { TableContentTableImport } from "./table-import";
 import { IDataSet } from "../../data/data-set";
 import { kSerializedXKey } from "../../data/expression-utils";
@@ -30,14 +30,14 @@ describe("TableContent", () => {
 
   it("can create empty/default TableContentModels", () => {
     const emptyTable = TableContentModel.create();
-    expect(emptyTable.type).toBe(kTableToolID);
+    expect(emptyTable.type).toBe(kTableTileType);
     expect(emptyTable.isImported).toBe(false);
     expect(emptyTable.dataSet.attributes.length).toBe(0);
     expect(emptyTable.dataSet.cases.length).toBe(0);
     expect(emptyTable.isUserResizable).toBe(true);
 
     const defaultTable = defaultTableContent();
-    expect(defaultTable.type).toBe(kTableToolID);
+    expect(defaultTable.type).toBe(kTableTileType);
     expect(defaultTable.isImported).toBe(true);
     expect(defaultTable.dataSet.attributes.length).toBe(2);
     expect(defaultTable.dataSet.cases.length).toBe(0);
@@ -58,7 +58,7 @@ describe("TableContent", () => {
             ]
           };
     const table = TableContentModel.create(importData as any);
-    expect(table.type).toBe(kTableToolID);
+    expect(table.type).toBe(kTableTileType);
     expect(table.isImported).toBe(true);
     expect(table.dataSet.name).toBe(kTableTitle);
     expect(table.dataSet.attributes.length).toBe(2);
@@ -76,7 +76,7 @@ describe("TableContent", () => {
             ]
           };
     const table = TableContentModel.create(importData as any);
-    expect(table.type).toBe(kTableToolID);
+    expect(table.type).toBe(kTableTileType);
     expect(table.isImported).toBe(true);
     expect(table.dataSet.name).toBe(kTableTitle);
     expect(table.dataSet.attributes.length).toBe(2);
@@ -98,7 +98,7 @@ describe("TableContent", () => {
       ]
     };
     const table = TableContentModel.create(importData);
-    expect(table.type).toBe(kTableToolID);
+    expect(table.type).toBe(kTableTileType);
     const xCol = table.dataSet.attrFromName("xCol");
     expect(xCol).not.toBeUndefined();
     if (xCol) {
@@ -132,7 +132,7 @@ describe("TableContent", () => {
   //   const metadata = TableMetadataModel.create({ id: "table-1" });
   //   table.doPostCreate?.(metadata);
 
-  //   expect(table.type).toBe(kTableToolID);
+  //   expect(table.type).toBe(kTableTileType);
   //   expect(table.isImported).toBe(true);
   //   expect(table.dataSet.name).toBe(kTableTitle);
   //   expect(table.dataSet.attributes.length).toBe(3);
@@ -160,7 +160,7 @@ describe("TableContent", () => {
   //   const metadata = TableMetadataModel.create({ id: "table-1" });
   //   table.doPostCreate!(metadata);
 
-  //   expect(table.type).toBe(kTableToolID);
+  //   expect(table.type).toBe(kTableTileType);
   //   expect(table.isImported).toBe(true);
   //   const _yAttr = table.dataSet.attrFromName("y");
   //   expect(_yAttr?.formula.display).toBe("xCol + $1");
@@ -201,7 +201,7 @@ describe("TableContent", () => {
           ];
     const snapshot = { changes: oldChanges.map(change => JSON.stringify(change)) };
     const table = TableContentModel.create(snapshot);
-    expect(table.type).toBe(kTableToolID);
+    expect(table.type).toBe(kTableTileType);
     expect(table.isImported).toBe(false);
     expect(table.dataSet.attributes.length).toBe(2);
     expect(table.dataSet.cases.length).toBe(3);
@@ -242,7 +242,7 @@ describe("TableContent", () => {
           ];
     const snapshot = { changes: changes.map(change => JSON.stringify(change)) };
     const table = TableContentModel.create(snapshot);
-    expect(table.type).toBe(kTableToolID);
+    expect(table.type).toBe(kTableTileType);
     expect(table.isImported).toBe(false);
     expect(table.dataSet.attributes.length).toBe(2);
     expect(table.dataSet.cases.length).toBe(3);

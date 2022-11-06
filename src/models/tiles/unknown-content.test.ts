@@ -1,5 +1,5 @@
 import { getSnapshot } from "mobx-state-tree";
-import { kUnknownToolID, UnknownContentModel } from "./tile-types";
+import { kUnknownTileType, UnknownContentModel } from "./tile-types";
 
 describe("UnknownContentModel", () => {
 
@@ -8,12 +8,12 @@ describe("UnknownContentModel", () => {
     const toolType = "Text";
     const toolContent = { type: toolType, text: "Some text" };
     let content = UnknownContentModel.create(toolContent as any);
-    expect(content.type).toBe(kUnknownToolID);
+    expect(content.type).toBe(kUnknownTileType);
     expect(content.original).toBe(JSON.stringify(toolContent));
 
     // can be created from UnknownToolModel snapshots
     content = UnknownContentModel.create(getSnapshot(content));
-    expect(content.type).toBe(kUnknownToolID);
+    expect(content.type).toBe(kUnknownTileType);
     expect(content.original).toBe(JSON.stringify(toolContent));
   });
 
@@ -22,12 +22,12 @@ describe("UnknownContentModel", () => {
     const toolType = "Geometry";
     const toolContent = { type: toolType, geometry: "Some Geometry" };
     let content = UnknownContentModel.create(toolContent as any);
-    expect(content.type).toBe(kUnknownToolID);
+    expect(content.type).toBe(kUnknownTileType);
     expect(content.original).toBe(JSON.stringify(toolContent));
 
     // can be created from UnknownToolModel snapshots
     content = UnknownContentModel.create(getSnapshot(content));
-    expect(content.type).toBe(kUnknownToolID);
+    expect(content.type).toBe(kUnknownTileType);
     expect(content.original).toBe(JSON.stringify(toolContent));
   });
 

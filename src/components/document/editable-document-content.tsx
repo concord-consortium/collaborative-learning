@@ -12,14 +12,14 @@ import { ToolbarComponent } from "../toolbar";
 import { EditableTileApiInterfaceRef, EditableTileApiInterfaceRefContext } from "../tiles/tile-api";
 import { DocumentModelType } from "../../models/document/document";
 import { ProblemDocument } from "../../models/document/document-types";
-import { ToolbarModelType } from "../../models/stores/problem-configuration";
+import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { WorkspaceMode } from "../../models/stores/workspace";
 
 import "./editable-document-content.scss";
 
 interface IToolbarProps {
   document: DocumentModelType;
-  toolbar: ToolbarModelType;
+  toolbar: IToolbarModel;
 }
 
 const DocumentToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) => {
@@ -30,7 +30,7 @@ const DocumentToolbar: React.FC<IToolbarProps> = ({ toolbar, ...others }) => {
   // do not affect another document's toolbar.
   // Currently the toolbar model is not modified, but it seems safer to do this.
   // The cloned model is stored in state so it isn't recreated on each render
-  const [toolbarModel] = useState<ToolbarModelType>(() => {
+  const [toolbarModel] = useState<IToolbarModel>(() => {
       // The new model is passed the appIcons as its environment, so the model
       // can lookup an app level Icon if needed.
       return clone(toolbar, { appIcons: appConfig.appIcons });
@@ -89,7 +89,7 @@ export interface IProps {
   isPrimary: boolean;
   document: DocumentModelType;
   showPlayback?: boolean;
-  toolbar?: ToolbarModelType;
+  toolbar?: IToolbarModel;
   readOnly?: boolean;
 }
 export const EditableDocumentContent: React.FC<IProps> = props => {

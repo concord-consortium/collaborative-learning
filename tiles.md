@@ -13,17 +13,17 @@ CLUE document content is made up of one or more tiles which are displayed in row
 - Text: a tile that allows users to enter/edit/display styled text
 - Dataflow (formerly dataflow branch only): a tile that allows users to create flow programs. The Dataflow Tile was only available on dataflow branches (e.g., https://github.com/concord-consortium/collaborative-learning/tree/dataflow or https://github.com/concord-consortium/collaborative-learning/tree/178982058-dataflow-tile) but has now been made available as part of the main application.
 
-Each tile type has a unique tile id. Here is an example of a tile id definition:
+Each tile type has a unique tile type constant. Here is an example of a tile type definition:
 ```typescript
-export const kPlaceholderToolID = "Placeholder";
+export const kPlaceholderTileType = "Placeholder";
 ```
-These ids are used in several places. They are defined when the tile is registered with `registerTileContentInfo`.
+These type constants are used in several places. They are used when the tile is registered with `registerTileContentInfo` and `registerTileComponentInfo`.
 
 ## Tile Models
 Each tile defines a content model. This content model is specified as a MobX State Tree (MST) model and contains properties and actions specific to the tile. Each of the tile content models is unioned together to define the `TileContentUnion` type.
 ```typescript
 export const TileContentUnion = types.union(
-                                  { dispatcher: toolFactory },
+                                  { dispatcher: tileContentFactory },
                                   PlaceholderContentModel,
                                   GeometryContentModel,
                                   ImageContentModel,
@@ -95,7 +95,7 @@ export interface ITileProps extends ITileBaseProps, IRegisterTileApiProps {
 }
 ```
 
-The `on*` properties are a way for the tool component tell the host things like wanting a larger height.
+The `on*` properties are a way for the tool component to communicate with the host, e.g. to request a change in height.
 
 ## ITileApi
 A tile API allows tile components to implement one or more functions that can be called generically for any tile that supports the ITileApi without knowing the specific tile type. This can be thought of as the beginnings of a generic plugin API model for tiles. The tile API interface is defined as follows:

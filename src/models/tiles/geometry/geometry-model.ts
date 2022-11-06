@@ -1,6 +1,6 @@
 import { difference, intersection } from "lodash";
 import { applySnapshot, getSnapshot, getType, Instance, SnapshotIn, types } from "mobx-state-tree";
-import { kDefaultBoardModelInputProps, kGeometryToolID } from "./geometry-types";
+import { kDefaultBoardModelInputProps, kGeometryTileType } from "./geometry-types";
 import { uniqueId } from "../../../utilities/js-utils";
 import { typeField } from "../../../utilities/mst-utils";
 import { TileContentModel } from "../tile-types";
@@ -344,7 +344,7 @@ export type GeometryObjectModelUnion = CommentModelType | ImageModelType | Movab
 export const GeometryBaseContentModel = TileContentModel
   .named("GeometryBaseContent")
   .props({
-    type: types.optional(types.literal(kGeometryToolID), kGeometryToolID),
+    type: types.optional(types.literal(kGeometryTileType), kGeometryTileType),
     board: types.maybe(BoardModel),
     bgImage: types.maybe(ImageModel),
     objects: types.map(types.union(CommentModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel)),

@@ -1,8 +1,8 @@
 import { IObservableArray, observable } from "mobx";
 import { IAnyStateTreeNode } from "mobx-state-tree";
 import { GeometryContentModelType } from "./geometry/geometry-content";
-import { kGeometryToolID } from "./geometry/geometry-types";
-import { kTableToolID, TableContentModelType } from "./table/table-content";
+import { kGeometryTileType } from "./geometry/geometry-types";
+import { kTableTileType, TableContentModelType } from "./table/table-content";
 import { getRowLabel, ILinkProperties, IRowLabel, ITableLinkProperties } from "./table-link-types";
 import { IDataSet } from "../data/data-set";
 import { getTileContentById } from "../../utilities/mst-utils";
@@ -103,17 +103,17 @@ export function getTableLinkColors(tableId?: string) {
 
 export function isLinkableTable(client: IAnyStateTreeNode, tableId: string) {
   const content = getTileContentById(client, tableId);
-  return content?.type === kTableToolID;
+  return content?.type === kTableTileType;
 }
 
 export function getTableContent(requester: IAnyStateTreeNode, tableId: string) {
   const content = getTileContentById(requester, tableId);
-  return content?.type === kTableToolID ? content as TableContentModelType : undefined;
+  return content?.type === kTableTileType ? content as TableContentModelType : undefined;
 }
 
 export function getGeometryContent(requester: IAnyStateTreeNode, geometryId: string) {
   const content = getTileContentById(requester, geometryId);
-  return content?.type === kGeometryToolID ? content as GeometryContentModelType : undefined;
+  return content?.type === kGeometryTileType ? content as GeometryContentModelType : undefined;
 }
 
 export function requestGeometryLinkToTable(tableContent: TableContentModelType, geometryId: string) {

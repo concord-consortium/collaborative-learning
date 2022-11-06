@@ -12,11 +12,11 @@ import {
   ESegmentLabelOption, JXGChange, JXGCoordPair, JXGImageParents, JXGObjectType, JXGProperties
 } from "./jxg-changes";
 import { getMovableLinePointIds, kGeometryDefaultHeight, kGeometryDefaultWidth } from "./jxg-types";
-import { kDefaultBoardModelOutputProps, kGeometryToolID } from "./geometry-types";
+import { kDefaultBoardModelOutputProps, kGeometryTileType } from "./geometry-types";
 import { defaultGeometryBoardChange } from "./geometry-import";
 
 export const isGeometryChangesContent = (snap: any) => {
-  return (snap?.type === kGeometryToolID) && Array.isArray(snap.changes);
+  return (snap?.type === kGeometryTileType) && Array.isArray(snap.changes);
 };
 
 export const convertChangesToModel = (changes: JXGChange[]) => {

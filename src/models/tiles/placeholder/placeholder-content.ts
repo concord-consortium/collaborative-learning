@@ -1,12 +1,12 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
 import { TileContentModel } from "../tile-types";
 
-export const kPlaceholderToolID = "Placeholder";
+export const kPlaceholderTileType = "Placeholder";
 
 export const PlaceholderContentModel = TileContentModel
   .named("PlaceholderContent")
   .props({
-    type: types.optional(types.literal(kPlaceholderToolID), kPlaceholderToolID),
+    type: types.optional(types.literal(kPlaceholderTileType), kPlaceholderTileType),
     sectionId: ""
   })
   .actions(self => ({
@@ -19,5 +19,5 @@ export type PlaceholderContentModelType = Instance<typeof PlaceholderContentMode
 export type PlaceholderContentSnapshotOutType = SnapshotOut<typeof PlaceholderContentModel>;
 
 export function isPlaceholderContent(content: any): content is PlaceholderContentModelType {
-  return content?.type === kPlaceholderToolID;
+  return content?.type === kPlaceholderTileType;
 }

@@ -1,4 +1,4 @@
-import { TextContentModel, kTextToolID } from "./text-content";
+import { TextContentModel, kTextTileType } from "./text-content";
 import { Value, ValueJSON } from "slate";
 import Plain from "slate-plain-serializer";
 import { registerTextPluginInfo } from "./text-plugin-info";
@@ -39,7 +39,7 @@ describe("TextContentModel", () => {
 
   it("accepts default arguments on creation", () => {
     const model = TextContentModel.create();
-    expect(model.type).toBe(kTextToolID);
+    expect(model.type).toBe(kTextTileType);
     expect(model.text).toBe("");
     expect(model.format).toBeUndefined();
   });
@@ -48,10 +48,10 @@ describe("TextContentModel", () => {
     const text = "Some text";
     const format = "plain";
     const model = TextContentModel.create({
-                    type: kTextToolID,
+                    type: kTextTileType,
                     text, format
                   });
-    expect(model.type).toBe(kTextToolID);
+    expect(model.type).toBe(kTextTileType);
     expect(model.text).toBe(text);
     expect(model.joinText).toBe(text);
     expect(model.format).toBe(format);

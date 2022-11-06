@@ -4,13 +4,13 @@ import { reaction } from "mobx";
 import { DQRoot, DQNode } from "@concord-consortium/diagram-view";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tiles/tile-content-info";
 import { TileContentModel } from "../../models/tiles/tile-types";
-import { kDiagramToolID, kDiagramToolStateVersion } from "./diagram-types";
+import { kDiagramTileType, kDiagramToolStateVersion } from "./diagram-types";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 
 export const DiagramContentModel = TileContentModel
   .named("DiagramTool")
   .props({
-    type: types.optional(types.literal(kDiagramToolID), kDiagramToolID),
+    type: types.optional(types.literal(kDiagramTileType), kDiagramTileType),
     version: types.optional(types.literal(kDiagramToolStateVersion), kDiagramToolStateVersion),
     root: types.optional(DQRoot, getSnapshot(DQRoot.create())),
   })

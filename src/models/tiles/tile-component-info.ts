@@ -2,7 +2,7 @@ import React, { SVGProps } from "react";
 import { ITileProps } from "../../components/tiles/tile-component";
 
 export interface ITileComponentInfo {
-  id: string;
+  type: string;
   Component: React.ComponentType<ITileProps>;
   tileEltClass: string;
   Icon?: React.FC<SVGProps<SVGSVGElement>>;
@@ -21,12 +21,12 @@ const gTileComponentInfoMap = new Map<string, ITileComponentInfo>();
 
 export function registerTileComponentInfo(tileComponentInfo: ITileComponentInfo) {
   // toLowerCase() for legacy support of tool names
-  gTileComponentInfoMap.set(tileComponentInfo.id.toLowerCase(), tileComponentInfo);
+  gTileComponentInfoMap.set(tileComponentInfo.type.toLowerCase(), tileComponentInfo);
 }
 
-// Tool id, e.g. kDrawingToolID, kGeometryToolID, etc.
+// Tool id, e.g. kDrawingTileType, kGeometryTileType, etc.
 // undefined is supported so callers do not need to check the id before passing it in
-export function getTileComponentInfo(id?: string) {
+export function getTileComponentInfo(type?: string) {
   // toLowerCase() for legacy support of tool names
-  return id ? gTileComponentInfoMap.get(id.toLowerCase()) : undefined;
+  return type ? gTileComponentInfoMap.get(type.toLowerCase()) : undefined;
 }

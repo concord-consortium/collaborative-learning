@@ -19,7 +19,7 @@ export interface IDefaultContentOptions {
 }
 
 export interface ITileContentInfo {
-  id: string;
+  type: string;
   modelClass: typeof TileContentModel;
   defaultContent: (options?: IDefaultContentOptions) => ITileContentModel;
   titleBase?: string;
@@ -34,24 +34,24 @@ const gTileContentInfoMap: Record<string, ITileContentInfo> = {};
 
 export function registerTileContentInfo(toolContentInfo: ITileContentInfo) {
   // toLowerCase() for legacy support of tool names
-  gTileContentInfoMap[toolContentInfo.id.toLowerCase()] = toolContentInfo;
+  gTileContentInfoMap[toolContentInfo.type.toLowerCase()] = toolContentInfo;
 }
 
-// ToolContent id, e.g. kDrawingToolID, kGeometryToolID, etc.
+// ToolContent type, e.g. kDrawingTileType, kGeometryTileType, etc.
 // undefined is supported so callers do not need to check the id before passing
 // it in.
-export function getTileContentInfo(id?: string) {
+export function getTileContentInfo(type?: string) {
   // toLowerCase() for legacy support of tool names
-  return id ? gTileContentInfoMap[id.toLowerCase()] : undefined;
+  return type ? gTileContentInfoMap[type.toLowerCase()] : undefined;
 }
 
 export function getTileContentModels() {
   return Object.values(gTileContentInfoMap).map(info => info.modelClass);
 }
 
-export function getTileTypeIds() {
+export function getTileTypes() {
   // the keys are toLowerCased(), so we look up the actual id
-  return Object.values(gTileContentInfoMap).map(info => info.id);
+  return Object.values(gTileContentInfoMap).map(info => info.type);
 }
 
 export interface ITileExportOptions {

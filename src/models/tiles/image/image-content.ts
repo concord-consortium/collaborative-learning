@@ -8,7 +8,7 @@ import { TileContentModel } from "../tile-types";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 
-export const kImageToolID = "Image";
+export const kImageTileType = "Image";
 
 // This is only used directly by tests
 export function defaultImageContent(options?: IDefaultContentOptions) {
@@ -18,7 +18,7 @@ export function defaultImageContent(options?: IDefaultContentOptions) {
 export const ImageContentModel = TileContentModel
   .named("ImageTool")
   .props({
-    type: types.optional(types.literal(kImageToolID), kImageToolID),
+    type: types.optional(types.literal(kImageTileType), kImageTileType),
     url: types.maybe(types.string),
     filename: types.maybe(types.string),
   })

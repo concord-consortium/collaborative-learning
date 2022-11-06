@@ -73,14 +73,14 @@ const TestTileComponent: React.FC<ITileProps> = () => {
 };
 
 registerTileContentInfo({
-  id: "TestTile",
+  type: "TestTile",
   modelClass: TestTile,
   defaultContent(options) {
     return TestTile.create();
   }
 });
 registerTileComponentInfo({
-  id: "TestTile",
+  type: "TestTile",
   Component: TestTileComponent,
   tileEltClass: "test-tile"
 });

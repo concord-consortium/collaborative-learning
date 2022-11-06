@@ -6,7 +6,7 @@ import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tile
 import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-types";
-import { kDrawingStateVersion, kDrawingToolID } from "./drawing-types";
+import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
@@ -47,7 +47,7 @@ export interface DrawingObjectMove {
 export const DrawingContentModel = TileContentModel
   .named("DrawingTool")
   .props({
-    type: types.optional(types.literal(kDrawingToolID), kDrawingToolID),
+    type: types.optional(types.literal(kDrawingTileType), kDrawingTileType),
     version: types.optional(types.literal(kDrawingStateVersion), kDrawingStateVersion),
     objects: types.array(DrawingObjectMSTUnion),
     stroke: DefaultToolbarSettings.stroke,

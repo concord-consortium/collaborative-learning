@@ -1,6 +1,6 @@
 import { kGeometryDefaultPixelsPerUnit, kGeometryDefaultXAxisMin, kGeometryDefaultYAxisMin } from "./jxg-types";
 
-export const kGeometryToolID = "Geometry";
+export const kGeometryTileType = "Geometry";
 
 export const kDefaultBoardModelInputProps = {
   xAxis: { min: kGeometryDefaultXAxisMin },

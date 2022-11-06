@@ -18,7 +18,7 @@ import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-u
 import { Logger, LogEventName } from "../../../lib/logger";
 import { uniqueId } from "../../../utilities/js-utils";
 
-export const kTableToolID = "Table";
+export const kTableTileType = "Table";
 export const kCaseIdName = "__id__";
 
 export const kTableDefaultHeight = 160;
@@ -147,7 +147,7 @@ export interface TableMetadataModelType extends Instance<typeof TableMetadataMod
 export const TableContentModel = TileContentModel
   .named("TableContent")
   .props({
-    type: types.optional(types.literal(kTableToolID), kTableToolID),
+    type: types.optional(types.literal(kTableTileType), kTableTileType),
     isImported: false,
     // Used to store the dataset when importing legacy formats
     importedDataSet: types.optional(DataSet, () => DataSet.create()),

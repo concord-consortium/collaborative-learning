@@ -1,6 +1,6 @@
 import { registerTileComponentInfo } from "./tile-component-info";
 import { registerTileContentInfo } from "./tile-content-info";
-import { kUnknownToolID, UnknownContentModel, IUnknownContentModel } from "./tile-types";
+import { kUnknownTileType, UnknownContentModel, IUnknownContentModel } from "./tile-types";
 import PlaceholderTileComponent from "../../components/tiles/placeholder/placeholder-tile";
 
 export function defaultContent(): IUnknownContentModel {
@@ -8,13 +8,13 @@ export function defaultContent(): IUnknownContentModel {
 }
 
 registerTileContentInfo({
-  id: kUnknownToolID,
+  type: kUnknownTileType,
   modelClass: UnknownContentModel,
   defaultContent
 });
 
 registerTileComponentInfo({
-  id: kUnknownToolID,
+  type: kUnknownTileType,
   Component: PlaceholderTileComponent,
   tileEltClass: "placeholder-tile",
   tileHandlesOwnSelection: true

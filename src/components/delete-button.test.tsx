@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import Modal from "react-modal";
 import { ModalProvider } from "react-modal-hook";
-import { ToolButtonModel } from "../models/tiles/tool-button";
+import { ToolbarButtonModel } from "../models/tiles/toolbar-button";
 import { DeleteButton } from "./delete-button";
 
 describe("DeleteButton", () => {
@@ -28,7 +28,7 @@ describe("DeleteButton", () => {
           isDefault: false,
           isTileTool: false
         };
-  const toolButton = ToolButtonModel.create(buttonConfig);
+  const toolButton = ToolbarButtonModel.create(buttonConfig);
 
   it("renders when disabled", () => {
     render(

@@ -6,8 +6,7 @@ import { ITileMetadataModel } from "./tile-metadata";
 import { tileModelHooks } from "./tile-model-hooks";
 
 /**
- * A dynamic union of tool/tile content models. Its typescript type is
- * `TileContentModel`.
+ * A dynamic union of tile content models. Its typescript type is `TileContentModel`.
  *
  * This uses MST's `late()`. It appears that `late()` runs the first time the
  * union is actually used by MST. For example to deserialize a snapshot or to
@@ -20,22 +19,22 @@ import { tileModelHooks } from "./tile-model-hooks";
  */
 export const TileContentUnion = types.late<typeof TileContentModel>(() => {
   const contentModels = getTileContentModels();
-  return types.union({ dispatcher: toolFactory }, ...contentModels) as typeof TileContentModel;
+  return types.union({ dispatcher: tileContentFactory }, ...contentModels) as typeof TileContentModel;
 });
 
-export const kUnknownToolID = "Unknown";
+export const kUnknownTileType = "Unknown";
 
 export interface ITileEnvironment {
   sharedModelManager?: ISharedModelManager;
 }
 
-// Generic "super class" of all tool content models
+// Generic "super class" of all tile content models
 export const TileContentModel = types.model("TileContentModel", {
     // The type field has to be optional because the typescript type created from the sub models
     // is an intersection ('&') of this TileContentModel and the sub model.  If this was just:
     //   type: types.string
     // then typescript has errors because the intersection logic means the type field is
-    // required when creating a content model. And in many cases these tool content models
+    // required when creating a content model. And in many cases these tile content models
     // are created without passing a type.
     //
     // It could be changed to
@@ -47,7 +46,7 @@ export const TileContentModel = types.model("TileContentModel", {
     //
     // Since this is optional, it needs a default value, and Unknown seems like the
     // best option for this.
-    // I verified that a specific tool content models could not be constructed with:
+    // I verified that a specific tile content model could not be constructed with:
     //   ImageContentModel.create({ type: "Unknown" }).
     // That line causes a typescript error.
     // I think it is because the image content type is more specific with its use of
@@ -55,7 +54,7 @@ export const TileContentModel = types.model("TileContentModel", {
     //
     // Perhaps there is some better way to define this so that there would be an error
     // if a sub type does not override it.
-    type: types.optional(types.string, kUnknownToolID)
+    type: types.optional(types.string, kUnknownTileType)
   })
   .views(self => ({
     get tileEnv() {
@@ -98,13 +97,13 @@ export const _private: IPrivate = {
   metadata: {}
 };
 
-export function isToolType(type: string) {
+export function isRegisteredTileType(type: string) {
   return !!getTileContentInfo(type);
 }
 
-export function toolFactory(snapshot: any) {
-  const toolType: string | undefined = snapshot?.type;
-  return getTileContentInfo(toolType)?.modelClass || UnknownContentModel;
+export function tileContentFactory(snapshot: any) {
+  const tileType: string | undefined = snapshot?.type;
+  return getTileContentInfo(tileType)?.modelClass || UnknownContentModel;
 }
 
 export function findMetadata(type: string, id: string) {
@@ -117,25 +116,25 @@ export function findMetadata(type: string, id: string) {
   return _private.metadata[id];
 }
 
-// The UnknownContentModel has to be defined in this tool-types module because it both
-// "extends" TileContentModel and UnknownContentModel is used by the toolFactory function
+// The UnknownContentModel has to be defined in this tile-types module because it both
+// "extends" TileContentModel and UnknownContentModel is used by the tileContentFactory function
 // above. Because of this it is a kind of circular dependency.
 // If UnknownContentModel is moved to its own module this circular dependency causes an error.
 // If they are in the same module then this isn't a problem.
 //
 // There is a still an "unknown-content" module, so that module can
-// register the tool without adding a circular dependency on tool-content-info here.
+// register the tile without adding a circular dependency on tile-content-info here.
 export const UnknownContentModel = TileContentModel
   .named("UnknownContentModel")
   .props({
-    type: types.optional(types.literal(kUnknownToolID), kUnknownToolID),
+    type: types.optional(types.literal(kUnknownTileType), kUnknownTileType),
     original: types.maybe(types.string)
   })
   .preProcessSnapshot(snapshot => {
     const type = snapshot?.type;
-    return type && (type !== kUnknownToolID)
+    return type && (type !== kUnknownTileType)
             ? {
-              type: kUnknownToolID,
+              type: kUnknownTileType,
               original: JSON.stringify(snapshot)
             }
             : snapshot;

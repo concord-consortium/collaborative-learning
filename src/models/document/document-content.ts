@@ -1,7 +1,7 @@
 import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn, getType, getEnv, getParent } from "mobx-state-tree";
 import { PlaceholderContentModel } from "../tiles/placeholder/placeholder-content";
-import { kTextToolID } from "../tiles/text/text-content";
+import { kTextTileType } from "../tiles/text/text-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { ITileContentModel } from "../tiles/tile-types";
 import {
@@ -765,7 +765,7 @@ export const DocumentContentModel = types
         if (addSidecarNotes) {
           const { rowId } = tileInfo;
           const row = self.rowMap.get(rowId);
-          const textContentInfo = getTileContentInfo(kTextToolID);
+          const textContentInfo = getTileContentInfo(kTextTileType);
           if (row && textContentInfo) {
             const tile = TileModel.create({ content: textContentInfo.defaultContent() });
             self.insertNewTileInRow(tile, row, 1);

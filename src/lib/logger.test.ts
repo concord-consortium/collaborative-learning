@@ -21,8 +21,8 @@ import { UIModel } from "../models/stores/ui";
 import { ENavTab } from "../models/view/nav-tabs";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTiles } from "../register-tiles";
-registerTiles(["Geometry", "Text"]);
+import { registerTileTypes } from "../register-tiles";
+registerTileTypes(["Geometry", "Text"]);
 
 const investigation = InvestigationModel.create({
   ordinal: 1,

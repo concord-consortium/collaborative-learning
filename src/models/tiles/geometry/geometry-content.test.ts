@@ -7,7 +7,7 @@ import {
   CommentModel, defaultBoard, ImageModel, MovableLineModel, PointModel, PolygonModel,
   PolygonModelType, segmentIdFromPointIds, VertexAngleModel
 } from "./geometry-model";
-import { kGeometryToolID } from "./geometry-types";
+import { kGeometryTileType } from "./geometry-types";
 import { ESegmentLabelOption, JXGChange } from "./jxg-changes";
 import { isPointInPolygon, getPointsForVertexAngle, getPolygonEdge } from "./jxg-polygon";
 import { canSupportVertexAngle, getVertexAngle, updateVertexAnglesFromObjects } from "./jxg-vertex-angle";
@@ -18,8 +18,8 @@ import {
 import { TileModel, ITileModel } from "../tile-model";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTiles } from "../../../register-tiles";
-registerTiles(["Geometry"]);
+import { registerTileTypes } from "../../../register-tiles";
+registerTileTypes(["Geometry"]);
 
 // Need to mock this so the placeholder that is added to the cache
 // has dimensions
@@ -171,14 +171,14 @@ describe("GeometryContent", () => {
 
   it("can create with default properties", () => {
     const content = GeometryContentModel.create();
-    expect(getSnapshot(content)).toEqual({ type: kGeometryToolID, board: defaultBoard(), objects: {} });
+    expect(getSnapshot(content)).toEqual({ type: kGeometryTileType, board: defaultBoard(), objects: {} });
 
     destroy(content);
   });
 
   it("can create with authored properties", () => {
     const authored = {
-            type: kGeometryToolID,
+            type: kGeometryTileType,
             board: {
               properties: {
                 axisNames: ["authorX", "authorY"]
@@ -188,7 +188,7 @@ describe("GeometryContent", () => {
           };
     const content = GeometryContentModel.create(authored as any);
     expect(getSnapshot(content)).toEqual({
-      type: kGeometryToolID,
+      type: kGeometryTileType,
       board: {
         xAxis: { name: "authorX", min: kGeometryDefaultXAxisMin, unit: kGeometryDefaultPixelsPerUnit },
         yAxis: { name: "authorY", min: kGeometryDefaultYAxisMin, unit: kGeometryDefaultPixelsPerUnit }

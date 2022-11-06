@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { useFeatureFlag } from "../../../hooks/use-stores";
-import { kTableToolID } from "../../../models/tiles/table/table-content";
+import { kTableTileType } from "../../../models/tiles/table/table-content";
 import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
 import {
   addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
@@ -44,7 +44,7 @@ interface IUseLinkableTableTilesProps {
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
 }
 const useLinkableTableTiles = ({ onRequestTilesOfType }: IUseLinkableTableTilesProps) => {
-  const tableTiles = useCurrent(onRequestTilesOfType(kTableToolID));
+  const tableTiles = useCurrent(onRequestTilesOfType(kTableTileType));
   // add default title if there isn't a title
   return tableTiles.current
           .map((tileInfo, i) => ({ id: tileInfo.id, title: tileInfo.title || `Table ${i + 1}` }));

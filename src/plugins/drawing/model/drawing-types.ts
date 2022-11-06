@@ -1,7 +1,7 @@
 import { DrawingObjectSnapshot } from "../objects/drawing-object";
 import { Point } from "./drawing-basic-types";
 
-export const kDrawingToolID = "Drawing";
+export const kDrawingTileType = "Drawing";
 
 // This version string is stored in the state of the tile.
 // Without this version, the model will try to convert the state.

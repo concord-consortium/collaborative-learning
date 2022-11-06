@@ -10,7 +10,7 @@ import { TileContentModel } from "../tile-types";
 import { SharedModelType } from "../../shared/shared-model";
 import { getAllTextPluginInfos } from "./text-plugin-info";
 
-export const kTextToolID = "Text";
+export const kTextTileType = "Text";
 
 export function defaultTextContent() {
   return TextContentModel.create();
@@ -19,9 +19,9 @@ export function defaultTextContent() {
 const MarkdownSerializer = new Markdown();
 
 export const TextContentModel = TileContentModel
-  .named("TextTool")
+  .named("TextContent")
   .props({
-    type: types.optional(types.literal(kTextToolID), kTextToolID),
+    type: types.optional(types.literal(kTextTileType), kTextTileType),
     text: types.optional(types.union(types.string, types.array(types.string)), ""),
     // e.g. "html", "markdown", "slate", "quill", empty => plain text
     format: types.maybe(types.string)

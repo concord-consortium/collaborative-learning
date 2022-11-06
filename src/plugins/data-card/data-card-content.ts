@@ -1,6 +1,6 @@
 import { reaction } from "mobx";
 import { addDisposer, getType, Instance, types } from "mobx-state-tree";
-import { kDataCardToolID, kDefaultLabel, kDefaultLabelPrefix } from "./data-card-types";
+import { kDataCardTileType, kDefaultLabel, kDefaultLabelPrefix } from "./data-card-types";
 import { withoutUndo } from "../../models/history/tree-monitor";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../models/tiles/tile-metadata";
@@ -31,7 +31,7 @@ export function defaultDataCardContent(props?: IDefaultContentOptions): DataCard
 export const DataCardContentModel = TileContentModel
   .named("DataCardTool")
   .props({
-    type: types.optional(types.literal(kDataCardToolID), kDataCardToolID),
+    type: types.optional(types.literal(kDataCardTileType), kDataCardTileType),
     caseIndex: 0
   })
   .volatile(self => ({

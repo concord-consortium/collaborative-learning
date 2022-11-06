@@ -23,6 +23,6 @@ const gTileRegistration: Record<string, () => void> = {
   "Text": () => import(/* webpackChunkName: "Text" */"./models/tiles/text/text-registration")
 };
 
-export function registerTiles(tileTypeIds: string[]) {
+export function registerTileTypes(tileTypeIds: string[]) {
   return Promise.all(tileTypeIds.map(id => gTileRegistration[id]?.()));
 }

@@ -111,14 +111,14 @@ const TestTileComponent: React.FC<ITileProps> = () => {
 };
 
 registerTileContentInfo({
-  id: "TestTile",
+  type: "TestTile",
   modelClass: TestTile,
   defaultContent(options) {
     throw new Error("Function not implemented.");
   }
 });
 registerTileComponentInfo({
-  id: "TestTile",
+  type: "TestTile",
   Component: TestTileComponent,
   tileEltClass: "test-tile"
 });

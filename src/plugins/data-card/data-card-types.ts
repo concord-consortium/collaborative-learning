@@ -1,4 +1,4 @@
-export const kDataCardToolID = "DataCard";
+export const kDataCardTileType = "DataCard";
 
 export const kDataCardDefaultHeight = 320;
 

@@ -1,8 +1,8 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-import { ToolButtonModel } from "../models/tiles/tool-button";
-import { ToolButtonComponent } from "./tool-button";
+import { ToolbarButtonModel } from "../models/tiles/toolbar-button";
+import { ToolbarButtonComponent } from "./toolbar-button";
 
 // This is needed so the icon for the text tool can be found
 import "../register-tiles";
@@ -24,7 +24,7 @@ describe("ToolButtonComponent", () => {
   });
 
   it("renders disabled select tool", () => {
-    const toolButton = ToolButtonModel.create({
+    const toolButton = ToolbarButtonModel.create({
       id: "select",
       title: "Select",
       iconId: "icon-select-tool",
@@ -33,7 +33,7 @@ describe("ToolButtonComponent", () => {
     });
 
     render(
-      <ToolButtonComponent
+      <ToolbarButtonComponent
         toolButton={toolButton}
         isActive={false}
         isDisabled={true}
@@ -53,7 +53,7 @@ describe("ToolButtonComponent", () => {
   });
 
   it("renders enabled text tool", () => {
-    const toolButton = ToolButtonModel.create({
+    const toolButton = ToolbarButtonModel.create({
       id: "Text",
       title: "Text",
       isDefault: false,
@@ -61,7 +61,7 @@ describe("ToolButtonComponent", () => {
     });
 
     render(
-      <ToolButtonComponent
+      <ToolbarButtonComponent
         toolButton={toolButton}
         isActive={false}
         isDisabled={false}

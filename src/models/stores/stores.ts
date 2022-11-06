@@ -10,7 +10,7 @@ import { GroupsModel, GroupsModelType } from "./groups";
 import { ClassModel, ClassModelType } from "./class";
 import { DB } from "../../lib/db";
 import { getUserContext } from "../../hooks/use-user-context";
-import { registerTiles } from "../../register-tiles";
+import { registerTileTypes } from "../../register-tiles";
 import { DemoModelType, DemoModel } from "./demo";
 import { SupportsModel, SupportsModelType } from "./supports";
 import { DocumentsModelType, DocumentsModel, createDocumentsModelWithRequiredDocuments } from "./documents";
@@ -124,9 +124,9 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   stores.appConfig.setConfigs([unit.config || {}, _investigation?.config || {}, _problem?.config || {}]);
 
   // load/initialize the necessary tools
-  const { toolbar = [], tools = [] } = stores.appConfig;
-  const unitToolIds = new Set([...toolbar.map(tool => tool.id), ...tools]);
-  await registerTiles([...unitToolIds]);
+  const { toolbar = [], tools: tileTypes = [] } = stores.appConfig;
+  const unitTileTypes = new Set([...toolbar.map(button => button.id), ...tileTypes]);
+  await registerTileTypes([...unitTileTypes]);
 
   // read the unit content with full contents now that we have tools
   stores.unit = UnitModel.create(unitJson);

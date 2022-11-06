@@ -104,13 +104,13 @@ const TestTile = TileContentModel
     },
     updateCounterAsync: flow(function *updateCounterAsync(){
       self.counter += 1;
-      yield wait(20);
+      yield wait(50); // intermittent failures with shorter waits
       self.counter += 1;
     }),
     updateCounterWithoutUndoAsync: flow(function *updateCounterWithoutUndoAsync(){
       withoutUndo();
       self.counter += 1;
-      yield wait(20);
+      yield wait(50); // intermittent failures with shorter waits
       self.counter += 1;
     }),
     setChildValue(_value: string){
@@ -124,14 +124,14 @@ const TestTileComponent: React.FC<ITileProps> = () => {
 };
 
 registerTileContentInfo({
-  id: "TestTile",
+  type: "TestTile",
   modelClass: TestTile,
   defaultContent(options) {
     return TestTile.create();
   }
 });
 registerTileComponentInfo({
-  id: "TestTile",
+  type: "TestTile",
   Component: TestTileComponent,
   tileEltClass: "test-tile"
 });
@@ -336,11 +336,11 @@ it("records a async tile change as one history event with one TreeRecordEntry", 
   ]);
 });
 
-it("records a async tile change and an interleaved history event with 2 entries", async () => {
+it("records an async tile change and an interleaved history event with 2 entries", async () => {
   const {tileContent, manager} = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
-  const updateCounterPromise =  tileContent.updateCounterAsync();
+  const updateCounterPromise = tileContent.updateCounterAsync();
   await wait(1);
   tileContent.setFlag(true);
 

@@ -5,7 +5,7 @@ import React from "react";
 import { ModalProvider } from "react-modal-hook";
 import { createDocumentModel } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
-import { ToolbarModel, ToolbarModelSnapshot } from "../models/stores/problem-configuration";
+import { ToolbarModel, IToolbarModelSnapshot } from "../models/stores/problem-configuration";
 import { specStores } from "../models/stores/spec-stores";
 import { ToolbarComponent } from "./toolbar";
 
@@ -24,7 +24,7 @@ describe("ToolbarComponent", () => {
                     content: content as any
                   });
 
-  const config: ToolbarModelSnapshot = [
+  const config: IToolbarModelSnapshot = [
     {
       id: "select",
       title: "Select",

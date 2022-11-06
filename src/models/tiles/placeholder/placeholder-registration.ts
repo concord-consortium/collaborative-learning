@@ -1,6 +1,6 @@
 import { registerTileComponentInfo } from "../tile-component-info";
 import { registerTileContentInfo } from "../tile-content-info";
-import { kPlaceholderToolID, PlaceholderContentModel } from "./placeholder-content";
+import { kPlaceholderTileType, PlaceholderContentModel } from "./placeholder-content";
 import PlaceholderTileComponent from "../../../components/tiles/placeholder/placeholder-tile";
 
 function defaultPlaceholderContent() {
@@ -8,13 +8,13 @@ function defaultPlaceholderContent() {
 }
 
 registerTileContentInfo({
-  id: kPlaceholderToolID,
+  type: kPlaceholderTileType,
   modelClass: PlaceholderContentModel,
   defaultContent: defaultPlaceholderContent
 });
 
 registerTileComponentInfo({
-  id: kPlaceholderToolID,
+  type: kPlaceholderTileType,
   Component: PlaceholderTileComponent,
   tileEltClass: "placeholder-tile",
   tileHandlesOwnSelection: true

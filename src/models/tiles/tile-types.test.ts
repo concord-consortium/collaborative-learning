@@ -1,14 +1,14 @@
-import { isToolType } from "./tile-types";
-import { kTextToolID } from "./text/text-content";
+import { isRegisteredTileType } from "./tile-types";
+import { kTextTileType } from "./text/text-content";
 
-// This is needed so isToolType knows about the text tool
-import { registerTiles } from "../../register-tiles";
-registerTiles([kTextToolID]);
+// This is needed so isRegisteredTileType knows about the text tool
+import { registerTileTypes } from "../../register-tiles";
+registerTileTypes([kTextTileType]);
 
 describe("ToolTypes", () => {
 
-  it("isToolType() works as expected", () => {
-    expect(isToolType(kTextToolID)).toBe(true);
-    expect(isToolType("foo")).toBe(false);
+  it("isRegisteredTileType() works as expected", () => {
+    expect(isRegisteredTileType(kTextTileType)).toBe(true);
+    expect(isRegisteredTileType("foo")).toBe(false);
   });
 });

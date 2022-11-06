@@ -2,7 +2,7 @@ import { getSnapshot } from "mobx-state-tree";
 import { omitUndefined } from "../../../utilities/test-utils";
 import { preprocessImportFormat } from "./geometry-import";
 import { BoardModel } from "./geometry-model";
-import { kDefaultBoardModelInputProps, kDefaultBoardModelOutputProps, kGeometryToolID } from "./geometry-types";
+import { kDefaultBoardModelInputProps, kDefaultBoardModelOutputProps, kGeometryTileType } from "./geometry-types";
 
 const getImageMock = jest.fn();
 jest.mock("../../image-map", () => ({
@@ -22,7 +22,7 @@ jest.mock("../../../utilities/js-utils", () => {
 });
 
 const kDefaultTestGeometryModel = {
-  type: kGeometryToolID,
+  type: kGeometryTileType,
   board: getSnapshot(BoardModel.create(kDefaultBoardModelInputProps)),
   objects: {}
 };
@@ -86,7 +86,7 @@ describe("Geometry import", () => {
       objects: []
     };
     expect(testImport(input)).toEqual({
-      type: kGeometryToolID,
+      type: kGeometryTileType,
       board: {
         xAxis: { name: "xName", label: "xLabel", min: 0, range: 24, unit: 20 },
         yAxis: { name: "yName", label: "yLabel", min: 0, range: 16, unit: 20 }
@@ -112,7 +112,7 @@ describe("Geometry import", () => {
       objects: []
     };
     expect(testImport(input)).toEqual({
-      type: kGeometryToolID,
+      type: kGeometryTileType,
       board: {
         xAxis: { name: "xName", label: "xLabel", min: 0, range: 24, unit: 20 },
         yAxis: { name: "yName", label: "yLabel", min: 0, range: 32, unit: 10 }
@@ -135,7 +135,7 @@ describe("Geometry import", () => {
     };
     jestSpyConsole("warn", spy => {
       expect(testImport(input)).toEqual({
-        type: kGeometryToolID,
+        type: kGeometryTileType,
         board: kDefaultBoardModelOutputProps,
         objects: {
           "testid-1": { type: "point", id: "testid-1", x: 0, y: 0 },
@@ -159,7 +159,7 @@ describe("Geometry import", () => {
       ]
     };
     expect(testImport(input)).toEqual({
-      type: kGeometryToolID,
+      type: kGeometryTileType,
       board: kDefaultBoardModelOutputProps,
       objects: {
         "testid-1": { type: "point", id: "testid-1", x: 0, y: 0 },
@@ -179,7 +179,7 @@ describe("Geometry import", () => {
       ]
     };
     expect(testImport(input)).toEqual({
-      type: kGeometryToolID,
+      type: kGeometryTileType,
       board: kDefaultBoardModelOutputProps,
       objects: {
         "testid-1": { type: "point", id: "testid-1", x: 0, y: 0 },
@@ -215,7 +215,7 @@ describe("Geometry import", () => {
       ]
     };
     expect(testImport(input)).toEqual({
-      type: kGeometryToolID,
+      type: kGeometryTileType,
       board: kDefaultBoardModelOutputProps,
       objects: {
         "testid-1": { type: "polygon", id: "testid-1", points: ["testid-2", "testid-3", "testid-4"] },
@@ -247,7 +247,7 @@ describe("Geometry import", () => {
       ]
     };
     expect(testImport(input)).toEqual({
-      type: kGeometryToolID,
+      type: kGeometryTileType,
       board: kDefaultBoardModelOutputProps,
       objects: {
         "testid-1": { type: "polygon", id: "testid-1", points: ["testid-2", "testid-3", "testid-4"] },
@@ -278,7 +278,7 @@ describe("Geometry import", () => {
       ]
     };
     expect(testImport(input)).toEqual({
-      type: kGeometryToolID,
+      type: kGeometryTileType,
       board: kDefaultBoardModelOutputProps,
       objects: {
         "v1": { type: "point", id: "v1", x: 0, y: 0 },
@@ -310,7 +310,7 @@ describe("Geometry import", () => {
       ]
     };
     expect(testImport(input)).toEqual({
-      type: kGeometryToolID,
+      type: kGeometryTileType,
       board: kDefaultBoardModelOutputProps,
       objects: {
         "testid-1": { type: "polygon", id: "testid-1", points: ["testid-2", "testid-3", "testid-4"] },
@@ -339,7 +339,7 @@ describe("Geometry import", () => {
       ]
     };
     expect(testImport(input)).toEqual({
-      type: kGeometryToolID,
+      type: kGeometryTileType,
       board: kDefaultBoardModelOutputProps,
       bgImage: { type: "image", id: "testid-1", x: 0, y: 0, url: "image/url", width: 10, height: 10 },
       objects: {}
@@ -359,7 +359,7 @@ describe("Geometry import", () => {
       ]
     };
     expect(testImport(input)).toEqual({
-      type: kGeometryToolID,
+      type: kGeometryTileType,
       board: kDefaultBoardModelOutputProps,
       bgImage: { type: "image", id: "testid-1", x: 0, y: 0, url: "image/url", width: 10, height: 10 },
       objects: {
@@ -382,7 +382,7 @@ describe("Geometry import", () => {
       ]
     };
     expect(testImport(input)).toEqual({
-      type: kGeometryToolID,
+      type: kGeometryTileType,
       board: kDefaultBoardModelOutputProps,
       bgImage: { type: "image", id: "i1", x: 0, y: 0, url: "image/url", width: 10, height: 10 },
       objects: {
@@ -414,7 +414,7 @@ describe("Geometry import", () => {
       ]
     };
     expect(testImport(input)).toEqual({
-      type: kGeometryToolID,
+      type: kGeometryTileType,
       board: kDefaultBoardModelOutputProps,
       objects: {
         "testid-1": { type: "movableLine", id: "testid-1",
@@ -444,7 +444,7 @@ describe("Geometry import", () => {
       ]
     };
     expect(testImport(input)).toEqual({
-      type: kGeometryToolID,
+      type: kGeometryTileType,
       board: kDefaultBoardModelOutputProps,
       objects: {
         "testid-1": { type: "movableLine", id: "testid-1",

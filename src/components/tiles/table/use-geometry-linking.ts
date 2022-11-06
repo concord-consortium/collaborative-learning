@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { useFeatureFlag } from "../../../hooks/use-stores";
-import { kGeometryToolID } from "../../../models/tiles/geometry/geometry-types";
+import { kGeometryTileType } from "../../../models/tiles/geometry/geometry-types";
 import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
 import {
   addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
@@ -46,7 +46,7 @@ interface IUseLinkableGeometryTilesProps {
   onRequestTilesOfType: (tileType: string) => ITileLinkMetadata[];
 }
 const useLinkableGeometryTiles = ({ model, onRequestTilesOfType }: IUseLinkableGeometryTilesProps) => {
-  const geometryTiles = useCurrent(onRequestTilesOfType(kGeometryToolID));
+  const geometryTiles = useCurrent(onRequestTilesOfType(kGeometryTileType));
   // add default title if there isn't a title
   return geometryTiles.current
           .map((tileInfo, i) => ({ id: tileInfo.id, title: tileInfo.title || `Graph ${i + 1}` }));

@@ -1,13 +1,13 @@
 import { registerTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { registerTileContentInfo } from "../../models/tiles/tile-content-info";
 import { DrawingContentModel, DrawingToolMetadataModel, defaultDrawingContent } from "./model/drawing-content";
-import { kDrawingToolID, kDrawingDefaultHeight } from "./model/drawing-types";
+import { kDrawingTileType, kDrawingDefaultHeight } from "./model/drawing-types";
 import DrawingToolComponent from "./components/drawing-tile";
 import DrawingToolIcon from "../../clue/assets/icons/draw-tool.svg";
 import { DrawingMigrator } from "./model/drawing-migrator";
 
 registerTileContentInfo({
-  id: kDrawingToolID,
+  type: kDrawingTileType,
   titleBase: "Drawing",
   // TODO: maybe there is a better way to do this kind of casting?
   //   The issue is that modelClass prop has a type of `typeof TileContentModel`,
@@ -22,7 +22,7 @@ registerTileContentInfo({
 });
 
 registerTileComponentInfo({
-  id: kDrawingToolID,
+  type: kDrawingTileType,
   Component: DrawingToolComponent,
   tileEltClass: "drawing-tool-tile",
   Icon: DrawingToolIcon

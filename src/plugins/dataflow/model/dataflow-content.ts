@@ -9,7 +9,7 @@ import { TileContentModel } from "../../../models/tiles/tile-types";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { getTileModel, setTileTitleFromContent } from "../../../models/tiles/tile-model";
 
-export const kDataflowToolID = "Dataflow";
+export const kDataflowTileType = "Dataflow";
 
 export function defaultDataflowContent(): DataflowContentModelType {
   return DataflowContentModel.create();
@@ -28,7 +28,7 @@ export const DEFAULT_PROGRAM_ZOOM = { dx: 0, dy: 0, scale: 1 };
 export const DataflowContentModel = TileContentModel
   .named("DataflowTool")
   .props({
-    type: types.optional(types.literal(kDataflowToolID), kDataflowToolID),
+    type: types.optional(types.literal(kDataflowTileType), kDataflowTileType),
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programDataRate: DEFAULT_DATA_RATE,
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),

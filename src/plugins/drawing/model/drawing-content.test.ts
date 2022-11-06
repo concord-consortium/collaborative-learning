@@ -3,7 +3,7 @@ import {
   createDrawingContent, defaultDrawingContent,
   DrawingContentModelSnapshot, DrawingToolMetadataModel
 } from "./drawing-content";
-import { kDrawingToolID } from "./drawing-types";
+import { kDrawingTileType } from "./drawing-types";
 import { DefaultToolbarSettings } from "./drawing-basic-types";
 import { AppConfigModel } from "../../../models/stores/app-config-model";
 import { ImageObject } from "../objects/image";
@@ -37,7 +37,7 @@ describe("computeStrokeDashArray", () => {
 describe('defaultDrawingContent', () => {
   it('should return content with no options', () => {
     const content = defaultDrawingContent();
-    expect(content.type).toBe(kDrawingToolID);
+    expect(content.type).toBe(kDrawingTileType);
     expect(content.stamps).toEqual([]);
     expect(content.objects).toEqual([]);
   });
@@ -45,7 +45,7 @@ describe('defaultDrawingContent', () => {
     const stamps = [{ url: "my/stamp/url", width: 10, height: 10 }];
     const appConfig = AppConfigModel.create({ config: { stamps } as any });
     const content = defaultDrawingContent({ appConfig });
-    expect(content.type).toBe(kDrawingToolID);
+    expect(content.type).toBe(kDrawingTileType);
     expect(content.stamps).toEqual(stamps);
     expect(content.objects).toEqual([]);
   });
@@ -80,7 +80,7 @@ describe("DrawingContentModel", () => {
 
   it("accepts default arguments on creation", () => {
     const model = createDrawingContentWithMetadata();
-    expect(model.type).toBe(kDrawingToolID);
+    expect(model.type).toBe(kDrawingTileType);
     expect(model.objects).toEqual([]);
     expect(model.isUserResizable).toBe(true);
     expect(model.selectedButton).toBe("select");
@@ -95,7 +95,7 @@ describe("DrawingContentModel", () => {
           fill, stroke, strokeDashArray, strokeWidth } as RectangleObjectSnapshot
       ]
     });
-    expect(model.type).toBe(kDrawingToolID);
+    expect(model.type).toBe(kDrawingTileType);
     expect(model.objects.length).toBe(1);
     expect(model.objects[0].type).toBe("rectangle");
   });

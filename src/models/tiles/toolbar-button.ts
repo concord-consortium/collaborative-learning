@@ -1,8 +1,8 @@
 import { getEnv, Instance, SnapshotOut, types } from "mobx-state-tree";
 import { getTileComponentInfo } from "./tile-component-info";
 
-const BaseToolButtonModel = types.model("BaseToolButton", {
-  id: types.string, // toolId in the case of tool buttons
+const BaseToolbarButtonModel = types.model("BaseToolbarButton", {
+  id: types.string, // tile type in the case of tile buttons
   title: types.string,
   isDefault: false,
 })
@@ -10,7 +10,7 @@ const BaseToolButtonModel = types.model("BaseToolButton", {
   Icon: undefined as any
 }));
 
-const AppToolButtonModel = BaseToolButtonModel.named("AppToolButtonModel")
+const AppToolbarButtonModel = BaseToolbarButtonModel.named("AppToolbarButtonModel")
   .props({
     iconId: types.string,
     isTileTool: types.literal(false)
@@ -27,7 +27,7 @@ const AppToolButtonModel = BaseToolButtonModel.named("AppToolButtonModel")
     }
   }));
 
-const TileToolButtonModel = BaseToolButtonModel.named("TileToolButtonModel")
+const TileToolbarButtonModel = BaseToolbarButtonModel.named("TileToolbarButtonModel")
   .props({
     isTileTool: types.literal(true)
   })
@@ -40,9 +40,9 @@ const TileToolButtonModel = BaseToolButtonModel.named("TileToolButtonModel")
     }
   }));
 
-export const ToolButtonModel = types.union(AppToolButtonModel, TileToolButtonModel);
+export const ToolbarButtonModel = types.union(AppToolbarButtonModel, TileToolbarButtonModel);
 
 // This can't be an interface because the type is a union which is not supported
 // by typescript interfaces
-export type ToolButtonModelType = Instance<typeof ToolButtonModel>;
-export type ToolButtonSnapshot = SnapshotOut<typeof ToolButtonModel>;
+export type IToolbarButtonModel = Instance<typeof ToolbarButtonModel>;
+export type IToolbarButtonSnapshot = SnapshotOut<typeof ToolbarButtonModel>;

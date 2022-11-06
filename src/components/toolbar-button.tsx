@@ -1,22 +1,22 @@
 import classNames from "classnames";
 import React from "react";
-import { ToolButtonModelType } from "../models/tiles/tool-button";
+import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
 
 export interface IButtonProps {
-  toolButton: ToolButtonModelType;
+  toolButton: IToolbarButtonModel;
   isActive: boolean;
   isDisabled: boolean;
-  onSetToolActive: (tool: ToolButtonModelType, isActive: boolean) => void;
-  onClick: (e: React.MouseEvent<HTMLDivElement>, tool: ToolButtonModelType) => void;
+  onSetToolActive: (tool: IToolbarButtonModel, isActive: boolean) => void;
+  onClick: (e: React.MouseEvent<HTMLDivElement>, tool: IToolbarButtonModel) => void;
 }
 
-export interface IToolButtonProps extends IButtonProps {
-  onDragStart: (e: React.DragEvent<HTMLDivElement>, tool: ToolButtonModelType) => void;
+export interface IToolbarButtonProps extends IButtonProps {
+  onDragStart: (e: React.DragEvent<HTMLDivElement>, tool: IToolbarButtonModel) => void;
   onShowDropHighlight: () => void;
   onHideDropHighlight: () => void;
 }
 
-export const ToolButtonComponent: React.FC<IToolButtonProps> =
+export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
   ({ toolButton, isActive, isDisabled, onSetToolActive, onClick, onDragStart,
       onShowDropHighlight, onHideDropHighlight }) => {
 
