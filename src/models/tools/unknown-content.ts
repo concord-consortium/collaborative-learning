@@ -1,3 +1,4 @@
+import { registerToolComponentInfo } from "./tool-component-info";
 import { registerToolContentInfo } from "./tool-content-info";
 import { kUnknownToolID, UnknownContentModel, UnknownContentModelType } from "./tool-types";
 import PlaceholderToolComponent from "../../components/tools/placeholder-tool/placeholder-tool";
@@ -9,8 +10,11 @@ export function defaultContent(): UnknownContentModelType {
 registerToolContentInfo({
   id: kUnknownToolID,
   modelClass: UnknownContentModel,
-  defaultContent,
-  // TODO: should really have a separate unknown tool that shows an "unknown tile" message
+  defaultContent
+});
+
+registerToolComponentInfo({
+  id: kUnknownToolID,
   Component: PlaceholderToolComponent,
   toolTileClass: "placeholder-tile",
   tileHandlesOwnSelection: true

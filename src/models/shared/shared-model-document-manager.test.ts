@@ -4,6 +4,7 @@ import { IToolTileProps } from "../../components/tools/tool-tile";
 import { SharedModel, SharedModelType } from "./shared-model";
 import { SharedModelDocumentManager } from "./shared-model-document-manager";
 import { registerSharedModelInfo } from "./shared-model-registry";
+import { registerToolComponentInfo } from "../tools/tool-component-info";
 import { registerToolContentInfo } from "../tools/tool-content-info";
 import { ITileEnvironment, ToolContentModel } from "../tools/tool-types";
 import { DocumentContentModel } from "../document/document-content";
@@ -114,7 +115,10 @@ registerToolContentInfo({
   modelClass: TestTile,
   defaultContent(options) {
     throw new Error("Function not implemented.");
-  },
+  }
+});
+registerToolComponentInfo({
+  id: "TestTile",
   Component: TestTileComponent,
   toolTileClass: "test-tile"
 });

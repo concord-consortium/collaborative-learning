@@ -5,6 +5,7 @@ import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
 import { cloneTileSnapshotWithNewId, IDragTileItem, IDragTiles, ToolTileModelType } from "../../models/tools/tool-tile";
 import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
+import { getToolComponentInfo } from "../../models/tools/tool-component-info";
 import { getToolContentInfoById } from "../../models/tools/tool-content-info";
 import { BaseComponent } from "../base";
 import PlaceholderToolComponent from "./placeholder-tool/placeholder-tool";
@@ -187,7 +188,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     const { model, readOnly, isUserResizable, widthPct } = this.props;
     const { hoverTile } = this.state;
     const { appConfig, ui } = this.stores;
-    const { Component: ToolComponent, toolTileClass } = getToolContentInfoById(model.content.type) || {};
+    const { Component: ToolComponent, toolTileClass } = getToolComponentInfo(model.content.type) || {};
     const isPlaceholderTile = ToolComponent === PlaceholderToolComponent;
     const isTileSelected = ui.isSelectedTile(model);
     const tileSelectedForComment = isTileSelected && ui.showChatPanel;
@@ -311,8 +312,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
 
     // Select the tile if the tool doesn't handle the selection itself
-    const toolContentInfo = getToolContentInfoById(model.content.type);
-    if (!toolContentInfo?.tileHandlesOwnSelection) {
+    if (!getToolComponentInfo(model.content.type)?.tileHandlesOwnSelection) {
       ui.setSelectedTile(model, {append: hasSelectionModifier(e)});
     }
   };
@@ -368,7 +368,7 @@ export class ToolTileComponent extends BaseComponent<IProps, IState> {
     }
     // set the drag data
     const { model, docId } = this.props;
-    const ToolComponent = getToolContentInfoById(model.content.type)?.Component;
+    const ToolComponent = getToolComponentInfo(model.content.type)?.Component;
     // can't drag placeholder tiles
     if (ToolComponent === PlaceholderToolComponent) {
       e.preventDefault();

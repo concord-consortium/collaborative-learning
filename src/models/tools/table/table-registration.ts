@@ -1,3 +1,4 @@
+import { registerToolComponentInfo } from "../tool-component-info";
 import { registerToolContentInfo } from "../tool-content-info";
 import {
   kTableToolID, TableContentModel, TableMetadataModel, kTableDefaultHeight, defaultTableContent
@@ -11,7 +12,11 @@ registerToolContentInfo({
   modelClass: TableContentModel,
   metadataClass: TableMetadataModel,
   defaultHeight: kTableDefaultHeight,
-  defaultContent: defaultTableContent,
+  defaultContent: defaultTableContent
+});
+
+registerToolComponentInfo({
+  id: kTableToolID,
   Component: TableToolComponent,
   toolTileClass: "table-tool-tile",
   Icon: TableToolIcon
