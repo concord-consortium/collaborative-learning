@@ -38,34 +38,34 @@ History:
 ### Asset Sizes
 |        File         |    Size   | % Change from Previous Release |
 |------------------------|----|------
-| vendor-main.2048c2e8.js | 2.1M | 0 |
-| Geometry.2acdd728.js | 886K | 0 |
-| Dataflow.7b0fe82c.js | 735K | 0 |
-| common-Diagram-SharedVariables.ae94f7b3.js | 611K | 0 |
-| index.2f810b939d662c464cda.js | 397K | 0 |
-| SharedVariables.e47d7d7d.js | 86K | 0 |
-| Table.d5e285a4.js | 84K | 0 |
-| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.1c62df70.js | 51K | 0 |
-| common-SharedVariables-Drawing.96107f60.js | 33K | 0 |
-| common-Dataflow-Geometry.0bd31c83.js | 26K | 0 |
-| Drawing.f47d1726.js | 26K | 0 |
-| DataCard.797d1870.js | 18K | 0 |
-| Text.7e4ddd5d.js | 16K | 0 |
-| Image.a3400d7c.js | 16K | 0 |
-| Diagram.0ce29ffe.js | 9.6K | 0 |
-| Starter.b26bfa75.js | 1.2K | 0 |
-| SharedDataSet.98119794.js | 254B | 0 |
-| main.f4a598b6.css | 162K | 0 |
-| Dataflow.5351851e.css | 32K | 0 |
-| Diagram.d44044a2.css | 11K | 0 |
-| Table.779f3837.css | 10K | 0 |
-| Geometry.9119587f.css | 10K | 0 |
-| DataCard.4b49ee7d.css | 8.4K | 0 |
-| Image.b5870984.css | 6.3K | 0 |
-| Drawing.030947a3.css | 5.2K | 0 |
-| Text.32b9f6a4.css | 4.5K | 0 |
-| SharedVariables.427c48a1.css | 696B | 0 |
-| Starter.3c909986.css | 207B | 0 |
+| vendor-main.210d2f8d.js | 2.1M | 0
+| Geometry.d3eb56a5.js | 886K | 0
+| Dataflow.5ac07c45.js | 735K | 0 
+| common-Diagram-SharedVariables.04f7a410.js | 613K | 0.33%
+| index.702debca2909e15b201f.js | 406K | 2.3%
+| SharedVariables.3a3b389f.js | 86K | 0
+| Table.d5e285a4.js | 84K | 0
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.1c62df70.js | 51K | 0
+| common-SharedVariables-Drawing.a41100ab.js | 33K | 0
+| Drawing.2f086891.js | 26K | 0
+| common-Dataflow-Geometry.0bd31c83.js | 26K | 0
+| DataCard.bac16fca.js | 18K | 0
+| Text.7e4ddd5d.js | 16K | 0
+| Image.0e040920.js | 16K | 0
+| Diagram.79eb19af.js | 10K | 4%
+| Starter.b26bfa75.js | 1.2K | 0
+| SharedDataSet.a14fff08.js | 253B | -0.4% 
+main.733a14a1.css | 164K | 1.2%
+| Dataflow.144debfa.css | 32K | 0
+| Diagram.2366e344.css | 11K | 0
+| Table.2e73962c.css | 10K | 0
+| Geometry.f10c31ff.css | 10K | 0
+| DataCard.3e41959a.css | 8.4K | 0
+| Image.e41d02a5.css | 6.3K | 0
+| Drawing.13a0c9ce.css | 5.2K | 0
+| Text.bf42cf91.css | 4.5K | 0
+| SharedVariables.ecdc1f16.css | 733B | 5.3 %
+| Starter.76692936.css | 207B | 0
 
 ## Version 3.1.0 - Oct 18, 2022
 
