@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { Provider } from "mobx-react";
+import { ModalProvider } from "react-modal-hook";
 import { CanvasComponent } from "./canvas";
 import { createDocumentModel } from "../../models/document/document";
 import { DocumentContentModel } from "../../models/document/document-content";
@@ -9,9 +10,8 @@ import { specStores } from "../../models/stores/spec-stores";
 import { createSingleTileContent } from "../../utilities/test-utils";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTools } from "../../register-tools";
-import { ModalProvider } from "react-modal-hook";
-registerTools(["Text"]);
+import { registerTileTypes } from "../../register-tile-types";
+registerTileTypes(["Text"]);
 
 const mockGetQueryState = jest.fn();
 jest.mock("react-query", () => ({

@@ -10,7 +10,7 @@ import {
 import { VariableType, Variable } from "@concord-consortium/diagram-view";
 import { VariableChip } from "./variable-chip";
 import { kVariableSlateType, getVariables, getOrFindSharedModel } from "./variables-text-content";
-import { TextContentModelType } from "../../../models/tools/text/text-content";
+import { TextContentModelType } from "../../../models/tiles/text/text-content";
 
 const kVariableClass = "variable-chip";
 const kVariableHighlightClass = "variable-chip-highlight";
@@ -19,7 +19,7 @@ function parseVariableValue(value?: string) {
   return value ? parseFloat(value) : undefined;
 }
 
-// This is for the input field 
+// This is for the input field
 function variableValueToString(value?: number) {
   if (value === undefined) {
     return "";

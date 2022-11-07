@@ -5,7 +5,7 @@ import { kDividerHalf, kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-t
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
 import { LogEventName, Logger } from "../../lib/logger";
-import { ToolTileModelType } from "../tools/tool-tile";
+import { ITileModel } from "../tiles/tile-model";
 import { ENavTab } from "../view/nav-tabs";
 
 type BooleanDialogResolver = (value: boolean | PromiseLike<boolean>) => void;
@@ -51,13 +51,14 @@ export const UIModel = types
     focusDocUpdates: 0,
     problemWorkspace: WorkspaceModel,
     learningLogWorkspace: WorkspaceModel,
-    teacherPanelKey: types.maybe(types.string)
+    teacherPanelKey: types.maybe(types.string),
+    selectedCommentedDocument: types.maybe(types.string),//key of selected commented MyWork/ClassWork doc
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
   }))
   .views((self) => ({
-    isSelectedTile(tile: ToolTileModelType) {
+    isSelectedTile(tile: ITileModel) {
       return self.selectedTileIds.indexOf(tile.id) !== -1;
     },
     get navTabContentShown () {
@@ -65,7 +66,7 @@ export const UIModel = types
     },
     get workspaceShown () {
       return self.dividerPosition < kDividerMax;
-    }
+    },
   }))
   .actions((self) => {
     const alert = (textOrOpts: string | UIDialogModelSnapshotWithoutType, title?: string) => {
@@ -158,7 +159,7 @@ export const UIModel = types
         self.activeNavTab = ENavTab.kStudentWork;
         self.activeGroupId = groupId;
       },
-      setSelectedTile(tile?: ToolTileModelType, options?: {append: boolean}) {
+      setSelectedTile(tile?: ITileModel, options?: {append: boolean}) {
         setOrAppendTileIdToSelection(tile && tile.id, options);
       },
       setSelectedTileId(tileId: string, options?: {append: boolean}) {
@@ -197,6 +198,9 @@ export const UIModel = types
       },
       setTeacherPanelKey(key: string) {
         self.teacherPanelKey = key;
+      },
+      setSelectedCommentedDocument(key: string | undefined){
+        self.selectedCommentedDocument = key ;
       }
     };
   });
@@ -204,7 +208,7 @@ export const UIModel = types
 export type UIModelType = typeof UIModel.Type;
 export type UIDialogModelType = typeof UIDialogModel.Type;
 
-export function selectTile(ui: UIModelType, model: ToolTileModelType, isExtending?: boolean) {
+export function selectTile(ui: UIModelType, model: ITileModel, isExtending?: boolean) {
   ui.setSelectedTile(model, { append: !!isExtending });
 }
 

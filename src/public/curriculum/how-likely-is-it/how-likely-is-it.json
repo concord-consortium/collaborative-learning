@@ -102,10 +102,38 @@
         {
           "description": "Problem 1.1",
           "ordinal": 1,
-          "title": "HL 1.1 Choosing Cereal",
-          "subtitle": "Tossing Coins to Find Probability",
+          "title": "HL 1.1 Negotiating Screen Time",
+          "subtitle": "Tossing Coins and Cups to Find Probability",
           "disabled": [],
           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         },
@@ -115,6 +143,34 @@
           "title": "HL 1.2 Match, No Match",
           "subtitle": "Finding Experimental Probabilities",
           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         },
@@ -124,6 +180,34 @@
           "title": "HL 1.3 Analyzing Events:",
           "subtitle": "Equally Likely",
           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         }
@@ -140,6 +224,34 @@
           "title": "HL 2.1 Gee Whiz Everyone Wins",
           "subtitle": "Finding Theoretical Probabilities",
           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         },
@@ -149,6 +261,34 @@
           "title": "HL 2.2 Designing a Fair Game",
           "subtitle": "Pondering Possible and Probable",
           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         },
@@ -158,6 +298,34 @@
           "title": "HL 2.3 Designing a Spinner to find Probabilities",
           "subtitle":"",
           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         }
@@ -174,6 +342,34 @@
           "title": "HL 3.1 Making Decisions: Analyzing Fairness",
           "subtitle": "",
           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         },
@@ -183,6 +379,34 @@
           "title": "HL 3.2 Roller Derby: Analyzing a Game",
           "subtitle": "",
           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         },
@@ -192,6 +416,34 @@
           "title": "HL 3.3 Scratching Spots",
           "subtitle": "Designing and Using a Simulation",
           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         }
@@ -205,9 +457,37 @@
         {
           "description": "Problem 4.1",
           "ordinal": 1,
-          "title": "HL 4.1 Using Area Models to Find Sample Spaces",
-          "subtitle": "",
+          "title": "HL 4.1 Making Purple Game",
+          "subtitle": "Using Area Models to Find Sample Spaces",
           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         },
@@ -215,8 +495,36 @@
           "description": "Problem 4.2",
           "ordinal": 2,
           "title": "HL 4.2 One-and-One Free Throw",
-          "subtitle": "",
+          "subtitle": "Simulating a Probability Situation",
           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         },
@@ -226,6 +534,34 @@
           "title": "HL 4.3 Finding Long-term Averages",
           "subtitle": "",
           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         },
@@ -235,6 +571,34 @@
           "title": "HL 4.4 Binomial Situations",
           "subtitle": "",
           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
           ],
           "supports": []
         }

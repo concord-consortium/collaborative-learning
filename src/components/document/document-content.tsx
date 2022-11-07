@@ -8,10 +8,10 @@ import { BaseComponent, IBaseProps } from "../base";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
 import { DocumentContentModelType, IDragToolCreateInfo, IDropRowInfo } from "../../models/document/document-content";
-import { getToolContentInfoById } from "../../models/tools/tool-content-info";
-import { IDragTiles } from "../../models/tools/tool-tile";
-import { ToolApiInterfaceContext } from "../tools/tool-api";
-import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tools/tool-tile";
+import { getTileContentInfo } from "../../models/tiles/tile-content-info";
+import { IDragTiles } from "../../models/tiles/tile-model";
+import { TileApiInterfaceContext } from "../tiles/tile-api";
+import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tiles/tile-component";
 import { safeJsonParse } from "../../utilities/js-utils";
 
 import "./document-content.sass";
@@ -46,8 +46,8 @@ const kDragUpdateInterval = 50;
 @observer
 export class DocumentContentComponent extends BaseComponent<IProps, IState> {
 
-  static contextType = ToolApiInterfaceContext;
-  declare context: React.ContextType<typeof ToolApiInterfaceContext>;
+  static contextType = TileApiInterfaceContext;
+  declare context: React.ContextType<typeof TileApiInterfaceContext>;
 
   public state: IState = {};
 
@@ -225,26 +225,26 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleScroll = throttle((e: React.UIEvent<HTMLDivElement>) => {
-    const toolApiInterface = this.context;
+    const tileApiInterface = this.context;
     const xScroll = this.domElement?.scrollLeft || 0;
     const yScroll = this.domElement?.scrollTop || 0;
-    toolApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
+    tileApiInterface?.forEach(api => api.handleDocumentScroll?.(xScroll, yScroll));
   }, 50);
 
   private handleRequestTilesOfType = (tileType: string) => {
     const { content } = this.props;
-    const toolApiInterface = this.context;
-    if (!content || !tileType || !toolApiInterface) return [];
+    const tileApiInterface = this.context;
+    if (!content || !tileType || !tileApiInterface) return [];
     const tilesOfType = content.getTilesOfType(tileType);
-    return tilesOfType.map(id => ({ id, title: toolApiInterface.getToolApi(id)?.getTitle?.() }));
+    return tilesOfType.map(id => ({ id, title: tileApiInterface.getTileApi(id)?.getTitle?.() }));
   };
 
   private handleRequestUniqueTitle = (tileId: string) => {
     const { content } = this.props;
-    const toolApiInterface = this.context;
+    const tileApiInterface = this.context;
     const tileType = content?.getTile(tileId)?.content.type;
-    const titleBase = getToolContentInfoById(tileType)?.titleBase;
-    const getTileTitle = (_tileId: string) => toolApiInterface?.getToolApi?.(_tileId)?.getTitle?.();
+    const titleBase = getTileContentInfo(tileType)?.titleBase;
+    const getTileTitle = (_tileId: string) => tileApiInterface?.getTileApi?.(_tileId)?.getTitle?.();
     return tileType && titleBase && content?.getUniqueTitle(tileType, titleBase, getTileTitle);
   };
 

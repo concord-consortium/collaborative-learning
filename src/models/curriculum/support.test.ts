@@ -1,6 +1,6 @@
 import { createStickyNote, createTextSupport, ESupportMode, ESupportType, SupportModel } from "./support";
 import { DocumentContentModel } from "../document/document-content";
-import "../../models/tools/text/text-registration";
+import "../tiles/text/text-registration";
 
 describe("support model", () => {
 

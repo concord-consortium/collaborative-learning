@@ -1118,15 +1118,38 @@
                         "content": {
                           "tiles": [
                             {
-                              "id": "gZ5gbhunVuXp5_-Z",
+                              "id": "rVfNvjNxjeFtSjd9",
+                              "title": "Text 3",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [ 
+                                  "<h2>STRESS AND FEELING SICK:</strong></h2>",
+                                  "<h2>Estrella’s Story</h2>" 
+                                ]
+                              }
+                            },
+                            {
+                              "id": "3bnHIJ4eNI8--KUd",
+                              "title": "Text 4",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [ 
+                                  "<h3>CHAPTER I: MATH TEST</h3>" 
+                                ]
+                              }
+                            },
+                            {
+                              "id": "lDyrFdl5Ce8dHais",
+                              "title": "Text 5",
                               "content": {
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
-                                  "<h2>CHAPTER 1: MATH TEST</h2>",
-                                  "<p>Estrella loved her family to bits and pieces. She would go to the ends of the earth for them. Her mom and step-dad worked hard every day to put a roof over their head. This often meant that they were at work for long hours and so Estrella’s abuela stayed home and watched over her and her 3 younger siblings. Abuela did a lot for them but sometimes it got hard to take care of so many things, so Estrella took it upon herself to help out around the house. She loved doing it because on top of getting to help her Abuela, it also meant that sometimes she got to be in charge of her siblings. </p>",
-                                  "<p>Her younger brothers and sister could be so annoying sometimes and yet so cute at the same time. She often picked them up from their elementary school and they would tell her everything that happened during their day with bright eyes and wide smiles which warmed Estrella’s heart. Once they got home she walked their family dog, and then spent the afternoon making sure her siblings did their homework and daily chores before dinner. Their family tried to eat together every evening and Abuela’s cooking was the best. By the time Estrella finished eating dinner and doing the dishes, it was usually already 7pm. She would then often chat or play video games with her friends for a while. She loved hanging out with her two best friends. Needless to say, this meant Estrella stayed up until midnight most days to get her work done. Sometimes she was so tired she wished she could just go to sleep but her grades were important to her and she was doing well in school. </p>",
-                                  "<p>However, when she was in school she often had trouble focusing. She really did want to focus in class, but sometimes the teacher’s voice became nothing but white noise and Estrella would zone out. She tried to make up for it by working hard on her homework, but homework alone does not prepare someone for tests. She needed to be able to pay attention in class if she wanted to keep her grades up. </p>"
+                                  "<p>Estrella loved her family very much. She would go to the ends of the earth for them and knew that they would do the same for her. Her mom and step-dad worked long hours everyday to put a roof over their head. Estrella’s abuela (grandma) stayed home and watched over the kids. Abuela did a lot for them but sometimes it got hard for her to take care of so many things, so Estrella took it upon herself to help out.</p>",
+                                  "<p>Estrella often dropped off and picked up her younger brothers and sister from their school bus stop and they would tell her everything that happened during their day with bright eyes and wide smiles. Once they got home Estrella would spend the afternoon making sure her siblings did their homework and daily chores, and then she walked the family dog before dinner.  Estrella also made time for her two best friends in the evenings when they played online together.  This meant most days Estrella stayed up until midnight to get her work done. Sometimes she was so tired she wished she could just go to sleep, but her grades were important to her and she was doing well in school. </p>",
+                                  "<p>However, in school she often had trouble focusing. She really did want to focus in class, but sometimes the teacher’s voice became nothing but white noise and Estrella would zone out. She needed to be able to pay attention in class if she wanted to stay in honors math even though her best friends were in the lower level general math. </p>"
                                 ]
                               }
                             },
@@ -1139,64 +1162,74 @@
                               }
                             },
                             {
-                              "id": "9u9n_OSFrp-ME0-_",
+                              "id": "RyhF27bC1E7DjgdX",
+                              "title": "Text 15",
                               "content": {
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
-                                  "<p>One day after school, Estrella felt like she was dragging her body home because she was so upset. That day she had taken a particularly hard math test and she had the sinking feeling that she didn’t do well on it. She tried, but just couldn’t focus.  She found herself staring at the paper and the numbers were glaring back at her making no sense. She couldn’t answer several of the questions at all. On top of that, her siblings just would not listen to her on their walk home. They were almost to the front of the house when they started fooling around.</p>",
-                                  "<p>Paco: Tito, watch me do a handstand.  </p>",
-                                  "<p>Tito: Lame. I bet you can’t run as fast as me</p>",
-                                  "<p>Paco: Bet I can!</p>",
-                                  "<p>Sandra: Hermana, I wanna run too!</p>",
-                                  "<p>Estrella: No running, it’s the street. Come on chicos, we have to go home. </p>",
-                                  "<p>Tito: Catch me if you can!</p>",
-                                  "<p>Sandra: Me too! Me too!</p>",
-                                  "<p>Paco: Oh no you don’t!</p>",
-                                  "<p>Estrella: Hey! Stop running! What are you doing?</p>",
-                                  "<p>Estrella grabs her siblings by the back of their shirts to slow them down</p>",
-                                  "<p>Estrella: Why do you never listen to me? Stop fooling around!</p>",
-                                  "<p>Her siblings were shocked by the snap in her tone. Sandra begins to cry at being yelled at, running into the house and straight to abuela. </p>",
-                                  "<p>Abuela: Nena, why are you crying?</p>",
-                                  "<p>Sandra: Mana screamed at me!</p>",
-                                  "<p>Estrella: I did not! You weren’t listening to me cause all of you were screaming. </p>",
-                                  "<p>Tito: We were not! </p>",
-                                  "<p>Abuela: Estrella, you have to go easy on them. They’re little. You’re older, you need to be patient with them.</p>",
-                                  "<p>Estrella: You’re never on my side! You always choose them over me. </p>",
-                                  "<p>Abuela: Estrella, Mija, that’s not true. I am on your side. What’s going on with you, Nena?</p>",
-                                  "<p>Estrella: Es nada, Abuela. </p>",
-                                  "<p>Abuela: Ay. I know you too well for that. You can tell me if something is bothering you.</p>",
-                                  "<p>Estrella: Well… I didn’t do well on my math test today. </p>",
-                                  "<p>Abuela: But you normally do so well. What happened?</p>",
-                                  "<p>Estrella: I don’t know. Sometimes I can’t focus in class. I’m just so tired and I think of everything else in the world. I try to focus, I really do. But, I just can’t. </p>",
-                                  "<p>Estrella choked back tears, trying to hide how upset she was. She felt as though no matter how hard she tried, her efforts were useless. </p>",
-                                  "<p>Abuela: Mi corazón, you’re tired. Of course you can’t focus. You’re stressed and sleep deprived. I’ve been telling you it’s not good to stay up till midnight so often. Why don’t you talk to your school counselor or one of your school teachers about how you feel? Aren’t you close with your science teacher? Talk to her. I’m sure they’ll understand and try to help you. You have to make this a priority and take care of yourself. </p>",
-                                  "<p>Estrella: I just feel like I don’t even belong in these classes.</p>",
-                                  "<p>Abuela: Why would you say that? Of course you do.</p>",
-                                  "<p>Estrella: It’s just… I remember Ms. Parker telling me that I don’t.</p>",
-                                  "<p>Abuela: What? When?</p>",
-                                  "<p></p>",
-                                  "<p><em><strong>~FLASHBACK~ </strong></em></p>",
-                                  "<p>Ms. Parker was handing back the math tests they had just taken. It was an AP math class and therefore the tests tend to be harder. This one was particularly hard and Estrella knew she didn’t do as well as she would have liked. </p>",
-                                  "<p>Ms. Parker: Estrella, can I talk to you for a second?</p>",
-                                  "<p>Estrella: Y-yes, of course. </p>",
-                                  "<p>Ms. Parker: I noticed that you haven’t been doing well on your tests lately. I think it might be best if you dropped down from this class. </p>",
-                                  "<p>Estrella: What?</p>",
-                                  "<p>Ms. Parker: I’m just saying it might be better for you if you take a step back. AP classes are difficult as it is and you don’t really need it if you don’t plan on going to college. I know your people normally don’t go to college so it may be best for you to just lighten the load.</p>",
-                                  "<p>Estrella: O-oh.</p>",
-                                  "<p><em><strong>~END FLASHBACK~ </strong></em></p>",
-                                  "<p></p>",
-                                  "<p>Abuela: Estrella. Do not listen to her.</p>",
-                                  "<p>Estrella: What if she’s right, Abuela?</p>",
-                                  "<p>Abuela: She is not and you know it. You know you are going towards college. It is not that you are not meant for these classes. You are just stressed. </p>",
-                                  "<p>Estrella knew her grandma was usually right about these things. She had never considered that maybe what she was feeling inside, the tense muscles and racing heartbeat, could be stress. Or that stress could be the reason she couldn’t focus. Estrella decided to talk to her science teacher after school tomorrow. That decision made her feel a bit better.</p>",
+                                  "<p>One day after school, Estrella felt like she was dragging her body home because she was so upset. That morning she was late to school - again - because her siblings’ school bus didn’t come on time. As per the school rules, she had to get a tardy-note from the main office that made her even more late for math. The class was taking a math test and she had missed the first 10 minutes but was still expected to finish it on time like everyone else. In addition to being late, Estrella found she just couldn’t focus. She found herself staring at the paper and the numbers were glaring back at her, making no sense. She had the sinking feeling that she didn’t do well on the test. On the way home, her siblings just would not listen to her. They were almost to the front of their house when they started fooling around.</p>",
                                   "<p></p>"
                                 ]
                               }
                             },
                             {
-                              "id": "csP7M5wzDeP4cvS-",
-                              "title": "Estrella Talks to Her Abuela",
+                              "id": "zIT-SWPxBLJk86b4",
+                              "title": "Text 6",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>Paco</strong>: Tito, watch me do a handstand.  </p>",
+                                  "<p><strong>Tito</strong>: Whatever. I bet you can’t run as fast as me</p>",
+                                  "<p><strong>Paco</strong>: Bet I can!</p>",
+                                  "<p><strong>Sandra</strong>: Hermana (sister), I wanna run too!</p>",
+                                  "<p><strong>Estrella</strong>: No running, it’s the street. we have to go home. </p>",
+                                  "<p><strong>Tito</strong>: Catch me if you can!</p>",
+                                  "<p><strong>Sandra</strong>: Me too! Me too!</p>",
+                                  "<p><strong>Estrella</strong>: STOP RUNNING! What are you doing?</p>",
+                                  "<p>[Estrella grabs her siblings by the back of their shirts]</p>",
+                                  "<p><strong>Estrella</strong>: Why do you never listen to me? STOP fooling around!</p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "hSZzIaK8HPEPpwNu",
+                              "title": "Text 7",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Her siblings were shocked by the snap in her tone. Sandra began to cry, and ran into the house and straight to Abuela. </p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "xe_2kUmRx5NAO2tF",
+                              "title": "Text 8",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>Abuela</strong>: Nena, ¿Por qué estás llorando? (Baby girl, why are you crying?)</p>",
+                                  "<p><strong>Sandra</strong>: She screamed at me!</p>",
+                                  "<p><strong>Estrella</strong>: I did not! You weren’t listening to me and were about to run out into the street. </p>",
+                                  "<p><strong>Tito</strong>: We were not! </p>",
+                                  "<p><strong>Abuela</strong>: Estrella, they’re little. You’re older, be patient with them.</p>",
+                                  "<p><strong>Estrella</strong>: You’re never on my side! You always choose them over me. </p>",
+                                  "<p><strong>Abuela</strong>: Estrella, Mija (daughter), that’s not true. I am on your side. What’s going on with you, Nena (baby girl)?</p>",
+                                  "<p><strong>Estrella</strong>: Es nada (it&#x27;s nothing), Abuela. </p>",
+                                  "<p><strong>Abuela</strong>: Ay. I know you too well for that. I can tell something is bothering you.</p>",
+                                  "<p><strong>Estrella</strong>: Well… I was late to school, missed half of math class, and didn’t do well on the test. </p>",
+                                  "<p><strong>Abuela</strong>: But you normally do so well. What happened?</p>",
+                                  "<p><strong>Estrella</strong>: I don’t know. Sometimes I can’t focus in class. I’m just so tired and I think of everything else in the world. I try to focus, I really do. But, I just can’t. </p>",
+                                  "<p></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "abO6rbPNbFZHjuaD",
+                              "title": "Estrella talks to her Abuela",
                               "content": {
                                 "type": "Image",
                                 "url": "curriculum/bio4community/images/Estrella_S3.jpg",
@@ -1204,17 +1237,85 @@
                               }
                             },
                             {
-                              "id": "tdD-dZKGiJAFSXQt",
+                              "id": "dBOtDNvxQZQZ5oSd",
+                              "title": "Text 9",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Estrella choked back tears, trying to hide how upset she was. She felt as though no matter how hard she tried, her efforts were useless. </p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "gSOSqg1I9G2IKHdi",
+                              "title": "Text 13",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>Abuela</strong>: Mi corazón (my heart), you’re tired. Of course you can’t focus. You’re stressed and sleep deprived. I’ve been telling you it’s not good to stay up till midnight so often. Why don’t you talk to your school counselor about how you feel? Aren’t you close with your science teacher? Maybe talk to her. I’m sure they’ll understand and try to help you. </p>",
+                                  "<p><strong>Estrella</strong>: I just feel like I don’t even belong in these classes.</p>",
+                                  "<p><strong>Abuela</strong>: Why would you say that? Of course you do.</p>",
+                                  "<p><strong>Estrella</strong>: It’s just… I remember Ms. Parker telling me that I don’t.</p>",
+                                  "<p><strong>Abuela</strong>: What? When?</p>",
+                                  "<p></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "ojPmRO2jeyG3o48C",
+                              "title": "Text 12",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>~~ FLASHBACK ~~</strong></p>",
+                                  "<p>[Ms. Parker was handing back the math tests for honors Calculus. This one was particularly hard and Estrella knew she didn’t do as well as she would have liked.]</p>",
+                                  "<p><strong>Ms. Parker</strong>: Estrella, can I talk to you for a second?</p>",
+                                  "<p><strong>Estrella</strong>: Y-yes, of course. </p>",
+                                  "<p><strong>Ms. Parker</strong>: I noticed that you haven’t been doing well on your tests lately. I talked to the school counselor and we think it might be best if you dropped down to the easier general level math class.</p>",
+                                  "<p><strong>Estrella</strong>:  Why? I like math….</p>",
+                                  "<p><strong>Ms. Parker</strong>: I’m just saying it might be better for you. Honors classes are difficult as it is and I don’t think you really need it anyway. People in your neighborhood don’t usually go to college so why waste your time. Might as well enjoy high school instead of struggling so much.  </p>",
+                                  "<p><strong>Estrella</strong>: O-oh.</p>",
+                                  "<p></p>",
+                                  "<p><strong>~~ END FLASHBACK ~~</strong></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "9MxWn_MQLdjw3QcE",
+                              "title": "Text 11",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>Abuela</strong>: Estrella. Do not listen to her!!</p>",
+                                  "<p><strong>Estrella</strong>: What if she’s right, Abuela?</p>",
+                                  "<p><strong>Abuela</strong>: She is not and you know it! You know you are going to universidad (university).</p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "r37UQ-aAVE1oyKn1",
+                              "title": "Text 10",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Estrella knew her grandma was usually right about these things. She had never considered that maybe what she was feeling inside, the tense muscles and racing heartbeat, could be stress. Or that stress could be the reason she couldn’t focus. Estrella decided to talk to her science teacher after school tomorrow. </p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "6OFBBbqkmJyRqKvM",
+                              "title": "Text 14",
                               "content": {
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
                                   "<p><strong>Do you think Abuela is right?</strong></p>",
-                                  "<p><strong>Discuss with your group--What do you think is the connection between stress and focus? </strong></p>",
-                                  "<p><em>—— Drag this tile into your Learning Log to write your answer ——</em></p>",
-                                  "<p>Your answer:</p>",
-                                  "<p></p>",
-                                  "<p></p>"
+                                  "<p>Discuss with your group--What do you think is the connection between stress and focus?</p>"
                                 ]
                               }
                             }
@@ -1227,12 +1328,21 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "17SEP20221154AM",
+                  "id": "-VyJI03fNSgRD_yA",
+                  "title": "Text 2",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                      "<p><strong>Welcome to CLUE! Here on the right-hand side of CLUE is your Workspace Log. </strong>You will use this space to -</p>",
+                      "<ul><li>collect and explain evidence, </li><li>take notes, and </li><li>answer questions about the effects of long-term stress. </li></ul>",
+                      "<p><strong>On the left-hand side of CLUE, </strong>there are two tabs. The <em>Story</em> tab has Chapters of the story. You will see chapters only after your teacher assigns them to you. The <em>Resource Library</em> tab has different resources connected to the story that you will use to learn more about different parts of the story.</p>",
+                      "<p><u><strong>What to Do:</strong></u></p>",
+                      "<p>Read the chapter and follow the instructions given below the chapter.</p>",
+                      "<p><u><strong>How to Use this Log:</strong></u></p>",
+                      "<p><strong>Tap on the icons at left to create a tile for text, images, drawing, or tables. Or, drag tiles over </strong>from the Resource Library or from the story chapter.</p>",
+                      "<p><strong>Place tiles where you want! </strong>Use the &quot;domino&quot; (six dots) in the upper right corner of a tile to drag it to a new position. But make sure to keep your Evidence Table (see below) near the top of your Log so you can get to it easily.</p>",
+                      "<p>Note: All your work in CLUE is saved <em>automatically</em> whenever the green box above says &quot;Online&quot;. If it turns red and says &quot;Offline,&quot; your work will NOT be saved. If that happens, please take a screenshot of your work and tell your teacher.</p>"
                     ]
                   }
                 },
@@ -1243,8 +1353,9 @@
                     "type": "Table",
                     "name": "Cast of Characters",
                     "columns": [
-                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)", "Ms.Guerra (science teacher)"]},
-                      {"name":"Actor name","width":200,"values":["","","","","","","","","",""]}
+                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)","Ms.Guerra (science teacher)"]},
+                      {"name":"Number of lines","width":130,"values":["(21 paragraphs)","35","12","4","3","4","3","4","4","12"]},
+                      {"name":"Actor name","width":180,"values":["","","","","","","","","",""]}
                     ]
                   }
                 },
@@ -1254,9 +1365,9 @@
                     "type": "Table",
                     "name": "Evidence Table",
                     "columns": [
-                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
-                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                      {"name":"Evidence","width":120,"values":["Type the name of the evidence here","","","",""]},
+                      {"name":"What did we learn from this evidence? ","width":210,"values":["","","","",""]},
+                      {"name":"What question does this evidence help us answer?","width":200,"values":["","","","",""]}
                     ]
                   }
                 }
@@ -1277,14 +1388,44 @@
                           "content": {
                             "tiles": [
                               {
-                                "id": "Mc8a9uMzF02NItpi",
+                                "id": "A9cRhaWig1A3zzuh",
                                 "title": "Text 1",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<h2>CHAPTER 2: LEARNING FROM MS. GUERRA</h2>",
-                                    "<p>The next day after science class, María stayed behind and spoke with Ms. Guerra. She told her openly and honestly about how much she had been struggling to focus and how she wanted to be able to do better. </p>"
+                                    "<h3>CHAPTER 2: LEARNING FROM MS. GUERRA</h3>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "T5ukoQhmHQij-9Rk",
+                                "title": "Text 2",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>The next day after science class, Estrella stayed behind and spoke with her science teacher, Ms. Guerra. </p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "D3yZVVkoskfDjZ8t",
+                                "title": "Text 3",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><strong>Estrella</strong>: Hi Ms. Guerra, can I talk to you for a moment? </p>",
+                                    "<p><strong>Ms. Guerra</strong>: Of course, Estrella. What do you need? </p>",
+                                    "<p><strong>Estrella</strong>: I’ve been having a lot of issues with focusing lately and it&#x27;s been hurting my grades. </p>",
+                                    "<p><strong>Ms. Guerra</strong>: Oh Estrella! It is ok. High school can be a really tough time. I know you’re involved in a lot of activities and you’re so helpful at home too. </p>",
+                                    "<p><strong>Estrella</strong>: Yeah… I was wondering if you could explain to me some science about attention and stress? </p>",
+                                    "<p><strong>Ms. Guerra</strong>: Oh of course. Your brain is a really complicated organ and spends your whole life processing so much information. When we feel stressed it can get harder for us to focus on things. </p>",
+                                    "<p><strong>Estrella</strong>: That makes sense…. </p>",
+                                    "<p><strong>Ms. Guerra</strong>: Remember earlier in the year we talked about neurons. </p>",
+                                    "<p><strong>Estrella</strong>: I think so. Aren&#x27;t neurons the cells in your brain that send signals to each other? </p>",
+                                    "<p><strong>Ms. Guerra</strong>: Yes!  If your issue is being able to focus, you need to work on growing more connections between the neurons in your brain! </p>"
                                   ]
                                 }
                               },
@@ -1297,40 +1438,72 @@
                                   "filename": "curriculum/bio4community/images/Estrella_S2.jpg"
                                 }
                               },
-                              {
-                                "id": "m6WtnTcPHmKThpIa",
-                                "title": "Text 2",
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p>In response, Ms. Guerra told María that high school could be tough and that she was glad that María was asking for help. She also had an interesting suggestion:</p>",
-                                    "<p>Ms. Guerra: If your issue is being able to focus, you need to work on growing more connections between the neurons in your brain! </p>",
-                                    "<p>María didn’t really understand what that meant. Ms. Guerra could sense her confusion based on the blank stare María gave her. Figuring María needed more of an explanation, Ms. Guerra pulled out slide show that she had used when she taught college courses a few years ago. Crowding around the computer, the two of them clicked on the link for the: “How our Brains Think” </p>",
-                                    "<p></p>",
-                                    "<p><strong>Watch the slide show - EVIDENCE 1 - How our Brains Think - in your Resource Library. </strong></p>",
-                                    "<p><strong>Discuss the animation in your group and together, then answer the questions below by dragging the question tile into your document.</strong></p>",
-                                    "<p><strong>Write what you learned from this evidence in your table.</strong></p>",
-                                    "<p></p>"
-                                  ]
-                                }
-                              },
-                              {
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p><strong>Questions About Evidence 2</strong></p>",
-                                    "<p><strong></strong></p>",
-                                    "<p>1. Increased attention shifts means the person is getting distracted.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
-                                    "<p></p>",
-                                    "<p>2. Going for walks, exercising, and mediating can reduce stress.  <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
-                                    "<p></p>",
-                                    "<p>3. Stress hormones in the brain: (underline your choice)</p>",
-                                    "<p><strong>A.Increase focus     B. Reduce focus     C. Reduce distractions</strong></p>"
-                                  ]
-                                }
-                              }                              
+                            {
+                              "id": "A9cRhaWig1A3zzuh",
+                              "title": "Text 1",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<h3>CHAPTER 2: LEARNING FROM MS. GUERRA</h3>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "T5ukoQhmHQij-9Rk",
+                              "title": "Text 2",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>The next day after science class, Estrella stayed behind and spoke with her science teacher, Ms. Guerra. </p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "D3yZVVkoskfDjZ8t",
+                              "title": "Text 3",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>Estrella</strong>: Hi Ms. Guerra, can I talk to you for a moment? </p>",
+                                  "<p><strong>Ms. Guerra</strong>: Of course, Estrella. What do you need? </p>",
+                                  "<p><strong>Estrella</strong>: I’ve been having a lot of issues with focusing lately and it&#x27;s been hurting my grades. </p>",
+                                  "<p><strong>Ms. Guerra</strong>: Oh Estrella! It is ok. High school can be a really tough time. I know you’re involved in a lot of activities and you’re so helpful at home too. </p>",
+                                  "<p><strong>Estrella</strong>: Yeah… I was wondering if you could explain to me some science about attention and stress? </p>",
+                                  "<p><strong>Ms. Guerra</strong>: Oh of course. Your brain is a really complicated organ and spends your whole life processing so much information. When we feel stressed it can get harder for us to focus on things. </p>",
+                                  "<p><strong>Estrella</strong>: That makes sense…. </p>",
+                                  "<p><strong>Ms. Guerra</strong>: Remember earlier in the year we talked about neurons. </p>",
+                                  "<p><strong>Estrella</strong>: I think so. Aren&#x27;t neurons the cells in your brain that send signals to each other? </p>",
+                                  "<p><strong>Ms. Guerra</strong>: Yes!  If your issue is being able to focus, you need to work on growing more connections between the neurons in your brain! </p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "Nu5Ew43MyYQpDCMj",
+                              "title": "Text 4",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Estrella didn’t really understand what that meant and Ms. Guerra could sense her confusion. Figuring Estrella needed more of an explanation, Ms. Guerra pulled out a video that she had used when she taught college courses a few years ago. Huddled around the computer, the two of them clicked on the link: “<em>How our Brains Think</em>” </p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "ZsBwzUxkZWug5ZwL",
+                              "title": "Text 5",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<ul><li><strong>Watch the slide show- </strong><em><strong>EVIDENCE 1-How our Brains Think</strong></em><strong> - in the Resource Library.</strong></li></ul>",
+                                  "<ul><li><strong>Discuss the animation in your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library. </strong></li></ul>",
+                                  "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li></ul>"
+                                ]
+                              }
+                            }                      
                             ]
                           },
                           "supports": []
@@ -1340,12 +1513,21 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "17SEP20221154AM",
+                  "id": "-VyJI03fNSgRD_yA",
+                  "title": "Text 2",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                      "<p><strong>Welcome to CLUE! Here on the right-hand side of CLUE is your Workspace Log. </strong>You will use this space to -</p>",
+                      "<ul><li>collect and explain evidence, </li><li>take notes, and </li><li>answer questions about the effects of long-term stress. </li></ul>",
+                      "<p><strong>On the left-hand side of CLUE, </strong>there are two tabs. The <em>Story</em> tab has Chapters of the story. You will see chapters only after your teacher assigns them to you. The <em>Resource Library</em> tab has different resources connected to the story that you will use to learn more about different parts of the story.</p>",
+                      "<p><u><strong>What to Do:</strong></u></p>",
+                      "<p>Read the chapter and follow the instructions given below the chapter.</p>",
+                      "<p><u><strong>How to Use this Log:</strong></u></p>",
+                      "<p><strong>Tap on the icons at left to create a tile for text, images, drawing, or tables. Or, drag tiles over </strong>from the Resource Library or from the story chapter.</p>",
+                      "<p><strong>Place tiles where you want! </strong>Use the &quot;domino&quot; (six dots) in the upper right corner of a tile to drag it to a new position. But make sure to keep your Evidence Table (see below) near the top of your Log so you can get to it easily.</p>",
+                      "<p>Note: All your work in CLUE is saved <em>automatically</em> whenever the green box above says &quot;Online&quot;. If it turns red and says &quot;Offline,&quot; your work will NOT be saved. If that happens, please take a screenshot of your work and tell your teacher.</p>"
                     ]
                   }
                 },
@@ -1356,8 +1538,9 @@
                     "type": "Table",
                     "name": "Cast of Characters",
                     "columns": [
-                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)", "Ms.Guerra (science teacher)"]},
-                      {"name":"Actor name","width":200,"values":["","","","","","","","","",""]}
+                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)","Ms.Guerra (science teacher)"]},
+                      {"name":"Number of lines","width":130,"values":["(21 paragraphs)","35","12","4","3","4","3","4","4","12"]},
+                      {"name":"Actor name","width":180,"values":["","","","","","","","","",""]}
                     ]
                   }
                 },
@@ -1367,9 +1550,9 @@
                     "type": "Table",
                     "name": "Evidence Table",
                     "columns": [
-                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
-                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                      {"name":"Evidence","width":120,"values":["Type the name of the evidence here","","","",""]},
+                      {"name":"What did we learn from this evidence? ","width":210,"values":["","","","",""]},
+                      {"name":"What question does this evidence help us answer?","width":200,"values":["","","","",""]}
                     ]
                   }
                 }
@@ -1390,31 +1573,72 @@
                           "content": {
                             "tiles": [
                               {
+                                "id": "_1xLSGqoTw61MpD1",
+                                "title": "Text 1",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<h2>CHAPTER 3: MAKING CONNECTIONS</h2>",
-                                    "<p>After watching the animation, María understood that in order to focus better, the signaling between neurons needed to get stronger. Her neurons simply needed to make more connections! It seemed stress had nothing to do with it after all. </p>",
-                                    "<p>The next week in school, María tried to practice focusing harder. Every time she was in class and caught herself feeling distracted she just thought about her neurons and concentrated as hard as she could to encourage them to make new connections. But despite her best efforts, it didn’t work. In fact, María felt like she was about to pop a blood vessel in her brain if she tried to focus any harder. No matter how hard she tried, she still caught herself daydreaming and texting even more. Resistance was futile. She also had so many things to do. </p>",
-                                    "<p>Mama: Mija, como estan sus hermanos? Ellos comiste?</p>",
-                                    "<p>Estrella: Si, nosotros comimos.</p>",
-                                    "<p>Mama: Bien, ayudarles con sus tareas, ok?</p>",
-                                    "<p>Estrella: Ok, Mama.</p>",
-                                    "<p>Papa: Paco y Tito tienen una conferencia con la maestra en una semana, verdad?</p>",
-                                    "<p>Estrella: Si</p>",
-                                    "<p>Mama: Tú necesitas ir con nosotros para hablar con la maestra en inglés.</p>",
-                                    "<p>Estrella: Pero, yo tengo una examen y necesito estudiar.</p>",
-                                    "<p>Papa: No podemos comprender sin ti. Es muy importante para ellos. </p>",
-                                    "<p>Estrella: Okay…</p>",
-                                    "<p>Estrella felt like she had so many things piling up on her plate, her shoulders felt heavier and heavier with each task. All this made focusing feel even more impossible. Feeling frustrated, María decided to look up “brain, stress, and neuron signaling” on Google. A few links down from the top, she came across a blog post: “Stress and the Brain”. </p>",
-                                    "<p></p>",
-                                    "<p><strong>Read the blog - EVIDENCE 2 - Stress and the Brain  - in the Resource Library. </strong></p>",
-                                    "<p><strong>Discuss the blog with your group and together, answer the questions below by dragging them into your workspace. </strong></p>",
-                                    "<p><strong>Write what you learned from this evidence in your table.</strong></p>"
+                                    "<h3>CHAPTER 3: MAKING CONNECTIONS</h3>"
                                   ]
                                 }
-                              }       
+                              },
+                              {
+                                "id": "rDcxrdrPP2l4dAEg",
+                                "title": "Text 2",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>After watching the video, Estrella now understood that in order to focus better, the signaling between neurons needed to get stronger. Her neurons simply needed to make more connections! It seemed that maybe stress had nothing to do with her inability to focus, after all. </p>",
+                                    "<p>The next week in school, Estrella tried to practice focusing harder. Every time she was in class and caught herself feeling distracted she just thought about her neurons and concentrated as hard as she could to encourage them to make new connections. But despite her best efforts, it didn’t seem to work. She still could not focus. That evening while having dinner her mother asked her:</p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "kv8NdJYpHN9qJEY1",
+                                "title": "Text 3",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><strong>Mamá</strong>: Mija, como estan sus hermanos? Ellos comieron? (Daughter, how are your brothers? Did they eat?)</p>",
+                                    "<p><strong>Estrella</strong>: Si, nosotros comimos. (Yes, we ate)</p>",
+                                    "<p><strong>Mamá</strong>: Bien, ayudarles con sus tareas, ok? (Good, help them with their homework, ok?)</p>",
+                                    "<p><strong>Estrella</strong>: Ok, Mama.</p>",
+                                    "<p><strong>Papá</strong>: Paco y Tito tienen una conferencia con las maestras en una semana, verdad? (Paco  and Tito have a conference with the teachers in a week, right?)</p>",
+                                    "<p><strong>Estrella</strong>: Sï (Yes)</p>",
+                                    "<p><strong>Mamá</strong>: Tú necesitas venir con nosotros para hablar con las maestras en inglés. (You need to come with us to talk to the teacher in English)</p>",
+                                    "<p><strong>Estrella</strong>: Pero, yo tengo una examen y necesito estudiar. (But, I have an exam and I need to study)</p>",
+                                    "<p><strong>Papá</strong>: Estrella, tú sabes que no hay conferencias de maestras en español. No entenderemos sin tu ayuda. Esto es muy importante para Tito y Paco, piensa en ellos también. (Estrella, you know that there are no conferences for teachers in Spanish. We won’t understand without your help. This is very important for Tito and Paco, think of them)</p>",
+                                    "<p><strong>Estrella</strong>: Okay…</p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "qHF-THwY16bcCVF1",
+                                "title": "Text 4",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>Estrella felt like she had so many things piling up on her plate, her shoulders felt heavier and heavier with each task. All this made focusing even harder. Feeling frustrated, Estrella decided to look up “brain, stress, and neuron signaling” on Google. A few links down from the top, she came across a blog post: “<em>Stress and the Brain</em>”.</p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "p378BRXMfkMlfKkx",
+                                "title": "Text 5",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<ul><li><strong>Read the blog- </strong><em><strong>EVIDENCE 2-Stress and the Brain</strong></em><strong>  - in the Resource Library. </strong></li></ul>",
+                                    "<ul><li><strong>Discuss the blog with your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library.</strong></li></ul>",
+                                    "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li></ul>"
+                                  ]
+                                }
+                              }
                             ],
                             "supports": []
                           }
@@ -1424,12 +1648,21 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "17SEP20221154AM",
+                  "id": "-VyJI03fNSgRD_yA",
+                  "title": "Text 2",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                      "<p><strong>Welcome to CLUE! Here on the right-hand side of CLUE is your Workspace Log. </strong>You will use this space to -</p>",
+                      "<ul><li>collect and explain evidence, </li><li>take notes, and </li><li>answer questions about the effects of long-term stress. </li></ul>",
+                      "<p><strong>On the left-hand side of CLUE, </strong>there are two tabs. The <em>Story</em> tab has Chapters of the story. You will see chapters only after your teacher assigns them to you. The <em>Resource Library</em> tab has different resources connected to the story that you will use to learn more about different parts of the story.</p>",
+                      "<p><u><strong>What to Do:</strong></u></p>",
+                      "<p>Read the chapter and follow the instructions given below the chapter.</p>",
+                      "<p><u><strong>How to Use this Log:</strong></u></p>",
+                      "<p><strong>Tap on the icons at left to create a tile for text, images, drawing, or tables. Or, drag tiles over </strong>from the Resource Library or from the story chapter.</p>",
+                      "<p><strong>Place tiles where you want! </strong>Use the &quot;domino&quot; (six dots) in the upper right corner of a tile to drag it to a new position. But make sure to keep your Evidence Table (see below) near the top of your Log so you can get to it easily.</p>",
+                      "<p>Note: All your work in CLUE is saved <em>automatically</em> whenever the green box above says &quot;Online&quot;. If it turns red and says &quot;Offline,&quot; your work will NOT be saved. If that happens, please take a screenshot of your work and tell your teacher.</p>"
                     ]
                   }
                 },
@@ -1440,8 +1673,9 @@
                     "type": "Table",
                     "name": "Cast of Characters",
                     "columns": [
-                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)", "Ms.Guerra (science teacher)"]},
-                      {"name":"Actor name","width":200,"values":["","","","","","","","","",""]}
+                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)","Ms.Guerra (science teacher)"]},
+                      {"name":"Number of lines","width":130,"values":["(21 paragraphs)","35","12","4","3","4","3","4","4","12"]},
+                      {"name":"Actor name","width":180,"values":["","","","","","","","","",""]}
                     ]
                   }
                 },
@@ -1451,9 +1685,9 @@
                     "type": "Table",
                     "name": "Evidence Table",
                     "columns": [
-                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
-                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                      {"name":"Evidence","width":120,"values":["Type the name of the evidence here","","","",""]},
+                      {"name":"What did we learn from this evidence? ","width":210,"values":["","","","",""]},
+                      {"name":"What question does this evidence help us answer?","width":200,"values":["","","","",""]}
                     ]
                   }
                 }
@@ -1474,18 +1708,65 @@
                           "content": {
                             "tiles": [
                               {
+                                "id": "17SEP20221154AM",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<h2>CHAPTER 4: IT’S ALL ABOUT THE NETWORKS</h2>",
-                                    "<p>After going through the blog, María began to understand that stress hormones were blocking her ability to focus. Who knew something in your brain could stop you from focusing? If stress hormones were stopping her from focusing, what else could they do? What was happening to her neurons? Her mind seemed fixated on these scary thoughts and she had a hard time stopping them. She was feeling anxious and unsettled. She decided to visit Ms. Guerra again tomorrow.</p>",
-                                    "<p>María didn’t have science the next day, so she waited till the end of the day to walk over to Ms. Guerra’s room. When she got there, Ms. Guerra was cleaning the classroom so María helped with the cleaning while telling her everything she learned in the blog last night. Ms. Guerra listened carefully to María and was curious herself. She suggested that María do a project about stress and focus. It would count towards her overall science grade in the class, and both of them would learn more about the topic. She even offered to email the scientist who wrote the blog post and ask for more resources that might help them both understand why stress hormones were affecting María’s ability to focus. María thought that was super cool… kind of like talking to a celebrity. </p>",
-                                    "<p>A few days later Ms. Guerra told María to stay after school because the scientist, Dr. Mackey, had responded! María was excited as she walked into Ms. Guerra’s room. The email Dr. Mackey sent had a report attached to it. So, Ms. Guerra clicked on the attachment and they both read Dr. Mackey’s Report</p>",
+                                    "<h3>CHAPTER 4: IT’S ALL ABOUT THE NETWORKS</h3>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "zbaHoNMnarYRK3fK",
+                                "title": "Text 1",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>After going through the blog, Estrella began to understand that stress hormones were blocking her ability to pay attention. Who knew something in your brain could stop you from focusing? If stress hormones were stopping her from focusing, what else could they do? Her mind seemed fixated on these scary thoughts and she felt anxious and unsettled. She decided to visit Ms. Guerra again tomorrow.</p>",
+                                    "<p>Estrella didn’t have science the next day, so she waited till the end of the day to walk over to Ms. Guerra’s room. When she got there, Ms. Guerra was cleaning the classroom so Estella helped with the cleaning.</p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "sdZk2qFTfmd7OX6n",
+                                "title": "Text 2",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><strong>Estrella</strong>: Remember my question a few days ago about stress, Ms. Guerra? </p>",
+                                    "<p><strong>Ms. Guerra</strong>: Yeah I do. Did you look into that more? </p>",
+                                    "<p><strong>Estrella</strong>: I did actually. Yesterday, I was thinking about how my stress may be related to  my focusing so I googled up stress and neuron signaling. </p>",
+                                    "<p><strong>Ms. Guerra</strong>: That’s really smart Estrella. What did you find out?</p>",
+                                    "<p><strong>Estrella</strong>: I found this really cool blog post by this scientist. Her name is Dr. Mackey? I think. </p>",
+                                    "<p><strong>Ms. Guerra</strong>: Oh that’s awesome. </p>",
                                     "<p></p>",
-                                    "<p><strong>Review the report- EVIDENCE 3- Dr. Mackey’s Report - in the Resource Library. </strong></p>",
-                                    "<p><strong>Discuss the report with your group and together, answer the questions in the Resource Library. </strong></p>",
-                                    "<p><strong>Write what you learned from this evidence in your table.</strong></p>"
+                                    "<p>[Ms. Guerra stopped what she was doing, and thought for a moment.]</p>",
+                                    "<p></p>",
+                                    "<p><strong>Ms. Guerra</strong>: You know it seems like you’re really interested in this topic, and spending a lot of time on it. Do you want to do a project about stress and focus for your science honors project this year? </p>",
+                                    "<p><strong>Estrella</strong>: I.. I can do that? But.. I already tried to look online and I couldn’t find much more…it’s all really confusing</p>",
+                                    "<p><strong>Ms. Guerra</strong>: Oh don’t worry Estrella. Why don’t I email the scientist, Dr. ...</p>",
+                                    "<p><strong>Estrella</strong>: Dr. Mackey?</p>",
+                                    "<p><strong>Ms. Guerra</strong>: Yes. Dr. Mackey! And I’ll ask her for some helpful resources for you. </p>",
+                                    "<p><strong>Estrella</strong>: Wow.. you’re gonna email a real scientist? </p>",
+                                    "<p><strong>Ms. Guerra</strong>: Why not! Let’s see what happens! </p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "FMqcIlJATvLOMPyY",
+                                "title": "Text 3",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<ul><li><strong>Review the report- </strong><em><strong>EVIDENCE 3a- Dr. Mackey’s Report</strong></em><strong> - in the Resource Library. </strong></li></ul>",
+                                    "<ul><li><strong>Then watch the video- </strong><em><strong>EVIDENCE 3b- Dr. Mackey Video</strong></em><strong> - in the Resource Library. </strong></li></ul>",
+                                    "<ul><li><strong>Explore the animation - </strong><em><strong>EVIDENCE 3c- Focus Animation</strong></em><strong> - in the Resource Library. Change the options in the animation and notice the effects.</strong></li></ul>",
+                                    "<ul><li><strong>Discuss the report and the animation with your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library. </strong></li></ul>",
+                                    "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li></ul>"
                                   ]
                                 }
                               }
@@ -1498,12 +1779,21 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "17SEP20221154AM",
+                  "id": "-VyJI03fNSgRD_yA",
+                  "title": "Text 2",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                      "<p><strong>Welcome to CLUE! Here on the right-hand side of CLUE is your Workspace Log. </strong>You will use this space to -</p>",
+                      "<ul><li>collect and explain evidence, </li><li>take notes, and </li><li>answer questions about the effects of long-term stress. </li></ul>",
+                      "<p><strong>On the left-hand side of CLUE, </strong>there are two tabs. The <em>Story</em> tab has Chapters of the story. You will see chapters only after your teacher assigns them to you. The <em>Resource Library</em> tab has different resources connected to the story that you will use to learn more about different parts of the story.</p>",
+                      "<p><u><strong>What to Do:</strong></u></p>",
+                      "<p>Read the chapter and follow the instructions given below the chapter.</p>",
+                      "<p><u><strong>How to Use this Log:</strong></u></p>",
+                      "<p><strong>Tap on the icons at left to create a tile for text, images, drawing, or tables. Or, drag tiles over </strong>from the Resource Library or from the story chapter.</p>",
+                      "<p><strong>Place tiles where you want! </strong>Use the &quot;domino&quot; (six dots) in the upper right corner of a tile to drag it to a new position. But make sure to keep your Evidence Table (see below) near the top of your Log so you can get to it easily.</p>",
+                      "<p>Note: All your work in CLUE is saved <em>automatically</em> whenever the green box above says &quot;Online&quot;. If it turns red and says &quot;Offline,&quot; your work will NOT be saved. If that happens, please take a screenshot of your work and tell your teacher.</p>"
                     ]
                   }
                 },
@@ -1514,8 +1804,9 @@
                     "type": "Table",
                     "name": "Cast of Characters",
                     "columns": [
-                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)", "Ms.Guerra (science teacher)"]},
-                      {"name":"Actor name","width":200,"values":["","","","","","","","","",""]}
+                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)","Ms.Guerra (science teacher)"]},
+                      {"name":"Number of lines","width":130,"values":["(21 paragraphs)","35","12","4","3","4","3","4","4","12"]},
+                      {"name":"Actor name","width":180,"values":["","","","","","","","","",""]}
                     ]
                   }
                 },
@@ -1525,9 +1816,9 @@
                     "type": "Table",
                     "name": "Evidence Table",
                     "columns": [
-                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
-                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                      {"name":"Evidence","width":120,"values":["Type the name of the evidence here","","","",""]},
+                      {"name":"What did we learn from this evidence? ","width":210,"values":["","","","",""]},
+                      {"name":"What question does this evidence help us answer?","width":200,"values":["","","","",""]}
                     ]
                   }
                 }
@@ -1548,22 +1839,43 @@
                           "content": {
                             "tiles": [
                               {
+                                "id": "QfJCBdIEUtTl4WDN",
+                                "title": "Text 1",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<h2>CHAPTER 5: SLEEP AND MOTIVATION </h2>",
-                                    "<p>The project and research helped María understand that the stress hormones caused her brain to think differently, with her fear neuron networks having stronger connections than the neuron networks that help her pay attention and focus. While interesting to learn, María was trying to figure out how to deal with these hormones so that she could build stronger attention networks. As she thought about all this, María had a realization. Her lack of focus seemed to happen only in the morning at school! She had no trouble focusing when she was talking to her siblings, helping them with their homework, playing video games with her friends, or even doing her homework at night! Why would the stress hormones only affect her at school and then stop affecting her when she got home? María decided these questions were worth one more trip to Ms. Guerra after school. She needed to solve this puzzle once and for all! </p>",
-                                    "<p>Ms. Guerra thought María’s question was a really good one. She herself did not have an answer so they decided to email Dr. Mackey again and ask. The following day Ms. Guerra found María as soon as school was over. She excitedly showed María the email and video that Dr. Mackey had sent. </p>",
-                                    "<p></p>",
-                                    "<p><strong>Read the email and watch the video- EVIDENCE 4- Dr. Mackey Email - in the Resource Library. </strong></p>",
-                                    "<p><strong>Discuss the email and video with your group and together, answer the questions in the  Resource Library. </strong></p>",
-                                    "<p><strong>Write what you learned from this evidence in your table.</strong></p>",
-                                    "<p><strong></strong></p>"
+                                    "<h3>CHAPTER 5: SLEEP AND MOTIVATION </h3>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "lh4lmsNpk2697B0v",
+                                "title": "Text 2",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>The project and research helped Estrella understand that the stress hormones caused her brain to think differently, with her fear networks having stronger connections than the neuron networks that help her pay attention and focus. While interesting to learn, Estrella was trying to figure out how to deal with these stress hormones so that she could build stronger attention networks. As she thought about all this, Estrella had a realization. </p>",
+                                    "<p>Her lack of focus seemed to happen only at school! She had no trouble focusing when she was helping her siblings with their homework or playing video games with her friends! Why would the stress hormones only affect her at school and then stop affecting her when she got home? Estrella decided these questions were worth one more trip to Ms. Guerra after school. She needed to solve this puzzle once and for all! Ms. Guerra thought Estrella’s question was a really good one. She herself did not have an answer so they decided to email Dr. Mackey again and ask. </p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "Kkw05peNhLaPahA3",
+                                "title": "Text 3",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<ul><li><strong>Explore - </strong><em><strong>EVIDENCE 4a-Focus Model Simulator </strong></em><strong>- in the Resource Library. Change the options in the simulator and notice the effects.</strong></li></ul>",
+                                    "<ul><li><strong>Read the email </strong><em><strong>EVIDENCE 4b- Dr. Mackey Email </strong></em><strong>- in the Resource Library.</strong></li></ul>",
+                                    "<ul><li><strong>Then watch the video- </strong><em><strong>EVIDENCE 4c- Dr. Mackey Email Attachment</strong></em><strong> - in the Resource Library.  </strong></li></ul>",
+                                    "<ul><li><strong>Discuss these materials with your group and together, answer the questions about the evidence in the Resource Library. </strong></li></ul>",
+                                    "<ul><li><strong>Write what you learned from this evidence in your table.</strong></li></ul>"
                                   ]
                                 }
                               }
-                              
                             ],
                             "supports": []
                           }
@@ -1573,12 +1885,21 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "17SEP20221154AM",
+                  "id": "-VyJI03fNSgRD_yA",
+                  "title": "Text 2",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                      "<p><strong>Welcome to CLUE! Here on the right-hand side of CLUE is your Workspace Log. </strong>You will use this space to -</p>",
+                      "<ul><li>collect and explain evidence, </li><li>take notes, and </li><li>answer questions about the effects of long-term stress. </li></ul>",
+                      "<p><strong>On the left-hand side of CLUE, </strong>there are two tabs. The <em>Story</em> tab has Chapters of the story. You will see chapters only after your teacher assigns them to you. The <em>Resource Library</em> tab has different resources connected to the story that you will use to learn more about different parts of the story.</p>",
+                      "<p><u><strong>What to Do:</strong></u></p>",
+                      "<p>Read the chapter and follow the instructions given below the chapter.</p>",
+                      "<p><u><strong>How to Use this Log:</strong></u></p>",
+                      "<p><strong>Tap on the icons at left to create a tile for text, images, drawing, or tables. Or, drag tiles over </strong>from the Resource Library or from the story chapter.</p>",
+                      "<p><strong>Place tiles where you want! </strong>Use the &quot;domino&quot; (six dots) in the upper right corner of a tile to drag it to a new position. But make sure to keep your Evidence Table (see below) near the top of your Log so you can get to it easily.</p>",
+                      "<p>Note: All your work in CLUE is saved <em>automatically</em> whenever the green box above says &quot;Online&quot;. If it turns red and says &quot;Offline,&quot; your work will NOT be saved. If that happens, please take a screenshot of your work and tell your teacher.</p>"
                     ]
                   }
                 },
@@ -1589,8 +1910,9 @@
                     "type": "Table",
                     "name": "Cast of Characters",
                     "columns": [
-                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)", "Ms.Guerra (science teacher)"]},
-                      {"name":"Actor name","width":200,"values":["","","","","","","","","",""]}
+                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)","Ms.Guerra (science teacher)"]},
+                      {"name":"Number of lines","width":130,"values":["(21 paragraphs)","35","12","4","3","4","3","4","4","12"]},
+                      {"name":"Actor name","width":180,"values":["","","","","","","","","",""]}
                     ]
                   }
                 },
@@ -1600,9 +1922,9 @@
                     "type": "Table",
                     "name": "Evidence Table",
                     "columns": [
-                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
-                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                      {"name":"Evidence","width":120,"values":["Type the name of the evidence here","","","",""]},
+                      {"name":"What did we learn from this evidence? ","width":210,"values":["","","","",""]},
+                      {"name":"What question does this evidence help us answer?","width":200,"values":["","","","",""]}
                     ]
                   }
                 }
@@ -1623,40 +1945,112 @@
                           "content": {
                             "tiles": [
                               {
+                                "id": "17SEP20221154AM",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<h2>CHAPTER 6: FINDING SOLUTIONS TOGETHER </h2>",
-                                    "<p>After reading the email, María smiled to herself. Abuela was right - she always was. María was so excited she had to share the news with Abuela. She thanked Ms. Guerra and rushed home. María didn’t have to pick up her siblings from school that day and got home quickly. She swung the front door open and called out to Abuela. </p>",
-                                    "<p>María: ¡Abuela! ¡Abuela! ¡Abuela! </p>",
-                                    "<p>Abuela: ¡Sí! ¡Sí! ¡Sí! </p>",
-                                    "<p>María: I have to tell you something. I learned some stuff about my focus problem.</p>",
-                                    "<p>María energetically filled her grandmother in on her breakthrough. She barely took breaths between sentences, her words running into each other. Her grandmother listened intently and when María was done she told her that this was important information that the whole family should hear and talk about at dinner. </p>",
-                                    "<p>That night, as María, Abuela, Papá, Mamá, and María’s younger siblings - Tito, Paco and Sandra - were sitting around the table, María carefully explained to them everything she learned about the way stress hormones reduce connections and make it hard to focus. She also explained that getting enough sleep and motivating work can help when the brain is trying to make new connections. They all listened and were amazed by what she figured out.</p>",
-                                    "<p>María: So that’s why I’m not focused during school. I’m not motivated by it even though I want to do well. </p>",
-                                    "<p>Mamá: Wow, you learned all that and you worked so hard to learn it. Good job, mija. </p>",
-                                    "<p>Tito: Wh-what’s motiwasion? </p>",
-                                    "<p>María giggled at her youngest brother’s pronunciation. </p>",
-                                    "<p>Papá: It’s like when you manage to somehow climb onto the cabinet when you want a cookie but can’t climb into bed when it’s bedtime. The cookie is your motivation. </p>",
-                                    "<p>Paco: So hermana just needs a cookie?</p>",
-                                    "<p>Mamá: A cookie helps, but maybe you should also talk to your teachers about making school more motivating to learn. </p>",
-                                    "<p>María: I like that idea Mamá. I’ll talk to them tomorrow. </p>",
-                                    "<p>Abuela: I think we all need to get to sleep earlier too. Pobrecitos are always dragging their heads in the morning going to school. </p>",
-                                    "<p>Papá: I wouldn’t mind a few extra minutes of shut eye. </p>",
-                                    "<p>Sandra: Papá, you fall asleep the fastest. </p>",
-                                    "<p>The whole family burst into laughter. </p>",
-                                    "<p>That night María went to bed an hour earlier. She did feel more rested the next day. She was also looking forward to talking with Ms. Guerra about stress, motivation, and school work. Ms. Guerra was a great teacher, she would probably have some good ideas to make science more interesting, relevant, and motivating to learn. </p>",
-                                    "<p></p>",
-                                    "<p><strong>The End!</strong></p>",
-                                    "<p><strong></strong></p>",
-                                    "<p><strong>Use your evidence table to develop a model that shows how long-term stress can result in difficulty in focusing.</strong></p>",
-                                    "<p> </p>",
+                                    "<h3>CHAPTER 6: FINDING SOLUTIONS TOGETHER </h3>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "ponD7qOi1qpD082e",
+                                "title": "Text 1",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>After reading the email, Estrella smiled to herself. Abuela was right - she always was. Estrella was so excited she had to share the news with Abuela. She thanked Ms. Guerra and rushed home. </p>",
                                     "<p></p>"
                                   ]
                                 }
+                              },
+                              {
+                                "id": "kdVF-H33bX7VmKT2",
+                                "title": "Text 2",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><strong>Estrella</strong>: ¡Abuela! ¡Abuela! ¡Abuela! [Grandma, Grandma, Grandma]</p>",
+                                    "<p><strong>Abuela</strong>: ¡Sí! ¡Sí! ¡Sí! [Yes, Yes, Yes]</p>",
+                                    "<p><strong>Estrella</strong>: I have to tell you something. I learned some stuff about my focus problem.</p>",
+                                    "<p></p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "9n3mwy1tRqYeaGju",
+                                "title": "Text 3",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>Estrella energetically filled her grandmother in on her breakthrough. She barely took breaths between sentences, her words running into each other. Her grandmother listened intently and when Estrella was done she told her that this was important information that the whole family should hear and talk about at dinner. That night, as Estrella, Abuela, Papá, Mamá, and Estrella’s younger siblings - Tito, Paco and Sandra - were sitting around the table, Estrella carefully explained to them everything she learned. </p>",
+                                    "<p></p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "ZWQcr-PPtZaIV9M1",
+                                "title": "Text 4",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><strong>Estrella</strong>: So that’s why I’m not focused during school. I’m not motivated by it even though I want to do well. </p>",
+                                    "<p><strong>Estrella</strong>: Wow, you learned all that and you worked so hard to learn it. Good job, mija [daughter]. </p>",
+                                    "<p><strong>Tito</strong>: Wh-what’s motiwasion?</p>",
+                                    "<p> </p>",
+                                    "<p>[Estrella giggled at her youngest brother’s pronunciation.]</p>",
+                                    "<p></p>",
+                                    "<p><strong>Papá</strong>: It’s like when you manage to somehow climb onto the cabinet when you want a cookie but can’t climb into bed when it’s bedtime. The cookie is your motivation. </p>",
+                                    "<p><strong>Paco</strong>: So hermana (sister) just needs a cookie?</p>",
+                                    "<p><strong>Mamá</strong>: A cookie helps, but maybe you should also talk to your teachers about making school more motivating to learn. </p>",
+                                    "<p><strong>Estrella</strong>: I like that idea Mamá. I’m worried about talking to Ms. Parker for honors Calculus because she doesn’t think I’m smart enough for that class…but I can talk to Ms. Guerra for Science. </p>",
+                                    "<p><strong>Abuela</strong>: I think we all need to get to sleep earlier too. Pobrecitos are always dragging their heads in the morning going to school. </p>",
+                                    "<p><strong>Papá</strong>: I wouldn’t mind a few extra minutes of shut eye. </p>",
+                                    "<p><strong>Sandra</strong>: Papá, you fall asleep the earliest! </p>",
+                                    "<p></p>",
+                                    "<p>[The whole family burst into laughter.]</p>",
+                                    "<p></p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "MhnwjhL2Om9dJ9pH",
+                                "title": "Text 5",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>That night Estrella went to bed an hour earlier. She did feel more rested the next day. She was also looking forward to talking with Ms. Guerra about stress, motivation, and school work. Ms. Guerra was a great teacher, she would probably have some good ideas to make science more interesting, relevant, and motivating to learn. Estrella hopes that Ms. Guerra might also give her some advice on how to talk to Ms. Parker about helping her stay motivated in honors Calculus. </p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "Fla_8SJwdN4yhvz8",
+                                "title": "Text 6",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<h2>The end!</h2>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "6NoE9yaG6h0O-tWZ",
+                                "title": "Text 7",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<ul><li><strong>Use your evidence table to develop a model that shows how long-term stress can result in difficulty in focusing.</strong></li></ul>"
+                                  ]
+                                }
                               }
-                              
                             ],
                             "supports": []
                           }
@@ -1666,12 +2060,21 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "17SEP20221154AM",
+                  "id": "-VyJI03fNSgRD_yA",
+                  "title": "Text 2",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                      "<p><strong>Welcome to CLUE! Here on the right-hand side of CLUE is your Workspace Log. </strong>You will use this space to -</p>",
+                      "<ul><li>collect and explain evidence, </li><li>take notes, and </li><li>answer questions about the effects of long-term stress. </li></ul>",
+                      "<p><strong>On the left-hand side of CLUE, </strong>there are two tabs. The <em>Story</em> tab has Chapters of the story. You will see chapters only after your teacher assigns them to you. The <em>Resource Library</em> tab has different resources connected to the story that you will use to learn more about different parts of the story.</p>",
+                      "<p><u><strong>What to Do:</strong></u></p>",
+                      "<p>Read the chapter and follow the instructions given below the chapter.</p>",
+                      "<p><u><strong>How to Use this Log:</strong></u></p>",
+                      "<p><strong>Tap on the icons at left to create a tile for text, images, drawing, or tables. Or, drag tiles over </strong>from the Resource Library or from the story chapter.</p>",
+                      "<p><strong>Place tiles where you want! </strong>Use the &quot;domino&quot; (six dots) in the upper right corner of a tile to drag it to a new position. But make sure to keep your Evidence Table (see below) near the top of your Log so you can get to it easily.</p>",
+                      "<p>Note: All your work in CLUE is saved <em>automatically</em> whenever the green box above says &quot;Online&quot;. If it turns red and says &quot;Offline,&quot; your work will NOT be saved. If that happens, please take a screenshot of your work and tell your teacher.</p>"
                     ]
                   }
                 },
@@ -1682,8 +2085,9 @@
                     "type": "Table",
                     "name": "Cast of Characters",
                     "columns": [
-                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)", "Ms.Guerra (science teacher)"]},
-                      {"name":"Actor name","width":200,"values":["","","","","","","","","",""]}
+                      {"name":"Character name","width":200,"values":["Narrator","Estrella (main character)","Abuela (grandmother)","Papá (father)","Ms. Parker (math teacher)","Mamá (mother)","Paco (brother)","Tito (brother)","Sandra (sister)","Ms.Guerra (science teacher)"]},
+                      {"name":"Number of lines","width":130,"values":["(21 paragraphs)","35","12","4","3","4","3","4","4","12"]},
+                      {"name":"Actor name","width":180,"values":["","","","","","","","","",""]}
                     ]
                   }
                 },
@@ -1693,9 +2097,9 @@
                     "type": "Table",
                     "name": "Evidence Table",
                     "columns": [
-                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
-                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                      {"name":"Evidence","width":120,"values":["Type the name of the evidence here","","","",""]},
+                      {"name":"What did we learn from this evidence? ","width":210,"values":["","","","",""]},
+                      {"name":"What question does this evidence help us answer?","width":200,"values":["","","","",""]}
                     ]
                   }
                 }
@@ -1723,15 +2127,111 @@
                         "content": {
                           "tiles": [
                             {
-                              "id": "OD0F9qGMjdy4f0OX",
-                              "title": "Text 1",
+                              "id": "cI1Xo-lIDz_ad-T5",
+                              "title": "Text 2",
                               "content": {
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
-                                  "<h2>CHAPTER 1: A NEW PHASE IN LIFE</h2>",
-                                  "<p></p>",
-                                  "<p>Being a law student is hard work, especially for Felix, who just started his final year of law school. He loved the independence that came with life in his mid 20s. He got to choose his own classes, meet new people who were also interested in law, and finally got to live with his boyfriend, Josue. Moving out of his parents’ home and into an apartment with Josue, was such an exciting step, something he had only seen in movies. But at the same time, law school life also meant that he had to pay for his college fees, course textbooks, and of course, rent and groceries! Moving away from home, living with his boyfriend, and starting this new phase in his life meant he had new responsibilities. </p>"
+                                  "<h2>STRESS AND FEELING SICK:</h2>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "29Fnhm8vVNnC48JK",
+                              "title": "Text 3",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<h3>CHAPTER 1:  A NEW PHASE IN LIFE</h3>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "YhvzIQ-7KHADpQH4",
+                              "title": "Text 4",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Being a law student is hard work, especially for Felix who just started his final year of law school. He loved the independence that came with life in his mid 20s. He got to choose his own classes, meet new people, and finally got to live with his boyfriend, Josué. Moving out of his parents’ home and into an apartment with Josué was so exciting, it was a dream come true even though all they could afford was a tiny basement apartment that was old and pretty run down. At the same time, law school life also meant that he had to pay for his college fees, course textbooks, and of course, rent and groceries! Moving away from home, living with his boyfriend, and starting this new phase in his life meant he had new responsibilities and more expenses. </p>",
+                                  "<p>To pay his living expenses, Felix worked at the grocery store close to his apartment. He would plan his shifts around his classes and try to get as many as he could. Some days he would have a full day of classes and then pick up two shifts right after, then go home and stay up all night reading for his classes the next day. Josué always worried about how hard Felix worked. One night, when Felix had just worked for six hours straight and was starting on his homework, Josué decided to say something about it. </p>",
+                                  "<p></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "OJDA6H9HwbtVFNGr",
+                              "title": "Text 5",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>Josué</strong>: Mi amor (my love), it’s 1:00 am. You need to sleep or else you’re gonna collapse during class.</p>",
+                                  "<p><strong>Felix</strong>: Yo sé pero, (I know but) I have to finish this assignment. I’ll go to bed soon.</p>",
+                                  "<p><strong>Josué</strong>: You say that every night. </p>",
+                                  "<p><strong>Felix</strong>: Ya vengo (I’ll come). I promise. </p>",
+                                  "<p></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "AboIT1VwI0DrcmLf",
+                              "title": "Text 6",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Felix didn’t want to admit it, but he knew Josué was right. But what was he supposed to do? How was he supposed to pay for rent if he didn’t work? After reading for another 30 minutes, Felix decided to listen to Josué and go to bed. </p>",
+                                  "<p>The next morning Felix woke up with a stuffy nose and a slight cough. He thought about maybe not going to his classes and resting. But then he remembered that he had to give a presentation that he couldn’t miss. And then he had another double shift at work. He wished the grocery store gave part-time employees sick days too. He was getting sick more often and it was really starting to make life harder. Felix and Josué couldn’t afford health insurance which meant they never saw the doctor even if they needed to. He decided to call his mom in hopes she would be able to provide him some tips and home remedies to help him get better. </p>",
+                                  "<p></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "m6Of6vMpB-E8HhQc",
+                              "title": "Text 7",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>Felix</strong>: Hola Mamá. Está bien? (Are you well?)</p>",
+                                  "<p><strong>Mamá</strong>: Sí Felix. Qué te pasa? (Whats wrong?)</p>",
+                                  "<p><strong>Felix</strong>: I’m just feeling a little under the weather lately. What do I eat to stop coughing again?</p>",
+                                  "<p><strong>Mamá</strong>: I don’t think I can help you. You know what you have to change to stop being sick.</p>",
+                                  "<p><strong>Felix</strong>: W-what do you mean?</p>",
+                                  "<p><strong>Mamá</strong>: Well, you choose to live that lifestyle. Of course you’re going to get sick and stressed. Leaving your family and living with another man, what did you think was going to happen?</p>",
+                                  "<p><strong>Felix</strong>: You think I’m getting sick because I’m gay? I didn’t CHOOSE any lifestyle. I can’t help who I love. </p>",
+                                  "<p><strong>Mamá</strong>: Did you call me to argue?</p>",
+                                  "<p><strong>Felix</strong>: I called you looking for some help and comfort while I was sick, like I did when I was little. Clearly that was a mistake. </p>",
+                                  "<p></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "TBeFkqs4cBtcHJtH",
+                              "title": "Text 8",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Felix hangs up the phone without hearing his mom’s response. He doesn’t know why he tries when he knows how his family is. Ever since he came out to them, they have been the opposite of supportive. If Felix’s head didn’t already hurt before, it for sure hurt after that phone call. It left him with a bitter taste in his mouth and a heavy feeling in his chest. Felix shook his head. He had other things to worry about aside from his mom’s homophobia. Lying in bed, Felix realized there was no way he could take the day off to recover. Instead, he just popped cough drops in his mouth and tried to deal with it. Felix walked into the kitchen to find Josué had already made coffee for them, and was just starting to pack their lunches.</p>",
+                                  "<p></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "95oH407GwPIBL3g_",
+                              "title": "Text 9",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>Felix</strong>: Good morning mi amor… (Felix coughs) </p>",
+                                  "<p><strong>Josué</strong>: Don’t tell me. You’re sick. Again?? Mi amor, c’mon now you know this isn’t right. I’m telling you, you’re stressing yourself to the point where you’re getting sick. </p>",
+                                  "<p><strong>Felix</strong>: Ugh please don’t. Not so early in the morning. I’m fine. And don’t be ridiculous, stress doesn’t make you sick.</p>",
+                                  "<p></p>"
                                 ]
                               }
                             },
@@ -1744,79 +2244,82 @@
                               }
                             },
                             {
-                              "id": "7Zsx_K833c0AOPhT",
-                              "title": "Text 1",
+                              "id": "wfUh5FxrjMEwuyjb",
+                              "title": "Text 10",
                               "content": {
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
-                                  "<p>Balancing the pressures of hard courses with having to pay rent and his other expenses was not easy. He did love his demanding classes, but finding the time to study was getting more and more difficult. To pay his living expenses, Felix worked at the CTown close to his apartment. He would plan his shifts around his classes and try to get as many as he could. Each shift at CTown was only three hours long though, so he tried to pick up as many shifts as possible. Some days he will have a full day of classes and then pick up two shifts right after, then go home and stay up all night reading for his classes the next day. </p>",
-                                  "<p>Josue always worried about how hard Felix worked. One night, when Felix had just worked for six hours straight and was starting on his homework, Josue decided to say something about it. </p>",
-                                  "<p></p>",
-                                  "<p>Josue: Mi amor, it’s 1:00 am. You need to sleep or else you’re gonna collapse during class.</p>",
-                                  "<p>Felix: Yo se pero I have to finish this assignment. I’ll go to bed soon.</p>",
-                                  "<p>Josue: You say that every night. </p>",
-                                  "<p>Felix: Ya vengo. I promise. </p>",
-                                  "<p></p>",
-                                  "<p>Felix didn’t want to admit it, but he knew Josue was right. He did say that every night. But what was he supposed to do? How was he supposed to pay for rent if he didn’t work at CTown? After reading for another 30 minutes, Felix decided to listen to Josue and go to bed. </p>",
-                                  "<p>The next morning Felix woke up with a stuffy nose and a slight cough. He didn’t feel sick the night before, but these days, it seemed like he was waking up and feeling sick more and more often. He thought about maybe not going to his classes and resting. But then he remembered that he had to give a presentation that he couldn’t miss. And then he had another double shift at work. C Town didn’t offer sick days. Getting sick more often was really starting to make going to school and work so much harder.  Felix also still didn’t have health insurance which meant he couldn’t see a doctor to get medication. He decided to call his mom in hopes she would be able to provide him some tips and home remedies to help him get better. </p>",
-                                  "<p>Felix: Hola Mama. Esta bien?</p>",
-                                  "<p>Mama: Si Felix. Que te pasa?</p>",
-                                  "<p>Felix: I’m just feeling a little under the weather lately. What do I eat to stop coughing again?</p>",
-                                  "<p>Mama: I don’t think I can help you. You have to change if you want to stop being sick.</p>",
-                                  "<p>Felix: W-what do you mean?</p>",
-                                  "<p>Mama: Well, you choose to live that lifestyle. Of course you’re going to get sick and stressed. Leaving your family and living with another man, what did you think was going to happen?</p>",
-                                  "<p>Felix: You think I’m getting sick because I’m gay? I didn’t CHOOSE any lifestyle. I can’t help who I love. </p>",
-                                  "<p>Mama: Did you call me to argue?</p>",
-                                  "<p>Felix: I called you looking for some help and comfort while I was sick, like I did when I was little. Clearly that was a mistake. </p>",
-                                  "<p>Felix hangs up the phone without hearing his mom’s response. He doesn’t know why he tries when he knows how his family is. Ever since he came out to them, they have been the opposite of supportive. If Felix’s head didn’t already hurt before, it for sure hurt after that phone call. It left him with a bitter taste in his mouth and a heavy feeling in his chest. Felix shook his head. He had other things to worry about aside from his mom’s blatant homophobia.</p>",
-                                  "<p>Lying in bed, Felix realized there was no way he could take the day off to recover from this stuffy nose and cough. Instead, he just popped cough drops in his mouth and tried to deal with it. </p>",
-                                  "<p>Felix walked into the kitchen to find Josue had already made coffee for them, and was just starting to pack their lunches. Felix said good morning with a sad tone and then coughed. </p>",
-                                  "<p></p>",
-                                  "<p>Josue: Don’t tell me. You’re sick. Again?? Mi amor, c’mon now you know this isn’t right. I’m telling you, you’re stressing yourself to the point where you’re getting sick. </p>",
-                                  "<p>Felix: Ugh please don’t. Not so early in the morning. You’re overreacting. I’m fine. And don’t be ridiculous, stress doesn’t make you sick.</p>",
-                                  "<p></p>",
-                                  "<p>Josue knew he was right, but didn’t know how to make Felix hear him. As usual, Felix was just being so stubborn, and now Josue needed to find a way to get through to him. </p>"
+                                  "<p>Josué knew he was right, but didn’t know how to make Felix hear him. As usual, Felix was just being so stubborn, and now Josué needed to find a way to get through to him. </p>"
                                 ]
                               }
                             },
                             {
-                              "id": "tdD-dZKGiJAFSXQt",
+                              "id": "96dATNGUsa5twZMM",
+                              "title": "Text 11",
                               "content": {
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
-                                  "<p><strong>Do you think Josue is right?</strong></p>",
-                                  "<p><strong>Discuss with your group--What do you think is the connection between stress and getting sick often? </strong></p>",
-                                  "<p><em>—— Drag this tile into your Learning Log to write your answer ——</em></p>",
-                                  "<p>Your answer:</p>",
-                                  "<p></p>",
-                                  "<p></p>"
+                                  "<p><strong>Do you think Josué is right?</strong></p>",
+                                  "<p><strong>Discuss with your group--What do you think is the connection between stress and getting sick often?</strong></p>"
                                 ]
                               }
                             },
                             {
-                              "id": "IrOyOloyaw6UgROa",
-                              "title": "Text 1",
+                              "id": "kVx8VOXJ2yrn-j2J",
+                              "title": "Text 12",
                               "content": {
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
                                   "<p><em>Continue reading to find out what happened next:</em></p>",
-                                  "<p></p>",
-                                  "<p>     Josue: You seem down. What’s wrong?</p>",
-                                  "<p>     Felix: Oh nothing. I just called my mom asking her for some advice on how to feel better. </p>",
-                                  "<p>     Josue: Did she give you any advice?</p>",
-                                  "<p>     Felix: Nope. She essentially said I’m sick because I’m gay. </p>",
-                                  "<p>     Josue: That’s ridiculous</p>",
-                                  "<p>     Felix: I know. I just wanted some comfort from my mom, you know? I feel like I&#x27;m never gonna get that again. </p>",
-                                  "<p>     Josue: You need to give them time, my love. In time, they’ll see what they’re missing out on and maybe you can have an actual conversation with them. But until then, you have my parents. They love you. </p>",
-                                  "<p>     Felix: Thanks Josue.</p>",
-                                  "<p>     Josue: In fact, I think you should call my mom right now. She’s a doctor and a mom so she knows a lot about people getting sick. Call her just to prove that I’m right. </p>",
-                                  "<p></p>",
-                                  "<p>Felix reluctantly agreed. He was tired of Josue’s nagging and he was also starting to worry about why he got sick so often, so he figured a chat with Josue’s mom wasn’t too hard to do.  Josue, realizing he had a golden opportunity, pulled out his phone right away and rang his mother. </p>",
-                                  "<p></p>",
-                                  "<p>Josue’s mother picked up the phone and Josue loudly told her that Felix was sick again! Unfortunately, Josue’s mom was in the middle of seeing a patient and couldn’t talk. She told them that she would send them a link to a slide show that explains how and why you get sick. Later that day, Felix was in class when he saw an email from Josue’s mother with a link to the slide show. He couldn’t wait so he clicked on the link: “How Do You Get Sick?”</p>"
+                                  "<p>When he finished packing their lunches, Josué looked up and noticed Felix seemed upset. </p>",
+                                  "<p></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "n7ptZVjfSXb4SjSu",
+                              "title": "Text 13",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p><strong>Josué</strong>: You seem down. What’s wrong?</p>",
+                                  "<p><strong>Felix</strong>: Oh nothing. I just called my mom asking her for some advice on treating this annoying cough. </p>",
+                                  "<p><strong>Josué</strong>: Oh no… what did she say this time? Did she give you any actual advice?</p>",
+                                  "<p><strong>Felix</strong>: Nope. She essentially said I’m sick because I’m gay. </p>",
+                                  "<p><strong>Josué</strong>: Well… what did you expect? I’m sorry love…</p>",
+                                  "<p><strong>Felix</strong>: I know. I just wanted some comfort from my mom, ya know? Jeez it’s the 21st Century and being gay isn’t illegal.. I don’t know why my mom and our community have these ridiculous expectations that everyone has to be straight. And now I feel like I&#x27;m never gonna get that love and comfort from my family again. </p>",
+                                  "<p><strong>Josué</strong>: You need to give them time, my love. In time, they’ll see what they’re missing out on and maybe you can have an actual conversation with them. But until then, you have my parents, no? And they love you so much! </p>",
+                                  "<p><strong>Felix</strong>: Thanks Josué.</p>",
+                                  "<p><strong>Josué</strong>: In fact, you know what. I think you should call my mom right now. She’s a doctor and a mom so she knows a lot about people getting sick. </p>",
+                                  "<p></p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "QdyiJujAJli-FGMn",
+                              "title": "Text 14",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<p>Felix reluctantly agreed and figured a chat with Josué’s mom wasn’t that hard to do.  Josué, realizing he had a golden opportunity, pulled out his phone right away and rang his mother. Josué’s mother picked up the phone and Josué loudly told her that Felix was sick again! Unfortunately, Josué’s mom was in the middle of seeing a patient and couldn’t talk. She told them that she would send them a link to a slide show that explains how and why you get sick. Later that day, Felix was in class when he saw a text from Josué’s mother with a link to the slide show. He couldn’t wait so he clicked on the link: “<em>How Do You Get Sick</em>?”</p>"
+                                ]
+                              }
+                            },
+                            {
+                              "id": "6VviThDk4BJ6RHXP",
+                              "title": "Text 15",
+                              "content": {
+                                "type": "Text",
+                                "format": "html",
+                                "text": [
+                                  "<ul><li><strong>Watch the slide show- </strong><em><strong>EVIDENCE 1-How Do You Get Sick? </strong></em><strong>- in the Resource Library. </strong></li></ul>",
+                                  "<ul><li><strong>Discuss the animation in your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library. </strong></li></ul>",
+                                  "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li><p><strong></strong></p></ul>"
                                 ]
                               }
                             }
@@ -1829,12 +2332,21 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "17SEP20221154AM",
+                  "id": "-VyJI03fNSgRD_yA",
+                  "title": "Text 2",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                      "<p><strong>Welcome to CLUE! Here on the right-hand side of CLUE is your Workspace Log. </strong>You will use this space to -</p>",
+                      "<ul><li>collect and explain evidence, </li><li>take notes, and </li><li>answer questions about the effects of long-term stress. </li></ul>",
+                      "<p><strong>On the left-hand side of CLUE, </strong>there are two tabs. The <em>Story</em> tab has Chapters of the story. You will see chapters only after your teacher assigns them to you. The <em>Resource Library</em> tab has different resources connected to the story that you will use to learn more about different parts of the story.</p>",
+                      "<p><u><strong>What to Do:</strong></u></p>",
+                      "<p>Read the chapter and follow the instructions given below the chapter.</p>",
+                      "<p><u><strong>How to Use this Log:</strong></u></p>",
+                      "<p><strong>Tap on the icons at left to create a tile for text, images, drawing, or tables. Or, drag tiles over </strong>from the Resource Library or from the story chapter.</p>",
+                      "<p><strong>Place tiles where you want! </strong>Use the &quot;domino&quot; (six dots) in the upper right corner of a tile to drag it to a new position. But make sure to keep your Evidence Table (see below) near the top of your Log so you can get to it easily.</p>",
+                      "<p>Note: All your work in CLUE is saved <em>automatically</em> whenever the green box above says &quot;Online&quot;. If it turns red and says &quot;Offline,&quot; your work will NOT be saved. If that happens, please take a screenshot of your work and tell your teacher.</p>"
                     ]
                   }
                 },
@@ -1846,7 +2358,8 @@
                     "name": "Cast of Characters",
                     "columns": [
                       {"name":"Character name","width":200,"values":["Narrator","Felix (main character)","Josué (boyfriend)","Camila (friend)","Prof. Nassir (teacher)","Mamá (mother)"]},
-                      {"name":"Actor name","width":200,"values":["","","","","",""]}
+                      {"name":"Number of lines","width":100,"values":["21 paragraphs","40","25","7","8","4"]},
+                      {"name":"Actor name","width":232,"values":["","","","","",""]}
                     ]
                   }
                 },
@@ -1856,16 +2369,15 @@
                     "type": "Table",
                     "name": "Evidence Table",
                     "columns": [
-                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
-                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                      {"name":"Evidence","width":120,"values":["Type the name of the evidence here","","","",""]},
+                      {"name":"What did we learn from this evidence? ","width":210,"values":["","","","",""]},
+                      {"name":"What question does this evidence help us answer?","width":200,"values":["","","","",""]}
                     ]
                   }
                 }
               ]
             }
-          },
-          "supports": []
+          }
         },
         {
           "description": "Story Ch2",
@@ -1879,60 +2391,71 @@
                           "content": {
                             "tiles": [
                               {
-                                "id": "7BD73skx3W8HrHhR",
+                                "id": "-91Bhx_bxb5EJwP6",
                                 "title": "Text 1",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<h2>CHAPTER 2: HEALTHY JOSUE</h2>",
-                                    "<p></p>",
-                                    "<p>After watching the slide show, Felix realized that he was getting sick because his body was trying to fight germs. He was right after all! And Josue’s mother helped support Felix’s case! It was not because he was stressed at all! That night when he got home from work, Felix told Josue about what he had learned. </p>",
-                                    "<p></p>",
-                                    "<p>Felix: So, guess what I found out today? I looked at those slides your mom sent, and, I was RIGHT! I’m just fighting off germs that are trying to get into my body! Stress has nothing to do with this! </p>",
-                                    "<p>Josue: Oh yeah, really? That’s what my mom’s thing really said? </p>",
-                                    "<p>Felix nodded and Josue thought for moment…</p>",
-                                    "<p>Josue: But wait. One second. If it’s just germs and not stress, then why am I not getting sick? </p>",
-                                    "<p>Felix: Huh? What d’u mean?</p>",
-                                    "<p>Josue: We live together, you’d think I would be sick as often as you, si?</p>",
-                                    "<p></p>",
-                                    "<p>This made Felix pause. He thought about it and realized that his boyfriend might actually have a point. Germs do travel from one person to the other, especially when someone coughs or sneezes - which Felix does a lot.  And it’s true, Felix couldn’t even remember the last time Josue felt slightly sick. </p>",
-                                    "<p>While he was thinking about this, Josue had already pulled out his phone and was looking up “stress and being sick” on YouTube. After a bit of searching, Josue found a good video. He called Felix over and clicked on the video: “Stress and Sickness” </p>",
-                                    "<p></p>"
+                                    "<h3><strong>CHAPTER 2: HEALTHY JOSUÉ</h3>"
                                   ]
                                 }
                               },
                               {
-                                "id": "tNynMRy-exFUX0ef",
+                                "id": "JgOYsdwwQaxrT1Li",
                                 "title": "Text 2",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<p><strong>Watch the video - EVIDENCE 2- Stress and Sickness- in the Resource Library</strong>.</p>",
-                                    "<p>Discuss the video with your group and together, answer the questions below by dragging them into your workspace.</p>",
-                                    "<p>Write what you learned from this evidence in your table.</p>"
+                                    "<p>After watching the slide show, Felix realized that he was getting sick because his body was trying to fight germs. He was right after all! And Josué’s mother helped support Felix’s case! It was not because he was stressed after all! That night when he got home from work, Felix called out to Josué. </p>",
+                                    "<p></p>"
                                   ]
                                 }
                               },
                               {
-                                "id": "8yt7aebIbnBY_RMs",
+                                "id": "-SyOS6h6PM0Ftkp-",
                                 "title": "Text 3",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<p><strong>Questions About Evidence 2:</strong></p>",
-                                    "<p></p>",
-                                    "<p>1. Being sick is... <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
-                                    "<p></p>",
-                                    "<p>2. Stress does .... <strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
-                                    "<p></p>",
-                                    "<p>3.  Being stressed (underline your choice)</p>",
-                                    "<p><strong>A.  The nose           B. The  Brain       C. The stomach</strong></p>"
+                                    "<p><strong>Felix</strong>: Mi amor, guess what I found out today? I looked at those slides your mom sent, and, I was RIGHT! I’m just fighting off germs that are trying to get into my body! Stress has nothing to do with this! </p>",
+                                    "<p><strong>Josué</strong>: Oh yeah, really? That’s what my mom’s thing really said? [Felix nodded and Josué thought for moment…]</p>",
+                                    "<p><strong>Josué</strong>: But wait. One second. If it’s just germs and not stress, then why am I not getting sick? </p>",
+                                    "<p><strong>Felix</strong>: Huh? What d’u mean?</p>",
+                                    "<p><strong>Josué</strong>: We live together, you’d think I would be sick as often as you, sí?</p>",
+                                    "<p></p>"
                                   ]
                                 }
-                              }                          
+                              },
+                              {
+                                "id": "P4Jz3JHicwbktzP5",
+                                "title": "Text 4",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>This made Felix pause. He thought about it and realized that his boyfriend might actually have a point. Germs do travel from one person to the other, especially when someone coughs or sneezes - which Felix does a lot. And it’s true, Felix couldn’t even remember the last time Josué was sick. While he was thinking about this, Josué had already pulled out his phone and was looking up “stress and being sick” on YouTube. After a bit of searching, Josué found a good video. He called Felix over and clicked on the video: “<em>Stress and Sickness</em>” </p>",
+                                    "<p></p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "bKH28z8fA10QxzPt",
+                                "title": "Text 5",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<ul><li><strong>Watch the video- </strong><em><strong>EVIDENCE 2a- Stress and Sickness</strong></em><strong>- in your Resource Library. </strong></li></ul>",
+                                    "<ul><li><strong>Explore the animation - </strong><em><strong>EVIDENCE 2b- Immune Response Animation</strong></em><strong> - in the Resource Library. Change the options in the animation and notice the effects.</strong></li></ul>",
+                                    "<ul><li><strong>Discuss the video with your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library.</strong></li></ul>",
+                                    "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li></ul>",
+                                    "<p></p>"
+                                  ]
+                                }
+                              }
                             ]
                           },
                           "supports": []
@@ -1942,12 +2465,21 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "17SEP20221154AM",
+                  "id": "-VyJI03fNSgRD_yA",
+                  "title": "Text 2",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                      "<p><strong>Welcome to CLUE! Here on the right-hand side of CLUE is your Workspace Log. </strong>You will use this space to -</p>",
+                      "<ul><li>collect and explain evidence, </li><li>take notes, and </li><li>answer questions about the effects of long-term stress. </li></ul>",
+                      "<p><strong>On the left-hand side of CLUE, </strong>there are two tabs. The <em>Story</em> tab has Chapters of the story. You will see chapters only after your teacher assigns them to you. The <em>Resource Library</em> tab has different resources connected to the story that you will use to learn more about different parts of the story.</p>",
+                      "<p><u><strong>What to Do:</strong></u></p>",
+                      "<p>Read the chapter and follow the instructions given below the chapter.</p>",
+                      "<p><u><strong>How to Use this Log:</strong></u></p>",
+                      "<p><strong>Tap on the icons at left to create a tile for text, images, drawing, or tables. Or, drag tiles over </strong>from the Resource Library or from the story chapter.</p>",
+                      "<p><strong>Place tiles where you want! </strong>Use the &quot;domino&quot; (six dots) in the upper right corner of a tile to drag it to a new position. But make sure to keep your Evidence Table (see below) near the top of your Log so you can get to it easily.</p>",
+                      "<p>Note: All your work in CLUE is saved <em>automatically</em> whenever the green box above says &quot;Online&quot;. If it turns red and says &quot;Offline,&quot; your work will NOT be saved. If that happens, please take a screenshot of your work and tell your teacher.</p>"
                     ]
                   }
                 },
@@ -1959,7 +2491,8 @@
                     "name": "Cast of Characters",
                     "columns": [
                       {"name":"Character name","width":200,"values":["Narrator","Felix (main character)","Josué (boyfriend)","Camila (friend)","Prof. Nassir (teacher)","Mamá (mother)"]},
-                      {"name":"Actor name","width":200,"values":["","","","","",""]}
+                      {"name":"Number of lines","width":100,"values":["21 paragraphs","40","25","7","8","4"]},
+                      {"name":"Actor name","width":232,"values":["","","","","",""]}
                     ]
                   }
                 },
@@ -1969,9 +2502,9 @@
                     "type": "Table",
                     "name": "Evidence Table",
                     "columns": [
-                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
-                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                      {"name":"Evidence","width":120,"values":["Type the name of the evidence here","","","",""]},
+                      {"name":"What did we learn from this evidence? ","width":210,"values":["","","","",""]},
+                      {"name":"What question does this evidence help us answer?","width":200,"values":["","","","",""]}
                     ]
                   }
                 }
@@ -1992,35 +2525,60 @@
                           "content": {
                             "tiles": [  
                               {
-                                "id": "y8pTycYL3bq20JSd",
+                                "id": "Lx4mCkxu13SZrR7J",
                                 "title": "Text 1",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<h2>CHAPTER 3: MOVIE NIGHT</h2>",
-                                    "<p>Felix thought about the video. He had to admit it shook him. The video showed a connection between cortisol released during stress and feeling sick. The possibility that Josue was right both annoyed and worried him. Maybe he was getting sick because of stress. But how? And was he really stressed that much? Enough to make him sick?</p>",
-                                    "<p>Felix made his way over to the school library to study for an international relations exam that was coming up soon. This class was one of his pre-Law classes so it was important and the professor was known to not grade kindly. It was fair to say Felix was stressed about this exam and knew there were a lot of things he had to revise. But, no matter how hard he stared at the textbook, the words were blurring together and his thoughts were getting in the way.</p>",
+                                    "<h3>CHAPTER 3: MOVIE NIGHT</h3>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "eIP3lrJRPF56Q-NQ",
+                                "title": "Text 2",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>Felix thought about the video and had to admit it worried him a bit. Maybe he really was getting sick because of stress? But how? And was he really stressed that much? Enough to make him sick? Ugh, was Josué actually right?</p>",
+                                    "<p>Felix made his way over to the school library to study for an exam that was coming up soon. This class was one of his pre-Law classes so it was important and the professor was known to be strict with grading. It was fair to say Felix was stressed about this exam and knew there were a lot of things he had to study still. But, no matter how hard he stared at the textbook, he couldn’t focus. The words were blurring together and his thoughts were getting in the way.</p>",
                                     "<p></p>",
-                                    "<p><strong>Felix Internal monologue</strong></p>",
-                                    "<p><em>Okay so NATO had established laws regarding… all the words look the same. </em></p>",
-                                    "<p><em>I really want to do well on this exam. I only have three days to cover 7 chapters. If I get through the harder chapters today, maybe tomorrow can just be review. </em></p>",
-                                    "<p><em>Wait okay, stop. NATO. </em></p>",
-                                    "<p><em>I have to focus on NATO. I won’t be able to get through anything if I don’t focus. </em></p>",
-                                    "<p><em>But I can’t focus… My body feels so weak.</em></p>",
+                                    "<p><em>Felix thought to himself as he read the textbook -- </em></p>",
+                                    "<p><em>Okay so the government had established laws regarding immigration… uhh my head hurts so much. none of this makes sense. Ok FOCUS.  I only have three days to cover 7 chapters. If I get through the harder chapters today, maybe tomorrow can just be review. But I can’t focus… My body feels so weak.</em></p>",
                                     "<p><em></em></p>",
-                                    "<p>Amongst all the internal distress and the trying to read through the same paragraph over and over again, Felix must have fallen asleep. Next thing he knows, he’s waking up with the lines of the book imprinted onto his face. Well that’s one way of taking in the information. </p>",
-                                    "<p></p>",
-                                    "<p>Felix: Oh man I fell asleep! That means I have even less time to study. I have to stay up and focus. </p>",
-                                    "<p>By the time Felix got home from the library, Josue could practically see the stress rolling off him. </p>",
-                                    "<p>Josue: Felix. You look dead on your feet. </p>",
-                                    "<p>Felix: It’s fine, I got through the chapters I had to for the exam.</p>",
-                                    "<p>Josue: Your body is screaming from the stress, I can hear it. You watched the video about stress and getting sick. </p>",
-                                    "<p>Felix: I know, I know. I just really need to do well on this exam. </p>",
-                                    "<p>Josue: Okay but know that you studied a little, you need a break. I think we both do. </p>",
-                                    "<p>Felix: Maybe you’re right.</p>",
-                                    "<p></p>",
-                                    "<p>After all this stress and sickness talk, Felix and Josue realized that they both really deserved some fun and time to chill out. Being around their community and friends usually helped them feel better and so they decided to go to the movie night that the LGBTQ+ club on campus hosts every Friday. There they can hang out with their friends, eat tasty snacks, and watch a good movie. Today, they ran into their friend Camila, who they hadn’t seen for quite a while. </p>"
+                                    "<p>Felix kept trying to read the same paragraph over and over again. At some point, he must have fallen asleep. Next thing he knew, he woke up and it was 2 hours later. He rushed to the bathroom to splash water on his face and noticed the lines of the book imprinted onto his face. Well. That’s one way of taking in the information, he thought to himself. By the time Felix got home from the library, Josué could practically see the stress rolling off him. </p>",
+                                    "<p></p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "HhYNdrPIbyfaWGwl",
+                                "title": "Text 3",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><strong>Josué</strong>: Felix. You look dead on your feet. </p>",
+                                    "<p><strong>Felix</strong>: It’s fine, I got through the chapters I had to for the exam.</p>",
+                                    "<p><strong>Josué</strong>: Your body is screaming from the stress, I can hear it. You watched the video about stress and getting sick, right? Remember that?  </p>",
+                                    "<p><strong>Felix</strong>: I know, I know. I just really need to do well on this exam. </p>",
+                                    "<p><strong>Josué</strong>: Okay but know that you have already studied so much, you need a break. I think we both do. </p>",
+                                    "<p><strong>Felix</strong>: Fine…Maybe you’re right.</p>",
+                                    "<p></p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "NWzEH9HnEEGFEIa2",
+                                "title": "Text 4",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>Being around their community and friends usually helped them feel better and so they decided to go to the movie night that the LGBTQ+ club on campus hosts every Friday. There were always good snacks, cool friends and an entertaining movie to watch. Today, they ran into their friend Camila, who they hadn’t seen for quite a while. </p>",
+                                    "<p></p>"
                                   ]
                                 }
                               },
@@ -2034,62 +2592,68 @@
                                 }
                               },
                               {
-                                "id": "fd1TKQtHQ9OZgeor",
-                                "title": "Text 2",
+                                "id": "Jj8mXvYKA-RjFS6l",
+                                "title": "Text 5",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<p>Camila: Felix! Josue! How are you! How has everything? It’s been so long. Where you two been hiding?</p>",
-                                    "<p>Felix: It’s good, I feel good! You look fantastic. </p>",
+                                    "<p><strong>Camila</strong>: Felix! Josué! How are you! How has everything been? It’s been so long. Where you two been hiding?</p>",
+                                    "<p><strong>Felix</strong>: It’s good, I feel good! Girl, you look fantastic! </p>",
                                     "<p></p>",
-                                    "<p>Camila was just about to hug Felix, when he sneezed. This earned him a disappointed look from Josue. Camila looked a bit confused at Josue, to which Josue said:</p>",
-                                    "<p>Josue: What he’s not mentioning is that he’s been working so hard his stress is making him sick. </p>",
-                                    "<p>Camila: What?</p>",
-                                    "<p>Felix: Is not. Camila. Josue is just being dramatic. </p>",
+                                    "<p>[Camila was just about to hug Felix, when he sneezed. This earned him a disappointed look from Josué. Camila gave Josué a questioning look.]</p>",
                                     "<p></p>",
-                                    "<p>As if on cue, Felix sneezed again. </p>",
+                                    "<p><strong>Josué</strong>: What he’s not mentioning is that he’s been working so hard his stress is making him sick. </p>",
+                                    "<p><strong>Camila</strong>: What?</p>",
+                                    "<p><strong>Felix</strong>: Is not. Camila. Josué is just being dramatic. </p>",
                                     "<p></p>",
-                                    "<p>Josue: Ay Dios mio, yes it can! Stop fighting with me about this! </p>",
-                                    "<p>Camila: Okay, listen. Why don’t you first find out how stressed you really are Felix. Why don’t you just get a stress test?</p>",
-                                    "<p>Felix: A what?</p>",
-                                    "<p>Camila: A stress test! All you have to do is go to a clinic near you. They have a program for people who don’t have health insurance and you can tell them you need to get your stress levels tested.  </p>",
-                                    "<p>Felix: We don’t have a clinic near us. </p>",
-                                    "<p>Camila: Oh yeah, I forgot how unfortunate that part of town is. </p>",
-                                    "<p>Josue: Excuse me? Unfortunate?</p>",
-                                    "<p>Felix: Camila, you used to live there too. Don’t forget your roots. </p>",
-                                    "<p>Camila: Yeah but my parents got me out. Now we actually have access to things like health clinics. </p>",
-                                    "<p>Felix: (getting agitated) Hey, at least when we get home late at night, our neighbors don’t call the cops on us cause they think we don’t belong there!</p>",
-                                    "<p>Josue: Sure your parents got you out of our town and you might live in a more privileged area, but we still have the best taqueria and Senor Sanchez still lets us take the chili mango candies for free when we go to his bodega. We have a community of people that look out for each other. </p>",
-                                    "<p>Camila: You’re right I’m sorry. I didn’t mean to come off rude. I haven’t had a good birria taco in such a long time, I think it’s getting to my head. </p>",
-                                    "<p>Felix: Well come over and we can change that. </p>",
+                                    "<p>[As if on cue, Felix sneezed again.] </p>",
                                     "<p></p>",
-                                    "<p>Felix playfully nudges Camila, allowing the tension to dissipate.</p>",
-                                    "<p></p>",
-                                    "<p>Camila: I’m sorry I was rude about our neighborhood... But Felix, you should still look for somewhere to get a stress test and then you can finally prove who is right.</p>",
-                                    "<p></p>",
-                                    "<p>Josue and Felix looked at each other briefly before nodding in agreement-- challenge accepted! </p>",
-                                    "<p>Before the test, Felix decided he needed to know more about what this stress test was going to involve. So, he searched and found a video on how stress test works. He clicked the link: “Saliva Stress Test” and watched the short video. The test seemed simple enough. He went to the community center the next day and did the test himself.</p>",
-                                    "<p>Both Felix and Josue expected that getting the test results might take a while, but within two days the results came in! Felix opened the email with baited breath, eager to see who was right. He clicked on the attachment: “Saliva Stress Test”, and he and Josue read the results.</p>"
+                                    "<p><strong>Josué</strong>: Ay Dios mío [Oh my God], yes it can! Stop fighting with me about this! </p>",
+                                    "<p><strong>Camila</strong>: Okay, listen. I don’t know what this whole argument is about. But Felix, if you’re feeling stressed why don’t you just get a stress test? That way you’ll know if Josué is right or not! </p>",
+                                    "<p><strong>Felix</strong>: A what?</p>",
+                                    "<p><strong>Camila</strong>: A stress test! All you have to do is go to a clinic near you. They have a program for people who don’t have health insurance and you can tell them you need to get your stress levels tested.  </p>",
+                                    "<p><strong>Felix</strong>: We don’t have anything near us - not a clinic, not a bank, even the grocery store is so bad.. Remember where we live? </p>",
+                                    "<p><strong>Camila</strong>: Oh yeah, I forgot how unfortunate that part of town is. </p>",
+                                    "<p><strong>Josué</strong>: Excuse me? Unfortunate?</p>",
+                                    "<p><strong>Felix</strong>: Camila, you used to live there too. Just cause your parents got fancy jobs and bought a house in the suburbs with all the rich white people….Don’t forget your roots. </p>",
+                                    "<p><strong>Camila</strong>: Yeah.... I know. I’m not forgetting my roots, okay? It’s obviously weird not seeing any black or brown people like us around. And I know it’s not fair at all, but do you know how easy it is for me to get to a clinic or the nice grocery store from my house now?</p>",
+                                    "<p><strong>Felix</strong>: (getting irritated) Hey, at least when we get home late at night, our neighbors don’t call the cops on us cause they think we don’t belong there!</p>",
+                                    "<p><strong>Josué</strong>: Exactly. Sure you guys moved out and live in a more fancy area, but we still have the best taqueria and Señor Sanchez still lets us take the chili mango candies for free when we go to his bodega. We have a community of people that look out for each other. </p>",
+                                    "<p><strong>Camila</strong>: Yeah, you’re right I’m sorry. I didn’t mean to come off rude. I haven’t had a good birria [meat] taco in such a long time, I think it’s getting to my head. </p>",
+                                    "<p><strong>Felix</strong>: Well come over and we can change that. (Felix playfully nudges Camila.)</p>",
+                                    "<p><strong>Camile</strong>: I would love that. And really, I’m sorry about what I said... But Felix, you should still look for somewhere to get a stress test and then you can finally prove who is right.</p>",
+                                    "<p></p>"
                                   ]
                                 }
                               },
                               {
-                                "id": "DzggcsxjHra_HrC9",
-                                "title": "Text 3",
+                                "id": "lLyC8uW4STGQPzGN",
+                                "title": "Text 6",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<p><strong>Watch the video - Saliva Stress Test - in the Resource Library.</strong></p>",
-                                    "<p>Then review the test results -  EVIDENCE 3 - Saliva Stress Test Results - in the Resource Library.</p>",
-                                    "<p>Discuss the video and test results with your group and together, answer the questions below by dragging them into your Workspace.</p>",
-                                    "<p>Write what you learned from this evidence in your table.</p>"
+                                    "<p>Josué and Felix looked at each other briefly before nodding in agreement! Before the test, Felix decided he needed to know more about what this stress test was going to involve. So, he searched and found a video on how stress test works. He clicked the link: “Saliva Stress Test” and watched the short video. The test seemed simple enough. He went to the clinic the next day and did the test himself. Within two days the results came in! Felix opened the email with bated breath, eager to see who was right. He clicked on the attachment: “Saliva Stress Test”, and he and Josué read the results.</p>",
+                                    "<p></p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "WVd9QaHjhL4PHwwh",
+                                "title": "Text 7",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<ul><li><strong>Watch the video- </strong><em><strong>EVIDENCE 3a-Saliva Stress Test</strong></em><strong> - in the Resource Library. </strong></li></ul>",
+                                    "<ul><li><strong>Then review the test results-  </strong><em><strong>EVIDENCE 3b-Saliva Stress Test Results</strong></em><strong> - in the Resource Library.</strong></li></ul>",
+                                    "<ul><li><strong>Discuss the video and test results with your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library. </strong></li></ul>",
+                                    "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li></ul>"
                                   ]
                                 }
                               }
-                            ],
-                            "supports": []
+                            ]
                           }
                         }
           ],
@@ -2097,12 +2661,21 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "17SEP20221154AM",
+                  "id": "-VyJI03fNSgRD_yA",
+                  "title": "Text 2",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                      "<p><strong>Welcome to CLUE! Here on the right-hand side of CLUE is your Workspace Log. </strong>You will use this space to -</p>",
+                      "<ul><li>collect and explain evidence, </li><li>take notes, and </li><li>answer questions about the effects of long-term stress. </li></ul>",
+                      "<p><strong>On the left-hand side of CLUE, </strong>there are two tabs. The <em>Story</em> tab has Chapters of the story. You will see chapters only after your teacher assigns them to you. The <em>Resource Library</em> tab has different resources connected to the story that you will use to learn more about different parts of the story.</p>",
+                      "<p><u><strong>What to Do:</strong></u></p>",
+                      "<p>Read the chapter and follow the instructions given below the chapter.</p>",
+                      "<p><u><strong>How to Use this Log:</strong></u></p>",
+                      "<p><strong>Tap on the icons at left to create a tile for text, images, drawing, or tables. Or, drag tiles over </strong>from the Resource Library or from the story chapter.</p>",
+                      "<p><strong>Place tiles where you want! </strong>Use the &quot;domino&quot; (six dots) in the upper right corner of a tile to drag it to a new position. But make sure to keep your Evidence Table (see below) near the top of your Log so you can get to it easily.</p>",
+                      "<p>Note: All your work in CLUE is saved <em>automatically</em> whenever the green box above says &quot;Online&quot;. If it turns red and says &quot;Offline,&quot; your work will NOT be saved. If that happens, please take a screenshot of your work and tell your teacher.</p>"
                     ]
                   }
                 },
@@ -2114,7 +2687,8 @@
                     "name": "Cast of Characters",
                     "columns": [
                       {"name":"Character name","width":200,"values":["Narrator","Felix (main character)","Josué (boyfriend)","Camila (friend)","Prof. Nassir (teacher)","Mamá (mother)"]},
-                      {"name":"Actor name","width":200,"values":["","","","","",""]}
+                      {"name":"Number of lines","width":100,"values":["21 paragraphs","40","25","7","8","4"]},
+                      {"name":"Actor name","width":232,"values":["","","","","",""]}
                     ]
                   }
                 },
@@ -2124,16 +2698,15 @@
                     "type": "Table",
                     "name": "Evidence Table",
                     "columns": [
-                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
-                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                      {"name":"Evidence","width":120,"values":["Type the name of the evidence here","","","",""]},
+                      {"name":"What did we learn from this evidence? ","width":210,"values":["","","","",""]},
+                      {"name":"What question does this evidence help us answer?","width":200,"values":["","","","",""]}
                     ]
                   }
                 }
               ]
             }
-          },
-          "supports": []
+          }
         },
         {
           "description": "Story Ch4",
@@ -2147,39 +2720,106 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "JzWS8mBr_iKFpVLy",
+                    "id": "17SEP20221154AM",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h3>CHAPTER 4: PROFESSOR NASSIR</h3>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "70xsdRtKg3GwtRh2",
                     "title": "Text 1",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>CHAPTER 4: PROFESSOR SMITH</h2>",
+                        "<p>As he read the report, Felix’s heart was racing, how stressed was he? Is Josué right about him? The test showed that his cortisol levels were way too high. He was, in fact, very stressed.</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ohXQbBQhhcKRe1fm",
+                    "title": "Text 2",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Josué</strong>: Mi vida (my world), I didn’t want to be right. I’m so worried. </p>",
+                        "<p><strong>Felix</strong>: Yo sé (I know). I didn’t think I was that stressed and it could be making me sick.</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "AfJg1syzed_LJYoD",
+                    "title": "Text 3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Knowing about his cortisol levels made Felix feel even more anxious. What could he do? He realized he could reach out to his immunology professor from undergrad. Professor Nassir was one of the best professors Felix had in college. She was always so helpful with any of his questions and cared about her students a lot. She would know how to interpret this and wouldn’t mind him asking her for help. Her office hours were every Thursday from 1:00 - 3:00 pm so he emailed her letting her know he would be dropping in. At 2:30, Felix found Professor Nassir getting ready to leave. He knocked on the office door:</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "4_bdsAg_yCiM-QSS",
+                    "title": "Text 4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Felix</strong>: Hi, Professor Nassir, how are you?</p>",
+                        "<p><strong>Prof. Nassir</strong>: Hey Felix! It’s so wonderful to see you! Aren’t you in law school now? What brings you here? </p>",
+                        "<p><strong>Felix</strong>: Yes, yes, I am. Law school is going really well, but I’ve been struggling a bit with my health and I had a biology-related question that I was hoping you may be able to help me figure out.</p>",
+                        "<p><strong>Prof. Nassir</strong>: Sure, of course, what is it?</p>",
+                        "<p><strong>Felix</strong>: OK. Well, I’ve been getting sick a lot lately and I think it may be because I’m stressed. I took a stress test and found out my cortisol levels are too high. But I don’t understand how cortisol could make me sick, I just don’t get the connection.</p>",
+                        "<p><strong>Prof. Nassir</strong>: Oh Felix, I’m sorry to hear about your stress levels. Balancing college, work, family, and friends is really difficult. You have always been such a good student so I know you must be working hard. </p>",
+                        "<p><strong>Felix</strong>: Thank you, I’m doing OK. It is super hard right now, I had several assignments due this week including a huge presentation that I gave the other day.</p>",
+                        "<p><strong>Prof. Nassir</strong>: That sounds like a lot, you really need to take time for yourself as well. You know, our immune systems are really sensitive in reacting to the germs we’re exposed to. When we feel sick, it usually means our immune system is responding and clearing out germs from our nose and throat. But once our immune system is done, we usually go back to feeling normal. </p>",
+                        "<p><strong>Felix</strong>: Oh yeah I remember that from class. But what does this have to do with stress and the cortisol hormone?</p>",
+                        "<p><strong>Prof. Nassir</strong>: It’s actually really interesting, cortisol is really important in our immune system. Turns out, cortisol stops the immune response and helps it return to a normal state. This is usually when people stop feeling sick. </p>",
+                        "<p><strong>Felix</strong>: But then in stressed people? My cortisol levels are so high…</p>",
+                        "<p><strong>Prof. Nassir</strong>: Honestly I’m not really sure what happens when you have high levels of cortisol for a long time, but I do know that people who are stressed and have higher levels of cortisol also tend to feel sick more often..</p>",
+                        "<p><strong>Felix</strong>: Hmm. I feel like that doesn’t really make sense. If cortisol stops the immune response and makes you feel less sick, why would high levels of cortisol make people feel sick for longer?</p>",
+                        "<p><strong>Prof. Nassir</strong>: You know, I’m not entirely sure. </p>",
                         "<p></p>",
-                        "<p>As he read the report, Felix’s heart was racing, how stressed was he? Is Josue right about him? The test showed that his cortisol levels were way too high. He was, in fact, very stressed.</p>",
+                        "<p>[At that moment, a student of Professor Nassir knocked on the door]</p>",
                         "<p></p>",
-                        "<p>Josue: Mi vida, I didn’t want to be right. I’m so worried. </p>",
-                        "<p>Felix: Yo se. I didn’t think I was that stressed and it could be making me sick.</p>",
+                        "<p><strong>Prof. Nassir</strong>: Felix I’m so sorry. I have to meet with Kareem now. (Professor Nasir points at the student waiting at the door). How about this though, I know of this simulator that might be helpful. Why don’t you take a look at it and see if you can figure it out? I’ll email you the link?</p>",
+                        "<p><strong>Felix</strong>: Oh thank you so much! I really appreciate you helping me out!   </p>",
                         "<p></p>",
-                        "<p>Knowing about his cortisol levels made Felix feel even more anxious. Clearly he was stressed, but what could he do about it? He needed to work to live and couldn’t stop going to class. What could he do? He realized he could reach out to his immunology professor from undergrad. She would know how to interpret this.</p>",
-                        "<p>Professor Smith was one of the best professors Felix had in college. His office hours were every Thursday from 1:00 - 3:00 pm so he decided to vist then. At 2:30, Felix found Professor Smith getting ready to leave. He knocked on the office door:</p>",
-                        "<p></p>",
-                        "<p>Felix: Hi, Professor Smith, do you remember me?</p>",
-                        "<p>Prof. Smith: Hello Felix, of course I do. What brings you here today? Aren’t you in law school now?</p>",
-                        "<p>Felix: Yes, yes, I am. Sorry to surprise you like this, but I have a biology-related question I was hoping you may be able to help me figure out.</p>",
-                        "<p>Prof. Smith: Sure, of course, what is it?</p>",
-                        "<p>Felix: OK. I have been getting sick a lot lately and I think it may be because I am stressed. I took a stress test and found out my cortisol levels are too high. But I don’t understand how cortisol could make me sick, I just don’t get the connection.</p>",
-                        "<p>Prof. Smith: Oh Felix, I am sorry to hear about your stress levels. Balancing college, work, family, and friends is really difficult. You have always been such a good student so I know you must be working hard. </p>",
-                        "<p>Felix: Thank you, I am doing OK. It is super hard right now, I had several assignment due this week including a huge presentation that I gave the other day.</p>",
-                        "<p>Prof. Smith: That sounds like a lot, you really need to take time for yourself as well. I may have a report that can help you make sense of all this. </p>",
-                        "<p>Prof. Smith looked around on the desk and found the report.</p>",
-                        "<p>Prof. Smith: Here it is! This is a simulation about the effect of cortisol on the immune system. It may give you some answers. I have to get to another class now, but if you have any questions just email me.</p>",
-                        "<p>Felix: Oh wow, Prof. Smith, that will be really helpful, thank you. I will read the report. Have fun teaching.</p>",
-                        "<p></p>",
-                        "<p>Felix really liked  Prof. Smith, she cared about her students and how they were doing. He looked down at the report in his hand. He planned to read it after his double shift, when he got home.</p>",
-                        "<p></p>",
-                        "<p>Read the report - EVIDENCE 4- Effect of Cortisol on the Immune System - in the Resource Library.</p>",
-                        "<p>Discuss the report with your group and together, answer the questions below.</p>",
-                        "<p>Write what you learned from this evidence in your table.</p>"
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "RZrdzK83UWrxwM_Y",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Felix really liked  Prof. Nassir, she cared about her students and how they were doing. He looked down at the report in his hand. He planned to read it after his double shift, when he got home.</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ffuXa0Uuxaum8Z4t",
+                    "title": "Text 6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li><strong>Explore - </strong><em><strong>EVIDENCE 4a-Immune Response Simulator</strong></em><strong> - in the Resource Library. Change the options in the simulator and notice the effects.</strong></li></ul>",
+                        "<ul><li><strong>Read the report - </strong><em><strong>EVIDENCE 4b- Effect of Cortisol on the Immune System</strong></em><strong> - in the Resource Library. </strong></li></ul>",
+                        "<ul><li><strong>Discuss the report with your group and together, answer the questions about the evidence in the Resource Library.</strong></li></ul>",
+                        "<ul><li><strong>Write what you learned from this evidence in your table.</strong></li></ul>"
                       ]
                     }
                   }
@@ -2191,12 +2831,21 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "17SEP20221154AM",
+                  "id": "-VyJI03fNSgRD_yA",
+                  "title": "Text 2",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
+                      "<p><strong>Welcome to CLUE! Here on the right-hand side of CLUE is your Workspace Log. </strong>You will use this space to -</p>",
+                      "<ul><li>collect and explain evidence, </li><li>take notes, and </li><li>answer questions about the effects of long-term stress. </li></ul>",
+                      "<p><strong>On the left-hand side of CLUE, </strong>there are two tabs. The <em>Story</em> tab has Chapters of the story. You will see chapters only after your teacher assigns them to you. The <em>Resource Library</em> tab has different resources connected to the story that you will use to learn more about different parts of the story.</p>",
+                      "<p><u><strong>What to Do:</strong></u></p>",
+                      "<p>Read the chapter and follow the instructions given below the chapter.</p>",
+                      "<p><u><strong>How to Use this Log:</strong></u></p>",
+                      "<p><strong>Tap on the icons at left to create a tile for text, images, drawing, or tables. Or, drag tiles over </strong>from the Resource Library or from the story chapter.</p>",
+                      "<p><strong>Place tiles where you want! </strong>Use the &quot;domino&quot; (six dots) in the upper right corner of a tile to drag it to a new position. But make sure to keep your Evidence Table (see below) near the top of your Log so you can get to it easily.</p>",
+                      "<p>Note: All your work in CLUE is saved <em>automatically</em> whenever the green box above says &quot;Online&quot;. If it turns red and says &quot;Offline,&quot; your work will NOT be saved. If that happens, please take a screenshot of your work and tell your teacher.</p>"
                     ]
                   }
                 },
@@ -2208,7 +2857,8 @@
                     "name": "Cast of Characters",
                     "columns": [
                       {"name":"Character name","width":200,"values":["Narrator","Felix (main character)","Josué (boyfriend)","Camila (friend)","Prof. Nassir (teacher)","Mamá (mother)"]},
-                      {"name":"Actor name","width":200,"values":["","","","","",""]}
+                      {"name":"Number of lines","width":100,"values":["21 paragraphs","40","25","7","8","4"]},
+                      {"name":"Actor name","width":232,"values":["","","","","",""]}
                     ]
                   }
                 },
@@ -2218,16 +2868,15 @@
                     "type": "Table",
                     "name": "Evidence Table",
                     "columns": [
-                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
-                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                      {"name":"Evidence","width":120,"values":["Type the name of the evidence here","","","",""]},
+                      {"name":"What did we learn from this evidence? ","width":210,"values":["","","","",""]},
+                      {"name":"What question does this evidence help us answer?","width":200,"values":["","","","",""]}
                     ]
                   }
                 }
               ]
             }
-          },
-          "supports": []
+          }
         },
         {
           "description": "Story Ch5",
@@ -2241,15 +2890,26 @@
                           "content": {
                             "tiles": [
                               {
-                                "id": "444OR8aFNRatXbRX",
+                                "id": "taHIt0qOAxxRpjOn",
                                 "title": "Text 1",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<h2>CHAPTER 5: JOSUE’S SOLUTION</h2>",
-                                    "<p>The report helped Felix piece the story together. He now understood what was happening to him. Josue was right all along, stress was making him sick. Now the question was what on Earth could he do about it?</p>",
-                                    "<p>He told Josue everything he figured out. He expected him to be smug with satisfaction that he won this argument. Josue wasn’t. Instead, he handed him his phone. </p>"
+                                    "<h3>CHAPTER 5: JOSUÉ’S SOLUTION</h3>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "q2FQk6x5y94A_pAq",
+                                "title": "Text 2",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>The report helped Felix piece the story together. He now understood what was happening to him. Josué was right all along, stress was making him sick. Now the question was what on Earth could he do about it?</p>",
+                                    "<p>That evening while relaxing on the couch with Josué, Felix told him everything he figured out. He expected Josué to be smug with satisfaction that he won this argument. Josué wasn’t. Instead, he handed him his phone. </p>",
+                                    "<p></p>"
                                   ]
                                 }
                               },
@@ -2263,40 +2923,81 @@
                                 }
                               },
                               {
-                                "id": "Q23fnRmSYk4ycm-j",
-                                "title": "Text 2",
-                                "content": {
-                                  "type": "Text",
-                                  "format": "html",
-                                  "text": [
-                                    "<p>Josue: Look I found this app called “InsightTimer” that can help you. It is a meditation app that can help you relax. I looked at a bunch of them and this is the best rated. I tried it too and it is really easy to use. Please, just try it. </p>",
-                                    "<p>Felix: You found this for me?</p>",
-                                    "<p>Josue: Mi amor, off course. I am not the one getting sick every other Tuesday.</p>",
-                                    "<p></p>",
-                                    "<p>Josue gave him one of his sarcastic half smiles, the one that was both sweet and annoying at the same time. It was good to know Josue always had his back. </p>",
-                                    "<p>Felix downloaded the app and tried it out. The app guided him through a series of meditations and breathing exercises. Every time he used it, he felt like he could breathe a little easier and the heavy feeling in his chest would go away for a bit. As he kept it up regularly, Felix began to notice himself sniffling a lot less. He still got sick more often than Josue, but not as often as before he started using the app. His health was better, but still not 100%. </p>",
-                                    "<p></p>",
-                                    "<p>Felix: Remember how I said I was going to make more time for myself to do some stuff that I love.</p>",
-                                    "<p>Josue: Yeah</p>",
-                                    "<p>Felix: Well, I haven’t played guitar in a while and I really used to love it.</p>",
-                                    "<p>Josue: Of course I remember. You serenaded me once. It was so cheesy. </p>",
-                                    "<p>Felix. Rude. (Josue laughs) Well anyway, I decided to join the guitar club.</p>",
-                                    "<p>Josue: Isn’t Camila in one of those?</p>",
-                                    "<p>Felix: Yeah! She’s actually the one that told me about it. It was established and run by people that are part of the LGBTQIA2S+ community, so it just feels like such a safe space.</p>",
-                                    "<p>Josue: That’s so great! You’re glowing just talking about it. </p>",
-                                    "<p>Felix: I think that’s just sweat. I ran home today excited to tell you the news.</p>",
-                                    "<p>They both laugh, enjoying the light heartedness they felt from knowing Felix was taking steps in the right direction towards a healthier lifestyle.  </p>"
-                                  ]
-                                }
-                              },
-                              {
-                                "id": "jf1niIgNVMTnCr3J",
+                                "id": "LX7WQPgIquRRE1du",
                                 "title": "Text 3",
                                 "content": {
                                   "type": "Text",
                                   "format": "html",
                                   "text": [
-                                    "<p>Use your evidence table to develop a model that shows how long-term stress can result in feeling sick more often.</p>"
+                                    "<p><strong>Josué</strong>: Look I found this app called “InsightTimer” that can help you. It’s a meditation app that can help you relax. I looked at a bunch of them and this is the best rated. I tried it too and it is really easy to use. Please, just try it. </p>",
+                                    "<p><strong>Felix</strong>: You found this for me?</p>",
+                                    "<p><strong>Josué</strong>: Of course I did, mi amor. I care about you!</p>",
+                                    "<p></p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "VIfU2_RiIIs5bwfL",
+                                "title": "Text 4",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>Josué gave him one of his sarcastic half smiles, the one that was both sweet and annoying at the same time. It was good to know Josué always had his back. Felix downloaded the app and tried it out. The app guided him through a series of meditations and breathing exercises. Every time he used it, he felt like he could breathe a little easier and the heavy feeling in his chest would go away for a bit. As he kept it up regularly, Felix began to notice himself sniffling a lot less. He still got sick more often than Josué, but not as often as before he started using the app. His health was better, but still not 100%. </p>",
+                                    "<p></p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "bn3YEHakSdnViIG8",
+                                "title": "Text 5",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p><strong>Felix</strong>: Remember how I said I was going to make more time for myself to do some stuff that I love.</p>",
+                                    "<p><strong>Josué</strong>: Yeah</p>",
+                                    "<p><strong>Felix</strong>: Well, I haven’t played guitar in a while and I really used to love it.</p>",
+                                    "<p><strong>Josué</strong>: Of course I remember. You played for me on our first date, remember? It was so cheesy but cute. </p>",
+                                    "<p><strong>Felix</strong>: Rude. (Josué laughs) Well anyway, I decided to join the guitar club.</p>",
+                                    "<p><strong>Josué</strong>: Isn’t Camila in one of those?</p>",
+                                    "<p><strong>Felix</strong>: Yeah! She’s actually the one that told me about it. The people who started the movie club also started this. So it just feels like such a safe space.</p>",
+                                    "<p><strong>Josué</strong>: That’s so great! </p>",
+                                    "<p><strong>Felix</strong>: I know right? I’m so excited, I couldn’t wait to tell you! </p>",
+                                    "<p></p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "2zuIgUcqt5M9_Rkp",
+                                "title": "Text 7",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<p>They both laugh, enjoying the light heartedness they felt from knowing Felix was taking steps in the right direction towards a healthier lifestyle.</p>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "OS4ualLezTokmm3C",
+                                "title": "Text 6",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<h2>The End!</h2>"
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "6LSk26QkUQ15lhEw",
+                                "title": "Text 8",
+                                "content": {
+                                  "type": "Text",
+                                  "format": "html",
+                                  "text": [
+                                    "<ul><li><strong>Use your evidence table to develop a model that shows how long-term stress can result in feeling sick more often.</strong></li></ul>"
                                   ]
                                 }
                               }
@@ -2308,16 +3009,7 @@
           "config": {
             "defaultDocumentTemplate": {
               "tiles": [
-                {
-                  "id": "17SEP20221154AM",
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "<p>Welcome to your workspace for Bio4Community. You will use this space to take notes, collect evidence, and answer questions about how stress affects the human body. You can create text, table, image, and drawing tiles in your workspace by tapping on the icons at left, or you can drag content in from the Story and Resource Library tabs.</p>"
-                    ]
-                  }
-                },
+                
                 {
                   "id": "dCd3mnjfG3EpvlXr",
                   "title": "Table 1",
@@ -2326,7 +3018,8 @@
                     "name": "Cast of Characters",
                     "columns": [
                       {"name":"Character name","width":200,"values":["Narrator","Felix (main character)","Josué (boyfriend)","Camila (friend)","Prof. Nassir (teacher)","Mamá (mother)"]},
-                      {"name":"Actor name","width":200,"values":["","","","","",""]}
+                      {"name":"Number of lines","width":100,"values":["21 paragraphs","40","25","7","8","4"]},
+                      {"name":"Actor name","width":232,"values":["","","","","",""]}
                     ]
                   }
                 },
@@ -2336,19 +3029,17 @@
                     "type": "Table",
                     "name": "Evidence Table",
                     "columns": [
-                      {"name":"Evidence","width":120,"values":["Evidence 1","Evidence 2","Evidence 3","Evidence 4","Evidence 5"]},
-                      {"name":"What did you learn from it?","width":210,"values":["","","","",""]},
-                      {"name":"Your questions now","width":200,"values":["","","","",""]}
+                      {"name":"Evidence","width":120,"values":["Type the name of the evidence here","","","",""]},
+                      {"name":"What did we learn from this evidence? ","width":210,"values":["","","","",""]},
+                      {"name":"What question does this evidence help us answer?","width":200,"values":["","","","",""]}
                     ]
                   }
                 }
               ]
             }
-          },
-          "supports": []
+          }
         }
       ]
     }
-  ],
-  "supports": []
+  ]
 }

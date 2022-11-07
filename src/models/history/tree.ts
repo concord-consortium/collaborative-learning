@@ -1,8 +1,8 @@
 import { types, IJsonPatch, applyPatch, resolvePath, getSnapshot, flow } from "mobx-state-tree";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentContentModelType } from "../document/document-content";
-import { SharedModelType } from "../tools/shared-model";
-import { ToolTileModelType } from "../tools/tool-tile";
+import { SharedModelType } from "../shared/shared-model";
+import { ITileModel } from "../tiles/tile-model";
 import { TreeManagerAPI } from "./tree-manager-api";
 import { TreeMonitor } from "./tree-monitor";
 
@@ -31,7 +31,7 @@ export const Tree = types.model("Tree", {
 
     // We can probably optimize this by using a MSTView to cache the tiles
     // here. But I don't remember how it handles parameter values
-    const tiles: Array<ToolTileModelType> = [];
+    const tiles: Array<ITileModel> = [];
     let sharedModel: SharedModelType | undefined;
     if (options) {
       sharedModel = options.sharedModel;
@@ -52,9 +52,9 @@ export const Tree = types.model("Tree", {
         });
       });
     }
-        
+
     // Run update function on the tiles
-    for(const tile of tiles) {      
+    for(const tile of tiles) {
       tile.content.updateAfterSharedModelChanges(sharedModel);
     }
   }
@@ -63,14 +63,14 @@ export const Tree = types.model("Tree", {
     const updateTreeAfterSharedModelChangesInternal = (sharedModel: SharedModelType) => {
         // If we are applying manager patches, then we ignore any sync actions
         // otherwise the user might make a change such as changing the name of a
-        // node while the patches are applied. When they do this the patch for 
+        // node while the patches are applied. When they do this the patch for
         // the shared model might have been applied first, and which if sync is
-        // enabled could create a new node in the diagram. Then the patch for the 
-        // diagram is applied which also creates a new node in the diagram. 
+        // enabled could create a new node in the diagram. Then the patch for the
+        // diagram is applied which also creates a new node in the diagram.
         // Even if we just disable the sync when the shared model update is done
         // from the patch, if the user makes a change, this would be a separate
         // action would would trigger the sync. So if the user made this change
-        // at just the right time it would could result in duplicate nodes in the 
+        // at just the right time it would could result in duplicate nodes in the
         // diagram.
         if (self.applyingManagerPatches) {
             return;
@@ -81,7 +81,7 @@ export const Tree = types.model("Tree", {
         // changes captured during the update, it should include these ids
         self.updateTreeAfterSharedModelChanges({sharedModel});
     };
-    
+
     return {
         updateTreeAfterSharedModelChangesInternal
     };
@@ -136,13 +136,13 @@ export const Tree = types.model("Tree", {
       // generate a new undoable action that is not grouped with the action that
       // deleted the node from the shared model. So now if the user undoes, the
       // actions will not get undone together. This will probably result in a
-      // broken UI for the user. 
+      // broken UI for the user.
       //
       // We could record the action id of any actions that happen while the
       // patches are being applied. It is possible that multiple actions could
       // happen. Because we aren't running the updateTreeAfterSharedModelChanges
       // after each of these actions, we wouldn't be able to tell what tree
-      // updates are associated with which of the multiple actions. 
+      // updates are associated with which of the multiple actions.
       //
       // I think the best thing to do is:
       // - merge any actions that happened during the patch application into a
@@ -151,7 +151,7 @@ export const Tree = types.model("Tree", {
       //   updateTreeAfterSharedModelChanges causes here.
       //
       // If there were no injected or intermediate actions, but for some reason
-      // this update function does make changes in the tree, what should we do?  
+      // this update function does make changes in the tree, what should we do?
       // We should at least log this issue to the console, so we can try to
       // track down what happened. One likely reason is a broken implementation
       // of the updateTreeAfterSharedModelChanges. And that will be likely to
@@ -164,19 +164,19 @@ export const Tree = types.model("Tree", {
       return Promise.resolve();
     },
   };
-  
+
 })
 .actions(self => ({
-  handleSharedModelChanges: flow(function* handleSharedModelChanges(historyEntryId: string, exchangeId: string, 
+  handleSharedModelChanges: flow(function* handleSharedModelChanges(historyEntryId: string, exchangeId: string,
       call: any, sharedModelPath: string) {
-        
+
       const model = resolvePath(self, sharedModelPath);
 
-      // Note: the environment of the call will be undefined because the undoRecorder cleared 
+      // Note: the environment of the call will be undefined because the undoRecorder cleared
       // it out before calling this function
       if (DEBUG_HISTORY) {
         // eslint-disable-next-line no-console
-        console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.treeId}`, 
+        console.log(`observed changes in sharedModel: ${model.id} of tree: ${self.treeId}`,
           {historyEntryId, action: call});
       }
 
@@ -187,20 +187,20 @@ export const Tree = types.model("Tree", {
 
       // When this is called by the TreeManager, we want to do the internal
       // shared model sync, but we don't want to resend the snapshot back to the
-      // manager. 
+      // manager.
       if (call.name !== "applySharedModelSnapshotFromManager") {
 
         // TODO: figure out if we should be recording this special action in the undo
         // stack
-        const snapshot = getSnapshot(model); 
-        
+        const snapshot = getSnapshot(model);
+
         // TODO: we use the exchangeId from the original exchange here so we
         // need to wait for the manager to confirm this updateSharedModel call
         // before we can continue. Otherwise the manager might receive the final
         // addTreePatchRecord before it gets any shared model updates. Currently
         // updateSharedModel waits for all of the dependent trees to update
         // their shared models before returning, so this might cause a long
-        // delay.  
+        // delay.
         //
         // We could start a new exchange with the manager and just wait for
         // that, and then call updateSharedModel with the exchangeId for this
@@ -224,12 +224,12 @@ export const Tree = types.model("Tree", {
         // Note that the TreeMonitor takes care of closing the exchangeId used
         // here. This same exchangeId is passed to all the shared model
         // callbacks and then they are all waited for, and finally the exchange
-        // is closed. 
+        // is closed.
         //
         yield self.treeManagerAPI.updateSharedModel(historyEntryId, exchangeId, self.treeId, snapshot);
       }
 
-      // Notify the tiles about the shared model update. 
+      // Notify the tiles about the shared model update.
       //
       // TODO: an inefficiency  with this approach is that we are
       // treating all changes within the sharedModelPath the same.
@@ -238,13 +238,13 @@ export const Tree = types.model("Tree", {
       //
       // There is probably a way to use the mobx internals so we can
       // track what updateTreeAfterSharedModelChanges references and
-      // only run it when one of those things have changed. 
+      // only run it when one of those things have changed.
       //
       // TODO: This should not cause a loop because the implementation
       // of updateTreeAfterSharedModelChanges should not modify
-      // the shared model or shared model view that triggered this 
-      // handler in the first place. However a developer might make 
-      // a mistake. So it would be useful if we could identify the 
+      // the shared model or shared model view that triggered this
+      // handler in the first place. However a developer might make
+      // a mistake. So it would be useful if we could identify the
       // looping and notify them.
       self.updateTreeAfterSharedModelChangesInternal(model);
   })

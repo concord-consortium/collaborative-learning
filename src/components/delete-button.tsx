@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import React from "react";
-import { IButtonProps } from "./tool-button";
+import { IButtonProps } from "./toolbar-button";
 import { useCautionAlert } from "./utilities/use-caution-alert";
 
 interface IProps extends IButtonProps {

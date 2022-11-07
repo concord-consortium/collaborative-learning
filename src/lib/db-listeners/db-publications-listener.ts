@@ -9,6 +9,7 @@ import { syncStars } from "./sync-stars";
 export class DBPublicationsListener extends BaseListener {
   private db: DB;
   private publicationsRef: firebase.database.Reference | null = null;
+  private handledPublications = new Set<string>();
 
   constructor(db: DB) {
     super("DBPublicationsListener");
@@ -59,6 +60,14 @@ export class DBPublicationsListener extends BaseListener {
 
   private handlePublication = (publication: DBPublication|null) => {
     if (publication) {
+      // All publications are added initially by the `once`. Then a
+      // `child_added` listener is added to watch for new publications. This
+      // `child_added` listener fires right away with the existing children, so
+      // any initial publications go through here a second time.
+      if (this.handledPublications.has(publication.documentKey)) {
+        return;
+      }
+      this.handledPublications.add(publication.documentKey);
       this.db.createDocumentFromPublication(publication)
         .then(doc => {
           syncStars(doc, this.db);

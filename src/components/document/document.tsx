@@ -8,7 +8,7 @@ import { MyWorkDocumentOrBrowser } from "./document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
-import { ToolbarModelType } from "../../models/stores/problem-configuration";
+import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
 import { ENavTab } from "../../models/view/nav-tabs";
@@ -32,7 +32,7 @@ interface IProps extends IBaseProps {
   onCopyDocument?: (document: DocumentModelType) => void;
   onDeleteDocument?: (document: DocumentModelType) => void;
   onAdminDestroyDocument?: (document: DocumentModelType) => void;
-  toolbar?: ToolbarModelType;
+  toolbar?: IToolbarModel;
   side: WorkspaceSide;
   readOnly?: boolean;
 }
@@ -362,7 +362,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
       <div className={`titlebar ${type}`}>
         {!hideButtons &&
           <div className="actions">
-            { showFileMenu && 
+            { showFileMenu &&
               <DocumentFileMenu document={document}
                 onOpenDocument={this.handleOpenDocumentClick}
                 onCopyDocument={this.handleCopyDocumentClick}

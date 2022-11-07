@@ -9,22 +9,33 @@
     "**/dist/**": true
   },
   "cSpell.words": [
+    "authed",
     "autorun",
     "boundingbox",
+    "canonicalize",
     "ccimg",
+    "clazz",
+    "commentable",
     "democlass",
     "elems",
+    "firestore",
     "fbrtdb",
     "iframes",
     "jsxgraph",
     "mcimage",
     "mcimages",
     "mcsupports",
+    "rollbar",
+    "subcollection",
+    "subtab",
     "tablelink",
+    "testid",
     "todos",
     "towle",
     "ulid",
     "undoable",
+    "unlistener",
+    "unlisteners",
     "wumps"
   ]
 }

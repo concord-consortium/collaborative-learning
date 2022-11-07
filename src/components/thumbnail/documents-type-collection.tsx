@@ -82,7 +82,8 @@ function getSectionDocs(section: NavTabSectionModelType, documents: DocumentsMod
   return sectDocs;
 }
 
-export const DocumentCollectionByType = observer(({ topTab, tab, section, index, numSections=0, scale, selectedDocument,
+export const DocumentCollectionByType: React.FC<IProps> = observer(({ 
+                                  topTab, tab, section, index, numSections=0, scale, selectedDocument,
                                   onSelectNewDocument, onSelectDocument, onDocumentDragStart,
                                   onDocumentStarClick, onDocumentDeleteClick }: IProps) => {
   const appConfigStore = useAppConfig();
@@ -118,13 +119,16 @@ export const DocumentCollectionByType = observer(({ topTab, tab, section, index,
       <div className={listClass}>
         {showNewDocumentThumbnail &&
           <NewDocumentThumbnail label={newDocumentLabel} onClick={handleNewDocumentClick} />}
-
-        {sectionDocs.map(document => {
+        {sectionDocs.map((document) => {
           const documentContext = getDocumentContext(document);
           return (
             <DocumentContextReact.Provider key={document.key} value={documentContext}>
-              <DecoratedDocumentThumbnailItem section={section} sectionDocument={document} tab={tab}
-                scale={scale} selectedDocument={selectedDocument}
+              <DecoratedDocumentThumbnailItem
+                section={section}
+                sectionDocument={document}
+                tab={tab}
+                scale={scale}
+                selectedDocument={selectedDocument}
                 onSelectDocument={onSelectDocument}
                 onDocumentDragStart={onDocumentDragStart}
                 onDocumentStarClick={onDocumentStarClick}
@@ -137,11 +141,13 @@ export const DocumentCollectionByType = observer(({ topTab, tab, section, index,
     </div>
   );
 });
+DocumentCollectionByType.displayName = "DocumentCollectionByType";
 
 interface INewDocumentThumbnailProps {
   label?: string;
   onClick: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
+
 const NewDocumentThumbnail: React.FC<INewDocumentThumbnailProps> = ({ label, onClick }) => {
   return (
     <div className="list-item" data-test="my-work-new-document" >

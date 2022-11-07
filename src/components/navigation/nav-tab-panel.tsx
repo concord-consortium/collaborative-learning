@@ -28,6 +28,7 @@ interface IProps extends IBaseProps {
 @inject("stores")
 @observer
 export class NavTabPanel extends BaseComponent<IProps> {
+
   private navTabPanelElt: HTMLDivElement | null = null;
   private topTabReset = "";
 
@@ -170,6 +171,7 @@ export class NavTabPanel extends BaseComponent<IProps> {
       const tabSpec = tabs[tabIndex];
       if (ui.activeNavTab !== tabSpec.tab) {
         ui.setActiveNavTab(tabSpec.tab);
+        ui.setSelectedCommentedDocument(undefined);
         ui.updateFocusDocument();
         const logParameters = {
           tab_name: tabSpec.tab.toString()

@@ -13,3 +13,4 @@ coverage-cypress
 cypress/screenshots
 *debug.log
 stats.json
+top-test/

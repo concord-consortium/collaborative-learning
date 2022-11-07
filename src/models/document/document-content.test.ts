@@ -4,16 +4,16 @@ import {
 import { createDefaultSectionedContent } from "./document-content-import";
 import { SectionModel, SectionModelType } from "../curriculum/section";
 import { IDropRowInfo } from "../../models/document/document-content";
-import { cloneTileSnapshotWithoutId, IDragTileItem } from "../../models/tools/tool-tile";
-import { TextContentModel } from "../tools/text/text-content";
-import { IDocumentExportOptions } from "../tools/tool-content-info";
-import { kDefaultColumnWidth } from "../../components/tools/table-tool/table-types";
+import { cloneTileSnapshotWithoutId, IDragTileItem } from "../tiles/tile-model";
+import { TextContentModel } from "../tiles/text/text-content";
+import { IDocumentExportOptions } from "../tiles/tile-content-info";
+import { kDefaultColumnWidth } from "../../components/tiles/table/table-types";
 import { safeJsonParse } from "../../utilities/js-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTools } from "../../register-tools";
-registerTools(["Drawing", "Geometry", "Image", "Table", "Text"]);
+import { registerTileTypes } from "../../register-tile-types";
+registerTileTypes(["Drawing", "Geometry", "Image", "Table", "Text"]);
 
 // mock uniqueId so we can recognize auto-generated IDs
 jest.mock("../../utilities/js-utils", () => {

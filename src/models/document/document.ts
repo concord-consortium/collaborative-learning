@@ -1,4 +1,4 @@
-import { applySnapshot, types, Instance, SnapshotIn, getEnv, onAction, addDisposer } from "mobx-state-tree";
+import { applySnapshot, types, Instance, SnapshotIn, getEnv, onAction, addDisposer, destroy } from "mobx-state-tree";
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
@@ -8,10 +8,10 @@ import {
   PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
 import { AppConfigModelType } from "../stores/app-config-model";
-import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
-import { UserStarModel, UserStarModelType } from "../tools/user-star";
-import { 
-  IDocumentMetadata, IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext 
+import { TileCommentsModel, TileCommentsModelType } from "../tiles/tile-comments";
+import { UserStarModel, UserStarModelType } from "../tiles/user-star";
+import {
+  IDocumentMetadata, IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext
 } from "../../../functions/src/shared";
 import { getFirebaseFunction } from "../../hooks/use-firebase-function";
 import { IDocumentProperties } from "../../lib/db-types";
@@ -19,8 +19,8 @@ import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { Tree } from "../history/tree";
 import { TreeMonitor } from "../history/tree-monitor";
-import { ISharedModelDocumentManager, SharedModelDocumentManager } from "../tools/shared-model-document-manager";
-import { ITileEnvironment } from "../tools/tool-types";
+import { ISharedModelDocumentManager, SharedModelDocumentManager } from "../shared/shared-model-document-manager";
+import { ITileEnvironment } from "../tiles/tile-types";
 import { TreeManager } from "../history/tree-manager";
 import { ESupportType } from "../curriculum/support";
 
@@ -103,7 +103,7 @@ export const DocumentModel = Tree.named("Document")
       // contextId. However the old functions do. The old functions were just
       // ignoring this contextId. So the contextId is added here so the client
       // code can work with the old functions.
-      return { contextId: "ignored", uid, type, key, createdAt, title, 
+      return { contextId: "ignored", uid, type, key, createdAt, title,
         originDoc, properties: properties.toJSON() } as IDocumentMetadata;
     },
     getProperty(key: string) {
@@ -310,6 +310,11 @@ export const DocumentModel = Tree.named("Document")
       self.treeManagerAPI = manager;
       self.treeMonitor = new TreeMonitor(self, manager, false);
       manager.setMainDocument(self);
+      // Clean up the manager when this document is destroyed this doesn't
+      // happen automatically because the manager is stored in volatile state.
+      // The manager needs to be destroyed so it can unsubscribe from firestore.
+      // Destroying it will probably also free up memory
+      addDisposer(self, () => destroy(manager));
     },
     undoLastAction() {
       self.treeManagerAPI?.undoManager.undo();
@@ -353,10 +358,10 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
       if (!document.content || !call.path?.match(/\/content\/tileMap\//)) {
         return;
       }
-      const toolTileId = call.path?.match(/\/content\/tileMap\/([^/]*)/)?.[1];
-      if (toolTileId) {
-        const toolTile = document.content.tileMap.get(toolTileId);
-        toolTile?.onTileAction(call);
+      const tileTypeId = call.path?.match(/\/content\/tileMap\/([^/]*)/)?.[1];
+      if (tileTypeId) {
+        const tile = document.content.tileMap.get(tileTypeId);
+        tile?.onTileAction(call);
       }
     }));
     if (document.content) {
@@ -376,7 +381,7 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
       throw e;
     }
 
-    // Putting the error in an object like this prevents Chrome from expanding the 
+    // Putting the error in an object like this prevents Chrome from expanding the
     // error and taking up a bunch of console lines.
     console.error("Failed to load document", {docKey: snapshot.key, error: e});
 

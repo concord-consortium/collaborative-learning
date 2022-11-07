@@ -1,14 +1,15 @@
 import React, {useEffect, useState} from "react";
 import classNames from "classnames";
 import { UserModelType } from "../../models/stores/user";
+import { ILogComment, Logger } from "../../lib/logger";
 import { WithId } from "../../hooks/firestore-hooks";
 import { useUIStore } from "../../hooks/use-stores";
 import { CommentDocument} from "../../lib/firestore-schema";
 import { CommentCard } from "./comment-card";
-import { getToolContentInfoById } from "../../models/tools/tool-content-info";
+import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import {ChatCommentThread} from "./chat-comment-thread";
-import { ToolIconComponent } from "./tool-icon-component";
+import { TileIconComponent } from "./tile-icon-component";
 import { ChatThreadToggle } from "./chat-thread-toggle";
 
 import "./chat-thread.scss";
@@ -26,6 +27,7 @@ interface IProps {
 
 export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   onPostComment, onDeleteComment, focusDocument, focusTileId, isDocumentView}) => {
+
   useEffect(() => {
     setExpandedThread(focusTileId || 'document');
   },[focusTileId]);
@@ -37,6 +39,16 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
   const ui = useUIStore();
 
   const handleThreadClick = (clickedId: string | null) => {
+    // Do the logging before we change expandedThread so we can tell whether the thread was expanded or collapsed.
+    const eventPayload: ILogComment = {
+      focusDocumentId: focusDocument || '',
+      focusTileId: clickedId && clickedId !== "document" ? clickedId : undefined, // no focusTile for document clicks
+      isFirst: false, // We're not adding a comment so this is irrelevant
+      commentText: '', // This is about a thread not a single comment it doesn't make sense to log the text.
+      action: clickedId === expandedThread ? "collapse" : "expand"
+    };
+    Logger.logCommentEvent(eventPayload);
+
     if (clickedId === expandedThread) {
       // We're closing the thread so clear out expanded thread.
       // The tile should stay selected though.
@@ -59,7 +71,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
             commentThread.comments.some((comment: WithId<CommentDocument>) => user?.id === comment.uid);
           const numComments = commentThread.comments.length;
           const shouldBeFocused = commentThread.tileId === focusId;
-          const Icon = commentThread.tileType && getToolContentInfoById(commentThread.tileType)?.Icon;
+          const Icon = commentThread.tileType && getTileComponentInfo(commentThread.tileType)?.Icon;
           const key= commentThread.tileId || "document";
           return (
             <div key={key}
@@ -115,7 +127,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
               <div className="comment-card-header comment-select" data-testid="comment-card-header">
                 <div className="comment-card-header-icon" data-testid="comment-card-header-icon">
                   <div data-testid="chat-thread-tile-type">
-                    <ToolIconComponent documentKey={focusDocument} tileId={focusTileId}/>
+                    <TileIconComponent documentKey={focusDocument} tileId={focusTileId}/>
                   </div>
                 </div>
               </div>

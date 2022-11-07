@@ -2,7 +2,7 @@ import { cloneDeep } from "lodash";
 import { getSnapshot } from "mobx-state-tree";
 import { SectionModelType } from "../curriculum/section";
 import { DisplayUserType } from "../stores/user-types";
-import { ToolTileSnapshotInType } from "../tools/tool-tile";
+import { ITileModelSnapshotIn } from "../tiles/tile-model";
 import { DocumentContentModel, DocumentContentModelType, INewTileOptions } from "./document-content";
 
 /*
@@ -44,40 +44,40 @@ function isOriginalSectionHeaderContent(content: IAuthoredTileContent | Original
   return !!content?.isSectionHeader && !!content.sectionId;
 }
 
-interface OriginalToolTileModel {
+interface OriginalTileModel {
   id?: string;
   display?: DisplayUserType;
   layout?: OriginalTileLayoutModel;
   content: IAuthoredTileContent | OriginalSectionHeaderContent;
 }
-interface OriginalAuthoredToolTileModel extends OriginalToolTileModel {
+interface OriginalAuthoredTileModel extends OriginalTileModel {
   content: IAuthoredTileContent;
 }
-function isOriginalAuthoredToolTileModel(tile: OriginalToolTileModel): tile is OriginalAuthoredToolTileModel {
+function isOriginalAuthoredTileModel(tile: OriginalTileModel): tile is OriginalAuthoredTileModel {
   return !!(tile.content as IAuthoredTileContent)?.type && !tile.content.isSectionHeader;
 }
 
-type OriginalTilesSnapshot = Array<OriginalToolTileModel | OriginalToolTileModel[]>;
+type OriginalTilesSnapshot = Array<OriginalTileModel | OriginalTileModel[]>;
 
 function addImportedTileInNewRow(
           content: DocumentContentModelType,
-          tile: OriginalAuthoredToolTileModel,
+          tile: OriginalAuthoredTileModel,
           options: INewTileOptions) {
   const id = tile.id || content.getNextTileId(tile.content.type);
   const tileSnapshot = { id, ...tile };
-  return content.addTileSnapshotInNewRow(tileSnapshot as ToolTileSnapshotInType, options);
+  return content.addTileSnapshotInNewRow(tileSnapshot as ITileModelSnapshotIn, options);
 }
 
 function addImportedTileInExistingRow(
           content: DocumentContentModelType,
-          tile: OriginalAuthoredToolTileModel,
+          tile: OriginalAuthoredTileModel,
           options: INewTileOptions) {
   const id = tile.id || content.getNextTileId(tile.content.type);
   const tileSnapshot = { id, ...tile };
-  return content.addTileSnapshotInExistingRow(tileSnapshot as ToolTileSnapshotInType, options);
+  return content.addTileSnapshotInExistingRow(tileSnapshot as ITileModelSnapshotIn, options);
 }
 
-function migrateTile(content: DocumentContentModelType, tile: OriginalToolTileModel) {
+function migrateTile(content: DocumentContentModelType, tile: OriginalTileModel) {
   const { layout, ...newTile } = cloneDeep(tile);
   const tileHeight = layout?.height;
   if (isOriginalSectionHeaderContent(newTile.content)) {
@@ -85,18 +85,18 @@ function migrateTile(content: DocumentContentModelType, tile: OriginalToolTileMo
     content.setImportContext(sectionId);
     content.addSectionHeaderRow(sectionId);
   }
-  else if (isOriginalAuthoredToolTileModel(newTile)) {
+  else if (isOriginalAuthoredTileModel(newTile)) {
     addImportedTileInNewRow(content, newTile, { rowIndex: content.rowCount, rowHeight: tileHeight });
   }
 }
 
-function migrateRow(content: DocumentContentModelType, tiles: OriginalToolTileModel[]) {
+function migrateRow(content: DocumentContentModelType, tiles: OriginalTileModel[]) {
   let insertRowIndex = content.rowCount;
   tiles.forEach((tile, tileIndex) => {
     const { layout, ...newTile } = cloneDeep(tile);
     const tileHeight = layout?.height;
     const options = { rowIndex: insertRowIndex, rowHeight: tileHeight };
-    if (isOriginalAuthoredToolTileModel(newTile)) {
+    if (isOriginalAuthoredTileModel(newTile)) {
       if (tileIndex === 0) {
         const newRowInfo = addImportedTileInNewRow(content, newTile, options);
         const newRowIndex = content.getRowIndex(newRowInfo.rowId);

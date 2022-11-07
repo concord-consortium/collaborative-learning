@@ -4,32 +4,32 @@ import React from "react";
 import { BaseComponent, IBaseProps } from "./base";
 import { DocumentModelType } from "../models/document/document";
 import { IDocumentContentAddTileOptions, IDragToolCreateInfo } from "../models/document/document-content";
-import { ToolbarModelType } from "../models/stores/problem-configuration";
-import { ToolButtonModelType } from "../models/tools/tool-button";
-import { getToolContentInfoById, IToolContentInfo } from "../models/tools/tool-content-info";
+import { IToolbarModel } from "../models/stores/problem-configuration";
+import { IToolbarButtonModel } from "../models/tiles/toolbar-button";
+import { getTileContentInfo, ITileContentInfo } from "../models/tiles/tile-content-info";
 import { DeleteButton } from "./delete-button";
-import { IToolButtonProps, ToolButtonComponent } from "./tool-button";
-import { EditableToolApiInterfaceRefContext } from "./tools/tool-api";
-import { kDragTileCreate  } from "./tools/tool-tile";
+import { IToolbarButtonProps, ToolbarButtonComponent } from "./toolbar-button";
+import { EditableTileApiInterfaceRefContext } from "./tiles/tile-api";
+import { kDragTileCreate  } from "./tiles/tile-component";
 
 import "./toolbar.sass";
 
 interface IProps extends IBaseProps {
   document: DocumentModelType;
-  toolbarModel: ToolbarModelType;
+  toolbarModel: IToolbarModel;
 }
 
 interface IState {
-  defaultTool?: ToolButtonModelType;
-  activeTool?: ToolButtonModelType;
+  defaultTool?: IToolbarButtonModel;
+  activeTool?: IToolbarButtonModel;
 }
 
 @inject("stores")
 @observer
 export class ToolbarComponent extends BaseComponent<IProps, IState> {
 
-  static contextType = EditableToolApiInterfaceRefContext;
-  declare context: React.ContextType<typeof EditableToolApiInterfaceRefContext>;
+  static contextType = EditableTileApiInterfaceRefContext;
+  declare context: React.ContextType<typeof EditableTileApiInterfaceRefContext>;
 
   private showDeleteTilesConfirmationAlert?: () => void;
 
@@ -43,7 +43,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const handleClickTool = (e: React.MouseEvent<HTMLDivElement>, tool: ToolButtonModelType) => {
+    const handleClickTool = (e: React.MouseEvent<HTMLDivElement>, tool: IToolbarButtonModel) => {
       switch (tool.id) {
         case "select":
           this.handleSelect();
@@ -58,21 +58,21 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
           this.handleDelete();
           break;
         default:
-          this.handleAddToolTile(tool);
+          this.handleAddTile(tool);
           break;
       }
     };
-    const handleSetActiveTool = (tool: ToolButtonModelType, isActive: boolean) => {
+    const handleSetActiveTool = (tool: IToolbarButtonModel, isActive: boolean) => {
       const { defaultTool } = this.state;
       this.setState({ activeTool: isActive && (tool !== defaultTool) ? tool : defaultTool });
     };
-    const handleDragTool = (e: React.DragEvent<HTMLDivElement>, tool: ToolButtonModelType) => {
-      this.handleDragNewToolTile(tool, e);
+    const handleDragTool = (e: React.DragEvent<HTMLDivElement>, tool: IToolbarButtonModel) => {
+      this.handleDragNewTile(tool, e);
     };
-    const renderToolButtons = (toolbarModel: ToolbarModelType) => {
+    const renderToolButtons = (toolbarModel: IToolbarModel) => {
       const { ui: { selectedTileIds } } = this.stores;
       return toolbarModel.map(toolButton => {
-        const buttonProps: IToolButtonProps = {
+        const buttonProps: IToolbarButtonProps = {
           toolButton,
           isActive: toolButton === this.state.activeTool,
           isDisabled: toolButton.id === "delete" && !selectedTileIds.length,
@@ -84,7 +84,7 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         };
         toolButton.initialize();
         return toolButton.id !== "delete"
-                ? <ToolButtonComponent key={toolButton.id} {...buttonProps} />
+                ? <ToolbarButtonComponent key={toolButton.id} {...buttonProps} />
                 : <DeleteButton key={toolButton.id}
                                 onSetShowDeleteTilesConfirmationAlert={this.setShowDeleteTilesConfirmationAlert}
                                 onDeleteSelectedTiles={this.handleDeleteSelectedTiles}
@@ -108,24 +108,24 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     document.content?.showPendingInsertHighlight(false);
   };
 
-  private getUniqueTitle(toolContentInfo: IToolContentInfo) {
-    const toolApiInterface = this.context?.current;
-    if (!toolApiInterface) return;
+  private getUniqueTitle(tileContentInfo: ITileContentInfo) {
+    const tileApiInterface = this.context?.current;
+    if (!tileApiInterface) return;
     const { document } = this.props;
-    const { id, titleBase } = toolContentInfo;
-    const getTileTitle = (tileId: string) => toolApiInterface?.getToolApi(tileId)?.getTitle?.();
-    return titleBase && document.getUniqueTitle(id, titleBase, getTileTitle);
+    const { type, titleBase } = tileContentInfo;
+    const getTileTitle = (tileId: string) => tileApiInterface?.getTileApi(tileId)?.getTitle?.();
+    return titleBase && document.getUniqueTitle(type, titleBase, getTileTitle);
   }
 
-  private handleAddToolTile(tool: ToolButtonModelType) {
+  private handleAddTile(tool: IToolbarButtonModel) {
     const { document } = this.props;
     const { ui } = this.stores;
-    const toolContentInfo = getToolContentInfoById(tool.id);
-    if (!toolContentInfo) return;
+    const tileContentInfo = getTileContentInfo(tool.id);
+    if (!tileContentInfo) return;
 
     const newTileOptions: IDocumentContentAddTileOptions = {
-            title: this.getUniqueTitle(toolContentInfo),
-            addSidecarNotes: !!toolContentInfo?.addSidecarNotes,
+            title: this.getUniqueTitle(tileContentInfo),
+            addSidecarNotes: !!tileContentInfo?.addSidecarNotes,
             insertRowInfo: { rowInsertIndex: document.content?.defaultInsertRow ?? 0 }
           };
     const rowTile = document.addTile(tool.id, newTileOptions);
@@ -152,15 +152,15 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleDelete() {
-    const toolApiInterface = this.context?.current;
-    if (!toolApiInterface) return;
+    const tileApiInterface = this.context?.current;
+    if (!tileApiInterface) return;
     let didDeleteInteriorSelection = false;
     const { ui } = this.stores;
     ui.selectedTileIds.forEach(tileId => {
-      const toolApi = toolApiInterface?.getToolApi(tileId);
+      const tileApi = tileApiInterface?.getTileApi(tileId);
       // if there is selected content inside the selected tile, delete it first
-      if (toolApi?.hasSelection?.()) {
-        toolApi.deleteSelection?.();
+      if (tileApi?.hasSelection?.()) {
+        tileApi.deleteSelection?.();
         didDeleteInteriorSelection = true;
       }
     });
@@ -183,14 +183,14 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     });
   };
 
-  private handleDragNewToolTile = (tool: ToolButtonModelType, e: React.DragEvent<HTMLDivElement>) => {
+  private handleDragNewTile = (tool: IToolbarButtonModel, e: React.DragEvent<HTMLDivElement>) => {
     // remove hover-insert highlight when we start a tile drag
     this.removeDropRowHighlight();
 
-    const toolContentInfo = getToolContentInfoById(tool.id);
-    if (toolContentInfo) {
+    const tileContentInfo = getTileContentInfo(tool.id);
+    if (tileContentInfo) {
       const dragInfo: IDragToolCreateInfo =
-        { toolId: tool.id, title: this.getUniqueTitle(toolContentInfo) };
+        { toolId: tool.id, title: this.getUniqueTitle(tileContentInfo) };
       e.dataTransfer.setData(kDragTileCreate, JSON.stringify(dragInfo));
     }
   };
