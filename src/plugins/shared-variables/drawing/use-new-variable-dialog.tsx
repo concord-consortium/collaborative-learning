@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useState } from "react";
 import { getOrFindSharedModel } from "./drawing-utils";
 import { VariableChipObjectSnapshotForAdd } from "./variable-object";
 import VariablesIcon from "../slate/variables.svg";
@@ -13,9 +13,7 @@ interface IProps {
 }
 export const useNewVariableDialog = ({ variable }: IProps) => {
   const drawingContent = useContext(DrawingContentModelContext);
-  const [forceNewVariable, setForceNewVariable] = useState(0);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const newVariable = useMemo(() => Variable.create({}), [forceNewVariable]);
+  const [newVariable, setNewVariable] = useState(Variable.create({}));
 
   const handleClick = () => {
     // Should we only create a new variable when name and value are legal?
@@ -32,7 +30,7 @@ export const useNewVariableDialog = ({ variable }: IProps) => {
       };
       drawingContent.addObject(variableChipSnapshot);
     }
-    setForceNewVariable(val => val + 1);
+    setNewVariable(Variable.create({}));
   };
 
   const [showModal, hideModal] = useCustomModal({
@@ -48,7 +46,7 @@ export const useNewVariableDialog = ({ variable }: IProps) => {
         onClick: handleClick
       }
     ]
-  }, [variable]);
+  }, [newVariable]);
 
   return [showModal, hideModal];
 };
