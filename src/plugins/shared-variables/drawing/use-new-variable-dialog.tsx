@@ -4,19 +4,15 @@ import { VariableChipObjectSnapshotForAdd } from "./variable-object";
 import VariablesIcon from "../slate/variables.svg";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
-import { EditVariableDialogContent, Variable, VariableType } from "@concord-consortium/diagram-view";
+import { EditVariableDialogContent, Variable } from "@concord-consortium/diagram-view";
 
 import '../../diagram-viewer/diagram-dialog.scss';
 
-interface IProps {
-  variable?: VariableType;
-}
-export const useNewVariableDialog = ({ variable }: IProps) => {
+export const useNewVariableDialog = () => {
   const drawingContent = useContext(DrawingContentModelContext);
   const [newVariable, setNewVariable] = useState(Variable.create({}));
 
   const handleClick = () => {
-    // Should we only create a new variable when name and value are legal?
     const sharedModel = getOrFindSharedModel(drawingContent);
     sharedModel?.addVariable(newVariable);
     const sharedVariable = sharedModel?.variables.find(v => v === newVariable);

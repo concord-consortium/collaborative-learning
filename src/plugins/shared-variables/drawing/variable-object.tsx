@@ -125,7 +125,7 @@ interface INewVariableButtonProps {
   toolbarManager: IToolbarManager;
 }
 export const NewVariableButton = observer(({ toolbarManager }: INewVariableButtonProps) => {
-  const [showVariableDialog] = useNewVariableDialog({});
+  const [showVariableDialog] = useNewVariableDialog();
 
   const disabled = toolbarManager.hasSelectedObjects;
   const onClick = () => {
