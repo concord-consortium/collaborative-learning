@@ -9,6 +9,7 @@ import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDrag
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
 import { DocumentContentModelType, IDragToolCreateInfo, IDropRowInfo } from "../../models/document/document-content";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
+import { getDocumentIdentifier } from "../../models/document/document-utils";
 import { IDragTiles } from "../../models/tiles/tile-model";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tiles/tile-component";
@@ -69,7 +70,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
       this.scrollDisposer = reaction(
         () => ({ tileId: this.stores.ui.scrollTo?.tileId, docId: this.stores.ui.scrollTo?.docId }),
         (scrollTo: Record<string, any>, prevScrollTo: Record<string, any>) => {
-        if (scrollTo.tileId && this.props.content?.documentIdentifier === scrollTo.docId) {
+        if (scrollTo.tileId && getDocumentIdentifier(this.props.content) === scrollTo.docId) {
           this.rowRefs.forEach((row: TileRowComponent | null) => {
             if (row?.tileRowDiv && row.hasTile(scrollTo.tileId)) {
               // Javascript struggles to scroll multiple elements at the same time,
