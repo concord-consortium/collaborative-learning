@@ -198,7 +198,26 @@ export const DocumentsModel = types
         const {firestore, userContext} = self;
 
         if (!firestore || !userContext) {
-          console.warn("Adding document before firestore and userContext is available");
+          // TODO: There is a chance that we'll lose history if the documents
+          // model isn't setup right. However, there are several cases where the
+          // documents does not need to save history so the firestore and
+          // userContext is not set in these cases:
+          // - the `stores.network` documents model just contains read only
+          //   documents which also can't replay history.
+          // - in tests a documents model is created just for the test
+          //
+          // When we work on:
+          // https://www.pivotaltracker.com/story/show/183291353
+          //
+          // > Safeguard the real documents from having their history changed by
+          // > the history slider. This can be done by adding a flag or some
+          // > other way to identify the history documents and only loading
+          // > history into documents with this flag. 
+          //
+          // We can consider adding another "type" to this flag indicating the
+          // document should be read-only like a network/remote document. Then
+          // we can add a warning if it looks like the document should be saving 
+          // history but there is firestore or useContext here
           return;
         }
 
