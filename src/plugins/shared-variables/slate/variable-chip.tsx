@@ -4,6 +4,8 @@ import React from "react";
 
 import "./variables-chip.scss";
 
+export const kEmptyVariable = "<no name>";
+
 interface IProps {
   variable: VariableType;
 }
@@ -16,6 +18,10 @@ export const VariableChip: React.FC<IProps> = observer(({variable}) => {
   const showValue = value !== undefined && !isNaN(value);
   const showEquals = showValue && name;
   const wrapUnit = !showValue;
+
+  if (!name && !showValue && !unit) {
+    return <span className="variable-name">{kEmptyVariable}</span>;
+  }
 
   return (
     <>
