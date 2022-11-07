@@ -1060,8 +1060,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Arc of Learning</strong></p>",
-                        "<p>Introduction </p>",
-                        "<p>Analysis</p>"
+                        "<p>Similar Figures: <em>Introduction</em> </p>",
+                        "<p>Proportional Reasoning: <em>Analysis</em></p>"
                       ]
                     }
                   },
@@ -1714,8 +1714,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Arc of Learning</strong></p>",
-                        "<p>Introduction Exploration </p>",
-                        "<p>Analysis</p>"
+                        "<p>Proportional Reasoning: <em>Analysis</em></p>",
+                        "<p>Similar Figures: <em>Introduction and Exploration</em></p>"
                       ]
                     }
                   },
@@ -2173,8 +2173,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Arc of Learning</strong></p>",
-                        "<p>Introduction Exploration</p>",
-                        "<p>Analysis</p>"
+                        "<p>Proportional Reasoning: <em>Analysis</em></p>",
+                        "<p>Similar Figures: <em>Introduction and Exploration</em></p>"
                       ]
                     }
                   },
@@ -2951,8 +2951,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Arc of Learning</strong></p>",
-                        "<p>Exploration Analysis </p>",
-                        "<p>Analysis</p>"
+                        "<p>Proportional Reasoning: <em>Analysis</em></p>",
+                        "<p>Similar Figures: <em>Exploration and Analysis</em></p>"
                       ]
                     }
                   },
@@ -3762,8 +3762,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Arc of Learning</strong></p>",
-                        "<p>Analysis </p>",
-                        "<p>Analysis</p>"
+                        "<p> Proportional Reasoning: <em>Analysis</em></p>",
+                        "<p>Similar Figures: <em>Analysis</em></p>"
                       ]
                     }
                   },
@@ -4536,8 +4536,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Arc of Learning</strong></p>",
-                        "<p>Analysis </p>",
-                        "<p>Analysis</p>"
+                        "<p>Proportional Reasoning: <em>Analysis</em> </p>",
+                        "<p>Similar Figures: <em>Analysis</em></p>"
                       ]
                     }
                   },
@@ -5370,8 +5370,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Arc of Learning</strong></p>",
-                        "<p>Analysis </p>",
-                        "<p>Synthesis</p>"
+                        "<p>Proportional Reasoning: <em>Synthesis</em> </p>",
+                        "<p>Similar Figures: <em>Analysis</em></p>"
                       ]
                     }
                   },
@@ -6022,8 +6022,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Arc of Learning</strong></p>",
-                        "<p>Analysis Synthesis </p>",
-                        "<p>Synthesis</p>"
+                        "<p>Proportional Reasoning: <em>Synthesis</em> </p>",
+                        "<p>Similar Figures: <em>Analysis and Synthesis</em></p>"
                       ]
                     }
                   },
@@ -6369,8 +6369,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Arc of Learning</strong></p>",
-                        "<p>Synthesis</p>",
-                        "<p>Synthesis</p>"
+                        "<p>Proportional Reasoning: <em>Synthesis</em> </p>",
+                        "<p>Similar Figures: <em>Synthesis</em></p>"
                       ]
                     }
                   },
@@ -7020,8 +7020,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Arc of Learning</strong></p>",
-                        "<p>Analysis </p>",
-                        "<p>Synthesis</p>"
+                        "<p>Proportional Reasoning: <em>Synthesis</em> </p>",
+                        "<p>Similar Figures: <em>Analysis</em></p>"
                       ]
                     }
                   },
@@ -7574,8 +7574,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Arc of Learning</strong></p>",
-                        "<p>Synthesis </p>",
-                        "<p>Synthesis</p>"
+                        "<p>Proportional Reasoning: <em>Synthesis</em> </p>",
+                        "<p>Similar Figures: <em>Synthesis</em></p>"
                       ]
                     }
                   },
@@ -8296,8 +8296,8 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Arc of Learning</strong></p>",
-                        "<p>Synthesis </p>",
-                        "<p>Synthesis</p>"
+                        "<p>Proportional Reasoning: <em>Synthesis</em> </p>",
+                        "<p>Similar Figures: <em>Synthesis</em></p>"
                       ]
                     }
                   },
@@ -8570,10 +8570,7 @@
             }
           ]
         }
-      ],
-      "supports": [
       ]
     }
-  ],
-  "supports": [ ]
+  ]
 }
