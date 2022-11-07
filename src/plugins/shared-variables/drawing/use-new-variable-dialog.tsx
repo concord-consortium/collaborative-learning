@@ -32,7 +32,7 @@ export const useNewVariableDialog = ({ variable }: IProps) => {
       };
       drawingContent.addObject(variableChipSnapshot);
     }
-    setForceNewVariable(val => val++);
+    setForceNewVariable(val => val + 1);
   };
 
   const [showModal, hideModal] = useCustomModal({
