@@ -2,11 +2,11 @@ import { getSnapshot } from "mobx-state-tree";
 import { createDocumentModel, DocumentModelType } from "./document";
 import { PersonalDocument, ProblemDocument } from "./document-types";
 import { createSingleTileContent } from "../../utilities/test-utils";
-import { TextContentModelType } from "../tools/text/text-content";
+import { TextContentModelType } from "../tiles/text/text-content";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTools } from "../../register-tools";
-registerTools(["Geometry", "Text"]);
+import { registerTileTypes } from "../../register-tile-types";
+registerTileTypes(["Geometry", "Text"]);
 
 const mockUserContext = { appMode: "authed", classHash: "class-1" };
 const mockQueryData = { content: {}, metadata: { createdAt: 10 } };

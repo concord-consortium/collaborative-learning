@@ -6,7 +6,7 @@ import {
   ISectionInfoMap, SectionModel, registerSectionInfo, suspendSectionContentParsing, resumeSectionContentParsing
 } from "./section";
 import { resumeSupportContentParsing, SupportModel, suspendSupportContentParsing } from "./support";
-import { StampModel } from "../../plugins/drawing-tool/model/stamp";
+import { StampModel } from "../../plugins/drawing/model/stamp";
 import { getAssetUrl } from "../../utilities/asset-utils";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { NavTabsConfigModel } from "../stores/nav-tabs";

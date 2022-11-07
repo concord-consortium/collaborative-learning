@@ -1,10 +1,10 @@
 import { flow, getSnapshot, getType, Instance, types } from "mobx-state-tree";
-import { IToolTileProps } from "src/components/tools/tool-tile";
+import { ITileProps } from "src/components/tiles/tile-component";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { registerSharedModelInfo } from "../shared/shared-model-registry";
-import { ToolContentModel } from "../tools/tool-types";
-import { registerToolComponentInfo } from "../tools/tool-component-info";
-import { registerToolContentInfo } from "../tools/tool-content-info";
+import { TileContentModel } from "../tiles/tile-types";
+import { registerTileComponentInfo } from "../tiles/tile-component-info";
+import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
 import { createDocumentModel } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
@@ -67,7 +67,7 @@ const TestTileChild = types.model("TestTileChild", {
   }
 }));
 
-const TestTile = ToolContentModel
+const TestTile = TileContentModel
   .named("TestTile")
   .props({
     type: "TestTile",
@@ -104,13 +104,13 @@ const TestTile = ToolContentModel
     },
     updateCounterAsync: flow(function *updateCounterAsync(){
       self.counter += 1;
-      yield wait(20);
+      yield wait(50); // intermittent failures with shorter waits
       self.counter += 1;
     }),
     updateCounterWithoutUndoAsync: flow(function *updateCounterWithoutUndoAsync(){
       withoutUndo();
       self.counter += 1;
-      yield wait(20);
+      yield wait(50); // intermittent failures with shorter waits
       self.counter += 1;
     }),
     setChildValue(_value: string){
@@ -119,21 +119,21 @@ const TestTile = ToolContentModel
   }));
 interface TestTileType extends Instance<typeof TestTile> {}
 
-const TestTileComponent: React.FC<IToolTileProps> = () => {
+const TestTileComponent: React.FC<ITileProps> = () => {
   throw new Error("Component not implemented.");
 };
 
-registerToolContentInfo({
-  id: "TestTile",
+registerTileContentInfo({
+  type: "TestTile",
   modelClass: TestTile,
   defaultContent(options) {
     return TestTile.create();
   }
 });
-registerToolComponentInfo({
-  id: "TestTile",
+registerTileComponentInfo({
+  type: "TestTile",
   Component: TestTileComponent,
-  toolTileClass: "test-tile"
+  tileEltClass: "test-tile"
 });
 
 const defaultDocumentContent = {
@@ -336,11 +336,11 @@ it("records a async tile change as one history event with one TreeRecordEntry", 
   ]);
 });
 
-it("records a async tile change and an interleaved history event with 2 entries", async () => {
+it("records an async tile change and an interleaved history event with 2 entries", async () => {
   const {tileContent, manager} = setupDocument();
   // This should record a history entry with this change and any changes to tiles
   // triggered by this change
-  const updateCounterPromise =  tileContent.updateCounterAsync();
+  const updateCounterPromise = tileContent.updateCounterAsync();
   await wait(1);
   tileContent.setFlag(true);
 

@@ -5,7 +5,7 @@ import ReactDOM from "react-dom";
 import { Tooltip } from "react-tippy";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { IFloatingToolbarProps, useFloatingToolbarLocation }
-  from "../../components/tools/hooks/use-floating-toolbar-location";
+  from "../../components/tiles/hooks/use-floating-toolbar-location";
 
 import { VariableType } from "@concord-consortium/diagram-view";
 

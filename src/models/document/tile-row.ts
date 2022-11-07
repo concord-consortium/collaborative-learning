@@ -1,5 +1,5 @@
 import { types, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
-import { ToolTileModelType } from "../tools/tool-tile";
+import { ITileModel } from "../tiles/tile-model";
 import { IDropRowInfo } from "../document/document-content";
 import { uniqueId } from "../../utilities/js-utils";
 import { withoutUndo } from "../history/tree-monitor";
@@ -69,7 +69,7 @@ export const TileRowModel = types
   .actions(self => ({
     updateLayout(tileMap: any) {
       self.tiles.forEach(tileRef => {
-        const tile: ToolTileModelType = tileMap.get(tileRef.tileId);
+        const tile: ITileModel = tileMap.get(tileRef.tileId);
         if (tile) {
           tileRef.setUserResizable(tile.isUserResizable);
         }
@@ -83,7 +83,7 @@ export const TileRowModel = types
       self.isSectionHeader = true;
       self.sectionId = sectionId;
     },
-    insertTileInRow(tile: ToolTileModelType, tileIndex?: number) {
+    insertTileInRow(tile: ITileModel, tileIndex?: number) {
       const dstTileIndex = (tileIndex != null) && (tileIndex >= 0) && (tileIndex < self.tiles.length)
                             ? tileIndex
                             : self.tiles.length;

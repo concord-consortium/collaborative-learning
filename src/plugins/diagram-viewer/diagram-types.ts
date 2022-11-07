@@ -1,4 +1,4 @@
-export const kDiagramToolID = "Diagram";
+export const kDiagramTileType = "Diagram";
 
 // The version shown to the user for the Diagram tile.
 // Currently it is just the version of the diagram-view library.

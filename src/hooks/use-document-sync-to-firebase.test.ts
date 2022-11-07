@@ -11,7 +11,7 @@ import { UserModel, UserModelType } from "../models/stores/user";
 import { useDocumentSyncToFirebase } from "./use-document-sync-to-firebase";
 const libDebug = require("../lib/debug");
 
-import "../models/tools/text/text-registration";
+import "../models/tiles/text/text-registration";
 
 const mockUseMutation = jest.fn((callback: (vars: any) => Promise<any>, options?: UseMutationOptions) => {
   return {

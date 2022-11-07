@@ -4,7 +4,7 @@ import { Editor, SlateEditor } from "@concord-consortium/slate-editor";
 import { render } from "@testing-library/react";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
-import { TextContentModel, TextContentModelType } from "../../../models/tools/text/text-content";
+import { TextContentModel, TextContentModelType } from "../../../models/tiles/text/text-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 import { getOrFindSharedModel, updateAfterSharedModelChanges } from "./variables-text-content";
 import { VariablesPlugin } from "./variables-plugin";

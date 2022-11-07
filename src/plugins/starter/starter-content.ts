@@ -1,16 +1,16 @@
 import { types, Instance } from "mobx-state-tree";
-import { ToolContentModel } from "../../models/tools/tool-types";
-import { kStarterToolID } from "./starter-types";
+import { TileContentModel } from "../../models/tiles/tile-types";
+import { kStarterTileType } from "./starter-types";
 
 export function defaultStarterContent(): StarterContentModelType {
   return StarterContentModel.create({text: "Hello World"});
 }
 
 
-export const StarterContentModel = ToolContentModel
+export const StarterContentModel = TileContentModel
   .named("StarterTool")
   .props({
-    type: types.optional(types.literal(kStarterToolID), kStarterToolID),
+    type: types.optional(types.literal(kStarterTileType), kStarterTileType),
     text: "",
   })
   .views(self => ({

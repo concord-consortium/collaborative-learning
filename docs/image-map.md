@@ -54,14 +54,14 @@ In some cases the URL that is sent to `getImage` needs to be converted. Here are
 
 When the URL is changed, the cache is updated to contain an entry for both the old URL and the new URL. Both entries will have the new URL as their `contentUrl`.
 
-In some cases it is possible there is a cache entry already at the new URL. This can happen if the new URL was requested directly by some other part of CLUE content. I believe in conversion cases 1 and 2 the new URL will be unique each time so it is not possible for it to conflict. In cases 3 and 4 the new URL could conflict. 
+In some cases it is possible there is a cache entry already at the new URL. This can happen if the new URL was requested directly by some other part of CLUE content. I believe in conversion cases 1 and 2 the new URL will be unique each time so it is not possible for it to conflict. In cases 3 and 4 the new URL could conflict.
 
 The cache entry for the new URL could be in any of 5 states: undefined or the 4 status states described above. And the cache entry being stored at this new location could be in 3 states: `PendingDimensions`, `Ready`, `Error`. When the cache entry has a status of `PendingStorage`, the converted URL is not known yet.
 
-Below are the combination of states between the updated entry and the existing entry. 
+Below are the combination of states between the updated entry and the existing entry.
 
 ### Updated cache entry is in Ready state
-If the existing entry is 
+If the existing entry is
 - `Ready` do nothing
 - `PendingDimensions` this could happen either if:
   1. the existing entry was created directly by `getImage`. In this case the existing entry should be left alone because there should be another promise updating it.
@@ -71,14 +71,14 @@ If the existing entry is
 - `undefined` store a copy of the updated entry
 
 ### Updated cache entry is in the PendingDimensions state
-If the existing entry is 
+If the existing entry is
 - `Ready` do nothing, the entry was already downloaded successfully leave it alone
 - `PendingDimensions` and `PendingStorage` this should mean the existing entry is being updated right now by a different promise, do nothing. Unlike when the updated cache entry is in the `Error` or `Ready` state, in this case the updated cache entry should not have been copied yet, so it can't managed by the same promise.
 - `Error` update the existing entry with the new entry. Also update the promise map so the URL of the existing entry maps to the promise of the updated entry. This way if a `getImage` request comes in for the existing entry's URL, this request will wait until the updated entry's promise has resolved.
 - `undefined` same as `Error`
 
 ### Updated cache entry is in the Error state
-If the existing entry is 
+If the existing entry is
 - `Ready` do nothing, the entry was already downloaded successfully leave it alone
 - `PendingDimensions` this could happen either if:
   1. the existing entry was created directly by `getImage`. In this case the existing entry should be left alone because there should be another promise updating it.
@@ -93,24 +93,24 @@ Currently there is a special placeholder image used by the Image Map and some of
 
 ## Filename
 
-The filename of an entry is needed so images that are used more than once in a tile or between multiple tiles can also know the filename. 
+The filename of an entry is needed so images that are used more than once in a tile or between multiple tiles can also know the filename.
 
 For example a student adds a file to the image tile. The ImageMap will upload this image to the firebase realtime database. The entry in the ImageMap cache will be stored under the URL to the image in the firebase realtime database. The filename might be shown to the user in the image tile. At this point the image tile knows the filename itself so there isn't a need to put it in the image map.  The image tile should store both the URL and the filename in its serialized state so this filename can be shown when the document is reloaded.
 
-Now if this image tile is dragged to a new document. The only thing actually transferred is the "content" URL to the image. This is the firebase realtime database URL. The user should still see the filename in the new image tile, this filename is taken from the ImageMap cache entry that was stored when the file was uploaded. Now when the new image tile looks up the image in the cache it will know the filename too. 
+Now if this image tile is dragged to a new document. The only thing actually transferred is the "content" URL to the image. This is the firebase realtime database URL. The user should still see the filename in the new image tile, this filename is taken from the ImageMap cache entry that was stored when the file was uploaded. Now when the new image tile looks up the image in the cache it will know the filename too.
 
 Because the cache is used this way to transfer the filename, it means when the document is reloaded the cache entries for any of these file based images need to have their filename set again. To support all of this there are two ways the filename can be set:
 
-1. It will be set when an image is first loaded from a file by calling `ImageMap#addFileImage`. 
+1. It will be set when an image is first loaded from a file by calling `ImageMap#addFileImage`.
 2. When `getImage` is called, the filename can be passed as an additional parameter.
 
-Any tile that stores image URLs in its serialized state also needs to store the filename if it is available. This is because any tile might be the first one to request the image from the ImageMap cache. All following requests will just work with the parameters of the first request. 
+Any tile that stores image URLs in its serialized state also needs to store the filename if it is available. This is because any tile might be the first one to request the image from the ImageMap cache. All following requests will just work with the parameters of the first request.
 
 For example, the same image is used by a geometry tile and an image tile. To illustrate this let's assume the geometry tile doesn't store the filename. When the document is reloaded, if the geometry tile requested the URL for the image first, an entry will be added to the cache that doesn't have a filename. When the image tile requests the same URL it would get back an entry without a filename. This original image tile could know the filename from its own state. However if the image was then copied to another document the new image tile would only have access to the info in the cache entry, so it would not know the filename.
 
 ## Dimensions
 
-The width and height of the image entry might not be set. This can happen if you are are observing an entry which has a status of `PendingStorage`, `PendingDimensions`, or `Error`. 
+The width and height of the image entry might not be set. This can happen if you are are observing an entry which has a status of `PendingStorage`, `PendingDimensions`, or `Error`.
 
 The best approach is for the client using the image map to store the dimensions in its state when they are known. This way when the image is being reloaded the client's components can reserve this space. Now if the entry has a width and height those can be used, otherwise the component falls back to the width and height in the state. If the entries width height are different than what is in the state the state should be updated.
 
@@ -118,20 +118,19 @@ When there is an error the cache returns a displayUrl of the placeholder image. 
 
 ### Current Implementation Notes on Dimensions
 
-The Image Tool uses the computed height to request a height from its tool tile wrapper.
-Otherwise, it doesn't seem to use the width or height, it seems like it is just letting the 
-browser size the image based on the tool tile wrapper.
+The Image tile uses the computed height to request a height from its tile wrapper.
+Otherwise, it doesn't seem to use the width or height, it seems like it is just letting the
+browser size the image based on the tile wrapper.
 If the height is not set then the desired height is undefined so no request is made
 
-geometry-content.tsx only partially handles image dimensions the code in the debouncing update ignores them. But code in tile drop and uploading background image also handles them. 
-It assumes the width and height are set with: 
+geometry-content.tsx only partially handles image dimensions the code in the debouncing update ignores them. But code in tile drop and uploading background image also handles them.
+It assumes the width and height are set with:
   `const width = image.width! / kGeometryDefaultPixelsPerUnit;`
-Because this is in a `getImage` handler, it should mean it won't get a entry with a status of `PendingDimensions`. But it might get one that has a status of `Error`.  
+Because this is in a `getImage` handler, it should mean it won't get a entry with a status of `PendingDimensions`. But it might get one that has a status of `Error`.
 FIXME: We should update this code so it handles undefined width and height values. It seems best to work on this in follow up PR.
 
-jxg-image (a part of the geometry tile) is getting a size from the internal object. it doesn't use the dimensions of the imageEntry that it gets using getCachedImage. Instead it just uses the size that was set above. 
+jxg-image (a part of the geometry tile) is getting a size from the internal object. it doesn't use the dimensions of the imageEntry that it gets using getCachedImage. Instead it just uses the size that was set above.
 
 drawing-layer.tsx (old version) assumes the image has a width and height. MST will throw an error in this code if there is an error and an image is returned without width and height. FIXME: This issue should be fixed in the new version.
 
 drawing-tool/objects/image.tsx this handles the case when the map entry doesn't have a width or height. It only updates its own image object width and height if they are set. So otherwise the width and height of the saved entry should be used.
-

@@ -7,14 +7,14 @@ import { PersonalDocument, PlanningDocument, ProblemDocument } from "../models/d
 import { specStores } from "../models/stores/spec-stores";
 import { IStores } from "../models/stores/stores";
 import { UserModel } from "../models/stores/user";
-import { TextContentModelType } from "../models/tools/text/text-content";
-import { ToolTileModelType } from "../models/tools/tool-tile";
+import { TextContentModelType } from "../models/tiles/text/text-content";
+import { ITileModel } from "../models/tiles/tile-model";
 import { createSingleTileContent } from "../utilities/test-utils";
 import * as UrlParams from "../utilities/url-params";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTools } from "../register-tools";
-registerTools(["Text"]);
+import { registerTileTypes } from "../register-tile-types";
+registerTileTypes(["Text"]);
 
 const mockDatabase = jest.fn();
 const mockFirestore = jest.fn();
@@ -146,7 +146,7 @@ describe("db", () => {
     }
 
     expect(docContent.tileMap.size).toBe(1);
-    docContent.tileMap.forEach((tile: ToolTileModelType) => {
+    docContent.tileMap.forEach((tile: ITileModel) => {
       const tileContent = tile.content as TextContentModelType;
       expect(tileContent.type).toBe("Text");
       expect(tileContent.format).toBeUndefined();
