@@ -584,7 +584,30 @@
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                 
+                ]
+              },
+              "launch": {
+                "tiles": [
+
+                ]
+              },
+              "explore": {
+                "tiles": [
+
+                ]
+              },
+              "summarize": {
+                "tiles": [
+
+                ]
+              }
+            }
+          }
         },
         {
           "description": "CAS Problem 1.2",
@@ -922,7 +945,30 @@
               "supports": []
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                 
+                ]
+              },
+              "launch": {
+                "tiles": [
+
+                ]
+              },
+              "explore": {
+                "tiles": [
+
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 1.3",
@@ -1371,7 +1417,31 @@
               },
               "supports": []
             }
-          ]
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                 
+                ]
+              },
+              "launch": {
+                "tiles": [
+
+                ]
+              },
+              "explore": {
+                "tiles": [
+
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  
+                ]
+              }
+            }
+          }
         }
       ],
       "supports": []
@@ -1991,7 +2061,30 @@
               "supports": []
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                 
+                ]
+              },
+              "launch": {
+                "tiles": [
+
+                ]
+              },
+              "explore": {
+                "tiles": [
+
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 2.2",
@@ -2387,7 +2480,30 @@
               "supports": []
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                 
+                ]
+              },
+              "launch": {
+                "tiles": [
+
+                ]
+              },
+              "explore": {
+                "tiles": [
+
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 2.3",
@@ -2968,7 +3084,30 @@
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                 
+                ]
+              },
+              "launch": {
+                "tiles": [
+
+                ]
+              },
+              "explore": {
+                "tiles": [
+
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  
+                ]
+              }
+            }
+          }
         }
       ],
       "supports": []
@@ -3446,7 +3585,30 @@
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                 
+                ]
+              },
+              "launch": {
+                "tiles": [
+
+                ]
+              },
+              "explore": {
+                "tiles": [
+
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 3.2",
@@ -3791,7 +3953,30 @@
               "supports": []
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                 
+                ]
+              },
+              "launch": {
+                "tiles": [
+
+                ]
+              },
+              "explore": {
+                "tiles": [
+
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 3.3",
@@ -4299,7 +4484,31 @@
               },
               "supports": []
             }
-          ]
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                 
+                ]
+              },
+              "launch": {
+                "tiles": [
+
+                ]
+              },
+              "explore": {
+                "tiles": [
+
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 3.4",
@@ -4749,7 +4958,31 @@
               },
               "supports": []
             }
-          ]
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                 
+                ]
+              },
+              "launch": {
+                "tiles": [
+
+                ]
+              },
+              "explore": {
+                "tiles": [
+
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  
+                ]
+              }
+            }
+          }
         }
       ],
       "supports": []
@@ -4966,10 +5199,32 @@
               },
               "supports": []
             }
-          ]
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                 
+                ]
+              },
+              "launch": {
+                "tiles": [
+
+                ]
+              },
+              "explore": {
+                "tiles": [
+
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  
+                ]
+              }
+            }
+          }
         }
-      ],
-      "supports": [
       ]
     }
   ],
