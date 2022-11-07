@@ -1,10 +1,9 @@
-import { types, Instance, SnapshotIn, getParent } from "mobx-state-tree";
+import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
 import { ProblemModel } from "./problem";
 import { SupportModel } from "./support";
 import { ProblemConfiguration } from "../stores/problem-configuration";
 import { SettingsMstType } from "../stores/settings";
-import { UnitModelType } from "./unit";
 
 const LegacyInvestigationModel = types
   .model("Investigation", {
@@ -32,11 +31,7 @@ const ModernInvestigationModel = types
     return {
       getProblem(problemOrdinal: number) {
         return self.problems.find(problem => problem.ordinal === problemOrdinal);
-      },
-      get unit(): UnitModelType {
-        // getParent is called twice below because each direct parent is an array
-        return getParent(getParent(self)) as UnitModelType;
-      },
+      }
     };
   });
 interface LegacySnapshot extends SnapshotIn<typeof LegacyInvestigationModel> {}

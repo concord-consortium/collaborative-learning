@@ -19,6 +19,7 @@ import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModel, SharedModelType, SharedModelUnion } from "../tools/shared-model";
 import { DocumentModelType, IDocumentEnvironment } from "./document";
 import { SectionModelType } from "../curriculum/section";
+import { getSectionPath } from "../curriculum/unit";
 
 export interface INewTileOptions {
   rowHeight?: number;
@@ -257,12 +258,15 @@ export const DocumentContentModel = types
   })
   .views(self => ({
     // Returns the key for user documents or path for problem documents
+    // FIXME: move this to a helper function in a different file so there isn't
+    // a circular dependency from the DocumentContentModel to its parents.
     get documentIdentifier(): string {
       const parent = getParent(self);
       if (Object.hasOwn(parent, "key")) {
         return (parent as DocumentModelType).key;
       } else {
-        return (parent as SectionModelType).path;
+        const section = parent as SectionModelType;
+        return getSectionPath(section);
       }
     },
     getSectionTypeForPlaceholderRow(row: TileRowModelType) {

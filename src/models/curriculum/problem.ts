@@ -1,11 +1,8 @@
-import { getParent, Instance, SnapshotIn, types } from "mobx-state-tree";
-import { InvestigationModelType } from "./investigation";
-import { UnitModelType } from "./unit";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { SectionModel, SectionModelType } from "./section";
 import { SettingsMstType } from "../stores/settings";
 import { SupportModel } from "./support";
 import { ProblemConfiguration } from "../stores/problem-configuration";
-import { buildProblemPath } from "../../../functions/src/shared";
 
 const LegacyProblemModel = types
   .model("Problem", {
@@ -37,18 +34,6 @@ const ModernProblemModel = types
     },
     getSectionById(sectionId: string): SectionModelType|undefined {
       return self.sections.find((section) => section.type === sectionId);
-    }
-  }))
-  .views(self => ({
-    get investigation(): InvestigationModelType {
-      // getParent is called twice below because each direct parent is an array
-      return getParent(getParent(self)) as InvestigationModelType;
-    },
-  }))
-  .views(self => ({
-    get problemPath(): string {
-      const unit = self.investigation.unit;
-      return buildProblemPath(unit.code, `${self.investigation.ordinal}`, `${self.ordinal}`);
     }
   }));
 interface LegacySnapshot extends SnapshotIn<typeof LegacyProblemModel> {}
