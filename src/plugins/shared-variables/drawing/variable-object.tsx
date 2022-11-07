@@ -132,7 +132,7 @@ export const NewVariableButton = observer(({ toolbarManager }: INewVariableButto
     showVariableDialog(); 
   };
 
-  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="variable" title="New Variable" 
+  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="new-variable" title="New Variable" 
     onClick={onClick} disabled={disabled} />;
 });
 
@@ -155,6 +155,6 @@ export const EditVariableButton = observer(({ toolbarManager }: IEditVariableBut
     showVariableDialog();
   };
 
-  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="variable" title="Edit Variable"
+  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="edit-variable" title="Edit Variable"
     onClick={onClick} disabled={disabled} />;
 });
