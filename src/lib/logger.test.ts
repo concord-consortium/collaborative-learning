@@ -1,5 +1,6 @@
 import mockXhr from "xhr-mock";
-import { Logger, LogEventName, ILogComment } from "./logger";
+import { getSnapshot } from "mobx-state-tree";
+import { Logger, LogEventName, ILogComment, ILogHistory } from "./logger";
 import { createDocumentModel, DocumentModelType } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
 import { InvestigationModel } from "../models/curriculum/investigation";
@@ -7,18 +8,21 @@ import { specAppConfig } from "../models/stores/spec-app-config";
 import { IStores, createStores } from "../models/stores/stores";
 import { UserModel } from "../models/stores/user";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType, LearningLogWorkspace } from "../models/stores/workspace";
-import { defaultGeometryContent } from "../models/tools/geometry/geometry-content";
-import { JXGChange } from "../models/tools/geometry/jxg-changes";
-import { TextContentModel } from "../models/tools/text/text-content";
-import { IDragTileItem, ToolTileModel } from "../models/tools/tool-tile";
+import { defaultGeometryContent } from "../models/tiles/geometry/geometry-content";
+import { JXGChange } from "../models/tiles/geometry/jxg-changes";
+import { TextContentModel } from "../models/tiles/text/text-content";
+import { IDragTileItem, TileModel } from "../models/tiles/tile-model";
 import { createSingleTileContent } from "../utilities/test-utils";
-import { ProblemModelType } from "../models/curriculum/problem";
+import { ProblemModel, ProblemModelType } from "../models/curriculum/problem";
+import { DocumentContentModel } from "../models/document/document-content";
+
+
 import { UIModel } from "../models/stores/ui";
 import { ENavTab } from "../models/view/nav-tabs";
 
 // This is needed so MST can deserialize snapshots referring to tools
-import { registerTools } from "../register-tools";
-registerTools(["Geometry", "Text"]);
+import { registerTileTypes } from "../register-tile-types";
+registerTileTypes(["Geometry", "Text"]);
 
 const investigation = InvestigationModel.create({
   ordinal: 1,
@@ -178,12 +182,26 @@ describe("authed logger", () => {
 
   beforeEach(() => {
     mockXhr.setup();
+
+    const content = DocumentContentModel.create(createSingleTileContent({
+      id: "tile1",
+      type: "Text",
+      title: "test title",
+    }));
+
     stores = createStores({
       appMode: "authed",
       appConfig: specAppConfig({ config: { appName: "TestLogger"} }),
       user: UserModel.create({
         id: "0", type: "student", portal: "test",
         loggingRemoteEndpoint: "foo"
+      }),
+      problem:  ProblemModel.create({
+        ordinal: 1, title: "Problem",
+        sections: [{
+          type: "introduction",
+          content: getSnapshot(content),
+        }]
       })
     });
 
@@ -212,8 +230,8 @@ describe("authed logger", () => {
 
   });
 
-  describe ("log comment events", () => {
-    const addDocument = (key: string)=> {
+  describe ("log history events", () => {
+    const addDocument = (key: string) => {
       const document = createDocumentModel({
         type: ProblemDocument,
         uid: "1",
@@ -224,10 +242,138 @@ describe("authed logger", () => {
       });
       stores.documents.add(document);
     };
-  
-    it("can log an ADD a document initial comment event", (done) => {
+
+    it("logs event with history metadata", (done) => {
       const documentKey = "source-document";
       addDocument(documentKey);
+      const historyPayload: ILogHistory = {
+        documentId: documentKey,
+        historyIndex: 12,
+        historyLength: 99,
+        historyEventId: "history-id",
+        action: "playStart"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const historyRequest = JSON.parse(req.body());
+        expect(historyRequest.event).toBe("HISTORY_PLAYBACK_START");
+        expect(historyRequest.parameters.documentKey).toBe(documentKey);
+        expect(historyRequest.parameters.historyEventId).toBe("history-id");
+        expect(historyRequest.parameters.historyLength).toBe(99);
+        expect(historyRequest.parameters.historyIndex).toBe(12);
+        done();
+        return res.status(201);
+      });
+      Logger.logHistoryEvent(historyPayload);
+    });
+
+    it("logs showControl Event", (done) => {
+      const documentKey = "source-document";
+      addDocument(documentKey);
+      const historyPayload: ILogHistory = {
+        documentId: documentKey,
+        action: "showControls"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const historyRequest = JSON.parse(req.body());
+        expect(historyRequest.event).toBe("HISTORY_SHOW_CONTROLS");
+        expect(historyRequest.parameters.documentKey).toBe(documentKey);
+        done();
+        return res.status(201);
+      });
+      Logger.logHistoryEvent(historyPayload);
+    });
+
+    it("logs showControl Event", (done) => {
+      const documentKey = "source-document";
+      addDocument(documentKey);
+      const historyPayload: ILogHistory = {
+        documentId: documentKey,
+        action: "hideControls"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const historyRequest = JSON.parse(req.body());
+        expect(historyRequest.event).toBe("HISTORY_HIDE_CONTROLS");
+        done();
+        return res.status(201);
+      });
+      Logger.logHistoryEvent(historyPayload);
+    });
+
+    it("logs playStart Event", (done) => {
+      const documentKey = "source-document";
+      addDocument(documentKey);
+      const historyPayload: ILogHistory = {
+        documentId: documentKey,
+        action: "playStart"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const historyRequest = JSON.parse(req.body());
+        expect(historyRequest.event).toBe("HISTORY_PLAYBACK_START");
+        done();
+        return res.status(201);
+      });
+      Logger.logHistoryEvent(historyPayload);
+    });
+
+    it("logs playEnd Event", (done) => {
+      const documentKey = "source-document";
+      addDocument(documentKey);
+      const historyPayload: ILogHistory = {
+        documentId: documentKey,
+        action: "playStop"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const historyRequest = JSON.parse(req.body());
+        expect(historyRequest.event).toBe("HISTORY_PLAYBACK_STOP");
+        done();
+        return res.status(201);
+      });
+      Logger.logHistoryEvent(historyPayload);
+    });
+
+    it("logs playSeek Event", (done) => {
+      const documentKey = "source-document";
+      addDocument(documentKey);
+      const historyPayload: ILogHistory = {
+        documentId: documentKey,
+        action: "playSeek"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const historyRequest = JSON.parse(req.body());
+        expect(historyRequest.event).toBe("HISTORY_PLAYBACK_SEEK");
+        done();
+        return res.status(201);
+      });
+      Logger.logHistoryEvent(historyPayload);
+    });
+  });
+
+  describe ("log comment events", () => {
+    const addDocumentWithTile = (key: string)=> {
+      const document = createDocumentModel({
+        type: ProblemDocument,
+        uid: "1",
+        key,
+        createdAt: 1,
+        content: createSingleTileContent({
+          id: "tile1",
+          type: "Text",
+          title: "test title",
+        }),
+        visibility: "public"
+      });
+      stores.documents.add(document);
+    };
+
+    it("can log an ADD a document initial comment event", (done) => {
+      const documentKey = "source-document";
+      addDocumentWithTile(documentKey);
       const commentText = "TeSt";
       const addEventPayload: ILogComment = {
         focusDocumentId: documentKey,
@@ -248,9 +394,34 @@ describe("authed logger", () => {
       Logger.logCommentEvent(addEventPayload);
     });
 
+    it("Curriculum path comment event logs Tile Type", (done) => {
+      const documentKey = "sas/0/1/introduction";
+      addDocumentWithTile(documentKey);
+      const commentText = "TeSt";
+      const addEventPayload: ILogComment = {
+        focusDocumentId: documentKey,
+        focusTileId: 'tile1',
+        isFirst: true,
+        commentText,
+        action: "add"
+      };
+
+      mockXhr.post(/.*/, (req, res) => {
+        const addCommentRequest = JSON.parse(req.body());
+        expect(addCommentRequest.event).toBe("ADD_INITIAL_COMMENT_FOR_TILE");
+        expect(addCommentRequest.parameters.commentText).toBe(commentText);
+        expect(addCommentRequest.parameters.curriculum).toBe(documentKey);
+        expect(addCommentRequest.parameters.tileType).toBe("Text");
+        done();
+        return res.status(201);
+      });
+
+      Logger.logCommentEvent(addEventPayload);
+    });
+
     it("can log an ADD a document response comment event", (done) => {
       const documentKey = "source-document";
-      addDocument(documentKey);
+      addDocumentWithTile(documentKey);
       const commentText = "TeSt";
       const addEventPayload: ILogComment = {
         focusDocumentId: documentKey,
@@ -264,6 +435,8 @@ describe("authed logger", () => {
         expect(addCommentRequest.event).toBe("ADD_RESPONSE_COMMENT_FOR_DOCUMENT");
         expect(addCommentRequest.parameters.commentText).toBe(commentText);
         expect(addCommentRequest.parameters.documentKey).toBe(documentKey);
+        expect(addCommentRequest.parameters.tileType).toBeUndefined();
+
         done();
         return res.status(201);
       });
@@ -271,15 +444,15 @@ describe("authed logger", () => {
       Logger.logCommentEvent(addEventPayload);
     });
 
-    it("can log an ADD a tile comment event", (done) => {
+    it("can log an ADD a tile comment event and tile type logged", (done) => {
       const documentKey = "source-document";
-      addDocument(documentKey);
-      const tile = ToolTileModel.create({ content: TextContentModel.create() });
-      const tileId = tile.id;
+
+      addDocumentWithTile(documentKey);
+      const tileId = "tile1";
       const commentText = "TeSt";
       const addEventPayload: ILogComment = {
         focusDocumentId: documentKey,
-        focusTileId: tile.id,
+        focusTileId: "tile1",
         isFirst: false,
         commentText,
         action: "add"
@@ -291,6 +464,7 @@ describe("authed logger", () => {
         expect(addCommentRequest.parameters.tileId).toBe(tileId);
         expect(addCommentRequest.parameters.commentText).toBe(commentText);
         expect(addCommentRequest.parameters.documentKey).toBe(documentKey);
+        expect(addCommentRequest.parameters.tileType).toBe("Text");
         done();
         return res.status(201);
       });
@@ -300,7 +474,7 @@ describe("authed logger", () => {
 
     it("can log a DELETE document comment event", (done) => {
       const documentKey = "source-document";
-      addDocument(documentKey);
+      addDocumentWithTile(documentKey);
       const commentText = "TeSt";
       const deleteEventPayload: ILogComment = {
         focusDocumentId: documentKey,
@@ -322,8 +496,8 @@ describe("authed logger", () => {
 
     it("can log a DELETE tile comment event", (done) => {
       const documentKey = "source-document";
-      addDocument(documentKey);
-      const tile = ToolTileModel.create({ content: TextContentModel.create() });
+      addDocumentWithTile(documentKey);
+      const tile = TileModel.create({ content: TextContentModel.create() });
       const tileId = tile.id;
       const commentText = "TeSt";
       const deleteEventPayload: ILogComment = {
@@ -348,8 +522,8 @@ describe("authed logger", () => {
 
     it("can log a EXPAND tile comment thread event", (done) => {
       const documentKey = "source-document";
-      addDocument(documentKey);
-      const tile = ToolTileModel.create({ content: TextContentModel.create() });
+      addDocumentWithTile(documentKey);
+      const tile = TileModel.create({ content: TextContentModel.create() });
       const tileId = tile.id;
       const expandCommentPayload: ILogComment = {
         focusDocumentId: documentKey,
@@ -369,11 +543,11 @@ describe("authed logger", () => {
       });
       Logger.logCommentEvent(expandCommentPayload);
     });
-    
+
     it("can log a COLLAPSE tile comment thread event", (done) => {
       const documentKey = "source-document";
-      addDocument(documentKey);
-      const tile = ToolTileModel.create({ content: TextContentModel.create() });
+      addDocumentWithTile(documentKey);
+      const tile = TileModel.create({ content: TextContentModel.create() });
       const tileId = tile.id;
       const collapseCommentPayload: ILogComment = {
         focusDocumentId: documentKey,
@@ -393,10 +567,10 @@ describe("authed logger", () => {
       });
       Logger.logCommentEvent(collapseCommentPayload);
     });
-    
+
     it("can log a EXPAND document comment thread event", (done) => {
       const documentKey = "source-document";
-      addDocument(documentKey);
+      addDocumentWithTile(documentKey);
       const expandCommentPayload: ILogComment = {
         focusDocumentId: documentKey,
         focusTileId: undefined,
@@ -415,10 +589,10 @@ describe("authed logger", () => {
       });
       Logger.logCommentEvent(expandCommentPayload);
     });
-    
+
     it("can log a COLLAPSE document comment thread event", (done) => {
       const documentKey = "source-document";
-      addDocument(documentKey);
+      addDocumentWithTile(documentKey);
       const expandCommentPayload: ILogComment = {
         focusDocumentId: documentKey,
         focusTileId: undefined,
@@ -465,7 +639,7 @@ describe("authed logger", () => {
     });
 
     it("can log tile creation", (done) => {
-      const tile = ToolTileModel.create({ content: TextContentModel.create() });
+      const tile = TileModel.create({ content: TextContentModel.create() });
 
       mockXhr.post(/.*/, (req, res) => {
         const request = JSON.parse(req.body());
@@ -485,7 +659,7 @@ describe("authed logger", () => {
 
       Logger.logTileEvent(LogEventName.CREATE_TILE, tile);
     });
-    
+
     it("can log tile creation in a document", (done) => {
       const document = createDocumentModel({
         type: ProblemDocument,
@@ -579,7 +753,7 @@ describe("authed logger", () => {
 
   describe("Tile changes", () => {
     it("can log tile change events", (done) => {
-      const tile = ToolTileModel.create({ content: defaultGeometryContent() });
+      const tile = TileModel.create({ content: defaultGeometryContent() });
       const change: JXGChange = { operation: "create", target: "point" };
 
       mockXhr.post(/.*/, (req, res) => {
@@ -595,7 +769,7 @@ describe("authed logger", () => {
         return res.status(201);
       });
 
-      Logger.logToolChange(LogEventName.GRAPH_TOOL_CHANGE, "create", change, tile.id);
+      Logger.logTileChange(LogEventName.GRAPH_TOOL_CHANGE, "create", change, tile.id);
     });
   });
 

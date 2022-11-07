@@ -3,15 +3,15 @@ import { getParentOfType, hasParentOfType, IAnyStateTreeNode } from "mobx-state-
 import { DocumentContentModelType } from "../document/document-content";
 import { SharedModelType } from "./shared-model";
 import { ISharedModelManager, SharedModelUnion } from "./shared-model-manager";
-import { ToolTileModel } from "../tools/tool-tile";
+import { TileModel } from "../tiles/tile-model";
 
 
-function getToolTile(tileContentModel: IAnyStateTreeNode){
-  if (!hasParentOfType(tileContentModel, ToolTileModel)) {
+function getTileModel(tileContentModel: IAnyStateTreeNode) {
+  if (!hasParentOfType(tileContentModel, TileModel)) {
     // we aren't attached in the right place yet
     return undefined;
   }
-  return getParentOfType(tileContentModel, ToolTileModel);
+  return getParentOfType(tileContentModel, TileModel);
 }
 
 export interface ISharedModelDocumentManager extends ISharedModelManager {
@@ -58,10 +58,10 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       return;
     }
 
-    // add this toolTile to the sharedModel entry
-    const toolTile = getToolTile(tileContentModel);
-    if (!toolTile) {
-      console.warn("addTileSharedModel can't find the toolTile");
+    // add this tile to the sharedModel entry
+    const tile = getTileModel(tileContentModel);
+    if (!tile) {
+      console.warn("addTileSharedModel can't find the tile");
       return;
     }
 
@@ -87,11 +87,11 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     const sharedModelEntry = this.document.addSharedModel(sharedModel);
 
     // If the sharedModel was added before we don't need to do anything
-    if (sharedModelEntry.tiles.includes(toolTile)) {
+    if (sharedModelEntry.tiles.includes(tile)) {
       return;
     }
 
-    sharedModelEntry.addTile(toolTile, isProvider);
+    sharedModelEntry.addTile(tile, isProvider);
 
     // When a shared model changes updateAfterSharedModelChanges is called on
     // the tile content model automatically by the tree monitor. However when
@@ -107,16 +107,16 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       return [];
     }
 
-    // add this toolTile to the sharedModel entry
-    const toolTile = getToolTile(tileContentModel);
-    if (!toolTile) {
-      console.warn("getTileSharedModels can't find the toolTile");
+    // add this tile to the sharedModel entry
+    const tile = getTileModel(tileContentModel);
+    if (!tile) {
+      console.warn("getTileSharedModels can't find the tile");
       return [];
     }
 
     const sharedModels: SharedModelType[] = [];
     for(const sharedModelEntry of this.document.sharedModelMap.values()) {
-      if (sharedModelEntry.tiles.includes(toolTile)) {
+      if (sharedModelEntry.tiles.includes(tile)) {
         sharedModels.push(sharedModelEntry.sharedModel);
       }
     }
@@ -129,9 +129,9 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       return;
     }
 
-    const toolTile = getToolTile(tileContentModel);
-    if (!toolTile) {
-      console.warn("removeTileSharedModel can't find the toolTile");
+    const tile = getTileModel(tileContentModel);
+    if (!tile) {
+      console.warn("removeTileSharedModel can't find the tile");
       return;
     }
 
@@ -141,6 +141,6 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       return;
     }
 
-    sharedModelEntry.removeTile(toolTile);
+    sharedModelEntry.removeTile(tile);
   }
 }

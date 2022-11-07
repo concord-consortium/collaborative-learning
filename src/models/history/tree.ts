@@ -2,7 +2,7 @@ import { types, IJsonPatch, applyPatch, resolvePath, getSnapshot, flow } from "m
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { DocumentContentModelType } from "../document/document-content";
 import { SharedModelType } from "../shared/shared-model";
-import { ToolTileModelType } from "../tools/tool-tile";
+import { ITileModel } from "../tiles/tile-model";
 import { TreeManagerAPI } from "./tree-manager-api";
 import { TreeMonitor } from "./tree-monitor";
 
@@ -31,7 +31,7 @@ export const Tree = types.model("Tree", {
 
     // We can probably optimize this by using a MSTView to cache the tiles
     // here. But I don't remember how it handles parameter values
-    const tiles: Array<ToolTileModelType> = [];
+    const tiles: Array<ITileModel> = [];
     let sharedModel: SharedModelType | undefined;
     if (options) {
       sharedModel = options.sharedModel;

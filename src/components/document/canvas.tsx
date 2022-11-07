@@ -7,15 +7,16 @@ import { BaseComponent } from "../base";
 import { DocumentContentComponent } from "./document-content";
 import { createDocumentModel, ContentStatus, DocumentModelType } from "../../models/document/document";
 import { DocumentContentModelType } from "../../models/document/document-content";
-import { transformCurriculumImageUrl } from "../../models/tools/image/image-import-export";
+import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { TreeManagerType } from "../../models/history/tree-manager";
 import { PlaybackComponent } from "../playback/playback";
 import {
-  IToolApi, IToolApiInterface, IToolApiMap, ToolApiInterfaceContext, EditableToolApiInterfaceRefContext
-} from "../tools/tool-api";
+  ITileApi, ITileApiInterface, ITileApiMap, TileApiInterfaceContext, EditableTileApiInterfaceRefContext
+} from "../tiles/tile-api";
 import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT } from "../../lib/debug";
 import { DocumentError } from "./document-error";
+import { Logger } from "../../lib/logger";
 
 import "./canvas.sass";
 
@@ -37,34 +38,34 @@ interface IProps {
 
 interface IState {
   historyDocumentCopy?: DocumentModelType;
-  showPlaybackControls: boolean;  
+  showPlaybackControls: boolean;
 }
 
 @inject("stores")
 @observer
 export class CanvasComponent extends BaseComponent<IProps, IState> {
 
-  private toolApiMap: IToolApiMap = {};
-  private toolApiInterface: IToolApiInterface;
+  private toolApiMap: ITileApiMap = {};
+  private tileApiInterface: ITileApiInterface;
   private hotKeys: HotKeys = new HotKeys();
 
-  static contextType = EditableToolApiInterfaceRefContext;
-  declare context: React.ContextType<typeof EditableToolApiInterfaceRefContext>;
+  static contextType = EditableTileApiInterfaceRefContext;
+  declare context: React.ContextType<typeof EditableTileApiInterfaceRefContext>;
 
   constructor(props: IProps) {
     super(props);
 
-    this.toolApiInterface = {
-      register: (id: string, toolApi: IToolApi) => {
-        this.toolApiMap[id] = toolApi;
+    this.tileApiInterface = {
+      register: (id: string, tileApi: ITileApi) => {
+        this.toolApiMap[id] = tileApi;
       },
       unregister: (id: string) => {
         delete this.toolApiMap[id];
       },
-      getToolApi: (id: string) => {
+      getTileApi: (id: string) => {
         return this.toolApiMap[id];
       },
-      forEach: (callback: (api: IToolApi) => void) => {
+      forEach: (callback: (api: ITileApi) => void) => {
         each(this.toolApiMap, api => callback(api));
       }
     };
@@ -77,22 +78,22 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
 
     this.state = {
       showPlaybackControls: false,
-    };   
+    };
   }
 
   public render() {
     if (this.context && !this.props.readOnly) {
       // update the editable api interface used by the toolbar
-      this.context.current = this.toolApiInterface;
+      this.context.current = this.tileApiInterface;
     }
     return (
-      <ToolApiInterfaceContext.Provider value={this.toolApiInterface}>
+      <TileApiInterfaceContext.Provider value={this.tileApiInterface}>
         <div key="canvas" className="canvas" data-test="canvas" onKeyDown={this.handleKeyDown}>
           {this.renderContent()}
           {this.renderDebugInfo()}
           {this.renderOverlayMessage()}
         </div>
-      </ToolApiInterfaceContext.Provider>
+      </TileApiInterfaceContext.Provider>
     );
   }
 
@@ -178,18 +179,19 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   private handleTogglePlaybackControlComponent = () => {
     this.setState((prevState, props) => {
       const showPlaybackControls = !prevState.showPlaybackControls;
-      const historyDocumentCopy = showPlaybackControls ? 
+      const historyDocumentCopy = showPlaybackControls ?
         this.createHistoryDocumentCopy() : undefined;
 
       if (prevState.historyDocumentCopy) {
         destroy(prevState.historyDocumentCopy);
       }
-
+      Logger.logHistoryEvent({documentId: this.props.document?.key || '',
+        action: showPlaybackControls ? "showControls": "hideControls" });
       return {
         showPlaybackControls,
         historyDocumentCopy
       };
-    });    
+    });
   };
 
   private createHistoryDocumentCopy = () => {

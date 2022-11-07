@@ -8,8 +8,8 @@ import {
   PlanningDocument, ProblemDocument, ProblemPublication, SupportPublication
 } from "./document-types";
 import { AppConfigModelType } from "../stores/app-config-model";
-import { TileCommentsModel, TileCommentsModelType } from "../tools/tile-comments";
-import { UserStarModel, UserStarModelType } from "../tools/user-star";
+import { TileCommentsModel, TileCommentsModelType } from "../tiles/tile-comments";
+import { UserStarModel, UserStarModelType } from "../tiles/user-star";
 import {
   IDocumentMetadata, IGetNetworkDocumentParams, IGetNetworkDocumentResponse, IUserContext
 } from "../../../functions/src/shared";
@@ -20,7 +20,7 @@ import { safeJsonParse } from "../../utilities/js-utils";
 import { Tree } from "../history/tree";
 import { TreeMonitor } from "../history/tree-monitor";
 import { ISharedModelDocumentManager, SharedModelDocumentManager } from "../shared/shared-model-document-manager";
-import { ITileEnvironment } from "../tools/tool-types";
+import { ITileEnvironment } from "../tiles/tile-types";
 import { TreeManager } from "../history/tree-manager";
 import { ESupportType } from "../curriculum/support";
 
@@ -358,10 +358,10 @@ export const createDocumentModel = (snapshot?: DocumentModelSnapshotType) => {
       if (!document.content || !call.path?.match(/\/content\/tileMap\//)) {
         return;
       }
-      const toolTileId = call.path?.match(/\/content\/tileMap\/([^/]*)/)?.[1];
-      if (toolTileId) {
-        const toolTile = document.content.tileMap.get(toolTileId);
-        toolTile?.onTileAction(call);
+      const tileTypeId = call.path?.match(/\/content\/tileMap\/([^/]*)/)?.[1];
+      if (tileTypeId) {
+        const tile = document.content.tileMap.get(tileTypeId);
+        tile?.onTileAction(call);
       }
     }));
     if (document.content) {

@@ -1,14 +1,14 @@
 import { v4 as uuid } from "uuid";
 import { getSnapshot } from "mobx-state-tree";
 import { Optional } from "utility-types";
-import { ToolTileModelType } from "../models/tools/tool-tile";
+import { ITileModel } from "../models/tiles/tile-model";
 import { IStores } from "../models/stores/stores";
 import { UserModelType } from "../models/stores/user";
 import { InvestigationModelType } from "../models/curriculum/investigation";
 import { ProblemModelType } from "../models/curriculum/problem";
 import { DocumentModelType } from "../models/document/document";
-import { JXGChange } from "../models/tools/geometry/jxg-changes";
-import { ITableChange } from "../models/tools/table/table-change";
+import { JXGChange } from "../models/tiles/geometry/jxg-changes";
+import { ITableChange } from "../models/tiles/table/table-change";
 import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
 import { isSectionPath, parseSectionPath } from "../../functions/src/shared";
@@ -133,10 +133,16 @@ export enum LogEventName {
 
   TEACHER_NETWORK_EXPAND_DOCUMENT_SECTION,
   TEACHER_NETWORK_COLLAPSE_DOCUMENT_SECTION,
+
+  HISTORY_SHOW_CONTROLS,
+  HISTORY_HIDE_CONTROLS,
+  HISTORY_PLAYBACK_START,
+  HISTORY_PLAYBACK_STOP,
+  HISTORY_PLAYBACK_SEEK
 }
 
 // This is the form the log events take
-export interface SimpleToolLogEvent {
+export interface SimpleTileLogEvent {
   path?: string;
   args?: Array<any>;
 }
@@ -147,8 +153,8 @@ export interface DataflowProgramChange extends Record<string,any>{
   nodeIds?: number[],
 }
 
-type LoggableToolChangeEvent =  Optional<JXGChange, "operation"> |
-                                SimpleToolLogEvent |
+type LoggableTileChangeEvent =  Optional<JXGChange, "operation"> |
+                                SimpleTileLogEvent |
                                 Optional<ITableChange, "action"> |
                                 DataflowProgramChange;
 
@@ -175,6 +181,15 @@ export interface ILogComment {
   isFirst?: boolean; // only used with "add"
   commentText: string;
   action: CommentAction;
+}
+
+type HistoryAction = "showControls" | "hideControls" | "playStart" | "playStop" | "playSeek";
+export interface ILogHistory {
+  documentId: string;
+  historyEventId?: string;  // The id of the history entry where the action took place. Used for start, stop and seek.
+  historyIndex?: number; // Index into history array. Used for start, stop, seek.
+  historyLength?: number; // Used for start, stop, seek
+  action: HistoryAction;
 }
 
 export class Logger {
@@ -205,7 +220,7 @@ export class Logger {
     sendToLoggingService(logMessage, this._instance.stores.user);
   }
 
-  public static logTileEvent(event: LogEventName, tile?: ToolTileModelType, metaData?: TileLoggingMetadata,
+  public static logTileEvent(event: LogEventName, tile?: ITileModel, metaData?: TileLoggingMetadata,
     commentText?: string) {
     if (!this._instance) return;
 
@@ -258,6 +273,38 @@ export class Logger {
     Logger.log(event, parameters);
   }
 
+  public static logHistoryEvent(historyLogInfo: ILogHistory) {
+    const eventMap: Record<HistoryAction, LogEventName> = {
+      showControls: LogEventName.HISTORY_SHOW_CONTROLS,
+      hideControls: LogEventName.HISTORY_HIDE_CONTROLS,
+      playStart: LogEventName.HISTORY_PLAYBACK_START,
+      playStop: LogEventName.HISTORY_PLAYBACK_STOP,
+      playSeek: LogEventName.HISTORY_PLAYBACK_SEEK
+    };
+    const event = eventMap[historyLogInfo.action];
+    if (isSectionPath(historyLogInfo.documentId)) {
+      Logger.logCurriculumEvent(event, historyLogInfo.documentId,
+        { historyLength: historyLogInfo.historyLength,
+          historyIndex: historyLogInfo.historyIndex,
+          historyEventId: historyLogInfo.historyEventId
+        });
+    }
+    else {
+      const document = this._instance.stores.documents.getDocument(historyLogInfo.documentId)
+                        || this._instance.stores.networkDocuments.getDocument(historyLogInfo.documentId);
+      if (document) {
+        Logger.logDocumentEvent(event, document,
+          { historyLength: historyLogInfo.historyLength,
+            historyIndex: historyLogInfo.historyIndex,
+            historyEventId: historyLogInfo.historyEventId
+          });
+      }
+      else {
+        console.warn("Warning: couldn't log history event for document:", historyLogInfo.documentId);
+      }
+    }
+  }
+
   public static logDocumentEvent(event: LogEventName, document: DocumentModelType, params?: Record<string, any>) {
     const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.isRemote
         ? { networkClassHash: document.remoteContext,
@@ -298,16 +345,23 @@ export class Logger {
                 : LogEventName.COLLAPSE_COMMENT_THREAD_FOR_DOCUMENT
     };
     const event = eventMap[action];
-
+    let tileType = undefined;
     if (isSectionPath(focusDocumentId)) {
-      Logger.logCurriculumEvent(event, focusDocumentId, { tileId: focusTileId, commentText });
+      if (focusTileId) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [unit, facet, investigation, problem, section] = parseSectionPath(focusDocumentId) || [];
+        const curriculumStore = facet === "guide" ?  this._instance.stores.teacherGuide : this._instance.stores.problem;
+        tileType = curriculumStore?.getSectionById(section)?.content?.getTileType(focusTileId);
+      }
+      Logger.logCurriculumEvent(event, focusDocumentId, { tileId: focusTileId, tileType, commentText });
     }
     else {
       const document = this._instance.stores.documents.getDocument(focusDocumentId)
                         || this._instance.stores.networkDocuments.getDocument(focusDocumentId);
       if (document) {
+        tileType = focusTileId ? document.content?.getTileType(focusTileId) : undefined;
         Logger.logDocumentEvent(event,
-          document, { tileId: focusTileId, commentText });
+          document, { tileId: focusTileId, tileType, commentText });
       }
       else {
         console.warn("Warning: couldn't log comment event for document:", focusDocumentId);
@@ -315,10 +369,10 @@ export class Logger {
     }
   }
 
-  public static logToolChange(
+  public static logTileChange(
     eventName: LogEventName,
     operation: string,
-    change: LoggableToolChangeEvent,
+    change: LoggableTileChangeEvent,
     toolId: string,
     method?: LogEventMethod)
   {

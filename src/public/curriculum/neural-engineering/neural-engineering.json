@@ -1579,7 +1579,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Today we will explore how Electromyography (EMH) signals can be used to control a robotic gripper.</p>",
+                        "<p>Today we will explore how Electromyography (EMG) signals can be used to control a robotic gripper.</p>",
                         "<p><strong>Learning Objectives</strong></p>",
                         "<p>By the end of this activity, you will be able to model the performance of a bionic arm. </p>"
                       ]
@@ -1591,6 +1591,17 @@
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/13.jpg" 
+                    }
+                  },
+                  {
+                    "id": "rJGaJ5il77ZQulgj",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Think about the muscle EMG signals that we measured in the previous lesson. How would you use these signals to make a robotic gripper open or close?</p>"
+                      ]
                     }
                   }
                 ]
@@ -1616,7 +1627,7 @@
                     "title": "Arduino kit components to get EMG signals into Dataflow",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/neural-engineering/images/14.jpg"
+                      "url": "curriculum/neural-engineering/images/Setup.jpg"
                     }
                   },
                   {
@@ -1848,29 +1859,19 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "4SK51tx_E7wAPtD9",
+                    "id": "NqJv3nwzPTTFLSgi",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Please load your KWL journal (&quot;My Work&quot; &gt;&gt; &quot;KWL Journals&quot;). </p>",
-                        "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "n0rsmTXnAaRje6B1",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>Lesson 1.5 Journal Entry</strong></p>",
+                        "<p>Please load your Learning journal (&quot;My Work&quot; &gt;&gt; &quot;Learning Journal&quot;).</p>",
+                        "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>",
+                        "<p>Lesson 1.5 Journal Entry</p>",
                         "<p>1. Today&#x27;s date:</p>",
                         "<p>2. Today&#x27;s topic:</p>",
-                        "<p>3. What did you already know about bionic arms before today&#x27;s class? </p>",
-                        "<p>4. What are the main things that you learned today about bionic arms?</p>",
-                        "<p>5. What questions do you have about bionic arms?</p>",
-                        "<p>6. How would you modify the design of the EMG-controlled gripper to help Tilly? </p>"
+                        "<p>3. How would you modify the design of the EMG-controlled gripper so it can help people like Tilly?</p>",
+                        "<p></p>"
                       ]
                     }
                   }

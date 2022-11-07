@@ -1,4 +1,4 @@
-import { NodeChannelInfo } from "src/plugins/dataflow-tool/model/utilities/node";
+import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/node";
 
 export class SerialDevice {
   value: string;

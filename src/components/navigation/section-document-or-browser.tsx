@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { observer } from "mobx-react";
 import { useQueryClient } from 'react-query';
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { DocumentModelType } from "../../models/document/document";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
 import { ENavTabSectionType, NavTabSectionSpec, NavTabSpec } from "../../models/view/nav-tabs";
 import { EditableDocumentContent } from "../document/editable-document-content";
-import { useAppConfig, useClassStore, useProblemStore, useUIStore, useUserStore } from "../../hooks/use-stores";
+import { useAppConfig, useClassStore, useProblemStore, useStores,
+  useUIStore, useUserStore } from "../../hooks/use-stores";
 import { Logger, LogEventName } from "../../lib/logger";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentCollectionByType } from "../thumbnail/documents-type-collection";
@@ -37,16 +39,16 @@ export interface ISubTabSpec {
   sections: NavTabSectionSpec[];
 }
 
-export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, selectedDocument,
+export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, reset, selectedDocument,
   isChatOpen, onSelectNewDocument, onSelectDocument, onTabClick }) => {
-
+  const ui = useUIStore();
+  const store = useStores();
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>();
   const [tabIndex, setTabIndex] = useState(0);
   const appConfigStore = useAppConfig();
   const problemStore = useProblemStore();
   const context = useUserContext();
   const queryClient = useQueryClient();
-  const ui = useUIStore();
   const user = useUserStore();
   const classStore = useClassStore();
   const navTabSpec = appConfigStore.navTabs.getNavTabSpec(tabSpec.tab);
@@ -71,6 +73,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   const sectionClass = referenceDocument?.type === "learningLog" ? "learning-log" : "";
   const handleTabClick = useCallback((title: string, type?: string) => {
     setReferenceDocument(undefined);
+    ui.setSelectedCommentedDocument(undefined);
     ui.updateFocusDocument();
     ui.setSelectedTile();
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
@@ -91,23 +94,70 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
   },[]);
 
   useEffect(()=>{
-    if (reset) {
-      // setTimeout to avoid infinite render issues
+    if (reset) {  // setTimeout to avoid infinite render issues
       reset();
       setTimeout(() => handleTabClick(tabSpec.label));
     }
   }, [handleTabClick, reset, tabSpec.label]);
 
+  useEffect(()=>{
+    //This useEffect sets the correct sectionTab (Workspace, Starred, Learning Log) when you select
+    //on a commented doc in document view
+
+    //Since <SectionDocOrBrowser> is rendered twice for My Work and ClassWork
+    //isActiveTab keeps track of if the selected  doc is part of the active nav tab
+    const isActiveTab =  ui.activeNavTab === tabSpec.label.toLowerCase().replace(' ', '-');
+
+    function getNewTabIndex(key: string, navTab: string ){
+      const doc = store.documents.getDocument(key);
+      if (navTab === "Class Work") {
+        if (doc?.type === "learningLogPublication"){
+          return 1;
+        }
+        else {
+          if (isActiveTab){
+            return 0;
+          }
+        }
+      }
+      if (navTab === "My Work"){
+        if (doc?.type === "learningLog"){
+          return 2;
+        }
+        else {
+          if (isActiveTab){
+            return 0;
+          }
+        }
+      }
+    }
+    if (ui.selectedCommentedDocument){
+      const newDoc = store.documents.getDocument(ui.selectedCommentedDocument);
+      if (isActiveTab) {
+        setReferenceDocument(newDoc);
+      }
+      const newIndex = getNewTabIndex(ui.selectedCommentedDocument, tabSpec.label);
+      if (newIndex !== undefined) {
+        setTabIndex(newIndex);
+      }
+    }
+
+  // if ui.activeNavTab is in dependency array, it will not remember last saved section subTab
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[store.documents, tabSpec.label, ui.selectedCommentedDocument]);
   const handleTabSelect = (tabidx: number) => {
     setTabIndex(tabidx);
     ui.updateFocusDocument();
   };
+
+
 
   const handleSelectDocument = (document: DocumentModelType) => {
     if (!document.hasContent && document.isRemote) {
       loadDocumentContent(document);
     }
     setReferenceDocument(document);
+    ui.setSelectedCommentedDocument(undefined);
     ui.updateFocusDocument();
     const logEvent = document.isRemote
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
@@ -162,12 +212,12 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
         }
       });
   };
-
   const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
     const classHash = classStore.classHash;
     return (
       <div>
-        { subTab.sections.map((section: any, index: any) => {
+        {
+          subTab.sections.map((section: any, index: any) => {
             const _handleDocumentStarClick = section.showStarsForUser(user)
               ? handleDocumentStarClick
               : undefined;
@@ -190,7 +240,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
             );
           })
         }
-        { user.isNetworkedTeacher &&
+        {
+          user.isNetworkedTeacher &&
           <NetworkDocumentsSection
             currentClassHash={classHash}
             currentTeacherName={user.name}
@@ -199,7 +250,8 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
             problemTitle={problemStore.title}
             scale={kNavItemScale}
             onSelectDocument={handleSelectDocument}
-          />}
+          />
+        }
       </div>
     );
   };
@@ -263,4 +315,4 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = ({ tabSpec, reset, sel
       </Tabs>
     </div>
   );
-};
+});

@@ -2,7 +2,7 @@ import { VariableType } from "@concord-consortium/diagram-view";
 import { getType } from "mobx-state-tree";
 import { Inline } from "slate";
 import { SharedModelType } from "../../../models/shared/shared-model";
-import { TextContentModelType } from "../../../models/tools/text/text-content";
+import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 
 export const kVariableSlateType = "m2s-variable";

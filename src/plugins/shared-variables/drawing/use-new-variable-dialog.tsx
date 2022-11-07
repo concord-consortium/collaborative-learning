@@ -2,7 +2,7 @@ import { useContext, useMemo, useState } from "react";
 import { getOrFindSharedModel } from "./drawing-utils";
 import { VariableChipObjectSnapshotForAdd } from "./variable-object";
 import VariablesIcon from "../slate/variables.svg";
-import { DrawingContentModelContext } from "../../drawing-tool/components/drawing-content-context";
+import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { EditVariableDialogContent, Variable, VariableType } from "@concord-consortium/diagram-view";
 

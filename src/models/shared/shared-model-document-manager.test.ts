@@ -1,11 +1,12 @@
 import { destroy, Instance, types, getEnv, flow, SnapshotIn } from "mobx-state-tree";
 import { when } from "mobx";
-import { IToolTileProps } from "../../components/tools/tool-tile";
+import { ITileProps } from "../../components/tiles/tile-component";
 import { SharedModel, SharedModelType } from "./shared-model";
 import { SharedModelDocumentManager } from "./shared-model-document-manager";
 import { registerSharedModelInfo } from "./shared-model-registry";
-import { registerToolContentInfo } from "../tools/tool-content-info";
-import { ITileEnvironment, ToolContentModel } from "../tools/tool-types";
+import { registerTileComponentInfo } from "../tiles/tile-component-info";
+import { registerTileContentInfo } from "../tiles/tile-content-info";
+import { ITileEnvironment, TileContentModel } from "../tiles/tile-types";
 import { DocumentContentModel } from "../document/document-content";
 import { createDocumentModel, DocumentModelType } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
@@ -83,7 +84,7 @@ registerSharedModelInfo({
 });
 
 
-const TestTile = ToolContentModel
+const TestTile = TileContentModel
   .named("TestTile")
   .props({
     type: "TestTile",
@@ -105,18 +106,21 @@ const TestTile = ToolContentModel
   }));
 interface TestTileType extends Instance<typeof TestTile> {}
 
-const TestTileComponent: React.FC<IToolTileProps> = () => {
+const TestTileComponent: React.FC<ITileProps> = () => {
   throw new Error("Component not implemented.");
 };
 
-registerToolContentInfo({
-  id: "TestTile",
+registerTileContentInfo({
+  type: "TestTile",
   modelClass: TestTile,
   defaultContent(options) {
     throw new Error("Function not implemented.");
-  },
+  }
+});
+registerTileComponentInfo({
+  type: "TestTile",
   Component: TestTileComponent,
-  toolTileClass: "test-tile"
+  tileEltClass: "test-tile"
 });
 
 describe("SharedModelDocumentManager", () => {
@@ -173,9 +177,9 @@ describe("SharedModelDocumentManager", () => {
 
   it("calls tileContent#updateAfterSharedModelChanges when the shared model changes", async () => {
     const {doc, docModel} = setupDocument();
-    const toolTile = doc.tileMap.get("t1");
-    assertIsDefined(toolTile);
-    const tileContent = toolTile.content as TestTileType;
+    const tile = doc.tileMap.get("t1");
+    assertIsDefined(tile);
+    const tileContent = tile.content as TestTileType;
     assertIsDefined(tileContent);
     await expectUpdateToBeCalledTimes(tileContent, 0);
 
@@ -192,9 +196,9 @@ describe("SharedModelDocumentManager", () => {
   it("calls tileContent#updateAfterSharedModelChanges only for shared model changes", async () => {
     const {doc, docModel} = setupDocument();
 
-    const toolTile = doc.tileMap.get("t1");
-    assertIsDefined(toolTile);
-    const tileContent = toolTile.content as TestTileType;
+    const tile = doc.tileMap.get("t1");
+    assertIsDefined(tile);
+    const tileContent = tile.content as TestTileType;
     assertIsDefined(tileContent);
     await expectUpdateToBeCalledTimes(tileContent, 0);
 
@@ -241,9 +245,9 @@ describe("SharedModelDocumentManager", () => {
       }
     });
 
-    const toolTile = doc.tileMap.get("t1");
-    assertIsDefined(toolTile);
-    const tileContent = toolTile.content as TestTileType;
+    const tile = doc.tileMap.get("t1");
+    assertIsDefined(tile);
+    const tileContent = tile.content as TestTileType;
     assertIsDefined(tileContent);
 
     await expectUpdateToBeCalledTimes(tileContent, 0);
@@ -393,9 +397,9 @@ describe("SharedModelDocumentManager", () => {
       }
     });
 
-    const toolTile = doc.tileMap.get("t1");
-    assertIsDefined(toolTile);
-    const tileContent = toolTile.content;
+    const tile = doc.tileMap.get("t1");
+    assertIsDefined(tile);
+    const tileContent = tile.content;
     assertIsDefined(tileContent);
     const manager = new SharedModelDocumentManager();
     manager.setDocument(doc);
@@ -404,9 +408,9 @@ describe("SharedModelDocumentManager", () => {
     expect(tileSharedModels).toHaveLength(1);
     expect(tileSharedModels[0]?.id).toBe("sm1");
 
-    const toolTile2 = doc.tileMap.get("t2");
-    assertIsDefined(toolTile2);
-    const tileContent2 = toolTile2.content;
+    const tile2 = doc.tileMap.get("t2");
+    assertIsDefined(tile2);
+    const tileContent2 = tile2.content;
     assertIsDefined(tileContent2);
     const tileSharedModels2 = manager.getTileSharedModels(tileContent2);
     expect(tileSharedModels2).toBeDefined();
@@ -471,9 +475,9 @@ describe("SharedModelDocumentManager", () => {
       }
     });
 
-    const toolTile = doc.tileMap.get("t1");
-    assertIsDefined(toolTile);
-    const tileContent = toolTile.content;
+    const tile = doc.tileMap.get("t1");
+    assertIsDefined(tile);
+    const tileContent = tile.content;
     assertIsDefined(tileContent);
     const manager = new SharedModelDocumentManager();
     manager.setDocument(doc);

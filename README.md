@@ -24,14 +24,19 @@ You *do not* need to build to deploy the code, that is automatic.  See more info
 
 ## Deployment
 
-Production releases to S3 are based on the contents of the /dist folder and are built automatically by GitHub Actions
-for each branch pushed to GitHub and each merge into production.
+Deployments are based on the contents of the /dist folder and are built automatically by GitHub Actions for each branch and tag pushed to GitHub.
 
-Merges into production are deployed to http://collaborative-learning.concord.org.
+Branches are deployed to `https://collaborative-learning.concord.org/branch/<name>/`.
 
-Other branches are deployed to http://collaborative-learning.concord.org/branch/<name>/.
+Tags are deployed to `https://collaborative-learning.concord.org/version/<name>/`
 
-You can view the status of all the branch deploys [here](https://github.com/concord-consortium/collaborative-learning/actions).
+You can view the status of all the branch and tag deploys [here](https://github.com/concord-consortium/collaborative-learning/actions).
+
+The production release is available at `https://collaborative-learning.concord.org`.
+
+Production releases are done using a manual GitHub Actions workflow. You specify which tag you want to release to production and the workflow copies that tag's `index-top.html` to `https://collaborative-learning.concord.org/index.html`.
+
+See [docs/deploy.md](docs/deploy.md) for more details.
 
 To deploy a production release:
 
@@ -42,11 +47,11 @@ To deploy a production release:
     - `npm run lint && npm run build && npm run test`
 1. Copy asset size markdown table from previous release and change sizes to match new sizes in `dist`
 1. Create `release-<version>` branch and commit changes, push to GitHub, create PR and merge
-1. Checkout master and pull
-1. Checkout production
-1. Run `git merge master --no-ff`
-1. Push production to GitHub
-1. Use https://github.com/concord-consortium/collaborative-learning/releases to create a new release tag
+1. Test the master build at: https://collaborative-learning.concord.org/index-master.html
+1. Push a version tag to GitHub and/or use https://github.com/concord-consortium/collaborative-learning/releases to create a new GitHub release
+1. Stage the release by running the [Release Staging Workflow](https://github.com/concord-consortium/collaborative-learning/actions/workflows/release-staging.yml) and entering the version tag you just pushed.
+1. Test the staged release at https://collaborative-learning.concord.org/index-staging.html
+1. Update production by running the [Release Workflow](https://github.com/concord-consortium/collaborative-learning/actions/workflows/release.yml) and entering the release version tag.
 
 ## Developing/deploying cloud functions
 

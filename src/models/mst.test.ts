@@ -1,5 +1,5 @@
 import { action, autorun, makeObservable, observable } from "mobx";
-import { addDisposer, applySnapshot, getType, isAlive, types, getRoot, 
+import { addDisposer, applySnapshot, getType, isAlive, types, getRoot,
   isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
   getSnapshot, addMiddleware, getEnv,
   createActionTrackingMiddleware2, resolvePath} from "mobx-state-tree";
@@ -20,7 +20,7 @@ describe("mst", () => {
 
     const todo1b = Todo1.create();
     // When the type created by the snapshotProcessor (Todo2) is instantiated,
-    // the base type's (Todo1's) create method is modified so it actually goes 
+    // the base type's (Todo1's) create method is modified so it actually goes
     // through the processor. This is bug in MST and has been reported here:
     // https://github.com/mobxjs/mobx-state-tree/issues/1897
     expect(todo1b.text).toBe("todo2 text");
@@ -59,7 +59,7 @@ describe("mst", () => {
     expect(lateCalled).toBe(true);
   });
 
-  it("loads a late type immediately when it is the direct child of a map", () => {        
+  it("loads a late type immediately when it is the direct child of a map", () => {
     let lateCalled = false;
     types.model("TypeWithLate", {
       prop: types.map(types.late(() => {
@@ -70,7 +70,7 @@ describe("mst", () => {
     expect(lateCalled).toBe(true);
   });
 
-  it("does not load a late type immediately when it is the direct child of an array", () => {        
+  it("does not load a late type immediately when it is the direct child of an array", () => {
     let lateCalled = false;
     types.model("TypeWithLate", {
       prop: types.array(types.late(() => {
@@ -81,7 +81,7 @@ describe("mst", () => {
     expect(lateCalled).toBe(false);
   });
 
-  it("loads a late type immediately when it is the direct child of an optional", () => {        
+  it("loads a late type immediately when it is the direct child of an optional", () => {
     let lateCalled = false;
     types.model("TypeWithLate", {
       prop: types.optional(types.late(() => {
@@ -92,7 +92,7 @@ describe("mst", () => {
     expect(lateCalled).toBe(true);
   });
 
-  it("delays loading a late type when it is the direct child of a maybe", () => {        
+  it("delays loading a late type when it is the direct child of a maybe", () => {
     let lateCalled = false;
     const TypeWithLate = types.model("TypeWithLate", {
       prop: types.maybe(types.late(() => {
@@ -106,7 +106,7 @@ describe("mst", () => {
     expect(lateCalled).toBe(true);
   });
 
-  it("delays loading a late type child of a map when the map is wrapped in late", () => {        
+  it("delays loading a late type child of a map when the map is wrapped in late", () => {
     let lateCalled = false;
     const TypeWithLate = types.model("TypeWithLate", {
       prop: types.late(() => types.map(types.late(() => {
@@ -143,7 +143,7 @@ describe("mst", () => {
   });
 
   test("applySnapshot does not merge the properties", () => {
-    const Todo1 = types.model({ 
+    const Todo1 = types.model({
       text1: types.maybe(types.string),
       text2: types.maybe(types.string)
     });
@@ -158,7 +158,7 @@ describe("mst", () => {
     const TodoValue = types.model({
       name: types.string
     });
-    const Todo = types.model({ 
+    const Todo = types.model({
       values: types.map(TodoValue),
     })
     .actions(self => ({
@@ -305,7 +305,7 @@ describe("mst", () => {
       setTimeout(resolve, 50);
     })
     .then(() => {
-      // even though the environment has changed the autorun is not triggered 
+      // even though the environment has changed the autorun is not triggered
       // a second time
       expect(autorunCount).toBe(1);
       expect(doSomething).toBeCalledTimes(1);
@@ -354,7 +354,10 @@ describe("mst", () => {
     expect(doSomething).toBeCalledTimes(1);
     expect(getEnv(todo)).toBe(env);
 
-    env.someValue = 1;
+    // ignore MobX warning for modifying an observable outside an action
+    jestSpyConsole("warn", () => {
+      env.someValue = 1;
+    });
 
     expect(getEnv(todo)).toEqual({someValue: 1});
 
@@ -420,7 +423,7 @@ describe("mst", () => {
 
   /**
    * This tests how createActionTrackingMiddleware2 handles cases of actions
-   * calling calling other actions. It tests 4 cases: 
+   * calling calling other actions. It tests 4 cases:
    *
    * Case 0: an action directly calls another action on a child model
    *
@@ -434,9 +437,9 @@ describe("mst", () => {
    *
    * The goal of the test is to see if the child model action calls are grouped
    * with the initial action.  This grouping is important for recording a single
-   * history entry. 
+   * history entry.
    */
-  test("createActionTrackingMiddleware2 loses track of the parent action " + 
+  test("createActionTrackingMiddleware2 loses track of the parent action " +
        "when there is an intermediate MST action in a different tree", () => {
     const Todo = types.model({
       name: types.string
@@ -454,7 +457,7 @@ describe("mst", () => {
           // Case: 0
           self.todos.forEach(todo => {
             todo.setName("new list name");
-          });  
+          });
         } else {
           // We'll pass 3 different managers here
           // 1. a MSTTodoManager which is in a different MST tree
@@ -496,8 +499,8 @@ describe("mst", () => {
         }
         started.push({action: call.name, topLevelId: call.env.id});
       },
-      onFinish(call) {   
-        finished.push({action: call.name, topLevelId: call.env.id});     
+      onFinish(call) {
+        finished.push({action: call.name, topLevelId: call.env.id});
       }
     });
     const disposer = addMiddleware(todoList, middleware, true);
@@ -531,7 +534,7 @@ describe("mst", () => {
 
     // Case 1: Run an action in the Main Tree that passes through the secondary tree.
     // This is the case that does what we don't want. The action tracking middleware
-    // creates 3 separate environment objects which so it is recording this as 3 
+    // creates 3 separate environment objects which so it is recording this as 3
     // different top level action calls
     const MSTTodoManager = types.model({
     })
@@ -542,7 +545,7 @@ describe("mst", () => {
         });
       }
     }));
-    const mstManager = MSTTodoManager.create();    
+    const mstManager = MSTTodoManager.create();
     todoList.updateAllTodos(mstManager);
     expect(started).toEqual(multipleTopLevelOnStartedCalls);
     resetTrackingProperties();
@@ -556,7 +559,7 @@ describe("mst", () => {
           managerUpdateAllTodos: action
         });
       }
-      
+
       managerUpdateAllTodos(list: Instance<typeof TodoList>) {
         list.todos.forEach(todo => {
           todo.setName("new manager name");
@@ -575,7 +578,7 @@ describe("mst", () => {
           todo.setName("new manager name");
         });
       }
-    };    
+    };
     todoList.updateAllTodos(plainManager);
     expect(started).toEqual(singleTopLevelOnStartedCalls);
     resetTrackingProperties();

@@ -5,6 +5,7 @@ import { Instance } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { useUIStore } from "../../hooks/use-stores";
 import { TreeManager } from "../../models/history/tree-manager";
+import { Logger } from "../../lib/logger";
 // import { PlaybackMarkerToolbar } from "./marker-toolbar";
 import Marker from "../../clue/assets/icons/playback/marker.svg";
 import PlayButton from "../../clue/assets/icons/playback/play-button.svg";
@@ -50,9 +51,17 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   const eventCreatedTime = currentHistoryEvent?.created;
   const playbackDisabled = numHistoryEventsApplied === undefined || sliderValue === history.length;
 
-  const handlePlayPauseToggle = useCallback((playing?: boolean) => {
-                                  setSliderPlaying(playing !== undefined ? playing : !sliderPlaying);
-                                },[sliderPlaying]);
+  const handlePlayPauseToggle = (playing?: boolean) => {
+    const playStatus = playing !== undefined ? playing : !sliderPlaying;
+    Logger.logHistoryEvent({
+      documentId: treeManager.mainDocument?.key || '',
+      historyEventId: currentHistoryEvent?.id,
+      historyLength: history.length,
+      historyIndex: sliderValue,
+      action: playStatus ? "playStart": "playStop",
+    });
+    setSliderPlaying(playStatus);
+  };
 
   useEffect(() => {
     if (sliderPlaying) {
@@ -92,6 +101,15 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
 
   const handleSliderValueChange = (value: any) => {
     treeManager.goToHistoryEntry(value);
+  };
+
+  const handleSliderAfterChange = (value: any) => {
+    Logger.logHistoryEvent({
+      documentId: treeManager.mainDocument?.key || '',
+      historyEventId: currentHistoryEvent?.id,
+      historyLength: history.length,
+      historyIndex: value,
+      action: "playSeek"});
   };
 
   const handleAddMarker = (value: any) => {
@@ -156,7 +174,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
       <>
         <div className="slider-container" ref={sliderContainerRef} data-testid="playback-slider">
           <Slider min={0} max={history.length} step={1} value={sliderValue} ref={railRef}
-                  className={`${activeNavTab}`} onChange={handleSliderValueChange} />
+                  className={`${activeNavTab}`} onChange={handleSliderValueChange} onAfterChange={handleSliderAfterChange}/>
         </div>
         { markers.map(marker => {
           const markerLocation = getMarkerLocation(marker.location);

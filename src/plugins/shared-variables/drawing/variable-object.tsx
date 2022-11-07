@@ -3,17 +3,17 @@ import React, { useContext, useRef } from "react";
 import { observer } from "mobx-react";
 import useResizeObserver from "use-resize-observer";
 import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, IToolbarButtonProps, IToolbarManager,
-  typeField } from "../../drawing-tool/objects/drawing-object";
-import { Point } from "../../drawing-tool/model/drawing-basic-types";
+  typeField } from "../../drawing/objects/drawing-object";
+import { Point } from "../../drawing/model/drawing-basic-types";
 import { VariableChip } from "../slate/variable-chip";
 import { findVariable } from "./drawing-utils";
 import { useVariableDialog } from "./use-variable-dialog";
 import { useEditVariableDialog } from "../../diagram-viewer/use-edit-variable-dialog";
 import { useNewVariableDialog } from "./use-new-variable-dialog";
 import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
-import { SvgToolbarButton } from "../../drawing-tool/components/drawing-toolbar-buttons";
-import { DrawingContentModelContext } from "../../drawing-tool/components/drawing-content-context";
-import { DrawingContentModelType } from "../../drawing-tool/model/drawing-content";
+import { SvgToolbarButton } from "../../drawing/components/drawing-toolbar-buttons";
+import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
+import { DrawingContentModelType } from "../../drawing/model/drawing-content";
 
 export const VariableChipObject = DrawingObject.named("VariableObject")
   .props({
@@ -155,6 +155,6 @@ export const EditVariableButton = observer(({ toolbarManager }: IEditVariableBut
     showVariableDialog();
   };
 
-  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="variable" title="Edit Variable" 
+  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="variable" title="Edit Variable"
     onClick={onClick} disabled={disabled} />;
 });

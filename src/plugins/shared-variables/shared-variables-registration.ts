@@ -1,10 +1,10 @@
 import { registerSharedModelInfo } from "../../models/shared/shared-model-registry";
-import { registerTextPluginInfo } from "../../models/tools/text/text-plugin-info";
+import { registerTextPluginInfo } from "../../models/tiles/text/text-plugin-info";
 import { kSharedVariablesID, SharedVariables } from "./shared-variables";
 import VariablesToolIcon from "./slate/variables.svg";
 import { VariablesPlugin } from "./slate/variables-plugin";
 import { updateAfterSharedModelChanges } from "./slate/variables-text-content";
-import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing-tool/components/drawing-object-manager";
+import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
 import { EditVariableButton, EditVariableTool, NewVariableButton, NewVariableTool, VariableChipComponent,
   VariableChipObject, VariableChipToolbarButton, VariableDrawingTool } from "./drawing/variable-object";
 
