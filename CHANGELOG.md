@@ -1,5 +1,72 @@
 # Changelog
 
+## Version 3.2.0 - Nov 7, 2022
+
+Version 3.2.0 adds a list of documents with comments, some fixes and logging related to history, and some bug fixes.
+
+### Features/Improvements
+Comment Features:
+- Add view of documents with comments along with logging of comment use
+    - Stories:  [#182565436](https://www.pivotaltracker.com/story/show/182565436),  [#183342400](https://www.pivotaltracker.com/story/show/183342400), [#183449090](https://www.pivotaltracker.com/story/show/183449090), [#183687968](https://www.pivotaltracker.com/story/show/183687968),
+    [#183342364](https://www.pivotaltracker.com/story/show/183342364), 
+    - PRs: [#1448](https://github.com/concord-consortium/collaborative-learning/pull/1448), [#1472](https://github.com/concord-consortium/collaborative-learning/pull/1472), [#1481](https://github.com/concord-consortium/collaborative-learning/pull/1481)  
+
+- Log Comment use [#183575574](https://www.pivotaltracker.com/story/show/183575574), [#1465](https://github.com/concord-consortium/collaborative-learning/pull/1465), [#1475](https://github.com/concord-consortium/collaborative-learning/pull/1475) 
+   
+Variables:
+  - Edit Variable dialog in Diagram Tile [#183455701](https://www.pivotaltracker.com/story/show/183455701) 
+  - New Variable Choice on Drawing Toolbar [#183690048](https://www.pivotaltracker.com/story/show/183690048), [#1456](https://github.com/concord-consortium/collaborative-learning/pull/1456)
+
+History:
+  - Log Playback Control use [#183575565](https://www.pivotaltracker.com/story/show/183575565), [#1470](https://github.com/concord-consortium/collaborative-learning/pull/1470) 
+
+Other:
+  - Switch deployment to use s3-deploy-action [#183571651](https://www.pivotaltracker.com/story/show/183571651), [#1468](https://github.com/concord-consortium/collaborative-learning/pull/1468), [#1455](https://github.com/concord-consortium/collaborative-learning/pull/1455)  
+  - Content related: Mostly Bio4 and MothEd [#1452](https://github.com/concord-consortium/collaborative-learning/pull/1452) [#1454](https://github.com/concord-consortium/collaborative-learning/pull/1454), [#1467](https://github.com/concord-consortium/collaborative-learning/pull/1467), [#1469](https://github.com/concord-consortium/collaborative-learning/pull/1469), [#1471](https://github.com/concord-consortium/collaborative-learning/pull/1471) 
+
+
+### Bug Fixes
+History: 
+  - Student removing rows from a table rows results in a bungled up table in the teacher view if the teacher has seen its history [#183572838](https://www.pivotaltracker.com/story/show/183572838)
+  - If history is already open for student's work in teacher view, the slider doesn't show any latest work when played [#183573049](https://www.pivotaltracker.com/story/show/183573049), [#1458](https://github.com/concord-consortium/collaborative-learning/pull/1458)
+
+
+
+- Cannot undo graph actions with Ctrl-Z while graph is selected for editing [#183544050](https://www.pivotaltracker.com/story/show/183544050) [#1457](https://github.com/concord-consortium/collaborative-learning/pull/1457)
+- Dragging multi-selected tiles to workspace reorders them, loses titles [#183604517](https://www.pivotaltracker.com/story/show/183604517), [#1464](https://github.com/concord-consortium/collaborative-learning/pull/1464)
+
+### Asset Sizes
+|        File         |    Size   | % Change from Previous Release |
+|------------------------|----|------
+| vendor-main.2048c2e8.js | 2.1M | 0 |
+| Geometry.2acdd728.js | 886K | 0 |
+| Dataflow.7b0fe82c.js | 735K | 0 |
+| common-Diagram-SharedVariables.ae94f7b3.js | 611K | 0 |
+| index.2f810b939d662c464cda.js | 397K | 0 |
+| SharedVariables.e47d7d7d.js | 86K | 0 |
+| Table.d5e285a4.js | 84K | 0 |
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.1c62df70.js | 51K | 0 |
+| common-SharedVariables-Drawing.96107f60.js | 33K | 0 |
+| common-Dataflow-Geometry.0bd31c83.js | 26K | 0 |
+| Drawing.f47d1726.js | 26K | 0 |
+| DataCard.797d1870.js | 18K | 0 |
+| Text.7e4ddd5d.js | 16K | 0 |
+| Image.a3400d7c.js | 16K | 0 |
+| Diagram.0ce29ffe.js | 9.6K | 0 |
+| Starter.b26bfa75.js | 1.2K | 0 |
+| SharedDataSet.98119794.js | 254B | 0 |
+| main.f4a598b6.css | 162K | 0 |
+| Dataflow.5351851e.css | 32K | 0 |
+| Diagram.d44044a2.css | 11K | 0 |
+| Table.779f3837.css | 10K | 0 |
+| Geometry.9119587f.css | 10K | 0 |
+| DataCard.4b49ee7d.css | 8.4K | 0 |
+| Image.b5870984.css | 6.3K | 0 |
+| Drawing.030947a3.css | 5.2K | 0 |
+| Text.32b9f6a4.css | 4.5K | 0 |
+| SharedVariables.427c48a1.css | 696B | 0 |
+| Starter.3c909986.css | 207B | 0 |
+
 ## Version 3.1.0 - Oct 18, 2022
 
 Version 3.1.0 contains quite a few individual tile improvements and bug fixes as well as some larger changes to allow generating and viewing the history of a document and more visibility of comments.
