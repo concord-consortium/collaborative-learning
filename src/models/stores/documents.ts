@@ -2,7 +2,8 @@ import { forEach } from "lodash";
 import { getEnv, types } from "mobx-state-tree";
 import { observable } from "mobx";
 import { AppConfigModelType } from "./app-config-model";
-import { DocumentModelType, IDocumentEnvironment } from "../document/document";
+import { DocumentModelType } from "../document/document";
+import { IDocumentEnvironment } from "../document/document-environment";
 import {
   DocumentType, LearningLogDocument, LearningLogPublication, OtherDocumentType, OtherPublicationType,
   PersonalDocument, PersonalPublication, PlanningDocument, ProblemDocument, ProblemPublication
@@ -212,11 +213,11 @@ export const DocumentsModel = types
           // > Safeguard the real documents from having their history changed by
           // > the history slider. This can be done by adding a flag or some
           // > other way to identify the history documents and only loading
-          // > history into documents with this flag. 
+          // > history into documents with this flag.
           //
           // We can consider adding another "type" to this flag indicating the
           // document should be read-only like a network/remote document. Then
-          // we can add a warning if it looks like the document should be saving 
+          // we can add a warning if it looks like the document should be saving
           // history but there is firestore or useContext here
           return;
         }

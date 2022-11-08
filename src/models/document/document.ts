@@ -2,6 +2,7 @@ import { applySnapshot, types, Instance, SnapshotIn, getEnv, onAction, addDispos
 import { forEach } from "lodash";
 import { QueryClient, UseQueryResult } from "react-query";
 import { DocumentContentModel, DocumentContentSnapshotType } from "./document-content";
+import { IDocumentEnvironment } from "./document-environment";
 import {
   DocumentType, DocumentTypeEnum, IDocumentAddTileOptions, IDocumentContext, ISetProperties,
   LearningLogDocument, LearningLogPublication, PersonalDocument, PersonalPublication,
@@ -335,10 +336,6 @@ export const getDocumentContext = (document: DocumentModelType): IDocumentContex
     setProperties: (properties: ISetProperties) => document.setProperties(properties)
   };
 };
-
-export interface IDocumentEnvironment {
-  appConfig?: AppConfigModelType;
-}
 
 /**
  * Create a DocumentModel and add a new sharedModelManager into its environment
