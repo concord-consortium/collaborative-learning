@@ -7,6 +7,7 @@ import {
   ISectionInfoMap, SectionModel, SectionModelType, 
   registerSectionInfo, suspendSectionContentParsing, resumeSectionContentParsing
 } from "./section";
+import { ProblemModelType } from "./problem";
 import { resumeSupportContentParsing, SupportModel, suspendSupportContentParsing } from "./support";
 import { StampModel } from "../../plugins/drawing/model/stamp";
 import { getAssetUrl } from "../../utilities/asset-utils";
@@ -15,7 +16,6 @@ import { NavTabsConfigModel } from "../stores/nav-tabs";
 import { SettingsMstType } from "../stores/settings";
 import { IBaseStores } from "../stores/stores";
 import { UnitConfiguration } from "../stores/unit-configuration";
-import { ProblemModelType } from "./problem";
 
 const PlanningDocumentConfigModel = types
   .model("PlanningDocumentConfigModel", {
