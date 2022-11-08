@@ -6,13 +6,14 @@ import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, IToo
   typeField } from "../../drawing/objects/drawing-object";
 import { Point } from "../../drawing/model/drawing-basic-types";
 import { VariableChip } from "../slate/variable-chip";
-import { findVariable } from "./drawing-utils";
+import { findVariable, getOrFindSharedModel } from "./drawing-utils";
 import { useVariableDialog } from "./use-variable-dialog";
 import { useEditVariableDialog } from "../../diagram-viewer/use-edit-variable-dialog";
 import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
 import { SvgToolbarButton } from "../../drawing/components/drawing-toolbar-buttons";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { DrawingContentModelType } from "../../drawing/model/drawing-content";
+import { useInsertVariableDialog } from "./use-insert-variable-dialog";
 
 export const VariableChipObject = DrawingObject.named("VariableObject")
   .props({
@@ -113,6 +114,27 @@ export function VariableChipToolbarButton(props: IToolbarButtonProps) {
   return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="variable"
     title="Variable" onClick={handleShowVariableDialog} />;
 }
+
+export class InsertVariableTool extends DrawingTool {
+  constructor(drawingLayer: IDrawingLayer) {
+    super(drawingLayer);
+  }
+}
+
+interface IInsertVariableButton {
+  toolbarManager: IToolbarManager;
+}
+export const InsertVariableButton = observer(({ toolbarManager }: IInsertVariableButton) => {
+  const sharedModel = getOrFindSharedModel(toolbarManager as DrawingContentModelType);
+  const variables = sharedModel?.variables || [];
+
+  const [showInsertVariableDialog] = useInsertVariableDialog({ variables });
+
+  const disabled = variables.length < 1;
+
+  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="insert-variable" title="Insert Variable"
+    onClick={showInsertVariableDialog} disabled={disabled} />;
+});
 
 export class EditVariableTool extends DrawingTool {
   constructor(drawingLayer: IDrawingLayer) {
