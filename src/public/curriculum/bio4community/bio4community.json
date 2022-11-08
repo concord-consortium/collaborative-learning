@@ -203,7 +203,7 @@
                                 "format": "html",
                                 "text": [
                                   "<p>Working for Amazon was never Rakesh’s first choice of career. Being an immigrant without a degree made it hard to find a job. It was even harder, because Rakesh’s ex-wife Sorayah (So-raa-yaa) was still back in India which meant Rakesh had to provide for their kids by himself.  </p>",
-                                  "<p>Rakesh and Sorayah met in high school in India and were married soon after graduating. Sorayah was from Iran but had lived in India almost all her life. Soon after they were married, Rakesh and Sorayah had two little chiren for whom they wanted a better life. So, they decided to immigrate to America. Rakesh left India first with the children so that the kids could start school in America. </p>",
+                                  "<p>Rakesh and Sorayah met in high school in India and were married soon after graduating. Sorayah was from Iran but had lived in India almost all her life. Soon after they were married, Rakesh and Sorayah had two little children for whom they wanted a better life. So, they decided to immigrate to America. Rakesh left India first with the children so that the kids could start school in America. </p>",
                                   "<p>Sorayah was supposed to follow once her visa was approved by the U.S. Immigration Services. But, to their surprise, Sorayah’s visa application was denied because of a new rule that prevented people from muslim countries coming into the U.S. This meant Sorayah couldn’t immigrate to America because she had an Iranian passport.  Even after all these years, Rakesh still had a lot of anger for the U.S. Immigration rules that broke up his family. Back in the lunchroom at work, Rakesh was zoning out, pushing the rice in his container around, when one of his co-workers, Nicole, came in. </p>"
                                 ]
                               }
@@ -370,9 +370,9 @@
                                 "type": "Table",
                                 "name": "Cast of Characters",
                                 "columns": [
-                                  {"name":"Character name","width":129.63671875,"values":["Narrator","Rakesh (main character)","Nicole &  (co-worker)","Deaundre (co-worker) ","Meera (cousin)","Dr. Adebayo (physician)","Dr. Zeiders (scientist)","Ajay (son)","Zainab (daughter)"]},
-                                  {"name":"Number of lines","width":100.359375,"values":["22","30","4","4","4","4","0","9","11"]},
-                                  {"name":"Actor Name","width":210.484375,"values":["","","","","","","","",""]}
+                                  {"name":"Character name","width":129.63671875,"values":["Narrator","Rakesh (main character)","Nicole &  (co-worker)","Deaundre (co-worker) ","Meera (cousin)","Dr. Adebayo (physician)","Dr. Zeiders (scientist)","Ajay (son)","Zainab (daughter)","Lakshmi","Paati"]},
+                                  {"name":"Number of lines","width":100.359375,"values":["22","30","4","4","4","4","0","9","11","6","2"]},
+                                  {"name":"Actor Name","width":210.484375,"values":["","","","","","","","","","",""]}
                                 ]
                               }
                             },
@@ -1124,7 +1124,7 @@
                                 "type": "Text",
                                 "format": "html",
                                 "text": [ 
-                                  "<h2>STRESS AND FEELING SICK:</strong></h2>",
+                                  "<h2>STRESS AND FOCUS:</strong></h2>",
                                   "<h2>Estrella’s Story</h2>" 
                                 ]
                               }
@@ -2133,7 +2133,8 @@
                                 "type": "Text",
                                 "format": "html",
                                 "text": [
-                                  "<h2>STRESS AND FEELING SICK:</h2>"
+                                  "<h2>STRESS AND FEELING SICK:</h2>",
+                                  "<h2>Felix’s Story</h2>" 
                                 ]
                               }
                             },
