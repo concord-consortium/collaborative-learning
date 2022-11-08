@@ -38,6 +38,12 @@ class DrawToolTile{
     getDrawToolVariable(){
       return cy.get('.primary-workspace .drawing-tool-button.button-variable');
     }
+    getDrawToolNewVariable(){
+      return cy.get('.primary-workspace .drawing-tool-button.button-new-variable');
+    }
+    getDrawToolEditVariable(){
+      return cy.get('.primary-workspace .drawing-tool-button.button-edit-variable');
+    }
     getDrawToolUploadImage(){
       return cy.get('.primary-workspace .drawing-tool-button.image-upload input');
     }
@@ -62,6 +68,9 @@ class DrawToolTile{
     }
     getSelectionBox(){
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer svg [data-testid=selection-box]');
+    }
+    getVariableChip() {
+      return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer .drawing-variable.variable-chip');
     }
 }
 

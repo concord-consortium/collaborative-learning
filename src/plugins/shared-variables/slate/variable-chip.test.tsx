@@ -2,13 +2,13 @@ import { Variable } from "@concord-consortium/diagram-view";
 import { render } from "@testing-library/react";
 import { applySnapshot } from "mobx-state-tree";
 import React from "react";
-import { VariableChip } from "./variable-chip";
+import { kEmptyVariable, VariableChip } from "./variable-chip";
 
 describe("VariableChip", () => {
   it("renders all combinations", () => {
     const variable = Variable.create();
     const {container} = render(<VariableChip variable={variable}/>);
-    expect(container).toHaveTextContent(/^$/);
+    expect(container).toHaveTextContent(kEmptyVariable);
 
     applySnapshot(variable, {id: variable.id, name: "some name"});
     expect(container).toHaveTextContent(/^some name$/);
