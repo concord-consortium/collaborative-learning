@@ -79,7 +79,7 @@ describe("ConfigurationManager", () => {
     keys.forEach((prop: SimpleProps) => {
       expect(appConfig[prop]).toEqual(defaults[prop]);
     });
-    expect(appConfig.hasDefaultDocumentTemplate).toBe(false);
+    expect(appConfig.defaultDocumentTemplate).toBeUndefined();
     expect(appConfig.getSetting("foo")).toBeUndefined();
     expect(appConfig.getSetting("foo", "bar")).toBeUndefined();
   });
@@ -96,7 +96,7 @@ describe("ConfigurationManager", () => {
         expect(appConfig[prop]).toEqual(overrides[prop]);
       }
     });
-    expect(appConfig.hasDefaultDocumentTemplate).toBe(false);
+    expect(appConfig.defaultDocumentTemplate).toBeUndefined();
     const section = SectionModel.create({ type: "intro" });
     expect(appConfig.getDisabledFeaturesOfSection(section)).toEqual(["foo", "bar"]);
     expect(appConfig.getDisabledFeaturesOfTile("", section)).toEqual(["foo", "bar"]);
@@ -115,12 +115,5 @@ describe("ConfigurationManager", () => {
     expect(appConfig.getUnitBasePath("foo")).toBe("");
     expect(appConfig.getUnit("example")).toBeDefined();
     expect(appConfig.getUnitBasePath("example")).toBe("curriculum/example-curriculum");
-  });
-
-  it("can manage default document settings", () => {
-    const appConfig = AppConfigModel.create({ config: defaults });
-    expect(appConfig.defaultDocumentContent).toBeDefined();
-    expect(appConfig.defaultDocumentSpec.type).toBe(appConfig.defaultDocumentType);
-    expect(appConfig.getDocumentLabel("personal")).toBe("");
   });
 });
