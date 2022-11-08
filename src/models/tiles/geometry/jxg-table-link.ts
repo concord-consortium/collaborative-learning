@@ -45,6 +45,16 @@ function createLinkedPoint(board: JXG.Board, parents: JXGCoordPair, props: any, 
   return createPoint(board, parents, _props);
 }
 
+export function getAllLinkedPoints(board: JXG.Board) {
+  const ids: string[] = [];
+  board.objectsList.forEach(obj => {
+    if (obj.elType === "point" && obj.getAttribute("clientType") === "linkedPoint") {
+      ids.push(obj.id);
+    }
+  });
+  return ids;
+}
+
 export const linkedPointChangeAgent: JXGChangeAgent = {
   create: (board, change) => {
     let result: JXG.Point | JXG.Point[] = [];

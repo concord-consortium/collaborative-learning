@@ -187,11 +187,14 @@ export const TableContentModel = TileContentModel
         return undefined;
       }
       return firstSharedModel as SharedDataSetType;
-    },
-    // Returns a list of ids, currently not implemented
-    get linkedGeometries(): string[] {
-      return [];
     }
+  }))
+  .views(self => ({
+    get linkedGeometries(): string[] {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      const tileIds = sharedModelManager?.getSharedModelTileIds(self.sharedModel) ?? [];
+      return tileIds.filter(id => id !== self.metadata.id);
+    },
   }))
   .views(self => ({
     get dataSet() {
