@@ -114,4 +114,11 @@ export interface ISharedModelManager {
    * @param tileContentModel
    */
   getTileSharedModels(tileContentModel: IAnyStateTreeNode): SharedModelType[];
+
+  /**
+   * Get the ids of the tiles that link to this shared model
+   *
+   * @param sharedModel
+   */
+  getSharedModelTileIds(sharedModel?: SharedModelType): string[];
 }

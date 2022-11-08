@@ -370,7 +370,7 @@ describe("SharedModelDocumentManager", () => {
     });
   });
 
-  it("gets shared models associated with the tile", () => {
+  it("gets shared models associated with the tile and vice-versa", () => {
     const doc = DocumentContentModel.create({
       sharedModelMap: {
         "sm1": {
@@ -407,6 +407,7 @@ describe("SharedModelDocumentManager", () => {
     expect(tileSharedModels).toBeDefined();
     expect(tileSharedModels).toHaveLength(1);
     expect(tileSharedModels[0]?.id).toBe("sm1");
+    expect(manager.getSharedModelTileIds(tileSharedModels[0])).toEqual(["t1"]);
 
     const tile2 = doc.tileMap.get("t2");
     assertIsDefined(tile2);
@@ -415,7 +416,8 @@ describe("SharedModelDocumentManager", () => {
     const tileSharedModels2 = manager.getTileSharedModels(tileContent2);
     expect(tileSharedModels2).toBeDefined();
     expect(tileSharedModels2).toHaveLength(0);
-  });
+    expect(manager.getSharedModelTileIds(tileSharedModels[0])).toEqual(["t1"]);
+});
 
   it("provides warnings when getting shared models for invalid cases", () => {
     const doc = DocumentContentModel.create({

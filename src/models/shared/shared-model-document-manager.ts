@@ -123,6 +123,11 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     return sharedModels;
   }
 
+  getSharedModelTileIds(sharedModel?: SharedModelType): string[] {
+    const entry = sharedModel?.id && this.document?.sharedModelMap.get(sharedModel.id);
+    return entry ? Array.from(entry.tiles.map(tile => tile.id)) : [];
+  }
+
   removeTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void {
     if (!this.document) {
       console.warn("removeTileSharedModel has no document");
