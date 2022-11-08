@@ -9,6 +9,7 @@ import { VariableChip } from "../slate/variable-chip";
 import { findVariable, getOrFindSharedModel } from "./drawing-utils";
 import { useVariableDialog } from "./use-variable-dialog";
 import { useEditVariableDialog } from "../../diagram-viewer/use-edit-variable-dialog";
+import { useNewVariableDialog } from "./use-new-variable-dialog";
 import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
 import { SvgToolbarButton } from "../../drawing/components/drawing-toolbar-buttons";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
@@ -121,6 +122,12 @@ export class InsertVariableTool extends DrawingTool {
   }
 }
 
+export class NewVariableTool extends DrawingTool {
+  constructor(drawingLayer: IDrawingLayer) {
+    super(drawingLayer);
+  }
+}
+
 interface IInsertVariableButton {
   toolbarManager: IToolbarManager;
 }
@@ -134,6 +141,21 @@ export const InsertVariableButton = observer(({ toolbarManager }: IInsertVariabl
 
   return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="insert-variable" title="Insert Variable"
     onClick={showInsertVariableDialog} disabled={disabled} />;
+});
+
+interface INewVariableButtonProps {
+  toolbarManager: IToolbarManager;
+}
+export const NewVariableButton = observer(({ toolbarManager }: INewVariableButtonProps) => {
+  const [showVariableDialog] = useNewVariableDialog();
+
+  const disabled = toolbarManager.hasSelectedObjects;
+  const onClick = () => {
+    showVariableDialog(); 
+  };
+
+  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="new-variable" title="New Variable" 
+    onClick={onClick} disabled={disabled} />;
 });
 
 export class EditVariableTool extends DrawingTool {
@@ -155,6 +177,6 @@ export const EditVariableButton = observer(({ toolbarManager }: IEditVariableBut
     showVariableDialog();
   };
 
-  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="variable" title="Edit Variable"
+  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="edit-variable" title="Edit Variable"
     onClick={onClick} disabled={disabled} />;
 });

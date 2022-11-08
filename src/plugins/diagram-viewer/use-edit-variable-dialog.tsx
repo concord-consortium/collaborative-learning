@@ -20,7 +20,7 @@ export const useEditVariableDialog = ({ variable }: IProps) => {
 
   const [showModal, hideModal] = useCustomModal({
     Icon: VariablesIcon,
-    title: "Diagram Variables",
+    title: "Variable Editor",
     Content: EditVariableDialogContent,
     contentProps: { variable: variableClone },
     buttons: [
