@@ -1,5 +1,5 @@
 const canvasArea = (workspaceClass) => `${workspaceClass || ".primary-workspace"} .canvas-area`;
-const variableCard = (workspaceClass) => `${canvasArea(workspaceClass)} [datatest-id=quantity-node]`;
+const variableCard = (workspaceClass) => `${canvasArea(workspaceClass)} .react-flow__node`;
 const dialog = (workspaceClass) => `.ReactModalPortal .custom-modal`;
 
 class DiagramToolTile {
@@ -10,8 +10,8 @@ class DiagramToolTile {
     this.getDiagramTile(workspaceClass).click();
     return cy.get(`${canvasArea(workspaceClass)} .diagram-toolbar`);
   }
-  getDiagramToolbarButton(buttonClass, workspaceClass) {
-    this.getDiagramTile(workspaceClass).click();
+  getDiagramToolbarButton(buttonClass, workspaceClass, skipClick) {
+    if (!skipClick) this.getDiagramTile(workspaceClass).click();
     return cy.get(`${canvasArea(workspaceClass)} .diagram-toolbar .${buttonClass}`);
   }
   getDiagramDialog(workspaceClass) {
@@ -24,7 +24,7 @@ class DiagramToolTile {
     return cy.get(variableCard(workspaceClass));
   }
   getVariableCardField(field, workspaceClass) {
-    return cy.get(`${variableCard(workspaceClass)} .variable-info.${field}`);
+    return cy.get(`.variable-info.${field}`);
   }
 }
 

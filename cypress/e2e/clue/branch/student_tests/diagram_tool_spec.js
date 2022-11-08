@@ -7,6 +7,8 @@ let clueCanvas = new ClueCanvas,
   drawTile = new DrawToolTile;
 
 context('Diagram Tool Tile', function () {
+  const dialogField = (field) => cy.get(`#evd-${field}`);
+  const dialogOkButton = () => cy.get(".modal-button").last();
   before(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=m2s";
     cy.clearQAData('all');
@@ -32,7 +34,7 @@ context('Diagram Tool Tile', function () {
       // diagramToolTile.getDiagramDialog().should("not.exist");
     });
   });
-  describe("Drawing Tool with Variables", () => {
+  describe("Drawing Tile with Variables", () => {
     it("drawing tile has proper toolbar buttons", () => {
       clueCanvas.addTile("drawing");
       drawTile.getDrawTile().should("exist");
@@ -45,35 +47,56 @@ context('Diagram Tool Tile', function () {
       const vUnit = "meter";
       drawTile.getDrawToolNewVariable().click();
       cy.get(".custom-modal").should("exist");
-      cy.get("#evd-name").type(vName);
-      cy.get("#evd-value").type(vValue);
-      cy.get("#evd-units").type(vUnit);
+      dialogField("name").type(vName);
+      dialogField("value").type(vValue);
+      dialogField("units").type(vUnit);
       drawTile.getVariableChip().should("not.exist");
-      cy.get(".modal-button").last().click();
+      dialogOkButton().click();
       drawTile.getVariableChip().should("exist");
       drawTile.getVariableChip().should("contain", vName);
       drawTile.getVariableChip().should("contain", vValue);
       drawTile.getVariableChip().should("contain", vUnit);
     });
+    // TODO Test adding variable to diagram tile
+    const newName = "vn2";
+    const newValue = "47";
+    const newUnit = "util";
     it("edit variable dialog works", () => {
-      const newName = "vn2";
-      const newValue = "47";
-      const newUnit = "util";
       drawTile.getVariableChip().click();
       drawTile.getDrawToolEditVariable().should("not.be.disabled").click();
-      cy.get("#evd-name").type(newName);
-      cy.get("#evd-value").type(newValue);
-      cy.get("#evd-units").type(newUnit);
-      cy.get(".modal-button").last().click();
+      dialogField("name").clear();
+      dialogField("value").clear();
+      dialogField("units").clear();
+      dialogField("name").type(newName);
+      dialogField("value").type(newValue);
+      dialogField("units").type(newUnit);
+      dialogOkButton().click();
       drawTile.getVariableChip().should("contain", newName);
       drawTile.getVariableChip().should("contain", newValue);
       drawTile.getVariableChip().should("contain", newUnit);
-
-      it("updates in diagram tile", () => {
-        diagramToolTile.getVariableCardField("name").value().should("equal", newName);
-        diagramToolTile.getVariableCardField("value").value().should("equal", newValue);
-        diagramToolTile.getVariableCardField("unit").value().should("equal", newUnit);
-      });
+    });
+    it("updates in diagram tile", () => {
+      diagramToolTile.getVariableCardField("name").should("have.value", newName);
+      diagramToolTile.getVariableCardField("value").should("have.value", newValue);
+      diagramToolTile.getVariableCardField("unit").should("have.value", newUnit);
+    });
+    it("diagram tile edit variable dialog", () => {
+      // TODO Move this to the diagram tile section when the new variable dialog is added to it
+      const vName = "name3";
+      const vValue = "-999.99";
+      const vUnit = "C";
+      diagramToolTile.getVariableCard().click();
+      diagramToolTile.getDiagramToolbarButton("button-dialog", undefined, true).should("not.be.disabled").click();
+      dialogField("name").clear();
+      dialogField("value").clear();
+      dialogField("units").clear();
+      dialogField("name").type(vName);
+      dialogField("value").type(vValue);
+      dialogField("units").type(vUnit);
+      dialogOkButton().click();
+      diagramToolTile.getVariableCardField("name").should("have.value", vName);
+      diagramToolTile.getVariableCardField("value").should("have.value", vValue);
+      diagramToolTile.getVariableCardField("unit").should("have.value", vUnit);
     });
   });
 });
