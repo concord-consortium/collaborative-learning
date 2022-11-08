@@ -442,7 +442,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
         const rowHeight = row?.height;
         const tileIndex = row?.tiles.findIndex(t => t.tileId === tileId) || 0;
         const clonedTile = cloneTileSnapshotWithNewId(srcTile, idMap[srcTile.id]);
-        getTileContentInfo(clonedTile.content.type)?.snapshotPostProcessor?.(clonedTile.content, idMap);
+        getTileContentInfo(clonedTile.content.type)?.contentSnapshotPostProcessor?.(clonedTile.content, idMap);
         dragTileItems.push({
           rowIndex, rowHeight, tileIndex,
           tileId: srcTile.id,

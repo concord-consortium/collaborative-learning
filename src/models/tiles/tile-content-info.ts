@@ -2,12 +2,6 @@ import { TileMetadataModel } from "./tile-metadata";
 import { TileContentModel, ITileContentModel } from "./tile-types";
 import { AppConfigModelType } from "../stores/app-config-model";
 
-export interface IDMap {
-  [id: string]: string;
-}
-export type TileContentModelSnapshotPostProcessor =
-              (content: any, idMap: IDMap, asTemplate?: boolean) => any;
-
 export interface IDefaultContentOptions {
   // title is only currently used by the Geometry and Table tiles
   title?: string;
@@ -18,6 +12,11 @@ export interface IDefaultContentOptions {
   appConfig?: AppConfigModelType;
 }
 
+type TileModelSnapshotPreProcessor = (tile: any) => any
+
+type TileContentSnapshotPostProcessor =
+      (content: any, idMap: Record<string, string>, asTemplate?: boolean) => any;
+
 export interface ITileContentInfo {
   type: string;
   modelClass: typeof TileContentModel;
@@ -27,7 +26,8 @@ export interface ITileContentInfo {
   addSidecarNotes?: boolean;
   defaultHeight?: number;
   exportNonDefaultHeight?: boolean;
-  snapshotPostProcessor?: TileContentModelSnapshotPostProcessor;
+  tileSnapshotPreProcessor?: TileModelSnapshotPreProcessor;
+  contentSnapshotPostProcessor?: TileContentSnapshotPostProcessor;
 }
 
 const gTileContentInfoMap: Record<string, ITileContentInfo> = {};
