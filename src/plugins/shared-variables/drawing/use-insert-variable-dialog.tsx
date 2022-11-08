@@ -1,18 +1,27 @@
 import React, { useContext, useState } from "react";
-import { getOrFindSharedModel } from "./drawing-utils";
-import { VariableChipObjectSnapshotForAdd } from "./variable-object";
+import { VariableChipList, VariableType } from "@concord-consortium/diagram-view";
+
+import { addChipToContent } from "./drawing-utils";
 import VariablesIcon from "../slate/variables.svg";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
-import { Variable, VariableChipList, VariableType } from "@concord-consortium/diagram-view";
 
-import '../../diagram-viewer/diagram-dialog.scss';
+import './variable-dialog.scss';
 
 interface IInsertVariableContent {
+  onClick?: (variable: VariableType) => void;
+  selectedVariables?: VariableType[];
   variables: VariableType[];
 }
-const InsertVariableContent = ({ variables }: IInsertVariableContent) => {
-  return <VariableChipList variables={variables} />;
+const InsertVariableContent = ({ onClick, selectedVariables, variables }: IInsertVariableContent) => {
+  return (
+    <div className="insert-variable-dialog-content">
+      Insert an existing variable:
+      <div className="variable-chip-list-container">
+        <VariableChipList onClick={onClick} selectedVariables={selectedVariables} variables={variables} />
+      </div>
+    </div>
+  );
 };
 
 interface IInsertVariableDialog {
@@ -20,30 +29,38 @@ interface IInsertVariableDialog {
 }
 export const useInsertVariableDialog = ({ variables }: IInsertVariableDialog) => {
   const drawingContent = useContext(DrawingContentModelContext);
-  const [newVariable, setNewVariable] = useState(Variable.create({}));
+  const [selectedVariables, setSelectedVariables] = useState<VariableType[]>([]);
+  const onClick = (variable: VariableType) => {
+    let foundVariable = false;
+    const newSV = [];
+    selectedVariables.forEach(v => {
+      if (v === variable) {
+        foundVariable = true;
+      } else {
+        newSV.push(v);
+      }
+    });
+    if (!foundVariable) newSV.push(variable);
+    setSelectedVariables(newSV);
+  };
 
   const handleClick = () => {
-    const sharedModel = getOrFindSharedModel(drawingContent);
-    sharedModel?.addVariable(newVariable);
-    const sharedVariable = sharedModel?.variables.find(v => v === newVariable);
-    const dialogVarId = sharedVariable?.id;
-    if (dialogVarId) {
-      const variableChipSnapshot: VariableChipObjectSnapshotForAdd = {
-        type: "variable",
-        x: 250,
-        y: 50,
-        variableId: dialogVarId
-      };
-      drawingContent.addObject(variableChipSnapshot);
-    }
-    setNewVariable(Variable.create({}));
+    let x = 250;
+    let y = 50;
+    const offset = 25;
+    selectedVariables.forEach(variable => {
+      addChipToContent(drawingContent, variable.id, x, y);
+      x += offset;
+      y += offset;
+    });
+    setSelectedVariables([]);
   };
 
   const [showModal, hideModal] = useCustomModal({
     Icon: VariablesIcon,
-    title: "Insert Variable",
+    title: "Insert Variables",
     Content: InsertVariableContent,
-    contentProps: { variables },
+    contentProps: { onClick, selectedVariables, variables },
     buttons: [
       { label: "Cancel" },
       { label: "OK",
@@ -52,7 +69,7 @@ export const useInsertVariableDialog = ({ variables }: IInsertVariableDialog) =>
         onClick: handleClick
       }
     ]
-  }, [newVariable]);
+  }, [selectedVariables, variables]);
 
   return [showModal, hideModal];
 };
