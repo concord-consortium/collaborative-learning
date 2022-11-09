@@ -11,13 +11,13 @@ import {
   TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
 } from "../document/tile-row";
 import { migrateSnapshot } from "./document-content-import";
+import { IDocumentEnvironment } from "./document-environment";
 import { IDocumentAddTileOptions } from "./document-types";
 import { Logger, LogEventName } from "../../lib/logger";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { SharedModelUnion } from "../shared/shared-model-manager";
-import { IDocumentEnvironment } from "./document";
 
 export interface INewTileOptions {
   locationInRow?: string;

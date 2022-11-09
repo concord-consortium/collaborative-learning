@@ -1,6 +1,5 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import { SectionModelType } from "../curriculum/section";
-import { DocumentContentModel, DocumentContentModelType } from "../document/document-content";
 import { ConfigurationManager, mergeDisabledFeatures } from "./configuration-manager";
 import { NavTabsConfigModel } from "./nav-tabs";
 import { ToolbarModel } from "./problem-configuration";
@@ -67,7 +66,7 @@ export const AppConfigModel = types
     get defaultDocumentTitle() { return self.configMgr.defaultDocumentTitle; },
     get docTimeStampPropertyName() { return self.configMgr.docTimeStampPropertyName; },
     get docDisplayIdPropertyName() { return self.configMgr.docDisplayIdPropertyName; },
-    get hasDefaultDocumentTemplate() { return !!self.configMgr.defaultDocumentTemplate; },
+    get defaultDocumentTemplate() { return self.configMgr.defaultDocumentTemplate; },
     get planningTemplate() { return self.configMgr.planningTemplate; },
     get defaultLearningLogTitle() { return self.configMgr.defaultLearningLogTitle; },
     get initialLearningLogTitle() { return self.configMgr.initialLearningLogTitle; },
@@ -111,12 +110,6 @@ export const AppConfigModel = types
       const disabledFeatures = this.getDisabledFeaturesOfSection(section)
                                 .filter(feature => (!tile || feature.includes(tile)) && (feature[0] !== "!"));
       return disabledFeatures;
-    },
-    get defaultDocumentContent(): DocumentContentModelType | undefined {
-      return DocumentContentModel.create(self.configMgr.defaultDocumentTemplate);
-    },
-    get defaultDocumentSpec() {
-      return { type: self.defaultDocumentType, content: this.defaultDocumentContent };
     },
     getDocumentLabel(docType: string, num?: number, lowerCase?: boolean) {
       const docLabel = self.documentLabels[docType];

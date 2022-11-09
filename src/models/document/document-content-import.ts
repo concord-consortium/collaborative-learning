@@ -1,63 +1,11 @@
 import { cloneDeep } from "lodash";
 import { getSnapshot } from "mobx-state-tree";
-import { SectionModelType } from "../curriculum/section";
-import { DisplayUserType } from "../stores/user-types";
 import { ITileModelSnapshotIn } from "../tiles/tile-model";
 import { DocumentContentModel, DocumentContentModelType, INewTileOptions } from "./document-content";
-
-/*
- * For ease of authoring, CLUE documents and tiles generally support an import format that is
- * simpler to author/edit than the full-blown serialization format. For instance, in most cases
- * objects ids are not required in authored content and will be added automatically during the
- * import process. The acceptable import format for tile-specific content is generally
- * determined by the tile itself.
- */
-
-// authored content is converted to current content on the fly
-export interface IAuthoredBaseTileContent {
-  type: string;
-}
-
-export interface IAuthoredTileContent extends IAuthoredBaseTileContent {
-  [key: string]: any;
-}
-
-export interface IAuthoredTile {
-  content: IAuthoredTileContent;
-}
-
-export interface IAuthoredDocumentContent {
-  tiles: Array<IAuthoredTile | IAuthoredTile[]>;
-}
-
-interface OriginalTileLayoutModel {
-  height?: number;
-}
-
-interface OriginalSectionHeaderContent {
-  isSectionHeader: true;
-  sectionId: string;
-}
-
-function isOriginalSectionHeaderContent(content: IAuthoredTileContent | OriginalSectionHeaderContent)
-          : content is OriginalSectionHeaderContent {
-  return !!content?.isSectionHeader && !!content.sectionId;
-}
-
-interface OriginalTileModel {
-  id?: string;
-  display?: DisplayUserType;
-  layout?: OriginalTileLayoutModel;
-  content: IAuthoredTileContent | OriginalSectionHeaderContent;
-}
-interface OriginalAuthoredTileModel extends OriginalTileModel {
-  content: IAuthoredTileContent;
-}
-function isOriginalAuthoredTileModel(tile: OriginalTileModel): tile is OriginalAuthoredTileModel {
-  return !!(tile.content as IAuthoredTileContent)?.type && !tile.content.isSectionHeader;
-}
-
-type OriginalTilesSnapshot = Array<OriginalTileModel | OriginalTileModel[]>;
+import {
+  isOriginalAuthoredTileModel, isOriginalSectionHeaderContent,
+  OriginalAuthoredTileModel, OriginalTileModel, OriginalTilesSnapshot
+} from "./document-content-import-types";
 
 function addImportedTileInNewRow(
           content: DocumentContentModelType,
@@ -121,25 +69,4 @@ export function migrateSnapshot(snapshot: any): any {
     }
   });
   return getSnapshot(docContent);
-}
-
-interface ISectionedContent {
-  sections?: SectionModelType[];
-  content?: Record<string, IAuthoredDocumentContent>;
-}
-export function createDefaultSectionedContent({ sections, content }: ISectionedContent = {}) {
-  const tiles: OriginalTilesSnapshot = [];
-  // for blank sectioned documents, default content is a section header row and a placeholder
-  // tile for each section that is present in the template (the passed sections)
-  sections?.forEach(section => {
-    tiles.push({ content: { isSectionHeader: true, sectionId: section.type }});
-    if (content?.[section.type]) {
-      tiles.push(...(content[section.type].tiles || []));
-    }
-    else {
-      tiles.push({ content: { type: "Placeholder", sectionId: section.type }});
-    }
-  });
-  // cast required because we're using the import format
-  return DocumentContentModel.create({ tiles } as any);
 }
