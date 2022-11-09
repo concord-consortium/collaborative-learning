@@ -46,7 +46,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   const mDocsRef = db.collection("documents");
   const mDocsInScopeRef = mDocsRef
     .where("network", "==", user?.network);
-  console.log("user network:", user?.network);
 
   //------Curriculum Documents--------
   useEffect(() => {
@@ -85,8 +84,6 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
   useEffect(() => {
     const unsubscribeFromDocs = mDocsInScopeRef.onSnapshot(querySnapshot=>{
       const docs = querySnapshot.docs.map(doc =>{ //convert each element of docs to an object
-        console.log("-------querySnapshot----map");
-        console.log("doc id:", doc.id);
         return (
           {
             id: doc.id,
@@ -159,42 +156,30 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
       {
         myWorkDocuments &&
         (myWorkDocuments).map((doc: PromisedDocumentDocument, index: number) =>{
-          // console.log("--------map myWorkDocuments-----");
-          // console.log('each doc:', doc);
           const sectionDoc =  store.documents.getDocument(doc.key);
           const networkDoc = store.networkDocuments.getDocument(doc.key);
-          // console.log("section Doc:", sectionDoc);
-          //   console.log('network doc? : ', networkDoc);
-
           if (sectionDoc){
             return (
               <MyWorkDocuments
                 key={index}
                 doc={doc}
                 index={index}
-                sectionDoc={sectionDoc}
+                sectionOrNetworkDoc={sectionDoc}
                 handleDocView={handleDocView}
               />
             );
           }
           if (networkDoc){
-            console.log("found network Document:", networkDoc);
             return (
               <MyWorkDocuments
                 key={index}
                 doc={doc}
                 index={index}
-                sectionDoc={networkDoc}
+                sectionOrNetworkDoc={networkDoc}
                 handleDocView={handleDocView}
               />
             );
           }
-
-          // else {
-          //   console.log("undefined Doc:", sectionDoc);
-          //   console.log('network doc? : ', networkDoc);
-          //   console.log("----------------\n");
-          // }
         })
 
       }
@@ -205,19 +190,12 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
 interface JProps {
   doc: any,
   index: number,
-  sectionDoc: DocumentModelType | undefined,
+  sectionOrNetworkDoc: DocumentModelType | undefined,
   handleDocView: (() => void) | undefined,
 
 }
 
-export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handleDocView}) => {
-  // console.log("----------------\n");
-  // console.log("valid myWorkDocument");
-  // console.log("doc:", doc);
-  // console.log("sectionDoc:", sectionDoc);
-
-
-
+export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkDoc, handleDocView}) => {
   const ui = useUIStore();
   let navTab = '';
   const myWorkTypes = ["problem", "planning", "learningLog", "personal"];
@@ -230,22 +208,15 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handl
       navTab = ENavTab.kClassWork;
     }
   }
-  const title =  useDocumentCaption(sectionDoc as DocumentModelType);
-  // console.log("title:", title);
-
-
+  const title =  useDocumentCaption(sectionOrNetworkDoc as DocumentModelType);
 
   return (
-    (sectionDoc === undefined) ?
-    <>
-    </>
-    :
     <div
       className={`document-box my-work-document ${navTab}`}
       onClick={()=>{
         ui.setActiveNavTab(navTab); //open correct NavTab
         ui.setSelectedTile();
-        ui.setSelectedCommentedDocument(sectionDoc.key); //need to activate
+        ui.setSelectedCommentedDocument(sectionOrNetworkDoc?.key); //need to activate
         ui.setFocusDocument(doc.key);
         if (handleDocView !== undefined){
           handleDocView();
