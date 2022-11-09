@@ -1,6 +1,6 @@
 import { types } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
-import { IAuthoredTileContent } from "../document/document-content-import";
+import { IAuthoredTileContent } from "../document/document-content-import-types";
 import { SupportModel } from "./support";
 import { each } from "lodash";
 

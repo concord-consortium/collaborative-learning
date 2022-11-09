@@ -1,6 +1,6 @@
 import { SectionModelType } from "../curriculum/section";
 import { DocumentContentModel } from "./document-content";
-import { IAuthoredDocumentContent, OriginalTilesSnapshot } from "./document-content-import";
+import { IAuthoredDocumentContent, OriginalTilesSnapshot } from "./document-content-import-types";
 
 interface ISectionedContent {
   sections?: SectionModelType[];

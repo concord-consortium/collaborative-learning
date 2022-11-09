@@ -1,62 +1,11 @@
 import { cloneDeep } from "lodash";
 import { getSnapshot } from "mobx-state-tree";
-import { DisplayUserType } from "../stores/user-types";
 import { ITileModelSnapshotIn } from "../tiles/tile-model";
 import { DocumentContentModel, DocumentContentModelType, INewTileOptions } from "./document-content";
-
-/*
- * For ease of authoring, CLUE documents and tiles generally support an import format that is
- * simpler to author/edit than the full-blown serialization format. For instance, in most cases
- * objects ids are not required in authored content and will be added automatically during the
- * import process. The acceptable import format for tile-specific content is generally
- * determined by the tile itself.
- */
-
-// authored content is converted to current content on the fly
-export interface IAuthoredBaseTileContent {
-  type: string;
-}
-
-export interface IAuthoredTileContent extends IAuthoredBaseTileContent {
-  [key: string]: any;
-}
-
-export interface IAuthoredTile {
-  content: IAuthoredTileContent;
-}
-
-export interface IAuthoredDocumentContent {
-  tiles: Array<IAuthoredTile | IAuthoredTile[]>;
-}
-
-interface OriginalTileLayoutModel {
-  height?: number;
-}
-
-interface OriginalSectionHeaderContent {
-  isSectionHeader: true;
-  sectionId: string;
-}
-
-function isOriginalSectionHeaderContent(content: IAuthoredTileContent | OriginalSectionHeaderContent)
-          : content is OriginalSectionHeaderContent {
-  return !!content?.isSectionHeader && !!content.sectionId;
-}
-
-interface OriginalTileModel {
-  id?: string;
-  display?: DisplayUserType;
-  layout?: OriginalTileLayoutModel;
-  content: IAuthoredTileContent | OriginalSectionHeaderContent;
-}
-interface OriginalAuthoredTileModel extends OriginalTileModel {
-  content: IAuthoredTileContent;
-}
-function isOriginalAuthoredTileModel(tile: OriginalTileModel): tile is OriginalAuthoredTileModel {
-  return !!(tile.content as IAuthoredTileContent)?.type && !tile.content.isSectionHeader;
-}
-
-export type OriginalTilesSnapshot = Array<OriginalTileModel | OriginalTileModel[]>;
+import {
+  isOriginalAuthoredTileModel, isOriginalSectionHeaderContent,
+  OriginalAuthoredTileModel, OriginalTileModel, OriginalTilesSnapshot
+} from "./document-content-import-types";
 
 function addImportedTileInNewRow(
           content: DocumentContentModelType,

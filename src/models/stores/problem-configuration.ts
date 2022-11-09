@@ -1,5 +1,5 @@
 import { Instance, SnapshotIn, types } from "mobx-state-tree";
-import { IAuthoredDocumentContent } from "../document/document-content-import";
+import { IAuthoredDocumentContent } from "../document/document-content-import-types";
 import { StampModel } from "../../plugins/drawing/model/stamp";
 import { ToolbarButtonModel } from "../tiles/toolbar-button";
 import { SettingsMstType } from "./settings";
