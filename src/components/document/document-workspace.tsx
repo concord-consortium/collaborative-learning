@@ -5,7 +5,7 @@ import { GroupVirtualDocumentComponent } from "../../components/document/group-v
 import { BaseComponent, IBaseProps } from "../../components/base";
 import { DocumentModelType } from "../../models/document/document";
 import { DocumentContentModel, DocumentContentModelType } from "../../models/document/document-content";
-import { createDefaultSectionedContent } from "../../models/document/document-content-import";
+import { createDefaultSectionedContent } from "../../models/document/sectioned-content";
 import {
   DocumentDragKey, LearningLogDocument, OtherDocumentType, PersonalDocument, ProblemDocument
 } from "../../models/document/document-types";
