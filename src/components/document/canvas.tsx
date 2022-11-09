@@ -38,7 +38,7 @@ interface IProps {
 
 interface IState {
   historyDocumentCopy?: DocumentModelType;
-  showPlaybackControls: boolean;  
+  showPlaybackControls: boolean;
 }
 
 @inject("stores")
@@ -78,7 +78,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
 
     this.state = {
       showPlaybackControls: false,
-    };   
+    };
   }
 
   public render() {
@@ -179,7 +179,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   private handleTogglePlaybackControlComponent = () => {
     this.setState((prevState, props) => {
       const showPlaybackControls = !prevState.showPlaybackControls;
-      const historyDocumentCopy = showPlaybackControls ? 
+      const historyDocumentCopy = showPlaybackControls ?
         this.createHistoryDocumentCopy() : undefined;
 
       if (prevState.historyDocumentCopy) {
@@ -191,7 +191,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
         showPlaybackControls,
         historyDocumentCopy
       };
-    });    
+    });
   };
 
   private createHistoryDocumentCopy = () => {

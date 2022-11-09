@@ -196,6 +196,9 @@ interface JProps {
 }
 
 export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkDoc, handleDocView}) => {
+  console.log("MyWorkDocuments with doc:", doc);
+  console.log("sectionOrNetworkDoc:", sectionOrNetworkDoc);
+
   const ui = useUIStore();
   let navTab = '';
   const myWorkTypes = ["problem", "planning", "learningLog", "personal"];
@@ -227,7 +230,7 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkD
         <DocumentIcon/>
       </div>
       <div className={"title"}>
-        {title}
+        {title} + {sectionOrNetworkDoc?.key}
       </div>
       <div className={"numComments"}>
         {doc.numComments}
