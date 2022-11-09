@@ -1,10 +1,13 @@
 import { IReactionDisposer, reaction } from "mobx";
-import { Instance, SnapshotIn, types } from "mobx-state-tree";
+import { getParent, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { buildProblemPath, buildSectionPath } from "../../../functions/src/shared";
 import { DocumentContentModel } from "../document/document-content";
-import { InvestigationModel } from "./investigation";
+import { InvestigationModel, InvestigationModelType } from "./investigation";
 import {
-  ISectionInfoMap, SectionModel, registerSectionInfo, suspendSectionContentParsing, resumeSectionContentParsing
+  ISectionInfoMap, SectionModel, SectionModelType, 
+  registerSectionInfo, suspendSectionContentParsing, resumeSectionContentParsing
 } from "./section";
+import { ProblemModelType } from "./problem";
 import { resumeSupportContentParsing, SupportModel, suspendSupportContentParsing } from "./support";
 import { StampModel } from "../../plugins/drawing/model/stamp";
 import { getAssetUrl } from "../../utilities/asset-utils";
@@ -64,7 +67,8 @@ const ModernUnitModel = types
     config: types.maybe(types.frozen<Partial<UnitConfiguration>>())
   })
   .volatile(self => ({
-    userListenerDisposer: null as IReactionDisposer | null
+    userListenerDisposer: null as IReactionDisposer | null,
+    facet: undefined as string | undefined,
   }))
   .actions(self => ({
     afterCreate() {
@@ -78,6 +82,9 @@ const ModernUnitModel = types
     },
     installUserListener(isTeacherFn: () => boolean, reactionFn: (isTeacher: boolean) => Promise<void>) {
       self.userListenerDisposer = reaction(isTeacherFn, reactionFn, { fireImmediately: true });
+    },
+    setFacet(facet: string) {
+      self.facet = facet;
     }
   }))
   .views(self => ({
@@ -199,4 +206,14 @@ export function isDifferentUnitAndProblem(stores: IBaseStores, unitId?: string |
   const { unit, investigation, problem } = stores;
   const combinedOrdinal = `${investigation.ordinal}.${problem.ordinal}`;
   return (unit.code !== unitId) || (combinedOrdinal !== problemOrdinal);
+}
+
+export function getSectionPath(section: SectionModelType) {
+  // getParent is called twice because the direct parent is an array
+  const problem = getParent(getParent(section)) as ProblemModelType;
+  const investigation = getParent(getParent(problem)) as InvestigationModelType;
+  const unit = getParent(getParent(investigation)) as UnitModelType;
+  const problemPath = buildProblemPath(unit.code, `${investigation.ordinal}`, `${problem.ordinal}`);
+
+  return buildSectionPath(problemPath, section.type, unit.facet) || '';  
 }

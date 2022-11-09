@@ -1,5 +1,5 @@
 import { cloneDeep, each } from "lodash";
-import { types, getSnapshot, Instance, SnapshotIn, getType, getEnv, getParent } from "mobx-state-tree";
+import { types, getSnapshot, Instance, SnapshotIn, getType, getEnv } from "mobx-state-tree";
 import { PlaceholderContentModel } from "../tiles/placeholder/placeholder-content";
 import { kTextTileType } from "../tiles/text/text-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
@@ -17,8 +17,7 @@ import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { SharedModelUnion } from "../shared/shared-model-manager";
-import { DocumentModelType, IDocumentEnvironment } from "./document";
-import { SectionModelType } from "../curriculum/section";
+import { IDocumentEnvironment } from "./document";
 
 export interface INewTileOptions {
   locationInRow?: string;
@@ -258,15 +257,6 @@ export const DocumentContentModel = types
     };
   })
   .views(self => ({
-    // Returns the key for user documents or path for problem documents
-    get documentIdentifier(): string {
-      const parent = getParent(self);
-      if (Object.hasOwn(parent, "key")) {
-        return (parent as DocumentModelType).key;
-      } else {
-        return (parent as SectionModelType).path;
-      }
-    },
     getSectionTypeForPlaceholderRow(row: TileRowModelType) {
       if (!self.isPlaceholderRow(row)) return;
       const tile = self.getTile(row.tiles[0].tileId);
