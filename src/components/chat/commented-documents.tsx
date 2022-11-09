@@ -220,7 +220,12 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkD
         ui.setActiveNavTab(navTab); //open correct NavTab
         ui.setSelectedTile();
         ui.setSelectedCommentedDocument(sectionOrNetworkDoc?.key); //need to activate
-        ui.setFocusDocument(doc.key);
+        // ui.setFocusDocument(doc.key); //original
+        ui.setFocusDocument(sectionOrNetworkDoc?.key); //added possibly?
+        //wait to deploy, check that setFocusDocument is being passed correct key doc.key equals sectionOrNetworkDoc.key
+        // all changed files in prev PR  https://github.com/concord-consortium/collaborative-learning/pull/1472/files
+
+
         if (handleDocView !== undefined){
           handleDocView();
         }

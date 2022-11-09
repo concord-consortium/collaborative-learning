@@ -200,6 +200,7 @@ export const UIModel = types
         self.teacherPanelKey = key;
       },
       setSelectedCommentedDocument(key: string | undefined){
+        console.log("ui.ts > setSelectedCommentedDocument with key:", key);
         self.selectedCommentedDocument = key ;
       }
     };
