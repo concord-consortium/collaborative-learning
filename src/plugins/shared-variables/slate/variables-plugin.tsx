@@ -12,7 +12,6 @@ import { kVariableSlateType, getVariables, getOrFindSharedModel } from "./variab
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 
 const kVariableClass = "slate-variable-chip";
-// const kVariableHighlightClass = "variable-chip-highlight";
 
 function parseVariableValue(value?: string) {
   return value ? parseFloat(value) : undefined;
@@ -39,10 +38,9 @@ function renderVariable(node: Inline, attributes: RenderAttributes, children: Re
   const { data } = node;
   const { className, ...otherAttributes } = attributes;
   const { isHighlighted, isSerializing, onClick: _onClick, onDoubleClick: _onDoubleClick } = options || {};
-  const selected = isHighlighted && !isSerializing;
-  // const highlightClass = isHighlighted && !isSerializing ? kVariableHighlightClass : undefined;
+  const selectedClass = isHighlighted && !isSerializing ? "slate-selected" : undefined;
   const reference: string = data.get("reference");
-  const classes = classNames(classArray(className), kSlateVoidClass, kVariableClass/*, highlightClass*/) || undefined;
+  const classes = classNames(classArray(className), kSlateVoidClass, kVariableClass) || undefined;
   const onClick = isSerializing ? undefined : _onClick;
   const onDoubleClick = isSerializing ? undefined : _onDoubleClick;
 
@@ -56,7 +54,7 @@ function renderVariable(node: Inline, attributes: RenderAttributes, children: Re
   return (
     <span className={classes} onClick={onClick} onDoubleClick={onDoubleClick} {...otherAttributes}>
       { variable ?
-        <VariableChip variable={variable} selected={selected} /> :
+        <VariableChip variable={variable} className={selectedClass} /> :
         `invalid reference: ${reference}`
       }
     </span>

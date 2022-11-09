@@ -83,8 +83,8 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
       >
         { // inline-block is required for the resize observer to monitor the size
         }
-        <span ref={variableChipRef} className="drawing-variable">
-          <VariableChip variable={selectedVariable} />
+        <span ref={variableChipRef} className="drawing-variable-container">
+          <VariableChip variable={selectedVariable} className="drawing-variable" />
         </span>
       </foreignObject>
     );
