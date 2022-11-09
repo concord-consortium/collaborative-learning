@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState} from "react";
-import { ILogComment, Logger } from "../../lib/logger";
+import { ILogComment, logCommentEvent } from "../../models/document/log-comment-event";
 import { UserModelType } from "../../models/stores/user";
 import { ChatPanelHeader } from "./chat-panel-header";
 import { ChatThread } from "./chat-thread";
@@ -48,7 +48,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         commentText: comment,
         action: "add"
       };
-      Logger.logCommentEvent(eventPayload);
+      logCommentEvent(eventPayload);
     }
 
     return document
@@ -68,7 +68,7 @@ export const ChatPanel: React.FC<IProps> = ({ user, activeNavTab, focusDocument,
         commentText,
         action: "delete"
       };
-      Logger.logCommentEvent(eventPayload);
+      logCommentEvent(eventPayload);
     }
     return commentsPath
       ? deleteCommentMutation.mutate(`${commentsPath}/${commentId}`)

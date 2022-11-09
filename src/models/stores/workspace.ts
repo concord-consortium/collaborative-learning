@@ -1,7 +1,8 @@
 import { types } from "mobx-state-tree";
 import { DocumentModelType } from "../document/document";
-import { LogEventName, Logger } from "../../lib/logger";
 import { GroupVirtualDocument } from "../document/group-virtual-document";
+import { logDocumentEvent } from "../document/log-document-event";
+import { LogEventName, Logger } from "../../lib/logger";
 
 export const ProblemWorkspace = "problem";
 export const LearningLogWorkspace = "learningLog";
@@ -25,13 +26,13 @@ export const WorkspaceModel = types
     const setPrimaryDocument = (document?: DocumentModelType) => {
       self.primaryDocumentKey = document && document.key;
       if (document) {
-        Logger.logDocumentEvent(LogEventName.VIEW_SHOW_DOCUMENT, document);
+        logDocumentEvent(LogEventName.VIEW_SHOW_DOCUMENT, { document });
       }
     };
     const setComparisonDocument = (document?: DocumentModelType | GroupVirtualDocument) => {
       self.comparisonDocumentKey = document && document.key;
       if (document && !(document instanceof GroupVirtualDocument)) {
-        Logger.logDocumentEvent(LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT, document);
+        logDocumentEvent(LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT, { document });
       }
     };
 

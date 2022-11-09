@@ -8,6 +8,7 @@ import { MyWorkDocumentOrBrowser } from "./document-or-browser";
 import { BaseComponent, IBaseProps } from "../base";
 import { DocumentModelType } from "../../models/document/document";
 import { LearningLogDocument, LearningLogPublication } from "../../models/document/document-types";
+import { logDocumentEvent } from "../../models/document/log-document-event";
 import { IToolbarModel } from "../../models/stores/problem-configuration";
 import { SupportType, TeacherSupportModelType, AudienceEnum } from "../../models/stores/supports";
 import { WorkspaceModelType } from "../../models/stores/workspace";
@@ -416,9 +417,9 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleToggleVisibility = () => {
-    const doc = this.props.document;
-    doc.toggleVisibility();
-    Logger.logDocumentEvent(LogEventName.SHOW_WORK, doc);
+    const document = this.props.document;
+    document.toggleVisibility();
+    logDocumentEvent(LogEventName.SHOW_WORK, { document });
   };
 
   private handleShowTwoUp = () => {

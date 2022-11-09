@@ -1,12 +1,12 @@
 import React, {useEffect, useState} from "react";
 import classNames from "classnames";
+import { ILogComment, logCommentEvent } from "../../models/document/log-comment-event";
 import { UserModelType } from "../../models/stores/user";
-import { ILogComment, Logger } from "../../lib/logger";
+import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { WithId } from "../../hooks/firestore-hooks";
 import { useUIStore } from "../../hooks/use-stores";
 import { CommentDocument} from "../../lib/firestore-schema";
 import { CommentCard } from "./comment-card";
-import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import UserIcon from "../../assets/icons/clue-dashboard/teacher-student.svg";
 import {ChatCommentThread} from "./chat-comment-thread";
 import { TileIconComponent } from "./tile-icon-component";
@@ -47,7 +47,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
       commentText: '', // This is about a thread not a single comment it doesn't make sense to log the text.
       action: clickedId === expandedThread ? "collapse" : "expand"
     };
-    Logger.logCommentEvent(eventPayload);
+    logCommentEvent(eventPayload);
 
     if (clickedId === expandedThread) {
       // We're closing the thread so clear out expanded thread.

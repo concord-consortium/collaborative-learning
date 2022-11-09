@@ -32,10 +32,12 @@ jest.mock("../../utilities/mst-utils", () => {
 });
 
 // mock Logger calls
+const registerEventType = jest.fn();
 const logTileEvent = jest.fn();
 jest.mock("../../lib/logger", () => ({
   ...(jest.requireActual("../../lib/logger") as any),
   Logger: {
+    registerEventType: (...args: any) => registerEventType(...args),
     logTileEvent: (...args: any) => logTileEvent(...args)
   }
 }));

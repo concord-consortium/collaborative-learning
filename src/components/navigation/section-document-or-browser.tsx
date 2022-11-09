@@ -4,6 +4,7 @@ import { useQueryClient } from 'react-query';
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { DocumentModelType } from "../../models/document/document";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
+import { logDocumentEvent } from "../../models/document/log-document-event";
 import { ENavTabSectionType, NavTabSectionSpec, NavTabSpec } from "../../models/view/nav-tabs";
 import { EditableDocumentContent } from "../document/editable-document-content";
 import { useAppConfig, useClassStore, useProblemStore, useStores,
@@ -165,7 +166,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
     const logEvent = document.isRemote
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
       : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
-    Logger.logDocumentEvent(logEvent, document);
+    logDocumentEvent(logEvent, { document });
   };
 
   const loadDocumentContent = async (document: DocumentModelType) => {
@@ -210,7 +211,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
         if (ok) {
           document.setProperty("isDeleted", "true");
           if (document.type === SupportPublication) {
-            Logger.logDocumentEvent(LogEventName.DELETE_SUPPORT, document);
+            logDocumentEvent(LogEventName.DELETE_SUPPORT, { document });
           }
         }
       });
