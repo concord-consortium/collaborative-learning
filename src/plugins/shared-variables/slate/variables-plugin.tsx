@@ -7,13 +7,12 @@ import {
   IDialogController, getDataFromElement, getRenderAttributesFromNode, classArray, EFormat, IRow,
   kSlateVoidClass
 } from "@concord-consortium/slate-editor";
-import { VariableType, Variable } from "@concord-consortium/diagram-view";
-import { VariableChip } from "./variable-chip";
+import { Variable, VariableChip, VariableType } from "@concord-consortium/diagram-view";
 import { kVariableSlateType, getVariables, getOrFindSharedModel } from "./variables-text-content";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 
-const kVariableClass = "variable-chip";
-const kVariableHighlightClass = "variable-chip-highlight";
+const kVariableClass = "slate-variable-chip";
+// const kVariableHighlightClass = "variable-chip-highlight";
 
 function parseVariableValue(value?: string) {
   return value ? parseFloat(value) : undefined;
@@ -40,9 +39,10 @@ function renderVariable(node: Inline, attributes: RenderAttributes, children: Re
   const { data } = node;
   const { className, ...otherAttributes } = attributes;
   const { isHighlighted, isSerializing, onClick: _onClick, onDoubleClick: _onDoubleClick } = options || {};
-  const highlightClass = isHighlighted && !isSerializing ? kVariableHighlightClass : undefined;
+  const selected = isHighlighted && !isSerializing;
+  // const highlightClass = isHighlighted && !isSerializing ? kVariableHighlightClass : undefined;
   const reference: string = data.get("reference");
-  const classes = classNames(classArray(className), kSlateVoidClass, kVariableClass, highlightClass) || undefined;
+  const classes = classNames(classArray(className), kSlateVoidClass, kVariableClass/*, highlightClass*/) || undefined;
   const onClick = isSerializing ? undefined : _onClick;
   const onDoubleClick = isSerializing ? undefined : _onDoubleClick;
 
@@ -56,7 +56,7 @@ function renderVariable(node: Inline, attributes: RenderAttributes, children: Re
   return (
     <span className={classes} onClick={onClick} onDoubleClick={onDoubleClick} {...otherAttributes}>
       { variable ?
-        <VariableChip {...{variable}}/> :
+        <VariableChip variable={variable} selected={selected} /> :
         `invalid reference: ${reference}`
       }
     </span>

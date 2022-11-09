@@ -18,7 +18,12 @@ const InsertVariableContent = ({ onClick, selectedVariables, variables }: IInser
     <div className="insert-variable-dialog-content">
       Insert an existing variable:
       <div className="variable-chip-list-container">
-        <VariableChipList onClick={onClick} selectedVariables={selectedVariables} variables={variables} />
+        <VariableChipList
+          onClick={onClick}
+          nameOnly={true}
+          selectedVariables={selectedVariables}
+          variables={variables}
+        />
       </div>
     </div>
   );
@@ -30,7 +35,7 @@ interface IInsertVariableDialog {
 export const useInsertVariableDialog = ({ variables }: IInsertVariableDialog) => {
   const drawingContent = useContext(DrawingContentModelContext);
   const [selectedVariables, setSelectedVariables] = useState<VariableType[]>([]);
-  const onClick = (variable: VariableType) => {
+  const onChipClick = (variable: VariableType) => {
     let foundVariable = false;
     const newSV = [];
     selectedVariables.forEach(v => {
@@ -44,7 +49,7 @@ export const useInsertVariableDialog = ({ variables }: IInsertVariableDialog) =>
     setSelectedVariables(newSV);
   };
 
-  const handleClick = () => {
+  const handleOk = () => {
     let x = 250;
     let y = 50;
     const offset = 25;
@@ -53,22 +58,24 @@ export const useInsertVariableDialog = ({ variables }: IInsertVariableDialog) =>
       x += offset;
       y += offset;
     });
-    setSelectedVariables([]);
   };
+
+  const onClose = () => setSelectedVariables([]);
 
   const [showModal, hideModal] = useCustomModal({
     Icon: VariablesIcon,
     title: "Insert Variables",
     Content: InsertVariableContent,
-    contentProps: { onClick, selectedVariables, variables },
+    contentProps: { onClick: onChipClick, selectedVariables, variables },
     buttons: [
       { label: "Cancel" },
       { label: "OK",
         isDefault: true,
         isDisabled: false,
-        onClick: handleClick
+        onClick: handleOk
       }
-    ]
+    ],
+    onClose
   }, [selectedVariables, variables]);
 
   return [showModal, hideModal];

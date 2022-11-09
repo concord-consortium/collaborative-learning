@@ -5,7 +5,7 @@ import useResizeObserver from "use-resize-observer";
 import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, IToolbarButtonProps, IToolbarManager,
   typeField } from "../../drawing/objects/drawing-object";
 import { Point } from "../../drawing/model/drawing-basic-types";
-import { VariableChip } from "../slate/variable-chip";
+import { VariableChip } from "@concord-consortium/diagram-view";
 import { findVariable, getOrFindSharedModel } from "./drawing-utils";
 import { useVariableDialog } from "./use-variable-dialog";
 import { useEditVariableDialog } from "../../diagram-viewer/use-edit-variable-dialog";
@@ -15,6 +15,8 @@ import { SvgToolbarButton } from "../../drawing/components/drawing-toolbar-butto
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { DrawingContentModelType } from "../../drawing/model/drawing-content";
 import { useInsertVariableDialog } from "./use-insert-variable-dialog";
+
+import "./variable-object.scss";
 
 export const VariableChipObject = DrawingObject.named("VariableObject")
   .props({
@@ -57,7 +59,7 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
           return;
         }
         // For some reason the resize observer border box width is off slightly
-        (model as VariableChipObjectType).setRenderedSize(chipWidth + 2, chipHeight);
+        (model as VariableChipObjectType).setRenderedSize(chipWidth + 2, chipHeight + 2);
       }
     });
 
@@ -78,10 +80,10 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
         onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null }
         onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null }
         onMouseDown={(e)=> handleDrag?.(e, model)}
-        >
+      >
         { // inline-block is required for the resize observer to monitor the size
         }
-        <span ref={variableChipRef} className="drawing-variable variable-chip" style={{display: "inline-block"}}>
+        <span ref={variableChipRef} className="drawing-variable">
           <VariableChip variable={selectedVariable} />
         </span>
       </foreignObject>

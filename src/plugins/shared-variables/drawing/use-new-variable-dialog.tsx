@@ -1,6 +1,5 @@
 import { useContext, useState } from "react";
-import { getOrFindSharedModel } from "./drawing-utils";
-import { VariableChipObjectSnapshotForAdd } from "./variable-object";
+import { addChipToContent, getOrFindSharedModel } from "./drawing-utils";
 import VariablesIcon from "../slate/variables.svg";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
@@ -18,13 +17,7 @@ export const useNewVariableDialog = () => {
     const sharedVariable = sharedModel?.variables.find(v => v === newVariable);
     const dialogVarId = sharedVariable?.id;
     if (dialogVarId) {
-      const variableChipSnapshot: VariableChipObjectSnapshotForAdd = {
-        type: "variable",
-        x: 250,
-        y: 50,
-        variableId: dialogVarId
-      };
-      drawingContent.addObject(variableChipSnapshot);
+      addChipToContent(drawingContent, dialogVarId);
     }
     setNewVariable(Variable.create({}));
   };
