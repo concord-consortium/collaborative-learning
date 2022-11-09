@@ -9,7 +9,7 @@ import { IFloatingToolbarProps, useFloatingToolbarLocation }
 
 import { VariableType } from "@concord-consortium/diagram-view";
 
-import VariablesToolIcon from "../shared-variables/slate/variables.svg";
+import VariableEditorIcon from "../shared-variables/assets/variable-editor-icon.svg";
 import DeleteSelectionIcon from "../../assets/icons/delete/delete-selection-icon.svg";
 import "./diagram-toolbar.scss";
 
@@ -54,8 +54,8 @@ interface IDialogButton {
 }
 const DialogButton = ({ handleClick, selectedVariable }: IDialogButton) => {
   return (
-    <SvgToolbarButton SvgIcon={VariablesToolIcon} buttonClass="button-dialog" disabled={!selectedVariable}
-      title="variable-dialog" onClick={handleClick} style={{fill: "#000000", strokeWidth: 0.1}} />
+    <SvgToolbarButton SvgIcon={VariableEditorIcon} buttonClass="button-dialog" disabled={!selectedVariable}
+      title="Edit Variable" onClick={handleClick} style={{fill: "#000000", strokeWidth: 0.1}} />
   );
 };
 

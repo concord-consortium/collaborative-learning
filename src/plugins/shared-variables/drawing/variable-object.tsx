@@ -2,14 +2,16 @@ import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React, { useContext, useRef } from "react";
 import { observer } from "mobx-react";
 import useResizeObserver from "use-resize-observer";
-import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, IToolbarButtonProps, IToolbarManager,
+import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, IToolbarManager,
   typeField } from "../../drawing/objects/drawing-object";
 import { Point } from "../../drawing/model/drawing-basic-types";
 import { VariableChip } from "@concord-consortium/diagram-view";
 import { findVariable, getOrFindSharedModel } from "./drawing-utils";
 import { useEditVariableDialog } from "../../diagram-viewer/use-edit-variable-dialog";
 import { useNewVariableDialog } from "./use-new-variable-dialog";
-import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
+import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
+import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
+import VariableEditorIcon from "../assets/variable-editor-icon.svg";
 import { SvgToolbarButton } from "../../drawing/components/drawing-toolbar-buttons";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { DrawingContentModelType } from "../../drawing/model/drawing-content";
@@ -117,7 +119,7 @@ export const InsertVariableButton = observer(({ toolbarManager }: IInsertVariabl
 
   const disabled = variables.length < 1;
 
-  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="insert-variable" title="Insert Variable"
+  return <SvgToolbarButton SvgIcon={InsertVariableChipIcon} buttonClass="insert-variable" title="Insert Variable"
     onClick={showInsertVariableDialog} disabled={disabled} />;
 });
 
@@ -138,7 +140,7 @@ export const NewVariableButton = observer(({ toolbarManager }: INewVariableButto
     showVariableDialog(); 
   };
 
-  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="new-variable" title="New Variable" 
+  return <SvgToolbarButton SvgIcon={AddVariableChipIcon} buttonClass="new-variable" title="New Variable" 
     onClick={onClick} disabled={disabled} />;
 });
 
@@ -161,6 +163,6 @@ export const EditVariableButton = observer(({ toolbarManager }: IEditVariableBut
     showVariableDialog();
   };
 
-  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="edit-variable" title="Edit Variable"
+  return <SvgToolbarButton SvgIcon={VariableEditorIcon} buttonClass="edit-variable" title="Edit Variable"
     onClick={onClick} disabled={disabled} />;
 });

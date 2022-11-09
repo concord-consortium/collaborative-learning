@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="36px" height="34px" viewBox="0 0 36 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>ED926058-5896-40A8-9C9C-115EBC65C1B7</title>
+    <g id="M2Studio" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="M2Studio-Design" transform="translate(-1204.000000, -175.000000)">
+            <g id="Exportable-Assets" transform="translate(1020.000000, 121.000000)">
+                <g id="Insert-Variable-Chip-ICON" transform="translate(184.000000, 54.000000)">
+                    <rect id="Insert-Variable-Chip-back" x="0" y="0" width="36" height="34"></rect>
+                    <g id="Insert-Variable-Chip-Icon" transform="translate(4.000000, 4.500000)">
+                        <path d="M21.807,3.49978644 L20.7680673,10.8385344 L28,9.81378644 L28,18.5 C28,20.1568542 26.6568542,21.5 25,21.5 L3,21.5 C1.34314575,21.5 0,20.1568542 0,18.5 L0,6.5 C0,4.84314575 1.34314575,3.5 3,3.5 L21.807,3.49978644 Z" id="Path" fill="#FFFFFF"></path>
+                        <path d="M21.807,3.49978644 L21.63,4.74978644 L3,4.75 C2.03350169,4.75 1.25,5.53350169 1.25,6.5 L1.25,18.5 C1.25,19.4664983 2.03350169,20.25 3,20.25 L25,20.25 C25.9664983,20.25 26.75,19.4664983 26.75,18.5 L26.75,9.99078644 L28,9.81378644 L28,18.5 C28,20.1568542 26.6568542,21.5 25,21.5 L3,21.5 C1.34314575,21.5 0,20.1568542 0,18.5 L0,6.5 C0,4.84314575 1.34314575,3.5 3,3.5 L21.807,3.49978644 Z" id="Path" fill="#545454" fill-rule="nonzero"></path>
+                        <polygon id="Path" fill="#3F3F3F" fill-rule="nonzero" points="9.192 13.188 9.64 14.708 9.656 14.708 10.056 13.156 11.848 8.5 13.224 8.5 9.816 16.676 9.272 16.676 5.8 8.5 7.272 8.5"></polygon>
+                        <path d="M14.55,11.188 L21.334,11.188 L21.334,12.34 L14.55,12.34 L14.55,11.188 Z M14.55,13.844 L21.334,13.844 L21.334,14.996 L14.55,14.996 L14.55,13.844 Z" id="Shape" fill="#3F3F3F" fill-rule="nonzero"></path>
+                        <polygon id="Path" fill="#545454" fill-rule="nonzero" transform="translate(26.303301, 5.303301) scale(-1, 1) rotate(45.000000) translate(-26.303301, -5.303301) " points="30.8033009 5.30330086 26.8133009 2.30330086 26.8133009 4.30330086 21.8033009 4.30330086 21.8033009 6.30330086 26.8133009 6.30330086 26.8133009 8.30330086"></polygon>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

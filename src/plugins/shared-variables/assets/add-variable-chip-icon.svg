@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="36px" height="34px" viewBox="0 0 36 34" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>16875AB0-2A5B-43C9-A8AB-C23AAE04D842</title>
+    <g id="M2Studio" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="M2Studio-Design" transform="translate(-1158.000000, -175.000000)">
+            <g id="Exportable-Assets" transform="translate(1020.000000, 121.000000)">
+                <g id="Add-Variable-Chip-ICON" transform="translate(138.000000, 54.000000)">
+                    <rect id="Add-Variable-Chip-back" x="0" y="0" width="36" height="34"></rect>
+                    <g id="Add-Variable-Chip-Icon" transform="translate(4.000000, 8.000000)">
+                        <rect id="Rectangle" fill="#FFFFFF" x="0" y="0" width="28" height="18" rx="3"></rect>
+                        <path d="M25,0 C26.6568542,0 28,1.34314575 28,3 L28,15 C28,16.6568542 26.6568542,18 25,18 L3,18 C1.34314575,18 0,16.6568542 0,15 L0,3 C0,1.34314575 1.34314575,0 3,0 L25,0 Z M25,1.25 L3,1.25 C2.03350169,1.25 1.25,2.03350169 1.25,3 L1.25,15 C1.25,15.9664983 2.03350169,16.75 3,16.75 L25,16.75 C25.9664983,16.75 26.75,15.9664983 26.75,15 L26.75,3 C26.75,2.03350169 25.9664983,1.25 25,1.25 Z" id="Rectangle" fill="#545454" fill-rule="nonzero"></path>
+                        <polygon id="Path" fill="#3F3F3F" fill-rule="nonzero" points="9.192 9.688 9.64 11.208 9.656 11.208 10.056 9.656 11.848 5 13.224 5 9.816 13.176 9.272 13.176 5.8 5 7.272 5"></polygon>
+                        <path d="M14.55,7.688 L21.334,7.688 L21.334,8.84 L14.55,8.84 L14.55,7.688 Z M14.55,10.344 L21.334,10.344 L21.334,11.496 L14.55,11.496 L14.55,10.344 Z" id="Shape" fill="#3F3F3F" fill-rule="nonzero"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
