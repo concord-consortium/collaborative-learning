@@ -220,7 +220,7 @@ export const DocumentContentModel = types
 
         each(snapshot.tileMap, tile => {
           getTileContentInfo(tile.content.type)
-            ?.snapshotPostProcessor?.(tile.content, tileIdMap, asTemplate);
+            ?.contentSnapshotPostProcessor?.(tile.content, tileIdMap, asTemplate);
         });
 
         snapshot.rowMap = (rowMap => {
