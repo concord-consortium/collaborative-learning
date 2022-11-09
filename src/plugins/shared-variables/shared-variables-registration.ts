@@ -6,7 +6,7 @@ import { VariablesPlugin } from "./slate/variables-plugin";
 import { updateAfterSharedModelChanges } from "./slate/variables-text-content";
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
 import { EditVariableButton, EditVariableTool, InsertVariableTool, InsertVariableButton, NewVariableButton,
-  NewVariableTool, VariableChipComponent, VariableChipObject, VariableChipToolbarButton, VariableDrawingTool }
+  NewVariableTool, VariableChipComponent, VariableChipObject }
   from "./drawing/variable-object";
 
 registerSharedModelInfo({
@@ -45,10 +45,4 @@ registerDrawingToolInfo({
   name: "edit-variable",
   toolClass: EditVariableTool,
   buttonComponent: EditVariableButton
-});
-
-registerDrawingToolInfo({
-  name: "variable",
-  toolClass: VariableDrawingTool,
-  buttonComponent: VariableChipToolbarButton
 });

@@ -7,7 +7,6 @@ import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, IToo
 import { Point } from "../../drawing/model/drawing-basic-types";
 import { VariableChip } from "@concord-consortium/diagram-view";
 import { findVariable, getOrFindSharedModel } from "./drawing-utils";
-import { useVariableDialog } from "./use-variable-dialog";
 import { useEditVariableDialog } from "../../diagram-viewer/use-edit-variable-dialog";
 import { useNewVariableDialog } from "./use-new-variable-dialog";
 import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
@@ -101,30 +100,7 @@ const getSelectedVariable = (drawingContent: DrawingContentModelType) => {
     : undefined;
 };
 
-export class VariableDrawingTool extends DrawingTool {
-  constructor(drawingLayer: IDrawingLayer) {
-    super(drawingLayer);
-  }
-}
-
-export function VariableChipToolbarButton(props: IToolbarButtonProps) {
-  const [showVariableDialog] = useVariableDialog();
-
-  const handleShowVariableDialog = () => {
-    showVariableDialog();
-  };
-
-  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="variable"
-    title="Variable" onClick={handleShowVariableDialog} />;
-}
-
 export class InsertVariableTool extends DrawingTool {
-  constructor(drawingLayer: IDrawingLayer) {
-    super(drawingLayer);
-  }
-}
-
-export class NewVariableTool extends DrawingTool {
   constructor(drawingLayer: IDrawingLayer) {
     super(drawingLayer);
   }
@@ -144,6 +120,12 @@ export const InsertVariableButton = observer(({ toolbarManager }: IInsertVariabl
   return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="insert-variable" title="Insert Variable"
     onClick={showInsertVariableDialog} disabled={disabled} />;
 });
+
+export class NewVariableTool extends DrawingTool {
+  constructor(drawingLayer: IDrawingLayer) {
+    super(drawingLayer);
+  }
+}
 
 interface INewVariableButtonProps {
   toolbarManager: IToolbarManager;
