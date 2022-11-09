@@ -22,7 +22,7 @@ import { ImageModelType } from "../models/image";
 import {
   DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds
 } from "../models/document/document-content";
-import { createDefaultSectionedContent } from "../models/document/document-content-import";
+import { createDefaultSectionedContent } from "../models/document/sectioned-content";
 import { Firebase } from "./firebase";
 import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
