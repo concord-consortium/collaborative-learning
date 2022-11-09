@@ -57,16 +57,16 @@ export const ProblemTabContent: React.FC<IProps>
 
   const handleTabSelected = (index: number) => {
     const section = sections?.[index];
-    if (!section) { return; }
-    // TODO: The log event had its properties reversed. We don't want to introduce
-    // a breaking change in the log event stream, so the variables are named for
-    // clarity. It might be better to add a version property to the log event
-    // so we can fix this.
-    const titleArgButReallyType = section.type;    
-    const typeArgButReallyTitle = getSectionTitle(section.type);
+    if (!section) return;
+    // TODO: The log event properties have been reversed for quite a while now.
+    // We don't want to introduce a breaking change in the log event stream, so
+    // the variables are named for clarity. It might be better to add a version
+    // property to the log event so we can fix this.
+    const namePropButReallyType = section.type;    
+    const typePropButReallyTitle = getSectionTitle(section.type);
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
-      tab_section_name: titleArgButReallyType,
-      tab_section_type: typeArgButReallyTitle
+      tab_section_name: namePropButReallyType,
+      tab_section_type: typePropButReallyTitle
     });
     // Clear any selected tiles when the tab changes
     ui.setSelectedTile();
