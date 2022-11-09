@@ -11,6 +11,7 @@ import { setUnitAndProblem } from "./models/stores/stores";
 import { UserModel } from "./models/stores/user";
 import { urlParams } from "./utilities/url-params";
 import { getAppMode } from "./lib/auth";
+import { DEBUG_STORES } from "./lib/debug";
 import { Logger } from "./lib/logger";
 import { setPageTitle } from "./lib/misc";
 import { gImageMap } from "./models/image-map";
@@ -38,6 +39,10 @@ const initializeApp = async () => {
 
   const isPreviewing = !!(urlParams.domain && urlParams.domain_uid && !urlParams.token);
   const stores = createStores({ appMode, appVersion, appConfig, user, showDemoCreator, demoName, isPreviewing });
+
+  if (DEBUG_STORES) {
+    (window as any).stores = stores;
+  }
 
   if (appMode === "qa" && urlParams.qaClear === "all") {
     ReactDOM.render(

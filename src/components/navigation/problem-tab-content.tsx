@@ -55,16 +55,23 @@ export const ProblemTabContent: React.FC<IProps>
 
   }, [ui, ui.focusDocument]);
 
-  const handleTabClick = (titleArgButReallyType: string, typeArgButReallyTitle: string) => {
-    // TODO: this function has its argument names reversed (see caller for details.)
-    // We can't simply switch it, however, because that would introduce a breaking change
-    // in the log event stream, so for now we just rename the arguments for clarity.
+  const handleTabSelected = (index: number) => {
+    const section = sections?.[index];
+    if (!section) { return; }
+    // TODO: The log event had its properties reversed. We don't want to introduce
+    // a breaking change in the log event stream, so the variables are named for
+    // clarity. It might be better to add a version property to the log event
+    // so we can fix this.
+    const titleArgButReallyType = section.type;    
+    const typeArgButReallyTitle = getSectionTitle(section.type);
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
       tab_section_name: titleArgButReallyType,
       tab_section_type: typeArgButReallyTitle
     });
+    // Clear any selected tiles when the tab changes
     ui.setSelectedTile();
     ui.updateFocusDocument();
+    setActiveIndex(index);
   };
 
   function findSelectedSectionIndex(fullPath: string | undefined){
@@ -88,6 +95,7 @@ export const ProblemTabContent: React.FC<IProps>
     <Tabs className={classNames("problem-tabs", context, chatBorder)}
           selectedTabClassName="selected"
           selectedIndex={activeIndex || 0}
+          onSelect={handleTabSelected}
           data-focus-document={problemPath}
     >
       <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
@@ -98,10 +106,6 @@ export const ProblemTabContent: React.FC<IProps>
               <Tab
                 className={classNames("prob-tab", context)}
                 key={`section-${section.type}`}
-                onClick={() => {
-                  handleTabClick(section.type, sectionTitle);
-                  setActiveIndex(index);
-                }}
               >
                 {sectionTitle}
               </Tab>
