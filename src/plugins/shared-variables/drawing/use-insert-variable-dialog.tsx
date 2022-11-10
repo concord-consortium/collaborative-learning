@@ -2,11 +2,11 @@ import React, { useContext, useState } from "react";
 import { VariableChipList, VariableType } from "@concord-consortium/diagram-view";
 
 import { addChipToContent } from "./drawing-utils";
-import VariablesIcon from "../slate/variables.svg";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 
-import './variable-dialog.scss';
+import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
+import "./variable-dialog.scss";
 
 interface IInsertVariableContent {
   onClick?: (variable: VariableType) => void;
@@ -63,7 +63,7 @@ export const useInsertVariableDialog = ({ variables }: IInsertVariableDialog) =>
   const onClose = () => setSelectedVariables([]);
 
   const [showModal, hideModal] = useCustomModal({
-    Icon: VariablesIcon,
+    Icon: InsertVariableChipIcon,
     title: "Insert Variables",
     Content: InsertVariableContent,
     contentProps: { onClick: onChipClick, selectedVariables, variables },

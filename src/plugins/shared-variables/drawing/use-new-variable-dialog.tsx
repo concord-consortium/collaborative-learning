@@ -1,10 +1,10 @@
 import { useContext, useState } from "react";
 import { addChipToContent, getOrFindSharedModel } from "./drawing-utils";
-import VariablesIcon from "../slate/variables.svg";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { EditVariableDialogContent, Variable } from "@concord-consortium/diagram-view";
 
+import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
 import '../../diagram-viewer/diagram-dialog.scss';
 
 export const useNewVariableDialog = () => {
@@ -23,7 +23,7 @@ export const useNewVariableDialog = () => {
   };
 
   const [showModal, hideModal] = useCustomModal({
-    Icon: VariablesIcon,
+    Icon: AddVariableChipIcon,
     title: "New Variable",
     Content: EditVariableDialogContent,
     contentProps: { variable: newVariable },
