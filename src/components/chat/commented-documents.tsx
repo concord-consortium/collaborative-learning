@@ -8,6 +8,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { useDocumentCaption } from "../thumbnail/decorated-document-thumbnail-item";
 import { ENavTab } from "../../models/view/nav-tabs";
 import DocumentIcon from "../../assets/icons/document-icon.svg";
+
 import "./commented-documents.scss";
 import { getProblemOrdinal } from "../../models/stores/stores";
 
@@ -220,6 +221,8 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkD
     }
   }
   const title =  useDocumentCaption(sectionOrNetworkDoc as DocumentModelType);
+  //to do : add the download hook to download network docs
+  // add yellow div behind the svg
 
   return (
     <div
@@ -234,15 +237,22 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkD
         }
       }}
     >
+    {
+      isNetworkDoc ?
+        <>
+          <div className="document-type-icon">
+            <DocumentIcon/>
+          </div>
+          <div className={"yellow-background"}>
+          </div>
+        </>
+      :
       <div className="document-type-icon">
-      {
-        isNetworkDoc ?
-        <p> yellow icon </p>
-        :
         <DocumentIcon/>
-      }
-
       </div>
+    }
+
+
       <div className={"title"}>
         {title} + {sectionOrNetworkDoc?.key}
       </div>
