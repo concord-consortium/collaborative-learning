@@ -943,9 +943,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "**Situation B. What’s Different?**",
+                        "<strong>Situation B. What’s Different?</strong>",
                         "1. How does the real-life teacher differ from the teacher in the photo?"
                       ]
                     }
@@ -954,7 +954,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "The teacher in the photo is smaller than the real-life teacher. But the ratio between the height of the teacher in the photo and the height of the magazine in the photo is the same as the ratio between the height of the real-life teacher and the height of the real-life magazine. ",
                         "If we cut the hat from the photo and put it on our head, it would be ridiculously small. We would need to scale-up the size of the hat to get it to fit."
@@ -964,7 +964,7 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "2. Can you think of some other times you could use a photo to estimate the size of something?"
                       ]
@@ -1964,11 +1964,11 @@
                     }
                   },
                   {
-                    "id": "21AUG20220850AM",
+                    "id": "21AUG20220852340AM",
                     "title": "Copies of Super Sleuth with different percent size factors.",
                     "content": {
                     "type": "Image",
-                    "url": "curriculum/stretching-and-shrinking/images/SS_1_3_In_11_results_500w.png"
+                    "url": "curriculum/stretching-and-shrinking/images/copiesOfSuperSleuth1_3.png"
                     }
                   },
                   {
@@ -1992,11 +1992,11 @@
                   },
                   {
                     "display": "teacher",
-                    "id": "21AUG20220850AM",
+                    "id": "21AUsfafG20220850AM",
                     "title": "Comparing side lengths for Super Sleuth and Copy 2",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/1-3_Initial_Challenge_1.png"
+                      "url": "curriculum/stretching-and-shrinking/images/comparingSideLengths1_3.png"
                     }
                   },
                   {
@@ -2012,7 +2012,7 @@
                   },
                   {
                     "display": "teacher",
-                    "id": "21AUG20220850AM",
+                    "id": "21AUasG2022adsf0850AM",
                     "title": "Comparing side lengths for Super Sleuth and Copy 1",
                     "content": {
                       "type": "Image",
@@ -2030,26 +2030,25 @@
                   },
                   {
                     "display": "teacher",
-                    "content":
-                    {
+                    "id": "_7HJi5zFt89fPzIp",
+                    "title": "Text 1",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Possible Answers</p>",
-                        "Stays the Same/Alike      Changes/Different     From Original to Image",
-                        "-same basic shapes         -size                                     Copy 1 – smaller/shrunk",
-                        "                                                                                       Copy 2 – bigger/stretched"
-                      ]
-                    }
-                  },
-                  {
-                    "display": "teacher",
-                    "content":
-                    {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>The perimeters change in the same way the corresponding lengths change. This can be explained by the Distributive Property. In Copy 2 the sides of the hat change by 150%, so the perimeter will also change by 150%: 1.5/+ 1.5/ + 1.5w + 1.5w = 1.5 (/ + / + w + w).</p>"
+                        "<p><strong>Possible answers</strong></p>",
+                        "<p>Stays the same/alike:</p>",
+                        "<ul><li>Same basic shapes</li><li>Corresponding angle measures</li></ul>",
+                        "<p>Size changes:</p>",
+                        "<ul><li>Copy 1 is smaller/shrunk</li><li>Copy 2 is bigger/stretched</li></ul>",
+                        "<p>Corresponding side lengths change:</p>",
+                        "<ul><li>Copy 1 are ¾ the size of the corresponding side lengths in the original</li><li>Copy 2 are 1.5 times the size of the corresponding side lengths in the original</li></ul>",
+                        "<p>Perimeter changes in the same way the corresponding side lengths change. This can be explained by the Distributive Property: For example, in Copy 2 the sides of the hat change b6 150%, so the perimeter will also change by 150%: 1.5l+1.5l+1.5w+1.5w=1.5(l+l+w+w)</p>",
+                        "<p>Area changes:</p>",
+                        "<ul><li>It’s smaller from the original to Copy 1</li><li>It’s larger from the original to Copy 2, but it is not 1.5 times larger.</li></ul>",
+                        "<p>Note: At this time in the Unit, students will make general statements about the area. Such as, “The area grows (or shrinks) but not in the same way as the lengths.” The area change relationship in scale figures will be developed in Investigations 2 and 3.</p>",
+                        "<p>Ratios change:</p>",
+                        "<ul><li>The ratio in length from the original to Copy 1 is 1 to ¾.</li><li>The ratio in length from the original to Copy 2 is 1 to 1.5</li></ul>"
                       ]
                     }
                   }
@@ -3947,32 +3946,6 @@
                         "The <strong>scale factor</strong> is the number that the side lengths of one figure are multiplied by to give the corresponding side lengths of a similar figure. <ul><li>What is the multiplier or scale factor when you use two rubber bands to enlarge a figure?</li><li>What is the multiplier or scale factor when you use a copier setting of <em>150%</em>? <em>75%</em>?</li><ul>"
                       ]
                     }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "The rectangles below are similar. The scale factor from the smaller rectangle to the larger rectangle is 3. That is, for every 1 cm in the original figure, there are 3 cm in the image.  The ratio of the original length of a side to the length of a corresponding side is 1:3."
-                      ]
-                    }
-                  },
-                  {
-                    "id": "AUG20221121AM",
-                    "title":"Comparing side lengths for similar rectangles",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SS_2_3_In_18_rectangles_500w.png"
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<em>What is the scale factor from the larger rectangle to the smaller rectangle? Explain how you found it.</em>"
-                      ]
-                    }
                   }
                 ]
               },
@@ -4810,7 +4783,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "Student answers will vary.",
                         "<strong>Quadrilaterals</strong>",
@@ -5178,7 +5151,7 @@
                       "format": "html",
                       "text": [
                         "<h3>Situation B. Going Backwards</h3>",
-                        "Dola started with a sketch of a quadrilateral. She divided it into four smaller quadrilaterals that have the same size and shape (congruent). She claims they are similar.<ol><li>Explain why the smaller shapes are similar to the original.</li><li>How do the lengths, perimeter, and area of the original figure compare to one of the four smaller figures?</li></ul>"
+                        "Dola started with a sketch of a quadrilateral. She divided it into four smaller quadrilaterals that have the same size and shape (congruent). She claims they are similar.<ol><li>Explain why the smaller shapes are similar to the original.</li><li>How do the lengths, perimeter, and area of the original figure compare to one of the four smaller figures?</li><li>Would this work for triangles? Explain.</li></ul>"
                       ]
                     }
                   },
@@ -5261,10 +5234,10 @@
                   {
                     "display": "teacher",
                     "id": "6wzAUG20220117pM",
-                    "title": "Drawing 4 rep-tile triangles using subdivided sides and parallel lines",
+                    "title": "Subdividing sides of a triangle with parallel lines",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_5.png"
+                      "url": "curriculum/stretching-and-shrinking/images/parallelSubdivide3_1.png"
                     }
                   },
                   {
@@ -5287,9 +5260,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-              ]
+              }
             },
             {
               "type": "nowWhatDoYouKnow",
@@ -5561,8 +5532,7 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Criteria for Rectangles</strong></p>",
-                        "<p><strong>Rectangle P</strong></p>",
-                        "<p>The scale factor from Rectangle A to Rectangle P is 2.5.</p>"
+                        "<ul><li><p><strong>Rectangle P</strong> The scale factor from Rectangle A to Rectangle P is 2.5.</ul></li>"
                       ]
                     }
                   },
@@ -5755,7 +5725,7 @@
                   },
                   {
                     "display": "teacher",
-                    "id": "-6zAUG20220132pm",
+                    "id": "adsfd-6zAUG20220132pm",
                     "title": "Comparing Triangle B and Triangle X",
                     "content": {
                       "type": "Image",
@@ -5783,11 +5753,11 @@
                   },
                   {
                     "display": "teacher",
-                    "id": "-6zAUG20220133pm",
+                    "id": "-6zAUG2022adte5y0133pm",
                     "title": "Comparing Triangle B and Triangle Y",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_4.png"
+                      "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_5.png"
                     }
                   },
                   {
@@ -6820,24 +6790,6 @@
                     }
                   },
                   {
-                    "display": "teacher",
-                    "id": "3dbxqfv4kJSJLn0D",
-                    "title": "Text 9",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Ratio of adjacent side lengths – longest side to short side lengths: </p>",
-                        "<p>Triangle A: 8 to 4 = 2 to 1 </p>",
-                        "<p>Triangle C: 12 to 6 = 2 to 1  </p>",
-                        "<p>Triangle D: 20 to 10 = 2 to 1</p>",
-                        "<p>Triangle B: 12 to 9 = 1 1/3 to 1</p>",
-                        "<p> </p>",
-                        "<p>The unit rate of the length of one side to the length of an adjacent side is equivalent for all three similar triangles. The triangle that is not similar to the others has a different rate. </p>"
-                      ]
-                    }
-                  },
-                  {
                     "id": "tkGNAXnwxXBo4M4s",
                     "title": "Text 10",
                     "content": {
@@ -6890,7 +6842,7 @@
                     "title": "Sample reasoning for irregular figures",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/4-1_What_If_Set_7.png"
+                      "url": "curriculum/stretching-and-shrinking/images/reasoningIrregular4_1.png"
                     }
                   },
                   {
@@ -7248,6 +7200,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
+                        "<strong>Mirror Method</strong>",
                         "<p>The triangles are scaled. The angles located at the mirror are congruent. If we imagined flipping the triangle created by the distance from the mirror to Ashton, we can see the triangles are similar. These triangles look like the ones that we created with the rep-tiles and with measuring the river distance.</p>"
                       ]
                     }
@@ -7486,7 +7439,7 @@
                       "text": [
                         "<p><strong>Did You Know?</strong> </p>",
                         "<p>Special cameras on satellites, airplanes, and ships take images of large areas on earth. They use the images to calculate lengths and areas of shapes. This process is called remote sensing. Some use of remote sensing is tracking forest fires, erupting volcanoes, ocean floor, growth of cities or forests, </p>",
-                        "<p>https://www.usgs.gov/faqs/what-remote-sensing-and-what-it-used?qt-news_science_products=0#qt-news_science_products</p>"
+                        "<p>https://www.usgs.gov/faqs/what-does-georeferenced-mean?qt-news_science_products=0#qt-news_science_products</p>"
                       ]
                     }
                   },
@@ -8154,6 +8107,16 @@
                       "text": [
                         "<p>No. All of the following shapes are quadrilaterals. None of them are similar to the other.</p>"
                       ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "id": "YBpMcjE1W-Ha652l",
+                    "title": "Examples of non-similar quadrilaterals",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/nonSimilarQuads4_2.png",
+                      "filename": "curriculum/stretching-and-shrinking/images/nonSimilarQuads4_2.png"
                     }
                   },
                   {
