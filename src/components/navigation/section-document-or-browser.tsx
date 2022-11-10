@@ -41,9 +41,9 @@ export interface ISubTabSpec {
 
 export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, reset, selectedDocument,
   isChatOpen, onSelectNewDocument, onSelectDocument, onTabClick }) => {
-  console.log("----<SectionDocumentOrBrowser>  with tabSpec-------", tabSpec.label);
-  console.log("selectedDocument", selectedDocument);
-  console.log("onSelectDocument:", onSelectDocument);
+  // console.log("----<SectionDocumentOrBrowser>  with tabSpec-------", tabSpec.label);
+  // console.log("selectedDocument", selectedDocument);
+  // console.log("onSelectDocument:", onSelectDocument);
 
   const ui = useUIStore();
   const store = useStores();
@@ -148,7 +148,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
                      store.networkDocuments.getDocument(ui.selectedCommentedDocument);
       if (isActiveTab) {
         console.log("setting referenceDoc to newDoc:", newDoc);
-
         setReferenceDocument(newDoc);
       }
       const newIndex = getNewTabIndex(ui.selectedCommentedDocument, tabSpec.label);
@@ -229,7 +228,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
 
   //----------------
   // TO DO:
-  // add tiles for network documents - see Leslie's story
+  // add yellow color for network documents - see Leslie's story
   //investigate bug where comments are not loading
 
   //--------------
@@ -242,8 +241,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
             const _handleDocumentStarClick = section.showStarsForUser(user)
               ? handleDocumentStarClick
               : undefined;
-              // console.log("-------section line 233 map ----------\n", section);
-              // console.log("referenceDocument?.key:", referenceDocument?.key);
 
             return (
               <DocumentCollectionByType

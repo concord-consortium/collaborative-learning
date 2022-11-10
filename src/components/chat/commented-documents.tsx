@@ -158,6 +158,11 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
         (myWorkDocuments).map((doc: PromisedDocumentDocument, index: number) =>{
           const sectionDoc =  store.documents.getDocument(doc.key);
           const networkDoc = store.networkDocuments.getDocument(doc.key);
+          console.log(`-------map---------${index}----`);
+          console.log("doc: ", doc);
+          console.log("sectionDoc:",sectionDoc);
+          console.log("networkDoc: ", networkDoc);
+
           if (sectionDoc){
             return (
               <MyWorkDocuments
@@ -165,6 +170,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
                 doc={doc}
                 index={index}
                 sectionOrNetworkDoc={sectionDoc}
+                isNetworkDoc={false}
                 handleDocView={handleDocView}
               />
             );
@@ -176,6 +182,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
                 doc={doc}
                 index={index}
                 sectionOrNetworkDoc={networkDoc}
+                isNetworkDoc={true}
                 handleDocView={handleDocView}
               />
             );
@@ -191,11 +198,12 @@ interface JProps {
   doc: any,
   index: number,
   sectionOrNetworkDoc: DocumentModelType | undefined,
+  isNetworkDoc: boolean,
   handleDocView: (() => void) | undefined,
 
 }
 
-export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkDoc, handleDocView}) => {
+export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkDoc, isNetworkDoc, handleDocView}) => {
   // console.log("MyWorkDocuments with doc:", doc);
   // console.log("sectionOrNetworkDoc:", sectionOrNetworkDoc);
 
@@ -219,22 +227,21 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkD
       onClick={()=>{
         ui.setActiveNavTab(navTab); //open correct NavTab
         ui.setSelectedTile();
-        ui.setSelectedCommentedDocument(sectionOrNetworkDoc?.key); //need to activate
-        // ui.setFocusDocument(doc.key); //original
-        ui.setFocusDocument(sectionOrNetworkDoc?.key); //added possibly?
-        //wait to deploy, check that setFocusDocument is being passed correct key doc.key equals sectionOrNetworkDoc.key
-        // all changed files in prev PR  https://github.com/concord-consortium/collaborative-learning/pull/1472/files
-        //check Tejal Teacher1 / CLUE Testing 3 > Teacher Teacher 1: this is a personal doc
-
-
-
+        ui.setSelectedCommentedDocument(sectionOrNetworkDoc?.key);
+        ui.setFocusDocument(sectionOrNetworkDoc?.key);
         if (handleDocView !== undefined){
           handleDocView();
         }
       }}
     >
       <div className="document-type-icon">
+      {
+        isNetworkDoc ?
+        <p> yellow icon </p>
+        :
         <DocumentIcon/>
+      }
+
       </div>
       <div className={"title"}>
         {title} + {sectionOrNetworkDoc?.key}
