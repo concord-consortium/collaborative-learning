@@ -14,7 +14,8 @@ import { TextToolbarComponent } from "./text-toolbar";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
 import { getTextPluginInstances, getTextPluginIds } from "../../../models/tiles/text/text-plugin-info";
-import { LogEventName, Logger, SimpleTileLogEvent } from "../../../lib/logger";
+import { Logger, SimpleTileLogEvent } from "../../../lib/logger";
+import { LogEventName } from "../../../lib/logger-types";
 
 import "./text-tile.sass";
 

@@ -1,6 +1,7 @@
 import mockXhr from "xhr-mock";
 import { getSnapshot } from "mobx-state-tree";
-import { Logger, LogEventName } from "./logger";
+import { Logger } from "./logger";
+import { LogEventName } from "./logger-types";
 import { createDocumentModel, DocumentModelType } from "../models/document/document";
 import { DocumentContentModel } from "../models/document/document-content";
 import { ProblemDocument } from "../models/document/document-types";

@@ -1,4 +1,5 @@
-import { LogEventName, Logger } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType } from "./document";
 

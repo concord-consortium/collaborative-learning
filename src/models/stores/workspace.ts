@@ -2,7 +2,8 @@ import { types } from "mobx-state-tree";
 import { DocumentModelType } from "../document/document";
 import { GroupVirtualDocument } from "../document/group-virtual-document";
 import { logDocumentEvent } from "../document/log-document-event";
-import { LogEventName, Logger } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 
 export const ProblemWorkspace = "problem";
 export const LearningLogWorkspace = "learningLog";

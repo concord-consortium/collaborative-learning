@@ -15,7 +15,8 @@ import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SharedModelType } from "../../shared/shared-model";
 import { kMinColumnWidth } from "../../../components/tiles/table/table-types";
 import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-utils";
-import { Logger, LogEventName } from "../../../lib/logger";
+import { Logger } from "../../../lib/logger";
+import { LogEventName } from "../../../lib/logger-types";
 import { uniqueId } from "../../../utilities/js-utils";
 
 export const kTableTileType = "Table";

@@ -10,7 +10,8 @@ import { specAppConfig } from "../../models/stores/spec-app-config";
 import { createStores, IStores } from "../stores/stores";
 import { UserModel } from "../stores/user";
 import { createSingleTileContent } from "../../utilities/test-utils";
-import { LogEventName, Logger } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 
 const investigation = InvestigationModel.create({
   ordinal: 1,

@@ -1,5 +1,6 @@
-import { LogEventName, Logger, DataflowProgramChange } from "../../lib/logger";
 import { Connection, Control, Node } from "rete";
+import { Logger, DataflowProgramChange } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 
 type DataflowLogPayload = any; //Node | Connection | Control | object;
 

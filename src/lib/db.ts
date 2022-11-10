@@ -27,7 +27,8 @@ import { createDefaultSectionedContent } from "../models/document/sectioned-cont
 import { Firebase } from "./firebase";
 import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
-import { Logger, LogEventName } from "./logger";
+import { Logger } from "./logger";
+import { LogEventName } from "./logger-types";
 import { IGetImageDataParams, IPublishSupportParams } from "../../functions/src/shared";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { getUserContext } from "../hooks/use-user-context";

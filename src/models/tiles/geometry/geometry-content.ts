@@ -37,7 +37,8 @@ import { ISharedModelManager } from "../../shared/shared-model-manager";
 import { getTileModel, setTileTitleFromContent } from "../tile-model";
 import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
-import { Logger, LogEventName } from "../../../lib/logger";
+import { Logger } from "../../../lib/logger";
+import { LogEventName } from "../../../lib/logger-types";
 import { gImageMap } from "../../image-map";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;

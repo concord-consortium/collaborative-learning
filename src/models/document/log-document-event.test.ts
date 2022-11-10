@@ -8,7 +8,8 @@ import { createStores, IStores } from "../stores/stores";
 import { UserModel } from "../stores/user";
 import { createSingleTileContent } from "../../utilities/test-utils";
 import { logDocumentEvent } from "./log-document-event";
-import { LogEventName, Logger } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { createDocumentModel } from "./document";
 import { ProblemDocument } from "./document-types";
 

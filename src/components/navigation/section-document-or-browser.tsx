@@ -9,7 +9,8 @@ import { ENavTabSectionType, NavTabSectionSpec, NavTabSpec } from "../../models/
 import { EditableDocumentContent } from "../document/editable-document-content";
 import { useAppConfig, useClassStore, useProblemStore, useStores,
   useUIStore, useUserStore } from "../../hooks/use-stores";
-import { Logger, LogEventName } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentCollectionByType } from "../thumbnail/documents-type-collection";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";

@@ -15,7 +15,8 @@ import { WorkspaceModelType } from "../../models/stores/workspace";
 import { ENavTab } from "../../models/view/nav-tabs";
 import { IconButton } from "../utilities/icon-button";
 import ToggleControl from "../utilities/toggle-control";
-import { Logger, LogEventName } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 
 import "./document.sass";
 

@@ -10,7 +10,8 @@ import { ImageObject } from "../objects/image";
 import { RectangleObject, RectangleObjectSnapshot, RectangleObjectSnapshotForAdd,
   RectangleObjectType } from "../objects/rectangle";
 import { computeStrokeDashArray } from "../objects/drawing-object";
-import { LogEventName, Logger } from "../../../lib/logger";
+import { Logger } from "../../../lib/logger";
+import { LogEventName } from "../../../lib/logger-types";
 
 jest.mock("../../../lib/logger", () => {
   return {

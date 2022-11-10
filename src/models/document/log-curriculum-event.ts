@@ -1,5 +1,6 @@
 import { parseSectionPath } from "../../../functions/src/shared";
-import { LogEventName, Logger } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 
 export const kLogCurriculumEvent = "LogCurriculumEvent";
 

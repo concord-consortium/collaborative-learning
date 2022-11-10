@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { GroupUserModelType } from "src/models/stores/groups";
 import { useGroupsStore, useUserStore } from "../../hooks/use-stores";
-import { LogEventName, Logger } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { FourUpComponent } from "../four-up";
 import "./student-group-view.scss";
 

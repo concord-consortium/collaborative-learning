@@ -13,7 +13,8 @@ import {
 import { migrateSnapshot } from "./document-content-import";
 import { IDocumentEnvironment } from "./document-environment";
 import { IDocumentAddTileOptions } from "./document-types";
-import { Logger, LogEventName } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModel, SharedModelType } from "../shared/shared-model";

@@ -12,7 +12,8 @@ import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
   isStrokedObject, ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
-import { LogEventName, Logger } from "../../../lib/logger";
+import { Logger } from "../../../lib/logger";
+import { LogEventName } from "../../../lib/logger-types";
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads

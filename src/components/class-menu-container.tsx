@@ -1,11 +1,12 @@
+import { IDropdownItem } from "@concord-consortium/react-components";
 import React from "react";
 import { uniq } from "lodash";
 import { inject, observer } from "mobx-react";
 import { BaseComponent, IBaseProps } from "./base";
-import { LogEventName, Logger, LogEventMethod } from "../lib/logger";
-import { IDropdownItem } from "@concord-consortium/react-components";
-import { IUserPortalOffering } from "../models/stores/user";
 import { CustomSelect } from "../clue/components/custom-select";
+import { Logger } from "../lib/logger";
+import { LogEventMethod, LogEventName } from "../lib/logger-types";
+import { IUserPortalOffering } from "../models/stores/user";
 
 interface IProps extends IBaseProps {}
 
