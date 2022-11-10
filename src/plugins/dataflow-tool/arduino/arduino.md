@@ -2,7 +2,7 @@
 
 This directory contains arduino files for testing, development, and use with Backyard Brains materials.
 
-The only file meant for use in the classroom is `ccemgfsr.ino`.
+`ccemgfsr.ino` is the sketch that must be running on an Arduino in order to work with Dataflow and   communicate with Backyard Brains hardware.  ⚠️ _This file needs to maintain this name and path on the master branch, as a link to it is published in printed materials._
 
 Each `.ino` file is in its own directory.  This is a requirement of the Visual Studio Code arduino plugin, which allows us to manage our development hardware and arduino sketches within vsc, and track changes in the same version control context.
 
