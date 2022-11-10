@@ -130,6 +130,7 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
   public componentWillUnmount() {
     this.resizeObserver.disconnect();
+    this.handleResizeDebounced.cancel();
     this._isMounted = false;
   }
   public componentDidUpdate(prevProps: IProps, prevState: IState) {
