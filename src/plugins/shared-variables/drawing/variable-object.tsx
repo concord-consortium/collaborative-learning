@@ -4,7 +4,7 @@ import { observer } from "mobx-react";
 import useResizeObserver from "use-resize-observer";
 import { VariableChip } from "@concord-consortium/diagram-view";
 
-import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, IToolbarManager,
+import { DrawingObject, IDrawingComponentProps, IToolbarManager,
   typeField } from "../../drawing/objects/drawing-object";
 import { Point } from "../../drawing/model/drawing-basic-types";
 import { findVariable, getOrFindSharedModel } from "./drawing-utils";
@@ -103,12 +103,6 @@ const getSelectedVariable = (drawingContent: DrawingContentModelType) => {
     : undefined;
 };
 
-export class InsertVariableTool extends DrawingTool {
-  constructor(drawingLayer: IDrawingLayer) {
-    super(drawingLayer);
-  }
-}
-
 interface IInsertVariableButton {
   toolbarManager: IToolbarManager;
 }
@@ -124,12 +118,6 @@ export const InsertVariableButton = observer(({ toolbarManager }: IInsertVariabl
     onClick={showInsertVariableDialog} disabled={disabled} />;
 });
 
-export class NewVariableTool extends DrawingTool {
-  constructor(drawingLayer: IDrawingLayer) {
-    super(drawingLayer);
-  }
-}
-
 interface INewVariableButtonProps {
   toolbarManager: IToolbarManager;
 }
@@ -144,12 +132,6 @@ export const NewVariableButton = observer(({ toolbarManager }: INewVariableButto
   return <SvgToolbarButton SvgIcon={AddVariableChipIcon} buttonClass="new-variable" title="New Variable" 
     onClick={onClick} disabled={disabled} />;
 });
-
-export class EditVariableTool extends DrawingTool {
-  constructor(drawingLayer: IDrawingLayer) {
-    super(drawingLayer);
-  }
-}
 
 interface IEditVariableButtonProps {
   toolbarManager: IToolbarManager;
