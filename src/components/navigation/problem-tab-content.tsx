@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { useProblemPathWithFacet, useUIStore, useUserStore } from "../../hooks/use-stores";
-import { getSectionTitle, SectionModelType } from "../../models/curriculum/section";
+import { getSectionTitle, SectionModelType, findSectionIndex } from "../../models/curriculum/section";
 import { ProblemPanelComponent } from "./problem-panel";
 import { Logger, LogEventName } from "../../lib/logger";
 import ToggleControl from "../utilities/toggle-control";
@@ -45,7 +45,7 @@ export const ProblemTabContent: React.FC<IProps>
       ui.updateFocusDocument();
     }
     setActiveIndex((prevState) => {
-      const newIndex = findSelectedSectionIndex(ui.focusDocument);
+      const newIndex = findSectionIndex(sections, ui.focusDocument);
       if (newIndex !== -1) {
         return newIndex;
       } else {
@@ -53,7 +53,7 @@ export const ProblemTabContent: React.FC<IProps>
       }
     });
 
-  }, [ui, ui.focusDocument]);
+  }, [sections, ui, ui.focusDocument]);
 
   const handleTabSelected = (index: number) => {
     const section = sections?.[index];
@@ -73,18 +73,6 @@ export const ProblemTabContent: React.FC<IProps>
     ui.updateFocusDocument();
     setActiveIndex(index);
   };
-
-  function findSelectedSectionIndex(fullPath: string | undefined){
-    if (fullPath !==undefined){
-      const lastSlashPosition = fullPath.split("/", 3).join("_").length + 1;
-      const sectionSelected =  fullPath.substring(lastSlashPosition, fullPath.length);
-      const index =  sections.findIndex((section: any) => section.type === sectionSelected);
-      return index;
-    }
-    else {
-      return 0;
-    }
-  }
 
   const handleToggleSolutions = () => {
     ui.toggleShowTeacherContent(!showTeacherContent);

@@ -1,4 +1,5 @@
 import { types } from "mobx-state-tree";
+import { parseSectionPath } from "../../../functions/src/shared";
 import { DocumentContentModel } from "../document/document-content";
 import { IAuthoredTileContent } from "../document/document-content-import";
 import { SupportModel } from "./support";
@@ -105,3 +106,14 @@ export const SectionModel = types
     };
   });
 export type SectionModelType = typeof SectionModel.Type;
+
+export function findSectionIndex(sections: SectionModelType[], fullPath: string | undefined){
+  if (fullPath !==undefined) {
+    const [,,,,sectionSelected] = parseSectionPath(fullPath) || [];
+    const index =  sections.findIndex((section: any) => section.type === sectionSelected);
+    return index;
+  }
+  else {
+    return 0;
+  }
+}

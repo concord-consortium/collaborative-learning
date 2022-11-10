@@ -1,5 +1,5 @@
 import { getSectionInitials, getSectionPlaceholder, getSectionTitle,
-        kAllSectionType, SectionModel, registerSectionInfo, kDefaultPlaceholder } from "./section";
+        kAllSectionType, SectionModel, registerSectionInfo, kDefaultPlaceholder, findSectionIndex } from "./section";
 
 describe("SectionModel", () => {
 
@@ -42,4 +42,19 @@ describe("SectionModel", () => {
     expect(foo2Section.placeholder).toBe("Foo Placeholder");
   });
 
+});
+
+describe("findSelectedSectionIndex", () => {
+  it("finds section index", () => {
+    const sections = [
+      SectionModel.create({ type: "foo" }),
+      SectionModel.create({ type: "bar" })
+    ];
+
+    expect(findSectionIndex(sections, "msa/1/1/foo")).toBe(0);
+    expect(findSectionIndex(sections, "msa/1/1/bar")).toBe(1);
+    expect(findSectionIndex(sections, "msa/1/1/baz")).toBe(-1);
+    expect(findSectionIndex(sections, "invalid")).toBe(-1);
+    expect(findSectionIndex(sections, undefined)).toBe(0);
+  });
 });
