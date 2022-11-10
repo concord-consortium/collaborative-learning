@@ -126,7 +126,6 @@ context('Shared Variables', function () {
     it("verify Insert Variable dialog opens on variable button click in drawing tile", () => {
       clueCanvas.addTile('drawing');
       drawToolTile.getDrawToolInsertVariable().click();
-      // cy.get("[data-original-title=Variable").click();
       cy.get(".modal-header").should("contain", "Insert Variables");
       cy.get(".ReactModalPortal").within(() => {
         // cy.findByRole("combobox").type("VarC{enter}");
@@ -144,7 +143,7 @@ context('Shared Variables', function () {
       drawTile().find('.drawing-variable:contains("VarCVarD")').should('exist');
     });
     it("verify edit variable dialog works", () => {
-      const editVariableButton = () => cy.get(`.drawing-tool-toolbar [data-original-title="Edit Variable"]`).find("button");
+      const editVariableButton = () => drawToolTile.getDrawToolEditVariable();
       const customModal = () => cy.get(".custom-modal");
       drawToolTile.getDrawTile().last().click();
       editVariableButton().should("exist");
@@ -167,7 +166,7 @@ context('Shared Variables', function () {
       drawTile().find('.drawing-variable:contains("VarCVarD")').should('not.exist');
     });
     it("verify create new variable", () => {
-      cy.get(`.drawing-tool-toolbar [data-original-title="New Variable"]`).click();
+      drawToolTile.getDrawToolNewVariable().click();
       cy.get(".modal-header").should("contain", "New Variable");
       cy.get(".ReactModalPortal").within(() => {
         cy.get("#evd-name").type("VarE");
