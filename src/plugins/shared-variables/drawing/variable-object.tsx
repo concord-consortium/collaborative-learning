@@ -2,10 +2,11 @@ import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React, { useContext, useRef } from "react";
 import { observer } from "mobx-react";
 import useResizeObserver from "use-resize-observer";
+import { VariableChip } from "@concord-consortium/diagram-view";
+
 import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, IToolbarManager,
   typeField } from "../../drawing/objects/drawing-object";
 import { Point } from "../../drawing/model/drawing-basic-types";
-import { VariableChip } from "@concord-consortium/diagram-view";
 import { findVariable, getOrFindSharedModel } from "./drawing-utils";
 import { useEditVariableDialog } from "../../diagram-viewer/use-edit-variable-dialog";
 import { useNewVariableDialog } from "./use-new-variable-dialog";

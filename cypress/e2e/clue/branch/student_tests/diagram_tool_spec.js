@@ -108,6 +108,9 @@ context('Diagram Tool Tile', function () {
       drawTile.getDrawToolInsertVariable().click();
       listChip().click();
       listChip(".selected").should("exist");
+      listChip().click();
+      listChip(".selected").should("not.exist");
+      listChip().click();
       dialogOkButton().click();
       drawTile.getVariableChip().should("exist");
     });
