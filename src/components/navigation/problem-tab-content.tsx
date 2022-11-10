@@ -3,7 +3,7 @@ import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { useProblemPathWithFacet, useUIStore, useUserStore } from "../../hooks/use-stores";
-import { getSectionTitle, SectionModelType } from "../../models/curriculum/section";
+import { getSectionTitle, SectionModelType, findSectionIndex } from "../../models/curriculum/section";
 import { ProblemPanelComponent } from "./problem-panel";
 import { Logger, LogEventName } from "../../lib/logger";
 import ToggleControl from "../utilities/toggle-control";
@@ -45,7 +45,7 @@ export const ProblemTabContent: React.FC<IProps>
       ui.updateFocusDocument();
     }
     setActiveIndex((prevState) => {
-      const newIndex = findSelectedSectionIndex(ui.focusDocument);
+      const newIndex = findSectionIndex(sections, ui.focusDocument);
       if (newIndex !== -1) {
         return newIndex;
       } else {
@@ -53,31 +53,26 @@ export const ProblemTabContent: React.FC<IProps>
       }
     });
 
-  }, [ui, ui.focusDocument]);
+  }, [sections, ui, ui.focusDocument]);
 
-  const handleTabClick = (titleArgButReallyType: string, typeArgButReallyTitle: string) => {
-    // TODO: this function has its argument names reversed (see caller for details.)
-    // We can't simply switch it, however, because that would introduce a breaking change
-    // in the log event stream, so for now we just rename the arguments for clarity.
+  const handleTabSelected = (index: number) => {
+    const section = sections?.[index];
+    if (!section) return;
+    // TODO: The log event properties have been reversed for quite a while now.
+    // We don't want to introduce a breaking change in the log event stream, so
+    // the variables are named for clarity. It might be better to add a version
+    // property to the log event so we can fix this.
+    const namePropButReallyType = section.type;    
+    const typePropButReallyTitle = getSectionTitle(section.type);
     Logger.log(LogEventName.SHOW_TAB_SECTION, {
-      tab_section_name: titleArgButReallyType,
-      tab_section_type: typeArgButReallyTitle
+      tab_section_name: namePropButReallyType,
+      tab_section_type: typePropButReallyTitle
     });
+    // Clear any selected tiles when the tab changes
     ui.setSelectedTile();
     ui.updateFocusDocument();
+    setActiveIndex(index);
   };
-
-  function findSelectedSectionIndex(fullPath: string | undefined){
-    if (fullPath !==undefined){
-      const lastSlashPosition = fullPath.split("/", 3).join("_").length + 1;
-      const sectionSelected =  fullPath.substring(lastSlashPosition, fullPath.length);
-      const index =  sections.findIndex((section: any) => section.type === sectionSelected);
-      return index;
-    }
-    else {
-      return 0;
-    }
-  }
 
   const handleToggleSolutions = () => {
     ui.toggleShowTeacherContent(!showTeacherContent);
@@ -88,6 +83,7 @@ export const ProblemTabContent: React.FC<IProps>
     <Tabs className={classNames("problem-tabs", context, chatBorder)}
           selectedTabClassName="selected"
           selectedIndex={activeIndex || 0}
+          onSelect={handleTabSelected}
           data-focus-document={problemPath}
     >
       <div className={classNames("tab-header-row", {"no-sub-tabs": !hasSubTabs})}>
@@ -98,10 +94,6 @@ export const ProblemTabContent: React.FC<IProps>
               <Tab
                 className={classNames("prob-tab", context)}
                 key={`section-${section.type}`}
-                onClick={() => {
-                  handleTabClick(section.type, sectionTitle);
-                  setActiveIndex(index);
-                }}
               >
                 {sectionTitle}
               </Tab>
