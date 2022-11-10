@@ -144,11 +144,14 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
     }
     if (ui.selectedCommentedDocument){
       console.log("section-document-or-browser.tsx > line 143");
-      const newDoc = store.documents.getDocument(ui.selectedCommentedDocument) ||
-                     store.networkDocuments.getDocument(ui.selectedCommentedDocument);
+      const newDoc = store.documents.getDocument(ui.selectedCommentedDocument)
+      || store.networkDocuments.getDocument(ui.selectedCommentedDocument);
       if (isActiveTab) {
         console.log("setting referenceDoc to newDoc:", newDoc);
         setReferenceDocument(newDoc);
+        if (newDoc?.isRemote){
+          handleSelectDocument(newDoc);
+        }
       }
       const newIndex = getNewTabIndex(ui.selectedCommentedDocument, tabSpec.label);
       if (newIndex !== undefined) {
@@ -167,6 +170,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
 
   const handleSelectDocument = (document: DocumentModelType) => {
     if (!document.hasContent && document.isRemote) {
+      console.log("handleSelectDocument inside if statement with document:", document);
       loadDocumentContent(document);
     }
     setReferenceDocument(document);
