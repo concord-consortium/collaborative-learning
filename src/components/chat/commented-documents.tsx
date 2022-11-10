@@ -196,8 +196,8 @@ interface JProps {
 }
 
 export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkDoc, handleDocView}) => {
-  console.log("MyWorkDocuments with doc:", doc);
-  console.log("sectionOrNetworkDoc:", sectionOrNetworkDoc);
+  // console.log("MyWorkDocuments with doc:", doc);
+  // console.log("sectionOrNetworkDoc:", sectionOrNetworkDoc);
 
   const ui = useUIStore();
   let navTab = '';
@@ -224,6 +224,8 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkD
         ui.setFocusDocument(sectionOrNetworkDoc?.key); //added possibly?
         //wait to deploy, check that setFocusDocument is being passed correct key doc.key equals sectionOrNetworkDoc.key
         // all changed files in prev PR  https://github.com/concord-consortium/collaborative-learning/pull/1472/files
+        //check Tejal Teacher1 / CLUE Testing 3 > Teacher Teacher 1: this is a personal doc
+
 
 
         if (handleDocView !== undefined){
