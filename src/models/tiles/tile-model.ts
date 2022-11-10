@@ -1,9 +1,8 @@
 import { cloneDeep } from "lodash";
 import { getParent, getSnapshot, getType,
   Instance, SnapshotIn, SnapshotOut, types, ISerializedActionCall } from "mobx-state-tree";
-import { GeometryContentModelType } from "./geometry/geometry-content";
 import { isPlaceholderContent } from "./placeholder/placeholder-content";
-import { ITileExportOptions } from "./tile-content-info";
+import { getTileContentInfo, ITileExportOptions } from "./tile-content-info";
 import { findMetadata, ITileContentModel, TileContentUnion } from "./tile-types";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
@@ -37,22 +36,22 @@ export function cloneTileSnapshotWithNewId(tile: ITileModel, newId?: string) {
   return { id: newId || uniqueId(), ...copy, content };
 }
 
-export function getTileModel(toolContentModel: ITileContentModel) {
+export function getTileModel(tileContentModel: ITileContentModel) {
   try {
-    const parent = getParent(toolContentModel);
+    const parent = getParent(tileContentModel);
     return getType(parent).name === "TileModel" ? parent as ITileModel : undefined;
   } catch (e) {
-    console.warn(`Unable to find tool tile for content ${toolContentModel}`);
+    console.warn(`Unable to find tile model for content ${tileContentModel}`);
     return undefined;
   }
 }
 
-export function getTileTitleFromContent(toolContentModel: ITileContentModel) {
-  return getTileModel(toolContentModel)?.title;
+export function getTileTitleFromContent(tileContentModel: ITileContentModel) {
+  return getTileModel(tileContentModel)?.title;
 }
 
-export function setTileTitleFromContent(toolContentModel: ITileContentModel, title: string) {
-  getTileModel(toolContentModel)?.setTitle(title);
+export function setTileTitleFromContent(tileContentModel: ITileContentModel, title: string) {
+  getTileModel(tileContentModel)?.setTitle(title);
 }
 
 export const TileModel = types
@@ -63,19 +62,16 @@ export const TileModel = types
     title: types.maybe(types.string),
     // whether to restrict display to certain users
     display: DisplayUserTypeEnum,
-    // e.g. "GeometryContentModel", "ImageContentModel", "TableContentModel", "TextContentModel", ...
+    // e.g. "TextContentModel", ...
     content: TileContentUnion
   })
   .preProcessSnapshot(snapshot => {
-    // Move the title up to handle legacy geometry tiles
-    if (snapshot.content.type === "Geometry" && !("title" in snapshot) && "title" in snapshot.content) {
-      const title = (snapshot.content as GeometryContentModelType).title;
-      return { ...snapshot, title };
-    }
-    return snapshot;
+    const tileType = snapshot.content.type;
+    const preProcessor = getTileContentInfo(tileType)?.tileSnapshotPreProcessor;
+    return preProcessor ? preProcessor(snapshot) : snapshot;
   })
   .views(self => ({
-    // generally negotiated with tool, e.g. single column width for table
+    // generally negotiated with tile, e.g. single column width for table
     get minWidth() {
       return kDefaultMinWidth;
     },

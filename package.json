@@ -105,7 +105,6 @@
   "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
   "overrides": {
     "mobx-state-tree": "npm:@concord-consortium/mobx-state-tree@5.1.5-cc.1",
-    
     "slate-react": "npm:@concord-consortium/slate-react",
     "slate-react-placeholder": "@concord-consortium/slate-react-placeholder"
   },

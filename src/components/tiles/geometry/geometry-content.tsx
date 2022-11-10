@@ -1,5 +1,5 @@
 import { castArray, each, filter, find, keys as _keys, throttle, values } from "lodash";
-import { observe } from "mobx";
+import { observe, reaction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
 import objectHash from "object-hash";
@@ -20,22 +20,24 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           isDragTargetOrAncestor } from "../../../models/tiles/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
-import { ESegmentLabelOption, JXGCoordPair } from "../../../models/tiles/geometry/jxg-changes";
+import { ESegmentLabelOption, ILinkProperties, JXGCoordPair } from "../../../models/tiles/geometry/jxg-changes";
+import { applyChange } from "../../../models/tiles/geometry/jxg-dispatcher";
 import { kSnapUnit } from "../../../models/tiles/geometry/jxg-point";
 import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
 } from "../../../models/tiles/geometry/jxg-polygon";
 import {
-  isAxis, isAxisLabel, isComment, isFreePoint, isImage, isLine, isMovableLine,
+  isAxis, isAxisLabel, isBoard, isComment, isFreePoint, isImage, isLine, isMovableLine,
   isMovableLineControlPoint, isMovableLineLabel, isPoint, isPolygon, isVertexAngle,
   isVisibleEdge, isVisibleMovableLine, isVisiblePoint, kGeometryDefaultPixelsPerUnit
 } from "../../../models/tiles/geometry/jxg-types";
 import {
   getVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
 } from "../../../models/tiles/geometry/jxg-vertex-angle";
-import { injectGetTableLinkColorsFunction } from "../../../models/tiles/geometry/jxg-table-link";
+import { getAllLinkedPoints, injectGetTableLinkColorsFunction } from "../../../models/tiles/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tile-component";
 import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
+import { linkedPointId } from "../../../models/tiles/table-link-types";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
@@ -272,6 +274,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       }
     });
 
+    // respond to linked table/shared model changes
+    this.disposers.push(reaction(
+      () => this.getContent().updateSharedModels,
+      () => this.syncLinkedPoints()
+    ));
+
     this.disposers.push(onSnapshot(this.getContent(), () => {
       if (!this.suspendSnapshotResponse) {
         this.destroyBoard();
@@ -506,6 +514,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           if (url) {
             this.updateImageUrl(url, filename);
           }
+          this.syncLinkedPoints(board);
           this.setState({ board });
           resolve(board);
         }
@@ -579,6 +588,39 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         this.rescaleBoardAndAxes({ xMax, yMax, xMin, yMin });
       }
     }
+  }
+
+  syncLinkedPoints(_board?: JXG.Board) {
+    const board = _board || this.state.board;
+    if (!board) return;
+
+    // remove/recreate all linked points
+    // TODO: A more tailored response would match up the existing points with the data set and only
+    // change the affected points, which would eliminate some visual flashing that occurs when
+    // unchanged points are re-created and would allow derived polygons to be preserved.
+    const ids = getAllLinkedPoints(board);
+    applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
+
+    // create new points for each linked table
+    this.getContent().linkedDataSets.forEach(link => {
+      const links: ILinkProperties = { tileIds: [link.providerId] };
+      const parents: JXGCoordPair[] = [];
+      const properties: Array<{ id: string }> = [];
+      for (let ci = 0; ci < link.dataSet.cases.length; ++ci) {
+        const x = link.dataSet.attributes[0]?.numericValue(ci);
+        for (let ai = 1; ai < link.dataSet.attributes.length; ++ai) {
+          const attr = link.dataSet.attributes[ai];
+          const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
+          const y = attr.numericValue(ci);
+          if (isFinite(x) && isFinite(y)) {
+            parents.push([x, y]);
+            properties.push({ id });
+          }
+        }
+      }
+      const pts = applyChange(board, { operation: "create", target: "linkedPoint", parents, properties, links });
+      castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
+    });
   }
 
   private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {

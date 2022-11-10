@@ -1,10 +1,9 @@
-import { getParent, types } from "mobx-state-tree";
+import { types } from "mobx-state-tree";
+import { parseSectionPath } from "../../../functions/src/shared";
 import { DocumentContentModel } from "../document/document-content";
-import { IAuthoredTileContent } from "../document/document-content-import";
-import { ProblemModelType } from "./problem";
+import { IAuthoredTileContent } from "../document/document-content-import-types";
 import { SupportModel } from "./support";
 import { each } from "lodash";
-import { buildSectionPath } from "../../../functions/src/shared";
 
 export type SectionType = string;
 
@@ -105,15 +104,16 @@ export const SectionModel = types
         return getSectionPlaceholder(self.type);
       }
     };
-  })
-  .views(self => {
-    return {
-      get path(): string {
-        // getParent is called twice below because the direct parent is an array
-        const problem = getParent(getParent(self)) as ProblemModelType;
-        const sectionTitle: string = self.title.toLowerCase().replace(' ', '-');
-        return buildSectionPath(problem.problemPath, sectionTitle) || '';
-      }
-    };
   });
 export type SectionModelType = typeof SectionModel.Type;
+
+export function findSectionIndex(sections: SectionModelType[], fullPath: string | undefined){
+  if (fullPath !==undefined) {
+    const [,,,,sectionSelected] = parseSectionPath(fullPath) || [];
+    const index =  sections.findIndex((section: any) => section.type === sectionSelected);
+    return index;
+  }
+  else {
+    return 0;
+  }
+}

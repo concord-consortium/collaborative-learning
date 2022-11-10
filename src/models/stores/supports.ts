@@ -10,7 +10,7 @@ import { IDocumentProperties } from "../../lib/db-types";
 import { Logger, LogEventName } from "../../lib/logger";
 import { createDocumentModel, DocumentModelType } from "../document/document";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
-import { IAuthoredDocumentContent } from "../document/document-content-import";
+import { IAuthoredDocumentContent } from "../document/document-content-import-types";
 import { SupportPublication } from "../document/document-types";
 import { DocumentsModelType } from "./documents";
 import { safeJsonParse } from "../../utilities/js-utils";

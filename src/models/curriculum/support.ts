@@ -1,6 +1,6 @@
 import { types, getSnapshot } from "mobx-state-tree";
 import { DocumentContentModel } from "../document/document-content";
-import { IAuthoredDocumentContent } from "../document/document-content-import";
+import { IAuthoredDocumentContent } from "../document/document-content-import-types";
 
 let gSuspendSupportContentParsing = 0;
 
