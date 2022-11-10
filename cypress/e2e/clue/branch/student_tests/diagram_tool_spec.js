@@ -40,6 +40,7 @@ context('Diagram Tool Tile', function () {
       drawTile.getDrawTile().should("exist");
       drawTile.getDrawToolNewVariable().should("exist").should("not.be.disabled");
       drawTile.getDrawToolEditVariable().should("exist").should("be.disabled");
+      drawTile.getDrawToolInsertVariable().should("exist").should("be.disabled");
     });
     it("new variable dialog works", () => {
       const vName = "variable-name";
@@ -65,10 +66,10 @@ context('Diagram Tool Tile', function () {
       drawTile.getVariableChip().click();
       drawTile.getDrawToolEditVariable().should("not.be.disabled").click();
       dialogField("name").clear();
-      dialogField("value").clear();
-      dialogField("units").clear();
       dialogField("name").type(newName);
+      dialogField("value").clear();
       dialogField("value").type(newValue);
+      dialogField("units").clear();
       dialogField("units").type(newUnit);
       dialogOkButton().click();
       drawTile.getVariableChip().should("contain", newName);
@@ -83,20 +84,32 @@ context('Diagram Tool Tile', function () {
     it("diagram tile edit variable dialog", () => {
       // TODO Move this to the diagram tile section when the new variable dialog is added to it
       const vName = "name3";
-      const vValue = "-999.99";
+      const vValue = "999.999";
       const vUnit = "C";
       diagramToolTile.getVariableCard().click();
       diagramToolTile.getDiagramToolbarButton("button-dialog", undefined, true).should("not.be.disabled").click();
       dialogField("name").clear();
-      dialogField("value").clear();
-      dialogField("units").clear();
       dialogField("name").type(vName);
+      dialogField("value").clear();
       dialogField("value").type(vValue);
+      dialogField("units").clear();
       dialogField("units").type(vUnit);
       dialogOkButton().click();
       diagramToolTile.getVariableCardField("name").should("have.value", vName);
       diagramToolTile.getVariableCardField("value").should("have.value", vValue);
       diagramToolTile.getVariableCardField("unit").should("have.value", vUnit);
+    });
+    it("insert variable dialog works", () => {
+      const listChip = otherClass => cy.get(`.variable-chip-list .variable-chip${otherClass || ""}`);
+      drawTile.getDrawTile().click();
+      drawTile.getVariableChip().click();
+      drawTile.getDrawToolDelete().click();
+      drawTile.getVariableChip().should("not.exist");
+      drawTile.getDrawToolInsertVariable().click();
+      listChip().click();
+      listChip(".selected").should("exist");
+      dialogOkButton().click();
+      drawTile.getVariableChip().should("exist");
     });
   });
 });
