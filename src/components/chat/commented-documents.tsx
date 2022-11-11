@@ -238,13 +238,11 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkD
     >
     {
       isNetworkDoc ?
-        <>
-          <div className="document-type-icon">
+          <div className="document-type-icon-yellow">
             <DocumentIcon/>
+            <div className="yellow-background"/>
+
           </div>
-          <div className={"yellow-background"}>
-          </div>
-        </>
       :
       <div className="document-type-icon">
         <DocumentIcon/>
@@ -253,7 +251,7 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkD
 
 
       <div className={"title"}>
-        {title} + {sectionOrNetworkDoc?.key}
+        {title}
       </div>
       <div className={"numComments"}>
         {doc.numComments}
