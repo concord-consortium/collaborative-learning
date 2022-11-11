@@ -16,6 +16,14 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
 ) => {
   const content = model.content as DiagramContentModelType;
 
+  const handleDeleteClick = () => {
+    const selectedNode = content.root.selectedNode;
+    if (selectedNode) {
+      content.root.removeNode(selectedNode);
+      content.root.selectedNode = undefined;
+    }
+  };
+
   const [showEditVariableDialog] = useEditVariableDialog({
     variable: content.root.selectedNode?.variable
   });
@@ -25,11 +33,12 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   return (
     <div className="diagram-tool">
       <DiagramToolbar
+        content={content}
         documentContent={documentContent}
+        handleDeleteClick={handleDeleteClick}
         handleDialogClick={() => showEditVariableDialog()}
         tileElt={tileElt}
         scale={scale}
-        selectedVariable={content.root.selectedNode?.variable}
         { ...toolbarProps }
       />
       <Diagram dqRoot={content.root} />

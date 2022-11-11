@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
 import { Tooltip } from "react-tippy";
+import { DiagramContentModelType } from "./diagram-content";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { IFloatingToolbarProps, useFloatingToolbarLocation }
   from "../../components/tiles/hooks/use-floating-toolbar-location";
@@ -59,21 +60,28 @@ const DialogButton = ({ handleClick, selectedVariable }: IDialogButton) => {
   );
 };
 
-const DeleteButton = () => {
-  const handleClick = () => console.log("deleted!");
+interface IDeleteButton {
+  handleClick: () => void;
+  selectedVariable?: VariableType;
+}
+const DeleteButton = ({ handleClick, selectedVariable }: IDeleteButton) => {
   return (
-    <SvgToolbarButton SvgIcon={DeleteSelectionIcon} buttonClass="button-delete" title="delete"
-      onClick={handleClick} />
+    <SvgToolbarButton SvgIcon={DeleteSelectionIcon} buttonClass="button-delete" disabled={!selectedVariable}
+      title="delete" onClick={handleClick} />
   );
 };
 
 interface IProps extends IFloatingToolbarProps {
+  content: DiagramContentModelType;
+  handleDeleteClick: () => void;
   handleDialogClick: () => void;
-  selectedVariable?: VariableType;
 }
 export const DiagramToolbar: React.FC<IProps> = observer(({
-  documentContent, handleDialogClick, onIsEnabled, selectedVariable, ...others
+  content, documentContent, handleDeleteClick, handleDialogClick, onIsEnabled, ...others
 }) => {
+  const root = content?.root;
+  const selectedVariable = root?.selectedNode?.variable;
+
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
     documentContent,
@@ -87,7 +95,7 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
         <div className={`diagram-toolbar ${enabled && location ? "enabled" : "disabled"}`}
             style={location} onMouseDown={e => e.stopPropagation()}>
           <DialogButton handleClick={handleDialogClick} selectedVariable={selectedVariable} />
-          <DeleteButton />
+          <DeleteButton handleClick={handleDeleteClick} selectedVariable={selectedVariable} />
         </div>, documentContent)
     : null;
 });
