@@ -109,7 +109,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
     const isActiveTab =  ui.activeNavTab === tabSpec.label.toLowerCase().replace(' ', '-');
 
     function getNewTabIndex(key: string, navTab: string ){
-      const doc = store.documents.getDocument(key);
+      const doc = store.documents.getDocument(key) || store.networkDocuments.getDocument(key);
       if (navTab === "Class Work") {
         if (doc?.type === "learningLogPublication"){
           return 1;
@@ -132,9 +132,13 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
       }
     }
     if (ui.selectedCommentedDocument){
-      const newDoc = store.documents.getDocument(ui.selectedCommentedDocument);
+      const newDoc = store.documents.getDocument(ui.selectedCommentedDocument)
+      || store.networkDocuments.getDocument(ui.selectedCommentedDocument);
       if (isActiveTab) {
         setReferenceDocument(newDoc);
+        if (newDoc?.isRemote){
+          handleSelectDocument(newDoc);
+        }
       }
       const newIndex = getNewTabIndex(ui.selectedCommentedDocument, tabSpec.label);
       if (newIndex !== undefined) {
@@ -145,12 +149,11 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
   // if ui.activeNavTab is in dependency array, it will not remember last saved section subTab
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[store.documents, tabSpec.label, ui.selectedCommentedDocument]);
+
   const handleTabSelect = (tabidx: number) => {
     setTabIndex(tabidx);
     ui.updateFocusDocument();
   };
-
-
 
   const handleSelectDocument = (document: DocumentModelType) => {
     if (!document.hasContent && document.isRemote) {
@@ -212,6 +215,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
         }
       });
   };
+
   const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
     const classHash = classStore.classHash;
     return (
@@ -221,6 +225,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
             const _handleDocumentStarClick = section.showStarsForUser(user)
               ? handleDocumentStarClick
               : undefined;
+
             return (
               <DocumentCollectionByType
                 key={`${section.type}_${index}`}
