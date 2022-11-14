@@ -2,18 +2,23 @@ import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React, { useContext, useRef } from "react";
 import { observer } from "mobx-react";
 import useResizeObserver from "use-resize-observer";
-import { DrawingObject, DrawingTool, IDrawingComponentProps, IDrawingLayer, IToolbarButtonProps, IToolbarManager,
+import { VariableChip } from "@concord-consortium/diagram-view";
+
+import { DrawingObject, IDrawingComponentProps, IToolbarManager,
   typeField } from "../../drawing/objects/drawing-object";
 import { Point } from "../../drawing/model/drawing-basic-types";
-import { VariableChip } from "../slate/variable-chip";
-import { findVariable } from "./drawing-utils";
-import { useVariableDialog } from "./use-variable-dialog";
+import { findVariable, getOrFindSharedModel } from "./drawing-utils";
 import { useEditVariableDialog } from "../../diagram-viewer/use-edit-variable-dialog";
 import { useNewVariableDialog } from "./use-new-variable-dialog";
-import VariableToolIcon from "../../../clue/assets/icons/variable-tool.svg";
+import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
+import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
+import VariableEditorIcon from "../assets/variable-editor-icon.svg";
 import { SvgToolbarButton } from "../../drawing/components/drawing-toolbar-buttons";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { DrawingContentModelType } from "../../drawing/model/drawing-content";
+import { useInsertVariableDialog } from "./use-insert-variable-dialog";
+
+import "./variable-object.scss";
 
 export const VariableChipObject = DrawingObject.named("VariableObject")
   .props({
@@ -56,7 +61,7 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
           return;
         }
         // For some reason the resize observer border box width is off slightly
-        (model as VariableChipObjectType).setRenderedSize(chipWidth + 2, chipHeight);
+        (model as VariableChipObjectType).setRenderedSize(chipWidth + 2, chipHeight + 2);
       }
     });
 
@@ -77,11 +82,9 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
         onMouseEnter={(e) => handleHover ? handleHover(e, model, true) : null }
         onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null }
         onMouseDown={(e)=> handleDrag?.(e, model)}
-        >
-        { // inline-block is required for the resize observer to monitor the size
-        }
-        <span ref={variableChipRef} className="drawing-variable variable-chip" style={{display: "inline-block"}}>
-          <VariableChip variable={selectedVariable} />
+      >
+        <span ref={variableChipRef} className="drawing-variable-container">
+          <VariableChip variable={selectedVariable} className="drawing-variable" />
         </span>
       </foreignObject>
     );
@@ -98,28 +101,20 @@ const getSelectedVariable = (drawingContent: DrawingContentModelType) => {
     : undefined;
 };
 
-export class VariableDrawingTool extends DrawingTool {
-  constructor(drawingLayer: IDrawingLayer) {
-    super(drawingLayer);
-  }
+interface IInsertVariableButton {
+  toolbarManager: IToolbarManager;
 }
+export const InsertVariableButton = observer(({ toolbarManager }: IInsertVariableButton) => {
+  const sharedModel = getOrFindSharedModel(toolbarManager as DrawingContentModelType);
+  const variables = sharedModel?.variables || [];
 
-export function VariableChipToolbarButton(props: IToolbarButtonProps) {
-  const [showVariableDialog] = useVariableDialog();
+  const [showInsertVariableDialog] = useInsertVariableDialog({ variables });
 
-  const handleShowVariableDialog = () => {
-    showVariableDialog();
-  };
+  const disabled = variables.length < 1;
 
-  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="variable"
-    title="Variable" onClick={handleShowVariableDialog} />;
-}
-
-export class NewVariableTool extends DrawingTool {
-  constructor(drawingLayer: IDrawingLayer) {
-    super(drawingLayer);
-  }
-}
+  return <SvgToolbarButton SvgIcon={InsertVariableChipIcon} buttonClass="insert-variable" title="Insert Variable"
+    onClick={showInsertVariableDialog} disabled={disabled} />;
+});
 
 interface INewVariableButtonProps {
   toolbarManager: IToolbarManager;
@@ -132,15 +127,9 @@ export const NewVariableButton = observer(({ toolbarManager }: INewVariableButto
     showVariableDialog(); 
   };
 
-  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="new-variable" title="New Variable" 
+  return <SvgToolbarButton SvgIcon={AddVariableChipIcon} buttonClass="new-variable" title="New Variable" 
     onClick={onClick} disabled={disabled} />;
 });
-
-export class EditVariableTool extends DrawingTool {
-  constructor(drawingLayer: IDrawingLayer) {
-    super(drawingLayer);
-  }
-}
 
 interface IEditVariableButtonProps {
   toolbarManager: IToolbarManager;
@@ -155,6 +144,6 @@ export const EditVariableButton = observer(({ toolbarManager }: IEditVariableBut
     showVariableDialog();
   };
 
-  return <SvgToolbarButton SvgIcon={VariableToolIcon} buttonClass="edit-variable" title="Edit Variable"
+  return <SvgToolbarButton SvgIcon={VariableEditorIcon} buttonClass="edit-variable" title="Edit Variable"
     onClick={onClick} disabled={disabled} />;
 });

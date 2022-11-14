@@ -8,6 +8,7 @@ import { DocumentModelType } from "../../models/document/document";
 import { useDocumentCaption } from "../thumbnail/decorated-document-thumbnail-item";
 import { ENavTab } from "../../models/view/nav-tabs";
 import DocumentIcon from "../../assets/icons/document-icon.svg";
+
 import "./commented-documents.scss";
 import { getProblemOrdinal } from "../../models/stores/stores";
 
@@ -157,13 +158,27 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
         myWorkDocuments &&
         (myWorkDocuments).map((doc: PromisedDocumentDocument, index: number) =>{
           const sectionDoc =  store.documents.getDocument(doc.key);
+          const networkDoc = store.networkDocuments.getDocument(doc.key);
           if (sectionDoc){
             return (
               <MyWorkDocuments
                 key={index}
                 doc={doc}
                 index={index}
-                sectionDoc={sectionDoc}
+                sectionOrNetworkDoc={sectionDoc}
+                isNetworkDoc={false}
+                handleDocView={handleDocView}
+              />
+            );
+          }
+          if (networkDoc){
+            return (
+              <MyWorkDocuments
+                key={index}
+                doc={doc}
+                index={index}
+                sectionOrNetworkDoc={networkDoc}
+                isNetworkDoc={true}
                 handleDocView={handleDocView}
               />
             );
@@ -178,12 +193,12 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
 interface JProps {
   doc: any,
   index: number,
-  sectionDoc: DocumentModelType,
+  sectionOrNetworkDoc: DocumentModelType,
+  isNetworkDoc: boolean,
   handleDocView: (() => void) | undefined,
-
 }
 
-export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handleDocView}) => {
+export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkDoc, isNetworkDoc, handleDocView}) => {
   const ui = useUIStore();
   let navTab = '';
   const myWorkTypes = ["problem", "planning", "learningLog", "personal"];
@@ -196,7 +211,7 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handl
       navTab = ENavTab.kClassWork;
     }
   }
-  const title =  useDocumentCaption(sectionDoc as DocumentModelType);
+  const title =  useDocumentCaption(sectionOrNetworkDoc);
 
   return (
     <div
@@ -204,16 +219,27 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionDoc, handl
       onClick={()=>{
         ui.setActiveNavTab(navTab); //open correct NavTab
         ui.setSelectedTile();
-        ui.setSelectedCommentedDocument(sectionDoc.key);
-        ui.setFocusDocument(doc.key);
+        ui.setSelectedCommentedDocument(sectionOrNetworkDoc?.key);
+        ui.setFocusDocument(sectionOrNetworkDoc?.key);
         if (handleDocView !== undefined){
           handleDocView();
         }
       }}
     >
+    {
+      isNetworkDoc ?
+          <div className="document-type-icon-yellow">
+            <DocumentIcon/>
+            <div className="yellow-background"/>
+
+          </div>
+      :
       <div className="document-type-icon">
         <DocumentIcon/>
       </div>
+    }
+
+
       <div className={"title"}>
         {title}
       </div>

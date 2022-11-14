@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import { debounce } from "lodash";
 import { observer, inject } from "mobx-react";
+import { isAlive } from "mobx-state-tree";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
@@ -180,7 +181,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
   public componentWillUnmount() {
     this.resizeObserver?.disconnect();
-
+    this.handleResizeDebounced.cancel();
     const options = { capture: true, passive: true };
     this.domElement?.removeEventListener("mousedown", this.handlePointerDown, options);
     this.domElement?.removeEventListener("touchstart", this.handlePointerDown, options);
@@ -273,6 +274,10 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
   private getTileResizeHandler = () => {
     const { model } = this.props;
+    // Because this is debounced and can also fire from a browser event, it
+    // can happen after the tile has been removed from the document.
+    if (!isAlive(model)) return;
+
     const tileApiInterface = this.context;
     return tileApiInterface?.getTileApi(`${model.id}[layout]`)?.handleTileResize ||
             tileApiInterface?.getTileApi(model.id)?.handleTileResize;

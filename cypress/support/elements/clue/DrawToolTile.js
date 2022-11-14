@@ -41,6 +41,9 @@ class DrawToolTile{
     getDrawToolNewVariable(){
       return cy.get('.primary-workspace .drawing-tool-button.button-new-variable');
     }
+    getDrawToolInsertVariable(){
+      return cy.get('.primary-workspace .drawing-tool-button.button-insert-variable');
+    }
     getDrawToolEditVariable(){
       return cy.get('.primary-workspace .drawing-tool-button.button-edit-variable');
     }

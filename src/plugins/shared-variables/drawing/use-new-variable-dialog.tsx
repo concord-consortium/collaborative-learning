@@ -1,11 +1,10 @@
 import { useContext, useState } from "react";
-import { getOrFindSharedModel } from "./drawing-utils";
-import { VariableChipObjectSnapshotForAdd } from "./variable-object";
-import VariablesIcon from "../slate/variables.svg";
+import { addChipToContent, getOrFindSharedModel } from "./drawing-utils";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { EditVariableDialogContent, Variable } from "@concord-consortium/diagram-view";
 
+import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
 import '../../diagram-viewer/diagram-dialog.scss';
 
 export const useNewVariableDialog = () => {
@@ -18,19 +17,13 @@ export const useNewVariableDialog = () => {
     const sharedVariable = sharedModel?.variables.find(v => v === newVariable);
     const dialogVarId = sharedVariable?.id;
     if (dialogVarId) {
-      const variableChipSnapshot: VariableChipObjectSnapshotForAdd = {
-        type: "variable",
-        x: 250,
-        y: 50,
-        variableId: dialogVarId
-      };
-      drawingContent.addObject(variableChipSnapshot);
+      addChipToContent(drawingContent, dialogVarId);
     }
     setNewVariable(Variable.create({}));
   };
 
   const [showModal, hideModal] = useCustomModal({
-    Icon: VariablesIcon,
+    Icon: AddVariableChipIcon,
     title: "New Variable",
     Content: EditVariableDialogContent,
     contentProps: { variable: newVariable },
