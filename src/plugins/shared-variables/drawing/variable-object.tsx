@@ -83,8 +83,6 @@ export const VariableChipComponent: React.FC<IDrawingComponentProps> = observer(
         onMouseLeave={(e) => handleHover ? handleHover(e, model, false) : null }
         onMouseDown={(e)=> handleDrag?.(e, model)}
       >
-        { // inline-block is required for the resize observer to monitor the size
-        }
         <span ref={variableChipRef} className="drawing-variable-container">
           <VariableChip variable={selectedVariable} className="drawing-variable" />
         </span>

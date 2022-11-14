@@ -1,3 +1,4 @@
+// inline-block is required for the resize observer to monitor the size
 .drawing-variable-container {
   display: inline-block;
   padding-top: 2px;
