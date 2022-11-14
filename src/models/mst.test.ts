@@ -662,4 +662,116 @@ describe("mst", () => {
     ]);
   });
 
+  // See mst-detached-error.md for details about this
+  describe("destroying an model that is being observed", () => {
+    const descriptions: Record<string, string> = observable({});
+    
+    const Item = types.model("Item", {
+      name: types.string
+    })
+    .views(self => ({
+      get nameWithDescription() {
+        const name = self.name;
+        const description = descriptions[name]; 
+        return `${name}: ${description}`;
+      }
+    }));
+
+    const List = types.model("List", {
+      items: types.array(Item)
+    })
+    .actions(self => ({
+      removeFirstItem() {
+        const todo = self.items[0];
+        delete descriptions[todo.name];
+        // Using detach instead of destroy prevents the harmless errors. However it 
+        // will then also not catch the harmful errors.
+        // detach(todos);
+        destroy(todo);
+      }
+    }));
+
+    function initialize() {
+      descriptions.one = "description of one";
+      descriptions.two = "description of two";
+
+      return {
+        itemList: List.create({
+          items: [
+            { name: "one" },
+            { name: "two" }
+          ]
+        }),
+        // Used to track each of the time the autorun runs      
+        output: [] as string[]
+      };
+    }
+
+    test("without isAlive a warning is printed", () => {
+
+      const { itemList, output } = initialize();
+
+      // This list of autorun reactions emulates a list of MobX React
+      // that are monitoring the items in this list
+      const disposers = itemList.items.map((item) => autorun(() => {
+        // This will cause a warning to be printed to the console
+        // when the item has been destroyed
+        const line = item.nameWithDescription;
+        output.push(line);
+      }));
+
+      expect(output).toEqual([
+        "one: description of one",
+        "two: description of two"
+      ]);
+  
+      jestSpyConsole("warn", spy => {
+        itemList.removeFirstItem();
+        expect(spy).toHaveBeenCalled();
+      });
+  
+      expect(itemList.items.length).toBe(1);
+      
+      expect(output).toEqual([
+        "one: description of one",
+        "two: description of two",
+        "one: undefined"
+      ]);
+  
+      // Clean up
+      disposers.forEach((disposer) => disposer());  
+    });
+
+    test("with isAlive no warning is printed", () => {
+      const { itemList, output } = initialize();
+
+      // This list of autorun reactions emulates a list of MobX React
+      // that are monitoring the items in this list
+      const disposers = itemList.items.map((item) => autorun(() => {
+        const line = isAlive(item) ? item.nameWithDescription : "not alive";
+        output.push(line);
+      }));
+
+      expect(output).toEqual([
+        "one: description of one",
+        "two: description of two"
+      ]);
+  
+      jestSpyConsole("warn", spy => {
+        itemList.removeFirstItem();
+        expect(spy).not.toHaveBeenCalled();
+      });
+  
+      expect(itemList.items.length).toBe(1);
+    
+      expect(output).toEqual([
+        "one: description of one",
+        "two: description of two",
+        "not alive"
+      ]);
+  
+      // Clean up
+      disposers.forEach((disposer) => disposer());  
+    });
+  });
 });
