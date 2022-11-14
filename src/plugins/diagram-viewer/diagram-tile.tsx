@@ -20,7 +20,6 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
     const selectedNode = content.root.selectedNode;
     if (selectedNode) {
       content.root.removeNode(selectedNode);
-      content.root.selectedNode = undefined;
     }
   };
 
