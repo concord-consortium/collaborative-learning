@@ -8,15 +8,15 @@ import { DrawingObject, IDrawingComponentProps, IToolbarManager,
   typeField } from "../../drawing/objects/drawing-object";
 import { Point } from "../../drawing/model/drawing-basic-types";
 import { findVariable, getOrFindSharedModel } from "./drawing-utils";
-import { useEditVariableDialog } from "../../diagram-viewer/use-edit-variable-dialog";
-import { useNewVariableDialog } from "./use-new-variable-dialog";
+import { useEditVariableDialog } from "../dialog/use-edit-variable-dialog";
+import { useNewVariableDialog } from "../dialog/use-new-variable-dialog";
 import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
 import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
 import VariableEditorIcon from "../assets/variable-editor-icon.svg";
 import { SvgToolbarButton } from "../../drawing/components/drawing-toolbar-buttons";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { DrawingContentModelType } from "../../drawing/model/drawing-content";
-import { useInsertVariableDialog } from "./use-insert-variable-dialog";
+import { useInsertVariableDialog } from "../dialog/use-insert-variable-dialog";
 
 import "./variable-object.scss";
 

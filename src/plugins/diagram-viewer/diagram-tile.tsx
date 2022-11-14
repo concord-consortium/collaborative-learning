@@ -1,14 +1,15 @@
 import React from "react";
 import { observer } from "mobx-react";
-import { ITileProps } from "../../components/tiles/tile-component";
+import { Diagram } from "@concord-consortium/diagram-view";
+
 import { DiagramToolbar } from "./diagram-toolbar";
 import { DiagramContentModelType } from "./diagram-content";
 import { kQPVersion } from "./diagram-types";
-import { useEditVariableDialog } from "./use-edit-variable-dialog";
+import { useEditVariableDialog } from "../shared-variables/dialog/use-edit-variable-dialog";
+import { ITileProps } from "../../components/tiles/tile-component";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
-import { Diagram } from "@concord-consortium/diagram-view";
-import "@concord-consortium/diagram-view/dist/index.css";
 
+import "@concord-consortium/diagram-view/dist/index.css";
 import "./diagram-tile.scss";
 
 export const DiagramToolComponent: React.FC<ITileProps> = observer((

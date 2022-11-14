@@ -1,7 +1,7 @@
-import React, { useContext, useState } from "react";
-import { VariableChipList, VariableType } from "@concord-consortium/diagram-view";
+import React, { useContext } from "react";
+import { useSelectMultipleVariables, VariableChipList, VariableType } from "@concord-consortium/diagram-view";
 
-import { addChipToContent } from "./drawing-utils";
+import { addChipToContent } from "../drawing/drawing-utils";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 
@@ -15,7 +15,7 @@ interface IInsertVariableContent {
 }
 const InsertVariableContent = ({ onClick, selectedVariables, variables }: IInsertVariableContent) => {
   return (
-    <div className="insert-variable-dialog-content">
+    <div className="variable-dialog-content">
       Insert an existing variable:
       <div className="variable-chip-list-container">
         <VariableChipList
@@ -34,20 +34,7 @@ interface IInsertVariableDialog {
 }
 export const useInsertVariableDialog = ({ variables }: IInsertVariableDialog) => {
   const drawingContent = useContext(DrawingContentModelContext);
-  const [selectedVariables, setSelectedVariables] = useState<VariableType[]>([]);
-  const onChipClick = (variable: VariableType) => {
-    let foundVariable = false;
-    const newSV = [];
-    selectedVariables.forEach(v => {
-      if (v === variable) {
-        foundVariable = true;
-      } else {
-        newSV.push(v);
-      }
-    });
-    if (!foundVariable) newSV.push(variable);
-    setSelectedVariables(newSV);
-  };
+  const { clearSelectedVariables, selectedVariables, toggleVariable } = useSelectMultipleVariables();
 
   const handleOk = () => {
     let x = 250;
@@ -60,13 +47,13 @@ export const useInsertVariableDialog = ({ variables }: IInsertVariableDialog) =>
     });
   };
 
-  const onClose = () => setSelectedVariables([]);
+  const onClose = clearSelectedVariables;
 
   const [showModal, hideModal] = useCustomModal({
     Icon: InsertVariableChipIcon,
     title: "Insert Variables",
     Content: InsertVariableContent,
-    contentProps: { onClick: onChipClick, selectedVariables, variables },
+    contentProps: { onClick: toggleVariable, selectedVariables, variables },
     buttons: [
       { label: "Cancel" },
       { label: "OK",
