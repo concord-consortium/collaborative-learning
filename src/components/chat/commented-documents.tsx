@@ -199,9 +199,6 @@ interface JProps {
 }
 
 export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkDoc, isNetworkDoc, handleDocView}) => {
-  // console.log("MyWorkDocuments with doc:", doc);
-  // console.log("sectionOrNetworkDoc:", sectionOrNetworkDoc);
-
   const ui = useUIStore();
   let navTab = '';
   const myWorkTypes = ["problem", "planning", "learningLog", "personal"];

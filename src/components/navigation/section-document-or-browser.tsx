@@ -41,10 +41,6 @@ export interface ISubTabSpec {
 
 export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, reset, selectedDocument,
   isChatOpen, onSelectNewDocument, onSelectDocument, onTabClick }) => {
-  // console.log("----<SectionDocumentOrBrowser>  with tabSpec-------", tabSpec.label);
-  // console.log("selectedDocument", selectedDocument);
-  // console.log("onSelectDocument:", onSelectDocument);
-
   const ui = useUIStore();
   const store = useStores();
   const [referenceDocument, setReferenceDocument] = useState<DocumentModelType>();
@@ -105,8 +101,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
   }, [handleTabClick, reset, tabSpec.label]);
 
   useEffect(()=>{
-    console.log("section-document-or-browser.tsx > useEffect()");
-
     //This useEffect sets the correct sectionTab (Workspace, Starred, Learning Log) when you select
     //on a commented doc in document view
 
@@ -115,12 +109,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
     const isActiveTab =  ui.activeNavTab === tabSpec.label.toLowerCase().replace(' ', '-');
 
     function getNewTabIndex(key: string, navTab: string ){
-      // const doc = store.documents.getDocument(key);//original
-      const doc = store.documents.getDocument(key) || store.networkDocuments.getDocument(key);//added
-      console.log("inside getNewTabIndex() with doc:", doc);
-
-      console.log("-----getNewTabIndex: with key:", key);
-      console.log("doc is:", doc);
+      const doc = store.documents.getDocument(key) || store.networkDocuments.getDocument(key);
       if (navTab === "Class Work") {
         if (doc?.type === "learningLogPublication"){
           return 1;
@@ -143,11 +132,9 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
       }
     }
     if (ui.selectedCommentedDocument){
-      console.log("section-document-or-browser.tsx > line 143");
       const newDoc = store.documents.getDocument(ui.selectedCommentedDocument)
       || store.networkDocuments.getDocument(ui.selectedCommentedDocument);
       if (isActiveTab) {
-        console.log("setting referenceDoc to newDoc:", newDoc);
         setReferenceDocument(newDoc);
         if (newDoc?.isRemote){
           handleSelectDocument(newDoc);
@@ -170,7 +157,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
 
   const handleSelectDocument = (document: DocumentModelType) => {
     if (!document.hasContent && document.isRemote) {
-      console.log("handleSelectDocument inside if statement with document:", document);
       loadDocumentContent(document);
     }
     setReferenceDocument(document);

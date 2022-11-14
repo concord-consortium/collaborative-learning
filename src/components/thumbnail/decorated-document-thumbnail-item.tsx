@@ -65,9 +65,6 @@ export const DecoratedDocumentThumbnailItem: React.FC<IProps> = observer(({
     useLastSupportViewTimestamp(section.type === "teacher-supports");
 
     function handleDocumentClick() {
-      console.log("decorated-document-thumbnail-item.tsx > handleDocumentClick()");
-      console.log("onSelectDocument?:", onSelectDocument);
-      console.log("sectionDocument:", sectionDocument);
       onSelectDocument?.(sectionDocument);
       (section.type === "teacher-supports") && user.setLastSupportViewTimestamp(Date.now());
     }
