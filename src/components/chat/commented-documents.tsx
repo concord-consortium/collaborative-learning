@@ -193,7 +193,7 @@ export const CommentedDocuments: React.FC<IProps> = ({user, handleDocView}) => {
 interface JProps {
   doc: any,
   index: number,
-  sectionOrNetworkDoc: DocumentModelType | undefined,
+  sectionOrNetworkDoc: DocumentModelType,
   isNetworkDoc: boolean,
   handleDocView: (() => void) | undefined,
 }
@@ -211,9 +211,7 @@ export const MyWorkDocuments: React.FC<JProps> = ({doc, index, sectionOrNetworkD
       navTab = ENavTab.kClassWork;
     }
   }
-  const title =  useDocumentCaption(sectionOrNetworkDoc as DocumentModelType);
-  //to do : add the download hook to download network docs
-  // add yellow div behind the svg
+  const title =  useDocumentCaption(sectionOrNetworkDoc);
 
   return (
     <div
