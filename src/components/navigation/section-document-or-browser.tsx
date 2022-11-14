@@ -216,12 +216,6 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
       });
   };
 
-  //----------------
-  // TO DO:
-  // add yellow color for network documents - see Leslie's story
-  //investigate bug where comments are not loading
-
-  //--------------
   const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
     const classHash = classStore.classHash;
     return (
