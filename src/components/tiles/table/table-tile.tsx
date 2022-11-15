@@ -32,10 +32,10 @@ import { lightenColor } from "../../../utilities/color-utils";
 import "./table-tile.scss";
 
 // observes row selection from shared selection store
-const TableToolComponent: React.FC<ITileProps> = observer(({
+const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
   documentId, documentContent, tileElt, model, readOnly, height, scale,
   onRequestRowHeight, onRequestTilesOfType, onRequestUniqueTitle, onRegisterTileApi, onUnregisterTileApi
-}) => {
+}) {
   // Gather data from the model
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);

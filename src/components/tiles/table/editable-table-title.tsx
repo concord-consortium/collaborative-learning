@@ -17,10 +17,10 @@ interface IProps {
   onEndEdit?: (title?: string) => void;
   onLinkGeometryClick?: () => void;
 }
-export const EditableTableTitle: React.FC<IProps> = observer(({
+export const EditableTableTitle: React.FC<IProps> = observer(function EditableTableTitle({
   className, readOnly, showLinkButton, isLinkEnabled, titleCellWidth, titleCellHeight,
   getLinkIndex, getTitle, onBeginEdit, onEndEdit, onLinkGeometryClick
-}) => {
+}) {
   // getTitle() and observer() allow this component to re-render
   // when the title changes without re-rendering the entire TableTool
   const title = getTitle();
