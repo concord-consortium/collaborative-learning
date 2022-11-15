@@ -1,7 +1,7 @@
 import { action, autorun, makeObservable, observable } from "mobx";
 import { addDisposer, applySnapshot, getType, isAlive, types, getRoot,
   isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
-  getSnapshot, addMiddleware, getEnv,
+  getSnapshot, addMiddleware, getEnv, IAnyStateTreeNode, detach,
   createActionTrackingMiddleware2, resolvePath} from "mobx-state-tree";
 
 describe("mst", () => {
@@ -665,14 +665,19 @@ describe("mst", () => {
   // See mst-detached-error.md for details about this
   describe("destroying an model that is being observed", () => {
     const descriptions: Record<string, string> = observable({});
-    
+
+    function destroySoon(obj: IAnyStateTreeNode) {
+      detach(obj);
+      setTimeout(() => destroy(obj));
+    }
+
     const Item = types.model("Item", {
       name: types.string
     })
     .views(self => ({
       get nameWithDescription() {
         const name = self.name;
-        const description = descriptions[name]; 
+        const description = descriptions[name];
         return `${name}: ${description}`;
       }
     }));
@@ -684,10 +689,15 @@ describe("mst", () => {
       removeFirstItem() {
         const todo = self.items[0];
         delete descriptions[todo.name];
-        // Using detach instead of destroy prevents the harmless errors. However it 
+        // Using detach instead of destroy prevents the harmless errors. However it
         // will then also not catch the harmful errors.
         // detach(todos);
         destroy(todo);
+      },
+      removeFirstItemSoon() {
+        const todo = self.items[0];
+        delete descriptions[todo.name];
+        destroySoon(todo);
       }
     }));
 
@@ -702,7 +712,7 @@ describe("mst", () => {
             { name: "two" }
           ]
         }),
-        // Used to track each of the time the autorun runs      
+        // Used to track each of the time the autorun runs
         output: [] as string[]
       };
     }
@@ -724,22 +734,22 @@ describe("mst", () => {
         "one: description of one",
         "two: description of two"
       ]);
-  
+
       jestSpyConsole("warn", spy => {
         itemList.removeFirstItem();
         expect(spy).toHaveBeenCalled();
       });
-  
+
       expect(itemList.items.length).toBe(1);
-      
+
       expect(output).toEqual([
         "one: description of one",
         "two: description of two",
         "one: undefined"
       ]);
-  
+
       // Clean up
-      disposers.forEach((disposer) => disposer());  
+      disposers.forEach((disposer) => disposer());
     });
 
     test("with isAlive no warning is printed", () => {
@@ -756,22 +766,53 @@ describe("mst", () => {
         "one: description of one",
         "two: description of two"
       ]);
-  
+
       jestSpyConsole("warn", spy => {
         itemList.removeFirstItem();
         expect(spy).not.toHaveBeenCalled();
       });
-  
+
       expect(itemList.items.length).toBe(1);
-    
+
       expect(output).toEqual([
         "one: description of one",
         "two: description of two",
         "not alive"
       ]);
-  
+
       // Clean up
-      disposers.forEach((disposer) => disposer());  
+      disposers.forEach((disposer) => disposer());
+    });
+
+    test("with destroySoon no warning is printed", () => {
+      const { itemList, output } = initialize();
+
+      // This list of autorun reactions emulates a list of MobX React
+      // that are monitoring the items in this list
+      const disposers = itemList.items.map((item) => autorun(() => {
+        output.push(item.nameWithDescription);
+      }));
+
+      expect(output).toEqual([
+        "one: description of one",
+        "two: description of two"
+      ]);
+
+      jestSpyConsole("warn", spy => {
+        itemList.removeFirstItemSoon();
+        expect(spy).not.toHaveBeenCalled();
+      });
+
+      expect(itemList.items.length).toBe(1);
+
+      expect(output).toEqual([
+        "one: description of one",
+        "two: description of two",
+        "one: undefined"
+      ]);
+
+      // Clean up
+      disposers.forEach((disposer) => disposer());
     });
   });
 });
