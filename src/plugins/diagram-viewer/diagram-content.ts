@@ -42,6 +42,9 @@ export const DiagramContentModel = TileContentModel
       // For now just return 100, 100
       // TODO: this should be moved into DQRoot
       return {x: 100, y: 100};
+    },
+    get variables() {
+      return self.root?.variables || [];
     }
   }))
   .actions(self => ({

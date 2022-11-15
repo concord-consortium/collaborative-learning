@@ -101,6 +101,22 @@ const getSelectedVariable = (drawingContent: DrawingContentModelType) => {
     : undefined;
 };
 
+// Returns a list of the variables used by the given drawingContent
+export const drawingVariables = (drawingContent: DrawingContentModelType) => {
+  const variableIds: string[] = [];
+  drawingContent.objects.forEach(object => {
+    if (object.type === "variable") {
+      const variableId = (object as VariableChipObjectType).variableId;
+      if (!variableIds.includes((object as VariableChipObjectType).variableId)) {
+        variableIds.push(variableId);
+      }
+    }
+  });
+  const variables = variableIds.map(id => findVariable(drawingContent, id));
+  const filteredVariables = variables.filter(variable => variable !== undefined);
+  return filteredVariables as VariableType[];
+};
+
 interface IInsertVariableButton {
   toolbarManager: IToolbarManager;
 }
