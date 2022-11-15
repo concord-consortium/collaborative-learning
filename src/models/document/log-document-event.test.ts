@@ -48,7 +48,7 @@ describe("logDocumentEvent", () => {
       })
     });
 
-    Logger.initializeLogger(stores, investigation, problem);
+    Logger.initializeLogger(stores, { investigation: investigation.title, problem: problem?.title });
   });
 
   afterEach(() => {

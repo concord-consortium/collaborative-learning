@@ -1,7 +1,7 @@
 import { isSectionPath } from "../../../functions/src/shared";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
-import { kLogCurriculumEvent } from "../document/log-curriculum-event";
+import { kLogCurriculumEvent } from "../curriculum/log-curriculum-event";
 import { kLogDocumentEvent } from "../document/log-document-event";
 import { DocumentsModelType } from "../stores/documents";
 import { TreeManagerType } from "./tree-manager";

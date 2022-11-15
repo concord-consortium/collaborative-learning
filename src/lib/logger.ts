@@ -1,14 +1,7 @@
 import { v4 as uuid } from "uuid";
-import { getSnapshot } from "mobx-state-tree";
-import { Optional } from "utility-types";
 import { LogEventMethod, LogEventName } from "./logger-types";
-import { ITileModel } from "../models/tiles/tile-model";
 import { IStores } from "../models/stores/stores";
 import { UserModelType } from "../models/stores/user";
-import { InvestigationModelType } from "../models/curriculum/investigation";
-import { ProblemModelType } from "../models/curriculum/problem";
-import { JXGChange } from "../models/tiles/geometry/jxg-changes";
-import { ITableChange } from "../models/tiles/table/table-change";
 import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
 import { timeZoneOffsetString } from "../utilities/js-utils";
@@ -23,7 +16,8 @@ const logManagerUrl: Record<LoggerEnvironment, string> = {
 const productionPortal = "learn.concord.org";
 
 type AnyRecord = Record<string, any>;
-type LogEventParamsCallback = (params: AnyRecord, context: AnyRecord) => AnyRecord;
+type UnknownRecord = Record<string, any>;
+type LogEventParamsCallback = (params: AnyRecord, context: UnknownRecord) => AnyRecord;
 
 interface LogMessage {
   // these top-level properties are treated specially by the log-ingester:
@@ -56,45 +50,25 @@ interface LogMessage {
   parameters: any;
 }
 
-interface TileLoggingMetadata {
-  originalTileId?: string;
-}
-
-// This is the form the log events take
-export interface SimpleTileLogEvent {
-  path?: string;
-  args?: Array<any>;
-}
-
-export interface DataflowProgramChange extends AnyRecord {
-  targetType: string,
-  nodeTypes?: string[],
-  nodeIds?: number[],
-}
-
-type LoggableTileChangeEvent =  Optional<JXGChange, "operation"> |
-                                SimpleTileLogEvent |
-                                Optional<ITableChange, "action"> |
-                                DataflowProgramChange;
-
-interface IDocumentInfo {
-  type: string;
-  key?: string;
-  uid?: string;
-  title?: string;
-  sectionId?: string;
-  properties?: { [prop: string]: string };
-  changeCount?: number;
-  remoteContext?: string;
-}
-
-interface ITeacherNetworkInfo {
-  networkClassHash?: string;
-  networkUsername?: string;
-}
-
 export class Logger {
   public static isLoggingEnabled = false;
+
+  /*
+    Previously, there were a number of application-specific logging methods that encapsulated
+    application-specific domain knowledge, e.g. `logTileEvent`, `logHistoryEvent`, etc.
+    This inherently makes the `Logger` application-specific rather than sharable. Instead, we
+    introduce the notion of client-defined event types which are registered by clients along
+    with a callback whose job it is to convert the arguments provided to the logging function
+    to the parameters that will be logged as part of the event. This allows all of the domain
+    knowledge to remain isolated to the client, allowing the `Logger` itself to be generic and
+    therefore sharable across applications. For instance, the `logDocumentEvent` function
+    converts a `DocumentModel` to a set of document metadata properties for logging.
+
+    If the parameters returned from one of these logging event callbacks includes the
+    `nextEventType` property, then the parameters returned from the original callback will be
+    passed to the specified `nextEventType` callback, which allows these parameter transformation
+    callbacks to be chained.
+   */
 
   private static eventTypes = new Map<string, LogEventParamsCallback>();
 
@@ -102,12 +76,8 @@ export class Logger {
     this.eventTypes.set(eventType, callback);
   }
 
-  public static eventTypeParams(eventType: string, params: AnyRecord) {
-    const callback = this.eventTypes.get(eventType);
-    return callback?.(params, { user: this._instance.stores.user }) ?? params;
-  }
-
-  public static initializeLogger(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
+  // `appContext` properties are logged with every event
+  public static initializeLogger(stores: IStores, appContext?: Record<string, any>) {
     const { appMode } = stores;
     const logModes: Array<typeof appMode> = ["authed"];
     this.isLoggingEnabled = logModes.includes(appMode) || DEBUG_LOGGER;
@@ -116,12 +86,11 @@ export class Logger {
       // eslint-disable-next-line no-console
       console.log("Logger#initializeLogger called.");
     }
-    this._instance = new Logger(stores, investigation, problem);
+    this._instance = new Logger(stores, appContext);
   }
 
-  public static updateProblem(investigation: InvestigationModelType, problem: ProblemModelType) {
-    this._instance.problemTitle = problem.title;
-    this._instance.investigationTitle = investigation.title;
+  public static updateAppContext(appContext: Record<string, any>) {
+    Object.assign(this._instance.appContext, appContext);
   }
 
   public static log(event: LogEventName, parameters?: Record<string, unknown>, method?: LogEventMethod) {
@@ -132,84 +101,22 @@ export class Logger {
     sendToLoggingService(logMessage, this._instance.stores.user);
   }
 
-  // log an event that was previously registered
+  // log an event of a previously registered event type
   public static logEvent(eventType: string, event: LogEventName, _params: AnyRecord) {
     let _eventType: string | undefined = eventType;
     let params = { ..._params };
     do {
       const callback = _eventType ? this.eventTypes.get(_eventType) : undefined;
       if (callback) {
-        const { nextEventType, ...others } = callback(params, this._instance.stores);
+        // stores are passed to the callback but not typed as such so the callbacks only depend
+        // on the store properties that are used rather than the stores object as a whole.
+        const { nextEventType, ...others } = callback(params, this._instance.stores as unknown as UnknownRecord);
         _eventType = nextEventType as string | undefined;
         params = others;
       }
+      // chain to the next event type if one is specified
     } while(_eventType);
-    this.log(event, params);
-  }
-
-  public static logTileEvent(event: LogEventName, tile?: ITileModel, metaData?: TileLoggingMetadata,
-    commentText?: string) {
-    if (!this._instance) return;
-
-    let parameters = {};
-
-    if (tile) {
-      const { uid, key, type, changeCount, sectionId, remoteContext } = Logger.Instance.getTileContext(tile.id);
-      const teacherNetworkInfo: ITeacherNetworkInfo | undefined = remoteContext
-      ? { networkClassHash: remoteContext,
-          networkUsername: `${uid}@${this._instance.stores.user.portal}`}
-      : undefined;
-
-      parameters = {
-        objectId: tile.id,
-        objectType: tile.content.type,
-        serializedObject: getSnapshot(tile).content,
-        documentUid: uid,
-        documentKey: key,
-        documentType: type,
-        documentChanges: changeCount,
-        sectionId,
-        commentText,
-        ...teacherNetworkInfo
-      };
-
-      if (event === LogEventName.COPY_TILE && metaData && metaData.originalTileId) {
-        const sourceDocument = Logger.Instance.getTileContext(metaData.originalTileId);
-        parameters = {
-          ...parameters,
-          sourceUsername: sourceDocument.uid,
-          sourceObjectId: metaData.originalTileId,
-          sourceDocumentKey: sourceDocument.key,
-          sourceDocumentType: sourceDocument.type,
-          sourceDocumentTitle: sourceDocument.title || "",
-          sourceDocumentProperties: sourceDocument.properties || {},
-          sourceSectionId: sourceDocument.sectionId
-        };
-      }
-    }
-
-    Logger.log(event, parameters);
-  }
-
-  public static logTileChange(
-    eventName: LogEventName,
-    operation: string,
-    change: LoggableTileChangeEvent,
-    toolId: string,
-    method?: LogEventMethod)
-  {
-    const { uid, key, type, changeCount, sectionId } = Logger.Instance.getTileContext(toolId);
-    const parameters: {[k: string]: any} = {
-      toolId,
-      operation,
-      ...change,
-      documentUid: uid,
-      documentKey: key,
-      documentType: type,
-      documentChanges: changeCount,
-      sectionId
-    };
-    Logger.log(eventName, parameters, method);
+    this.log(event, params, _params.method);
   }
 
   private static _instance: Logger;
@@ -222,14 +129,12 @@ export class Logger {
   }
 
   private stores: IStores;
-  private investigationTitle = "";
-  private problemTitle = "";
+  private appContext: Record<string, any> = {};
   private session: string;
 
-  private constructor(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
+  private constructor(stores: IStores, appContextProps = {}) {
     this.stores = stores;
-    if (investigation) this.investigationTitle = investigation.title;
-    if (problem) this.problemTitle = problem.title;
+    this.appContext = appContextProps;
     this.session = uuid();
   }
 
@@ -257,8 +162,7 @@ export class Logger {
       classHash,
       session: this.session,
       appMode,
-      investigation: this.investigationTitle,
-      problem: this.problemTitle,
+      ...this.appContext,
       problemPath,
       navTabsOpen: navTabContentShown,
       selectedNavTab: activeNavTab,
@@ -288,19 +192,6 @@ export class Logger {
     return logMessage;
   }
 
-  private getTileContext(tileId: string): IDocumentInfo {
-    const document = this.stores.documents.findDocumentOfTile(tileId)
-      || this.stores.networkDocuments.findDocumentOfTile(tileId);
-    if (document) {
-      const { type, key, uid, title, content, changeCount, remoteContext, properties } = document;
-      const sectionId = content?.getSectionIdForTile(tileId);
-      return { type, key, uid, title, sectionId, changeCount, remoteContext, properties: properties?.toJSON() || {} };
-    } else {
-      return {
-        type: "Instructions"        // eventually we will need to include copying from supports
-      };
-    }
-  }
 }
 
 function sendToLoggingService(data: LogMessage, user: UserModelType) {

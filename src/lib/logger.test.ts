@@ -12,10 +12,7 @@ import { IStores, createStores } from "../models/stores/stores";
 import { UIModel } from "../models/stores/ui";
 import { UserModel } from "../models/stores/user";
 import { WorkspaceModel, ProblemWorkspace, WorkspaceModelType, LearningLogWorkspace } from "../models/stores/workspace";
-import { defaultGeometryContent } from "../models/tiles/geometry/geometry-content";
-import { JXGChange } from "../models/tiles/geometry/jxg-changes";
-import { TextContentModel } from "../models/tiles/text/text-content";
-import { IDragTileItem, TileModel } from "../models/tiles/tile-model";
+import { IDragTileItem } from "../models/tiles/tile-model";
 import { ENavTab } from "../models/view/nav-tabs";
 import { createSingleTileContent } from "../utilities/test-utils";
 
@@ -67,12 +64,11 @@ describe("uninitialized logger", () => {
 
     // should not log since we're not initialized
     Logger.log(TEST_LOG_MESSAGE);
-    Logger.logTileEvent(TEST_LOG_MESSAGE);
 
     Logger.initializeLogger(stores);
 
     // should log now that we're initialized
-    Logger.logTileEvent(TEST_LOG_MESSAGE);
+    Logger.log(TEST_LOG_MESSAGE);
   });
 });
 
@@ -98,7 +94,7 @@ describe("dev/qa/test logger with DEBUG_LOGGER false", () => {
       user: UserModel.create({id: "0", type: "teacher", portal: "test"})
     });
 
-    Logger.initializeLogger(stores, investigation, problem);
+    Logger.initializeLogger(stores, { investigation: investigation.title, problem: problem?.title });
   });
 
   afterEach(() => {
@@ -147,7 +143,7 @@ describe("demo logger with DEBUG_LOGGER false", () => {
       user: UserModel.create({id: "0", type: "teacher", portal: "test"})
     });
 
-    Logger.initializeLogger(stores, investigation, problem);
+    Logger.initializeLogger(stores, { investigation: investigation.title, problem: problem?.title });
   });
 
   afterEach(() => {
@@ -202,7 +198,7 @@ describe("authed logger", () => {
       })
     });
 
-    Logger.initializeLogger(stores, investigation, problem);
+    Logger.initializeLogger(stores, { investigation: investigation.title, problem: problem?.title });
   });
 
   afterEach(() => {
@@ -219,7 +215,7 @@ describe("authed logger", () => {
     const _problem = investigation.getProblem(1) as ProblemModelType;
 
     it("updateProblem()", () => {
-      Logger.updateProblem(_investigation, _problem);
+      Logger.updateAppContext({ investigation: _investigation.title, problem: _problem.title });
 
       expect((Logger as any)._instance.investigationTitle = "Investigation 2");
       expect((Logger as any)._instance.problemTitle = "Problem 2.1");
@@ -252,27 +248,27 @@ describe("authed logger", () => {
       Logger.log(LogEventName.CREATE_TILE, { foo: "bar" });
     });
 
-    it("can log tile creation", (done) => {
-      const tile = TileModel.create({ content: TextContentModel.create() });
+    // it("can log tile creation", (done) => {
+    //   const tile = TileModel.create({ content: TextContentModel.create() });
 
-      mockXhr.post(/.*/, (req, res) => {
-        const request = JSON.parse(req.body());
+    //   mockXhr.post(/.*/, (req, res) => {
+    //     const request = JSON.parse(req.body());
 
-        expect(request.event).toBe("CREATE_TILE");
-        expect(request.parameters.objectId).toBe(tile.id);
-        expect(request.parameters.objectType).toBe("Text");
-        expect(request.parameters.serializedObject).toEqual({
-          type: "Text",
-          text: ""
-        });
-        expect(request.parameters.documentKey).toBe(undefined);
+    //     expect(request.event).toBe("CREATE_TILE");
+    //     expect(request.parameters.objectId).toBe(tile.id);
+    //     expect(request.parameters.objectType).toBe("Text");
+    //     expect(request.parameters.serializedObject).toEqual({
+    //       type: "Text",
+    //       text: ""
+    //     });
+    //     expect(request.parameters.documentKey).toBe(undefined);
 
-        done();
-        return res.status(201);
-      });
+    //     done();
+    //     return res.status(201);
+    //   });
 
-      Logger.logTileEvent(LogEventName.CREATE_TILE, tile);
-    });
+    //   // Logger.logTileEvent(LogEventName.CREATE_TILE, tile);
+    // });
 
     it("can log tile creation in a document", (done) => {
       const document = createDocumentModel({
@@ -365,27 +361,27 @@ describe("authed logger", () => {
 
   });
 
-  describe("Tile changes", () => {
-    it("can log tile change events", (done) => {
-      const tile = TileModel.create({ content: defaultGeometryContent() });
-      const change: JXGChange = { operation: "create", target: "point" };
+  // describe("Tile changes", () => {
+  //   it("can log tile change events", (done) => {
+  //     const tile = TileModel.create({ content: defaultGeometryContent() });
+  //     // const change: JXGChange = { operation: "create", target: "point" };
 
-      mockXhr.post(/.*/, (req, res) => {
-        const request = JSON.parse(req.body());
+  //     mockXhr.post(/.*/, (req, res) => {
+  //       const request = JSON.parse(req.body());
 
-        expect(request.event).toBe("GRAPH_TOOL_CHANGE");
-        expect(request.parameters.toolId).toBe(tile.id);
-        expect(request.parameters.operation).toBe("create");
-        expect(request.parameters.target).toBe("point");
-        expect(request.parameters.documentKey).toBe(undefined);
+  //       expect(request.event).toBe("GRAPH_TOOL_CHANGE");
+  //       expect(request.parameters.toolId).toBe(tile.id);
+  //       expect(request.parameters.operation).toBe("create");
+  //       expect(request.parameters.target).toBe("point");
+  //       expect(request.parameters.documentKey).toBe(undefined);
 
-        done();
-        return res.status(201);
-      });
+  //       done();
+  //       return res.status(201);
+  //     });
 
-      Logger.logTileChange(LogEventName.GRAPH_TOOL_CHANGE, "create", change, tile.id);
-    });
-  });
+  //     // Logger.logTileChange(LogEventName.GRAPH_TOOL_CHANGE, "create", change, tile.id);
+  //   });
+  // });
 
   describe("workspace events", () => {
 

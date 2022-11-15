@@ -1,7 +1,7 @@
 import { getSnapshot } from "mobx-state-tree";
-import { DocumentContentModel } from "./document-content";
-import { InvestigationModel } from "../curriculum/investigation";
-import { ProblemModel } from "../curriculum/problem";
+import { DocumentContentModel } from "../document/document-content";
+import { InvestigationModel } from "./investigation";
+import { ProblemModel } from "./problem";
 import { specAppConfig } from "../stores/spec-app-config";
 import { createStores, IStores } from "../stores/stores";
 import { UserModel } from "../stores/user";
@@ -47,7 +47,7 @@ describe("logCurriculumEvent", () => {
       })
     });
 
-    Logger.initializeLogger(stores, investigation, problem);
+    Logger.initializeLogger(stores, { investigation: investigation.title, problem: problem?.title });
   });
 
   afterAll(() => {

@@ -1,21 +1,21 @@
 import { getSnapshot } from "mobx-state-tree";
 import mockXhr from "xhr-mock";
 import { ILogComment, logCommentEvent } from "./log-comment-event";
-import { InvestigationModel } from "../curriculum/investigation";
-import { ProblemModel } from "../curriculum/problem";
-import { DocumentContentModel } from "../document/document-content";
-import { createDocumentModel } from "../../models/document/document";
-import { ProblemDocument } from "../../models/document/document-types";
-import { specAppConfig } from "../../models/stores/spec-app-config";
-import { createStores, IStores } from "../stores/stores";
-import { UserModel } from "../stores/user";
-import { TileModel } from "../tiles/tile-model";
-import { TextContentModel } from "../tiles/text/text-content";
-import { Logger } from "../../lib/logger";
-import { createSingleTileContent } from "../../utilities/test-utils";
+import { InvestigationModel } from "../../curriculum/investigation";
+import { ProblemModel } from "../../curriculum/problem";
+import { DocumentContentModel } from "../../document/document-content";
+import { createDocumentModel } from "../../document/document";
+import { ProblemDocument } from "../../document/document-types";
+import { specAppConfig } from "../../stores/spec-app-config";
+import { createStores, IStores } from "../../stores/stores";
+import { UserModel } from "../../stores/user";
+import { TileModel } from "../tile-model";
+import { TextContentModel } from "../text/text-content";
+import { Logger } from "../../../lib/logger";
+import { createSingleTileContent } from "../../../utilities/test-utils";
 
 // This is needed so MST can deserialize snapshots referring to tiles
-import { registerTileTypes } from "../../register-tile-types";
+import { registerTileTypes } from "../../../register-tile-types";
 registerTileTypes(["Text"]);
 
 const investigation = InvestigationModel.create({
@@ -53,7 +53,7 @@ describe("authed logger", () => {
       })
     });
 
-    Logger.initializeLogger(stores, investigation, problem);
+    Logger.initializeLogger(stores, { investigation: investigation.title, problem: problem?.title });
   });
 
   afterEach(() => {

@@ -10,18 +10,12 @@ import { ImageObject } from "../objects/image";
 import { RectangleObject, RectangleObjectSnapshot, RectangleObjectSnapshotForAdd,
   RectangleObjectType } from "../objects/rectangle";
 import { computeStrokeDashArray } from "../objects/drawing-object";
-import { Logger } from "../../../lib/logger";
 import { LogEventName } from "../../../lib/logger-types";
 
-jest.mock("../../../lib/logger", () => {
-  return {
-    ...(jest.requireActual("../../../lib/logger") as any),
-    Logger: {
-      logTileChange: jest.fn()
-    }
-  };
-});
-const logTileChange = Logger.logTileChange as jest.Mock;
+const mockLogTileChangeEvent = jest.fn();
+jest.mock("../../../models/tiles/log/log-tile-change-event", () => ({
+  logTileChangeEvent: (...args: any[]) => mockLogTileChangeEvent(...args)
+}));
 
 describe("computeStrokeDashArray", () => {
   it("should return expected results", () => {
@@ -135,7 +129,7 @@ describe("DrawingContentModel", () => {
   it("can delete a set of selected drawing objects", () => {
     const model = createDrawingContentWithMetadata();
 
-    logTileChange.mockReset();
+    mockLogTileChangeEvent.mockReset();
 
     const rectSnapshot1: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"a", x:0, y:0};
     model.addObject(rectSnapshot1);
@@ -155,38 +149,55 @@ describe("DrawingContentModel", () => {
     expect(model.objects.length).toBe(0);
     // Note: Normally the path will start at the root of the document, but for this test we
     // are mocking the onTileAction so the path is just blank
-    expect(logTileChange).toHaveBeenNthCalledWith(1,
-      LogEventName.DRAWING_TOOL_CHANGE, "addObject", { args: [ {
-        fill: "#666666",
-        height: 10,
-        id: "a",
-        stroke: "#888888",
-        strokeDashArray: "3,3",
-        strokeWidth: 5,
-        type: "rectangle",
-        width: 10,
-        x: 0,
-        y: 0
-      } ], path: ""}, "drawing-1");
-    expect(logTileChange).toHaveBeenNthCalledWith(2,
-      LogEventName.DRAWING_TOOL_CHANGE, "addObject", { args: [ {
-        fill: "#666666",
-        height: 10,
-        id: "b",
-        stroke: "#888888",
-        strokeDashArray: "3,3",
-        strokeWidth: 5,
-        type: "rectangle",
-        width: 10,
-        x: 20,
-        y: 20
-      } ], path: ""}, "drawing-1");
-    expect(logTileChange).toHaveBeenNthCalledWith(3,
-      LogEventName.DRAWING_TOOL_CHANGE, "deleteObjects", { args: [ [] ], path: ""}, "drawing-1");
-    expect(logTileChange).toHaveBeenNthCalledWith(4,
-      LogEventName.DRAWING_TOOL_CHANGE, "setSelection", { args: [ ["a", "b"] ], path: ""}, "drawing-1");
-    expect(logTileChange).toHaveBeenNthCalledWith(5,
-      LogEventName.DRAWING_TOOL_CHANGE, "deleteObjects", { args: [ ["a", "b"] ], path: ""}, "drawing-1");
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+        operation: "addObject",
+        change: {
+          args: [ {
+            fill: "#666666",
+            height: 10,
+            id: "a",
+            stroke: "#888888",
+            strokeDashArray: "3,3",
+            strokeWidth: 5,
+            type: "rectangle",
+            width: 10,
+            x: 0,
+            y: 0
+          } ],
+          path: ""
+        },
+        tileId: "drawing-1"
+      });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(2,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+        operation: "addObject",
+        change: {
+          args: [ {
+            fill: "#666666",
+            height: 10,
+            id: "b",
+            stroke: "#888888",
+            strokeDashArray: "3,3",
+            strokeWidth: 5,
+            type: "rectangle",
+            width: 10,
+            x: 20,
+            y: 20
+          } ],
+          path: ""
+        },
+        tileId: "drawing-1"
+      });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(3,
+      LogEventName.DRAWING_TOOL_CHANGE,
+      { operation: "deleteObjects", change: { args: [ [] ], path: ""}, tileId: "drawing-1" });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(4,
+      LogEventName.DRAWING_TOOL_CHANGE,
+      { operation: "setSelection", change: { args: [ ["a", "b"] ], path: ""}, tileId: "drawing-1" });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(5,
+      LogEventName.DRAWING_TOOL_CHANGE,
+      { operation: "deleteObjects", change: { args: [ ["a", "b"] ], path: ""}, tileId: "drawing-1" });
   });
 
   it("can update the properties of a set of selected drawing objects", () => {
@@ -199,7 +210,7 @@ describe("DrawingContentModel", () => {
     const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:10, y:10};
     model.addObject(rectSnapshot2);
 
-    logTileChange.mockReset();
+    mockLogTileChangeEvent.mockReset();
     model.setSelection(["a", "b"]);
     model.setStroke("#000000", model.selectedIds);
     model.setStrokeWidth(2, model.selectedIds);
@@ -216,14 +227,18 @@ describe("DrawingContentModel", () => {
     expect(rect2.stroke).toBe("#000000");
     expect(rect2.strokeWidth).toBe(2);
 
-    expect(logTileChange).toHaveBeenNthCalledWith(1,
-      LogEventName.DRAWING_TOOL_CHANGE, "setSelection", { args: [["a", "b"]], path: "" }, "drawing-1");
-    expect(logTileChange).toHaveBeenNthCalledWith(2,
-      LogEventName.DRAWING_TOOL_CHANGE, "setStroke", { args: ["#000000", ["a", "b"]], path: "" }, "drawing-1");
-    expect(logTileChange).toHaveBeenNthCalledWith(3,
-      LogEventName.DRAWING_TOOL_CHANGE, "setStrokeWidth", { args: [2, ["a", "b"]], path: "" }, "drawing-1");
-    expect(logTileChange).toHaveBeenNthCalledWith(4,
-      LogEventName.DRAWING_TOOL_CHANGE, "setStrokeDashArray", { args: ["3,3", ["a", "b"]], path: "" }, "drawing-1");
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
+      LogEventName.DRAWING_TOOL_CHANGE,
+      { operation: "setSelection", change: { args: [["a", "b"]], path: "" }, tileId: "drawing-1" });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(2,
+      LogEventName.DRAWING_TOOL_CHANGE,
+      { operation: "setStroke", change: { args: ["#000000", ["a", "b"]], path: "" }, tileId: "drawing-1" });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(3,
+      LogEventName.DRAWING_TOOL_CHANGE,
+      { operation: "setStrokeWidth", change: { args: [2, ["a", "b"]], path: "" }, tileId: "drawing-1" });
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(4,
+      LogEventName.DRAWING_TOOL_CHANGE,
+      { operation: "setStrokeDashArray", change: { args: ["3,3", ["a", "b"]], path: "" }, tileId: "drawing-1" });
   });
 
   it("can move objects", () => {
@@ -235,16 +250,20 @@ describe("DrawingContentModel", () => {
     const rectSnapshot2: RectangleObjectSnapshotForAdd = {...baseRectangleSnapshot, id:"b", x:10, y:10};
     model.addObject(rectSnapshot2);
 
-    logTileChange.mockReset();
+    mockLogTileChangeEvent.mockReset();
     model.moveObjects([
       {id: "a", destination: {x: 20, y: 20}},
       {id: "b", destination: {x: 30, y: 30}}
     ]);
-    expect(logTileChange).toHaveBeenNthCalledWith(1,
-      LogEventName.DRAWING_TOOL_CHANGE, "moveObjects", { args: [[
-        {id: "a", destination: {x: 20, y: 20}},
-        {id: "b", destination: {x: 30, y: 30}}
-      ]], path: "" }, "drawing-1");
+    expect(mockLogTileChangeEvent).toHaveBeenNthCalledWith(1,
+      LogEventName.DRAWING_TOOL_CHANGE, {
+        operation: "moveObjects",
+        change: {
+          args: [[{id: "a", destination: {x: 20, y: 20}}, {id: "b", destination: {x: 30, y: 30}}]],
+          path: ""
+        },
+        tileId: "drawing-1"
+      });
   });
 
   it("can change the current stamp", () => {

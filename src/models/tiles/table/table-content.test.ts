@@ -5,14 +5,10 @@ import { kSerializedXKey } from "../../data/expression-utils";
 import { kDefaultColumnWidth } from "../../../components/tiles/table/table-types";
 
 // mock Logger calls
-jest.mock("../../../lib/logger", () => {
-  return {
-    ...(jest.requireActual("../../../lib/logger") as any),
-    Logger: {
-      logTileChange: jest.fn()
-    }
-  };
-});
+const mockLogTileChangeEvent = jest.fn();
+jest.mock("../log/log-tile-change-event", () => ({
+  logTileChangeEvent: (...args: any[]) => mockLogTileChangeEvent()
+}));
 
 function getCaseNoId(dataSet: IDataSet, index: number) {
   const c = dataSet.getCaseAtIndex(index);

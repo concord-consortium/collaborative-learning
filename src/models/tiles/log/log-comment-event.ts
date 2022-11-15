@@ -1,9 +1,9 @@
-import { isSectionPath, parseSectionPath } from "../../../functions/src/shared";
-import { ProblemModelType } from "../curriculum/problem";
-import { kLogCurriculumEvent } from "../document/log-curriculum-event";
-import { kLogDocumentEvent } from "../document/log-document-event";
-import { Logger } from "../../lib/logger";
-import { LogEventName } from "../../lib/logger-types";
+import { isSectionPath, parseSectionPath } from "../../../../functions/src/shared";
+import { ProblemModelType } from "../../curriculum/problem";
+import { kLogCurriculumEvent } from "../../curriculum/log-curriculum-event";
+import { kLogDocumentEvent } from "../../document/log-document-event";
+import { Logger } from "../../../lib/logger";
+import { LogEventName } from "../../../lib/logger-types";
 
 export const kLogCommentEvent = "LogCommentEvent";
 

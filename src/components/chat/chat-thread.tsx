@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import classNames from "classnames";
-import { ILogComment, logCommentEvent } from "../../models/document/log-comment-event";
+import { ILogComment, logCommentEvent } from "../../models/tiles/log/log-comment-event";
 import { UserModelType } from "../../models/stores/user";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { WithId } from "../../hooks/firestore-hooks";

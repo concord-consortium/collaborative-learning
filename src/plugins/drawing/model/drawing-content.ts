@@ -12,8 +12,8 @@ import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";
 import { DrawingObjectMSTUnion } from "../components/drawing-object-manager";
 import { DrawingObjectSnapshotForAdd, DrawingObjectType, isFilledObject,
   isStrokedObject, ObjectMap, ToolbarModalButton } from "../objects/drawing-object";
-import { Logger } from "../../../lib/logger";
 import { LogEventName } from "../../../lib/logger-types";
+import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 
 // track selection in metadata object so it is not saved to firebase but
 // also is preserved across document/content reloads
@@ -122,11 +122,10 @@ export const DrawingContentModel = TileContentModel
       self.metadata = metadata as DrawingToolMetadataModelType;
     },
     onTileAction(call) {
-      const {name, ...loggedChangeProps} = call;
-      // TODO: logTileChange includes an explicit DrawingToolLogEvent
-      // this isn't a good pattern to support generic plugins logging events
-      Logger.logTileChange(LogEventName.DRAWING_TOOL_CHANGE, name,
-        loggedChangeProps, self.metadata?.id ?? "");
+      const tileId = self.metadata?.id ?? "";
+      const {name: operation, ...change} = call;
+      console.log("DrawingContent.onTileAction", JSON.stringify(change));
+      logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, { operation, change, tileId });
     }
   }))
   .extend(self => {

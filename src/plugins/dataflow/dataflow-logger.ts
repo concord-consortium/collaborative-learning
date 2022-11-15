@@ -1,8 +1,14 @@
 import { Connection, Control, Node } from "rete";
-import { Logger, DataflowProgramChange } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
+import { logTileChangeEvent } from "../../models/tiles/log/log-tile-change-event";
 
 type DataflowLogPayload = any; //Node | Connection | Control | object;
+
+interface DataflowProgramChange extends Record<string ,any> {
+  targetType: string,
+  nodeTypes?: string[],
+  nodeIds?: number[],
+}
 
 export function dataflowLogEvent( operation: string, payload: DataflowLogPayload, tileId: string ){
   const logEventName = LogEventName.DATAFLOW_TOOL_CHANGE;
@@ -14,7 +20,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
       nodeTypes: [n.name],
       nodeIds: [n.id]
     };
-    Logger.logTileChange(logEventName, operation, change, tileId);
+    logTileChangeEvent(logEventName, { operation, change, tileId });
   }
 
   else if (payload instanceof Connection){
@@ -30,7 +36,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
       connectionInputNodeId: inputNode.id,
       connectionInputNodeType: inputNode.name
     };
-    Logger.logTileChange(logEventName, operation, change, tileId);
+    logTileChangeEvent(logEventName, { operation, change, tileId });
   }
 
   else if (payload instanceof Control){
@@ -46,7 +52,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
         value: (ctrl as any).props.value,
         units: (ctrl as any).props.currentUnits || ""
       };
-      Logger.logTileChange(logEventName, operation, change, tileId);
+      logTileChangeEvent(logEventName, { operation, change, tileId });
     }
   }
 
@@ -60,7 +66,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
         targetType: 'program',
         programTitle: payload.programTitleValue
       };
-      Logger.logTileChange(logEventName, operation, change, tileId);
+      logTileChangeEvent(logEventName, { operation, change, tileId });
     }
 
    else if (changeProperties.includes("sensorTypeValue")){
@@ -71,7 +77,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
         selectItem: "sensorType",
         value: payload.sensorTypeValue
       };
-      Logger.logTileChange(logEventName, operation, change, tileId);
+      logTileChangeEvent(logEventName, { operation, change, tileId });
     }
 
     else if (changeProperties.includes("sensorDataOptionValue")){
@@ -82,7 +88,7 @@ export function dataflowLogEvent( operation: string, payload: DataflowLogPayload
         selectItem: "sensorDataOption",
         value: payload.sensorDataOptionValue
       };
-      Logger.logTileChange(logEventName, operation, change, tileId);
+      logTileChangeEvent(logEventName, { operation, change, tileId });
     }
   }
 }
