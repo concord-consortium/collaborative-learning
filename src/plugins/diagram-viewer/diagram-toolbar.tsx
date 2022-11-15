@@ -10,6 +10,7 @@ import { IFloatingToolbarProps, useFloatingToolbarLocation }
 
 import { VariableType } from "@concord-consortium/diagram-view";
 
+import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
 import VariableEditorIcon from "../shared-variables/assets/variable-editor-icon.svg";
 import DeleteSelectionIcon from "../../assets/icons/delete/delete-selection-icon.svg";
 import "./diagram-toolbar.scss";
@@ -49,6 +50,16 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
     : null;
 };
 
+interface IInsertVariableButton {
+  handleClick: () => void;
+}
+const InsertVariableButton = ({ handleClick }: IInsertVariableButton) => {
+  return (
+    <SvgToolbarButton SvgIcon={InsertVariableCardIcon} buttonClass="button-insert-variable" disabled={false}
+      title="Insert Variable" onClick={handleClick} />
+  );
+};
+
 interface IDialogButton {
   handleClick: () => void;
   selectedVariable?: VariableType;
@@ -74,10 +85,12 @@ const DeleteButton = ({ handleClick, selectedVariable }: IDeleteButton) => {
 interface IProps extends IFloatingToolbarProps {
   content: DiagramContentModelType;
   handleDeleteClick: () => void;
-  handleDialogClick: () => void;
+  handleEditVariableClick: () => void;
+  handleInsertVariableClick: () => void;
 }
 export const DiagramToolbar: React.FC<IProps> = observer(({
-  content, documentContent, handleDeleteClick, handleDialogClick, onIsEnabled, ...others
+  content, documentContent, handleDeleteClick, handleEditVariableClick, handleInsertVariableClick, onIsEnabled,
+  ...others
 }) => {
   const root = content?.root;
   const selectedVariable = root?.selectedNode?.variable;
@@ -94,7 +107,8 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
     ? ReactDOM.createPortal(
         <div className={`diagram-toolbar ${enabled && location ? "enabled" : "disabled"}`}
             style={location} onMouseDown={e => e.stopPropagation()}>
-          <DialogButton handleClick={handleDialogClick} selectedVariable={selectedVariable} />
+          <InsertVariableButton handleClick={handleInsertVariableClick} />
+          <DialogButton handleClick={handleEditVariableClick} selectedVariable={selectedVariable} />
           <DeleteButton handleClick={handleDeleteClick} selectedVariable={selectedVariable} />
         </div>, documentContent)
     : null;

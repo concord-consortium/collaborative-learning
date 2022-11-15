@@ -2,22 +2,22 @@ import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React, { useContext, useRef } from "react";
 import { observer } from "mobx-react";
 import useResizeObserver from "use-resize-observer";
-import { VariableChip } from "@concord-consortium/diagram-view";
+import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
 
+import { addChipToContent, findVariable, getOrFindSharedModel } from "./drawing-utils";
 import { DrawingObject, IDrawingComponentProps, IToolbarManager,
   typeField } from "../../drawing/objects/drawing-object";
 import { Point } from "../../drawing/model/drawing-basic-types";
-import { findVariable, getOrFindSharedModel } from "./drawing-utils";
 import { useEditVariableDialog } from "../dialog/use-edit-variable-dialog";
 import { useNewVariableDialog } from "../dialog/use-new-variable-dialog";
-import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
-import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
-import VariableEditorIcon from "../assets/variable-editor-icon.svg";
 import { SvgToolbarButton } from "../../drawing/components/drawing-toolbar-buttons";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { DrawingContentModelType } from "../../drawing/model/drawing-content";
 import { useInsertVariableDialog } from "../dialog/use-insert-variable-dialog";
 
+import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
+import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
+import VariableEditorIcon from "../assets/variable-editor-icon.svg";
 import "./variable-object.scss";
 
 export const VariableChipObject = DrawingObject.named("VariableObject")
@@ -105,10 +105,21 @@ interface IInsertVariableButton {
   toolbarManager: IToolbarManager;
 }
 export const InsertVariableButton = observer(({ toolbarManager }: IInsertVariableButton) => {
-  const sharedModel = getOrFindSharedModel(toolbarManager as DrawingContentModelType);
+  const drawingContent = toolbarManager as DrawingContentModelType;
+  const sharedModel = getOrFindSharedModel(drawingContent);
   const variables = sharedModel?.variables || [];
+  const insertVariables = (variablesToInsert: VariableType[]) => {
+    let x = 250;
+    let y = 50;
+    const offset = 25;
+    variablesToInsert.forEach(variable => {
+      addChipToContent(drawingContent, variable.id, x, y);
+      x += offset;
+      y += offset;
+    });
+  };
 
-  const [showInsertVariableDialog] = useInsertVariableDialog({ variables });
+  const [showInsertVariableDialog] = useInsertVariableDialog({ insertVariables, variables });
 
   const disabled = variables.length < 1;
 

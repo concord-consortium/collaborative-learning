@@ -1,8 +1,8 @@
-import React, { useContext } from "react";
+import React/*, { useContext }*/ from "react";
 import { useSelectMultipleVariables, VariableChipList, VariableType } from "@concord-consortium/diagram-view";
 
-import { addChipToContent } from "../drawing/drawing-utils";
-import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
+// import { addChipToContent } from "../drawing/drawing-utils";
+// import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 
 import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
@@ -30,27 +30,19 @@ const InsertVariableContent = ({ onClick, selectedVariables, variables }: IInser
 };
 
 interface IInsertVariableDialog {
+  Icon?: any;
+  insertVariables: (variables: VariableType[]) => void;
   variables: VariableType[];
 }
-export const useInsertVariableDialog = ({ variables }: IInsertVariableDialog) => {
-  const drawingContent = useContext(DrawingContentModelContext);
+export const useInsertVariableDialog = ({ Icon, insertVariables, variables }: IInsertVariableDialog) => {
   const { clearSelectedVariables, selectedVariables, toggleVariable } = useSelectMultipleVariables();
 
-  const handleOk = () => {
-    let x = 250;
-    let y = 50;
-    const offset = 25;
-    selectedVariables.forEach(variable => {
-      addChipToContent(drawingContent, variable.id, x, y);
-      x += offset;
-      y += offset;
-    });
-  };
+  const handleOk = () => insertVariables(selectedVariables);
 
   const onClose = clearSelectedVariables;
 
   const [showModal, hideModal] = useCustomModal({
-    Icon: InsertVariableChipIcon,
+    Icon: Icon || InsertVariableChipIcon,
     title: "Insert Variables",
     Content: InsertVariableContent,
     contentProps: { onClick: toggleVariable, selectedVariables, variables },
