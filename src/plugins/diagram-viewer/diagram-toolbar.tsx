@@ -79,7 +79,7 @@ interface IDeleteButton {
 const DeleteButton = ({ handleClick, selectedVariable }: IDeleteButton) => {
   return (
     <SvgToolbarButton SvgIcon={DeleteSelectionIcon} buttonClass="button-delete" disabled={!selectedVariable}
-      title="delete" onClick={handleClick} />
+      title="Delete" onClick={handleClick} />
   );
 };
 
