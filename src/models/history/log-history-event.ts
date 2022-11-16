@@ -1,15 +1,13 @@
 import { isSectionPath } from "../../../functions/src/shared";
 import { Logger } from "../../lib/logger";
 import { LogEventName } from "../../lib/logger-types";
-import { kLogCurriculumEvent } from "../curriculum/log-curriculum-event";
-import { kLogDocumentEvent } from "../document/log-document-event";
+import { isCurriculumLogEvent, logCurriculumEvent } from "../curriculum/log-curriculum-event";
+import { isDocumentLogEvent, logDocumentEvent } from "../document/log-document-event";
 import { DocumentsModelType } from "../stores/documents";
 import { TreeManagerType } from "./tree-manager";
 
-export const kLogHistoryEvent = "LogHistoryEvent";
-
 type HistoryAction = "showControls" | "hideControls" | "playStart" | "playStop" | "playSeek";
-export interface ILogHistory {
+export interface ILogHistory extends Record<string, any> {
   documentId: string;
   historyEventId?: string;  // The id of the history entry where the action took place. Used for start, stop and seek.
   historyIndex?: number; // Index into history array. Used for start, stop, seek.
@@ -22,22 +20,22 @@ interface IContext extends Record<string, any> {
   networkDocuments: DocumentsModelType;
 }
 
-Logger.registerEventType(kLogHistoryEvent, (params, context) => {
-  const { documentId, action, ...others } = params as ILogHistory;
-  const { documents, networkDocuments } = context as IContext;
+function processHistoryEventParams(params: ILogHistory, context: IContext) {
+  const { documentId, action, ...others } = params;
+  const { documents, networkDocuments } = context;
 
   if (isSectionPath(documentId)) {
-    return { nextEventType: kLogCurriculumEvent, curriculum: documentId, ...others };
+    return { curriculum: documentId, ...others };
   }
 
   const document = documents.getDocument(documentId) || networkDocuments.getDocument(documentId);
   if (document) {
-    return { nextEventType: kLogDocumentEvent, document, ...others };
+    return { document, ...others };
   }
 
   console.warn("Warning: couldn't transform log history event params for document:", documentId);
   return params;
-});
+}
 
 export function logHistoryEvent(historyLogInfo: ILogHistory) {
   const eventMap: Record<HistoryAction, LogEventName> = {
@@ -48,7 +46,16 @@ export function logHistoryEvent(historyLogInfo: ILogHistory) {
     playSeek: LogEventName.HISTORY_PLAYBACK_SEEK
   };
   const event = eventMap[historyLogInfo.action];
-  Logger.logEvent(kLogHistoryEvent, event, historyLogInfo);
+  const params = processHistoryEventParams(historyLogInfo, Logger.stores);
+  if (isCurriculumLogEvent(params)) {
+    logCurriculumEvent(event, params);
+  }
+  else if (isDocumentLogEvent(params)) {
+    logDocumentEvent(event, params);
+  }
+  else {
+    Logger.log(event, historyLogInfo);
+  }
 }
 
 export function logCurrentHistoryEvent(treeManager: TreeManagerType, action: HistoryAction) {

@@ -1,16 +1,29 @@
 import { Logger } from "../../../lib/logger";
+import { LogEventName } from "../../../lib/logger-types";
 import { DocumentModelType } from "../../document/document";
-import { kLogDocumentEvent } from "../../document/log-document-event";
+import { isDocumentLogEvent, logDocumentEvent } from "../../document/log-document-event";
 
-export const kLogTileBaseEvent = "LogTileBaseEvent";
-
-interface IParams extends Record<string, any> {
+interface ITileBaseLogEvent extends Record<string, any> {
   document: DocumentModelType;
   tileId: string;
 }
 
-Logger.registerEventType(kLogTileBaseEvent, (_params) => {
-  const { document, tileId, ...others } = _params as IParams;
+export function isTileBaseEvent(params: Record<string, any>): params is ITileBaseLogEvent {
+  return !!params.document; // document is sufficient for logging purposes
+}
+
+function processTileBaseEventParams(params: ITileBaseLogEvent) {
+  const { document, tileId, ...others } = params;
   const sectionId = document?.content?.getSectionIdForTile(tileId);
-  return { nextEventType: kLogDocumentEvent, document, tileId, sectionId, ...others };
-});
+  return { document, tileId, sectionId, ...others };
+}
+
+export function logTileBaseEvent(event: LogEventName, _params: ITileBaseLogEvent) {
+  const params = processTileBaseEventParams(_params);
+  if (isDocumentLogEvent(params)) {
+    logDocumentEvent(event, params);
+  }
+  else {
+    Logger.log(event, params);
+  }
+}

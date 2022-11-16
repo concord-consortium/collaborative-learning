@@ -3,11 +3,9 @@ import { Logger } from "../../../lib/logger";
 import { LogEventName } from "../../../lib/logger-types";
 import { DocumentsModelType } from "../../stores/documents";
 import { ITileModel } from "../tile-model";
-import { kLogTileBaseEvent } from "./log-tile-base-event";
+import { isTileBaseEvent, logTileBaseEvent } from "./log-tile-base-event";
 
-export const kLogTileDocumentEvent = "LogTileDocumentEvent";
-
-interface IParams extends Record<string, any> {
+interface ITileDocumentLogEvent extends Record<string, any> {
   tile: ITileModel;
   commentText?: string;
 }
@@ -17,16 +15,21 @@ interface IContext extends Record<string, any> {
   networkDocuments: DocumentsModelType;
 }
 
-Logger.registerEventType(kLogTileDocumentEvent, (_params, _context) => {
-  const { tile: { id: tileId, content }, ...others } = _params as IParams;
+function processTileDocumentEventParams(params: ITileDocumentLogEvent, context: IContext) {
+  const { tile: { id: tileId, content }, ...others } = params;
   const tileType = content.type;
-  const context = _context as IContext;
   const document = context.documents.findDocumentOfTile(tileId) ||
                     context.networkDocuments.findDocumentOfTile(tileId);
   const legacyTileProps = { objectId: tileId, objectType: tileType, serializedObject: getSnapshot(content) };
-  return { nextEventType: kLogTileBaseEvent, document, tileId, tileType, ...legacyTileProps, ...others };
-});
+  return { document, tileId, tileType, ...legacyTileProps, ...others };
+}
 
-export function logTileDocumentEvent(event: LogEventName, params: IParams) {
-  Logger.logEvent(kLogTileDocumentEvent, event, params);
+export function logTileDocumentEvent(event: LogEventName, _params: ITileDocumentLogEvent) {
+  const params = processTileDocumentEventParams(_params, Logger.stores);
+  if (isTileBaseEvent(params)) {
+    logTileBaseEvent(event, params);
+  }
+  else {
+    Logger.log(event, params);
+  }
 }

@@ -1,26 +1,27 @@
 import { Logger } from "../../lib/logger";
-import { LogEventName } from "../../lib/logger-types";
+import { LogEventMethod, LogEventName } from "../../lib/logger-types";
 import { UserModelType } from "../stores/user";
 import { DocumentModelType } from "./document";
-
-export const kLogDocumentEvent = "LogDocumentEvent";
 
 interface ITeacherNetworkInfo {
   networkClassHash?: string;
   networkUsername?: string;
 }
 
-interface IParams extends Record<string, any> {
+export interface IDocumentLogEvent extends Record<string, any> {
   document: DocumentModelType;
+}
+
+export function isDocumentLogEvent(params: Record<string, any>): params is IDocumentLogEvent {
+  return !!params.document;
 }
 
 interface IContext extends Record<string, any> {
   user: UserModelType;
 }
 
-Logger.registerEventType(kLogDocumentEvent, (_params, _context) => {
-  const { document, ...others } = _params as IParams;
-  const { user } = _context as IContext;
+function processDocumentEventParams(params: IDocumentLogEvent, { user }: IContext) {
+  const { document, ...others } = params;
   const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.isRemote
       ? { networkClassHash: document.remoteContext,
           networkUsername: `${document.uid}@${user.portal}` }
@@ -37,8 +38,9 @@ Logger.registerEventType(kLogDocumentEvent, (_params, _context) => {
     ...others,
     ...teacherNetworkInfo
   };
-});
+}
 
-export function logDocumentEvent(event: LogEventName, params: IParams) {
-  Logger.logEvent(kLogDocumentEvent, event, params);
+export function logDocumentEvent(event: LogEventName, _params: IDocumentLogEvent, method?: LogEventMethod) {
+  const params = processDocumentEventParams(_params, Logger.stores);
+  Logger.log(event, params, method);
 }

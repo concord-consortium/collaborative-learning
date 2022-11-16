@@ -2,11 +2,9 @@ import { Logger } from "../../../lib/logger";
 import { LogEventName } from "../../../lib/logger-types";
 import { DocumentsModelType } from "../../stores/documents";
 import { ITileModel } from "../tile-model";
-import { kLogTileDocumentEvent } from "./log-tile-document-event";
+import { logTileDocumentEvent } from "./log-tile-document-event";
 
-export const kLogTileCopyEvent = "LogTileCopyEvent";
-
-interface IParams extends Record<string, any> {
+interface ITileCopyLogEvent extends Record<string, any> {
   tile: ITileModel;
   originalTileId: string;
 }
@@ -16,9 +14,8 @@ interface IContext extends Record<string, any> {
   networkDocuments: DocumentsModelType;
 }
 
-Logger.registerEventType(kLogTileCopyEvent, (_params, _context) => {
-  const { originalTileId, ...others } = _params as IParams;
-  const context = _context as IContext;
+function processTileCopyEventParams(params: ITileCopyLogEvent, context: IContext) {
+  const { originalTileId, ...others } = params;
   const srcDocument = context.documents.findDocumentOfTile(originalTileId) ||
                       context.networkDocuments.findDocumentOfTile(originalTileId);
   const srcProps = srcDocument
@@ -32,9 +29,10 @@ Logger.registerEventType(kLogTileCopyEvent, (_params, _context) => {
                       sourceSectionId: srcDocument.content?.getSectionIdForTile(originalTileId)
                     }
                     : undefined;
-  return { nextEventType: kLogTileDocumentEvent, ...srcProps, ...others };
-});
+  return { ...srcProps, ...others };
+}
 
-export function logTileCopyEvent(event: LogEventName, params: IParams) {
-  Logger.logEvent(kLogTileCopyEvent, event, params);
+export function logTileCopyEvent(event: LogEventName, _params: ITileCopyLogEvent) {
+  const params = processTileCopyEventParams(_params, Logger.stores);
+  logTileDocumentEvent(event, params);
 }
