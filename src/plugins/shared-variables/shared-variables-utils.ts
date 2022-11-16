@@ -7,7 +7,6 @@ import { kDiagramTileType } from "../diagram-viewer/diagram-types";
 import { DrawingContentModelType } from "../drawing/model/drawing-content";
 import { kDrawingTileType } from "../drawing/model/drawing-types";
 import { kTextTileType } from "../../models/tiles/text/text-content";
-import { ITileModel } from "../../models/tiles/tile-model";
 import { ITileContentModel } from "../../models/tiles/tile-types";
 
 const getTileVariables = (content: ITileContentModel) => {
@@ -31,7 +30,7 @@ export const variableBuckets =
   (content: ITileContentModel, sharedVariables?: SharedVariablesType) =>
 {
   if (!sharedVariables) return { selfVariables: [], otherVariables: [], unusedVariables: [] };
-  
+
   const sharedModelManager = content.tileEnv?.sharedModelManager;
   const tiles = sharedModelManager?.getSharedModelTiles(sharedVariables) ?? [];
 

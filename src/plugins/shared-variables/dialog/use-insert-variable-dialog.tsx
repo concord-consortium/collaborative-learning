@@ -1,8 +1,7 @@
-import React/*, { useContext }*/ from "react";
+import React from "react";
+import classNames from "classnames";
 import { useSelectMultipleVariables, VariableChipList, VariableType } from "@concord-consortium/diagram-view";
 
-// import { addChipToContent } from "../drawing/drawing-utils";
-// import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 
 import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
@@ -30,6 +29,7 @@ const InsertVariableContent =
           Variables already used by this tile:
           <div className="variable-chip-list-container">
             <VariableChipList
+              className={classNames({disabled: disallowSelf})}
               onClick={disallowSelf ? undefined : onClick}
               nameOnly={true}
               selectedVariables={selectedVariables}

@@ -124,7 +124,6 @@ interface IInsertVariableButton {
 export const InsertVariableButton = observer(({ toolbarManager }: IInsertVariableButton) => {
   const drawingContent = toolbarManager as DrawingContentModelType;
   const sharedModel = getOrFindSharedModel(drawingContent);
-  const variables = sharedModel?.variables || [];
   const insertVariables = (variablesToInsert: VariableType[]) => {
     let x = 250;
     let y = 50;
