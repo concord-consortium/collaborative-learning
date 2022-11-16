@@ -173,8 +173,16 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
     return (
       <>
         <div className="slider-container" ref={sliderContainerRef} data-testid="playback-slider">
-          <Slider min={0} max={history.length} step={1} value={sliderValue} ref={railRef}
-                  className={`${activeNavTab}`} onChange={handleSliderValueChange} onAfterChange={handleSliderAfterChange}/>
+          <Slider
+            min={0}
+            max={history.length}
+            step={1}
+            value={sliderValue}
+            ref={railRef}
+            className={`${activeNavTab}`}
+            onChange={handleSliderValueChange}
+            onAfterChange={handleSliderAfterChange}
+          />
         </div>
         { markers.map(marker => {
           const markerLocation = getMarkerLocation(marker.location);

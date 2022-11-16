@@ -124,8 +124,10 @@ export const DrawingContentModel = TileContentModel
       const {name, ...loggedChangeProps} = call;
       // TODO: logTileChange includes an explicit DrawingToolLogEvent
       // this isn't a good pattern to support generic plugins logging events
-      Logger.logTileChange(LogEventName.DRAWING_TOOL_CHANGE, name,
-        loggedChangeProps, self.metadata?.id ?? "");
+      if (name !== "setDisabledFeatures"){
+        Logger.logTileChange(LogEventName.DRAWING_TOOL_CHANGE, name,
+          loggedChangeProps, self.metadata?.id ?? "");
+      }
     }
   }))
   .extend(self => {
