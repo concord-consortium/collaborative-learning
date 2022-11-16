@@ -129,7 +129,6 @@ export const TileModel = types
       }
     },
     onTileAction(call: ISerializedActionCall) {
-      // console.log("tile-model.ts > onTileAction > line 132 where onTileAction: \n", self.content.onTileAction);
       self.content.onTileAction?.(call);
     },
     willRemoveFromDocument() {
