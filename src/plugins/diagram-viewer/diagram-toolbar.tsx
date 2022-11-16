@@ -51,11 +51,12 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
 };
 
 interface IInsertVariableButton {
+  disabled?: boolean;
   handleClick: () => void;
 }
-const InsertVariableButton = ({ handleClick }: IInsertVariableButton) => {
+const InsertVariableButton = ({ disabled, handleClick }: IInsertVariableButton) => {
   return (
-    <SvgToolbarButton SvgIcon={InsertVariableCardIcon} buttonClass="button-insert-variable" disabled={false}
+    <SvgToolbarButton SvgIcon={InsertVariableCardIcon} buttonClass="button-insert-variable" disabled={disabled}
       title="Insert Variable" onClick={handleClick} />
   );
 };
@@ -84,13 +85,14 @@ const DeleteButton = ({ handleClick, selectedVariable }: IDeleteButton) => {
 
 interface IProps extends IFloatingToolbarProps {
   content: DiagramContentModelType;
+  disableInsertVariableButton?: boolean;
   handleDeleteClick: () => void;
   handleEditVariableClick: () => void;
   handleInsertVariableClick: () => void;
 }
 export const DiagramToolbar: React.FC<IProps> = observer(({
-  content, documentContent, handleDeleteClick, handleEditVariableClick, handleInsertVariableClick, onIsEnabled,
-  ...others
+  content, disableInsertVariableButton, documentContent, handleDeleteClick, handleEditVariableClick,
+  handleInsertVariableClick, onIsEnabled, ...others
 }) => {
   const root = content?.root;
   const selectedVariable = root?.selectedNode?.variable;
@@ -107,7 +109,7 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
     ? ReactDOM.createPortal(
         <div className={`diagram-toolbar ${enabled && location ? "enabled" : "disabled"}`}
             style={location} onMouseDown={e => e.stopPropagation()}>
-          <InsertVariableButton handleClick={handleInsertVariableClick} />
+          <InsertVariableButton disabled={disableInsertVariableButton} handleClick={handleInsertVariableClick} />
           <DialogButton handleClick={handleEditVariableClick} selectedVariable={selectedVariable} />
           <DeleteButton handleClick={handleDeleteClick} selectedVariable={selectedVariable} />
         </div>, documentContent)

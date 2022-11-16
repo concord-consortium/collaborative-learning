@@ -6,15 +6,16 @@ import { DiagramContentModelType } from "../diagram-viewer/diagram-content";
 import { kDiagramTileType } from "../diagram-viewer/diagram-types";
 import { DrawingContentModelType } from "../drawing/model/drawing-content";
 import { kDrawingTileType } from "../drawing/model/drawing-types";
-import { ITileModel } from "../../models/tiles/tile-model";
 import { kTextTileType } from "../../models/tiles/text/text-content";
+import { ITileModel } from "../../models/tiles/tile-model";
+import { ITileContentModel } from "../../models/tiles/tile-types";
 
-const getTileVariables = (tile: ITileModel) => {
-  if (tile.content.type === kDiagramTileType) {
-    return (tile.content as DiagramContentModelType).variables;
-  } else if (tile.content.type === kDrawingTileType) {
-    return drawingVariables(tile.content as DrawingContentModelType);
-  } else if (tile.content.type === kTextTileType) {
+const getTileVariables = (content: ITileContentModel) => {
+  if (content.type === kDiagramTileType) {
+    return (content as DiagramContentModelType).variables;
+  } else if (content.type === kDrawingTileType) {
+    return drawingVariables(content as DrawingContentModelType);
+  } else if (content.type === kTextTileType) {
     // TODO Get variables used by text tiles
     return [];
   } else {
@@ -23,18 +24,25 @@ const getTileVariables = (tile: ITileModel) => {
 };
 
 // Returns three lists containing all of the variables in the shared model.
-// selfVariables are variables used by the tile provided
-// otherVariables are variables used by another tile but not the provided tile
+// selfVariables are variables used by the tile content provided
+// otherVariables are variables used by another tile but not the provided tile content
 // unusedVariables are variables not used by any tile
-export const variableBuckets = (tile: ITileModel, tiles: ITileModel[], sharedVariables: SharedVariablesType) => {
-  const selfVariables = getTileVariables(tile);
+export const variableBuckets =
+  (content: ITileContentModel, sharedVariables?: SharedVariablesType) =>
+{
+  if (!sharedVariables) return { selfVariables: [], otherVariables: [], unusedVariables: [] };
+  
+  const sharedModelManager = content.tileEnv?.sharedModelManager;
+  const tiles = sharedModelManager?.getSharedModelTiles(sharedVariables) ?? [];
+
+  const selfVariables = getTileVariables(content);
   const otherVariables: VariableType[] = [];
   const unusedVariables: VariableType[] = [];
   sharedVariables.variables.forEach((variable: VariableType) => {
     if (!selfVariables.includes(variable)) {
       let found = false;
       for (let i = 0; i < tiles.length; i++) {
-        const variables = getTileVariables(tiles[i]);
+        const variables = getTileVariables(tiles[i].content);
         if (variables.includes(variable)) {
           otherVariables.push(variable);
           found = true;

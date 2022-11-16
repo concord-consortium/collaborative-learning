@@ -42,23 +42,17 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
       content.root.setSelectedNode(content.root.getNodeFromVariableId(variable.id));
     });
   };
-  const sharedModel = content.sharedModel;
-  // let selfVariables: VariableType[] = [];
-  // let otherVariables: VariableType[] = [];
-  let unusedVariables: VariableType[] = content.root.variablesAPI?.getVariables() || [];
-  if (sharedModel) {
-    const sharedModelManager = content.tileEnv?.sharedModelManager;
-    const tiles = sharedModelManager?.getSharedModelTiles(sharedModel) ?? [];
-    const v = variableBuckets(model, tiles, sharedModel);
-    // selfVariables = v.selfVariables;
-    // otherVariables = v.otherVariables;
-    unusedVariables = v.unusedVariables;
-  }
+  const { selfVariables, otherVariables, unusedVariables } = variableBuckets(content, content.sharedModel);
   const [showInsertVariableDialog] = useInsertVariableDialog({
+    disallowSelf: true,
     Icon: InsertVariableCardIcon,
     insertVariables,
-    variables: unusedVariables
+    otherVariables,
+    selfVariables,
+    unusedVariables
   });
+  const disableInsertVariableButton =
+    otherVariables.length < 1 && unusedVariables.length < 1;
 
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
 
@@ -66,6 +60,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
     <div className="diagram-tool">
       <DiagramToolbar
         content={content}
+        disableInsertVariableButton={disableInsertVariableButton}
         documentContent={documentContent}
         handleDeleteClick={handleDeleteClick}
         handleEditVariableClick={showEditVariableDialog}

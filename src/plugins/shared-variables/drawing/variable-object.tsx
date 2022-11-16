@@ -5,15 +5,16 @@ import useResizeObserver from "use-resize-observer";
 import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
 
 import { addChipToContent, findVariable, getOrFindSharedModel } from "./drawing-utils";
+import { useEditVariableDialog } from "../dialog/use-edit-variable-dialog";
+import { useInsertVariableDialog } from "../dialog/use-insert-variable-dialog";
+import { useNewVariableDialog } from "../dialog/use-new-variable-dialog";
+import { variableBuckets } from "../shared-variables-utils";
 import { DrawingObject, IDrawingComponentProps, IToolbarManager,
   typeField } from "../../drawing/objects/drawing-object";
 import { Point } from "../../drawing/model/drawing-basic-types";
-import { useEditVariableDialog } from "../dialog/use-edit-variable-dialog";
-import { useNewVariableDialog } from "../dialog/use-new-variable-dialog";
 import { SvgToolbarButton } from "../../drawing/components/drawing-toolbar-buttons";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { DrawingContentModelType } from "../../drawing/model/drawing-content";
-import { useInsertVariableDialog } from "../dialog/use-insert-variable-dialog";
 
 import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
 import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
@@ -134,10 +135,11 @@ export const InsertVariableButton = observer(({ toolbarManager }: IInsertVariabl
       y += offset;
     });
   };
+  const { selfVariables, otherVariables, unusedVariables } = variableBuckets(drawingContent, sharedModel);
+  const [showInsertVariableDialog] = useInsertVariableDialog({
+    insertVariables, otherVariables, selfVariables, unusedVariables });
 
-  const [showInsertVariableDialog] = useInsertVariableDialog({ insertVariables, variables });
-
-  const disabled = variables.length < 1;
+  const disabled = selfVariables.length < 1 && otherVariables.length < 1 && unusedVariables.length < 1;
 
   return <SvgToolbarButton SvgIcon={InsertVariableChipIcon} buttonClass="insert-variable" title="Insert Variable"
     onClick={showInsertVariableDialog} disabled={disabled} />;
