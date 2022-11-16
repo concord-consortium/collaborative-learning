@@ -124,7 +124,6 @@ export const DrawingContentModel = TileContentModel
     onTileAction(call) {
       const tileId = self.metadata?.id ?? "";
       const {name: operation, ...change} = call;
-      console.log("DrawingContent.onTileAction", JSON.stringify(change));
       logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, { operation, change, tileId });
     }
   }))
