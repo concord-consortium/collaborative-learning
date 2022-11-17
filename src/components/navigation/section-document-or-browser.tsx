@@ -136,11 +136,13 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
     if (ui.selectedCommentedDocument){
       const newDoc = store.documents.getDocument(ui.selectedCommentedDocument)
       || store.networkDocuments.getDocument(ui.selectedCommentedDocument);
+
       if (isActiveTab) {
         setReferenceDocument(newDoc);
-        if (newDoc?.isRemote){
+        if (newDoc){
           handleSelectDocument(newDoc);
         }
+
       }
       const newIndex = getNewTabIndex(ui.selectedCommentedDocument, tabSpec.label);
       if (newIndex !== undefined) {

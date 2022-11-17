@@ -124,6 +124,9 @@ export const DrawingContentModel = TileContentModel
     onTileAction(call) {
       const tileId = self.metadata?.id ?? "";
       const {name: operation, ...change} = call;
+      // Ignore the setDisabledFeatures action is doesn't need to be logged
+      if (operation === "setDisabledFeatures") return;
+
       logTileChangeEvent(LogEventName.DRAWING_TOOL_CHANGE, { operation, change, tileId });
     }
   }))

@@ -114,7 +114,11 @@ export const CommentTextBox: React.FC<IProps> = ({ activeNavTab, numPostedCommen
               data-testid="comment-cancel-button">
           Cancel
         </div>
-        <div className={postButtonClass} onClick={handlePostComment} data-testid="comment-post-button">
+        <div
+          className={postButtonClass}
+          onClick={handlePostComment}
+          data-testid="comment-post-button"
+        >
           <SendIcon />
           Post
         </div>

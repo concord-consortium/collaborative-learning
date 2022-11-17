@@ -137,9 +137,11 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const { ui: { showChatPanel } } = this.stores;
     const reset = tabSpec.tab === this.topTabReset;
     return (
-      <SectionDocumentOrBrowser tabSpec={tabSpec}
-                                reset={reset ? this.clearTopTabReset : undefined}
-                                isChatOpen={showChatPanel}/>
+      <SectionDocumentOrBrowser
+        tabSpec={tabSpec}
+        reset={reset ? this.clearTopTabReset : undefined}
+        isChatOpen={showChatPanel}
+      />
     );
   };
 

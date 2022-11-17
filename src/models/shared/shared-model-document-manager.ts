@@ -3,7 +3,7 @@ import { getParentOfType, hasParentOfType, IAnyStateTreeNode } from "mobx-state-
 import { DocumentContentModelType } from "../document/document-content";
 import { SharedModelType } from "./shared-model";
 import { ISharedModelManager, SharedModelUnion } from "./shared-model-manager";
-import { TileModel } from "../tiles/tile-model";
+import { ITileModel, TileModel } from "../tiles/tile-model";
 
 
 function getTileModel(tileContentModel: IAnyStateTreeNode) {
@@ -123,9 +123,14 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     return sharedModels;
   }
 
-  getSharedModelTileIds(sharedModel?: SharedModelType): string[] {
+  getSharedModelTiles(sharedModel?: SharedModelType): ITileModel[] {
     const entry = sharedModel?.id && this.document?.sharedModelMap.get(sharedModel.id);
-    return entry ? Array.from(entry.tiles.map(tile => tile.id)) : [];
+    return entry ? Array.from(entry.tiles) : [];
+  }
+
+  getSharedModelTileIds(sharedModel?: SharedModelType): string[] {
+    const tiles = this.getSharedModelTiles(sharedModel);
+    return tiles.map(tile => tile.id);
   }
 
   removeTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void {
