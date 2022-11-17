@@ -67,10 +67,10 @@ export function getOrFindSharedModel(drawingContent: DrawingContentModelType) {
   return sharedModel;
 }
 
-export function findVariable(drawingContent: DrawingContentModelType, selectedVariableId: string) {
+export function findVariable(drawingContent: DrawingContentModelType, variableId: string) {
   const variables = getVariables(drawingContent);
-  const selectedVariable = variables.find(v => v.id === selectedVariableId);
-  return selectedVariable;
+  const variable = variables.find(v => v.id === variableId);
+  return variable;
 }
 
 export function addChipToContent(drawingContent: DrawingContentModelType, variableId: string, x?: number, y?: number) {

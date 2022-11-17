@@ -1,5 +1,6 @@
 
 import { IAnyStateTreeNode, types } from "mobx-state-tree";
+import { ITileModel } from "../tiles/tile-model";
 import { kUnknownSharedModel, SharedModel, SharedModelType } from "./shared-model";
 import { getSharedModelClasses, getSharedModelInfoByType } from "./shared-model-registry";
 
@@ -114,6 +115,13 @@ export interface ISharedModelManager {
    * @param tileContentModel
    */
   getTileSharedModels(tileContentModel: IAnyStateTreeNode): SharedModelType[];
+
+  /**
+   * Get the tiles that link to this shared model
+   * 
+   * @param sharedModel 
+   */
+  getSharedModelTiles(sharedModel?: SharedModelType): ITileModel[];
 
   /**
    * Get the ids of the tiles that link to this shared model

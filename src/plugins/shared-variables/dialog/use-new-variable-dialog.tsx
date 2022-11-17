@@ -1,11 +1,11 @@
 import { useContext, useState } from "react";
-import { addChipToContent, getOrFindSharedModel } from "./drawing-utils";
+import { addChipToContent, getOrFindSharedModel } from "../drawing/drawing-utils";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { EditVariableDialogContent, Variable } from "@concord-consortium/diagram-view";
 
 import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
-import '../../diagram-viewer/diagram-dialog.scss';
+import './variable-dialog.scss';
 
 export const useNewVariableDialog = () => {
   const drawingContent = useContext(DrawingContentModelContext);

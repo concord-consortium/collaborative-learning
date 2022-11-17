@@ -32,6 +32,9 @@ const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelMa
     getTileSharedModels(tileContentModel: IAnyStateTreeNode): SharedModelType[] {
       return variables ? [variables] : [];
     },
+    getSharedModelTiles(sharedModel?: SharedModelType) {
+      return [];
+    },
     getSharedModelTileIds(sharedModel?: SharedModelType) {
       // ignore linked tiles for now
       return [];

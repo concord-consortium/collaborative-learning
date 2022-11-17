@@ -2,22 +2,23 @@ import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import React, { useContext, useRef } from "react";
 import { observer } from "mobx-react";
 import useResizeObserver from "use-resize-observer";
-import { VariableChip } from "@concord-consortium/diagram-view";
+import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
 
+import { addChipToContent, findVariable, getOrFindSharedModel } from "./drawing-utils";
+import { useEditVariableDialog } from "../dialog/use-edit-variable-dialog";
+import { useInsertVariableDialog } from "../dialog/use-insert-variable-dialog";
+import { useNewVariableDialog } from "../dialog/use-new-variable-dialog";
+import { variableBuckets } from "../shared-variables-utils";
 import { DrawingObject, IDrawingComponentProps, IToolbarManager,
   typeField } from "../../drawing/objects/drawing-object";
 import { Point } from "../../drawing/model/drawing-basic-types";
-import { findVariable, getOrFindSharedModel } from "./drawing-utils";
-import { useEditVariableDialog } from "../../diagram-viewer/use-edit-variable-dialog";
-import { useNewVariableDialog } from "./use-new-variable-dialog";
-import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
-import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
-import VariableEditorIcon from "../assets/variable-editor-icon.svg";
 import { SvgToolbarButton } from "../../drawing/components/drawing-toolbar-buttons";
 import { DrawingContentModelContext } from "../../drawing/components/drawing-content-context";
 import { DrawingContentModelType } from "../../drawing/model/drawing-content";
-import { useInsertVariableDialog } from "./use-insert-variable-dialog";
 
+import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
+import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
+import VariableEditorIcon from "../assets/variable-editor-icon.svg";
 import "./variable-object.scss";
 
 export const VariableChipObject = DrawingObject.named("VariableObject")
@@ -101,16 +102,43 @@ const getSelectedVariable = (drawingContent: DrawingContentModelType) => {
     : undefined;
 };
 
+// Returns a list of the variables used by the given drawingContent
+export const drawingVariables = (drawingContent: DrawingContentModelType) => {
+  const variableIds: string[] = [];
+  drawingContent.objects.forEach(object => {
+    if (object.type === "variable") {
+      const variableId = (object as VariableChipObjectType).variableId;
+      if (!variableIds.includes((object as VariableChipObjectType).variableId)) {
+        variableIds.push(variableId);
+      }
+    }
+  });
+  const variables = variableIds.map(id => findVariable(drawingContent, id));
+  const filteredVariables = variables.filter(variable => variable !== undefined);
+  return filteredVariables as VariableType[];
+};
+
 interface IInsertVariableButton {
   toolbarManager: IToolbarManager;
 }
 export const InsertVariableButton = observer(({ toolbarManager }: IInsertVariableButton) => {
-  const sharedModel = getOrFindSharedModel(toolbarManager as DrawingContentModelType);
-  const variables = sharedModel?.variables || [];
+  const drawingContent = toolbarManager as DrawingContentModelType;
+  const sharedModel = getOrFindSharedModel(drawingContent);
+  const insertVariables = (variablesToInsert: VariableType[]) => {
+    let x = 250;
+    let y = 50;
+    const offset = 25;
+    variablesToInsert.forEach(variable => {
+      addChipToContent(drawingContent, variable.id, x, y);
+      x += offset;
+      y += offset;
+    });
+  };
+  const { selfVariables, otherVariables, unusedVariables } = variableBuckets(drawingContent, sharedModel);
+  const [showInsertVariableDialog] = useInsertVariableDialog({
+    insertVariables, otherVariables, selfVariables, unusedVariables });
 
-  const [showInsertVariableDialog] = useInsertVariableDialog({ variables });
-
-  const disabled = variables.length < 1;
+  const disabled = selfVariables.length < 1 && otherVariables.length < 1 && unusedVariables.length < 1;
 
   return <SvgToolbarButton SvgIcon={InsertVariableChipIcon} buttonClass="insert-variable" title="Insert Variable"
     onClick={showInsertVariableDialog} disabled={disabled} />;

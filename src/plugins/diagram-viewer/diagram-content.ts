@@ -1,7 +1,7 @@
 import { getSnapshot, types, Instance, destroy, SnapshotIn,
   isValidReference, addDisposer, getType } from "mobx-state-tree";
 import { reaction } from "mobx";
-import { DQRoot, DQNode } from "@concord-consortium/diagram-view";
+import { DQRoot } from "@concord-consortium/diagram-view";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tiles/tile-content-info";
 import { TileContentModel } from "../../models/tiles/tile-types";
 import { kDiagramTileType, kDiagramToolStateVersion } from "./diagram-types";
@@ -42,6 +42,9 @@ export const DiagramContentModel = TileContentModel
       // For now just return 100, 100
       // TODO: this should be moved into DQRoot
       return {x: 100, y: 100};
+    },
+    get variables() {
+      return self.root?.variables || [];
     }
   }))
   .actions(self => ({
@@ -113,23 +116,7 @@ export const DiagramContentModel = TileContentModel
         // We should never get into this case, but this is here to just in case
         // somehow we do
         console.warn("updateAfterSharedModelChanges was called with no shared model present");
-        return;
       }
-
-      Array.from(self.sharedModel.variables.values()).forEach(variable => {
-        // sync up shared data model items with the tile data of items
-        // look for this item in the itemList, if it is not there add it
-        const sharedItemId = variable.id;
-
-        // the dereferencing of sharedItem should be safe here because we first cleaned up any
-        // items that referenced invalid shared items.
-        const nodes = Array.from(self.root.nodes.values());
-        const matchingItem = nodes.find(node => node.variable.id === sharedItemId);
-        if (!matchingItem) {
-          const newItem = DQNode.create({ variable: sharedItemId, ...self.positionForNewNode });
-          self.root.addNode(newItem);
-        }
-      });
     }
   }));
 
