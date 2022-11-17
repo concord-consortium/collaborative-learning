@@ -1,5 +1,54 @@
 # Changelog
 
+## Version 3.3.0 - Nov 16, 2022
+
+Version 3.3.0 addresses bug fixes for chat/comment features and adding new variabledialog to the drawing tile.
+
+### Features/Improvements
+- New Variable Choice on Drawing Toolbar: #1485 [#183690048] (https://www.pivotaltracker.com/story/show/183690048)
+- Network Documents in All Documents with Comments View: #1495 [#183725759](https://www.pivotaltracker.com/story/show/183725759)
+- List/Insert Variable  on Drawing Tile: #1493 [#183431011] (https://www.pivotaltracker.com/story/show/183431011)
+### Bug Fixes
+- Fix console warning "Adding document before firestore and userContext is available": #1480 [#183718139](https://www.pivotaltracker.com/story/show/183718139)
+- Scroll to commented tile in Teacher Guide and some problem sections isn't working: #1460 [#183643073](https://www.pivotaltracker.com/story/show/183643073)
+- Fix console error "Warning: Failed prop type: The prop `onSelect`...": #1490 [#183756388](https://www.pivotaltracker.com/story/show/183756388)
+- Fix MST detach warning when history scrubbing a resized tile.: #1494 [#183772527](https://www.pivotaltracker.com/story/show/183772527)
+
+### Asset Sizes
+|        File                                                                           |    Size   |
+|---------------------------------------------------------------------------------------|-----------|
+| vendor-main.6b6cd21d.js                                                               |      2.1M |
+| Geometry.27bab22f.js                                                                  |      886K |
+| Dataflow.a468af8e.js                                                                  |      735K |
+| common-Diagram-SharedVariables.370bf43f.js                                            |      615K |
+| index.d1e598eaccc663c2c2c2.js                                                         |      407K |
+| Table.7b7dd794.js                                                                     |       84K |
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.3a46870f.js |       51K |
+| common-SharedVariables-Drawing.f8212ef1.js                                            |       33K |
+| Drawing.3fa3feb5.js                                                                   |       26K |
+| common-Dataflow-Geometry.8787ebf3.js                                                  |       26K |
+| DataCard.358926a8.js                                                                  |       18K |
+| SharedVariables.6b802018.js                                                           |       17K |
+| Text.1ab2af58.js                                                                      |       16K |
+| Image.9c73f794.js                                                                     |       16K |
+| Diagram.6a512196.js                                                                   |       12K |
+| Starter.5a8e3691.js                                                                   |      1.2K |
+| SharedDataSet.a14fff08.js                                                             |      253B |
+
+|        File                   |    Size   |
+|-------------------------------|-----------|
+| main.3dcf01c7.css             |      165K |
+| Dataflow.f6c1e246.css         |       32K |
+| Diagram.8634075a.css          |       12K |
+| Table.fad90774.css            |       10K |
+| Geometry.99cf842b.css         |       10K |
+| DataCard.b2b5c0c3.css         |      8.4K |
+| Image.b81a37e5.css            |      6.3K |
+| Drawing.39e9ae0b.css          |      5.2K |
+| Text.b14eb834.css             |      4.5K |
+| SharedVariables.dcd83673.css  |      333B |
+| Starter.6352fad4.css          |      207B |
+
 ## Version 3.1.0 - Oct 18, 2022
 
 Version 3.1.0 contains quite a few individual tile improvements and bug fixes as well as some larger changes to allow generating and viewing the history of a document and more visibility of comments.
