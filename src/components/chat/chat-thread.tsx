@@ -98,7 +98,7 @@ export const ChatThread: React.FC<IProps> = ({ activeNavTab, user, chatThreads,
                   <ChatThreadToggle
                     isThreadExpanded={expandedThread === key}
                     activeNavTab={activeNavTab}
-                      />
+                  />
                 </div>
               </div>
               {

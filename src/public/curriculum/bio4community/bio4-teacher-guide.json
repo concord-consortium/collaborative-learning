@@ -1263,6 +1263,17 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
+                        "<h2>CHAPTER 6 - No new resources.</h2>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "HXNr2yCndseRnnWh",
+                    "title": "Text 13",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<h2>CHAPTER 5 RESOURCES</h2>"
                       ]
                     }
@@ -3587,7 +3598,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>CHAPTER 5 RESOURCES <strong>- </strong>No new resources.</h2>"
+                        "<h2>CHAPTER 5 RESOURCES - No new resources.</h2>"
                       ]
                     }
                   },

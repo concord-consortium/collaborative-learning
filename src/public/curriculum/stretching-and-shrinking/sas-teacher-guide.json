@@ -247,8 +247,7 @@
                       "format": "html",
                       "text": [
                         "<p><u>Presenting the Challenge</u><strong></strong></p>",
-                        "<p><strong>Display Learning Aid 1.1: Photograph of Mystery Teacher </strong>or have the students refer to their books. </p>",
-                        "Suggested questions"
+                        "<p><strong>Display Learning Aid 1.1: Photograph of Mystery Teacher </strong>or have the students refer to their books. </p>"
                       ]
                     }
                   },
@@ -374,17 +373,6 @@
                     }
                   },
                   {
-                    "display": "teacher",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><u>Making the Mathematics Explicit </u></p>",
-                        "<p>Focus the summary conversations on the use of ratios, “for every” statements and measurement.  Listen for the use of formal and informal language to assess your students’ understanding of these ideas to help you in your instruction for the rest of the Unit.</p>"
-                      ]
-                    }
-                  },
-                  {
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -392,7 +380,7 @@
                         "<p><strong>Suggested Questions</strong></p>",
                         "<ul><li>What measurements were important to you in finding the height of the teacher? (height of the magazine in the picture, height of the magazine in real life, height of the teacher in the picture.)</li></ul>",
                         "<p>Revisit the questions from the What If:</p>",
-                        "<ul><li>In What If Situation A, do you agree with Daphne’s reasoning? (Yes. Guide the conversation around the reasoning that the teacher being 7 inches tall and each magazine being 10 inches in real life gives us 7 groups of 10.)</li><li>Can someone explain Daphne’s statement: For every one magazine height, there are 10 inches in real life? (Answers will vary. Listen for their current understanding about rates and unit rates so you can expand on this throughout the Unit.)</li><li>In What If Situation A, do you agree with Daphne’s reasoning? (Yes. Guide the conversation around the reasoning that the teacher being 7 inches tall and each magazine being 10 inches in real life gives us 7 groups of 10.)</li></ul>"
+                        "<ul><li>In What If Situation A, do you agree with Daphne’s reasoning? (Yes. Guide the conversation around the reasoning that the teacher being 7 inches tall and each magazine being 10 inches in real life gives us 7 groups of 10.)</li><li>Can someone explain Daphne’s statement: For every one magazine height, there are 10 inches in real life? (Answers will vary. Listen for their current understanding about rates and unit rates so you can expand on this throughout the Unit.)</li></ul>"
                       ]
                     }
                   },
@@ -565,7 +553,7 @@
                   },
                   {
                     "id": "21AUG20220840AM",
-                    "title": "Right-handed and left-handed setup for using a rubber band stretcher",
+                    "title": "Right-handed setup for using a rubber band stretcher",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_presenting_the_challenge_2.png"
@@ -573,7 +561,7 @@
                   },
                   {
                     "id": "21AUG20220841AM",
-                    "title": "Similar figures produced by a two rubber band stretcher",
+                    "title": "Left-handed setup for using a rubber band stretcher",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_presenting_the_challenge_3.png"
@@ -697,8 +685,8 @@
                     }
                   },
                   {
-                    "title": "Similar figures produced by a three rubber band stretcher",
-                    "id": "24hCGEXVpFNUQjwi",
+                    "title": "Using a two rubber band stretcher",
+                    "id": "24hCGEasdfXVpFNUQjwsadfdsfi",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_making_mathematics_explicit_1.png"
@@ -715,11 +703,11 @@
                     }
                   },
                   {
-                    "title": "Similar figures showing an increase of 25%",
-                    "id": "ol68q8QVoeVFICU2",
+                    "title": "Using a three rubber band stretcher - first knot",
+                    "id": "ol68q8QVoeVFICUaassxx2",
                     "content": {
                       "type": "Image",
-                      "url": "ccimg://fbrtdb.concord.org/-MjFC5KZl_f_I6D91I2P"
+                      "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_making_mathematics_explicit_2.png"
                     }
                   },
                   {
@@ -733,11 +721,11 @@
                     }
                   },
                   {
-                    "title": "Similar figures showing an decrease of 25%",
-                    "id": "YLidaiv0RWNbLk7h",
+                    "title": "Using a three rubber band stretcher - second knot",
+                    "id": "YLidsafasaiv0RWNbLk7h",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_making_mathematics_explicit_2.png"
+                      "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_making_mathematics_explicit_3.png"
                     }
                   },
                   {
@@ -1927,12 +1915,16 @@
                       "text": [
                         "<p><u><strong>Launch (Getting Started)</strong></u></p>",
                         "<p><u><em>Connecting to Prior Knowledge</em></u></p>",
-                        "Introduce the vocabulary of scale factor and connect it to the work from previous problems. Discussing the pair of similar rectangles below can spring board the conversation.",
-                        "<p>Ask students to describe the relationship between the side lengths when going from the large shape to the smaller shape and vice versa. You can show the Launch Video here to reinforce the relationships between corresponding angles and corresponding sides of similar figures.(Language)</p>",
-                        "<p></p>",
-                        "<p>This Launch Video gives students a dynamic representation of similar figures.</p>",
-                        "<p>A man is building houses for his cat and dog, and he wants their houses to be similar to his own. As he puts the roofs on the houses, he discusses their characteristics. The pairs of corresponding sides of the triangular roofs are highlighted in succession, as are the pairs of corresponding angles. </p>"
+                        "Introduce the vocabulary of scale factor and connect it to the work from previous problems. Discussing the pair of similar rectangles below can spring board the conversation."
                       ]
+                    }
+                  },
+                  {
+                    "id": "KVr12DYAKUFasdfPcFs",
+                    "title": "Similar rectangles with a scale factor of 3",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/stretching-and-shrinking/images/similarRectanglesTG2_3.png"
                     }
                   },
                   {
@@ -2088,13 +2080,13 @@
                       "text": [
                         "<p>You might try this on one of the triangles in the Problem. Students should be able to measure the sides of the triangle with enough accuracy to verify the reasoning.</p>",
                         "<p>Once you feel students have some ideas about similarity and scale factor, probe students’ understanding of similarity by asking the reverse of some of the above questions:</p>",
-                        "<ul><li>If the perimeter of the mouth of a new Wump family member is 150, what are the length, width, and area of its mouth? What scale factor was used to grow this new Wump from Mug 1? (If the perimeter is 150, then I must find a number that when the original perimeter (10) is multiplied by this number, the product is 150, that is, 10 ×   . So, I divide 150 by 10 to get 15, which is the scale factor. Therefore, the length is 60, the width is 15, and the area is 900.)</li><li>What scale factor is needed to produce a new mouth (rectangle) whose perimeter is 5? (This requires students to shrink the original rectangle by a scale factor of  .)</li></ul>"
+                        "<ul><li>If the perimeter of the mouth of a new Wump family member is 150, what are the length, width, and area of its mouth? What scale factor was used to grow this new Wump from Mug 1? (If the perimeter is 150, then I must find a number that when the original perimeter (10) is multiplied by this number, the product is 150, that is, 10 ×   . So, I divide 150 by 10 to get 15, which is the scale factor. Therefore, the length is 60, the width is 15, and the area is 900.)</li><li>What scale factor is needed to produce a new mouth (rectangle) whose perimeter is 5? (This requires students to shrink the original rectangle by a scale factor of ½.)</li></ul>"
                       ]
                     }
                   },
                   {
                     "id": "KVr12DYAKUFgPcFs",
-                    "title": "",
+                    "title": "Scaling Mug’s mouth by ½",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/stretching-and-shrinking/images/SASTG_2-3_making_mathematics_explicit_1.png"
@@ -3034,6 +3026,31 @@
                     }
                   },
                   {
+                    "id": "RC3UieLB15VxqHaO",
+                    "title": "Rep-tiled triangle",
+                    "content": {
+                      "type": "Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-4.186, -2.093],
+                          "axisRange": [26.23, 17.486],
+                          "axisNames": ["x", "y"],
+                          "axisLabels": ["x", "y"]
+                        }
+                      },
+                      "objects": [
+                        { "type": "point", "parents": [1, 10.008111338797814], "properties": {"id":"IMav4NSL51yAx2cW","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [1.006617144808743, -0.011740095628415048], "properties": {"id":"WaQmRcXAjS6as7VI","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [9, 10.008111338797814], "properties": {"id":"fqFFfArr0yCYZJ3K","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["IMav4NSL51yAx2cW", "WaQmRcXAjS6as7VI", "fqFFfArr0yCYZJ3K"],"properties": {"id":"6XU2YDR00D7gA--b"} },
+                        { "type": "point", "parents": [5, 5], "properties": {"id":"ibra8nKjqADwKLiq","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [5, 10], "properties": {"id":"4QncjKswHDWPVSnP","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "point", "parents": [1, 5], "properties": {"id":"2YPLz3SsOv5QwWCR","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                        { "type": "polygon", "parents": ["ibra8nKjqADwKLiq", "4QncjKswHDWPVSnP", "2YPLz3SsOv5QwWCR"],"properties": {"id":"YqqUEnzvRliI6dmb"} }
+                      ]
+                    }
+                  },
+                  {
                     "id": "YJ6oeERZMx9HX5Oa",
                     "content": {
                       "type": "Text",
@@ -3372,10 +3389,7 @@
                       "format": "html",
                       "text": [
                         "<p><u>Presenting the Challenge</u></p>",
-                        "<p>Launch Video</p>",
-                        "<p>In this animation, a robot finds a device that takes his picture. The robot distorts the photo in a few different ways. The robot wonders which of the distortions is similar to the original picture.</p>",
                         "<p>Tell students that, in this Problem, they will look at sets of quadrilaterals and triangles to determine if they are similar.  They will use scale factors and ratios of adjacent sides to determine similarity.</p>",
-                        "<p></p>",
                         "<p>Pass out Learning Aid 4.1A Rectangles Sets and Triangle Set and Learning Aid 4.1C Ratio Recording Sheet for the initial Challenge. Distribute Learning Aid 4.1B What If, Situation B:  Shape Pairs for students to use during What If Situation A.</p>",
                         "<p></p>",
                         "<p><strong>Implementation Notes:</strong> The focus of this Problem is on internal ratios – ratio of two adjacent sides in one figure being equivalent to the two corresponding adjacent sides in the other similar figure. For quadrilaterals suggest they use short to long side as the ratio. Then ask in the Summary about long side to short. Both produce equal ratios, but the order of the ratio needs to be consistent.</p>"
