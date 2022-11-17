@@ -3,6 +3,7 @@ import { addDisposer, applySnapshot, getType, isAlive, types, getRoot,
   isStateTreeNode, SnapshotOut, Instance, getParent, destroy, hasParent,
   getSnapshot, addMiddleware, getEnv, IAnyStateTreeNode, detach,
   createActionTrackingMiddleware2, resolvePath} from "mobx-state-tree";
+import { Output } from "rete";
 
 describe("mst", () => {
   it("snapshotProcessor unexpectedly modifies the base type", () => {
@@ -664,76 +665,97 @@ describe("mst", () => {
 
   // See mst-detached-error.md for details about this
   describe("destroying an model that is being observed", () => {
-    const descriptions: Record<string, string> = observable({});
-
     function destroySoon(obj: IAnyStateTreeNode) {
+      // Using detach instead of destroy prevents the harmless errors. However it
+      // will then also not catch the harmful errors that can happen when the object
+      // is detached before it is destroyed.
       detach(obj);
       setTimeout(() => destroy(obj));
     }
 
-    const Item = types.model("Item", {
-      name: types.string
-    })
-    .views(self => ({
-      get nameWithDescription() {
-        const name = self.name;
-        const description = descriptions[name];
-        return `${name}: ${description}`;
-      }
-    }));
-
-    const List = types.model("List", {
-      items: types.array(Item)
-    })
-    .actions(self => ({
-      removeFirstItem() {
-        const todo = self.items[0];
-        delete descriptions[todo.name];
-        // Using detach instead of destroy prevents the harmless errors. However it
-        // will then also not catch the harmful errors.
-        // detach(todos);
-        destroy(todo);
-      },
-      removeFirstItemSoon() {
-        const todo = self.items[0];
-        delete descriptions[todo.name];
-        destroySoon(todo);
-      }
-    }));
-
     function initialize() {
-      descriptions.one = "description of one";
-      descriptions.two = "description of two";
+      const log = [] as string[];
+      const descriptions: Record<string, string> = observable({
+        one: "description of one",
+        two: "description of two"
+      });
+
+      const Item = types.model("Item", {
+        name: types.string
+      })
+      .views(self => ({
+        get nameWithDescription() {
+          const name = self.name;
+          log.push(`computedValue called on ${name}`);
+          const description = descriptions[name];
+          return `${name}: ${description}`;
+        }
+      }));
+
+      const List = types.model("List", {
+        items: types.array(Item)
+      })
+      .actions(self => ({
+        removeFirstItem() {
+          const todo = self.items[0];
+          delete descriptions[todo.name];
+          destroy(todo);
+        },
+        removeFirstItemSoon() {
+          const todo = self.items[0];
+          delete descriptions[todo.name];
+          destroySoon(todo);
+        }
+      }));
 
       return {
+        Item,
+        List,
+        descriptions,
         itemList: List.create({
           items: [
             { name: "one" },
             { name: "two" }
           ]
         }),
-        // Used to track each of the time the autorun runs
-        output: [] as string[]
+        // Used to track each calls to illustrate what is happening
+        log,
+        clearLog() {
+          log.length = 0;
+        }
       };
     }
 
+    const initialLog = [
+      "computedValue called on one",
+      "autorun: one - one: description of one",
+      "computedValue called on two",
+      "autorun: two - two: description of two"
+    ];
+
     test("without isAlive a warning is printed", () => {
 
-      const { itemList, output } = initialize();
+      const { itemList, log, clearLog } = initialize();
 
       // This list of autorun reactions emulates a list of MobX React
-      // that are monitoring the items in this list
-      const disposers = itemList.items.map((item) => autorun(() => {
-        // This will cause a warning to be printed to the console
-        // when the item has been destroyed
-        const line = item.nameWithDescription;
-        output.push(line);
-      }));
+      // components that are monitoring the items in this list.
+      // However with a real component the render call is not run
+      // directly. Instead the need to re-render is queued up when
+      // a dependency changes. If a parent of the component stops
+      // rendering this component in the meantime the re-render will
+      // never happen.
+      const disposers = itemList.items.map((item) => {
+        const itemName = item.name;
+        return autorun(() => {
+          // This will cause a warning to be printed to the console
+          // when the item has been destroyed
+          const { nameWithDescription } = item;
+          log.push(`autorun: ${itemName} - ${nameWithDescription}`);
+        });
+      });
 
-      expect(output).toEqual([
-        "one: description of one",
-        "two: description of two"
-      ]);
+      expect(log).toEqual(initialLog);
+      clearLog();
 
       jestSpyConsole("warn", spy => {
         itemList.removeFirstItem();
@@ -742,10 +764,9 @@ describe("mst", () => {
 
       expect(itemList.items.length).toBe(1);
 
-      expect(output).toEqual([
-        "one: description of one",
-        "two: description of two",
-        "one: undefined"
+      expect(log).toEqual([
+        "computedValue called on one",
+        "autorun: one - one: undefined"
       ]);
 
       // Clean up
@@ -753,19 +774,25 @@ describe("mst", () => {
     });
 
     test("with isAlive no warning is printed", () => {
-      const { itemList, output } = initialize();
+      const { itemList, log, clearLog } = initialize();
 
       // This list of autorun reactions emulates a list of MobX React
-      // that are monitoring the items in this list
-      const disposers = itemList.items.map((item) => autorun(() => {
-        const line = isAlive(item) ? item.nameWithDescription : "not alive";
-        output.push(line);
-      }));
+      // components that are monitoring the items in this list.
+      // However with a real component the render call is not run
+      // directly. Instead the need to re-render is queued up when
+      // a dependency changes. If a parent of the component stops
+      // rendering this component in the meantime the re-render will
+      // never happen.
+      const disposers = itemList.items.map((item) => {
+        const itemName = item.name;
+        return autorun(() => {
+          const line = isAlive(item) ? item.nameWithDescription : "not alive";
+          log.push(`autorun: ${itemName} - ${line}`);
+        });
+      });
 
-      expect(output).toEqual([
-        "one: description of one",
-        "two: description of two"
-      ]);
+      expect(log).toEqual(initialLog);
+      clearLog();
 
       jestSpyConsole("warn", spy => {
         itemList.removeFirstItem();
@@ -774,10 +801,8 @@ describe("mst", () => {
 
       expect(itemList.items.length).toBe(1);
 
-      expect(output).toEqual([
-        "one: description of one",
-        "two: description of two",
-        "not alive"
+      expect(log).toEqual([
+        "autorun: one - not alive"
       ]);
 
       // Clean up
@@ -785,18 +810,32 @@ describe("mst", () => {
     });
 
     test("with destroySoon no warning is printed", () => {
-      const { itemList, output } = initialize();
+      const { itemList, log, clearLog } = initialize();
 
       // This list of autorun reactions emulates a list of MobX React
-      // that are monitoring the items in this list
-      const disposers = itemList.items.map((item) => autorun(() => {
-        output.push(item.nameWithDescription);
-      }));
+      // components that are monitoring the items in this list.
+      // However with a real component the render call is not run
+      // directly. Instead the need to re-render is queued up when
+      // a dependency changes. If a parent of the component stops
+      // rendering this component in the meantime the re-render will
+      // never happen.
+      const disposers = itemList.items.map((item) => {
+        const itemName = item.name;
+        return autorun(() => {
+          // In this case a warning won't be printed because the item
+          // is detached first and then the autorun is disposed
+          // before the item is destroyed
+          // The nameWithDescription is still called on the item though
+          // so if nameWithDescription assumes the item it is a child
+          // that will fail. Or if nameWithDescription assumes the description
+          // will always exist for itself that could also fail.
+          const { nameWithDescription } = item;
+          log.push(`autorun: ${itemName} - ${nameWithDescription}`);
+        });
+      });
 
-      expect(output).toEqual([
-        "one: description of one",
-        "two: description of two"
-      ]);
+      expect(log).toEqual(initialLog);
+      clearLog();
 
       jestSpyConsole("warn", spy => {
         itemList.removeFirstItemSoon();
@@ -805,10 +844,9 @@ describe("mst", () => {
 
       expect(itemList.items.length).toBe(1);
 
-      expect(output).toEqual([
-        "one: description of one",
-        "two: description of two",
-        "one: undefined"
+      expect(log).toEqual([
+        "computedValue called on one",
+        "autorun: one - one: undefined"
       ]);
 
       // Clean up
