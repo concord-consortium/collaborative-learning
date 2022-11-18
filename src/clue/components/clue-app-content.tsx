@@ -6,7 +6,9 @@ import { BaseComponent, IBaseProps } from "../../components/base";
 import { WorkspaceComponent } from "../../components/workspace/workspace";
 import { DialogComponent } from "../../components/utilities/dialog";
 import { TeacherDashboardComponent } from "./teacher/teacher-dashboard";
-import { Logger, LogEventName } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
+
 import "./clue-app-content.sass";
 
 interface IProps extends IBaseProps {}

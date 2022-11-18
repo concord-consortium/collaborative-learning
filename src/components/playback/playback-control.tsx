@@ -4,9 +4,8 @@ import classNames from "classnames";
 import { Instance } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { useUIStore } from "../../hooks/use-stores";
+import { logCurrentHistoryEvent } from "../../models/history/log-history-event";
 import { TreeManager } from "../../models/history/tree-manager";
-import { Logger } from "../../lib/logger";
-// import { PlaybackMarkerToolbar } from "./marker-toolbar";
 import Marker from "../../clue/assets/icons/playback/marker.svg";
 import PlayButton from "../../clue/assets/icons/playback/play-button.svg";
 import PauseButton from "../../clue/assets/icons/playback/pause-button.svg";
@@ -42,26 +41,17 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   // by the history stuff, but it is being used to trigger document saves to Firebase
   // I think.  In some sense this is like a hash of the document content.
 
-  const {numHistoryEventsApplied} = treeManager;
+  const {numHistoryEventsApplied, currentHistoryEntry} = treeManager;
   // numHistoryEventsApplied can be 0 or undefined, the event is undefined in both cases
-  const currentHistoryEvent = !numHistoryEventsApplied
-                                ? undefined
-                                : treeManager.getHistoryEntry(numHistoryEventsApplied - 1);
-  const sliderValue = numHistoryEventsApplied === undefined ? 0 : numHistoryEventsApplied;
-  const eventCreatedTime = currentHistoryEvent?.created;
+  const sliderValue = numHistoryEventsApplied ?? 0;
+  const eventCreatedTime = currentHistoryEntry?.created;
   const playbackDisabled = numHistoryEventsApplied === undefined || sliderValue === history.length;
 
-  const handlePlayPauseToggle = (playing?: boolean) => {
+  const handlePlayPauseToggle = useCallback((playing?: boolean) => {
     const playStatus = playing !== undefined ? playing : !sliderPlaying;
-    Logger.logHistoryEvent({
-      documentId: treeManager.mainDocument?.key || '',
-      historyEventId: currentHistoryEvent?.id,
-      historyLength: history.length,
-      historyIndex: sliderValue,
-      action: playStatus ? "playStart": "playStop",
-    });
+    logCurrentHistoryEvent(treeManager, playStatus ? "playStart" : "playStop");
     setSliderPlaying(playStatus);
-  };
+  }, [sliderPlaying, treeManager]);
 
   useEffect(() => {
     if (sliderPlaying) {
@@ -104,12 +94,7 @@ export const PlaybackControlComponent: React.FC<IProps> = observer((props: IProp
   };
 
   const handleSliderAfterChange = (value: any) => {
-    Logger.logHistoryEvent({
-      documentId: treeManager.mainDocument?.key || '',
-      historyEventId: currentHistoryEvent?.id,
-      historyLength: history.length,
-      historyIndex: value,
-      action: "playSeek"});
+    logCurrentHistoryEvent(treeManager, "playSeek");
   };
 
   const handleAddMarker = (value: any) => {

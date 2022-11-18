@@ -1,17 +1,9 @@
 import { v4 as uuid } from "uuid";
-import { getSnapshot } from "mobx-state-tree";
-import { Optional } from "utility-types";
-import { ITileModel } from "../models/tiles/tile-model";
+import { LogEventMethod, LogEventName } from "./logger-types";
 import { IStores } from "../models/stores/stores";
 import { UserModelType } from "../models/stores/user";
-import { InvestigationModelType } from "../models/curriculum/investigation";
-import { ProblemModelType } from "../models/curriculum/problem";
-import { DocumentModelType } from "../models/document/document";
-import { JXGChange } from "../models/tiles/geometry/jxg-changes";
-import { ITableChange } from "../models/tiles/table/table-change";
 import { ENavTab } from "../models/view/nav-tabs";
 import { DEBUG_LOGGER } from "../lib/debug";
-import { isSectionPath, parseSectionPath } from "../../functions/src/shared";
 import { timeZoneOffsetString } from "../utilities/js-utils";
 
 type LoggerEnvironment = "dev" | "production";
@@ -54,148 +46,11 @@ interface LogMessage {
   parameters: any;
 }
 
-interface TileLoggingMetadata {
-  originalTileId?: string;
-}
-
-export enum LogEventMethod {
-  DO = "do",
-  UNDO = "undo",
-  REDO = "redo"
-}
-
-export enum LogEventName {
-  CREATE_TILE,
-  COPY_TILE,
-  MOVE_TILE,
-  DELETE_TILE,
-
-  VIEW_SHOW_DOCUMENT,
-  VIEW_SHOW_COMPARISON_DOCUMENT,
-  VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT,
-  VIEW_ENTER_FOUR_UP,
-  VIEW_ENTER_ONE_UP,
-  VIEW_FOUR_UP_RESIZED,
-  VIEW_SHOW_COMPARISON_PANEL,
-  VIEW_HIDE_COMPARISON_PANEL,
-  VIEW_SHOW_SUPPORT,
-  VIEW_GROUP,
-
-  CREATE_PERSONAL_DOCUMENT,
-  CREATE_LEARNING_LOG,
-
-  SHOW_WORK,
-  SHOW_TAB,
-  SHOW_TAB_SECTION,
-  HIDE_SOLUTIONS,
-  SHOW_SOLUTIONS,
-
-  GRAPH_TOOL_CHANGE,
-  DRAWING_TOOL_CHANGE,
-  TABLE_TOOL_CHANGE,
-  TEXT_TOOL_CHANGE,
-  DATAFLOW_TOOL_CHANGE,
-
-  TILE_UNDO,
-  TILE_REDO,
-
-  PUBLISH_DOCUMENT,
-  PUBLISH_SUPPORT,
-  DELETE_SUPPORT,
-
-  CREATE_STICKY_NOTE,
-  CLOSE_STICKY_NOTES,
-  OPEN_STICKY_NOTES,
-
-  ADD_INITIAL_COMMENT_FOR_DOCUMENT,
-  ADD_INITIAL_COMMENT_FOR_TILE,
-  ADD_RESPONSE_COMMENT_FOR_DOCUMENT,
-  ADD_RESPONSE_COMMENT_FOR_TILE,
-  DELETE_COMMENT_FOR_DOCUMENT,
-  DELETE_COMMENT_FOR_TILE,
-  EXPAND_COMMENT_THREAD_FOR_DOCUMENT,
-  EXPAND_COMMENT_THREAD_FOR_TILE,
-  COLLAPSE_COMMENT_THREAD_FOR_DOCUMENT,
-  COLLAPSE_COMMENT_THREAD_FOR_TILE,
-  CHAT_PANEL_HIDE,
-  CHAT_PANEL_SHOW,
-
-  // the following are for potential debugging purposes and are all marked "internal"
-  INTERNAL_AUTHENTICATED,
-  INTERNAL_ERROR_ENCOUNTERED,
-
-  DASHBOARD_SWITCH_CLASS,
-  DASHBOARD_SWITCH_PROBLEM,
-  DASHBOARD_DESELECT_STUDENT,
-  DASHBOARD_SELECT_STUDENT,
-  DASHBOARD_TOGGLE_TO_WORKSPACE,
-  DASHBOARD_TOGGLE_TO_DASHBOARD,
-
-  TEACHER_NETWORK_EXPAND_DOCUMENT_SECTION,
-  TEACHER_NETWORK_COLLAPSE_DOCUMENT_SECTION,
-
-  HISTORY_SHOW_CONTROLS,
-  HISTORY_HIDE_CONTROLS,
-  HISTORY_PLAYBACK_START,
-  HISTORY_PLAYBACK_STOP,
-  HISTORY_PLAYBACK_SEEK
-}
-
-// This is the form the log events take
-export interface SimpleTileLogEvent {
-  path?: string;
-  args?: Array<any>;
-}
-
-export interface DataflowProgramChange extends Record<string,any>{
-  targetType: string,
-  nodeTypes?: string[],
-  nodeIds?: number[],
-}
-
-type LoggableTileChangeEvent =  Optional<JXGChange, "operation"> |
-                                SimpleTileLogEvent |
-                                Optional<ITableChange, "action"> |
-                                DataflowProgramChange;
-
-interface IDocumentInfo {
-  type: string;
-  key?: string;
-  uid?: string;
-  title?: string;
-  sectionId?: string;
-  properties?: { [prop: string]: string };
-  changeCount?: number;
-  remoteContext?: string;
-}
-
-interface ITeacherNetworkInfo {
-  networkClassHash?: string;
-  networkUsername?: string;
-}
-
-type CommentAction = "add" | "delete" | "expand" | "collapse";  // | "edit"
-export interface ILogComment {
-  focusDocumentId: string;
-  focusTileId?: string;
-  isFirst?: boolean; // only used with "add"
-  commentText: string;
-  action: CommentAction;
-}
-
-type HistoryAction = "showControls" | "hideControls" | "playStart" | "playStop" | "playSeek";
-export interface ILogHistory {
-  documentId: string;
-  historyEventId?: string;  // The id of the history entry where the action took place. Used for start, stop and seek.
-  historyIndex?: number; // Index into history array. Used for start, stop, seek.
-  historyLength?: number; // Used for start, stop, seek
-  action: HistoryAction;
-}
-
 export class Logger {
   public static isLoggingEnabled = false;
 
-  public static initializeLogger(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
+  // `appContext` properties are logged with every event
+  public static initializeLogger(stores: IStores, appContext?: Record<string, any>) {
     const { appMode } = stores;
     const logModes: Array<typeof appMode> = ["authed"];
     this.isLoggingEnabled = logModes.includes(appMode) || DEBUG_LOGGER;
@@ -204,12 +59,11 @@ export class Logger {
       // eslint-disable-next-line no-console
       console.log("Logger#initializeLogger called.");
     }
-    this._instance = new Logger(stores, investigation, problem);
+    this._instance = new Logger(stores, appContext);
   }
 
-  public static updateProblem(investigation: InvestigationModelType, problem: ProblemModelType) {
-    this._instance.problemTitle = problem.title;
-    this._instance.investigationTitle = investigation.title;
+  public static updateAppContext(appContext: Record<string, any>) {
+    Object.assign(this._instance.appContext, appContext);
   }
 
   public static log(event: LogEventName, parameters?: Record<string, unknown>, method?: LogEventMethod) {
@@ -218,176 +72,6 @@ export class Logger {
     const eventString = LogEventName[event];
     const logMessage = Logger.Instance.createLogMessage(eventString, parameters, method);
     sendToLoggingService(logMessage, this._instance.stores.user);
-  }
-
-  public static logTileEvent(event: LogEventName, tile?: ITileModel, metaData?: TileLoggingMetadata,
-    commentText?: string) {
-    if (!this._instance) return;
-
-    let parameters = {};
-
-    if (tile) {
-      const { uid, key, type, changeCount, sectionId, remoteContext } = Logger.Instance.getTileContext(tile.id);
-      const teacherNetworkInfo: ITeacherNetworkInfo | undefined = remoteContext
-      ? { networkClassHash: remoteContext,
-          networkUsername: `${uid}@${this._instance.stores.user.portal}`}
-      : undefined;
-
-      parameters = {
-        objectId: tile.id,
-        objectType: tile.content.type,
-        serializedObject: getSnapshot(tile).content,
-        documentUid: uid,
-        documentKey: key,
-        documentType: type,
-        documentChanges: changeCount,
-        sectionId,
-        commentText,
-        ...teacherNetworkInfo
-      };
-
-      if (event === LogEventName.COPY_TILE && metaData && metaData.originalTileId) {
-        const sourceDocument = Logger.Instance.getTileContext(metaData.originalTileId);
-        parameters = {
-          ...parameters,
-          sourceUsername: sourceDocument.uid,
-          sourceObjectId: metaData.originalTileId,
-          sourceDocumentKey: sourceDocument.key,
-          sourceDocumentType: sourceDocument.type,
-          sourceDocumentTitle: sourceDocument.title || "",
-          sourceDocumentProperties: sourceDocument.properties || {},
-          sourceSectionId: sourceDocument.sectionId
-        };
-      }
-    }
-
-    Logger.log(event, parameters);
-  }
-
-  public static logCurriculumEvent(event: LogEventName, curriculum: string, params?: Record<string, any>) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [unit, facet, investigation, problem, section] = parseSectionPath(curriculum) || [];
-    // unit, investigation, and problem are already being logged as part of the common log params
-    // log the facet and section separately; they're embedded in the path, but could be useful independently
-    const parameters = { curriculum, curriculumFacet: facet, curriculumSection: section, ...params };
-    Logger.log(event, parameters);
-  }
-
-  public static logHistoryEvent(historyLogInfo: ILogHistory) {
-    const eventMap: Record<HistoryAction, LogEventName> = {
-      showControls: LogEventName.HISTORY_SHOW_CONTROLS,
-      hideControls: LogEventName.HISTORY_HIDE_CONTROLS,
-      playStart: LogEventName.HISTORY_PLAYBACK_START,
-      playStop: LogEventName.HISTORY_PLAYBACK_STOP,
-      playSeek: LogEventName.HISTORY_PLAYBACK_SEEK
-    };
-    const event = eventMap[historyLogInfo.action];
-    if (isSectionPath(historyLogInfo.documentId)) {
-      Logger.logCurriculumEvent(event, historyLogInfo.documentId,
-        { historyLength: historyLogInfo.historyLength,
-          historyIndex: historyLogInfo.historyIndex,
-          historyEventId: historyLogInfo.historyEventId
-        });
-    }
-    else {
-      const document = this._instance.stores.documents.getDocument(historyLogInfo.documentId)
-                        || this._instance.stores.networkDocuments.getDocument(historyLogInfo.documentId);
-      if (document) {
-        Logger.logDocumentEvent(event, document,
-          { historyLength: historyLogInfo.historyLength,
-            historyIndex: historyLogInfo.historyIndex,
-            historyEventId: historyLogInfo.historyEventId
-          });
-      }
-      else {
-        console.warn("Warning: couldn't log history event for document:", historyLogInfo.documentId);
-      }
-    }
-  }
-
-  public static logDocumentEvent(event: LogEventName, document: DocumentModelType, params?: Record<string, any>) {
-    const teacherNetworkInfo: ITeacherNetworkInfo | undefined = document.isRemote
-        ? { networkClassHash: document.remoteContext,
-            networkUsername: `${document.uid}@${this._instance.stores.user.portal}`}
-        : undefined;
-
-    const parameters = {
-      documentUid: document.uid,
-      documentKey: document.key,
-      documentType: document.type,
-      documentTitle: document.title || "",
-      documentProperties: document.properties?.toJSON() || {},
-      documentVisibility: document.visibility,
-      documentChanges: document.changeCount,
-      ...params,
-      ...teacherNetworkInfo
-    };
-    Logger.log(event, parameters);
-  }
-
-  public static logCommentEvent({ focusDocumentId, focusTileId, isFirst, commentText, action }: ILogComment) {
-    const eventMap: Record<CommentAction, LogEventName> = {
-      add: focusTileId
-            ? isFirst
-                ? LogEventName.ADD_INITIAL_COMMENT_FOR_TILE
-                : LogEventName.ADD_RESPONSE_COMMENT_FOR_TILE
-            : isFirst
-                ? LogEventName.ADD_INITIAL_COMMENT_FOR_DOCUMENT
-                : LogEventName.ADD_RESPONSE_COMMENT_FOR_DOCUMENT,
-      delete: focusTileId
-                ? LogEventName.DELETE_COMMENT_FOR_TILE
-                : LogEventName.DELETE_COMMENT_FOR_DOCUMENT,
-      expand: focusTileId
-                ? LogEventName.EXPAND_COMMENT_THREAD_FOR_TILE
-                : LogEventName.EXPAND_COMMENT_THREAD_FOR_DOCUMENT,
-      collapse: focusTileId
-                ? LogEventName.COLLAPSE_COMMENT_THREAD_FOR_TILE
-                : LogEventName.COLLAPSE_COMMENT_THREAD_FOR_DOCUMENT
-    };
-    const event = eventMap[action];
-    let tileType = undefined;
-    if (isSectionPath(focusDocumentId)) {
-      if (focusTileId) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const [unit, facet, investigation, problem, section] = parseSectionPath(focusDocumentId) || [];
-        const curriculumStore = facet === "guide" ?  this._instance.stores.teacherGuide : this._instance.stores.problem;
-        tileType = curriculumStore?.getSectionById(section)?.content?.getTileType(focusTileId);
-      }
-      Logger.logCurriculumEvent(event, focusDocumentId, { tileId: focusTileId, tileType, commentText });
-    }
-    else {
-      const document = this._instance.stores.documents.getDocument(focusDocumentId)
-                        || this._instance.stores.networkDocuments.getDocument(focusDocumentId);
-      if (document) {
-        tileType = focusTileId ? document.content?.getTileType(focusTileId) : undefined;
-        Logger.logDocumentEvent(event,
-          document, { tileId: focusTileId, tileType, commentText });
-      }
-      else {
-        console.warn("Warning: couldn't log comment event for document:", focusDocumentId);
-      }
-    }
-  }
-
-  public static logTileChange(
-    eventName: LogEventName,
-    operation: string,
-    change: LoggableTileChangeEvent,
-    toolId: string,
-    method?: LogEventMethod)
-  {
-    const { uid, key, type, changeCount, sectionId } = Logger.Instance.getTileContext(toolId);
-    const parameters: {[k: string]: any} = {
-      toolId,
-      operation,
-      ...change,
-      documentUid: uid,
-      documentKey: key,
-      documentType: type,
-      documentChanges: changeCount,
-      sectionId
-    };
-    Logger.log(eventName, parameters, method);
   }
 
   private static _instance: Logger;
@@ -399,15 +83,17 @@ export class Logger {
     throw new Error("Logger not initialized yet.");
   }
 
+  public static get stores() {
+    return this._instance?.stores;
+  }
+
   private stores: IStores;
-  private investigationTitle = "";
-  private problemTitle = "";
+  private appContext: Record<string, any> = {};
   private session: string;
 
-  private constructor(stores: IStores, investigation?: InvestigationModelType, problem?: ProblemModelType) {
+  private constructor(stores: IStores, appContext = {}) {
     this.stores = stores;
-    if (investigation) this.investigationTitle = investigation.title;
-    if (problem) this.problemTitle = problem.title;
+    this.appContext = appContext;
     this.session = uuid();
   }
 
@@ -435,8 +121,7 @@ export class Logger {
       classHash,
       session: this.session,
       appMode,
-      investigation: this.investigationTitle,
-      problem: this.problemTitle,
+      ...this.appContext,
       problemPath,
       navTabsOpen: navTabContentShown,
       selectedNavTab: activeNavTab,
@@ -466,19 +151,6 @@ export class Logger {
     return logMessage;
   }
 
-  private getTileContext(tileId: string): IDocumentInfo {
-    const document = this.stores.documents.findDocumentOfTile(tileId)
-      || this.stores.networkDocuments.findDocumentOfTile(tileId);
-    if (document) {
-      const { type, key, uid, title, content, changeCount, remoteContext, properties } = document;
-      const sectionId = content?.getSectionIdForTile(tileId);
-      return { type, key, uid, title, sectionId, changeCount, remoteContext, properties: properties?.toJSON() || {} };
-    } else {
-      return {
-        type: "Instructions"        // eventually we will need to include copying from supports
-      };
-    }
-  }
 }
 
 function sendToLoggingService(data: LogMessage, user: UserModelType) {

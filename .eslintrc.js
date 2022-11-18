@@ -36,7 +36,8 @@ module.exports = {
       "@typescript-eslint/no-non-null-assertion": "off",  // 27 as of 2020-09-13
       "@typescript-eslint/no-require-imports": "error",
       "@typescript-eslint/no-shadow": ["error", { builtinGlobals: false, hoist: "all", allow: ["resolve", "reject"] }],
-      "@typescript-eslint/no-unused-vars": ["warn", { args: "none", ignoreRestSiblings: true }],
+      "@typescript-eslint/no-unused-vars": ["warn",
+        { args: "none", ignoreRestSiblings: true, "destructuredArrayIgnorePattern": "^_" }],
       "@typescript-eslint/prefer-optional-chain": "off",  // 300 as of 2020-09-13
       curly: ["error", "multi-line", "consistent"],
       "dot-notation": "error",

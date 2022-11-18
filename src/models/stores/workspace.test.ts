@@ -2,6 +2,10 @@ import { WorkspaceModel, WorkspaceModelType, ProblemWorkspace } from "./workspac
 import { createDocumentModel, DocumentModelType } from "../document/document";
 import { ProblemDocument } from "../document/document-types";
 
+jest.mock("../document/log-document-event", () => ({
+  logDocumentEvent: () => null
+}));
+
 describe("workspaces model", () => {
   let workspace: WorkspaceModelType;
   let goodDoc: DocumentModelType;

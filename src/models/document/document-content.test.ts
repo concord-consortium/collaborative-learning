@@ -32,12 +32,9 @@ jest.mock("../../utilities/mst-utils", () => {
 });
 
 // mock Logger calls
-const logTileEvent = jest.fn();
-jest.mock("../../lib/logger", () => ({
-  ...(jest.requireActual("../../lib/logger") as any),
-  Logger: {
-    logTileEvent: (...args: any) => logTileEvent(...args)
-  }
+const mockLogTileDocumentEvent = jest.fn();
+jest.mock("../tiles/log/log-tile-document-event", () => ({
+  logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent()
 }));
 
 function parsedExport(content: DocumentContentModelType, options?: IDocumentExportOptions) {
@@ -1472,20 +1469,20 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
 
 describe("DocumentContentModel -- user-logging actions", () => {
   const documentContent = DocumentContentModel.create({});
-  logTileEvent.mockReset();
+  mockLogTileDocumentEvent.mockReset();
 
   it("logs user adding/removing tiles", () => {
     const newTile = documentContent.userAddTile("text");
     const newTileId = newTile?.tileId;
     expect(newTileId).toBeDefined();
-    expect(logTileEvent).toHaveBeenCalledTimes(1);
+    expect(mockLogTileDocumentEvent).toHaveBeenCalledTimes(1);
 
     documentContent.userDeleteTile(newTileId!);
-    expect(logTileEvent).toHaveBeenCalledTimes(2);
+    expect(mockLogTileDocumentEvent).toHaveBeenCalledTimes(2);
 
     // deleting it again has no effect
     documentContent.userDeleteTile(newTileId!);
-    expect(logTileEvent).toHaveBeenCalledTimes(2);
+    expect(mockLogTileDocumentEvent).toHaveBeenCalledTimes(2);
   });
 });
 
