@@ -59,7 +59,7 @@ runReactions ("mobx@observable.ts:112:9")
 
 This is one case that can cause these MST detached or destroyed object warnings. 
 
-Because MobX React components are reactions, they will trigger computed value checks for any computed value they access whenever one of these observed computed values changes. This is done by MobX to see if the reaction should be run again. So let’s say you have a component rendering an item in a MST list and it uses a computed value from the item. This computed value accesses some global observable object to get some extra info about the item. 
+Because MobX React `observer` components use reactions under-the-hood, they will trigger computed value checks for any computed value they access whenever one of these observed computed values changes. This is done by MobX to see if the reaction should be run again. So let’s say you have a component rendering an item in a MST list and it uses a computed value from the item. This computed value accesses some global observable object to get some extra info about the item. 
 
 ```js
 const descriptions = observable({
@@ -83,7 +83,7 @@ const ItemComponent = observer(function ItemComponent({item})) {
 
 A working version of this code can be found in `mst.test.ts`.
 
-If you remove the item from the list by destroying it using `destroy(item)` and at the same time you modify the `descriptions` to clean up the entry for this item, you will see a confusing warning from MST. The change of `descriptions` triggers a `shouldCompute` test of `nameWithDescription`. But at this point the item will be destroyed so the reading of `self.name` will print the detached or destroyed object warning. This is confusing because the item is destroyed so why is `nameWithDescription` being read? On top of this you might see that the `ItemComponent` for the item is never even re-rendered because its parent component is only rendering the remaining children. 
+If you remove the item from the list by destroying it using `destroy(item)` and at the same time you modify the `descriptions` to clean up the entry for this item, you will see a confusing warning from MST. The change of `descriptions` triggers a `shouldCompute` test of `nameWithDescription`. But at this point the item has been destroyed so the reading of `self.name` will print the detached or destroyed object warning. This is confusing because the item is destroyed so why is `nameWithDescription` being read? On top of this you might see that the `ItemComponent` for the item is never even re-rendered because its parent component is only rendering the remaining children. 
 
 Here is what is going on: even though `ItemComponent` isn't re-rendered, the fact that it was rendered once means there is a MobX reaction monitoring `item.nameWithDescription`. `item.nameWithDescription` is accessing `descriptions`. When `descriptions` changes MobX goes up the dependency tree and finds this reaction. It then goes through the reaction's dependencies to see if any of them have actually changed. To tell if a dependency has changed it needs to "evaluate" or compute it. So it actually evaluates `nameWithDescription`. And because the item has been destroyed MST prints a warning about the reading of `self.name`. 
 
