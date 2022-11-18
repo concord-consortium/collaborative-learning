@@ -1,25 +1,36 @@
+import { types } from "mobx-state-tree";
+import { Variable } from "@concord-consortium/diagram-view";
 import { DiagramMigrator } from "./diagram-migrator";
 import { kDiagramToolStateVersion } from "./diagram-types";
 
+const NodeContainer = types.model("NodeContainer", {
+  variable: Variable,
+  diagramMigrator: DiagramMigrator
+});
+
 describe("DiagramMigrator", () => {
+  const variable = { id: "v1", name: "variable1" };
   const basicDiagram = {
     root: {
       nodes: {
         "node1": {
           x: 1,
           y: 1,
-          variable: "variable1"
+          variable: "v1"
         }
       }
     },
   };
 
   it("loads modern state", () => {
-    const migrated = DiagramMigrator.create({
-      version: kDiagramToolStateVersion,
-      ...basicDiagram
+    const dc = NodeContainer.create({
+      variable,
+      diagramMigrator: {
+        version: kDiagramToolStateVersion,
+        ...basicDiagram
+      }
     });
-    expect(migrated.root?.nodes.size).toBe(1);
+    expect(dc.diagramMigrator.root?.nodes.size).toBe(1);
   });
 
   it("blanks out state without a version", () => {
