@@ -81,7 +81,7 @@ const ItemComponent = observer(function ItemComponent({item})) {
 });
 ```
 
-A working version of this code can be found in `mst.test.ts`.
+A working version of this code can be found in `mst.test.ts` and `mobx-react-mst.test.tsx`.
 
 If you remove the item from the list by destroying it using `destroy(item)` and at the same time you modify the `descriptions` to clean up the entry for this item, you will see a confusing warning from MST. The change of `descriptions` triggers a `shouldCompute` test of `nameWithDescription`. But at this point the item has been destroyed so the reading of `self.name` will print the detached or destroyed object warning. This is confusing because the item is destroyed so why is `nameWithDescription` being read? On top of this you might see that the `ItemComponent` for the item is never even re-rendered because its parent component is only rendering the remaining children.
 
@@ -93,10 +93,19 @@ Instead you can use MST's isAlive combined with an optimization that MobX has to
 
 ```
 const ItemComponent = observer(function ItemComponent({item})) {
-  return isAlive(item)
-    ? <span>{ item.nameWithDescription }</span>
-    : null;
+  if (!isAlive(item)) {
+    console.warn("rendering destroyed item");
+  }
+  return <span>{ item.nameWithDescription }</span>;
 });
 ```
 
-It turns out that MST's isAlive is observable itself. So the "aliveness" of item is now another dependency of the `ItemComponent` observer reaction. If MobX evaluated all of the dependencies in parallel for changes, this wouldn't fix the problem because `nameWithDescription` would still be evaluated to see if it changed. In reality, MobX evaluates the dependencies in the order that they are referenced, and it stops going through the list if a dependency has changed. It is implemented this way because as soon as MobX sees a change it knows it is has to run the reaction, so there is no reason to keep looking for changes. Because of this optimization, when the "aliveness" of `item` changes, `nameWithDescription` will not be evaluated/computed. If the component actually gets re-rendered `item.nameWithDescription` will also not be called if isAlive is false. In this case it is unlikely the component will be re-rendered because the parent component should only be rendering `ItemComponent`s for the active items.
+It turns out that MST's isAlive is observable itself. So the "aliveness" of item is now another dependency of the `ItemComponent` observer reaction. If MobX evaluated all of the dependencies in parallel for changes, this wouldn't fix the problem because `nameWithDescription` would still be evaluated to see if it changed. In reality, MobX evaluates the dependencies in the order that they are referenced, and it stops going through the list if a dependency has changed. It is implemented this way because as soon as MobX sees a change it knows it is has to run the reaction, so there is no reason to keep looking for changes. Because of this optimization, when the "aliveness" of `item` changes, `nameWithDescription` will not be evaluated/computed. If the component actually gets re-rendered there will be a console warning from us to help find the problem, and then a second warning from MST about accessing `nameWithDescription` on a destroyed object. If this happens it is probably some kind of memory leaking error since the parent component should only be rendering `ItemComponent`s for the active items.
+
+### Alternative destroy soon solution
+
+It is also possible to avoid this warning by first detaching the item from the tree and then destroying it. The initial detach will still cause the `nameWithDescription` to be re-computed but because the item is not destroyed the reading of `name` will still be valid. This alternative approach demonstrated in both `mst.test.ts` and `mobx-react-mst.test.tsx`
+
+The potential problem with this approach is any errors or side effects that might happen when the item is detached before it is destroyed. In the case that triggered this whole investigation, the table tile is looking at the shared model manager to figure out the dataset. Since the table tile is no longer part of the tree, its reference gets automatically removed from the entry in the shared model manager. So when the MST view tries to find the shared model a warning is printed because the shared model manager doesn't expect a lookup for a tile that isn't part of the tree. Additionally when it is just detached and the dataSet view is evaluated it returns the importedDataSet. This seems to be harmless, but if something was being done with that imported data set like automatically adding it as a shared model, that would be bad.
+
+If the whole evaluation of view is short circuited using the first approach of an isAlive check, then this avoids these side effects. It does mean we have to add this check to any components that are using models that might be destroyed and where the component is directly or indirectly depending on an observable that changes when the item is destroyed. This extra work seems worth it to prevent harder to find side effects.
