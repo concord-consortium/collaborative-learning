@@ -1,5 +1,54 @@
 # Changelog
 
+## Version 3.3.0 - Nov 16, 2022
+
+Version 3.3.0 addresses bug fixes for chat/comment features and adding new variabledialog to the drawing tile.
+
+### Features/Improvements
+- New Variable Choice on Drawing Toolbar: #1485 [#183690048] (https://www.pivotaltracker.com/story/show/183690048)
+- Network Documents in All Documents with Comments View: #1495 [#183725759](https://www.pivotaltracker.com/story/show/183725759)
+- List/Insert Variable  on Drawing Tile: #1493 [#183431011] (https://www.pivotaltracker.com/story/show/183431011)
+### Bug Fixes
+- Fix console warning "Adding document before firestore and userContext is available": #1480 [#183718139](https://www.pivotaltracker.com/story/show/183718139)
+- Scroll to commented tile in Teacher Guide and some problem sections isn't working: #1460 [#183643073](https://www.pivotaltracker.com/story/show/183643073)
+- Fix console error "Warning: Failed prop type: The prop `onSelect`...": #1490 [#183756388](https://www.pivotaltracker.com/story/show/183756388)
+- Fix MST detach warning when history scrubbing a resized tile.: #1494 [#183772527](https://www.pivotaltracker.com/story/show/183772527)
+
+### Asset Sizes
+|        File                                                                           |    Size   | % Change from Previous Release |
+|---------------------------------------------------------------------------------------|-----------|--------------------------------|
+| vendor-main.6b6cd21d.js                                                               |      2.1M |                             0% |
+| Geometry.27bab22f.js                                                                  |      886K |                             0% |
+| Dataflow.a468af8e.js                                                                  |      735K |                             0% |
+| common-Diagram-SharedVariables.370bf43f.js                                            |      615K |                           0.3% |
+| index.d1e598eaccc663c2c2c2.js                                                         |      407K |                           0.2% |
+| Table.7b7dd794.js                                                                     |       84K |                             0% |
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.3a46870f.js |       51K |                             0% |
+| common-SharedVariables-Drawing.f8212ef1.js                                            |       33K |                             0% |
+| Drawing.3fa3feb5.js                                                                   |       26K |                             0% |
+| common-Dataflow-Geometry.8787ebf3.js                                                  |       26K |                             0% |
+| DataCard.358926a8.js                                                                  |       18K |                             0% |
+| SharedVariables.6b802018.js                                                           |       17K |                        -80.23% |
+| Text.1ab2af58.js                                                                      |       16K |                             0% |
+| Image.9c73f794.js                                                                     |       16K |                             0% |
+| Diagram.6a512196.js                                                                   |       12K |                            20% |
+| Starter.5a8e3691.js                                                                   |      1.2K |                             0% |
+| SharedDataSet.a14fff08.js                                                             |      253B |                             0% |
+
+|        File                   |    Size   | % Change from Previous Release |
+|-------------------------------|-----------|--------------------------------|
+| main.3dcf01c7.css             |      165K |                           0.6% |
+| Dataflow.f6c1e246.css         |       32K |                             0% |
+| Diagram.8634075a.css          |       12K |                           9.1% |
+| Table.fad90774.css            |       10K |                             0% |
+| Geometry.99cf842b.css         |       10K |                             0% |
+| DataCard.b2b5c0c3.css         |      8.4K |                             0% |
+| Image.b81a37e5.css            |      6.3K |                             0% |
+| Drawing.39e9ae0b.css          |      5.2K |                             0% |
+| Text.b14eb834.css             |      4.5K |                             0% |
+| SharedVariables.dcd83673.css  |      333B |                         -54.6% |
+| Starter.6352fad4.css          |      207B |                             0% |
+
 ## Version 3.2.0 - Nov 7, 2022
 
 Version 3.2.0 adds a list of documents with comments, some fixes and logging related to history, and some bug fixes.
