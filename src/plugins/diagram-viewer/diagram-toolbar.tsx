@@ -10,6 +10,7 @@ import { IFloatingToolbarProps, useFloatingToolbarLocation }
 
 import { VariableType } from "@concord-consortium/diagram-view";
 
+import AddVariableCardIcon from "./src/assets/add-variable-card-icon.svg";
 import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
 import VariableEditorIcon from "../shared-variables/assets/variable-editor-icon.svg";
 import DeleteSelectionIcon from "../../assets/icons/delete/delete-selection-icon.svg";
@@ -48,6 +49,16 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
         </button>
       </Tooltip>
     : null;
+};
+
+interface INewVariableButton {
+  handleClick: () => void;
+}
+const NewVaribleButton = ({ handleClick }: INewVariableButton) => {
+  return (
+    <SvgToolbarButton SvgIcon={AddVariableCardIcon} buttonClass="button-add-variable" title="New Variable"
+      onClick={handleClick} />
+  );
 };
 
 interface IInsertVariableButton {
@@ -89,10 +100,11 @@ interface IProps extends IFloatingToolbarProps {
   handleDeleteClick: () => void;
   handleEditVariableClick: () => void;
   handleInsertVariableClick: () => void;
+  handleNewVariableClick: () => void;
 }
 export const DiagramToolbar: React.FC<IProps> = observer(({
   content, disableInsertVariableButton, documentContent, handleDeleteClick, handleEditVariableClick,
-  handleInsertVariableClick, onIsEnabled, ...others
+  handleInsertVariableClick, handleNewVariableClick, onIsEnabled, ...others
 }) => {
   const root = content?.root;
   const selectedVariable = root?.selectedNode?.variable;
@@ -109,6 +121,7 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
     ? ReactDOM.createPortal(
         <div className={`diagram-toolbar ${enabled && location ? "enabled" : "disabled"}`}
             style={location} onMouseDown={e => e.stopPropagation()}>
+          <NewVaribleButton handleClick={handleNewVariableClick} />
           <InsertVariableButton disabled={disableInsertVariableButton} handleClick={handleInsertVariableClick} />
           <DialogButton handleClick={handleEditVariableClick} selectedVariable={selectedVariable} />
           <DeleteButton handleClick={handleDeleteClick} selectedVariable={selectedVariable} />

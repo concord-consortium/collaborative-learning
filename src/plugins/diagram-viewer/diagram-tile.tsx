@@ -8,6 +8,8 @@ import { kQPVersion } from "./diagram-types";
 import { variableBuckets } from "../shared-variables/shared-variables-utils";
 import { useEditVariableDialog } from "../shared-variables/dialog/use-edit-variable-dialog";
 import { useInsertVariableDialog } from "../shared-variables/dialog/use-insert-variable-dialog";
+import { SharedVariablesType } from "../shared-variables/shared-variables";
+import { useNewVariableDialog } from "../shared-variables/dialog/use-new-variable-dialog";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 
@@ -42,6 +44,11 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
       content.root.setSelectedNode(content.root.getNodeFromVariableId(variable.id));
     });
   };
+  const insertVariable = (variable: VariableType) => insertVariables([variable]);
+
+  const [showNewVariableDialog] =
+    useNewVariableDialog({ addVariable: insertVariable, sharedModel: content.sharedModel as SharedVariablesType });
+
   const { selfVariables, otherVariables, unusedVariables } = variableBuckets(content, content.sharedModel);
   const [showInsertVariableDialog] = useInsertVariableDialog({
     disallowSelf: true,
@@ -65,6 +72,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
         handleDeleteClick={handleDeleteClick}
         handleEditVariableClick={showEditVariableDialog}
         handleInsertVariableClick={showInsertVariableDialog}
+        handleNewVariableClick={showNewVariableDialog}
         tileElt={tileElt}
         scale={scale}
         { ...toolbarProps }
