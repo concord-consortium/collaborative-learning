@@ -3,12 +3,13 @@ import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
 import { Tooltip } from "react-tippy";
+import { DragOverlay, UniqueIdentifier, useDraggable } from "@dnd-kit/core";
+import { VariableType } from "@concord-consortium/diagram-view";
+
 import { DiagramContentModelType } from "./diagram-content";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { IFloatingToolbarProps, useFloatingToolbarLocation }
   from "../../components/tiles/hooks/use-floating-toolbar-location";
-
-import { VariableType } from "@concord-consortium/diagram-view";
 
 import AddVariableCardIcon from "./src/assets/add-variable-card-icon.svg";
 import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
@@ -52,12 +53,24 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
 };
 
 interface INewVariableButton {
+  draggingId?: UniqueIdentifier;
   handleClick: () => void;
 }
-const NewVaribleButton = ({ handleClick }: INewVariableButton) => {
+const NewVaribleButton = ({ draggingId, handleClick }: INewVariableButton) => {
+  const id = "new-variable-button";
+  const { attributes, listeners, setNodeRef } = useDraggable({ id });
   return (
-    <SvgToolbarButton SvgIcon={AddVariableCardIcon} buttonClass="button-add-variable" title="New Variable"
-      onClick={handleClick} />
+    <>
+      <div ref={setNodeRef} {...attributes} {...listeners} >
+        <SvgToolbarButton SvgIcon={AddVariableCardIcon} buttonClass="button-add-variable" title="New Variable"
+          onClick={handleClick} />
+      </div>
+      <DragOverlay>
+        { draggingId === id
+          ? <AddVariableCardIcon />
+          : null }
+      </DragOverlay>
+    </>
   );
 };
 
@@ -97,13 +110,14 @@ const DeleteButton = ({ handleClick, selectedVariable }: IDeleteButton) => {
 interface IProps extends IFloatingToolbarProps {
   content: DiagramContentModelType;
   disableInsertVariableButton?: boolean;
+  draggingId?: UniqueIdentifier;
   handleDeleteClick: () => void;
   handleEditVariableClick: () => void;
   handleInsertVariableClick: () => void;
   handleNewVariableClick: () => void;
 }
 export const DiagramToolbar: React.FC<IProps> = observer(({
-  content, disableInsertVariableButton, documentContent, handleDeleteClick, handleEditVariableClick,
+  content, disableInsertVariableButton, documentContent, draggingId, handleDeleteClick, handleEditVariableClick,
   handleInsertVariableClick, handleNewVariableClick, onIsEnabled, ...others
 }) => {
   const root = content?.root;
@@ -121,7 +135,7 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
     ? ReactDOM.createPortal(
         <div className={`diagram-toolbar ${enabled && location ? "enabled" : "disabled"}`}
             style={location} onMouseDown={e => e.stopPropagation()}>
-          <NewVaribleButton handleClick={handleNewVariableClick} />
+          <NewVaribleButton draggingId={draggingId} handleClick={handleNewVariableClick} />
           <InsertVariableButton disabled={disableInsertVariableButton} handleClick={handleInsertVariableClick} />
           <DialogButton handleClick={handleEditVariableClick} selectedVariable={selectedVariable} />
           <DeleteButton handleClick={handleDeleteClick} selectedVariable={selectedVariable} />

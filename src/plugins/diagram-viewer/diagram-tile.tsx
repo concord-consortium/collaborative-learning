@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { observer } from "mobx-react";
+import { DndContext, DragEndEvent, DragStartEvent, UniqueIdentifier } from "@dnd-kit/core";
 import { Diagram, VariableType } from "@concord-consortium/diagram-view";
 
 import { DiagramToolbar } from "./diagram-toolbar";
@@ -63,23 +64,30 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
 
   const toolbarProps = useToolbarTileApi({ id: model.id, enabled: !readOnly, onRegisterTileApi, onUnregisterTileApi });
 
+  const [draggingId, setDraggingId] = useState<UniqueIdentifier | undefined>();
+  const onDragStart = (event: DragStartEvent) => setDraggingId(event.active.id);
+  const onDragEnd = (event: DragEndEvent) => setDraggingId(undefined);
+
   return (
-    <div className="diagram-tool">
-      <DiagramToolbar
-        content={content}
-        disableInsertVariableButton={disableInsertVariableButton}
-        documentContent={documentContent}
-        handleDeleteClick={handleDeleteClick}
-        handleEditVariableClick={showEditVariableDialog}
-        handleInsertVariableClick={showInsertVariableDialog}
-        handleNewVariableClick={showNewVariableDialog}
-        tileElt={tileElt}
-        scale={scale}
-        { ...toolbarProps }
-      />
-      <Diagram dqRoot={content.root} />
-      <div className="qp-version">{`version: ${kQPVersion}`}</div>
-    </div>
+    <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
+      <div className="diagram-tool">
+        <DiagramToolbar
+          content={content}
+          disableInsertVariableButton={disableInsertVariableButton}
+          draggingId={draggingId}
+          documentContent={documentContent}
+          handleDeleteClick={handleDeleteClick}
+          handleEditVariableClick={showEditVariableDialog}
+          handleInsertVariableClick={showInsertVariableDialog}
+          handleNewVariableClick={showNewVariableDialog}
+          tileElt={tileElt}
+          scale={scale}
+          { ...toolbarProps }
+        />
+        <Diagram dqRoot={content.root} />
+        <div className="qp-version">{`version: ${kQPVersion}`}</div>
+      </div>
+    </DndContext>
   );
 });
 DiagramToolComponent.displayName = "DiagramToolComponent";
