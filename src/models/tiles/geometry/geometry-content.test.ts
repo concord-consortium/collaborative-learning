@@ -32,14 +32,11 @@ jest.mock( "../../../utilities/image-utils", () => ({
 import placeholderImage from "../../../assets/image_placeholder.png";
 
 // mock Logger calls
-jest.mock("../../../lib/logger", () => {
-  return {
-    ...(jest.requireActual("../../../lib/logger") as any),
-    Logger: {
-      logTileChange: jest.fn()
-    }
-  };
-});
+const mockLogTileChangeEvent = jest.fn();
+jest.mock("../log/log-tile-change-event", () => ({
+  logTileChangeEvent: (...args: any[]) => mockLogTileChangeEvent()
+}));
+
 // mock uniqueId so we can recognize auto-generated IDs
 const { uniqueId, castArrayCopy, safeJsonParse } = jest.requireActual("../../../utilities/js-utils");
 jest.mock("../../../utilities/js-utils", () => ({

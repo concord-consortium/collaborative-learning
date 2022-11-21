@@ -1,9 +1,10 @@
+import { IDropdownItem } from "@concord-consortium/react-components";
+import { inject, observer } from "mobx-react";
 import React from "react";
 import { IBaseProps, BaseComponent } from "./base";
-import { inject, observer } from "mobx-react";
-import { LogEventName, LogEventMethod, Logger } from "../lib/logger";
-import { IDropdownItem } from "@concord-consortium/react-components";
 import { CustomSelect } from "../clue/components/custom-select";
+import { Logger } from "../lib/logger";
+import { LogEventMethod, LogEventName } from "../lib/logger-types";
 
 interface IProps extends IBaseProps {}
 

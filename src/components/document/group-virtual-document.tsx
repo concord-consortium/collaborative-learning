@@ -2,7 +2,8 @@ import { inject, observer } from "mobx-react";
 import React from "react";
 import { FourUpComponent } from "../four-up";
 import { BaseComponent, IBaseProps } from "../base";
-import { LogEventName, Logger } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { IGroupVirtualDocument, GroupVirtualDocument } from "../../models/document/group-virtual-document";
 
 import "./group-virtual-document.sass";

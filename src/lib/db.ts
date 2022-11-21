@@ -22,11 +22,13 @@ import { ImageModelType } from "../models/image";
 import {
   DocumentContentSnapshotType, DocumentContentModelType, cloneContentWithUniqueIds
 } from "../models/document/document-content";
+import { logDocumentEvent } from "../models/document/log-document-event";
 import { createDefaultSectionedContent } from "../models/document/sectioned-content";
 import { Firebase } from "./firebase";
 import { Firestore } from "./firestore";
 import { DBListeners } from "./db-listeners";
-import { Logger, LogEventName } from "./logger";
+import { Logger } from "./logger";
+import { LogEventName } from "./logger-types";
 import { IGetImageDataParams, IPublishSupportParams } from "../../functions/src/shared";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
 import { getUserContext } from "../hooks/use-user-context";
@@ -463,7 +465,7 @@ export class DB {
 
         publicationRef.set(publication)
           .then(() => {
-            Logger.logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, documentModel);
+            logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, { document: documentModel });
             resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
           })
           .catch(reject);
@@ -500,7 +502,7 @@ export class DB {
         };
         publicationRef.set(publication)
           .then(() => {
-            Logger.logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, documentModel);
+            logDocumentEvent(LogEventName.PUBLISH_DOCUMENT, { document: documentModel });
             resolve({document, metadata: metadata as DBPublicationDocumentMetadata});
           })
           .catch(reject);

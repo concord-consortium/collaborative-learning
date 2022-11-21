@@ -9,7 +9,8 @@ import { ISubTabSpec } from "../navigation/section-document-or-browser";
 import { useNetworkDocuments, useUserStore } from "../../hooks/use-stores";
 import { DecoratedDocumentThumbnailItem } from "./decorated-document-thumbnail-item";
 import { NavTabSectionModelType } from "../../models/view/nav-tabs";
-import { Logger, LogEventName } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 
 import "./document-type-collection.sass";
 import "./collapsible-document-section.scss";

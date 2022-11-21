@@ -56,7 +56,7 @@ const initializeApp = async () => {
 
   gImageMap.initialize(stores.db);
 
-  Logger.initializeLogger(stores, stores.investigation, stores.problem);
+  Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
 
   if (kEnableLivelinessChecking) {
     setLivelinessChecking("error");

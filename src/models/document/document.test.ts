@@ -8,6 +8,12 @@ import { TextContentModelType } from "../tiles/text/text-content";
 import { registerTileTypes } from "../../register-tile-types";
 registerTileTypes(["Geometry", "Text"]);
 
+// mock Logger calls
+const mockLogTileDocumentEvent = jest.fn();
+jest.mock("../tiles/log/log-tile-document-event", () => ({
+  logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent()
+}));
+
 const mockUserContext = { appMode: "authed", classHash: "class-1" };
 const mockQueryData = { content: {}, metadata: { createdAt: 10 } };
 

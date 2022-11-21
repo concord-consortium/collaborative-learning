@@ -13,7 +13,9 @@ import {
 import { migrateSnapshot } from "./document-content-import";
 import { IDocumentEnvironment } from "./document-environment";
 import { IDocumentAddTileOptions } from "./document-types";
-import { Logger, LogEventName } from "../../lib/logger";
+import { logTileCopyEvent } from "../tiles/log/log-tile-copy-event";
+import { logTileDocumentEvent } from "../tiles/log/log-tile-document-event";
+import { LogEventName } from "../../lib/logger-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
@@ -885,18 +887,22 @@ export const DocumentContentModel = types
       const result = self.addTile(toolId, options);
       const newTile = result?.tileId && self.getTile(result.tileId);
       if (newTile) {
-        Logger.logTileEvent(LogEventName.CREATE_TILE, newTile);
+        logTileDocumentEvent(LogEventName.CREATE_TILE, { tile: newTile });
       }
       return result;
     },
     userDeleteTile(tileId: string) {
-      if (self.getTile(tileId)) {
-        Logger.logTileEvent(LogEventName.DELETE_TILE, self.getTile(tileId));
+      const tile = self.getTile(tileId);
+      if (tile) {
+        logTileDocumentEvent(LogEventName.DELETE_TILE, { tile });
         self.deleteTile(tileId);
       }
     },
     userMoveTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
-      tiles.forEach(tile => Logger.logTileEvent(LogEventName.MOVE_TILE, self.getTile(tile.tileId)));
+      tiles.forEach(tileItem => {
+        const tile = self.getTile(tileItem.tileId);
+        tile && logTileDocumentEvent(LogEventName.MOVE_TILE, { tile });
+      });
       self.moveTiles(tiles, rowInfo);
     },
     userCopyTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
@@ -908,7 +914,7 @@ export const DocumentContentModel = types
         const newTile = result?.tileId && self.getTile(result.tileId);
         if (result && newTile) {
           const originalTileId = tiles[i].tileId;
-          Logger.logTileEvent(LogEventName.COPY_TILE, newTile, { originalTileId });
+          logTileCopyEvent(LogEventName.COPY_TILE, { tile: newTile, originalTileId });
         }
       });
       return results;

@@ -10,7 +10,8 @@ import { UserType } from "../models/stores/user-types";
 import { getErrorMessage } from "../utilities/super-agent-helpers";
 import { getPortalOfferings, getPortalClassOfferings,  getProblemIdForAuthenticatedUser } from "./portal-api";
 import { PortalJWT, PortalFirebaseJWT, IPortalClassInfo } from "./portal-types";
-import { Logger, LogEventName } from "../lib/logger";
+import { Logger } from "../lib/logger";
+import { LogEventName } from "../lib/logger-types";
 import { uniqueId } from "../utilities/js-utils";
 
 export const PORTAL_JWT_URL_SUFFIX = "api/v1/jwt/portal";

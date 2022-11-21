@@ -31,7 +31,7 @@ describe("dev/qa/test logger with DEBUG_LOGGER true", () => {
     // intercept and suppress console logs
     mockConsoleLog = jest.spyOn(global.console, "log").mockImplementation(() => null);
 
-    Logger.initializeLogger(stores, investigation, problem);
+    Logger.initializeLogger(stores, { investigation: investigation.title, problem: problem?.title });
   });
 
   afterEach(() => {

@@ -4,11 +4,13 @@ import { useQueryClient } from 'react-query';
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { DocumentModelType } from "../../models/document/document";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
+import { logDocumentEvent } from "../../models/document/log-document-event";
 import { ENavTabSectionType, NavTabSectionSpec, NavTabSpec } from "../../models/view/nav-tabs";
 import { EditableDocumentContent } from "../document/editable-document-content";
 import { useAppConfig, useClassStore, useProblemStore, useStores,
   useUIStore, useUserStore } from "../../hooks/use-stores";
-import { Logger, LogEventName } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentCollectionByType } from "../thumbnail/documents-type-collection";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
@@ -134,11 +136,13 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
     if (ui.selectedCommentedDocument){
       const newDoc = store.documents.getDocument(ui.selectedCommentedDocument)
       || store.networkDocuments.getDocument(ui.selectedCommentedDocument);
+
       if (isActiveTab) {
         setReferenceDocument(newDoc);
-        if (newDoc?.isRemote){
+        if (newDoc){
           handleSelectDocument(newDoc);
         }
+
       }
       const newIndex = getNewTabIndex(ui.selectedCommentedDocument, tabSpec.label);
       if (newIndex !== undefined) {
@@ -165,7 +169,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
     const logEvent = document.isRemote
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
       : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
-    Logger.logDocumentEvent(logEvent, document);
+    logDocumentEvent(logEvent, { document });
   };
 
   const loadDocumentContent = async (document: DocumentModelType) => {
@@ -210,7 +214,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
         if (ok) {
           document.setProperty("isDeleted", "true");
           if (document.type === SupportPublication) {
-            Logger.logDocumentEvent(LogEventName.DELETE_SUPPORT, document);
+            logDocumentEvent(LogEventName.DELETE_SUPPORT, { document });
           }
         }
       });
