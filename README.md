@@ -46,6 +46,8 @@ To deploy a production release:
 1. Verify that everything builds correctly
     - `npm run lint && npm run build && npm run test`
 1. Copy asset size markdown table from previous release and change sizes to match new sizes in `dist`
+    - `ls -lhS dist/*.js | awk '{print "|", $9, "|", $5, "|"}'`
+    - `ls -lhS dist/*.css | awk '{print "|", $9, "|", $5, "|"}'`
 1. Create `release-<version>` branch and commit changes, push to GitHub, create PR and merge
 1. Test the master build at: https://collaborative-learning.concord.org/index-master.html
 1. Push a version tag to GitHub and/or use https://github.com/concord-consortium/collaborative-learning/releases to create a new GitHub release
