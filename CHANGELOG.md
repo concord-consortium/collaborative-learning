@@ -65,6 +65,7 @@ Version 3.3.0 addresses bug fixes for chat/comment features and adding new varia
 - Scroll to commented tile in Teacher Guide and some problem sections isn't working: #1460 [#183643073](https://www.pivotaltracker.com/story/show/183643073)
 - Fix console error "Warning: Failed prop type: The prop `onSelect`...": #1490 [#183756388](https://www.pivotaltracker.com/story/show/183756388)
 - Fix MST detach warning when history scrubbing a resized tile.: #1494 [#183772527](https://www.pivotaltracker.com/story/show/183772527)
+- Fixed table/geometry linking bugs #1487
 
 ### Asset Sizes
 |        File                                                                           |    Size   | % Change from Previous Release |
