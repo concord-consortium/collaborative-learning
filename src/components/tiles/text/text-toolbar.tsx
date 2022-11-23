@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
-import { Editor, EFormat, handleToggleSuperSubscript } from "@concord-consortium/slate-editor";
+//import { EFormat} from "@concord-consortium/slate-editor";
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { TextToolbarButton } from "./text-toolbar-button";
@@ -21,6 +21,7 @@ import NumberedListToolIcon from "../../../assets/icons/text/numbered-list-text-
 import BulletedListToolIcon from "../../../assets/icons/text/bulleted-list-text-icon.svg";
 
 import "./text-toolbar.sass";
+import { CustomEditor } from ".yalc/@concord-consortium/slate-editor/dist";
 
 interface IButtonDef {
   iconName: string;  // icon name for this button.
@@ -30,7 +31,7 @@ interface IButtonDef {
 
 interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
   selectedButtons: string[];
-  editor?: Editor;
+  editor?: any; // FIXME: Which editor type is this? CustomEditor?
 }
 
 const kShortcutPrefix = isMac() ? "Cmd-" : "Ctrl-";
@@ -81,68 +82,70 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
 
   const handleToolBarButtonClick = (buttonIconName: string, event: React.MouseEvent) => {
     event.preventDefault();
-
+    console.log('toolbar click');
     if (!editor) {
       // In theory the editor can be undefined. Cut that option off
       // here so we don't need to worry about it below
       return;
     }
+  // FIXME: Need to add all the toolbar buttons in. 
+  //   switch (buttonIconName) {
+  //     case "bold":
+  //       editor.command("toggleMark", EFormat.bold);
+  //       break;
+  //     case "italic":
+  //       editor.command("toggleMark", EFormat.italic);
+  //       break;
+  //     case "underline":
+  //       editor.command("toggleMark", EFormat.underlined);
+  //       break;
+  //     case "subscript":
+  //       handleToggleSuperSubscript(EFormat.subscript, editor);
+  //       break;
+  //     case "superscript":
+  //       handleToggleSuperSubscript(EFormat.superscript, editor);
+  //       break;
+  //     case "list-ol":
+  //       editor.command("toggleBlock", EFormat.numberedList);
+  //       break;
+  //     case "list-ul":
+  //       editor.command("toggleBlock", EFormat.bulletedList);
+  //       break;
+  //     case "undo":
+  //       editor.undo();
+  //       break;
+  //     default: {
+  //       const toolInfo = getTextPluginInfo(buttonIconName);
 
-    switch (buttonIconName) {
-      case "bold":
-        editor.command("toggleMark", EFormat.bold);
-        break;
-      case "italic":
-        editor.command("toggleMark", EFormat.italic);
-        break;
-      case "underline":
-        editor.command("toggleMark", EFormat.underlined);
-        break;
-      case "subscript":
-        handleToggleSuperSubscript(EFormat.subscript, editor);
-        break;
-      case "superscript":
-        handleToggleSuperSubscript(EFormat.superscript, editor);
-        break;
-      case "list-ol":
-        editor.command("toggleBlock", EFormat.numberedList);
-        break;
-      case "list-ul":
-        editor.command("toggleBlock", EFormat.bulletedList);
-        break;
-      case "undo":
-        editor.undo();
-        break;
-      default: {
-        const toolInfo = getTextPluginInfo(buttonIconName);
-
-        // Handle Text Plugins
-        if (!toolInfo?.command) {
-          console.warn("Can't find text plugin command for", buttonIconName);
-          break;
-        }
-        // Send the dialogController to all plugins
-        //
-        // TODO: I think this should be an object: `{dialogController}`
-        // instead of a raw param. This way we can add more props to it
-        // without changing the method signature and worrying about argument
-        // order. The reason is that I hope we can provide additional
-        // controllers or services that plugins can use. This change should be
-        // made in slate-editor too for consistency.
-        editor.command(toolInfo?.command, dialogController);
-      }
-    }
+  //       // Handle Text Plugins
+  //       if (!toolInfo?.command) {
+  //         console.warn("Can't find text plugin command for", buttonIconName);
+  //         break;
+  //       }
+  //       // Send the dialogController to all plugins
+  //       //
+  //       // TODO: I think this should be an object: `{dialogController}`
+  //       // instead of a raw param. This way we can add more props to it
+  //       // without changing the method signature and worrying about argument
+  //       // order. The reason is that I hope we can provide additional
+  //       // controllers or services that plugins can use. This change should be
+  //       // made in slate-editor too for consistency.
+  //       editor.command(toolInfo?.command, dialogController);
+  //     }
+  //   }
   };
 
   // listen for configuration requests from plugins
   useEffect(() => {
-    const emitter: EventEmitter | undefined = editor?.query("emitter");
+    //const emitter: EventEmitter | undefined = editor?.query("emitter");
     const handler = (event: string, ...args: any) => {
-      editor?.command(event, dialogController, ...args);
+      // FIXME: Need to convert this command to the new way.
+      console.log('toolbar command is broken');
+      //editor?.command(event, dialogController, ...args);
     };
-    emitter?.on("toolbarDialog", handler);
+    editor?.emitter?.onEvent("toolbarDialog", handler);
     return () => {
-      emitter?.off("toolbarDialog", handler);
+      editor?.emitter?.offEvent("toolbarDialog", handler);
     };
   }, [editor, dialogController]);
 

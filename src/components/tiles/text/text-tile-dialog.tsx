@@ -1,12 +1,13 @@
-import { DisplayDialogSettings, Editor, FieldType, IDialogController,
+import { CustomEditor, DisplayDialogSettings, FieldType, IDialogController,
   IFieldValues, IModalDialogProps, ModalDialog } from "@concord-consortium/slate-editor";
 import { clone } from "lodash";
 import { useCallback, useMemo, useRef } from "react";
-import { useCustomModal } from "../../../hooks/use-custom-modal";
+import { ReactEditor } from "slate-react";
+//import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { useForceUpdate } from "../hooks/use-force-update";
 
 interface IProps {
-  editor?: Editor;
+  editor?: any;
 }
 
 export const useTextToolDialog = ({editor}: IProps) => {
@@ -67,19 +68,22 @@ export const useTextToolDialog = ({editor}: IProps) => {
     onClose: handleClose,
   };
 
-  const [showDialog, hideDialog] = useCustomModal({
-    title: settingsRef.current?.title || "",
-    Content: ModalDialog,
-    contentProps: dialogProps,
-    buttons: []
-  }, [dialogProps]);
-
+  // const [showDialog, hideDialog] = useCustomModal({
+  //   title: settingsRef.current?.title || "",
+  //   Content: ModalDialog,
+  //   contentProps: dialogProps,
+  //   buttons: []
+  // }, [dialogProps]);
+ // FIXME: A type in customModal is broken
+  const showDialog = ()=> console.log('show dialog');
+  const hideDialog = ()=> console.log('hide dialog');
+  
   const dialogController: IDialogController = useMemo(() => ({
     display: (settings: DisplayDialogSettings) => {
       settingsRef.current = settings;
       validateFieldValues();
       // prevents focus-bouncing between editor and dialog
-      editor?.blur();
+      ReactEditor.blur(editor);  //FIXME: Is CustomEditor what we want here instead?
       showDialog();
     },
     update: (newValues: IFieldValues) => {

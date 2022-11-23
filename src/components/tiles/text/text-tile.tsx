@@ -1,8 +1,9 @@
 import React from "react";
+import {ReactEditor} from "slate-react";
 import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
-  Editor, EditorRange, EditorValue, HtmlSerializablePlugin, SlateEditor
+  CustomEditor, Editable, EditorValue, SlateEditor
 } from "@concord-consortium/slate-editor";
 import "@concord-consortium/slate-editor/dist/index.css";
 
@@ -91,10 +92,9 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private disposers: IReactionDisposer[];
   private prevText: any;
   private textTileDiv: HTMLElement | null;
-  private editor: Editor | undefined;
+  private editor: CustomEditor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarTileApi: ITileApi | undefined;
-  private plugins: HtmlSerializablePlugin[] | undefined;
   private textOnFocus: string | string [] | undefined;
 
   // map from slate type string to button icon name
@@ -148,9 +148,10 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       },
       isTileSelected => {
         const { value } = this.state;
-        const isFocused = !!value?.selection.isFocused;
+        //const isFocused = !!value?.selection.isFocused;
+        const isFocused = this.editor && ReactEditor.isFocused(this.editor);
         if (isFocused && !isTileSelected) {
-          this.editor?.blur();
+          this.editor && ReactEditor.blur(this.editor);
         }
       }
     ));
@@ -170,7 +171,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     });
 
 
-    this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
+    //this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
   }
 
   public componentWillUnmount() {
@@ -197,6 +198,18 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         data-testid="text-tool-wrapper"
         ref={elt => this.textTileDiv = elt}
         onMouseDown={this.handleMouseDownInWrapper}>
+        
+        <SlateEditor
+          className={classes}
+          //onEditorRef={this.handleEditorRef}
+          value={editorValue}
+          //placeholder={placeholderText}
+          //readOnly={readOnly}
+          //plugins={this.plugins}
+          onChange={this.handleChange}
+          //onFocus={this.handleFocus}
+          //onBlur={this.handleBlur}
+        >
         <TextToolbarComponent
           documentContent={documentContent}
           tileElt={tileElt}
@@ -207,18 +220,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
           onRegisterTileApi={this.handleRegisterToolApi}
           onUnregisterTileApi={this.handleUnregisterToolApi}
         />
-        <SlateEditor
-          className={classes}
-          onEditorRef={this.handleEditorRef}
-          value={editorValue}
-          placeholder={placeholderText}
-          readOnly={readOnly}
-          plugins={this.plugins}
-          onValueChange={this.handleChange}
-          onFocus={this.handleFocus}
-          onBlur={this.handleBlur}
-
-        />
+        </SlateEditor>
       </div>
     );
   }
@@ -238,7 +240,8 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   private handleIsEnabled = () => {
     // text toolbar is based on editor focus rather than tile selection
-    return !!this.state.value?.selection.isFocused;
+    return !!(this.editor && ReactEditor.isFocused(this.editor));
+    //return !!this.state.value?.selection.isFocused;
   };
 
   private handleChange = (value: EditorValue) => {
@@ -246,7 +249,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const content = this.getContent();
     const { ui } = this.stores;
 
-    if (value.selection.isFocused) {
+    if (this.editor && ReactEditor.isFocused(this.editor)) {
       debouncedSelectTile(ui, model);
     }
 
@@ -260,31 +263,31 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   };
 
   private getSelectedIcons(value: EditorValue): string[] {
-    const listOfMarks = value.activeMarks;
+    const listOfMarks = this.editor?.marks;
 
     const buttonList: string[] = ["undo"];  // Always show "undo" as selected.
 
-    listOfMarks?.forEach(mark => {
-      if (mark?.type) {
-        const buttonIconName = this.slateMap[mark.type];
-        buttonIconName && buttonList.push(buttonIconName);
-      }
-    });
+    // listOfMarks?.forEach((mark:any) => {
+    //   if (mark?.type) {
+    //     const buttonIconName = this.slateMap[mark.type];
+    //     buttonIconName && buttonList.push(buttonIconName);
+    //   }
+    // });
 
-    const { document, selection } = value;
-    const currentRange = EditorRange.create(
-      {
-        anchor: selection.anchor,
-        focus: selection.focus
-      }
-    );
-    const nodes = document.getDescendantsAtRange(currentRange);
-    ["ordered-list", "bulleted-list"].forEach((slateType) => {
-      if (nodes.some((node: any) => node.type === slateType)) {
-        const buttonIconName = this.slateMap[slateType];
-        buttonIconName && buttonList.push(buttonIconName);
-      }
-    });
+    // const { children, selection } = this.editor;
+    // const currentRange = this.editor.create(
+    //   {
+    //     anchor: selection.anchor,
+    //     focus: selection.focus
+    //   }
+    // );
+    // const nodes = children.getDescendantsAtRange(currentRange);
+    // ["ordered-list", "bulleted-list"].forEach((slateType) => {
+    //   if (nodes.some((node: any) => node.type === slateType)) {
+    //     const buttonIconName = this.slateMap[slateType];
+    //     buttonIconName && buttonList.push(buttonIconName);
+    //   }
+    // });
     return buttonList;
   }
 
@@ -294,7 +297,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const isExtendingSelection = hasSelectionModifier(e);
     const isWrapperClick = e.target === this.textTileDiv;
     if (readOnly || isWrapperClick || isExtendingSelection) {
-      isWrapperClick && this.editor?.focus();
+      isWrapperClick && this.editor && ReactEditor.focus(this.editor);
       ui.setSelectedTile(model, { append: isExtendingSelection });
       e.preventDefault();
     }
@@ -317,7 +320,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.textOnFocus = this.getContent().text;
     this.setState({ editing: true });
   };
-  private handleEditorRef = (editor?: Editor) => {
+  private handleEditorRef = (editor?: CustomEditor) => {
     this.editor = editor;
     editor && this.getContent()?.setEditor(editor);
   };

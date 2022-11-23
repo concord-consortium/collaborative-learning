@@ -1,4 +1,4 @@
-import React from "react";
+/*import React from "react";
 import { IAnyStateTreeNode, IAnyType, types, castToSnapshot } from "mobx-state-tree";
 import { Editor, SlateEditor } from "@concord-consortium/slate-editor";
 import { render } from "@testing-library/react";
@@ -209,3 +209,4 @@ describe("VariablesTextContent", () => {
     expect(addSharedModelSpy).toHaveBeenCalled();
   });
 });
+*/

@@ -1,4 +1,4 @@
-import { HtmlSerializablePlugin } from "@concord-consortium/slate-editor";
+/*import { HtmlSerializablePlugin } from "@concord-consortium/slate-editor";
 import { getAllTextPluginInfos, getTextPluginIds, getTextPluginInfo, 
   getTextPluginInstances, registerTextPluginInfo } from "./text-plugin-info";
 
@@ -52,5 +52,4 @@ describe("TextPluginInfo", () => {
     expect(pluginInfos).toHaveLength(2);
     expect(pluginInfos).toContain(testTextPluginInfo);
     expect(pluginInfos).toContain(testTextPluginInfoWithUpdate);
-  });
-});
+  });*/

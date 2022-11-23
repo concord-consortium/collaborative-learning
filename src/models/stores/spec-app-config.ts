@@ -6,13 +6,13 @@ import { UnitConfiguration } from "./unit-configuration";
 const PartialAppConfigModel = types
   .model("PartialAppConfig", {
     // the set of curriculum units available
-    units: types.map(UnitSpecModel),
+    units: types.map(UnitSpecModel) as any, // FIXME type is wrong
     // unit code overrides (legacy unit code support)
-    unitCodeMap: types.map(types.string),
+    unitCodeMap: types.map(types.string) as any, // FIXME: type is wrong
     // default problem to load if none specified
     defaultUnit: "",
     // default unit configuration
-    config: types.maybe(types.frozen<Partial<UnitConfiguration>>())
+    config: types.maybe(types.frozen<Partial<UnitConfiguration>>()) as any // FIXME: type is wrong
   });
 interface PartialAppConfigModelSnapshot extends Partial<Instance<typeof PartialAppConfigModel>> {}
 

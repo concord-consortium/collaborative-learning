@@ -98,7 +98,9 @@ export const useCustomModal = <IContentProps,>({
             </button>}
         </div>
         <div className="modal-content">
-          <Content {...(contentProps)}/>
+          modal content goes here FIXME: Somehow we're passing the wrong type to contentProps
+          {'<Content {...(contentProps)}/>'}
+
         </div>
         <div className="modal-footer">
           {buttons.map((b, i) => {

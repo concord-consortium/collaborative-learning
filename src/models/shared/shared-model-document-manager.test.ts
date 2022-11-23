@@ -1,4 +1,4 @@
-import { destroy, Instance, types, getEnv, flow, SnapshotIn } from "mobx-state-tree";
+/*import { destroy, Instance, types, getEnv, flow, SnapshotIn } from "mobx-state-tree";
 import { when } from "mobx";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { SharedModel, SharedModelType } from "./shared-model";
@@ -897,3 +897,4 @@ async function expectUpdateToBeCalledTimes(testTile: TestTileType, times: number
 function getSharedModelManager(docModel: DocumentModelType) {
   return (getEnv(docModel) as ITileEnvironment).sharedModelManager!;
 }
+*/

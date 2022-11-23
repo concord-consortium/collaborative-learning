@@ -1,9 +1,6 @@
 import { types, Instance } from "mobx-state-tree";
-import { Value } from "slate";
-import Plain from "slate-plain-serializer";
-import Markdown from "slate-md-serializer";
 import {
-  deserializeValueFromLegacy, Editor, htmlToSlate, serializeValueToLegacy, slateToHtml, textToSlate
+  htmlToSlate, slateToHtml, textToSlate, EditorValue, slateToText
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tile-content-info";
 import { TileContentModel } from "../tile-types";
@@ -16,8 +13,6 @@ export function defaultTextContent() {
   return TextContentModel.create();
 }
 
-const MarkdownSerializer = new Markdown();
-
 export const TextContentModel = TileContentModel
   .named("TextContent")
   .props({
@@ -27,7 +22,7 @@ export const TextContentModel = TileContentModel
     format: types.maybe(types.string)
   })
   .volatile(self => ({
-    editor: undefined as Editor | undefined
+    editor: undefined
   }))
   .views(self => ({
     get joinText() {
@@ -39,20 +34,21 @@ export const TextContentModel = TileContentModel
     getSlate() {
       return !self.text || Array.isArray(self.text)
               ? textToSlate("")
-              : deserializeValueFromLegacy(self.text);
+              : self.text; // THIS IS WRONG
     }
   }))
   .views(self => ({
-    asSlate(): Value {
+    asSlate(): any {
       switch (self.format) {
         case "slate":
           return self.getSlate();
         case "html":
           return htmlToSlate(self.joinText);
         case "markdown":
-          return MarkdownSerializer.deserialize(self.joinText);
+          return self.joinText;
+          //return MarkdownSerializer.deserialize(self.joinText);
         default:
-          return Plain.deserialize(self.joinText);
+          return textToSlate(self.joinText);
       }
     }
   }))
@@ -85,12 +81,13 @@ export const TextContentModel = TileContentModel
       self.format = "markdown";
       self.text = text;
     },
-    setSlate(value: Value) {
+    setSlate(value: EditorValue) {
       self.format = "slate";
-      self.text = serializeValueToLegacy(value);
+      self.text = slateToText(value);  // FIXME: This is probably wrong
     },
-    setEditor(editor?: Editor) {
-      self.editor = editor;
+    setEditor(editor?: any) { // FIXME: type here is wrong
+      console.log('calling set editor....');
+;      self.editor = editor;
     }
   }))
   .actions(self => ({

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { getSnapshot } from "mobx-state-tree";
 import { EditVariableDialogContent, updateVariable, Variable, VariableType } from "@concord-consortium/diagram-view";
 
-import { useCustomModal } from "../../../hooks/use-custom-modal";
+//import { useCustomModal } from "../../../hooks/use-custom-modal";
 
 import VariableEditorIcon from "../assets/variable-editor-icon.svg";
 import './variable-dialog.scss';
@@ -19,20 +19,23 @@ export const useEditVariableDialog = ({ variable }: IProps) => {
     }
   };
 
-  const [showModal, hideModal] = useCustomModal({
-    Icon: VariableEditorIcon,
-    title: "Variable Editor",
-    Content: EditVariableDialogContent,
-    contentProps: { variable: variableClone },
-    buttons: [
-      { label: "Cancel" },
-      { label: "OK",
-        isDefault: true,
-        isDisabled: !variable,
-        onClick: handleClick
-      }
-    ]
-  }, [variable]);
+  // const [showModal, hideModal] = useCustomModal({
+  //   Icon: VariableEditorIcon,
+  //   title: "Variable Editor",
+  //   Content: EditVariableDialogContent,
+  //   contentProps: { variable: variableClone },
+  //   buttons: [
+  //     { label: "Cancel" },
+  //     { label: "OK",
+  //       isDefault: true,
+  //       isDisabled: !variable,
+  //       onClick: handleClick
+  //     }
+  //   ]
+  // }, [variable]);
+  // FIXME: CustomModal was getting the wrong type.
+  const showModal = () => {console.log('show modal');}
+  const hideModal = () => {console.log('hide modal');}
 
   return [showModal, hideModal];
 };

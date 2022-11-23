@@ -43,7 +43,7 @@ export function useFirestoreTeacher(uid: string, network: string) {
 
 // https://medium.com/swlh/using-firestore-with-typescript-65bd2a602945
 const defaultConverter = <T>(): firebase.firestore.FirestoreDataConverter<T> => ({
-  toFirestore: (data: T) => data,
+  toFirestore: (data: any) => data, // uh oh. FIXME
   fromFirestore: (doc: firebase.firestore.QueryDocumentSnapshot) => doc.data() as T
 });
 
