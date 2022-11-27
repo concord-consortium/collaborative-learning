@@ -612,8 +612,7 @@
                         "<p><u>Now What Do Students Know</u></p>",
                         "<p>Ask students to reflect on the discussion and answer the Now What Do You Know.</p>",
                         "<p></p>",
-                        "<p>See answers for more information about the strategies and embedded mathematics.</p>",
-                        "<p>[End Green Box]</p>"
+                        "<p>See answers for more information about the strategies and embedded mathematics.</p>"
                       ]
                     }
                   },
@@ -1123,7 +1122,7 @@
                         "title": "Scaling in tables",
                         "content": {
                           "type": "Image",
-                          "url": "curriculum/comparing-and-scaling/images/TG_1-2_Adia3_350w.jpg"
+                          "url": "curriculum/comparing-and-scaling/images/TG_1-2_Adia4_350w.jpg"
                         }
                       },
                       {
@@ -2662,6 +2661,7 @@
                 },
                 {
                   "id": "TmkQvK91VFGYSic6",
+                  "title": "Tony's Biggest Rate",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/comparing-and-scaling/images/TG_2-2_TonysRatePurple.png"
@@ -3280,16 +3280,24 @@
                       "format": "html",
                       "text": [
                         "<p><em>Now What Do You Know?</em></p>",
-                        "<p><em>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph. In what ways is a unit rate or the constant of proportionality helpful for solving a problem?</em></p>"
+                        "<p><em>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph. In what ways is a unit rate or the constant of proportionality helpful for solving a problem? Select student work for each representation to discuss how they found the unit rate or the constant of proportionality.</em></p>"
                       ]
                     }
-                  },
+                  }
+                ]
+              }
+            },
+            {
+              "type": "summarize",
+              "content": {
+                "tiles": [
                   {
                     "id": "c2UhywuTocMSzac5",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
+                        "<p><u>Solutions and Strategies</u></p>",
                         "<p>Begin by having students discuss why Mia has only one table while she has two equations and two graphs.</p>",
                         "<p></p>",
                         "<p><strong>Note:</strong> One table works for both unit rates. With a table, the variables can be put in either row (or column, if you have a vertical table). There is no mathematical convention for setting up a table in a certain way. However, each unit rate has a unique graph and equation. For the graph and equation, you must identify which variable is independent and which is dependent. For the situation of buying oranges, it depends on which unit rate you want to focus on.</p>"
@@ -3716,14 +3724,7 @@
                         "url": "curriculum/comparing-and-scaling/images/TG_2-3_FoodFreshStore_2.png"
                       }
                     }
-                  ]
-                ]
-              }
-            },
-            {
-              "type": "summarize",
-              "content": {
-                "tiles": [
+                  ],
                   {
                     "display": "teacher",
                     "content": {
@@ -4092,6 +4093,7 @@
                   },
                   {
                     "id": "KEXF8L_Jh29sae5Q",
+                    "title": "Proportion Strategy",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-1_PossibleStrategy_Proportions.png"
@@ -4394,20 +4396,20 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Revision Comments</strong>- https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#RevisionComments</p>",
-                        "<p><strong>Stem Problem Format</strong>- https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#StemProblemFormat</p>",
-                        "<p><strong>Unit Descriptions</strong>- https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitDescriptions</p>",
-                        "<p><strong>Summary Investigations</strong>- https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#SummaryInvestigations</p>",
-                        "<p><strong>Unit Goals</strong>- https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitGoals</p>",
-                        "<p><strong>Unit Alignment</strong>- https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAlignment</p>",
-                        "<p><strong>General AoL</strong>- https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#GeneralAoL</p>",
-                        "<p><strong>Unit AoL</strong>- https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAoL</p>",
-                        "<p><strong>Math Overview</strong>- https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#MathOverview</p>",
-                        "<p><strong>Learning Aids</strong>- https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids</p>",
-                        "<p><strong>Teaching Aids</strong>- https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids</p>",
-                        "<p><strong>Family Letters</strong>- https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters</p>",
-                        "<p><strong>Assessments</strong>- https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments</p>",
-                        "<p><strong>ACE Homework</strong>- https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework</p>"
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#RevisionComments'><strong>Revision Comments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#StemProblemFormat'><strong>Stem Problem Format</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guiide/comparing-and-scaling/#UnitDescriptions'><strong>Unit Descriptions</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#SummaryInvestigations'><strong>Summary Investigations</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitGoals'><strong>Unit Goals</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAlignment'><strong>Unit Alignment</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#GeneralAoL'><strong>General AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAoL'><strong>Unit AoL</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#MathOverview'><strong>Math Overview</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a></p>",
+                        "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a></p>"
                       ]
                     }
                   }
@@ -4445,68 +4447,32 @@
                     }
                   },
                   {
-                    "id": "etD2lZ4vSNmuS704",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Step 1</p>"
-                      ]
-                    }
-                  },
-                  {
                     "id": "_GDIYqnL4Opzrtzx",
+                    "title": "Step 1",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-2_Launch_Step1.png"
                     }
                   },
                   {
-                    "id": "SRHTZVpOsjePIBk6",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Step 2</p>"
-                      ]
-                    }
-                  },
-                  {
                     "id": "DM7s_mNu--q2aQ-1",
+                    "title": "Step 2",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-2_Launch_Step2.png"
                     }
                   },
                   {
-                    "id": "f-b4-UNB_y52CPe1",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Step 3</p>"
-                      ]
-                    }
-                  },
-                  {
                     "id": "dr5MgrJIRuoCD8F4",
+                    "title": "Step 3",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-2_Launch_Step3.png"
                     }
                   },
                   {
-                    "id": "KYdsYdNJnXyPZvcw",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Step 4</p>"
-                      ]
-                    }
-                  },
-                  {
                     "id": "0zgk5-dTYXL2oflt",
+                    "title": "Step 4",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-2_Launch_Step4.png"
@@ -4543,29 +4509,30 @@
                       ]
                     }
                   },
-                  [
-                    {
-                      "id": "U6r2Kp0XHeF5sofL",
-                      "content": {
-                        "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_TipProportion_1.png"
-                      }
-                    },
-                    {
-                      "id": "I8U5wfHeicIyas5H",
-                      "content": {
-                        "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_TipProportion_2.png"
-                      }
-                    },
-                    {
-                      "id": "qF0h0Z7ObVk9arNv",
-                      "content": {
-                        "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_TipProportion_3.png"
-                      }
+                  {
+                    "id": "U6r2Kp0XHeF5sofL",
+                    "title": "Proportion for 10% tip",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_TipProportion_1.png"
                     }
-                  ],
+                  },
+                  {
+                    "id": "I8U5wfHeicIyas5H",
+                    "title": "Proportion for 20% tip",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_TipProportion_2.png"
+                    }
+                  },
+                  {
+                    "id": "qF0h0Z7ObVk9arNv",
+                    "title": "Proportion for 15% tip",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_TipProportion_3.png"
+                    }
+                  },
                   {
                     "id": "dpcbktYb5AefJCVR",
                     "content": {
@@ -4611,6 +4578,7 @@
                   },
                   {
                     "id": "JB2043G8nQQEbgca",
+                    "title": "Sample Proportion Reasoning",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-2_ExplorePicture.png"
@@ -4645,7 +4613,7 @@
                       "format": "html",
                       "text": [
                         "<p><em>Now What Do You Know?</em></p>",
-                        "<p><em>Describe some strategies you used to solve percent problems.</em></p>"
+                        "<p><em>Describe some strategies you used to solve percent problems. Select student strategies to highlight in the summary to help students make connections between the different strategies - percent bar or tape diagram, double number lines, rate tables, informal proportions or proportions.</em></p>"
                       ]
                     }
                   }
@@ -4679,32 +4647,22 @@
                       ]
                     }
                   },
-                  [
-                    {
-                      "id": "DU7w7KybXd0ux2KS",
-                      "content": {
-                        "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize1.png"
-                      }
-                    },
-                    {
-                      "id": "wn12QDHVTUut9BRc",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>OR</p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "GyY6h5bOdIZUgYyf",
-                      "content": {
-                        "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize2.png"
-                      }
+                  {
+                    "id": "DU7w7KybXd0ux2KS",
+                    "title": "Scaling from 1% to 106%",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize1.png"
                     }
-                  ],
+                  },
+                  {
+                    "id": "GyY6h5bOdIZUgYyf",
+                    "title": "Scaling by multiplying by 1.06",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize2.png"
+                    }
+                  },
                   {
                     "id": "1sH6w6eCkTJb2XBl",
                     "content": {
@@ -4733,6 +4691,7 @@
                   },
                   {
                     "id": "yDOJy2t-3zyqAbtp",
+                    "title": "Scaling from 10% to 20%",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize_SitA&C.png"
@@ -4793,34 +4752,16 @@
                     }
                   },
                   {
-                    "id": "HHABOoygUXOipGEQ",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Proportion</p>"
-                      ]
-                    }
-                  },
-                  {
                     "id": "FoWp2yufrzAMznkp",
+                    "title": "Proportion",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize_SitB_Proportion.png"
                     }
                   },
                   {
-                    "id": "7MDGknhGkWCbaPci",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Percent Bar/Tape Diagram</p>"
-                      ]
-                    }
-                  },
-                  {
                     "id": "aWL7pSpUxoo6Ehhr",
+                    "title": "Percent Bar/Tape Diagram",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize_SitB_BarPercent1.png"
@@ -4838,6 +4779,7 @@
                   },
                   {
                     "id": "wWIRAkXSv8cgH3Py",
+                    "title": "Partitions of the percent Bar/Tape Diagram",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize_SitB_BarPercent2.png"
@@ -4875,65 +4817,34 @@
                         "<p><em>Going Further</em></p>",
                         "<ul><li>If the clerk had done the discounts in the reverse order (20% discount, then 30% discount), would the price be the same? (Yes. In either case, we would get a 44% discount. We pay 70% of 80% or 80% of 70%. Because this is multiplicative, the order of the multiplication does not matter. Students may notice that this looks like fraction multiplication that they did with brownie pans in Grade 6: Let’s Be Rational 2.)</li></ul>",
                         "<p></p>",
-                        "<p>We can use a 100 grid to show the numerical relationships. (PROTRAYAL) The shaded portions represent the discounts off and the white portions represent what we would pay.</p>"
+                        "<p>We can use a 100 grid to show the numerical relationships. (PORTRAYAL) The shaded portions represent the discounts off and the white portions represent what we would pay.</p>"
                       ]
                     }
                   },
-                  [
-                    {
-                      "id": "fDQ-MCssqFyCeyjh",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>50% OFF</p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "aELrELCTUPgG-SbA",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>30% OFF then 20% OFF</p>"
-                        ]
-                      }
-                    },
-                    {
-                      "id": "yWbLYZk6lre3Jzlz",
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>20% OFF then 30% OFF</p>"
-                        ]
-                      }
+                  {
+                    "id": "e0DbxJc9u4ej6ASr",
+                    "title": "50% Off",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_GoingFurther_1.png"
                     }
-                  ],
-                  [
-                    {
-                      "id": "e0DbxJc9u4ej6ASr",
-                      "content": {
-                        "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_GoingFurther_1.png"
-                      }
-                    },
-                    {
-                      "id": "g3iPZEaqRBa1hW92",
-                      "content": {
-                        "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_GoingFurther_2.png"
-                      }
-                    },
-                    {
-                      "id": "72102I-xitQja2Y0",
-                      "content": {
-                        "type": "Image",
-                        "url": "curriculum/comparing-and-scaling/images/TG_3-2_GoingFurther_3.png"
-                      }
+                  },
+                  {
+                    "id": "g3iPZEaqRBa1hW92",
+                    "title": "30% OFF then 20% OFF",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_GoingFurther_2.png"
                     }
-                  ],
+                  },
+                  {
+                    "id": "72102I-xitQja2Y0",
+                    "title": "20% OFF then 30% OFF",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/TG_3-2_GoingFurther_3.png"
+                    }
+                  },
                   [
                     {
                       "id": "collpiX8v9RihZzP",
@@ -5244,19 +5155,6 @@
                         "<p><strong>Suggested Questions</strong></p>",
                         "<p></p>",
                         "<ul><li>How are the two representations related? (Possible answer: Each point on the graph can be written as a ratio. Any two points on the graph can be written as a proportion.)</li></ul>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "XqBdTvwYgSN06tdW",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><em>Situation C</em></p>",
-                        "<p></p>",
-                        "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>What are some ways that we can answer the free throw questions? (Possible answers: In each case you can use a bar, a table, or proportion, and because this is about percentages, there is always a quantity of 100 somewhere in one of the ratios.)</li></ul>"
                       ]
                     }
                   },
@@ -5966,7 +5864,16 @@
                         "<ul><li>What evidence in students’ work shows an understanding of the ideas in this Unit?</li><li>What mathematical ideas will still need emphasis?</li><li>What opportunities exist in the rest of the Unit, or in future Units, to extend and connect the students’ learning?</li></ul>"
                       ]
                     }
-                  },
+                  }
+                ]
+              }
+            },
+            {
+              "type": "MathReflection3",
+              "content":
+              {
+                "tiles":
+                [
                   {
                     "id": "SgDR8hHd-Xd4z7ma",
                     "content": {
@@ -6006,16 +5913,7 @@
                         "<p></p>"
                       ]
                     }
-                  }
-                ]
-              }
-            },
-            {
-              "type": "MathReflection3",
-              "content":
-              {
-                "tiles":
-                [
+                  },
                   {
                     "id": "PeucERxCxzGcC9eo",
                     "content": {

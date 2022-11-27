@@ -285,7 +285,16 @@
                       "text": [
                         "<strong>Situation A. Mr. Zhoa’s Students’ Strategies</strong>",
                         "<p>Mr. Zhoa’s class had some interesting strategies for answering the questions about the orange juice recipes which they displayed on posters. Examine the work of each group.</p>",
-                        "<ol><li>Do you agree with the students’ strategies? Can you use the strategy to decide which recipe is the most orangey? Explain.</li><li>How are the strategies alike? Different?</li></ol>",
+                        "<ol><li>Do you agree with the students’ strategies? Can you use the strategy to decide which recipe is the most orangey? Explain.</li><li>How are the strategies alike? Different?</li></ol>"
+                      ]
+                    }
+                  },
+                  {
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<p>All of the groups use strategies that can answer the question of which recipe is the most orangey.</p>"
                       ]
                     }
@@ -308,6 +317,7 @@
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -334,6 +344,7 @@
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -360,6 +371,7 @@
                     }
                   },
                   {
+                    "display": "teacher",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -1571,9 +1583,8 @@
                         "text": [
                           "<p>Possible answers:</p>",
                           "<p><em>Smoothie Bar</em></p>",
-                          "<p>(12 (Zane^&#x27; s age))/(4 (Stella^&#x27; sage)) = (3 segments)/(1 segment)  OR </p>",
-                          "(12 (Zane^&#x27; s age))/(3 segments) = (4 (Stella^&#x27; sage))/(1 segment)</p>",
-                          "<p></p>",
+                          "<p>(12 (Zane&#x27;s age))/(4 (Stella&#x27;s age)) = (3 segments)/(1 segment)  OR </p>",
+                          "(12 (Zane&#x27;s age))/(3 segments) = (4 (Stella&#x27;s age))/(1 segment)</p>",
                           "<p><em>Height of Trees</em></p>",
                           "<p>(5 ft.nested triangle.)/(8 ft.nested triangle) = (30  ft.large triangle )/(48 ft.large triangle ) OR (48 ft.large triangle)/(8 ft.nested triangle) = (30  ft.large triangle )/(5 ft.nested triangle.)</p>",
                           "<p>Note: With similar triangles, we used two proportions to find similar shapes.</p>",
@@ -1961,8 +1972,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><em>What is being compared in each statement above?</em></p>",
-                        "<p><em>What is the unit of measure for each quantity?</em></p>"
+                        "<p>What is being compared in each statement above?</p>",
+                        "<p>What is the unit of measure for each quantity?</p>"
                       ]
                     }
                   },
@@ -2001,7 +2012,7 @@
                     },
                     [
                       {
-                        "id": "08OCt20220400PM",
+                        "id": "08OCt202204012q34PM",
                         "title": "Large Table for 10 people",
                         "content": {
                           "type": "Image",
@@ -2371,8 +2382,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "\u00a0                 x 26.25",
-                        "                        ⃕",
+                        "Proportions as a strategy:",
+                        "\u00a0               x 26.25",
+                        "                      ⃕",
                         "8 people = 210 people",
                         "___________________________",
                         "3 pizzas = 78.75 pizzas",
@@ -2910,12 +2922,10 @@
                         "objects": [
                           { "type": "point", "parents": [1, 42.00000000000001], "properties": {"id":"ZfmEiftXc7XsDAyo","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
                           { "type": "point", "parents": [2, 52], "properties": {"id":"vo_WEMFMeo-Rt8SG","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [3.1, 64.00000000000001], "properties": {"id":"Wt7595slDPkbjGhC","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [4, 73.99999999999993], "properties": {"id":"zZRFMvBCkEAd5SXj","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [5, 84.99999999999994], "properties": {"id":"zbDELqB1i_IMk32B","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [10, 140.00000000000003], "properties": {"id":"b_ZJMhiV8ggpQNBz","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [15, 195], "properties": {"id":"bEzTiGORjXpUifWX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "polygon", "parents": ["ZfmEiftXc7XsDAyo", "vo_WEMFMeo-Rt8SG", "Wt7595slDPkbjGhC", "zZRFMvBCkEAd5SXj", "zbDELqB1i_IMk32B", "b_ZJMhiV8ggpQNBz", "bEzTiGORjXpUifWX"],"properties": {"id":"Aw0ovQjdAqlVu8uF"} }
+                          { "type": "point", "parents": [3, 63], "properties": {"id":"Wt7595slDPkbjGhC","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [4, 74], "properties": {"id":"zZRFMvBCkEAd5SXj","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [5, 85], "properties": {"id":"zbDELqB1i_IMk32B","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "polygon", "parents": ["ZfmEiftXc7XsDAyo", "vo_WEMFMeo-Rt8SG", "Wt7595slDPkbjGhC", "zZRFMvBCkEAd5SXj", "zbDELqB1i_IMk32B"],"properties": {"id":"Aw0ovQjdAqlVu8uF"} }
                         ]
                       }
                     }
@@ -2960,14 +2970,17 @@
                           }
                         },
                         "objects": [
-                          { "type": "point", "parents": [1, 42.00000000000001], "properties": {"id":"ZfmEiftXc7XsDAyo","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [1, 42], "properties": {"id":"ZfmEiftXc7XsDAyo","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
                           { "type": "point", "parents": [2, 52], "properties": {"id":"vo_WEMFMeo-Rt8SG","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [3.1, 64.00000000000001], "properties": {"id":"Wt7595slDPkbjGhC","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [4, 73.99999999999993], "properties": {"id":"zZRFMvBCkEAd5SXj","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [5, 84.99999999999994], "properties": {"id":"zbDELqB1i_IMk32B","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [10, 140.00000000000003], "properties": {"id":"b_ZJMhiV8ggpQNBz","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "point", "parents": [15, 195], "properties": {"id":"bEzTiGORjXpUifWX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-                          { "type": "polygon", "parents": ["ZfmEiftXc7XsDAyo", "vo_WEMFMeo-Rt8SG", "Wt7595slDPkbjGhC", "zZRFMvBCkEAd5SXj", "zbDELqB1i_IMk32B", "b_ZJMhiV8ggpQNBz", "bEzTiGORjXpUifWX"],"properties": {"id":"Aw0ovQjdAqlVu8uF"} }
+                          { "type": "point", "parents": [3, 63], "properties": {"id":"Wt7595slDPkbjGhC","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [4, 74], "properties": {"id":"zZRFMvBCkEAd5SXj","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [5, 85], "properties": {"id":"zbDELqB1i_IMk32B","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [1, 12], "properties": {"id":"A26NOV20220844pm","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [2, 22], "properties": {"id":"B26NOV20220844pm","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [3, 33], "properties": {"id":"C26NOV20220844pm","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [4, 44], "properties": {"id":"D26NOV20220844pm","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "point", "parents": [5, 55], "properties": {"id":"E26NOV20220844pm","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                          { "type": "polygon", "parents": ["ZfmEiftXc7XsDAyo", "vo_WEMFMeo-Rt8SG", "Wt7595slDPkbjGhC", "zZRFMvBCkEAd5SXj", "zbDELqB1i_IMk32B"],"properties": {"id":"Aw0ovQjdAqlVu8uF"} }
                         ]
                       }
                     }
@@ -3789,7 +3802,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph. In what ways is a unit rate or the constant of proportionality helpful for solving a problem?</p>"
+                        "<p>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph. In what ways is a unit rate or the constant of proportionality helpful for solving a problem? </p>"
                       ]
                     }
                   },
@@ -5408,8 +5421,8 @@
                           "properties": {
                             "axisMin": [-1.1, -1.1],
                             "axisRange": [13.189, 7.072],
-                            "axisNames": ["x", "y"],
-                            "axisLabels": ["", ""]
+                            "axisNames": ["Total amount of food", "Cups of protein"],
+                            "axisLabels": ["Total amount of food", "Cups of protein"]
                           }
                         },
                         "objects": [
@@ -5429,8 +5442,8 @@
                           "properties": {
                             "axisMin": [-1.5, -1.1],
                             "axisRange": [20.541, 7.072],
-                            "axisNames": ["x", "y"],
-                            "axisLabels": ["", ""]
+                            "axisNames": ["Total amount of food", "Cups of fiber"],
+                            "axisLabels": ["Total amount of food", "Cups of fiber"]
                           }
                         },
                         "objects": [
@@ -5523,7 +5536,9 @@
                       "board": {
                         "properties": {
                           "axisMin": [-2.186, -1.093],
-                          "axisRange": [26.23, 17.486]
+                          "axisRange": [26.23, 17.486],
+                          "axisNames": ["Total amount of food", "Cups of protein"],
+                          "axisLabels": ["Total amount of food", "Cups of protein"]
                         }
                       },
                       "objects": [
@@ -5842,7 +5857,7 @@
         {
           "description": "Problem 3.4",
           "ordinal": 4,
-          "title": "CAS 3.4 4  Leaky Faucets, Free Throws, Populations, and Environment",
+          "title": "CAS 3.4 Leaky Faucets, Free Throws, Populations, and Environment",
           "subtitle": "What’s the Connection?",
           "sections": [
             {
@@ -6209,10 +6224,20 @@
                     }
                   },
                   {
+                    "id": "F_s9zela_gQrU",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Proportion: 16/120 = x/40</p>"
+                      ]
+                    }
+                  },
+                  {
                     "id": "VFqJlDMpISePftmA",
                     "content": {
                       "type": "Geometry",
-                      "title": "Proportion: 16/120 = x/40",
+                      "title": "Graph representation",
                       "board": {
                         "properties": {
                           "axisMin": [-2.186, -1.093],
@@ -6227,10 +6252,20 @@
                     "layout": { "height": 250 }
                   },
                   {
+                    "id": "F_s9zela_gQrU",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Equation: Y = 0.60x</p>"
+                      ]
+                    }
+                  },
+                  {
                     "id": "Uklotw3WymGXRtW3",
                     "content": {
                       "type": "Table",
-                      "name": "Equation: Y = 0.60x",
+                      "name": "Table representation",
                       "columns": [
                         {"name":"x","values":["1","5","10","15"]},
                         {"name":"y","values":["12","60","120","180"]}
