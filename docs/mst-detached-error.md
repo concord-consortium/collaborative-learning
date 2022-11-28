@@ -81,7 +81,7 @@ const ItemComponent = observer(function ItemComponent({item})) {
 });
 ```
 
-A working version of this code can be found in `mst.test.ts` and `mobx-react-mst.test.tsx`.
+A working version of this code can be found in `mobx-react-mst.test.tsx`.
 
 If you remove the item from the list by destroying it using `destroy(item)` and at the same time you modify the `descriptions` to clean up the entry for this item, you will see a confusing warning from MST. The change of `descriptions` triggers a `shouldCompute` test of `nameWithDescription`. But at this point the item has been destroyed so the reading of `self.name` will print the detached or destroyed object warning. This is confusing because the item is destroyed so why is `nameWithDescription` being read? On top of this you might see that the `ItemComponent` for the item is never even re-rendered because its parent component is only rendering the remaining children.
 
@@ -104,8 +104,24 @@ It turns out that MST's isAlive is observable itself. So the "aliveness" of item
 
 ### Alternative destroy soon solution
 
-It is also possible to avoid this warning by first detaching the item from the tree and then destroying it. The initial detach will still cause the `nameWithDescription` to be re-computed but because the item is not destroyed the reading of `name` will still be valid. This alternative approach demonstrated in both `mst.test.ts` and `mobx-react-mst.test.tsx`
+It is also possible to avoid this warning by first detaching the item from the tree and then destroying it. The initial detach will still cause the `nameWithDescription` to be re-computed but because the item is not destroyed the reading of `name` will still be valid. This alternative approach demonstrated in `mobx-react-mst.test.tsx`
 
 The potential problem with this approach is any errors or side effects that might happen when the item is detached before it is destroyed. In the case that triggered this whole investigation, the table tile is looking at the shared model manager to figure out the dataset. Since the table tile is no longer part of the tree, its reference gets automatically removed from the entry in the shared model manager. So when the MST view tries to find the shared model a warning is printed because the shared model manager doesn't expect a lookup for a tile that isn't part of the tree. Additionally when it is just detached and the dataSet view is evaluated it returns the importedDataSet. This seems to be harmless, but if something was being done with that imported data set like automatically adding it as a shared model, that would be bad.
 
 If the whole evaluation of view is short circuited using the first approach of an isAlive check, then this avoids these side effects. It does mean we have to add this check to any components that are using models that might be destroyed and where the component is directly or indirectly depending on an observable that changes when the item is destroyed. This extra work seems worth it to prevent harder to find side effects.
+
+### Other Notes
+
+I think the complexity here stems from the fact that MST introduces this "alive" concept. MobX does not have this concept itself. It might be possible to fix the problem within the frameworks, (MST, MobX, and MobX React). I've come up with two viable solutions and a third that probably wouldn't work.
+
+Viable Solution #1:
+
+We add support to MobX itself for this "alive" property of objects. With this in MobX, MobX's `shouldCompute` can find the object of the computedValue function and see if the object is alive before testing the computedValue. If the object isn't alive then it could just return true.
+
+Viable Solution #2:
+
+MST could add isAlive checks around every view function that MST sets up for the model objects.
+
+Probably not Viable Solution:
+
+Adding hooks to MobX React so we could extend it with an isAlive short circuit on the reactions MobX React creates when `observer(...)` is used. The problem is that the reaction might be reacting to multiple objects and at the time `observer(...)` is called it can't figured out what these objects are automatically. Perhaps there is a way to access the list of objects being monitored by MobX for changes, but this list wouldn't be known until after the first render. So the short circuit wouldn't know to call isAlive on these objects until the second time through the render function. This would be too late to actually short circuit in most cases. Instead I'd guess there'd have to be some helper method called during render that is passed the objects that should be checked. To actually implement that helper function we don't need any changes to MobX React it can just be a function that checks each of the passed in objects.

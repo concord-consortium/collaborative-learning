@@ -39,12 +39,12 @@ function initialize() {
       const todo = self.items[0];
       destroy(todo);
     },
-    removeFirstItemAndDescription() {
+    removeFirstDescriptionAndItem() {
       const todo = self.items[0];
       delete descriptions[todo.name];
       destroy(todo);
     },
-    removeFirstItemAndDescriptionSoon() {
+    removeFirstDescriptionAndItemSoon() {
       const todo = self.items[0];
       delete descriptions[todo.name];
       destroySoon(todo);
@@ -125,7 +125,7 @@ describe("behavior of mobx-react with mst objects", () => {
     ]);
   });
 
-  it("updates a list and prints warning with removeFirstItemAndDescription", () => {
+  it("updates a list and prints warning with removeFirstDescriptionAndItem", () => {
     const {List, ListComponent, log, clearLog } = initialize();
     const list = List.create({
       items: [ {name: "one"}, {name: "two"}]
@@ -140,7 +140,7 @@ describe("behavior of mobx-react with mst objects", () => {
     clearLog();
 
     jestSpyConsole("warn", spy => {
-      list.removeFirstItemAndDescription();
+      list.removeFirstDescriptionAndItem();
       expect(spy).toHaveBeenCalled();
     });
 
@@ -154,7 +154,7 @@ describe("behavior of mobx-react with mst objects", () => {
     ]);
   });
 
-  it("updates a list and doesn't print warning with removeFirstItemAndDescription and isAlive short circuit", () => {
+  it("updates a list and doesn't print warning with removeFirstDescriptionAndItem and isAlive short circuit", () => {
     const {List, Item, log, clearLog } = initialize();
     const testList = List.create({
       items: [ {name: "one"}, {name: "two"}]
@@ -165,7 +165,7 @@ describe("behavior of mobx-react with mst objects", () => {
     ) {
       log.push(`ItemComponent rendering ${item.name}`);
       if (!isAlive(item)) {
-        // Note: it isn't necessary to bail out here. Just checking if
+        // Note: we aren't bailing out here. Just checking if
         // the item is alive before item.nameWithDescription is
         // enough to short circuit MobX's shouldCompute.
         // shouldCompute finds the dependencies have changed so it returns
@@ -197,7 +197,7 @@ describe("behavior of mobx-react with mst objects", () => {
     clearLog();
 
     jestSpyConsole("warn", spy => {
-      testList.removeFirstItemAndDescription();
+      testList.removeFirstDescriptionAndItem();
       expect(spy).not.toHaveBeenCalled();
     });
 
@@ -210,7 +210,7 @@ describe("behavior of mobx-react with mst objects", () => {
     ]);
   });
 
-  it("updates a list and doesn't print warning with removeFirstItemAndDescriptionSoon", () => {
+  it("updates a list and doesn't print warning with removeFirstDescriptionAndItemSoon", () => {
     const {List, ListComponent, log, clearLog } = initialize();
     const testList = List.create({
       items: [ {name: "one"}, {name: "two"}]
@@ -225,7 +225,7 @@ describe("behavior of mobx-react with mst objects", () => {
     clearLog();
 
     jestSpyConsole("warn", spy => {
-      testList.removeFirstItemAndDescriptionSoon();
+      testList.removeFirstDescriptionAndItemSoon();
       expect(spy).not.toHaveBeenCalled();
     });
 
