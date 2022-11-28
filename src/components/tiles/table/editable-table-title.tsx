@@ -1,10 +1,13 @@
+import { isAlive } from "mobx-state-tree";
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useState } from "react";
+import { TableContentModelType } from "../../../models/tiles/table/table-content";
 import { HeaderCellInput } from "./header-cell-input";
 import { LinkGeometryButton } from "./link-geometry-button";
 
 interface IProps {
+  content: TableContentModelType;
   className?: string;
   readOnly?: boolean;
   showLinkButton: boolean;
@@ -12,18 +15,23 @@ interface IProps {
   titleCellWidth: number;
   titleCellHeight: number;
   getLinkIndex: () => number;
-  getTitle: () => string | undefined;
   onBeginEdit?: () => void;
   onEndEdit?: (title?: string) => void;
   onLinkGeometryClick?: () => void;
 }
 export const EditableTableTitle: React.FC<IProps> = observer(function EditableTableTitle({
-  className, readOnly, showLinkButton, isLinkEnabled, titleCellWidth, titleCellHeight,
-  getLinkIndex, getTitle, onBeginEdit, onEndEdit, onLinkGeometryClick
+  content, className, readOnly, showLinkButton, isLinkEnabled, titleCellWidth, titleCellHeight,
+  getLinkIndex, onBeginEdit, onEndEdit, onLinkGeometryClick
 }) {
-  // getTitle() and observer() allow this component to re-render
+
+  // TODO: Make this a generic utility that other components can use
+  if (!isAlive(content)) {
+    console.warn("Table Tile is being rendered for destroyed content");
+  }
+
+  // content.title and observer() allow this component to re-render
   // when the title changes without re-rendering the entire TableTool
-  const title = getTitle();
+  const title = content.title;
   const [isEditing, setIsEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState(title);
   const handleClick = () => {

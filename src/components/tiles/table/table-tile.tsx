@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { onSnapshot } from "mobx-state-tree";
+import { isAlive, onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
@@ -40,6 +40,11 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const content = useMemo(() => getContent(), [getContent]);
+
+  // TODO: Make this a generic utility that other components can use
+  if (!isAlive(content)) {
+    console.warn("Table Tile is being rendered for destroyed content");
+  }
   const metadata = getContent().metadata;
 
   // Basic operations based on the model
@@ -114,7 +119,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   useControlsColumn({ controlsColumn, readOnly: !!readOnly, onAddColumn, onRemoveRows });
 
   // Functions for getting and modifying the title
-  const { getTitle, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
+  const { onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, content, readOnly,
     onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle, requestRowHeight
   });
@@ -171,7 +176,11 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const exportContentAsTileJson = useCallback(() => {
     return exportTableContentAsJson(content.metadata, dataSet, content.columnWidth);
   }, [dataSet, content]);
-  useToolApi({ content: getContent(), getTitle, getContentHeight, exportContentAsTileJson,
+  // TODO: it really seems like we could remove getTitle from the tool api and instead
+  // all tile content models can provide a title property. In some cases this is a
+  // actual MST property that is saved, in the the case of the table tile this is
+  // a computed value coming from the dataset.
+  useToolApi({ content: getContent(), getTitle: () => content.title, getContentHeight, exportContentAsTileJson,
                 onRegisterTileApi, onUnregisterTileApi });
 
   useEffect(() => {
@@ -204,10 +213,18 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
       <TableToolbar documentContent={documentContent} tileElt={tileElt} {...toolbarProps}
                     onSetExpression={showExpressionsDialog} scale={scale}/>
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
-        <EditableTableTitle className="table-title" readOnly={readOnly} showLinkButton={showLinkButton}
-          isLinkEnabled={isLinkEnabled} getLinkIndex={getLinkIndex} onLinkGeometryClick={showLinkGeometryDialog}
-          getTitle={getTitle} titleCellWidth={titleCellWidth} titleCellHeight={getTitleHeight()}
-          onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
+        <EditableTableTitle
+          content={content}
+          className="table-title"
+          readOnly={readOnly}
+          showLinkButton={showLinkButton}
+          isLinkEnabled={isLinkEnabled}
+          getLinkIndex={getLinkIndex}
+          onLinkGeometryClick={showLinkGeometryDialog}
+          titleCellWidth={titleCellWidth}
+          titleCellHeight={getTitleHeight()}
+          onBeginEdit={onBeginTitleEdit}
+          onEndEdit={onEndTitleEdit} />
         <ReactDataGrid ref={gridRef} selectedRows={getSelectedRows()} rows={rows} rowHeight={rowHeight}
           headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
           {...dataGridProps} {...rowProps} />
