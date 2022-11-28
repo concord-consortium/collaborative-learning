@@ -534,19 +534,30 @@
                   "content": {
                     "tiles": [
                       {
-                        "id": "zy34543woT6wp_c7IxjDmS",
+                        "id": "OkqWQlPcmv0mJyhU",
+                        "title": "Human Hand Gripping a Ski Pole",
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/neural-engineering/images/skiGloveGrip.png",
+                          "filename": "curriculum/neural-engineering/images//skiGloveGrip.png"
+                        }
+                      },
+                      {
+                        "id": "qlmLt2DcbaH6z5H6",
+                        "title": "Text 1",
                         "content": {
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<h3>Lesson 2.1 Overview</h3>",
-                            "<p>Students will begin Module 2 by examining how sensory input impacts our ability to move and interact with objects.</p>",
-                            "<p>Materials:  \nFor every two students:<ul><li>A 30 cm ruler</li><li>Winter gloves</li></ul></p>",
-                            "<h3>Lesson Resources</strong></h3>",
-                            "<p><a href='https://www.pbs.org/newshour/show/how-sensors-rewiring-nerves-could-help-prosthetics-feel-and-function-like-real-limbs'>PBS News Hour story</a></p>"
+                            "<p><strong>Lesson Overview:</strong></p>",
+                            "<p>Students will begin Module 2 by examining how sensory input impacts our ability to move and interact with objects. </p>",
+                            "<p><strong>Materials</strong>:</p>",
+                            "<p>A 30 cm ruler and thick winter gloves (ski gloves) will be needed for each pair of students.   </p>",
+                            "<p><strong>Learning Objectives:</strong></p>",
+                            "<p>Students develop a model in which they describe the relationship “between components, including: (1) The functions of at least two major body systems in terms of contributions to overall function of an organism and (2) Ways the functions of the two different systems affect one another; and (3) A system’s function and how that relates both to the system’s parts and th overall function of the organism.”  (HS-LS1-2)</p>"
                           ]
                         }
-                      } 
+                      }
                     ]
                   },
                   "supports": [ ]
@@ -556,23 +567,31 @@
                   "content": {
                     "tiles": [
                       {
-                        "id": "BfEcsBHvG1mVwV4H",
+                        "id": "GUz0n4_ThH-w0DBE",
+                        "title": "Text 4",
                         "content": {
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<p><strong>Instructional Sequence</strong></p>",
+                            "<p><strong>Instructional Sequence</strong>:</p>",
                             "<p><em>5 minutes</em></p>",
-                            "<p>Warm-up: Ask students to think about the EMG-controlled claw and discuss some challenges they may encounter when trying to hold an egg with the claw (e.g., the egg might crack). Ask students how they would improve the design of the claw to overcome these challenges. </p><p> Inform students that in Module 2 we will explore how sensory information impacts movement.</p>",
-                            "<p></p>",
-                            "<p><em>20 minutes</em></p>",
-                            "<p>Remind students that in Lesson 1.2 they measured their reaction  time using a ruler, comparing their dominant and non-dominant hand.  Inform students that today we will conduct a similar experiment to  investigate how tactile information impacts reaction time (in other  words, how being able to feel the ruler with our fingertips impacts how fast we are at catching it?). </p><p> Ask students to discuss how they would modify the reaction time experiment to answer this new research question. In this process, students should create a table similar to the results sheet used in Lesson 1.2 to record their reaction time with and without a winter glove.</p><p>After students have collected their data, ask them to discuss their findings. As an extension activity, ask students to enter their average reaction time into a Google spreadsheet to compute the class average.</p>",
+                            "<p>Warm-up: Ask students to think about the EMG-controlled gripper and discuss some challenges they may encounter when trying to hold an egg with the gripper (e.g., the egg might crack). </p>",
+                            "<p>Inform students that in Module 2 we will explore how sensory information impacts movement. Elicit from students the senses (sight and touch) associated with gripping an object. Ask students how they would improve the design of the gripper to overcome these challenges. </p>",
+                            "<p><em>15 minutes</em></p>",
+                            "<p>Remind students that previously (lesson 1.2) they had measured their reaction time using a ruler, comparing their dominant and non-dominant hand. Inform students that today we will conduct a similar experiment to investigate how tactile information impacts reaction time (in other words, how being able to feel the ruler with our fingertips impacts how fast we are at catching it?).     </p>",
+                            "<p>Ask students to discuss how they would modify the reaction time experiment to answer this new research question. In this process, students should create a table similar to the results sheet used in Lesson 1.2 to record their reaction time with and without a winter glove.</p>",
+                            "<p>After students have collected their data, ask them to discuss their findings. As an extension activity, ask students to enter their average reaction time into a Google spreadsheet to compute the class average.</p>",
                             "<p><em>5 minutes</em></p>",
-                            "<p>Present the first 3 minutes of this <a href='https://www.pbs.org/newshour/show/how-sensors-rewiring-nerves-could-help-prosthetics-feel-and-function-like-real-limbs'>PBS News Hour story</a> (until the moment the reporter cracks an egg with his prosthetic arm). While watching the video, ask students to list 3 things that stand out to them. Collect these ideas at the end of the video. </p>",
-                            "<p><em>10 minutes</em></p>",
-                            "<p>In small groups, ask students to discuss how prosthetic arms can be improved by incorporating sensory information (similar to the prosthetic leg example from the video). Encourage students to sketch their ideas and consider how the motor command from the brain interacts with tactile information from objects.</p>",
+                            "<p>Present the first 3 minutes of a PBS News Hour story (until the moment the reporter cracks an egg with his prosthetic arm).  (A link to the clip can be found in teacher resources).</p>",
+                            "<p>While watching the video, ask students to list three things that stand out to them. Collect these ideas at the end of the video. </p>",
+                            "<p><em>15 minutes</em></p>",
+                            "<p>In small groups, ask students to discuss how prosthetic arms can be improved by incorporating sensory information (similar to the prosthetic leg example from the video). Ask students to investigate ways  the functions of the two nervous and muscular systems affect one another, and then construct  an illustrated and annotated model to communicate understanding.</p>",
                             "<p><em>5 minutes</em></p>",
-                            "<p>Using their Learning Journals, ask each student to revise what they know, wonder, and learned the role of tactile information in movement. </p>"
+                            "<p>In their individual journal, ask students to describe potential limitations of Tilly’s prosthetic arm, and how the limited ability of her prosthetic arm to naturally function may affect her life. </p>",
+                            "<p><strong>Resources:</strong></p>",
+                            "<p>How the nervous system <a href='http://faculty.washington.edu/chudler/organ.html'>interacts with other body systems</a></p>",
+                            "<p>PBS News Hour <a href='https://www.pbs.org/newshour/show/how-sensors-rewiring-nerves-could-help-prosthetics-feel-and-function-like-real-limbs'>story on rewiring nerves</a></p>",
+                            "<p>Advanced new sensors can <a href='https://scitechdaily.com/advanced-new-sensors-could-transform-prosthetics-and-robotic-limbs/'>transform prosthetics and robotic limbs</a></p>"
                           ]
                         }
                       }
@@ -592,49 +611,74 @@
                   "type": "overview",
                   "content": {
                     "tiles": [
-                            {
-                              "id": "zy34543woT6wp_c7IxjDmS",
-                              "content": {
-                                "type": "Text",
-                                "format": "html",
-                                "text": [
-                                  "<h3>Lesson 2.1 Overview</h3>",
-                                  "<p>Students will explore the variance in touch sensitivity of different body parts and different people, and examine how the nervous system is responsible for this variance. </p>",
-                                  "<p>Materials:  \nFor every two students:<ul><li>1 <a href='https://www.amazon.com/dp/B0739GGS46/ref=pe_386300_440135490_TE_item'>caliper</a> for each team of 3 students</li><li>Chart paper and markers</li></ul></p>"
-                                ]
-                              }
-                            } 
+                      {
+                        "id": "WiXXZSavJxhoDr9W",
+                        "title": "Text 5",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Lesson 2.2 - How do we perceive touch?</strong></p>",
+                            "<p><strong>Lesson Overview</strong>: </p>",
+                            "<p>Students will explore the variance in touch sensitivity of different body parts and different people, and examine how the nervous system is responsible for this variance. </p>",
+                            "<p><strong>Materials:</strong></p>",
+                            "<p>1 caliper for each team of 3 students</p>",
+                            "<p>Chart paper and markers</p>",
+                            "<p>Learning Objectives:</p>",
+                            "<p>Students develop a model in which they describe the relationship “between components, including: (1) The functions of at least two major body systems in terms of contributions to overall function of an organism and (2) Ways the functions of the two different systems affect one another; and (3) A system’s function and how that relates both to the system’s parts and the overall function of the organism.”  (HS-LS1-2)</p>"
                           ]
-                        },
+                        }
+                      }
+                    ]
+                  },
                   "supports": [ ]
                 },
                 {
                   "type": "teach",
                   "content": {
                     "tiles": [
-                            {
-                              "id": "BfEcsBHvG1mVwV4H",
-                              "content": {
-                                "type": "Text",
-                                "format": "html",
-                                "text": [
-                                  "<p><strong>Instructional Sequence</strong></p>",
-                                  "<p><em>5 minutes</em></p>",
-                                  "<p>Begin with a brief overview of the previous lesson (How does sensory information impact movement?). Then, inform students that today’s lesson will help them explore how the nervous system processes sensory (and more specifically <em>tactile</em>) information and what problems could arise in this process.  </p>",
-                                  "<p></p>",
-                                  "<p><em>15 minutes</em></p>",
-                                  "<p>Inform students that in today’s activity they will measure their touch sensitivity across different parts of the body and enter the information to a webpage to map how the brain represents their body (“homunculus”). </p><p>Students should follow the instructions in the Lab Work tab in the lesson, and enter their measurements into <a href='https://brainmapper.org/'>https://brainmapper.org/</a>(Experiment tab → Enter the Results).</p>",
-                                  "<p><em>10 minutes</em></p>",
-                                  "<p>Ask students to discuss the following questions in their groups and record their answers and then collect students’ answers:<ol><li> What is the most/least sensitive body part?</li><li> Why do different parts of the body have different sensitivity to touch?</li><li> Were there differences between students in their touch sensitivity? What can explain these differences? </li></ol></p><p>Extension activity: Ask students to enter their measurements into a shared Google Spreadsheet and create the averaged homunculus of all students in the class.</p>",
-                                  "<p><em>15 minutes</em></p>",
-                                  "<p>Back in their groups, ask students to read this brief text on the neuroscience of touch.</p><p>Students should identify which body parts are involved in processing touch information and make an annotated model that shows how they are connected to each other. To do so, students will need to read online about:<ul><li>Touch receptors</li><li>Sensory nerves</li><li>Spinal cord</li><li>Thalamus</li><li>Somatosensory cortex.</li></ul></p><p><a href='https://https://www.brainfacts.org/'>Brainfacts.org</a> is a good source of information and has a <a href='https://www.brainfacts.org/3d-brain#intro=true'>3D model of the brain</a>.</p><p>Extension activity: Ask students to compare their model to the one created in the first module (control of movement).</p>",
-                                  "<p><em>5 minutes</em></p>",
-                                  "<p>Using their Learning Journals, ask each student to revise what they know, wonder, and learned the role of tactile information in movement. </p>"
-                                ]
-                              }
-                            }
+                      {
+                        "id": "pJ6Zjt2CJfnWlXGs",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Instructional Sequence</strong>:</p>",
+                            "<p><em>5 minute</em>s</p>",
+                            "<p>Begin with a brief overview of the previous lesson (How does sensory information impact movement?). Then, inform students that today’s lesson will help them explore how the nervous system processes sensory (and more specifically tactile) information and what problems could arise in this process. </p>",
+                            "<p><em>15 minutes</em></p>",
+                            "<p>Inform students that in today’s activity they will measure their touch sensitivity across different parts of the body and enter the information to a webpage to map how the brain represents their body (“homunculus”).  </p>",
+                            "<p>Students should follow the instructions in a handout (see resources below) and enter their measurements to https://brainmapper.org/ (Experiment tab → Enter the Results). </p>",
+                            "<p><em>10 minutes</em></p>",
+                            "<p>Ask students to discuss the following questions in their groups and record their answers and then collect students’ answers:</p>",
+                            "<p>1. What is the most/least sensitive body part?</p>",
+                            "<p>2. Why do different parts of the body have different sensitivity to touch?</p>",
+                            "<p>3. Were there differences between students in their touch sensitivity? What can explain these differences? </p>",
+                            "<p>Extension activity: Ask students to enter their measurements into a shared Google Spreadsheet and create the averaged homunculus of all students in the class. </p>",
+                            "<p><em>15 minutes</em></p>",
+                            "<p>Back in their groups, ask students to read this brief text on the neuroscience of touch.</p>",
+                            "<p>Students should identify which body parts are involved in processing touch information and revise their illustrated and annotated models so that they communicate how the parts are connected to each other. To do so, students will need to read online about:</p>",
+                            "<p></p>",
+                            "<ul><li>Touch receptors</li><li>Sensory nerves</li><li>Spinal cord</li><li>Thalamus</li><li>Somatosensory cortex </li><p>Extension activity: Ask students to compare their model to the one created in the first module (control of movement). </p></ul>",
+                            "<p></p>",
+                            "<p><em>10 minutes</em></p>",
+                            "<p>Ask one member from each team to share their model. Facilitate a whole-class conversation about what is similar and different about the models, and list these observations on the classroom board. </p>",
+                            "<p><em>5 minutes</em></p>",
+                            "<p>Ask one member from each team to share their model. Facilitate a whole-class conversation about what is similar and different about the models, and list these observations on the classroom board. </p>",
+                            "<p><em>15 minutes</em></p>",
+                            "<p>Introduce pressure sensors to students.  Ask students to propose and how these sensors could be incorporated in the design of the gripper via a DataFlow model.</p>",
+                            "<p>5 minutes</p>",
+                            "<p>Ask students to record three every day challenges in Tilly&#x27;s life if her bionic arms do not have sensors to provide feedback about objects she touches.</p>",
+                            "<p><strong>Resources</strong>:</p>",
+                            "<p><a href='https://www.brainfacts.org/'>Brain Facts</a>: https://www.brainfacts.org/ </p>",
+                            "<p><a href='https://brainmapper.org/'>Brain Mapper</a>: https://brainmapper.org/ </p>",
+                            "<p>Article: <a href='https://www.science.org/content/article/sensors-may-soon-give-prosthetics-lifelike-sense-touch'>Sensors may soon give prosthetics a lifelike sense of touch</a></p>",
+                            "<p>Article: <a href='https://www.fierceelectronics.com/components/intelligent-prosthetic-pressure-sensors-could-ease-pain-for-lower-limb-amputees'>Intelligent prosthetic pressure sensors</a></p>"
                           ]
-                        },
+                        }
+                      }
+                    ]
+                  },
                   "supports": [ ]
                 }
               ]
@@ -709,22 +753,18 @@
                   "content": {
                     "tiles": [
                       {
-                        "id": "M3FIWTuuCHr34gFp",
+                        "id": "6WLwonLVfBUOyJSZ",
+                        "title": "Text 6",
                         "content": {
                           "type": "Text",
                           "format": "html",
                           "text": [
+                            "<p><strong>Lesson 2.4: Putting it all together</strong></p>",
+                            "<p><strong>Lesson Overview</strong>:</p>",
                             "<p>Using knowledge and skills gained in the module, students will co-design a new device to improve the lives of specific users. Each student team will prepare an illustration of the proposed device. </p>",
-                            "<p>Materials:</p>",
-                            "<p>Problem scenarios: </p>",
-                            "<ul><li>Help Mrs. Marcus</li><li>Help Tilly</li><li>Help Mr. Johnson</li></ul>",
-                            "<p></p>",
-                            "<p>Whiteboards </p>",
-                            "<p>Dry erase markers</p>",
-                            "<p>Journal Template (in the lesson)</p>",
-                            "<p>Informative design thinking process graphic</p>",
-                            "<p></p>",
-                            "<p><strong>Learning Objective</strong></p>",
+                            "<p><strong>Materials:</strong></p>",
+                            "<p>White boards, dry erase markers, case scenarios </p>",
+                            "<p><strong>Learning Objectives:</strong></p>",
                             "<p>Students will design and evaluate engineering solutions that can help improve the lives of patients with sensory-motor impairments (i.e., a human-machine interface). </p>"
                           ]
                         }
@@ -738,37 +778,52 @@
                   "content": {
                     "tiles": [
                       {
-                        "id": "g-FwP1kTr4AaQzHP",
+                        "id": "t3o4RNkq9fYiJpJ6",
+                        "title": "Text 2",
                         "content": {
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<p><em>10 min</em></p>",
-                            "<p>Review the engineering design process, highlighting the value for use. Outline the design thinking process using an informative graphic as reference. Inform students that they will embark on the first step – empathize – by researching the experiences and challenges of someone who has a sensory or motor condition. </p>",
-                            "<p><em>5 min</em></p>",
+                            "<p><strong>Instructional Sequence:</strong></p>",
+                            "<p><em>10 minutes</em></p>",
+                            "<p>Review the engineering design process, highlighting the value for use (see resources). Outline the design thinking process using an informative graphic as reference. Inform students that they will embark on the first step – empathize – by researching the experiences and challenges of someone who has a sensory or motor condition. </p>",
+                            "<p>5 minutes</p>",
+                            "<p>Survey students as to which case they would like to support. This can be introduced in two ways:</p>",
                             "<p>Option 1:</p>",
                             "<p>Present the following two cases to students:</p>",
-                            "<p>Help Mrs. Marcus</p>",
-                            "<p>Help Tilly</p>",
+                            "<ul><li>Help Mrs. Marcus</li><li>Help Tilly</li><li>Help Mr. Johnson</li><li>Help Julio and Mr. Paulino</li></ul>",
                             "<p>Survey students as to which person they would like to help and organize teams of three or four students based on their responses (try to have two teams per case)</p>",
                             "<p>Option 2:</p>",
-                            "<p>Ask each pre-established group to review the two cases and decide if they would like to help Mrs. Marcus or Tilly. </p>",
-                            "<p><em>15 min</em></p>",
+                            "<p>Ask each pre-established group to review the four cases and decide who they want to help.</p>",
+                            "<p><em>15 minutes</em></p>",
                             "<p>Ask each team to prepare a response to the following questions (these questions should help orient students towards designing a solution) and record their responses in a journal template.</p>",
-                            "<ol><li>What are the challenges experienced by Mrs. Marcus’s/Tilly?</li><li>Why is it important to help reduce these challenges?</li><li>How can we apply what we have learned throughout the unit to help this individual?</li><p></p></ol>",
-                            "<p><em>10 min</em></p>",
-                            "<p>After each team has prepared a response, ask teams who are working on helping the same person (Tilly or Mrs. Marcus) to exchange their ideas and summarize common ideas on paper. Ask one representative working on helping Tilly to share the collective ideas with the entire class. Then ask one representative working on helping Mrs. Marcus to do the same.</p>",
-                            "<p><em>30-40 min</em></p>",
-                            "<p>Direct each team to use their knowledge of body systems and technology to propose a product that can help Mrs. Marcus/Tilly circumvent the challenge described in the case. Direct students to sketch the product on whiteboards/chart paper, with annotations.  </p>",
-                            "<p></p>",
+                            "<p>What are the challenges experienced by [person’s name]?</p>",
+                            "<p>Why is it important to help reduce these challenges?</p>",
+                            "<p>How can we apply what we have learned throughout the unit to help this individual?</p>",
+                            "<p><em>10 minutes</em></p>",
+                            "<p>After each team has prepared a response, ask teams who are working on helping the same person to exchange their ideas and summarize common ideas on paper. Ask one representative working on helping each person to share the collective ideas with the entire class. </p>",
+                            "<p><em>35 minutes</em></p>",
+                            "<p>Direct each team to use their knowledge of body systems and technology to propose a product that can help [the person] circumvent the challenge described in the case. Direct students to sketch the product on whiteboards/chart paper, with annotations.  </p>",
                             "<p>As students work on the proposed products, circulate between teams and prompt students’ empathic design thinking by asking the following questions:</p>",
-                            "<p>Will Mrs. Marcus/Tilly find the product safe?</p>",
-                            "<p>Will Mrs. Marcus/Tilly find the product easy to use?</p>",
-                            "<p>Will Mrs. Marcus/Tilly find the product comfortable?</p>",
-                            "<p>Will Mrs. Marcus/Tilly find the product useful?</p>",
-                            "<p>20 min</p>",
-                            "<p>After students have completed their illustrated and annotated models of the proposed products, ask each team to share their design, including the design considerations made to ensure that Mrs.Marcus/Tilly would find the product easy to use, safe, useful, and comfortable. This can be accomplished much like a professional science meeting poster session – one team member can represent the work to others, while the rest of the team visits other teams’ posters to gain insight and provide feedback (ask students to write down questions and comments on sticky notes and attach them to the poster).</p>"
+                            "<p>Will [person’s name] find the product safe?</p>",
+                            "<p>Will [person’s name] find the product easy to use?</p>",
+                            "<p>Will [person’s name] find the product comfortable?</p>",
+                            "<p>Will [person’s name] find the product useful?</p>",
+                            "<p><em>20 minutes</em></p>",
+                            "<p>After students have completed their illustrated and annotated models of the proposed products, ask each team to share their design, including the design considerations made to ensure that the person they are helping would find the product easy to use, safe, useful, and comfortable. This can be accomplished much like a professional science meeting poster session – one team member can represent the work to others, while the rest of the team visits other teams’ posters to gain insight and provide feedback (ask students to write down questions and comments on sticky notes and attach them to the poster).</p>",
+                            "<p><strong>Resources</strong>:</p>",
+                            "<p>Links to four case studies (Aaron is reviewing them for accuracy and feasibility)</p>",
+                            "<p><a href='https://web.stanford.edu/~mshanks/MichaelShanks/files/509554.pdf'>Introduction to design thinking</a> process </p>"
                           ]
+                        }
+                      },
+                      {
+                        "id": "mYRpW2l97Pljfw2y",
+                        "title": "Human hand with thumb and forefinger pinched together",
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/neural-engineering/images/thumbPinch.png",
+                          "filename": "curriculum/neural-engineering/images/thumbPinch.png"
                         }
                       }
                     ]
