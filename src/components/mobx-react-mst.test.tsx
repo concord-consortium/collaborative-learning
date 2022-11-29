@@ -171,7 +171,7 @@ describe("behavior of mobx-react with mst objects", () => {
       // shouldCompute finds the dependencies have changed so it returns
       // true. But the component is never rendered because the parent
       // component only renders active (alive) children.
-      verifyAlive(item);
+      verifyAlive(item, "ItemComponent");
       return <div>{item.nameWithDescription}</div>;
     });
 

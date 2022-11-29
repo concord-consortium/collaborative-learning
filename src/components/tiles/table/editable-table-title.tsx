@@ -24,7 +24,7 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
   getLinkIndex, onBeginEdit, onEndEdit, onLinkGeometryClick
 }) {
 
-  verifyAlive(content);
+  verifyAlive(content, "EditableTableTile");
 
   // content.title and observer() allow this component to re-render
   // when the title changes without re-rendering the entire TableTool
