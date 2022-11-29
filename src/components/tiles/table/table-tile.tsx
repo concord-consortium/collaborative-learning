@@ -1,5 +1,5 @@
 import { observer } from "mobx-react";
-import { isAlive, onSnapshot } from "mobx-state-tree";
+import { onSnapshot } from "mobx-state-tree";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactDataGrid from "react-data-grid";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
