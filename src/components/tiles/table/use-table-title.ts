@@ -18,11 +18,12 @@ export const useTableTitle = ({
 
   // Short circuit access of content.dataSet when the content model has been
   // destroyed. See mst-detached-error.md
-  const getTitle = useCallback(() => isAlive(content) ? content.dataSet.name : "unknown", [content]);
-  const editingTitle = useCurrent(getTitle());
+  // const getTitle = useCallback(() => isAlive(content) ? content.dataSet.name : "unknown", [content]);
+  // const getTitle = useCallback(() => content.dataSet.name, [content]);
+  const editingTitle = useCurrent(content.title);
 
   const onBeginTitleEdit = () => {
-    editingTitle.current = getTitle();
+    editingTitle.current = content.title;
     gridContext.onClearSelection();
     return !readOnly;
   };
@@ -49,5 +50,5 @@ export const useTableTitle = ({
     return () => onRequestUniqueTitleRef.current = undefined;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return { getTitle, onBeginTitleEdit, onEndTitleEdit };
+  return { onBeginTitleEdit, onEndTitleEdit };
 };
