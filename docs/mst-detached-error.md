@@ -57,7 +57,10 @@ runReactions ("mobx@observable.ts:112:9")
 
 ## Item destroyed in a list
 
-This is one case that can cause these MST detached or destroyed object warnings.
+This is one case that can cause these MST detached or destroyed object warnings. This will happen under these conditions:
+- there is `observer` component
+- this component is observing a MST model that is destroyed in some cases
+- this component is directly or indirectly depending on another observable that changes when the MST model is destroyed
 
 Because MobX React `observer` components use reactions under-the-hood, they will trigger computed value checks for any computed value they access whenever one of these observed computed values changes. This is done by MobX to see if the reaction should be run again. So let’s say you have a component rendering an item in a MST list and it uses a computed value from the item. This computed value accesses some global observable object to get some extra info about the item.
 
@@ -104,7 +107,7 @@ It turns out that MST's isAlive is observable itself. So the "aliveness" of item
 
 ### Alternative destroy soon solution
 
-It is also possible to avoid this warning by first detaching the item from the tree and then destroying it. The initial detach will still cause the `nameWithDescription` to be re-computed but because the item is not destroyed the reading of `name` will still be valid. This alternative approach demonstrated in `mobx-react-mst.test.tsx`
+It is also possible to avoid this warning by first detaching the item from the tree and then destroying it. The initial detach will still cause the `nameWithDescription` to be re-computed but because the item is not destroyed the reading of `name` will still be valid. This alternative approach is demonstrated in `mobx-react-mst.test.tsx`
 
 The potential problem with this approach is any errors or side effects that might happen when the item is detached before it is destroyed. In the case that triggered this whole investigation, the table tile is looking at the shared model manager to figure out the dataset. Since the table tile is no longer part of the tree, its reference gets automatically removed from the entry in the shared model manager. So when the MST view tries to find the shared model a warning is printed because the shared model manager doesn't expect a lookup for a tile that isn't part of the tree. Additionally when it is just detached and the dataSet view is evaluated it returns the importedDataSet. This seems to be harmless, but if something was being done with that imported data set like automatically adding it as a shared model, that would be bad.
 
