@@ -58,8 +58,8 @@ export function getTileContentById(target: IAnyStateTreeNode, tileId: string) {
  *
  * See mst-detached-error.md and mobx-react-mst.test.tsx for more details.
  */
-export function verifyAlive(target: IAnyStateTreeNode) {
+export function verifyAlive(target: IAnyStateTreeNode, source = "unknown") {
   if (!isAlive(target)) {
-    console.warn(`Destroyed MST Object is being accessed. Type: ${getType(target)}`);
+    console.warn(`Destroyed MST Object is being accessed from ${source}. Type: ${getType(target)}`);
   }
 }
