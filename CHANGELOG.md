@@ -1,4 +1,47 @@
 # Changelog
+## Version 3.4.1 - Nov 29, 2022
+
+Version 3.4.1 makes CAS corrections and fixes some console errors.
+
+### Bug Fixes
+- CAS Corrections #1508
+- Fix console errors for document mst detached #1496
+
+### Asset Sizes
+|        File                                                                           |    Size   | % Change from Previous Release |
+|---------------------------------------------------------------------------------------|-----------|--------------------------------|
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.3a46870f.js |       51K |                                |
+| common-Dataflow-Geometry.8787ebf3.js                                                  |       26K |                                |
+| common-Diagram-SharedVariables-Drawing.21234838.js                                    |       26K |                                |
+| common-Diagram-SharedVariables.40f6a0bf.js                                            |       11K |                                |
+| common-Diagram-SharedVariables.ecab853c.js                                            |      624K |                                |
+| DataCard.358926a8.js                                                                  |       18K |                                |
+| Dataflow.785fcd3b.js                                                                  |      736K |                                |
+| Diagram.995a50c6.js                                                                   |       11K |                                |
+| Drawing.81438ecd.js                                                                   |       33K |                                |
+| Geometry.c59e2dda.js                                                                  |      886K |                                |
+| Image.9c73f794.js                                                                     |       16K |                                |
+| index.46776cc509b7398ff3f0.js                                                         |      408K |                                |
+| SharedDataSet.a14fff08.js                                                             |      253B |                                |
+| SharedVariables.aea4282f.js                                                           |      6.4K |                                |
+| Starter.5a8e3691.js                                                                   |      1.2K |                                |
+| Table.7b7dd794.js                                                                     |       84K |                                |
+| Text.e29bbe93.js                                                                      |       16K |                                |
+| vendor-main.6b6cd21d.js                                                               |      2.1M |                                |
+
+| File                         | Size | % Change from Previous Release |
+|------------------------------|------|--------------------------------|
+| DataCard.3e6cb803.css        | 8.4K |                                |
+| Dataflow.e5075c32.css        | 32K  |                                |
+| Diagram.078bbe51.css         | 12K  |                                |
+| Drawing.86aea47b.css         | 5.2K |                                |
+| Geometry.00061447.css        | 10K  |                                |
+| Image.8e890c8f.css           | 6.3K |                                |
+| main.503d2417.css            | 165K |                                |
+| SharedVariables.faed1eee.css | 333B |                         30.03% |
+| Starter.27340418.css         | 207B |                                |
+| Table.8ccaaeca.css           | 10K  |                                |
+| Text.9d39c880.css            | 4.5K |                                |
 
 ## Version 3.4.0 - Nov 22, 2022
 
