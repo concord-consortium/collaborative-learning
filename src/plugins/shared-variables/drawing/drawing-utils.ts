@@ -1,5 +1,6 @@
 import { VariableType } from "@concord-consortium/diagram-view";
 import { getType } from "mobx-state-tree";
+import { VariableChipObjectSnapshotForAdd } from "./variable-object";
 import { DrawingContentModelType } from "../../drawing/model/drawing-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 
@@ -66,8 +67,18 @@ export function getOrFindSharedModel(drawingContent: DrawingContentModelType) {
   return sharedModel;
 }
 
-export function findVariable(drawingContent: DrawingContentModelType, selectedVariableId: string) {
+export function findVariable(drawingContent: DrawingContentModelType, variableId: string) {
   const variables = getVariables(drawingContent);
-  const selectedVariable = variables.find(v => v.id === selectedVariableId);
-  return selectedVariable;
+  const variable = variables.find(v => v.id === variableId);
+  return variable;
+}
+
+export function addChipToContent(drawingContent: DrawingContentModelType, variableId: string, x?: number, y?: number) {
+  const variableChipSnapshot: VariableChipObjectSnapshotForAdd = {
+    type: "variable",
+    x: x === undefined ? 250 : x,
+    y: y === undefined ? 50 : y,
+    variableId
+  };
+  drawingContent.addObject(variableChipSnapshot);
 }

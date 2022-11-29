@@ -4,7 +4,8 @@ import { AppConfigModelType } from "./app-config-model";
 import { kDividerHalf, kDividerMax, kDividerMin, UIDialogTypeEnum } from "./ui-types";
 import { WorkspaceModel } from "./workspace";
 import { DocumentModelType } from "../document/document";
-import { LogEventName, Logger } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { ITileModel } from "../tiles/tile-model";
 import { ENavTab } from "../view/nav-tabs";
 

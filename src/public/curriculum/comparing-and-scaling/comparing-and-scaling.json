@@ -584,7 +584,179 @@
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "RCyE1mOM8KawfN_R",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 1.1 Mixing Juice:  Choosing a Comparing Strategy</strong></p>",
+                        "<p>Students encounter an open-ended situation in which they need to make a decision using a comparison. In the Initial Challenge, students compare drink recipes using proportional reasoning to figure out which recipe will create the most “orangey” tasting juice. In the What If Situations they will analyze other student strategies for solving this challenge.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "l7ATmoD_g0Vp3tYP",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p>Describe some strategies for solving problems that involve ratios. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "geD2-nKha2wnUWNk",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p>",
+                        "<p>Reasoning Proportionally with Quantities: <em>Introduction, Exploration, </em></p>",
+                        "<p><em>and Analysis</em></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "tgX_TSRpAh8yqc7x",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>",
+                        "<p>Ratio</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "SUgbcvf8XcNXhSr0",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 1.1 Strategies</p>",
+                        "<p>Teaching Aid 1.1 Orange Juice Recipes</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "nGBXSmq2W74Mg7RL",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 2 Days</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p></p>",
+                        "<p>2-3</p>",
+                        "<p><strong>A</strong> #1-4</p>",
+                        "<p><strong>C</strong> #15-18</p>",
+                        "<p><strong>E</strong> #28-30</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.RP.A.1 </p>",
+                        "<p>7.RP.A.2</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "SPa-uWnzyht2ZhQA",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p><em>Teacher Moves: Problem Solving Environment</em></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Use the Introduction to Investigation 1 to remind students of the mathematics in the Grade 6 <em>Comparing Quantities</em> Unit, including ratios, equivalent ratios, and unit rate. Review the definition of a ratio and the many ways that ratios can be written. </p>",
+                        "<p><em>Teacher Moves: Portrayal</em></p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Introduce the orange juice recipes using <strong>Teaching Aid 1.1: Orange Juice Recipes</strong>. Tell students that Arvin and Mariah ask four people for help making the juice and each person gives them a different recipe. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What do you notice about the orange juice recipes? What do you wonder? </li><li>Have you ever had juice or some other drink that tastes different depending on who makes it? </li></ul>",
+                        "<p>Help students connect prior learning to the recipes. Do not push for the comparison statements to be in any particular form. </p>",
+                        "<p><em>Have different groups work on the different strategies in the What If Situations. This is an opportunity to provide for individual needs by have students work on strategies that can push their thinking in new directions. </em></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "AcvaIiHK7SoB_E24",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p><em>Teacher Moves: Problem Solving Environment</em></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>After giving students some time to try a few ideas, you might suggest that students just begin by comparing two recipes rather than all four at once. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Let’s take a look at Recipe A and Recipe B. Which do you think would be the most orangey? </li><li>How does the amount of water for Recipe A compare to the amount of water for Recipe B? </li><li>If we were looking at just water, how many batches of Recipe A would it take to get the same amount of water in Recipe B? </li></ul>",
+                        "<p>Some students will use naïve strategies such as simply focusing on the number of cups of concentrate and ignoring the water. Ask questions to challenge students’ ideas.</p>",
+                        "<ul><li>How can we keep adding cups of water without making the juice less orangey?</li><li>What do you notice and wonder about the strategies in the What If?</li><li>Is this group using a part to part or part to whole way of thinking about the recipes?</li><li>Is this group using a strategy similar to something you did in <em>Stretching and Shrinking </em>or from the Grade 6 <em>Comparing Quantities</em> Unit?</li></ul>",
+                        "<p><em>Teacher Moves: Selecting and Sequencing</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>As you are circulating during the Explore select student work to use in the Summary.  Look for a variety of strategies to discuss and make connections.  Find examples of part-to-part and part-to-whole thinking.  Look for students using fractions, percents, unit rates, etc.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "2oVg4QJVwz97bZun",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>Teacher Moves: Agency, Identity, Ownership</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>Have groups display their work. Then have students do a Gallery Walk to look at all of the work from other groups. Ask them what they notice and wonder about the strategies used by their classmates. As a class, discuss the strategies and solutions for determining which juice has the most orangey flavor.</p>",
+                        "<p><em>Teacher Moves: Claim, Support, Question</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p>As students explain, justify, and discuss the strategies in the What If to the whole class, ask questions to analyze the strategies. Also, compare the strategies to each other and to the strategies that your students used in the Initial Challenge.</p>",
+                        "<ul><li>How did Moja’s, Lima’s, Tatu’s, or Sanji’s group think about this problem? </li><li>Is their thinking correct?</li><li>Why is Max’s strategy not a ratio?</li><li>Why do Stella, Elise and Dan have different unit rates?</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "CAS Problem 1.2",
@@ -922,7 +1094,174 @@
               "supports": []
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "DpXDa_HzyxJg_XtV",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 1.2 Time to Concentrate:  Scaling Ratios</strong></p>",
+                        "<p>This Problem gives students the opportunity to practice the scaling strategies they explored earlier. The Initial Challenge goes back to the orange juice recipes from Problem 1.1. Students choose part-to-part or part-to-whole ratios, as appropriate. In the What If Situations students will look at scaling strategies to solve proportions, foreshadowing the next Problem, where proportions are defined and solving proportions is dealt with directly.<strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "b1VAvNSjzAl4X9no",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p>How do the strategies you used in this Problem compare to those used in Problem 1.1?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_7HaSroVLVE0jp_k",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p>",
+                        "<p>Reasoning Proportionally with Quantities: <em>Analysis</em></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ZIpprS1nAYkupYnJ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>",
+                        "<p>Part-to Part</p>",
+                        "<p>Part-to-Whole</p>",
+                        "<p>Unit Rate<strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "VWLTXzWNSjpUvvor",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 1.2 Recipes </p>",
+                        "<p>Teaching Aid 1.2  Ratio Types Notation</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "1zzbEMX8bBoiOnlz",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>2</p>",
+                        "<p><strong>A </strong>#5-10</p>",
+                        "<p><strong>C</strong> #19-22</p>",
+                        "<p><strong>E </strong>#31-32</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.RP.A.1 </p>",
+                        "<p>7.RP. A.2 </p>",
+                        "<p>7.RP. A.2.A </p>",
+                        "<p>7.RP. A.2.C </p>",
+                        "<p>7.RP.A.3</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "Tl5KI3Frn6VbxuAW",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p><em>Teacher Moves: Time</em></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>If students are not using the term “scaling ratios” from <em>Stretching and Shrinking</em> or Grade 6 <em>Comparing Quantities</em>, now is the time to encourage that vocabulary.<strong> Teaching Aid 1.2: Ratio Type Notation </strong>may be used to emphasize the scaling.</p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Use <strong>Learning Aid 1.2: Recipes</strong> to shift students’ attention back to the orange juice recipes. Have students consider making batches of each recipe for 210 campers. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Arvin and Mariah are thinking about the supplies they need to make batches of juice. Does each recipe serve the same number of people? </li><li>Does this change how you will find the number of batches for each recipe?</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "lpll1a_6xG_kWpIe",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>Suggested questions</p>",
+                        "<ul><li>Are you using the recipe as a part-to-part or part-to-whole comparison? How did you decide? </li><li>Did you scale up a ratio? How did you decide what to multiply by? How do you know that the relationship between the ingredients is still correct? </li><li>How can you tell if two ratios are equivalent? </li><li>How could scaling help solve a problem? How can you decide on a scale factor to use?</li><li>How did each student in the What If Situations find equivalent ratios?</li></ul>",
+                        "<p><em>Teacher Moves: Selecting and Sequencing</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>Look for student work examples to show using scaling strategies- rate tables, unit rates, proportions, etc.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "b-y8LSGJ-oQg_Ckq",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>﻿Teacher Moves: Claim, Support, Question</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>The beginning of the Summary should be a time for students to share their strategies for finding the amount of supplies needed for making juice for 210 campers.</p>",
+                        "<p>Choose groups of students who used different strategies. Have them explain why they think their ideas make sense and answer the questions. You want students to leave this Problem having experienced several problem-solving strategies and making connections between them.</p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>How are the strategies used in our classroom similar to and different from each other?</li><li>Do you have any What If questions?</li><li>How are Adia’s and Otis’s strategies alike?  Different?</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 1.3",
@@ -934,66 +1273,65 @@
               "type": "introduction",
               "content": {
                 "tiles": [
-                      {
-                        "id": "vQp8l_By7JeUZewV",
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<p>In Problem 1.2, Adia and Otis recognized that the comparisons could be represented with ratios. They used scaling to find the number of batches of Recipe A.</p>",
-                            "<p></p>",
-                            "<p>Adia used equivalent ratios in a table to show how the original ratio, 1 to 5, was scaled to find the number of batches.</p>"
-                          ]
-                        }
-                      },
-                      {
-                        "id": "OV4hI1MBtqeSapI8",
-                        "content": {
-                          "type": "Table",
-                          "name": "Adia's strategy",
-                          "columns": [
-                            {"name":"Number of Batches of Recipe A","width":106,"values":["1","2","3","4","5","10","20","40","41","x"]},
-                            {"name":"Number of 1 cup servings of juice","width":117,"values":["5","10","15","20","25","50","100","200","205","210"]}
-                          ]
-                        }
-                      },
-                      {
-                        "id": "vauIDhVz0C1Bqv-N",
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<p>Otis wrote the original ratio and an equivalent ratio in fraction form. He scaled the quantities in the ratio to find the number of batches needed for 210 cups of juice. He wrote the following equation:</p>"
-                          ]
-                        }
-                      },
-                      {
-                        "id": "01qasdfeMrTuRBgHG",
-                        "title": "Otis' strategy",
-                        "content": {
-                          "type": "Image",
-                          "url": "curriculum/comparing-and-scaling/images/C&S_1-3_Intro2_350w.png"
-                        }
-                      },
-                      {
-                        "id": "hrruntQBxTFwDZMO",
-                        "content": {
-                          "type": "Text",
-                          "format": "html",
-                          "text": [
-                            "<p>This equation showing two ratios that are equal is called a <strong>proportion.</strong></p>",
-                            "<p>When we find equivalent ratios using strategies like Adia’s table or Otis’s equation to answer questions, we are using <strong>proportional reasoning</strong>. Both strategies involve proportions. </p>",
-                            "<p>Adia’s table shows many proportions, such as</p>",
-                            "1/5 = 2/10 or 2/10 = 3/15 or 5/25 = 10/50",
-                            "<p>Otis’s equation shows one proportion.</p>",
-                            "1/5 = x/210",
-                            "<p>In the <em>Comparing Quantities</em> Unit, we worked with ratios to determine how to share Smoothie Bars. In the <em>Stretching and Shrinking Unit</em>, we worked with ratios to find missing lengths in similar figures. These examples involved proportional reasoning. There are many other situations in which setting up a proportion can help us solve a problem, as in the next problem.</p>"
-                          ]
-                        }
-                      }
+                  {
+                    "id": "vQp8l_By7JeUZewV",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>In Problem 1.2, Adia and Otis recognized that the comparisons could be represented with ratios. They used scaling to find the number of batches of Recipe A.</p>",
+                        "<p></p>",
+                        "<p>Adia used equivalent ratios in a table to show how the original ratio, 1 to 5, was scaled to find the number of batches.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "OV4hI1MBtqeSapI8",
+                    "content": {
+                      "type": "Table",
+                      "name": "Adia's strategy",
+                      "columns": [
+                        {"name":"Number of Batches of Recipe A","width":106,"values":["1","2","3","4","5","10","20","40","41","x"]},
+                        {"name":"Number of 1 cup servings of juice","width":117,"values":["5","10","15","20","25","50","100","200","205","210"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "vauIDhVz0C1Bqv-N",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Otis wrote the original ratio and an equivalent ratio in fraction form. He scaled the quantities in the ratio to find the number of batches needed for 210 cups of juice. He wrote the following equation:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "01qasdfeMrTuRBgHG",
+                    "title": "Otis' strategy",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/comparing-and-scaling/images/C&S_1-3_Intro2_350w.png"
+                    }
+                  },
+                  {
+                    "id": "hrruntQBxTFwDZMO",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>This equation showing two ratios that are equal is called a <strong>proportion.</strong></p>",
+                        "<p>When we find equivalent ratios using strategies like Adia’s table or Otis’s equation to answer questions, we are using <strong>proportional reasoning</strong>. Both strategies involve proportions. </p>",
+                        "<p>Adia’s table shows many proportions, such as</p>",
+                        "1/5 = 2/10 or 2/10 = 3/15 or 5/25 = 10/50",
+                        "<p>Otis’s equation shows one proportion.</p>",
+                        "1/5 = x/210",
+                        "<p>In the <em>Comparing Quantities</em> Unit, we worked with ratios to determine how to share Smoothie Bars. In the <em>Stretching and Shrinking Unit</em>, we worked with ratios to find missing lengths in similar figures. These examples involved proportional reasoning. There are many other situations in which setting up a proportion can help us solve a problem, as in the next problem.</p>"
+                      ]
+                    }
+                  }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "initialChallenge",
@@ -1371,7 +1709,174 @@
               },
               "supports": []
             }
-          ]
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "FNz4pEN5HLy_8WZb",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 1.3 Keeping Things in Proportion:  Using Proportions</strong></p>",
+                        "<p>In the Initial Challenge students encounter a variety of situations that involve proportional reasoning.  In the What If Situations students will set up proportions and solve for unknown values. Students should start to formalize the process of setting up equivalent ratios that make similar comparisons of quantities. In particular, scaling one ratio to find an unknown value in an equivalent ratio is highlighted as one strategy to help find unknown values.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "h7wy5SehMmzzqU8d",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p>How are proportions like other strategies that you have used to solve ratio problems?  How are they different?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "VKLfWWCpUdlRZDy_",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p>",
+                        "<p>Reasoning Proportionally with Quantities: <em>Analysis and Synthesis</em></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "LUD85GFnVWm0P8WK",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>",
+                        "<p>Proportion</p>",
+                        "<p>Proportional Reasoning<strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "n4dH5U9IkRoayRr5",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Teaching Aid 1.3 Proportional Reasoning Examples</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "A6io5x2fdHfQrcSp",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>Think-Pair-Share</p>",
+                        "<p><strong>A</strong> #11-14</p>",
+                        "<p><strong>C</strong> #23-27</p>",
+                        "<p><strong>E</strong> #33-34</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.RP.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP. A.2.A </p>",
+                        "<p>7.RP.A.2.C </p>",
+                        "<p>7.RP.A.3</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "dcAHQDlrvTFbmV_d",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Introduce the vocabulary of proportions and proportional reasoning.  Revisit Adia’s and Otis’s strategies to introduce the terms from Problem 1.2. Ask students for examples of finding a missing quantity from prior Units. <strong>Teaching Aid 1.3 Proportional Reasoning Examples</strong> can be used to show a couple of examples from prior Units.</p>",
+                        "<p>It is important that students understand that when setting up a proportion, the ratios are relating the same two quantities. Labeling the quantities will help students make sure that they are comparing.</p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Challenge students to answer the questions for each situation in the Initial Challenge. Make sure students know to show their work so strategies can be discussed in the Summarize.</p>",
+                        "<p>Tell students that they are going to be working on a variety of situations where they need to find unknown values. Emphasize that they should find the unknown values using strategies you have discussed as a class (such as using equivalent ratios, rate tables, scaling, and writing proportions) and other strategies that make sense to them.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "jqDAN61UwlgO0XL6",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS </p>",
+                        "<p>As students are working on the Initial Challenge and What If, check to see if they are using a variety of strategies to represent and solve the questions. Have students think about other ways to compare the quantities.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>For the various Situations and questions, are the ratios you are writing part-to-part or part-to-whole? </li><li>What are some strategies that you have heard for finding two equivalent ratios? </li><li>For What If Situation A, what strategies are you using to solve for x? </li><li>For Situation B, what would a proportion look like</li></ul>",
+                        "<p><em>Teacher Moves: Selecting and Sequencing</em></p>",
+                        "<p>PPLANNING FOR THE SUMMARY</p>",
+                        "<p>As you are circulating during the Explore listen for students using the language of equivalent ratios and then how they use those to write and solve proportions.  Find different examples of how students looked at the relationships in each context to compare- equivalent ratios, ratio tables, unit rates and proportions.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "_e1ibYXWFcLWmK7N",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>﻿Teacher Moves: Agency, Identity, Ownership; Compare Thinking</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>Select different groups to represent different strategies that you observed during the exploration. Consider taking one specific situation (or all, if you have time) and have students show multiple ways of solving the questions, such as using equivalent ratios, ratio tables, unit rates, and proportions. Encourage groups to explain how they got the answer and why the answer makes sense. Invite other students to question or challenge the solutions presented, to make connections between strategies, or to offer an alternative strategy.</p>",
+                        "<p><em>Teacher Moves: Compare Thinking</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p>Guide students’ thinking by asking them to think of other ways to set up the relationship. Help make explicit how the strategies for answering the questions are connected and how the proportions can be notated.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Are there other ways of writing the same proportional situation?</li><li>Do you agree with the way that Nic wrote the proportions in the What If Situation A? </li><li>Which way of writing the proportion helps you to see the relationship between the quantities?</li><li>If we were to make a table for Reading Speeds, what might it look like?</li></ul>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         }
       ],
       "supports": []
@@ -1991,7 +2496,175 @@
               "supports": []
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "f2NQxbwjRKzB-QNG",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 2.1 Sharing Pizzas:  Comparing Rate Strategies</strong></p>",
+                        "<p>In the Initial Challenge two different numbers of pizzas are placed at tables that seat two different numbers of people. Students must determine whether this situation is fair. In the What If Situations students will analyze strategies such as finding how much pizza each person gets at the different tables, or how many people share a pizza. The numbers are small, so the comparison can be the central focus.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Xt_RGpRYdnoNHOKb",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p>We have used several strategies for solving problems that involve ratios. How do you decide which method to use?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "6GTDPFngKavuNT4z",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p>",
+                        "<p>Reasoning Proportionally with Quantities: <em>Analysis</em></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "1JRTzjRyPc5VgEF5",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>",
+                        "<p>Rates</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "0XTrdh9bg13vrhwN",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 2.1A: Pizzas and Tables</p>",
+                        "<p>Learning Aid 2.1B: Strategies</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "37IUnGqAUzb4eImv",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>2</p>",
+                        "<p><strong>A</strong> #1-3</p>",
+                        "<p><strong>C</strong> #10-12</p>",
+                        "<p><strong>E </strong>#21-22</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.RP.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.A </p>",
+                        "<p>7.RP.A.2.C</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "j-8T80KdOo7CCfBr",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Remind students of the story about Arvin and Mariah making orange juice for campers in Problem 1.2. Let students know that you are going to consider another situation at the camp.</p>",
+                        "<p>If you have the time, you may want to review some of the strategies that students used in Investigation 1 to solve problems, such as ratio tables and proportions.</p>",
+                        "<p><em>Teacher Moves: Notice Wonder</em></p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>For the Initial Challenge, have students keep their books closed or do not let them see the What If to start out. The What If presents student strategies that you may not want students to see until after working on the tables with pizzas. Introduce the Problem using <strong>Learning Aid 2.1A: Pizzas and Tables</strong>. You can use one Learning Aid per group. Tell students that the camp has a large table and a small table setup. They need to understand that the pizzas will be shared equally by everyone at the table and that a camper will be sitting at each plate. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What do you notice about the tables and pizzas?  What do you wonder?</li><li>What do you notice about the tables and pizzas? What do you wonder?</li><li>What quantities are being compared?</li><li>Will any of the strategies you used in Investigation 1 work for this situation?</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "dt2UMOSuMGEYteOV",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p><em>Teacher Moves: Agency, Identity, Ownership</em></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>This is an example of a ratio that relates quantities with different units, people and pizzas. After working through Investigation 1, most students should answer the Initial Challenge without too much difficulty, although some students may find it challenging to express their solutions in the language of ratios. It is possible to reason about the quantities and answer the question without finding specific numerical answers. As you walk around observing groups, push students to make their reasoning and conclusion visible to others. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Do you think that your diagram, notations, and explanation will show another group how you are making sense of the question? </li><li>Can you think of another strategy to solve the Initial Challenge? Are your two strategies related? If so, how?</li></ul>",
+                        "<p><em>Teacher Moves: Selecting and Sequencing</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>As you are circulating during the Explore look for the strategies students are using to solve this Problem to use during the Summary- pictures using estimation, how much pizza per person, how many people per pizza.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "y_5dEmQ6UwFS_Fll",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>﻿Teacher Moves: Portrayal; Compare Thinking</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>Students will come up with a variety of ways to reason about this Problem. Let them present their strategies to one another and justify the validity of their approaches. As students share their strategies, it is important to be clear about what comparisons are being made by the ratios. When students use certain strategies, such as scaling a ratio to an equivalent ratio, be sure to call attention to that strategy for the class. With unit rates, it is important for students to see how scaling a ratio so that one quantity is 1 connects to dividing to find a unit rate. </p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p>Strategies from students: (many examples given in the extended LES in the Teacher Guide)</p>",
+                        "<ul><li>Reasoning with pictures and estimation</li><li>How much pizza for a fixed number of people</li><li>How many people for a fixed number of pizzas</li></ul>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>How much pizza for a fixed number of people.</li><li>How many people share a fixed number of pizzas</li><li>What quantities are you comparing? Do they have the same units of measure? </li><li>Since each ratio is a comparison of two quantities <em>measured in different units</em> (pizza and tables), they are called <strong>rates</strong>. Can you think of other rates that we have used?</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 2.2",
@@ -2387,7 +3060,181 @@
               "supports": []
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "NlyxIO6BMpJMFSao",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 2.2 Comparing Pizza Prices: Scaling Rates</strong></p>",
+                        "<p>In Problem 2.2, students scale ratios to solve problems. The ratios in Problem 2.2 are rates. The Initial Challenge ratio/rate compares two quantities measured in different units, number of pizzas and price in dollars.  In the What If Situations students will look at different strategies and representations to find rates and compare rate situations.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "SGmZS3lUN8mSrF1p",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p>How can you determine if a situation is a proportional relationship?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "KSIq9qIMq1qWSgMg",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p>",
+                        "<p>Reasoning Proportionally with Quantities: <em>Analysis and Synthesis</em></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "B84vo4d-dIU2PVLR",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>",
+                        "<p>Rates</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "FvAO5myZmPhzvHFl",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 2.2: Royal and Howdy Pizza Costs</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "So24lrQr2tsdcG9G",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>2</p>",
+                        "<p><strong>A</strong></p>",
+                        "<p><strong>C</strong></p>",
+                        "<p><strong>E</strong></p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.RP.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.A </p>",
+                        "<p>7.RP.A.2.B  </p>",
+                        "<p>7.RP.A.2.C </p>",
+                        "<p>7.EE.B.3 </p>",
+                        "<p>7.EE.B.4 </p>",
+                        "<p>7.EE.B.4.A</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "ObU0d4YVsyh_TfM-",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Use <strong>Learning Aid 2.2: Royal and Howdy’s Pizza Costs</strong> to discuss the comparison statements in the Introduction.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Comparisons have two quantities. What are the two quantities in each statement? </li><li>Since each ratio is a comparison of two quantities <em>measured in different units</em> (number of pizzas and price in dollars), they are called <strong>rates</strong>. Can you think of other rates that we have used?</li></ul>",
+                        "<p>Use <strong>Teaching Aid 2.2: Introduction</strong> to review the rate table and proportion strategies in the Introduction. These strategies review finding the number of pizzas for 210 people in the previous Problem.</p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Introduce the Royal Pizza and Howdy’s Pizza deals using <strong>Learning Aid 2.2: Royal and Howdy’s Pizza Costs.</strong> You will want one Learning Aid per student to optimize class time. Tell students that Royal Pizza and Howdy’s Pizza are advertising their prices. Students need to notice the different costs for the different amounts of pizza.</p>",
+                        "<p><strong>Suggested question</strong></p>",
+                        "<ul><li>We are considering buying pizza for a class celebration. I found ads from two pizzerias. What do you notice and what do you wonder?</li></ul>",
+                        "<p><em>Be sure to hold a discussion after the Initial Challenge before moving on to the What If. This will allow you to highlight your students’ strategies before analyzing the strategies of other students that are presented in the What If.</em></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "VbT6UMPCesbLN8Pc",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>If we consider Royal Pizza, what do we know about the pizza costs there? </li><li>How might we draw a picture to represent that?</li><li>How does the $65 relate to the 5 pizzas?</li><li>How can we determine the cost of one of the pizzas?</li><li>For Royal, we know the cost for 5 pizzas. How can we find the cost for 10 pizzas?</li><li>For Howdy’s Pizza, if I look at the ad, it says that 15 pizzas cost $165. Why does the table show $195 for 15 pizzas?</li></ul>",
+                        "<p><em>Teacher Moves: Selecting and Sequencing</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>Listen for how students are solving the Initial Challenge and how they decide that one company has pricing that is proportional and one does not.  Listen for how students talk about the initial value of 0 versus 30 and how it impacts the situation. Select student groups to talk about the different representations and how they see when the situation is proportional.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "rz7OcfkQtCI0sTUF",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>﻿Teacher Moves: Problem Solving Environment</em></p>",
+                        "<p></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>Begin with a discussion of which pizzeria Julia should choose. This is an inequality situation. Groups should have different answers depending on the number of pizzas being considered. Push the students to consider when the price is better.  </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>How can you describe the pattern between the variables for Royal Pizza? </li><li>How can you describe the pattern between the variables for Howdy’s Pizza?</li></ul>",
+                        "<p><em>Teacher Moves: Compare Thinking</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p>Have students share their strategies for finding the values on the tables. As students discuss their proportional reasoning with the tables, make sure to connect the various ways of notating their thinking. By the end of the discussion, students should connect finding the values in the tables to writing proportions. Students need to see that Royal’s rates are proportional and Howdy’s rates are not proportional.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Does the scaling in Amit’s table work? Will 5 pizzas cost $65 at Howdy’s? </li><li>What do you think about Eun Mi’s claim in Situation A, do proportions work for Royal, but not for Howdy’s?</li><li>How do we find the unit rate? </li><li>How is this Problem similar to and/or different from previous Problems?</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 2.3",
@@ -2450,8 +3297,7 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "initialChallenge",
@@ -2968,10 +3814,178 @@
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "mJKroZgE5taIBDL9",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 2.3 Finding Costs:  Unit Rate and Constant of Proportionality</strong></p>",
+                        "<p>This Problem focuses on how unit rate, or constant of proportionality, is helpful to solve problems. In the Initial Challenge students also look at the role of unit rate in different representations of tables, graphs, and equations with the context of buying oranges. The What If Situations continue this work with the contexts of buying tickets and pasta.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "6NKmj0T0ank1Q4Y5",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p>Describe how you can determine a unit rate, or constant of proportionality, from a description, rate table, equation, or graph? In what ways is a unit rate or the constant of proportionality helpful for solving a problem?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "m6qukFiwEJXHHAjN",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p>",
+                        "<p>Reasoning Proportionally with Quantities: <em>Synthesis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "jKsi0U7oWjsPXVal",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>",
+                        "<p>Constant of proportionality</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Y8RqvdXgTj0dl4HA",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 2.3: Cost of Oranges</p>",
+                        "<p>Graphing technology such as an online graphing program or a graphing calculator (optional)</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "oBZE13C02CpdIpOP",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>Think-Pair-Share</p>",
+                        "<p><strong>A</strong> #6-9</p>",
+                        "<p><strong>C</strong> #17-20</p>",
+                        "<p><strong>E</strong> #24</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7RP.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.A </p>",
+                        "<p>7.RP.A.2.B  </p>",
+                        "<p>7.RP.A.2.C </p>",
+                        "<p>7.RP.A.2.D </p>",
+                        "<p>7.EE.A.2 </p>",
+                        "<p>7.EE.B.3 </p>",
+                        "<p>7.EE.B.4 </p>",
+                        "<p>7.EE.B.4.A</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "MBxmhhy2DHbr4hLF",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>If you did not introduce the vocabulary of constant of proportionality in the Summary of Problem 2.2, you can introduce the term now.</p>",
+                        "<p><em>Teacher Moves: Think-Pair-Share</em></p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Students will be analyzing the proportionality in descriptions, tables, graphs, and equations.  Let students know that the situation involves a sale on oranges where there are 10 oranges for $2.  Students will analyze how they can use this information to think about buying any number of oranges. Have students begin this work independently for a few minutes and then work with a partner.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "T6ju-8S8srCua7UV",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>As groups work on this Problem, make sure that students are relating the two quantities in the rate table to the variables in the equations and graphs.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What does the N stand for in the equations? </li><li>Where do you see number of oranges in the table? In the graph? </li><li>What does the C stand for in the equations? </li><li>Where do you see total cost in dollars in the table? In the graph? </li><li>In What if Situation A, what does the table, graph, or equation say to you?</li><li>For What if Situation B, is there a previous strategy that could help you? </li></ul>",
+                        "<p><em>Teacher Moves: Selecting and Sequencing</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>Select student work for each representation to discuss how students found the unit rate or constant of proportionality.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "1_Ekmsc1_o_12aSa",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>Begin by having students discuss why Mia has only one table while she has two equations and two graphs.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Why does Mia have only one table when she has two equations and two graphs? </li><li>What do Mia’s equations tell us?</li><li>What is the unit rate? </li><li>Where do you see the unit rate in the table? Equation? Graph? </li></ul>",
+                        "<p><em>Teacher Moves: Language</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What is the unit rate or constant of proportionality for Noralie’s concert ticket? </li><li>Where do you see the constant of proportionality in the graph and the equation? </li><li>If I know that this is a proportional situation and 2 tickets cost $60, how can I find how many tickets I can buy with $120?</li><li>How are the representations (description, equation, graph, table) the same and different with a $10 processing fee?</li><li>How can we tell whether or not this is a proportional relationship? </li><li>For each store what if Mia did two divisions? 6 ÷ 7 = 0.857 and 7 ÷ 6 = 1.16666. What do the numbers tell us about the pasta at that store?</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         }
-      ],
-      "supports": []
+      ]
     },
     {
       "description": "Investigation 3",
@@ -3446,7 +4460,184 @@
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "tn8ivMz0hPSjzau6",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 3.1 Using Percents:  What is the Tax?</strong></p>",
+                        "<p>This Problem builds on students’ understandings of percent that began in the Grade 6 <em>Comparing Quantities</em> Unit.  In the Initial Challenge students use the context of buying school supplies to explore the idea of tax.  In the What If Situations students will look at multiple strategies for finding tax on those items, look at percent in general, and work backwards to find a total.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "jrKsJyN3A_l6ameF",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p>How are percent problems like ratio and rate problems? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "4wiEJHt_IaRJZpSa",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p>",
+                        "<p>Reasoning Proportionally with Quantities: <em> Analysis and Synthesis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "vIBxrckEsodiHC-o",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "6K3scHoNZrKnCXl1",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 3.1A Cost of Skylar’s School Items</p>",
+                        "<p>Learning Aid 3.1B Student Strategies</p>",
+                        "<p></p>",
+                        "<p>Teacher Aid 3.1 Introduction</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "eZOIKD8BVcv7iIJu",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>2</p>",
+                        "<p><strong>A</strong> #1-5</p>",
+                        "<p><strong>C</strong> #16-18</p>",
+                        "<p><strong>E</strong> #28</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.RP.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.2.A </p>",
+                        "<p>7.RP.2.B </p>",
+                        "<p>7.RP.A.2.C </p>",
+                        "<p>7.RP.A.2.D </p>",
+                        "<p>7.RP.A.3 </p>",
+                        "<p>7.EE.A.2</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "z1R65kvzBP-0H9eZ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Explain the use of percentages for discounts and taxes. It is important for students to understand that discounts take a percentage off of an amount and that taxes add a percentage to an amount. Some students may be familiar with this use of percentages.</p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Introduce the Skylar’s school items with tax using Learning Aid 3.1A: Cost of Skylar’s School Items. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Why is it important to estimate? </li><li>How do we find estimates? </li><li>What is an estimate for the price of the sticky notes?</li></ul>",
+                        "<p></p>",
+                        "<p>Then have students work on finding the exact costs with tax.</p>",
+                        "<p><em>Be sure to hold a discussion after the Initial Challenge before moving on to the What If. This will allow you to highlight your students’ strategies before analyzing the strategies of other students that are presented in the What If.</em></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "aAGbPcfiEzBl4upl",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>As you move around the room, listen to students discuss the Problem. Find appropriate opportunities to ask students about connections among percents, ratios, and rates.</p>",
+                        "<p>Encourage students to make their reasoning and conclusion visible to others.  (See extended LES in Teacher Guide for student examples)</p>",
+                        "<p><em>Teacher Moves: Selecting and Sequencing</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>As you are circulating during the Explore look for examples of student strategies to use in the summary- percent bar or tape diagrams, double number lines, rate tables, informal proportions and proportions.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "nNUCL6LK1fAboxy2",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p>﻿SOLUTIONS AND STRATEGIES </p>",
+                        "<p>As a class, discuss the strategies and solutions for determining the total cost with tax. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Does the estimate for the total bill with tax allow us to answer if Skylar will have enough money? </li><li>What are some ways that we can find the actual cost with tax?<em></em></li></ul>",
+                        "<p><em>Teacher Moves: Compare Thinking; Portrayal; Time</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p>For What If Situation A give students an opportunity to discuss how the five strategies are alike and how they compare to strategies that your students used to answer the questions. </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What strategy shows thinking like you did on the Initial Challenge? </li><li>Is there a strategy that you like and might use to answer questions in the future? </li><li>Whose strategies look different but are really using the same type of reasoning? </li></ul>",
+                        "<p></p>",
+                        "<p>The student wonderings in What If Situation B push students to connect their current thinking to previous mathematical ideas. </p>",
+                        "<ul><li>Do you agree with Sam or Will?</li><li>Do you agree with Nicky or Marta? Is there more than one price with tax? Or is it the same to find tax on each item and the tax on the total of the items? </li></ul>",
+                        "<p>Given the tax amount and percentage, students have to determine the whole in What If Situation C. Push students to relate this to previous strategies discussed in class.</p>",
+                        "<ul><li>How could I use a (choose some strategy, such as rate table) to find out how much Funda paid for the used gaming system?</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 3.2",
@@ -3791,7 +4982,187 @@
               "supports": []
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "bzJt32rkzRq5qdYn",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 3.2 Using Percents: What is the Tip?</strong></p>",
+                        "<p>The goal of this Problem is to give students more practice in solving the standard family of percent problems. In the Initial Challenge the context is calculating tax, and tips (or service charges) on restaurant meals. In the What If Situations students will look at multiple strategies for tax, tips, and discounts. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Wu6zZF-73Ebd1IZT",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p>Describe some strategies you used to solve percent problems.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "71YCyk56jvtnVU6x",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p>",
+                        "<p>Reasoning Proportionally with Quantities: <em>Synthesis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "y8OAJT9IdGmXPTWB",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "DaMjghd45qY7DOkK",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid.3.2 Larry’s Lunch Place Menu</p>",
+                        "<p>Chart Paper</p>",
+                        "<p>Sticky Notes</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "QslD3GkCgT27Xqph",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>3-4</p>",
+                        "<p><strong>A </strong>#6-8</p>",
+                        "<p><strong>C </strong>#19-20</p>",
+                        "<p><strong>E</strong> #29-30</p>",
+                        "<p></p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.RP.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.A </p>",
+                        "<p>7.RP.A.2.B </p>",
+                        "<p>7.RP.A.2.C </p>",
+                        "<p>7.RP.A.2.D </p>",
+                        "<p>7.RP.A.3</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "nKArbugvQFoA3vrK",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>If students do not eat out or usually eat out only at fast food restaurants, they might not be familiar with tipping. It might be useful to explain how that system works and even to work out one simple example as a whole class.  </p>",
+                        "<p><strong>Suggested questions </strong></p>",
+                        "<ul><li>Suppose you eat at a restaurant and the bill comes to $14. What would a tip of 10% be? A tip of 20%? A tip of 15%? ($1.40; $2.80; $2.10)</li></ul>",
+                        "<p></p>",
+                        "<p>Following up on the strategies from Problem 3.1, you might ask:</p>",
+                        "<ul><li>Can you show how to work out these tips on a percent bar? Rate table?  Writing a proportion?</li></ul>",
+                        "<p></p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Alert students that the questions here are about tips and discounts, but the same kind of reasoning as in Problem 3.1 will apply. Encourage them to use tape diagrams, rate tables, or proportions. </p>",
+                        "<p>The openness of the Initial Challenge is an inviting opportunity for students to make their own choices. Time will be a factor when sharing their work in the Summary. You may want to have groups do a Gallery Walk. Have each group put their work on large chart paper to use in a Gallery Walk in the Summary.</p>",
+                        "<p><strong>Implementation Note:</strong>  You may want to use a menu from a local restaurant instead of Larry’s Lunch Place.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  
+                  {
+                    "id": "njrH-tJxEWrKuxCV",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p><strong>Suggested questions  </strong></p>",
+                        "<ul><li>How did you calculate the bill plus tax?</li><li>How did you calculate your share of the bill?</li><li>Would it have given you the same answer if you divided the total bill by 4, then divided the tip by 4, and then added? </li></ul>",
+                        "<p><em>Teacher Moves: Selecting and Sequencing</em></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>Select student strategies to highlight in the Summary to help students make connections between the different strategies: percent bar or tape diagrams, double number lines, rate tables, informal proportions and proportions.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "qQq-GBx2LrKN-aal",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>﻿Teacher Moves: Gallery Walk</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>During the Gallery Walk, you can have groups rotate to at least two other groups’ work. Students can check the work and give feedback on sticky notes.  </p>",
+                        "<p><strong>Suggested questions </strong></p>",
+                        "<ul><li>Some groups found the sub-total for the food items and then added 6% of that amount to the bill. How else might you calculate the total amount?</li></ul>",
+                        "<p><em>Teacher Moves: Compare Thinking</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p>Use the What If Situations  to make sure that all students have strategies for finding percents such as tax, tips, and discounts.  </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What happens when we find 10% of a number? </li><li>How can I use the 10% rate to find the 20% rate?</li></ul>",
+                        "<p></p>",
+                        "<p>Use What If Situation B to make sure that all students have strategies for finding the quantity of 100% when a percentage and quantity are given.</p>",
+                        "<ul><li>In What If Situation C, did you use the same strategy or did you change your strategy when finding the 6% tax then finding the 15% tip?</li></ul>",
+                        "<p></p>",
+                        "<p>What If Situation D explores what happens when you have discounts on top of discounts. This is often counterintuitive for students. Many will think that this is an application of the Distributive Property, but it is not.</p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 3.3",
@@ -4296,10 +5667,177 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             }
-          ]
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "t6rzfOMGLer_Daz2",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 3.3 Feeding Chimps:  The Percent Connection</strong></p>",
+                        "<p>The mathematics in this Problem reviews and connects the three main proportional reasoning focuses of this Unit: ratios, rates, and percents. Like the orange juice problem earlier in the Unit, students are presented with a mixture context. In the Initial Challenge students  will be answering questions about food mixtures for baby chimps. In the What If Situations students will look at multiple strategies for solving these mixture situations and then apply them with adult chimp food recipes. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "EBScRCIQXnGgwHLF",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p>How are percents useful to solve problems?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "X6WiWVGtKTAF4qqN",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p>",
+                        "<p>Reasoning Proportionally with Quantities: <em>Synthesis and Abstraction</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "luLz6KJXFt6RBbkj",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Q2tkHeLXpyorZP1h",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 3.3 Chimp Food Mixtures.</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Ao5i53Yk9Ru3Iji8",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 1 Day</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>2</p>",
+                        "<p><strong>A </strong>#9-11</p>",
+                        "<p><strong>C</strong> #21-23</p>",
+                        "<p><strong>E</strong> #31-32</p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.RP.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP. A.2.A </p>",
+                        "<p>7.RP.A.2.B </p>",
+                        "<p>7.RP.A.2.C </p>",
+                        "<p>7.RP.A.2.D </p>",
+                        "<p>7.RP.A.3 </p>",
+                        "<p>7.EE.B.4</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "OZQDbuPHlHKu_1Ex",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p><em>Teacher Moves: Time</em></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>This Problem is intended to bring together the proportional reasoning of ratio, rate, and percent. It may be a time to revisit a few previous Problems from each Investigation. You may want to look back at Summary notes or anchor charts where you kept track of what students were taking away from the Problems. Problems to revisit might include: Problem 1.2 Mixing Juice, Problem 2.1 Sharing Pizzas, Problem 2.2 Comparing Pizza Prices, and Problem 3.1 Using Percents. For your class, there may be different Problems that resulted in reflective moments on the mathematical highlights.</p>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>For the Initial Challenge, have students keep their books closed or look only at the Initial Challenge. The What If portion of the Problem presents student strategies that you may not want students to see until after working on the baby and adult chimp mixture questions in the Initial Challenge.</p>",
+                        "<p>Introduce the chimp recipes using Learning Aid 3.3: Chimp Food Mixtures. You can use one Learning Aid per group of two students.</p>",
+                        "<p><em>You may want to hold a discussion after the Initial Challenge before moving on to the What If. This will allow you to highlight your students’ strategies before analyzing the strategies of other students that are presented in the What If. You can use the strategies in the What If to connect to how your students thought about the proportional reasoning in the chimp food questions.</em></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "ahBKLGds76TQ9yhk",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>What could be a comparison statement for how to make the mixture for baby chimps? </li><li>Is this part-to-part or part-to-whole? </li><li>What would be a comparison statement for the total of the mixture for baby chimps? </li><li>Is this part-to-part or part-to-whole? </li><li>What is a unit rate we could find for the Baby Chimp mixture? </li><li>Why is finding unit rate helpful? </li><li>What are some other strategies that we have used in this Unit to help answer proportional questions like these?</li></ul>",
+                        "<p></p>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>Students should be able to draw on their experiences in this Unit and reference tip, tax, mixtures when the quantities aren’t equal, etc.<strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "BGUFw0Lg5a0aUzM9",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>Teacher Moves: Compare Thinking</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>Have students show and discuss their strategies for answering the chimp recipe questions.</p>",
+                        "<p><em>Teacher Moves: Agency, Identity, Ownership</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p>Help students connect the way they chose to answer the questions to other strategies in What If Situation A.</p>",
+                        "<p>Choose a strategy that connects to the strategies that your students used in class.  </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>How does this strategy compare to yours? </li><li>What strategies did Ms. Stewart’s class use that we did not? How are those strategies useful? </li><li>How are the two representations in What If Situation B related?</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 3.4",
@@ -4749,7 +6287,190 @@
               },
               "supports": []
             }
-          ]
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "tjjHIZIbxi1rWLJq",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 3.4 Leaky Faucets, Free Throws, Populations, and Environment:  What’s the Connection</strong></p>",
+                        "<p>This Problem provides students with an opportunity to further develop their understanding of proportional relationships. In the Initial Challenge students will simulate a leaky faucet using a paper cup with a hole in it that is dripping water. In the What If Situations students will encounter various contexts involving ratios and be given representations to create their own contexts and question.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "2f8otU3HC-IfShjF",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p>",
+                        "<p>Describe some situations that you encounter in your daily life that require proportional reasoning.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "z3qRWiIYrKunToeJ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p>",
+                        "<p>Reasoning Proportionally with Quantities: <em>Analysis and Synthesis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "7cRG5mY2tJ9d7K11",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "owZmrmVt2thZpKVV",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>",
+                        "<p>Learning Aid 3.4 Leaky Faucet Data</p>",
+                        "<p>Styrofoam or paper cups</p>",
+                        "<p>Paper clips</p>",
+                        "<p>Timer or clock with a second hand</p>",
+                        "<p>Clear measuring containers that measure milliliters (such as a graduated cylinder)</p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>",
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "M0YolN-auBF2ZA3h",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p>",
+                        "<p> 2 Days</p>",
+                        "<p><strong>Groups</strong></p>",
+                        "<p>3-4</p>",
+                        "<p><strong>A</strong> #12-15</p>",
+                        "<p><strong>C </strong>#24-27</p>",
+                        "<p><strong>E</strong> #33-34</p>",
+                        "<p></p>",
+                        "<p><strong>CCSSM</strong></p>",
+                        "<p>7.RP.A.1 </p>",
+                        "<p>7.RP.A.2 </p>",
+                        "<p>7.RP.A.2.B </p>",
+                        "<p>7.RP.A.2.C </p>",
+                        "<p>7.RP.A.2.D </p>",
+                        "<p>7.RP.A.3</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "D7akjFxUJEE7RJNo",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p>",
+                        "<p><strong>LAUNCH</strong></p>",
+                        "<p>CONNECTING TO PRIOR KNOWLEDGE</p>",
+                        "<p>Discuss student work in this Unit using rates, rate tables, and unit rates.  </p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>When have we used rates in this Unit? </li><li>When have we used rate tables in this Unit? </li><li>When have we used unit rates in this Unit?</li></ul>",
+                        "<p>PRESENTING THE CHALLENGE</p>",
+                        "<p>Explain the situation using the Introduction about leaky faucets wasting water every year.</p>",
+                        "<p>Introduce the directions for the simulation.</p>",
+                        "<p>Have students work in groups of 3-4 to collect their data and then complete the Problem.  Distribute <strong>Learning Aid 3.4: Leaky Faucet Data</strong> for students to record their data from the simulation.</p>",
+                        "<p>You may want to give each group two of the situations from What If Situation A to differentiate based on needs of each group</p>",
+                        "<p></p>",
+                        "<p>Have groups do What If Situation B on large paper so that it can be used in a Gallery Walk in the Summary.</p>",
+                        "<p><strong>Implementation Note:  </strong>This Problem may take two days to complete the experiment, analyze the data, and complete the Problem. You may want to hold a brief summary after the Initial Challenge and have students complete the What If on the second day.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "6CeNoSj_Pi0e3d_S",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p>",
+                        "<p>PROVIDING FOR INDIVIDUAL NEEDS</p>",
+                        "<p>As groups are working on the leaky faucet simulation, monitor that they are following the directions to get adequate data.</p>",
+                        "<ul><li>Is the hole in their cup small enough? Is the hole clogging up?</li><li>Are they collecting data every 5 seconds?</li><li>Are they continuing to add water as the cup empties? (Keeping about the same amount of water in the cup at all times)</li><li>Are they accurately reading the container catching the water?</li></ul>",
+                        "<p>Some students may need assistance when looking at the contexts in What If Situation A.</p>",
+                        "<ul><li>What is the ratio/rate in this situation? </li><li>What are some strategies we have used in this Unit that might help you?</li></ul>",
+                        "<p>PLANNING FOR THE SUMMARY</p>",
+                        "<p>As you are circulating during the Explore listen for conversations students are having about the given contexts and about the contexts they create for What If Situation D.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "6ly9IVEZ5VUOoxf8",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p>",
+                        "<p><em>Teacher Moves: Gallery Walk</em></p>",
+                        "<p>SOLUTIONS AND STRATEGIES </p>",
+                        "<p>Have students share their results from the Leaky Faucet Experiment. Have students share how they used this data to make predictions in the Initial Challenge.</p>",
+                        "<p>Have students discuss the Situations in What If Situation A.</p>",
+                        "<p>Have students display their work for What It Situation B in a Gallery Walk.</p>",
+                        "<p><em>Teacher Moves: Compare Thinking</em></p>",
+                        "<p>MAKING THE MATHEMATICS EXPLICIT</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>How did you use your data to make predictions in the Initial Challenge?</li></ul>",
+                        "<p></p>",
+                        "<p>In What If Situation A, discuss the ratio application(s).</p>",
+                        "<ul><li>What is the ratio in this application?</li><li>How did you use the ratio to answer the questions in this application? </li><li>What are some ways that we can answer these questions? </li></ul>",
+                        "<p></p>",
+                        "<p>During the Gallery Walk for What If Situation B have students look at two or more other posters and decide if they agree or disagree with the posters.</p>",
+                        "<ul><li>Do you agree with the posters you looked at? Why or why not?</li></ul>",
+                        "<p></p>",
+                        "<p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         }
       ],
       "supports": []
@@ -4966,10 +6687,32 @@
               },
               "supports": []
             }
-          ]
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                 
+                ]
+              },
+              "launch": {
+                "tiles": [
+
+                ]
+              },
+              "explore": {
+                "tiles": [
+
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  
+                ]
+              }
+            }
+          }
         }
-      ],
-      "supports": [
       ]
     }
   ],

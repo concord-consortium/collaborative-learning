@@ -61,6 +61,7 @@
       flex-basis: 130px;
       margin: 0 5px;
     }
+
     .document-type-icon {
       align-self: flex-start;
       svg {
@@ -68,6 +69,27 @@
         height: 16.5px;
       }
     }
+
+    .document-type-icon-yellow {
+      align-self: flex-start;
+      position: relative;
+      svg {
+        width: 18px;
+        height: 16.5px;
+      }
+      .yellow-background{
+        background-color: yellow;
+        height: 9px;
+        width: 11px;
+        position: absolute;
+        top: 25%;
+        left: 25%;
+        opacity: 0.4;
+      }
+    }
+
+
+
     .numComments {
       align-self: flex-start;
       width: 24px;

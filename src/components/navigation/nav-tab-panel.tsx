@@ -4,7 +4,8 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { BaseComponent, IBaseProps } from "../base";
 import { kDividerMax, kDividerMin } from "../../models/stores/ui-types";
 import { NavTabSpec, ENavTab } from "../../models/view/nav-tabs";
-import { Logger, LogEventName } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { StudentGroupView } from "../document/student-group-view";
 import { ProblemTabContent } from "./problem-tab-content";
 import { SectionDocumentOrBrowser } from "./section-document-or-browser";
@@ -136,9 +137,11 @@ export class NavTabPanel extends BaseComponent<IProps> {
     const { ui: { showChatPanel } } = this.stores;
     const reset = tabSpec.tab === this.topTabReset;
     return (
-      <SectionDocumentOrBrowser tabSpec={tabSpec}
-                                reset={reset ? this.clearTopTabReset : undefined}
-                                isChatOpen={showChatPanel}/>
+      <SectionDocumentOrBrowser
+        tabSpec={tabSpec}
+        reset={reset ? this.clearTopTabReset : undefined}
+        isChatOpen={showChatPanel}
+      />
     );
   };
 

@@ -2,11 +2,13 @@ import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import TextToolTile from '../../../../support/elements/clue/TextToolTile';
 import DrawToolTile from '../../../../support/elements/clue/DrawToolTile';
+import DiagramToolTile from '../../../../support/elements/clue/DiagramToolTile';
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
 const drawToolTile = new DrawToolTile;
+const diagramToolTile = new DiagramToolTile;
 
 context('Shared Variables', function () {
   const queryParam = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=example-variables";
@@ -25,6 +27,12 @@ context('Shared Variables', function () {
     });
   });
 
+  const addLastCard = () => {
+    diagramToolTile.getDiagramToolbarButton("button-insert-variable").click();
+    cy.get(".custom-modal .variable-chip").last().click();
+    cy.get(".custom-modal .modal-button").last().click();
+  };
+
   describe("Text tile", () => {
     it('can add a variable chip to the text tool', function() {
       clueCanvas.addTile('text');
@@ -40,6 +48,7 @@ context('Shared Variables', function () {
       // Make sure the text tile now has a chip with Var A.
       textToolTile.getTextTile().last().should('contain', 'Var A');
       // Make sure the diagram tile now has a card with Var A.
+      addLastCard();
       cy.get('.primary-workspace .canvas-area .diagram-tool [data-testid="quantity-node"]')
         .findByDisplayValue('Var A')
         .should('exist');
@@ -122,25 +131,29 @@ context('Shared Variables', function () {
   describe("Drawing tile", () => {
     const diagramTile = () => cy.get(".diagram-tool");
     const drawTile = () => drawToolTile.getDrawTile().last();
+    const listChip = () => cy.get(`.variable-chip-list .variable-chip`);
     it("verify Insert Variable dialog opens on variable button click in drawing tile", () => {
       clueCanvas.addTile('drawing');
-      cy.get("[data-original-title=Variable").click();
-      cy.get(".modal-header").should("contain", "Insert Variable");
+      drawToolTile.getDrawToolInsertVariable().click();
+      cy.get(".modal-header").should("contain", "Insert Variables");
       cy.get(".ReactModalPortal").within(() => {
-        cy.findByRole("combobox").type("VarC{enter}");
-        cy.findByRole("button", {name: "OK"}).click();
+        // cy.findByRole("combobox").type("VarC{enter}");
+        listChip().last().click();
+        cy.get(".custom-modal .modal-button").last().click();
       });
     });
     it("verify variables appears in draw tool", () => {
       drawTile().find('.drawing-variable:contains("VarC")').should('have.length', 1);
     });
     it("verify changes in diagram view propagates to draw tool", () => {
+      addLastCard();
       diagramTile().find(".variable-info.name[value=VarC]");
-      diagramTile().find(".variable-info.name[value=VarC]").type('Var D');
-      drawTile().find('.drawing-variable:contains("VarCVar D")').should('exist');
+      diagramTile().find(".variable-info.name[value=VarC]").type('Var D').blur();
+      // Look for "VarCVarD" because spaces are not allowed in variable names
+      drawTile().find('.drawing-variable:contains("VarCVarD")').should('exist');
     });
     it("verify edit variable dialog works", () => {
-      const editVariableButton = () => cy.get(`[data-original-title="Edit Variable"]`).find("button");
+      const editVariableButton = () => drawToolTile.getDrawToolEditVariable();
       const customModal = () => cy.get(".custom-modal");
       drawToolTile.getDrawTile().last().click();
       editVariableButton().should("exist");
@@ -160,17 +173,17 @@ context('Shared Variables', function () {
       drawToolTile.getDrawToolSelect().click();
       drawTile().find('.drawing-variable:contains("VarC")').click();
       drawToolTile.getDrawToolDelete().click();
-      drawTile().find('.drawing-variable:contains("VarCVar D")').should('not.exist');
+      drawTile().find('.drawing-variable:contains("VarCVarD")').should('not.exist');
     });
     it("verify create new variable", () => {
-      cy.get("[data-original-title=Variable").click();
-      cy.get(".modal-header").should("contain", "Insert Variable");
+      drawToolTile.getDrawToolNewVariable().click();
+      cy.get(".modal-header").should("contain", "New Variable");
       cy.get(".ReactModalPortal").within(() => {
-        cy.get("#variable-name-input").type("Var E");
-        cy.get("#variable-value-input").type("5.432{enter}");
+        cy.get("#evd-name").type("VarE");
+        cy.get("#evd-value").type("5.432");
         cy.findByRole("button", {name: "OK"}).click();
       });
-      drawTile().find('.drawing-variable:contains("Var E")').should('have.length', 1);
+      drawTile().find('.drawing-variable:contains("VarE")').should('have.length', 1);
       drawTile().find('.drawing-variable:contains("5.432")').should('have.length', 1);
 
     });

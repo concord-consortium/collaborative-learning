@@ -15,7 +15,8 @@ import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SharedModelType } from "../../shared/shared-model";
 import { kMinColumnWidth } from "../../../components/tiles/table/table-types";
 import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-utils";
-import { Logger, LogEventName } from "../../../lib/logger";
+import { LogEventName } from "../../../lib/logger-types";
+import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { uniqueId } from "../../../utilities/js-utils";
 
 export const kTableTileType = "Table";
@@ -251,8 +252,8 @@ export const TableContentModel = TileContentModel
       self.importedDataSet = DataSet.create();
     },
     logChange(change: ITableChange) {
-      const toolId = self.metadata?.id || "";
-      Logger.logTileChange(LogEventName.TABLE_TOOL_CHANGE, change.action, change, toolId);
+      const tileId = self.metadata?.id || "";
+      logTileChangeEvent(LogEventName.TABLE_TOOL_CHANGE, { operation: change.action, change, tileId });
     }
   }))
   .actions(self => ({

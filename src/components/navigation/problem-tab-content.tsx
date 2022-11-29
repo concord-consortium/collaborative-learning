@@ -5,7 +5,8 @@ import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { useProblemPathWithFacet, useUIStore, useUserStore } from "../../hooks/use-stores";
 import { getSectionTitle, SectionModelType, findSectionIndex } from "../../models/curriculum/section";
 import { ProblemPanelComponent } from "./problem-panel";
-import { Logger, LogEventName } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import ToggleControl from "../utilities/toggle-control";
 import { ENavTab } from "../../models/view/nav-tabs";
 

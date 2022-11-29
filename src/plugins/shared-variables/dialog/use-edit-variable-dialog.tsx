@@ -1,10 +1,11 @@
 import { useMemo } from "react";
 import { getSnapshot } from "mobx-state-tree";
-import VariablesIcon from "../shared-variables/slate/variables.svg";
-import { useCustomModal } from "../../hooks/use-custom-modal";
 import { EditVariableDialogContent, updateVariable, Variable, VariableType } from "@concord-consortium/diagram-view";
 
-import './diagram-dialog.scss';
+import { useCustomModal } from "../../../hooks/use-custom-modal";
+
+import VariableEditorIcon from "../assets/variable-editor-icon.svg";
+import './variable-dialog.scss';
 
 interface IProps {
   variable?: VariableType;
@@ -19,7 +20,7 @@ export const useEditVariableDialog = ({ variable }: IProps) => {
   };
 
   const [showModal, hideModal] = useCustomModal({
-    Icon: VariablesIcon,
+    Icon: VariableEditorIcon,
     title: "Variable Editor",
     Content: EditVariableDialogContent,
     contentProps: { variable: variableClone },

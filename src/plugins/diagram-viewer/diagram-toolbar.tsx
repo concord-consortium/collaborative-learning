@@ -3,13 +3,15 @@ import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
 import { Tooltip } from "react-tippy";
+import { DiagramContentModelType } from "./diagram-content";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
 import { IFloatingToolbarProps, useFloatingToolbarLocation }
   from "../../components/tiles/hooks/use-floating-toolbar-location";
 
 import { VariableType } from "@concord-consortium/diagram-view";
 
-import VariablesToolIcon from "../shared-variables/slate/variables.svg";
+import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
+import VariableEditorIcon from "../shared-variables/assets/variable-editor-icon.svg";
 import DeleteSelectionIcon from "../../assets/icons/delete/delete-selection-icon.svg";
 import "./diagram-toolbar.scss";
 
@@ -48,32 +50,53 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
     : null;
 };
 
+interface IInsertVariableButton {
+  disabled?: boolean;
+  handleClick: () => void;
+}
+const InsertVariableButton = ({ disabled, handleClick }: IInsertVariableButton) => {
+  return (
+    <SvgToolbarButton SvgIcon={InsertVariableCardIcon} buttonClass="button-insert-variable" disabled={disabled}
+      title="Insert Variable" onClick={handleClick} />
+  );
+};
+
 interface IDialogButton {
   handleClick: () => void;
   selectedVariable?: VariableType;
 }
 const DialogButton = ({ handleClick, selectedVariable }: IDialogButton) => {
   return (
-    <SvgToolbarButton SvgIcon={VariablesToolIcon} buttonClass="button-dialog" disabled={!selectedVariable}
-      title="variable-dialog" onClick={handleClick} style={{fill: "#000000", strokeWidth: 0.1}} />
+    <SvgToolbarButton SvgIcon={VariableEditorIcon} buttonClass="button-dialog" disabled={!selectedVariable}
+      title="Edit Variable" onClick={handleClick} style={{fill: "#000000", strokeWidth: 0.1}} />
   );
 };
 
-const DeleteButton = () => {
-  const handleClick = () => console.log("deleted!");
+interface IDeleteButton {
+  handleClick: () => void;
+  selectedVariable?: VariableType;
+}
+const DeleteButton = ({ handleClick, selectedVariable }: IDeleteButton) => {
   return (
-    <SvgToolbarButton SvgIcon={DeleteSelectionIcon} buttonClass="button-delete" title="delete"
-      onClick={handleClick} />
+    <SvgToolbarButton SvgIcon={DeleteSelectionIcon} buttonClass="button-delete" disabled={!selectedVariable}
+      title="Delete" onClick={handleClick} />
   );
 };
 
 interface IProps extends IFloatingToolbarProps {
-  handleDialogClick: () => void;
-  selectedVariable?: VariableType;
+  content: DiagramContentModelType;
+  disableInsertVariableButton?: boolean;
+  handleDeleteClick: () => void;
+  handleEditVariableClick: () => void;
+  handleInsertVariableClick: () => void;
 }
 export const DiagramToolbar: React.FC<IProps> = observer(({
-  documentContent, handleDialogClick, onIsEnabled, selectedVariable, ...others
+  content, disableInsertVariableButton, documentContent, handleDeleteClick, handleEditVariableClick,
+  handleInsertVariableClick, onIsEnabled, ...others
 }) => {
+  const root = content?.root;
+  const selectedVariable = root?.selectedNode?.variable;
+
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
     documentContent,
@@ -86,8 +109,9 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
     ? ReactDOM.createPortal(
         <div className={`diagram-toolbar ${enabled && location ? "enabled" : "disabled"}`}
             style={location} onMouseDown={e => e.stopPropagation()}>
-          <DialogButton handleClick={handleDialogClick} selectedVariable={selectedVariable} />
-          <DeleteButton />
+          <InsertVariableButton disabled={disableInsertVariableButton} handleClick={handleInsertVariableClick} />
+          <DialogButton handleClick={handleEditVariableClick} selectedVariable={selectedVariable} />
+          <DeleteButton handleClick={handleDeleteClick} selectedVariable={selectedVariable} />
         </div>, documentContent)
     : null;
 });

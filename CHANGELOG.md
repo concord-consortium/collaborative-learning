@@ -1,5 +1,174 @@
 # Changelog
 
+## Version 3.4.0 - Nov 22, 2022
+
+Version 3.4.0 supports Draw Tool logging, fixes a crash in clue for non-existent variables and maintains a master list of variables for m2studio.
+
+### Features/Improvements
+- Master Variable List outside of Diagram [#183640291](https://www.pivotaltracker.com/story/show/183640291)
+- Check DocumentID on View/Comment log events  [#183725028](https://www.pivotaltracker.com/story/show/183725028)
+- List Unused Variables in dialog [#183455685](https://www.pivotaltracker.com/story/show/183455685)
+
+### Bug Fixes
+- CLUE crashes when any variable chip is deleted in the diagram tile [#183830425](https://www.pivotaltracker.com/story/show/183830425)
+- CLUE crashes in m2studio unit upon loading certain documents [#183830396](https://www.pivotaltracker.com/story/show/183830396)
+- CLUE crashes when the last variable in a diagram tile is deleted [#183817328](https://www.pivotaltracker.com/story/show/183817328)
+- Bogus Draw Tool logging on the left side view [#183808548](https://www.pivotaltracker.com/story/show/183808548)
+
+### Asset Sizes
+|        File                                                                           |    Size   | % Change from Previous Release |
+|---------------------------------------------------------------------------------------|-----------|--------------------------------|
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.3a46870f.js |       51K |                                |
+| common-Dataflow-Geometry.8787ebf3.js                                                  |       26K |                                |
+| common-Diagram-SharedVariables-Drawing.21234838.js                                    |       26K |                        -95.77% |
+| common-Diagram-SharedVariables.40f6a0bf.js                                            |       11K |                        -162.4% |
+| common-Diagram-SharedVariables.ecab853c.js                                            |      624K |                       1709.09% |
+| DataCard.358926a8.js                                                                  |       18K |                                |
+| Dataflow.785fcd3b.js                                                                  |      736K |                          0.14% |
+| Diagram.995a50c6.js                                                                   |       11K |                       1782.58% |
+| Drawing.81438ecd.js                                                                   |       33K |                         26.92% |
+| Geometry.c59e2dda.js                                                                  |      886K |                                |
+| Image.9c73f794.js                                                                     |       16K |                                |
+| index.05e4791ba3d628c62db9.js                                                         |      408K |                          0.25% |
+| SharedDataSet.a14fff08.js                                                             |      253B |                                |
+| SharedVariables.aea4282f.js                                                           |      6.4K |                        -97.79% |
+| Starter.5a8e3691.js                                                                   |      1.2K |                                |
+| Table.7b7dd794.js                                                                     |       84K |                                |
+| Text.e29bbe93.js                                                                      |       16K |                                |
+| vendor-main.6b6cd21d.js                                                               |      2.1M |                                |
+
+|        File                   |    Size   | % Change from Previous Release |
+|-------------------------------|-----------|--------------------------------|
+| DataCard.3e6cb803.css         |      8.4K |                                |
+| Dataflow.e5075c32.css         |       32K |                                |
+| Diagram.078bbe51.css          |       12K |                                |
+| Drawing.86aea47b.css          |      5.2K |                                |
+| Geometry.00061447.css         |       10K |                                |
+| Image.8e890c8f.css            |      6.3K |                                |
+| main.503d2417.css             |      165K |                                |
+| SharedVariables.faed1eee.css  |      433B |                         30.03% |
+| Starter.27340418.css          |      207B |                                |
+| Table.8ccaaeca.css            |       10K |                                |
+| Text.9d39c880.css             |      4.5K |                                |
+
+
+## Version 3.3.0 - Nov 16, 2022
+
+Version 3.3.0 addresses bug fixes for chat/comment features and adding new variabledialog to the drawing tile.
+
+### Features/Improvements
+- New Variable Choice on Drawing Toolbar: #1485 [#183690048] (https://www.pivotaltracker.com/story/show/183690048)
+- Network Documents in All Documents with Comments View: #1495 [#183725759](https://www.pivotaltracker.com/story/show/183725759)
+- List/Insert Variable  on Drawing Tile: #1493 [#183431011] (https://www.pivotaltracker.com/story/show/183431011)
+### Bug Fixes
+- Fix console warning "Adding document before firestore and userContext is available": #1480 [#183718139](https://www.pivotaltracker.com/story/show/183718139)
+- Scroll to commented tile in Teacher Guide and some problem sections isn't working: #1460 [#183643073](https://www.pivotaltracker.com/story/show/183643073)
+- Fix console error "Warning: Failed prop type: The prop `onSelect`...": #1490 [#183756388](https://www.pivotaltracker.com/story/show/183756388)
+- Fix MST detach warning when history scrubbing a resized tile.: #1494 [#183772527](https://www.pivotaltracker.com/story/show/183772527)
+- Fixed table/geometry linking bugs #1487
+
+### Asset Sizes
+|        File                                                                           |    Size   | % Change from Previous Release |
+|---------------------------------------------------------------------------------------|-----------|--------------------------------|
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.3a46870f.js |       51K |                             0% |
+| common-Dataflow-Geometry.8787ebf3.js                                                  |       26K |                             0% |
+| common-Diagram-SharedVariables.370bf43f.js                                            |      615K |                           0.3% |
+| common-SharedVariables-Drawing.f8212ef1.js                                            |       33K |                             0% |
+| DataCard.358926a8.js                                                                  |       18K |                             0% |
+| Dataflow.a468af8e.js                                                                  |      735K |                             0% |
+| Diagram.6a512196.js                                                                   |       12K |                            20% |
+| Drawing.3fa3feb5.js                                                                   |       26K |                             0% |
+| Geometry.27bab22f.js                                                                  |      886K |                             0% |
+| Image.9c73f794.js                                                                     |       16K |                             0% |
+| index.d1e598eaccc663c2c2c2.js                                                         |      407K |                           0.2% |
+| SharedDataSet.a14fff08.js                                                             |      253B |                             0% |
+| SharedVariables.6b802018.js                                                           |       17K |                        -80.23% |
+| Starter.5a8e3691.js                                                                   |      1.2K |                             0% |
+| Table.7b7dd794.js                                                                     |       84K |                             0% |
+| Text.1ab2af58.js                                                                      |       16K |                             0% |
+| vendor-main.6b6cd21d.js                                                               |      2.1M |                             0% |
+
+|        File                   |    Size   | % Change from Previous Release |
+|-------------------------------|-----------|--------------------------------|
+| DataCard.b2b5c0c3.css         |      8.4K |                             0% |
+| Dataflow.f6c1e246.css         |       32K |                             0% |
+| Diagram.8634075a.css          |       12K |                           9.1% |
+| Drawing.39e9ae0b.css          |      5.2K |                             0% |
+| Geometry.99cf842b.css         |       10K |                             0% |
+| Image.b81a37e5.css            |      6.3K |                             0% |
+| main.3dcf01c7.css             |      165K |                           0.6% |
+| SharedVariables.dcd83673.css  |      333B |                         -54.6% |
+| Starter.6352fad4.css          |      207B |                             0% |
+| Table.fad90774.css            |       10K |                             0% |
+| Text.b14eb834.css             |      4.5K |                             0% |
+
+## Version 3.2.0 - Nov 7, 2022
+
+Version 3.2.0 adds a list of documents with comments, some fixes and logging related to history, and some bug fixes.
+
+### Features/Improvements
+Comment Features:
+- Add view of documents with comments along with logging of comment use
+    - Stories:  [#182565436](https://www.pivotaltracker.com/story/show/182565436),  [#183342400](https://www.pivotaltracker.com/story/show/183342400), [#183449090](https://www.pivotaltracker.com/story/show/183449090), [#183687968](https://www.pivotaltracker.com/story/show/183687968),
+    [#183342364](https://www.pivotaltracker.com/story/show/183342364), 
+    - PRs: [#1448](https://github.com/concord-consortium/collaborative-learning/pull/1448), [#1472](https://github.com/concord-consortium/collaborative-learning/pull/1472), [#1481](https://github.com/concord-consortium/collaborative-learning/pull/1481)  
+
+- Log Comment use [#183575574](https://www.pivotaltracker.com/story/show/183575574), [#1465](https://github.com/concord-consortium/collaborative-learning/pull/1465), [#1475](https://github.com/concord-consortium/collaborative-learning/pull/1475) 
+   
+Variables:
+  - Edit Variable dialog in Diagram Tile [#183455701](https://www.pivotaltracker.com/story/show/183455701) 
+  - New Variable Choice on Drawing Toolbar [#183690048](https://www.pivotaltracker.com/story/show/183690048), [#1456](https://github.com/concord-consortium/collaborative-learning/pull/1456)
+
+History:
+  - Log Playback Control use [#183575565](https://www.pivotaltracker.com/story/show/183575565), [#1470](https://github.com/concord-consortium/collaborative-learning/pull/1470) 
+
+Other:
+  - Switch deployment to use s3-deploy-action [#183571651](https://www.pivotaltracker.com/story/show/183571651), [#1468](https://github.com/concord-consortium/collaborative-learning/pull/1468), [#1455](https://github.com/concord-consortium/collaborative-learning/pull/1455)  
+  - Content related: Mostly Bio4 and MothEd [#1452](https://github.com/concord-consortium/collaborative-learning/pull/1452) [#1454](https://github.com/concord-consortium/collaborative-learning/pull/1454), [#1467](https://github.com/concord-consortium/collaborative-learning/pull/1467), [#1469](https://github.com/concord-consortium/collaborative-learning/pull/1469), [#1471](https://github.com/concord-consortium/collaborative-learning/pull/1471) 
+
+
+### Bug Fixes
+History: 
+  - Student removing rows from a table rows results in a bungled up table in the teacher view if the teacher has seen its history [#183572838](https://www.pivotaltracker.com/story/show/183572838)
+  - If history is already open for student's work in teacher view, the slider doesn't show any latest work when played [#183573049](https://www.pivotaltracker.com/story/show/183573049), [#1458](https://github.com/concord-consortium/collaborative-learning/pull/1458)
+
+
+
+- Cannot undo graph actions with Ctrl-Z while graph is selected for editing [#183544050](https://www.pivotaltracker.com/story/show/183544050) [#1457](https://github.com/concord-consortium/collaborative-learning/pull/1457)
+- Dragging multi-selected tiles to workspace reorders them, loses titles [#183604517](https://www.pivotaltracker.com/story/show/183604517), [#1464](https://github.com/concord-consortium/collaborative-learning/pull/1464)
+
+### Asset Sizes
+|        File         |    Size   | % Change from Previous Release |
+|------------------------|----|------
+| vendor-main.210d2f8d.js | 2.1M | 0
+| Geometry.d3eb56a5.js | 886K | 0
+| Dataflow.5ac07c45.js | 735K | 0 
+| common-Diagram-SharedVariables.04f7a410.js | 613K | 0.33%
+| index.702debca2909e15b201f.js | 406K | 2.3%
+| SharedVariables.3a3b389f.js | 86K | 0
+| Table.d5e285a4.js | 84K | 0
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.1c62df70.js | 51K | 0
+| common-SharedVariables-Drawing.a41100ab.js | 33K | 0
+| Drawing.2f086891.js | 26K | 0
+| common-Dataflow-Geometry.0bd31c83.js | 26K | 0
+| DataCard.bac16fca.js | 18K | 0
+| Text.7e4ddd5d.js | 16K | 0
+| Image.0e040920.js | 16K | 0
+| Diagram.79eb19af.js | 10K | 4%
+| Starter.b26bfa75.js | 1.2K | 0
+| SharedDataSet.a14fff08.js | 253B | -0.4% 
+main.733a14a1.css | 164K | 1.2%
+| Dataflow.144debfa.css | 32K | 0
+| Diagram.2366e344.css | 11K | 0
+| Table.2e73962c.css | 10K | 0
+| Geometry.f10c31ff.css | 10K | 0
+| DataCard.3e41959a.css | 8.4K | 0
+| Image.e41d02a5.css | 6.3K | 0
+| Drawing.13a0c9ce.css | 5.2K | 0
+| Text.bf42cf91.css | 4.5K | 0
+| SharedVariables.ecdc1f16.css | 733B | 5.3 %
+| Starter.76692936.css | 207B | 0
+
 ## Version 3.1.0 - Oct 18, 2022
 
 Version 3.1.0 contains quite a few individual tile improvements and bug fixes as well as some larger changes to allow generating and viewing the history of a document and more visibility of comments.

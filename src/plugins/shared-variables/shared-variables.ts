@@ -26,5 +26,10 @@ export const SharedVariables = SharedModel.named("SharedVariables")
     self.addVariable(variable);
     return variable;
   },
+}))
+.views(self => ({
+  getVariables() {
+    return self.variables;
+  }
 }));
 export interface SharedVariablesType extends Instance<typeof SharedVariables> {}

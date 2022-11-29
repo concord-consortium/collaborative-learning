@@ -1,7 +1,6 @@
 import { castArray, difference, each, size as _size, union } from "lodash";
 import { reaction } from "mobx";
 import { addDisposer, applySnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
-import { Optional } from "utility-types";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SelectionStoreModelType } from "../../stores/selection";
 import { ITableLinkProperties, linkedPointId } from "../table-link-types";
@@ -37,7 +36,8 @@ import { ISharedModelManager } from "../../shared/shared-model-manager";
 import { getTileModel, setTileTitleFromContent } from "../tile-model";
 import { IDataSet } from "../../data/data-set";
 import { uniqueId } from "../../../utilities/js-utils";
-import { Logger, LogEventName } from "../../../lib/logger";
+import { logTileChangeEvent } from "../log/log-tile-change-event";
+import { LogEventName } from "../../../lib/logger-types";
 import { gImageMap } from "../../image-map";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
@@ -945,24 +945,24 @@ export const GeometryContentModel = GeometryBaseContentModel
       }
     }
 
-    function applyAndLogChange(board: JXG.Board | undefined, change: JXGChange) {
-      const result = board && syncChange(board, change);
+    function applyAndLogChange(board: JXG.Board | undefined, _change: JXGChange) {
+      const result = board && syncChange(board, _change);
 
-      let loggedChangeProps: Optional<JXGChange, "operation"> = {...change};
-      if (!Array.isArray(change.properties)) {
+      let loggedChange = {..._change};
+      if (!Array.isArray(_change.properties)) {
         // flatten change.properties
-        delete loggedChangeProps.properties;
-        loggedChangeProps = {
-          ...loggedChangeProps,
-          ...change.properties
+        delete loggedChange.properties;
+        loggedChange = {
+          ...loggedChange,
+          ..._change.properties
         };
       } else {
         // or clean up MST array
-        loggedChangeProps.properties = Array.from(change.properties);
+        loggedChange.properties = Array.from(_change.properties);
       }
-      delete loggedChangeProps.operation;
-      Logger.logTileChange(LogEventName.GRAPH_TOOL_CHANGE, change.operation,
-        loggedChangeProps, self.metadata ? self.metadata.id : "");
+      const tileId = self.metadata?.id || "";
+      const { operation, ...change } = loggedChange;
+      logTileChangeEvent(LogEventName.GRAPH_TOOL_CHANGE, { tileId, operation, change });
 
       return result;
     }

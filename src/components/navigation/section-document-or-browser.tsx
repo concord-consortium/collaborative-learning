@@ -4,11 +4,13 @@ import { useQueryClient } from 'react-query';
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { DocumentModelType } from "../../models/document/document";
 import { getDocumentDisplayTitle } from "../../models/document/document-utils";
+import { logDocumentEvent } from "../../models/document/log-document-event";
 import { ENavTabSectionType, NavTabSectionSpec, NavTabSpec } from "../../models/view/nav-tabs";
 import { EditableDocumentContent } from "../document/editable-document-content";
 import { useAppConfig, useClassStore, useProblemStore, useStores,
   useUIStore, useUserStore } from "../../hooks/use-stores";
-import { Logger, LogEventName } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { useUserContext } from "../../hooks/use-user-context";
 import { DocumentCollectionByType } from "../thumbnail/documents-type-collection";
 import { DocumentDragKey, SupportPublication } from "../../models/document/document-types";
@@ -109,7 +111,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
     const isActiveTab =  ui.activeNavTab === tabSpec.label.toLowerCase().replace(' ', '-');
 
     function getNewTabIndex(key: string, navTab: string ){
-      const doc = store.documents.getDocument(key);
+      const doc = store.documents.getDocument(key) || store.networkDocuments.getDocument(key);
       if (navTab === "Class Work") {
         if (doc?.type === "learningLogPublication"){
           return 1;
@@ -132,9 +134,15 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
       }
     }
     if (ui.selectedCommentedDocument){
-      const newDoc = store.documents.getDocument(ui.selectedCommentedDocument);
+      const newDoc = store.documents.getDocument(ui.selectedCommentedDocument)
+      || store.networkDocuments.getDocument(ui.selectedCommentedDocument);
+
       if (isActiveTab) {
         setReferenceDocument(newDoc);
+        if (newDoc){
+          handleSelectDocument(newDoc);
+        }
+
       }
       const newIndex = getNewTabIndex(ui.selectedCommentedDocument, tabSpec.label);
       if (newIndex !== undefined) {
@@ -145,12 +153,11 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
   // if ui.activeNavTab is in dependency array, it will not remember last saved section subTab
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[store.documents, tabSpec.label, ui.selectedCommentedDocument]);
+
   const handleTabSelect = (tabidx: number) => {
     setTabIndex(tabidx);
     ui.updateFocusDocument();
   };
-
-
 
   const handleSelectDocument = (document: DocumentModelType) => {
     if (!document.hasContent && document.isRemote) {
@@ -162,7 +169,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
     const logEvent = document.isRemote
       ? LogEventName.VIEW_SHOW_TEACHER_NETWORK_COMPARISON_DOCUMENT
       : LogEventName.VIEW_SHOW_COMPARISON_DOCUMENT;
-    Logger.logDocumentEvent(logEvent, document);
+    logDocumentEvent(logEvent, { document });
   };
 
   const loadDocumentContent = async (document: DocumentModelType) => {
@@ -207,11 +214,12 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
         if (ok) {
           document.setProperty("isDeleted", "true");
           if (document.type === SupportPublication) {
-            Logger.logDocumentEvent(LogEventName.DELETE_SUPPORT, document);
+            logDocumentEvent(LogEventName.DELETE_SUPPORT, { document });
           }
         }
       });
   };
+
   const renderDocumentBrowserView = (subTab: ISubTabSpec) => {
     const classHash = classStore.classHash;
     return (
@@ -221,6 +229,7 @@ export const SectionDocumentOrBrowser: React.FC<IProps> = observer(({ tabSpec, r
             const _handleDocumentStarClick = section.showStarsForUser(user)
               ? handleDocumentStarClick
               : undefined;
+
             return (
               <DocumentCollectionByType
                 key={`${section.type}_${index}`}

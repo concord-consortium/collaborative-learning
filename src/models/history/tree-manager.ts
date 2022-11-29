@@ -5,11 +5,11 @@ import firebase from "firebase/app";
 import { nanoid } from "nanoid";
 import { TreeAPI } from "./tree-api";
 import { IUndoManager, UndoStore } from "./undo-store";
-import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot, 
+import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
   HistoryOperation, HistoryEntrySnapshot } from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { getFirebaseFunction } from "../../hooks/use-firebase-function";
-import { ICommentableDocumentParams, IDocumentMetadata, IUserContext, 
+import { ICommentableDocumentParams, IDocumentMetadata, IUserContext,
   networkDocumentKey } from "../../../functions/src/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserModelType } from "../stores/user";
@@ -136,7 +136,7 @@ export const TreeManager = types
         return "History is loaded";
       case HistoryStatus.HISTORY_LOADING: {
         const historyLength = self.document.history.length;
-        const {numHistoryEventsApplied} = self;    
+        const {numHistoryEventsApplied} = self;
         return `Loading history (${historyLength}/${numHistoryEventsApplied})`;
       }
       default:
@@ -197,7 +197,7 @@ export const TreeManager = types
 
       if (!firestore) {
         // We might want to throw an error here to figure out when this happens.
-        // Currently, when running the spec tests firestore is not setup, so it is 
+        // Currently, when running the spec tests firestore is not setup, so it is
         // easier to just return and not try to save the history to Firestore.
         return;
       }
@@ -237,7 +237,7 @@ export const TreeManager = types
 
   setPropsForFirestoreSaving({userContext, firestore}: IFirestoreSavingProps) {
     self.userContext = userContext;
-    self.firestore = firestore;  
+    self.firestore = firestore;
   },
 
   setNumHistoryEntriesApplied(value: number){
@@ -327,7 +327,7 @@ export const TreeManager = types
 }))
 .actions((self) => ({
   mirrorHistoryFromFirestore(user: UserModelType, firestore: Firestore) {
-    // FIXME-HISTORY: we should protect active documents so that if 
+    // FIXME-HISTORY: we should protect active documents so that if
     // mirrorHistoryFromFirestore is accidentally called on their treeManager
     // we don't replace their history. Probably the best approach is
     // adding a prop to documents so we can identify documents that are being
@@ -347,18 +347,18 @@ export const TreeManager = types
     self.setNumHistoryEntriesAppliedFromFirestore(firestore, docPath);
 
     // TODO: We are not checking if the parent document of the history entries actually
-    // exists before getting the history collection below it. 
+    // exists before getting the history collection below it.
     // If this parent document doesn't exist the history won't exist.
     // Also if this document doesn't exist then probably the query of the
     // history will fail. I think this approach is OK, but we should
     // check what happens if history is opened on a document that doesn't
     // have a parent document.
-    
+
     const query = firestore.collection(`${docPath}/history`)
       .orderBy("index")
       .withConverter(historyEntryConverter);
 
-    // FIXME-HISTORY: this approach probably does not handle paging well, 
+    // FIXME-HISTORY: this approach probably does not handle paging well,
     // and I'd suspect we'll have a lot of changes so we'll need to handle that.
     // https://www.pivotaltracker.com/story/show/183291353
     const snapshotUnsubscribe = query.onSnapshot(
@@ -586,12 +586,18 @@ export const TreeManager = types
     // One way might be using unique history_entry_ids that we mark as closed
     // after the finish call.
     self.numHistoryEventsApplied = newHistoryPosition;
-  }),
-
+  })
+}))
+.views(self => ({
   getHistoryEntry: (historyIndex: number) => {
     return self.document.history.at(historyIndex);
   }
-
+}))
+.views(self => ({
+  get currentHistoryEntry() {
+    const index = self.numHistoryEventsApplied ?? 0;
+    return index > 0 ? self.getHistoryEntry(index - 1) : undefined;
+  }
 }));
 
 export interface TreeManagerType extends Instance<typeof TreeManager> {}
@@ -621,13 +627,13 @@ async function prepareFirestoreHistoryInfo(
       { userContext, mainDocument, firestore });
     throw new Error("cannot record history entry because environment is not valid");
   }
-    
+
   const documentPath = getDocumentPath(userContext.uid, mainDocument.key, userContext.network);
   const documentRef = firestore.doc(documentPath);
   const docSnapshot = await documentRef.get();
   // create a document if necessary
   if (!docSnapshot.exists) {
-    const validateCommentableDocument = 
+    const validateCommentableDocument =
       getFirebaseFunction<ICommentableDocumentParams>("validateCommentableDocument_v1");
 
 
@@ -638,10 +644,10 @@ async function prepareFirestoreHistoryInfo(
   const lastHistoryEntry = await getLastHistoryEntry(firestore, documentPath);
 
   return {
-    documentPath, 
+    documentPath,
     // We start with -1 so if there is no last entry the next entry will get an index of 0
     // 0 is a valid index so ?? must be used instead of ||
-    lastEntryIndex: lastHistoryEntry?.index ?? -1, 
+    lastEntryIndex: lastHistoryEntry?.index ?? -1,
     // We use null here so this is a valid Firestore property value
     lastEntryId: lastHistoryEntry?.id || null
   };

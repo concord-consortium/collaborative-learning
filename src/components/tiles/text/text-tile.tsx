@@ -8,13 +8,14 @@ import "@concord-consortium/slate-editor/dist/index.css";
 
 import { BaseComponent } from "../../base";
 import { debouncedSelectTile } from "../../../models/stores/ui";
+import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { TextToolbarComponent } from "./text-toolbar";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
 import { getTextPluginInstances, getTextPluginIds } from "../../../models/tiles/text/text-plugin-info";
-import { LogEventName, Logger, SimpleTileLogEvent } from "../../../lib/logger";
+import { LogEventName } from "../../../lib/logger-types";
 
 import "./text-tile.sass";
 
@@ -307,8 +308,8 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.setState({ editing: false });
     // If the text has changed since the editor was focused, log the new text.
     if (this.getContent().text !== this.textOnFocus) {
-      const change:SimpleTileLogEvent = {args:[{text: this.getContent().text}]};
-      Logger.logTileChange(LogEventName.TEXT_TOOL_CHANGE, 'update', change, this.props.model.id);
+      const change = {args:[{text: this.getContent().text}]};
+      logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, { operation: 'update', change, tileId: this.props.model.id });
     }
   };
 

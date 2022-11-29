@@ -11,7 +11,8 @@ import { GroupUserModelType } from "../models/stores/groups";
 import { CellPositions, FourUpGridCellModelType, FourUpGridModel, FourUpGridModelType
       } from "../models/view/four-up-grid";
 import { FourUpOverlayComponent } from "./four-up-overlay";
-import { Logger, LogEventName } from "../lib/logger";
+import { Logger } from "../lib/logger";
+import { LogEventName } from "../lib/logger-types";
 import FourUpIcon from "../clue/assets/icons/4-up-icon.svg";
 
 import "./four-up.sass";
@@ -227,7 +228,7 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
       const cell = this.grid.cells[cornerIndex];
       const document = groupDoc(cornerIndex);
 
-      const overlay = toggleable && 
+      const overlay = toggleable &&
         <FourUpOverlayComponent
           context={cornerLabel}
           style={{top: 0, left: 0, width: "100%", height: "100%"}}
@@ -238,24 +239,24 @@ export class FourUpComponent extends BaseComponent<IProps, IState> {
 
       // If we are looking at a specific student toggledContext equals the cornerLabel
       // of that student. When we are looking at a specific student we need the overlay
-      // to be inside of the Canvas so the canvas can put its history UI on top of the 
+      // to be inside of the Canvas so the canvas can put its history UI on top of the
       // overlay. When we are not looking at a specific student we need the overlay
       // to be unscaled and have dimensions based on the grid so its clickable area
       // covers the whole quadrant of the grid not just the area of the canvas
       const overlayInsideOfCanvas = toggledContext && overlay;
       const overlayOnTopOfCanvas = !toggledContext && overlay;
 
-      return !toggledContext || (toggledContext === cornerLabel) 
-        ? <div key={cornerIndex} className={classNames("canvas-container", indexToCornerClass[cornerIndex])} 
+      return !toggledContext || (toggledContext === cornerLabel)
+        ? <div key={cornerIndex} className={classNames("canvas-container", indexToCornerClass[cornerIndex])}
               style={indexToStyle[cornerIndex]}>
             <div className="canvas-scaler" style={scaleStyle(cell)}>
-              {hideCanvas(cornerIndex) 
-                ? this.renderUnshownMessage(groupUsers[cornerIndex], indexToLocation[cornerIndex]) 
+              {hideCanvas(cornerIndex)
+                ? this.renderUnshownMessage(groupUsers[cornerIndex], indexToLocation[cornerIndex])
                 : renderCanvas(cornerIndex, overlayInsideOfCanvas)}
             </div>
             {overlayOnTopOfCanvas}
             {memberName(cornerLabel)}
-          </div> 
+          </div>
         : null;
     };
 

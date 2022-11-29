@@ -7,7 +7,8 @@ import { ESupportMode, ESupportType, SupportModel, SupportModelType } from "../c
 import { UnitModelType } from "../curriculum/unit";
 import { DB } from "../../lib/db";
 import { IDocumentProperties } from "../../lib/db-types";
-import { Logger, LogEventName } from "../../lib/logger";
+import { Logger } from "../../lib/logger";
+import { LogEventName } from "../../lib/logger-types";
 import { createDocumentModel, DocumentModelType } from "../document/document";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";
 import { IAuthoredDocumentContent } from "../document/document-content-import-types";
