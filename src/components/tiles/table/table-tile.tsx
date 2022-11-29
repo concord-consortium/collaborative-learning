@@ -28,6 +28,7 @@ import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { useToolbarTileApi } from "../hooks/use-toolbar-tile-api";
 import { lightenColor } from "../../../utilities/color-utils";
+import { verifyAlive } from "../../../utilities/mst-utils";
 
 import "./table-tile.scss";
 
@@ -40,11 +41,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const content = useMemo(() => getContent(), [getContent]);
-
-  // TODO: Make this a generic utility that other components can use
-  if (!isAlive(content)) {
-    console.warn("Table Tile is being rendered for destroyed content");
-  }
+  verifyAlive(content);
   const metadata = getContent().metadata;
 
   // Basic operations based on the model
@@ -176,11 +173,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   const exportContentAsTileJson = useCallback(() => {
     return exportTableContentAsJson(content.metadata, dataSet, content.columnWidth);
   }, [dataSet, content]);
-  // TODO: it really seems like we could remove getTitle from the tool api and instead
-  // all tile content models can provide a title property. In some cases this is a
-  // actual MST property that is saved, in the the case of the table tile this is
-  // a computed value coming from the dataset.
-  useToolApi({ content: getContent(), getTitle: () => content.title, getContentHeight, exportContentAsTileJson,
+  useToolApi({ content: getContent(), getContentHeight, exportContentAsTileJson,
                 onRegisterTileApi, onUnregisterTileApi });
 
   useEffect(() => {

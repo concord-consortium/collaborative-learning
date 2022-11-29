@@ -6,18 +6,21 @@ import { ITileApi } from "../tile-api";
 
 interface IProps {
   content: TableContentModelType;
-  getTitle: () => string | undefined;
   getContentHeight: () => number | undefined;
   exportContentAsTileJson: () => string;
   onRegisterTileApi: (tileApi: ITileApi, facet?: string | undefined) => void;
   onUnregisterTileApi: (facet?: string | undefined) => void;
 }
 export const useToolApi = ({
-  content, getTitle, getContentHeight, exportContentAsTileJson, onRegisterTileApi, onUnregisterTileApi
+  content, getContentHeight, exportContentAsTileJson, onRegisterTileApi, onUnregisterTileApi
 }: IProps) => {
   const contentRef = useCurrent(content);
   const tileApi: ITileApi = useMemo(() => ({
-    getTitle,
+    // TODO: we should be able to remove getTitle from the tool api and instead
+    // all tile content models can provide a title property. In some cases this is a
+    // actual MST property that is saved, in the the case of the table tile this is
+    // a computed value coming from the dataset.
+    getTitle: () => contentRef.current.title,
     getContentHeight,
     exportContentAsTileJson,
     isLinked: () => {
@@ -28,7 +31,7 @@ export const useToolApi = ({
               ? getLinkedTableIndex(contentRef.current.metadata.id)
               : -1;
     }
-  }), [exportContentAsTileJson, getContentHeight, getTitle, contentRef]);
+  }), [exportContentAsTileJson, getContentHeight, contentRef]);
 
   useEffect(() => {
     onRegisterTileApi(tileApi);

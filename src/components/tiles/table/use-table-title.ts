@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
-import { isAlive } from "mobx-state-tree";
+import { useEffect, useRef } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { IGridContext } from "./table-types";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
@@ -16,10 +15,6 @@ export const useTableTitle = ({
   gridContext, content, readOnly, onRequestUniqueTitle, onSetTableTitle, requestRowHeight
 }: IProps) => {
 
-  // Short circuit access of content.dataSet when the content model has been
-  // destroyed. See mst-detached-error.md
-  // const getTitle = useCallback(() => isAlive(content) ? content.dataSet.name : "unknown", [content]);
-  // const getTitle = useCallback(() => content.dataSet.name, [content]);
   const editingTitle = useCurrent(content.title);
 
   const onBeginTitleEdit = () => {

@@ -1,4 +1,5 @@
-import { IAnyStateTreeNode, getParent, getType, hasParent, types } from "mobx-state-tree";
+import { IAnyStateTreeNode, getParent, getType, hasParent, types,
+         isAlive } from "mobx-state-tree";
 import { DocumentContentModelType } from "../models/document/document-content";
 
 /**
@@ -39,4 +40,26 @@ export function getContentIdFromNode(target: IAnyStateTreeNode) {
 
 export function getTileContentById(target: IAnyStateTreeNode, tileId: string) {
   return getDocumentContentFromNode(target)?.getTileContent(tileId);
+}
+
+/**
+ * A short circuit isAlive check. It is intended to be used in observing
+ * components. If the observing component is working with a MST object that
+ * might get destroyed and the component should not be rendered after the object
+ * is destroyed, this function should prevent the MST warnings. These warnings
+ * can show up when MobX recomputes a computed value to see if it has changed.
+ * This recomputing can happen even if the component is never re-rendered.
+ *
+ * It doesn't throw an error since often these issues are not critical. However
+ * the issues do have the potential to cause hard to track down problems.
+ *
+ * It doesn't return a value because it can be used before hooks in a component
+ * which should be run regardless of this check for consistency.
+ *
+ * See mst-detached-error.md and mobx-react-mst.test.tsx for more details.
+ */
+export function verifyAlive(target: IAnyStateTreeNode) {
+  if (!isAlive(target)) {
+    console.warn(`Destroyed MST Object is being accessed. Type: ${getType(target)}`);
+  }
 }

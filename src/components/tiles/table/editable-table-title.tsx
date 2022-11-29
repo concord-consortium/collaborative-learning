@@ -1,8 +1,8 @@
-import { isAlive } from "mobx-state-tree";
 import classNames from "classnames";
 import { observer } from "mobx-react";
 import React, { useState } from "react";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
+import { verifyAlive } from "../../../utilities/mst-utils";
 import { HeaderCellInput } from "./header-cell-input";
 import { LinkGeometryButton } from "./link-geometry-button";
 
@@ -24,10 +24,7 @@ export const EditableTableTitle: React.FC<IProps> = observer(function EditableTa
   getLinkIndex, onBeginEdit, onEndEdit, onLinkGeometryClick
 }) {
 
-  // TODO: Make this a generic utility that other components can use
-  if (!isAlive(content)) {
-    console.warn("Table Tile is being rendered for destroyed content");
-  }
+  verifyAlive(content);
 
   // content.title and observer() allow this component to re-render
   // when the title changes without re-rendering the entire TableTool
