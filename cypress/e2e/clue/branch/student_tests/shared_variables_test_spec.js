@@ -27,11 +27,17 @@ context('Shared Variables', function () {
     });
   });
 
-  const addLastCard = () => {
+  const addCard = (last) => {
     diagramToolTile.getDiagramToolbarButton("button-insert-variable").click();
-    cy.get(".custom-modal .variable-chip").last().click();
+    if (last) {
+      cy.get(".custom-modal .variable-chip").last().click();
+    } else {
+      cy.get(".custom-modal .variable-chip").first().click();
+    }
     cy.get(".custom-modal .modal-button").last().click();
   };
+
+  const addLastCard = () => addCard(true);
 
   describe("Text tile", () => {
     it('can add a variable chip to the text tool', function() {
@@ -146,7 +152,11 @@ context('Shared Variables', function () {
       drawTile().find('.drawing-variable:contains("VarC")').should('have.length', 1);
     });
     it("verify changes in diagram view propagates to draw tool", () => {
-      addLastCard();
+      // Delete the existing variable card so it won't overlap with the new card
+      diagramTile().find(".node").click();
+      diagramToolTile.getDiagramToolbarButton("button-delete", undefined, true).click();
+
+      addCard();
       diagramTile().find(".variable-info.name[value=VarC]");
       diagramTile().find(".variable-info.name[value=VarC]").type('Var D').blur();
       // Look for "VarCVarD" because spaces are not allowed in variable names
