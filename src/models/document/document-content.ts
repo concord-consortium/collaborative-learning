@@ -8,11 +8,10 @@ import {
   IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut
 } from "../tiles/tile-model";
 import {
-  TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
+  IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
 } from "../document/tile-row";
 import { migrateSnapshot } from "./document-content-import";
 import { IDocumentEnvironment } from "./document-environment";
-import { IDocumentAddTileOptions } from "./document-types";
 import { logTileCopyEvent } from "../tiles/log/log-tile-copy-event";
 import { logTileDocumentEvent } from "../tiles/log/log-tile-document-event";
 import { LogEventName } from "../../lib/logger-types";
@@ -20,6 +19,12 @@ import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { SharedModelUnion } from "../shared/shared-model-manager";
+
+export interface IDocumentAddTileOptions {
+  title?: string;
+  addSidecarNotes?: boolean;
+  url?: string;
+}
 
 export interface INewTileOptions {
   locationInRow?: string;
@@ -35,13 +40,6 @@ export interface INewRowTile {
   additionalTileIds?: string[];
 }
 export type NewRowTileArray = Array<INewRowTile | undefined>;
-
-export interface IDropRowInfo {
-  rowInsertIndex: number;
-  rowDropIndex?: number;
-  rowDropLocation?: string;
-  updateTimestamp?: number;
-}
 
 export interface IDocumentContentAddTileOptions extends IDocumentAddTileOptions {
   insertRowInfo?: IDropRowInfo;
