@@ -1,6 +1,8 @@
 import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn, getType, getEnv } from "mobx-state-tree";
-import { PlaceholderContentModel } from "../tiles/placeholder/placeholder-content";
+import {
+  getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
+} from "../tiles/placeholder/placeholder-content";
 import { kTextTileType } from "../tiles/text/text-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { ITileContentModel } from "../tiles/tile-types";
@@ -156,8 +158,8 @@ export const DocumentContentModel = types
         return (row.tileCount > 0) &&
                 row.tiles.every((entry, index) => {
                   const tileId = row.getTileIdAtIndex(index);
-                  const tile = tileId && self.tileMap.get(tileId);
-                  return tile ? tile.isPlaceholder : false;
+                  const tile = tileId ? self.tileMap.get(tileId) : undefined;
+                  return isPlaceholderTile(tile);
                 });
       },
       getSectionIdForTile(tileId: string) {
@@ -260,7 +262,7 @@ export const DocumentContentModel = types
     getSectionTypeForPlaceholderRow(row: TileRowModelType) {
       if (!self.isPlaceholderRow(row)) return;
       const tile = self.getTile(row.tiles[0].tileId);
-      return tile && tile.placeholderSectionId;
+      return getPlaceholderSectionId(tile);
     },
     get defaultInsertRow() {
       // next tile comes after the last visible row with content
@@ -297,7 +299,7 @@ export const DocumentContentModel = types
       rows.forEach(row => {
         row.tiles
           .map(tileLayout => self.tileMap.get(tileLayout.tileId))
-          .forEach(tile => tile && !tile.isPlaceholder && tiles.push(tile));
+          .forEach(tile => tile && !isPlaceholderTile(tile) && tiles.push(tile));
       });
       return tiles;
     },
@@ -488,11 +490,11 @@ export const DocumentContentModel = types
       }
     },
     removePlaceholderTilesFromRow(rowIndex: number) {
-      const isPlaceholderTile = (tileId: string) => {
+      const isPlaceholderTileId = (tileId: string) => {
         return self.getTileType(tileId) === "Placeholder";
       };
       const row = self.getRowByIndex(rowIndex);
-      row?.removeTilesFromRow(isPlaceholderTile);
+      row?.removeTilesFromRow(isPlaceholderTileId);
     }
   }))
   .actions(self => ({
