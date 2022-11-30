@@ -2,6 +2,7 @@ import { inject, observer } from "mobx-react";
 import { IReactionDisposer, reaction } from "mobx";
 import React from "react";
 import { findDOMNode } from "react-dom";
+import { DndContext, DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 import { throttle } from "lodash";
 import classNames from "classnames";
 import { BaseComponent, IBaseProps } from "../base";
@@ -128,19 +129,24 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
                                           && ui.focusDocument;
     const documentClass = classNames("document-content", {"document-content-smooth-scroll" : viaTeacherDashboard,
                                      "comment-select" : documentSelectedForComment});
+
+    const onDragStart = (event: DragStartEvent) => ui.setDraggingId(event.active.id.toString());
+    const onDragEnd = (event: DragEndEvent) => ui.setDraggingId(undefined);
     return (
-      <div className={documentClass}
-        data-testid="document-content"
-        onScroll={this.handleScroll}
-        onClick={this.handleClick}
-        onDragOver={this.handleDragOver}
-        onDragLeave={this.handleDragLeave}
-        onDrop={this.handleDrop}
-        ref={(elt) => this.domElement = elt}
-      >
-        {this.renderRows()}
-        {this.renderSpacer()}
-      </div>
+      <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd}>
+        <div className={documentClass}
+          data-testid="document-content"
+          onScroll={this.handleScroll}
+          onClick={this.handleClick}
+          onDragOver={this.handleDragOver}
+          onDragLeave={this.handleDragLeave}
+          onDrop={this.handleDrop}
+          ref={(elt) => this.domElement = elt}
+        >
+          {this.renderRows()}
+          {this.renderSpacer()}
+        </div>
+      </DndContext>
     );
   }
 

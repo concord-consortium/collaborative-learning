@@ -35,7 +35,7 @@ export const useNewVariableDialog = ({ addVariable, sharedModel }: IUseNewVariab
         onClick: handleClick
       }
     ]
-  }, [newVariable]);
+  }, [addVariable, newVariable]);
 
   return [showModal, hideModal];
 };

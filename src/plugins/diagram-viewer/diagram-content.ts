@@ -10,6 +10,7 @@ import { SharedVariables, SharedVariablesType } from "../shared-variables/shared
 export const DiagramContentModel = TileContentModel
   .named("DiagramTool")
   .props({
+    hideNavigator: types.maybe(types.boolean),
     type: types.optional(types.literal(kDiagramTileType), kDiagramTileType),
     version: types.optional(types.literal(kDiagramToolStateVersion), kDiagramToolStateVersion),
     root: types.optional(DQRoot, getSnapshot(DQRoot.create())),
@@ -117,6 +118,11 @@ export const DiagramContentModel = TileContentModel
         // somehow we do
         console.warn("updateAfterSharedModelChanges was called with no shared model present");
       }
+    }
+  }))
+  .actions(self => ({
+    setHideNavigator(val: boolean) {
+      self.hideNavigator = val;
     }
   }));
 
