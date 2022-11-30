@@ -221,6 +221,11 @@ export const TableContentModel = TileContentModel
     }
   }))
   .views(self => ({
+    get title() {
+      return self.dataSet.name;
+    }
+  }))
+  .views(self => ({
     get tileSnapshotForCopy() {
       const snapshot = getSnapshot(self);
       if (!self.dataSet.isEmpty) {

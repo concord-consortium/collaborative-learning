@@ -1,8 +1,9 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import { destroy, detach, IAnyStateTreeNode, Instance, isAlive, types } from "mobx-state-tree";
+import { destroy, detach, IAnyStateTreeNode, Instance, types } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { observable } from "mobx";
+import { verifyAlive } from "../utilities/mst-utils";
 
 function destroySoon(obj: IAnyStateTreeNode) {
   // Using detach instead of destroy prevents the harmless errors. However it
@@ -164,15 +165,13 @@ describe("behavior of mobx-react with mst objects", () => {
       {item}: {item: Instance<typeof Item>}
     ) {
       log.push(`ItemComponent rendering ${item.name}`);
-      if (!isAlive(item)) {
-        // Note: we aren't bailing out here. Just checking if
-        // the item is alive before item.nameWithDescription is
-        // enough to short circuit MobX's shouldCompute.
-        // shouldCompute finds the dependencies have changed so it returns
-        // true. But the component is never rendered because the parent
-        // component only renders active (alive) children.
-        console.warn("rendering a destroyed item");
-      }
+      // Note: we aren't bailing out here. Just checking if
+      // the item is alive before item.nameWithDescription is
+      // enough to short circuit MobX's shouldCompute.
+      // shouldCompute finds the dependencies have changed so it returns
+      // true. But the component is never rendered because the parent
+      // component only renders active (alive) children.
+      verifyAlive(item, "ItemComponent");
       return <div>{item.nameWithDescription}</div>;
     });
 
