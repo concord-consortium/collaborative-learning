@@ -28,18 +28,20 @@ import { useRowsFromDataSet } from "./use-rows-from-data-set";
 import { useCurrent } from "../../../hooks/use-current";
 import { useToolbarTileApi } from "../hooks/use-toolbar-tile-api";
 import { lightenColor } from "../../../utilities/color-utils";
+import { verifyAlive } from "../../../utilities/mst-utils";
 
 import "./table-tile.scss";
 
 // observes row selection from shared selection store
-const TableToolComponent: React.FC<ITileProps> = observer(({
+const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComponent({
   documentId, documentContent, tileElt, model, readOnly, height, scale,
   onRequestRowHeight, onRequestTilesOfType, onRequestUniqueTitle, onRegisterTileApi, onUnregisterTileApi
-}) => {
+}) {
   // Gather data from the model
   const modelRef = useCurrent(model);
   const getContent = useCallback(() => modelRef.current.content as TableContentModelType, [modelRef]);
   const content = useMemo(() => getContent(), [getContent]);
+  verifyAlive(content, "TableToolComponent");
   const metadata = getContent().metadata;
 
   // Basic operations based on the model
@@ -114,7 +116,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(({
   useControlsColumn({ controlsColumn, readOnly: !!readOnly, onAddColumn, onRemoveRows });
 
   // Functions for getting and modifying the title
-  const { getTitle, onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
+  const { onBeginTitleEdit, onEndTitleEdit } = useTableTitle({
     gridContext, content, readOnly,
     onSetTableTitle, onRequestUniqueTitle: handleRequestUniqueTitle, requestRowHeight
   });
@@ -171,7 +173,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(({
   const exportContentAsTileJson = useCallback(() => {
     return exportTableContentAsJson(content.metadata, dataSet, content.columnWidth);
   }, [dataSet, content]);
-  useToolApi({ content: getContent(), getTitle, getContentHeight, exportContentAsTileJson,
+  useToolApi({ content: getContent(), getContentHeight, exportContentAsTileJson,
                 onRegisterTileApi, onUnregisterTileApi });
 
   useEffect(() => {
@@ -204,10 +206,18 @@ const TableToolComponent: React.FC<ITileProps> = observer(({
       <TableToolbar documentContent={documentContent} tileElt={tileElt} {...toolbarProps}
                     onSetExpression={showExpressionsDialog} scale={scale}/>
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
-        <EditableTableTitle className="table-title" readOnly={readOnly} showLinkButton={showLinkButton}
-          isLinkEnabled={isLinkEnabled} getLinkIndex={getLinkIndex} onLinkGeometryClick={showLinkGeometryDialog}
-          getTitle={getTitle} titleCellWidth={titleCellWidth} titleCellHeight={getTitleHeight()}
-          onBeginEdit={onBeginTitleEdit} onEndEdit={onEndTitleEdit} />
+        <EditableTableTitle
+          content={content}
+          className="table-title"
+          readOnly={readOnly}
+          showLinkButton={showLinkButton}
+          isLinkEnabled={isLinkEnabled}
+          getLinkIndex={getLinkIndex}
+          onLinkGeometryClick={showLinkGeometryDialog}
+          titleCellWidth={titleCellWidth}
+          titleCellHeight={getTitleHeight()}
+          onBeginEdit={onBeginTitleEdit}
+          onEndEdit={onEndTitleEdit} />
         <ReactDataGrid ref={gridRef} selectedRows={getSelectedRows()} rows={rows} rowHeight={rowHeight}
           headerRowHeight={headerRowHeight()} columns={columns} {...gridProps} {...gridModelProps}
           {...dataGridProps} {...rowProps} />
