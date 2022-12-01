@@ -1900,20 +1900,20 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "zy34543woT6wp_c7IxjDmS",
+                    "id": "G09TlC-G-r_fVP1s",
+                    "title": "Text 1",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>Lesson 2.1 Overview</h3>",
-                        "<p>Today let's talk about how sensory input impacts our ability to move and interact with objects.</p>",
-                        "<p>Materials:  \nFor every two students:<ul><li>A 30 cm ruler</li><li>Winter gloves</li></ul></p>",
-                        "<h3>Lesson Resources</strong></h3>",
-                        "<p>Watch this video <a href='https://www.pbs.org/newshour/show/how-sensors-rewiring-nerves-could-help-prosthetics-feel-and-function-like-real-limbs'>PBS News Hour story</a> about how technology could be used to improve the function of prosthetic limbs.</p>",
-                        "<p>Think about the EMG-controlled grabber we built in the previous lesson and discuss some challenges you might encounter when trying to hold an egg with the grabber. How would you improve the design of the system to overcome these challenges? Document some ideas in your workspace. You can use images, drawings, text or programs to record your ideas.</p>"
+                        "<p>In this lesson, you will learn about how sensory feedback impacts our ability to move and interact with objects. </p>",
+                        "<p><strong>Do Now</strong></p>",
+                        "<p>Discuss the following questions with a classmate and then record your answers individually in your workspace: </p>",
+                        "<p>1) What are some challenges that you may encounter when trying to hold <em>fragile</em> objects (e.g., an egg) with the robotic gripper? </p>",
+                        "<p>2) How would you improve the design of the gripper to overcome these challenges?</p>"
                       ]
                     }
-                  } 
+                  }
                 ]
               }
             },
@@ -1922,14 +1922,118 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "BfEcsBHvG1mVwV4H",
+                    "id": "t3r434R0V6UgouTR",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h3>REACTION TIME AND TOUCH</h3>",
-                        "<p>In Lesson 1.2 you measured reaction time using a ruler, comparing your dominant and non-dominant hands.  Today we will conduct a similar experiment to investigate how tactile information impacts reaction time (in other words, if we can feel the ruler with our fingertips, how does this impacts how fast we are at catching it?. </p><p>Discuss with your group how to modify the reaction time experiment to answer this new research question. Design a new data recording table, similar to the one in Lesson 1.2, that allows you to record reaction time with and without a winter glove.</p>",
-                        "<p>Conduct your experiment as designed and record your findings here. Assign one member of the group to collect all the data from the groupmates and publish it to the class.</p>"
+                        "<p><strong>Does reaction time depend on tactile feedback?</strong></p>",
+                        "<p>As you recall, in lesson 1.2, you measured your reaction time using a ruler, comparing your dominant and non-dominant hand. Today we will conduct a similar experiment to investigate how tactile information impacts reaction time (in other words, how being able to feel the ruler with our fingertips impacts how fast we are at catching it?).  </p>",
+                        "<p>If you need a reminder on how to conduct the experiment, please watch this <a href='https://www.youtube.com/watch?v=gJEuT3aKcMI'>video</a>.</p>",
+                        "<p>Follow these steps:</p>",
+                        "<p>1. Decide who is the Dropper and who is the Catcher.</p>",
+                        "<p>2. The catcher should extend their hand with the index finger and thumb about 1 cm apart. The dropper should hold the ruler at the top such that the catcher has their thumb and index fingers on either side of the zero cm mark.</p>",
+                        "<p>3. When the catcher says they are ready. the dropper should count up, in their head, to a number between 3 and 5 (use a different number each time). When the number is reached, they drop the ruler.</p>",
+                        "<p>4. Catcher catches the ruler as fast as they can. Ignore any times the ruler falls on the ground. </p>",
+                        "<p>5. Enter the ruler cm value closest to Catcher’s pinch point in the table below (you should first drag the table to your worksheet). </p>",
+                        "<p>6. Repeat steps 2-5 five times.</p>",
+                        "<p>7. Repeat the process <u>while the catcher is wearing a winter glove</u>. </p>",
+                        "<p></p>",
+                        "<p>Drag the following tables into your workspace and use them to record and calculate your results.</p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "Wnz_YHBh9bfIXHMc",
+                      "title": "Table 1",
+                      "content": {
+                        "type": "Table",
+                        "name": "Without a glove",
+                        "columns": [
+                          {"name":"Trial","width":80,"values":["1","2","3","4","5","Shortest (s)","Longest (l)","Range (l-s)","Average"]},
+                          {"name":"Distance (cm)","width":100,"values":["","","","","","","","",""]},
+                          {"name":"Time (ms)","width":80,"values":["","","","","","","","",""]}
+                        ]
+                      }
+                    },
+                    {
+                      "id": "_sdC2TP8apXjqq5v",
+                      "title": "Table 2",
+                      "content": {
+                        "type": "Table",
+                        "name": "With a glove",
+                        "columns": [
+                          {"name":"Trial","width":80,"values":["1","2","3","4","5","Shortest (s)","Longest (l)","Range (l-s)","Average"]},
+                          {"name":"Distance (cm)","width":104.6593017578125,"values":["","","","","","","","",""]},
+                          {"name":"Time (ms)","width":80,"values":["","","","","","","","",""]}
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "uS_U6mjZ9EAvOY_B",
+                    "title": "Text 3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Use the table below to convert drop distance (in cm) to time (in milliseconds, which is thousands of a second):</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "PdWaZTWq_Lz_R1tP",
+                    "title": "Table 3",
+                    "content": {
+                      "type": "Table",
+                      "name": "Reaction Time Lookup Table",
+                      "columns": [
+                        {"name":"Distance (cm)","width":160,"values":["5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30"]},
+                        {"name":"Reaction time (ms)","width":160,"values":["101","111","120","128","136","143","150","156","163","169","175","181","186","192","197","202","207","212","217","221","226","230","235","239","243","247"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "LIVvd3Z5j0eInf4t",
+                    "title": "Text 4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Discuss the following question with your partner and enter your answers in your workspace:</p>",
+                        "<p>How did wearing a glove affect your reaction time? Why? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "vvj8ZFTiKjnxWZ1g",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>PBS News Hour story</strong></p>",
+                        "<p>Answer the following question after watching the first 3 minutes of the PBS News Hour story [link:  https://www.pbs.org/newshour/show/how-sensors-rewiring-nerves-could-help-prosthetics-feel-and-function-like-real-limbs]:</p>",
+                        "<p>What stood out to you in the video? List at least 3 things in your workspace. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "7EeFH3yJN62ZJdlt",
+                    "title": "Text 6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Design an improved gripper </strong></p>",
+                        "<p>Create a model on paper or a whiteboard to communicate how information about touch/pressure can be incorporated into the design of the gripper. Some things to consider:</p>",
+                        "<p>1. How would you measure the pressure applied by the gripper on objects? </p>",
+                        "<p>2. How would touch/pressure information impact the opening/closing of the gripper?   </p>",
+                        "<p>Make sure to label your model. When you&#x27;re done, take a picture of your model and upload it to your workspace as an image tile. </p>",
+                        "<p><strong>Reflection</strong></p>",
+                        "<p>At the end of the activity, please record your current thinking and learning in your Learning journal (see Reflection tab). </p>"
                       ]
                     }
                   }
@@ -1941,18 +2045,31 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "BfEsq345csBHvG1mVwV4H",
+                    "id": "vsLAfG7znk0cZlwS",
+                    "title": "Text 7",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>With your group, discuss how prosthetic arms can be improved by incorporating sensory information (similar to the prosthetic leg example from the video). Sketch your ideas and consider how the motor command from the brain interacts with tactile information from objects.</p>",
-                        "<h3>KWL JOURNALS</h3>",
-                        "<p>Using your KWL journal, add new rows to the table to add to what you know, wonder, and learned about the role of tactile information in movement. </p>"
+                        "<p>Add the following entry to your learning journal:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "6SsD215pUdu1fauJ",
+                    "title": "Text 8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Lesson 2.1 Journal Entry</strong></p>",
+                        "<p>1. Today&#x27;s date:</p>",
+                        "<p>2. Today&#x27;s topic:</p>",
+                        "<p>3. Based on today&#x27;s lesson,  describe how information about touch/pressure affects our movement. </p>",
+                        "<p>4. How do you think Tilly (the teen with the bionic arms) would react to the improved gripper that you designed today?</p>"
                       ]
                     }
                   }
-
                 ]
               }
             }
