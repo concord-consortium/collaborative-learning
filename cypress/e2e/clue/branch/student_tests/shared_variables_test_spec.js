@@ -176,7 +176,8 @@ context('Shared Variables', function () {
       cy.get("#evd-units").type("util");
       customModal().find(".modal-button").last().click();
       customModal().should("not.exist");
-      diagramTile().find(".variable-info.unit[value=util]").should("exist");
+      diagramTile().find(".variable-info.unit").should("exist");
+      diagramTile().find(".variable-info.unit").should("have.value", "util");
     });
     it('deletes variable chip in draw tool', () => {
       drawTile().click();
