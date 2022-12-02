@@ -54,6 +54,7 @@ export const UIModel = types
     learningLogWorkspace: WorkspaceModel,
     teacherPanelKey: types.maybe(types.string),
     selectedCommentedDocument: types.maybe(types.string),//key of selected commented MyWork/ClassWork doc
+    dragId: types.maybe(types.string) // The id of the object being dragged. Used with dnd-kit dragging.
   })
   .volatile(self => ({
     defaultLeftNavExpanded: false,
@@ -202,6 +203,9 @@ export const UIModel = types
       },
       setSelectedCommentedDocument(key: string | undefined){
         self.selectedCommentedDocument = key ;
+      },
+      setDraggingId(dragId?: string) {
+        self.dragId = dragId;
       }
     };
   });

@@ -14,6 +14,7 @@
 
   .diagram-tool-button {
     position: relative;
+    background-color: $workspace-teal-light-9;
     // These are button elements so we have to disable default button styles
     // of border, padding, and display
     border: 0;    
@@ -43,7 +44,7 @@
       }
     }
 
-    &.button-dialog {
+    &.button-add-variable {
       border-bottom-left-radius: 3px;
     }
     &.button-delete {
@@ -51,7 +52,7 @@
     }
 
     &.disabled {
-      background-color: #fafafa;
+      background-color: $workspace-teal-light-9;
       cursor: default;
 
       svg {

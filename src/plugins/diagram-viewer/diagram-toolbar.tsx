@@ -3,15 +3,27 @@ import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
 import { Tooltip } from "react-tippy";
+import { DragEndEvent, DragOverlay, useDndMonitor, useDraggable, useDroppable } from "@dnd-kit/core";
+import { DiagramHelper, VariableType } from "@concord-consortium/diagram-view";
+
 import { DiagramContentModelType } from "./diagram-content";
+import { kNewVariableButtonDraggableId, kNewVariableButtonDroppableId } from "./diagram-types";
+import { useUIStore } from "../../hooks/use-stores";
 import { useTooltipOptions } from "../../hooks/use-tooltip-options";
+import { ButtonDivider } from "../../components/tiles/toolbar/button-divider";
 import { IFloatingToolbarProps, useFloatingToolbarLocation }
   from "../../components/tiles/hooks/use-floating-toolbar-location";
 
-import { VariableType } from "@concord-consortium/diagram-view";
-
+import AddVariableCardIcon from "./src/assets/add-variable-card-icon.svg";
 import InsertVariableCardIcon from "./src/assets/insert-variable-card-icon.svg";
 import VariableEditorIcon from "../shared-variables/assets/variable-editor-icon.svg";
+import ZoomInIcon from "./src/assets/zoom-in-icon.svg";
+import ZoomOutIcon from "./src/assets/zoom-out-icon.svg";
+import FitViewIcon from "./src/assets/fit-view-icon.svg";
+import LockLayoutIcon from "./src/assets/lock-layout-icon.svg";
+import UnlockLayoutIcon from "./src/assets/unlock-layout-icon.svg";
+import HideNavigatorIcon from "./src/assets/hide-navigator-icon.svg";
+import ShowNavigatorIcon from "./src/assets/show-navigator-icon.svg";
 import DeleteSelectionIcon from "../../assets/icons/delete/delete-selection-icon.svg";
 import "./diagram-toolbar.scss";
 
@@ -50,6 +62,43 @@ export const SvgToolbarButton: React.FC<ISvgToolbarButtonProps> = ({
     : null;
 };
 
+interface INewVariableButton {
+  handleClick: () => void;
+  tileId: string;
+}
+const NewVaribleButton = ({ handleClick, tileId }: INewVariableButton) => {
+  const ui = useUIStore();
+  const draggableId = `${kNewVariableButtonDraggableId}-${tileId}`;
+  const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });
+
+  // Because the button is draggable, it can no longer be clicked.
+  // Instead, we check to see if it's dropped on itself, and if it is we "click" it.
+  const droppableId = `${kNewVariableButtonDroppableId}-${tileId}`;
+  const droppableInfo = useDroppable({ id: droppableId });
+  const setDroppableNodeRef = droppableInfo.setNodeRef;
+  useDndMonitor({
+    onDragEnd: (event: DragEndEvent) => {
+      if (event.over?.id === droppableId && event.active.id === draggableId) {
+        handleClick();
+      }
+    }
+  });
+
+  return (
+    <div ref={setDroppableNodeRef}>
+      <div ref={setNodeRef} {...attributes} {...listeners} >
+        <SvgToolbarButton SvgIcon={AddVariableCardIcon} buttonClass="button-add-variable" title="New Variable"
+          onClick={handleClick} />
+      </div>
+      <DragOverlay>
+        { ui.dragId === draggableId.toString()
+          ? <AddVariableCardIcon />
+          : null }
+      </DragOverlay>
+    </div>
+  );
+};
+
 interface IInsertVariableButton {
   disabled?: boolean;
   handleClick: () => void;
@@ -61,14 +110,61 @@ const InsertVariableButton = ({ disabled, handleClick }: IInsertVariableButton) 
   );
 };
 
-interface IDialogButton {
+interface IEditVariableButton {
   handleClick: () => void;
   selectedVariable?: VariableType;
 }
-const DialogButton = ({ handleClick, selectedVariable }: IDialogButton) => {
+const EditVariableButton = ({ handleClick, selectedVariable }: IEditVariableButton) => {
   return (
-    <SvgToolbarButton SvgIcon={VariableEditorIcon} buttonClass="button-dialog" disabled={!selectedVariable}
+    <SvgToolbarButton SvgIcon={VariableEditorIcon} buttonClass="button-edit-variable" disabled={!selectedVariable}
       title="Edit Variable" onClick={handleClick} style={{fill: "#000000", strokeWidth: 0.1}} />
+  );
+};
+
+interface IZoomControlButton {
+  handleClick?: () => void;
+}
+const doNothing = () => { return undefined; };
+const ZoomInButton = ({ handleClick }: IZoomControlButton) => {
+  return (
+    <SvgToolbarButton SvgIcon={ZoomInIcon} buttonClass="button-zoom-in" title="Zoom In"
+      onClick={handleClick || doNothing} />
+  );
+};
+const ZoomOutButton = ({ handleClick }: IZoomControlButton) => {
+  return (
+    <SvgToolbarButton SvgIcon={ZoomOutIcon} buttonClass="button-zoom-out" title="Zoom Out"
+      onClick={handleClick || doNothing} />
+  );
+};
+const FitViewButton = ({ handleClick }: IZoomControlButton) => {
+  return (
+    <SvgToolbarButton SvgIcon={FitViewIcon} buttonClass="button-fit-view" title="Fit View"
+      onClick={handleClick || doNothing} />
+  );
+};
+
+interface ILockLayoutButton {
+  interactionLocked: boolean;
+  toggleInteractionLocked: () => void;
+}
+const LockLayoutButton = ({ interactionLocked, toggleInteractionLocked }: ILockLayoutButton) => {
+  return (
+    <SvgToolbarButton SvgIcon={interactionLocked ? UnlockLayoutIcon : LockLayoutIcon}
+      buttonClass="button-lock-layout" title={interactionLocked ? "Unlock Layout" : "Lock Layout"}
+      onClick={toggleInteractionLocked} />
+  );
+};
+
+interface IHideNavigatorButton {
+  hideNavigator: boolean;
+  toggleNavigator: () => void;
+}
+const HideNavigatorButton = ({ hideNavigator, toggleNavigator }: IHideNavigatorButton) => {
+  return (
+    <SvgToolbarButton SvgIcon={hideNavigator ? ShowNavigatorIcon : HideNavigatorIcon}
+      buttonClass="button-hide-navigator" title={hideNavigator ? "Show Navigator" : "Hide Navigator"}
+      onClick={toggleNavigator} />
   );
 };
 
@@ -85,14 +181,22 @@ const DeleteButton = ({ handleClick, selectedVariable }: IDeleteButton) => {
 
 interface IProps extends IFloatingToolbarProps {
   content: DiagramContentModelType;
+  diagramHelper?: DiagramHelper;
   disableInsertVariableButton?: boolean;
   handleDeleteClick: () => void;
   handleEditVariableClick: () => void;
   handleInsertVariableClick: () => void;
+  hideNavigator: boolean;
+  handleNewVariableClick: () => void;
+  interactionLocked: boolean;
+  tileId: string;
+  toggleInteractionLocked: () => void;
+  toggleNavigator: () => void;
 }
 export const DiagramToolbar: React.FC<IProps> = observer(({
-  content, disableInsertVariableButton, documentContent, handleDeleteClick, handleEditVariableClick,
-  handleInsertVariableClick, onIsEnabled, ...others
+  content, diagramHelper, disableInsertVariableButton, documentContent, handleDeleteClick, handleEditVariableClick,
+  handleInsertVariableClick, hideNavigator, handleNewVariableClick, interactionLocked, onIsEnabled, tileId,
+  toggleInteractionLocked, toggleNavigator,  ...others
 }) => {
   const root = content?.root;
   const selectedVariable = root?.selectedNode?.variable;
@@ -107,11 +211,19 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
   });
   return documentContent
     ? ReactDOM.createPortal(
-        <div className={`diagram-toolbar ${enabled && location ? "enabled" : "disabled"}`}
-            style={location} onMouseDown={e => e.stopPropagation()}>
-          <InsertVariableButton disabled={disableInsertVariableButton} handleClick={handleInsertVariableClick} />
-          <DialogButton handleClick={handleEditVariableClick} selectedVariable={selectedVariable} />
-          <DeleteButton handleClick={handleDeleteClick} selectedVariable={selectedVariable} />
-        </div>, documentContent)
+      <div className={`diagram-toolbar ${enabled && location ? "enabled" : "disabled"}`}
+          style={location} onMouseDown={e => e.stopPropagation()}>
+        <NewVaribleButton handleClick={handleNewVariableClick} tileId={tileId} />
+        <InsertVariableButton disabled={disableInsertVariableButton} handleClick={handleInsertVariableClick} />
+        <EditVariableButton handleClick={handleEditVariableClick} selectedVariable={selectedVariable} />
+        <ButtonDivider />
+        <ZoomInButton handleClick={() => diagramHelper?.zoomIn()} />
+        <ZoomOutButton handleClick={() => diagramHelper?.zoomOut()} />
+        <FitViewButton handleClick={() => diagramHelper?.fitView()} />
+        <LockLayoutButton interactionLocked={interactionLocked} toggleInteractionLocked={toggleInteractionLocked} />
+        <HideNavigatorButton hideNavigator={hideNavigator} toggleNavigator={toggleNavigator} />
+        <ButtonDivider />
+        <DeleteButton handleClick={handleDeleteClick} selectedVariable={selectedVariable} />
+      </div>, documentContent)
     : null;
 });

@@ -1,0 +1,9 @@
+@use "../../vars.sass";
+
+.button-divider {
+  background-color: vars.$workspace-teal-light-9;
+  border: dashed 1px vars.$workspace-teal;
+  box-sizing: border-box;
+  height: vars.$toolbar-button-height;
+  width: 1px;
+}
