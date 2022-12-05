@@ -2334,14 +2334,15 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "iEgQChsdHufMYUbi",
+                    "id": "xC4RUqsgRn4TNf8r",
+                    "title": "Text 1",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Can you grab an egg (with the gripper) without cracking it?</p>",
-                        "<p>Materials:</p>",
-                        "<ul><li>A gripper kit</li><li>Two gripper “mittens”, one will be a regular plastic attachment, the other will have a pressure sensor on it (see picture →)</li><li>10 kΩ ohm resistor</li><li>1 breadboard</li><li>2 segments of wire</li><li>A plastic egg or a drained egg</li><p></p></ul>"
+                        "<p>In today&#x27;s lesson, we will explore how robotic grippers can sense objects. </p>",
+                        "<p><strong>Do Now</strong></p>",
+                        "<p>Think back to what you have learned in lesson 2.1  (how does touch impact movement?) and lesson 2.2 (how do we perceive touch?). Answer the following question in your workspace: How would change the design of the gripper to make it &quot;feel&quot; objects?  </p>"
                       ]
                     }
                   }
@@ -2353,19 +2354,20 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "s3n37sHI6K6rpa9O",
+                    "id": "nPZ2t8qjTw72Qzmf",
+                    "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Assembly: </p>",
-                        "<p>1. Set up your gripper like normal. If you are stuck, reference the gripper directions in Lesson 1.5.  Attach the “pressure sensor mittens” to each side of the gripper,  like in the picture.</p>"
+                        "<p><strong>Working with pressure sensors</strong></p>",
+                        "<p>Today we will work with pressure sensors to make the gripper &quot;feel&quot; objects. To do so, you will need a gripper kit with two &quot;mittens.&quot; If you look closely, you will notice that there is a sensor attached to one of the &quot;mittens.&quot; This sensor can measure the level of pressure applied by the gripper on objects.</p>"
                       ]
                     }
                   },
                   {
-                    "id": "R8jKw96R4bhk_fvp",
-                    "title": "Pressure sensor mounted on claw",
+                    "id": "5GoFVnia1ZflBMk6",
+                    "title": "Pressure sensor mounted on the gripper",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/neural-engineering/images/mittens.jpg",
@@ -2373,156 +2375,73 @@
                     }
                   },
                   {
-                    "id": "5uBdFgEMg1kClzar",
+                    "id": "a6O5yNWtW-CGadj6",
+                    "title": "Text 4",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>2. Grab the materials listed above and lay them out.</p>",
-                        "<p>3. Find the tiny breadboard.</p>",
-                        "<p>4. Place the 10K Ω (Brown - Black - Orange color bands on the resistor) resistor across the center of the board:</p>"
+                        "<p>The first step is to connect the pressure sensor to the Muscle Spiker Shield (orange board).  You will notice that there are three wires coming out of the sensor: red, black, and blue. Plug these wires to the following sockets:</p>"
                       ]
                     }
                   },
                   {
-                    "id": "XEUEgeONkNlgB_1-",
-                    "title": "Resistor Placed on Breadboard",
+                    "id": "iRLH-JgZYIUmUb6w",
+                    "title": "Connecting the sensor to the muscle spiker shield (orange board)",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/neural-engineering/images/breadboard.jpg",
-                      "filename": "curriculum/neural-engineering/images/breadboard.jpg"
+                      "url": "curriculum/neural-engineering/images/arduinowPressure.png",
+                      "filename": "curriculum/neural-engineering/images/arduinowPressure.png"
                     }
                   },
                   {
-                    "id": "vdWs-AJEEA-c7oqP",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>5. Take one of the wires coming out of the pressure sensor and plug it to the <strong>5V socket</strong> in the Arduino. (4th space.) Note: The wires coming from the pressure sensor may need the wire ends to be twisted a bit to fit well into the breadboard and Arduino.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "KrEizkJp-K4Dn3S1",
-                    "title": "Wire to Arduino",
+                    "id": "G4St3ETHDxn6Xxb0",
+                    "title": "Zoom in",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/neural-engineering/images/wireToArduino.jpg",
-                      "filename": "curriculum/neural-engineering/images/wireToArduino.jpg"
+                      "url": "curriculum/neural-engineering/images/connectorColors.png",
+                      "filename": "curriculum/neural-engineering/images/connectorColors.png"
                     }
                   },
                   {
-                    "id": "7HYJ1kGyLt9CaYnm",
+                    "id": "dTTzuz68xecRDgTs",
+                    "title": "Text 5",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>6. Take the other wire that is coming out of the pressure sensor and plug it to the left side of the 10K Ω resistor in the same row as the resistor:</p>"
+                        "<p>Next, you will need to connect the Arduino board to your computer using the blue USB cable, open a DataFlow tile and click on the lightning bolt connection button to pair your device. Add a sensor to your DataFlow program and choose &quot;Surface Pressure&quot; from the first drop-down menu and &quot;connect for live fsr&quot; from the second drop-down menu. Click on the graph icon to visualize the data that is received from the sensor and change the sampling rate to 100ms.</p>",
+                        "<p>Try pressing the sensor with your fingers. Do you see any changes in your graph? If not, make sure you properly followed all the previous steps. </p>"
                       ]
                     }
                   },
                   {
-                    "id": "-Gzyv9sIz9rJOvHj",
-                    "title": "Wire to Breadboard",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/wireToBreadboard.jpg",
-                      "filename": "curriculum/neural-engineering/images/wireToBreadboard.jpg"
-                    }
-                  },
-                  {
-                    "id": "cJPRVe8rhvLo8KgJ",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>7. Take a segment of wire. Plug one end to the <strong>ground socket (either the second or third space) </strong>of the Arduino and the other one to the opposite side as the pressure wire of the  of the 10K Ω resistor. This completes the circuit, allowing current to flow through the pressure sensor and the 10 kΩ resistor.</p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "Kl_oPnn9T-4rjvRB",
-                    "title": "Ground socket wire",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/groundWire.jpg",
-                      "filename": "curriculum/neural-engineering/images/groundWire.jpg"
-                    }
-                  },
-                  {
-                    "id": "yoLd9jIUYJ7IZK3n",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>8. Take another segment of wire. Plug one end to <strong>socket A1</strong> in the Arduino. The other end should be connected to the same side as the pressure wire of the 10 K Ω resistor. </p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "MzfhGbECHkibVMZw",
-                    "title": "Socket A1 wire",
-                    "content": {
-                      "type": "Image",
-                      "url": "curriculum/neural-engineering/images/socket.jpg",
-                      "filename": "curriculum/neural-engineering/images/socket.jpg"
-                    }
-                  },
-                  {
-                    "id": "LREbXfHuzyMc-DS1",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>9. CONGRATULATIONS! You’ve just built a force sensing circuit. This circuit works like this: as force is applied to the pressure sensor on the gripper mitten, more electrical current flows through the circuit. As more current flows through the 10 kΏ resistor, the voltage across the resistor increases. We will measure the voltage changes using the Arduino (this is why the red wire from the circuit is connected to A1.)</p>",
-                        "<p>10. Connect your Arduino shield to your computer using the same cabling from Lesson 1.5. Create a Dataflow programming tile in your Workspace. You can also copy the one shown here by dragging it into your Workspace. Open up two sensor blocks and select EMG in one and Surface Pressure in the other. You will need to choose &quot;connect for live ...&quot; from one sensor block, and use the lightning bolt connection button in the left corner of the Dataflow screen to connect the program to the sensor input.  Once you do, you should begin to see readings show up in the block output fields. Is there a response on the screen? If not, check your circuit. </p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "yU7QpRbJyWfPXtEK",
-                    "title": "Read EMG and Pressure Sensors",
+                    "id": "Pbmb_5NSuyphX0nR",
+                    "title": "Program 1",
                     "content": {
                       "type": "Dataflow",
                       "programDataRate": 1000,
                       "programZoom": {
                         "dx": 0,
                         "dy": 0,
-                        "scale": 1.020000291714255
+                        "scale": 1
                       },
                       "program": {
-                      "values": {"1": {"currentValues": {}}, "2": {"currentValues": {}}},
+                      "values": {"1": {"currentValues": {}}},
                       "id": "dataflow@0.1.0",
                       "nodes": {
                         "1": {
                           "id": 1,
                           "name": "Sensor",
-                          "x": 273.76337909510426,
-                          "y": 57.84759654973931,
+                          "x": 40,
+                          "y": 5,
                           "inputs": {},
                           "outputs": {"num": {"connections": {}}},
                           "data": {
-                            "plot": true,
+                            "plot": false,
                             "type": "fsr-reading",
-                            "sensor": "none",
-                            "virtual": false,
-                            "inputKeys": []
-                          }
-                        },
-                        "2": {
-                          "id": 2,
-                          "name": "Sensor",
-                          "x": 24.38005772448913,
-                          "y": 61.62890019391375,
-                          "inputs": {},
-                          "outputs": {"num": {"connections": {}}},
-                          "data": {
-                            "plot": true,
-                            "type": "emg-reading",
-                            "sensor": "none",
-                            "virtual": false,
-                            "inputKeys": []
+                            "sensor": "fsr",
+                            "virtual": false
                           }
                         }
                       }
@@ -2530,284 +2449,76 @@
                     }
                   },
                   {
-                    "id": "PydgYugDbZPtaiTX",
+                    "id": "WY0kXUDfbiDWaHIb",
+                    "title": "Text 3",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Next, try to use the gripper to pick up an object by dragging this program into your Workspace and pairing the arduino devices with it.  This program does two main things: (1) when a muscle is contracted, the signal is detected and triggers the claw to close. (2) When something presses against the force sensor, the voltage increase across the 10 kΏ resistor is detected and tells the claw to stop gripping. This is meant to prevent the claw from closing too strongly on the target (egg) and damaging it.</p>",
-                        "<p>13. When the program is in your workspace and you've paired with your Arduino setup, make sure that you can cause the gripper to close by clenching your muscles.</p>",
-                        "<p>14. To test the force sensor, try pinching the sensor and contracting your muscle. Does the gripper move? Why or why not?</p>",
-                        "<p>What is the purpose of the Control block? Why are there so many conditions to check in the three logic blocks?</p>"
+                        "<p><strong>Control the gripper with your muscles</strong></p>",
+                        "<p>Follow the same steps from lesson 1.5 to control the gripper with your muscles (go back to lesson 1.5 if you need additional information):</p>",
+                        "<p>1. Connect the gripper to the Muscle SpikerShield. </p>",
+                        "<p>2. Stick two EMG surface electrodes on your forearm and one on your elbow.</p>",
+                        "<p>3. Connect the black alligator clip to the electrode on your elbow and the red alligator clips to the electrodes on your forearm. </p>",
+                        "<p>4. Plug the end of the orange wire into the orange connection box on the Muscle SpikerShield.</p>",
+                        "<p>5. Create a new DataFlow tile and add a sensor block:</p>",
+                        "<p>- In the &quot;Select a sensor type&quot; drop-down menu, select EMG</p>",
+                        "<p>- In the &quot;Select a sensor&quot; drop-down menu, select &quot;connect for live EMG&quot;</p>",
+                        "<p>6. Add a Live Output Block. In the drop-down menu, choose &quot;Grabber.&quot; </p>",
+                        "<p>7. Add logic and number blocks and connect all the blocks (just like you did in lesson 1.5). </p>",
+                        "<p>8. Power up the gripper by connecting a 9V battery to the Muscle SpikerShield (the yellow board). </p>",
+                        "<p>Can you make the gripper open and close by contracting your arm muscles? If not, check your work and make sure you followed all the previous steps correctly.  </p>"
                       ]
                     }
                   },
                   {
-                    "id": "z4xy6dFTjuc-Hjeh",
-                    "title": "Pressure feedback to keep claw from closing too far",
+                    "id": "rlC-zkmUWgRhuT5K",
+                    "title": "Text 6",
                     "content": {
-                      "type": "Dataflow",
-                      "programDataRate": 100,
-                      "programZoom": {
-                        "dx": 0.203125,
-                        "dy": -0.20703125,
-                        "scale": 0.9721118612183195
-                      },
-                      "program": {
-                      "values": {
-                        "3186": {"currentValues": {"nodeValue": 40}},
-                        "3191": {"currentValues": {"nodeValue": 500}},
-                        "3196": {"currentValues": {"nodeValue": 0.08}},
-                        "3212": {"currentValues": {"nodeValue": 0.08}},
-                        "3213": {"currentValues": {"nodeValue": 0.08}},
-                        "3214": {"currentValues": {"nodeValue": 2}},
-                        "3215": {"currentValues": {"nodeValue": 0}},
-                        "3216": {"currentValues": {"nodeValue": 50}},
-                        "3217": {"currentValues": {"nodeValue": 0}},
-                        "3218": {"currentValues": {"nodeValue": 0}},
-                        "3219": {"currentValues": {"nodeValue": 40}}
-                      },
-                      "id": "dataflow@0.1.0",
-                      "nodes": {
-                        "3186": {
-                          "id": 3186,
-                          "name": "Sensor",
-                          "x": -6.208802263617637,
-                          "y": 253.41449541880104,
-                          "inputs": {},
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3196-undefined-num1": {"node": 3196, "input": "num1", "data": {}},
-                                "3218-undefined-num1": {"node": 3218, "input": "num1", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {
-                            "plot": false,
-                            "type": "emg-reading",
-                            "sensor": "00008VIR",
-                            "virtual": true,
-                            "inputKeys": []
-                          }
-                        },
-                        "3191": {
-                          "id": 3191,
-                          "name": "Number",
-                          "x": 1.8108177316116851,
-                          "y": 423.1035687766325,
-                          "inputs": {},
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3196-undefined-num2": {"node": 3196, "input": "num2", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {"plot": false, "nodeValueUnits": "", "inputKeys": []}
-                        },
-                        "3196": {
-                          "id": 3196,
-                          "name": "Math",
-                          "x": 306.4467360408912,
-                          "y": 411.86803599346047,
-                          "inputs": {
-                            "num1": {
-                              "connections": {
-                                "3186-num-undefined": {"node": 3186, "output": "num", "data": {}}
-                              }
-                            },
-                            "num2": {
-                              "connections": {
-                                "3191-num-undefined": {"node": 3191, "output": "num", "data": {}}
-                              }
-                            }
-                          },
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3213-undefined-num2": {"node": 3213, "input": "num2", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {"plot": false, "mathOperator": "Divide", "inputKeys": []}
-                        },
-                        "3212": {
-                          "id": 3212,
-                          "name": "Demo Output",
-                          "x": 985.2457365920405,
-                          "y": 98.45708055402545,
-                          "inputs": {
-                            "nodeValue": {
-                              "connections": {
-                                "3213-num-undefined": {"node": 3213, "output": "num", "data": {}}
-                              }
-                            }
-                          },
-                          "outputs": {},
-                          "data": {"outputType": "Grabber", "demoOutput": 0.08, "inputKeys": []}
-                        },
-                        "3213": {
-                          "id": 3213,
-                          "name": "Control",
-                          "x": 757.6258265614418,
-                          "y": 245.45000240682847,
-                          "inputs": {
-                            "num1": {
-                              "connections": {
-                                "3217-num-undefined": {"node": 3217, "output": "num", "data": {}}
-                              }
-                            },
-                            "num2": {
-                              "connections": {
-                                "3196-num-undefined": {"node": 3196, "output": "num", "data": {}}
-                              }
-                            }
-                          },
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3212-undefined-nodeValue": {
-                                  "node": 3212,
-                                  "input": "nodeValue",
-                                  "data": {}
-                                }
-                              }
-                            }
-                          },
-                          "data": {"plot": false, "controlOperator": "Hold Prior", "inputKeys": []}
-                        },
-                        "3214": {
-                          "id": 3214,
-                          "name": "Sensor",
-                          "x": 48.47769944823017,
-                          "y": 4.948161412369174,
-                          "inputs": {},
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3215-undefined-num1": {"node": 3215, "input": "num1", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {
-                            "plot": false,
-                            "type": "fsr-reading",
-                            "sensor": "00010VIR",
-                            "virtual": true,
-                            "inputKeys": []
-                          }
-                        },
-                        "3215": {
-                          "id": 3215,
-                          "name": "Logic",
-                          "x": 333.37817825105054,
-                          "y": 46.30885293229212,
-                          "inputs": {
-                            "num1": {
-                              "connections": {
-                                "3214-num-undefined": {"node": 3214, "output": "num", "data": {}}
-                              }
-                            },
-                            "num2": {
-                              "connections": {
-                                "3216-num-undefined": {"node": 3216, "output": "num", "data": {}}
-                              }
-                            }
-                          },
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3217-undefined-num1": {"node": 3217, "input": "num1", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {"plot": false, "logicOperator": "Greater Than", "inputKeys": []}
-                        },
-                        "3216": {
-                          "id": 3216,
-                          "name": "Number",
-                          "x": 50.48336640964742,
-                          "y": 161.72504067251808,
-                          "inputs": {},
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3215-undefined-num2": {"node": 3215, "input": "num2", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {"plot": false, "nodeValueUnits": "", "inputKeys": []}
-                        },
-                        "3217": {
-                          "id": 3217,
-                          "name": "Logic",
-                          "x": 579.8953773516724,
-                          "y": 81.98029032729616,
-                          "inputs": {
-                            "num1": {
-                              "connections": {
-                                "3215-num-undefined": {"node": 3215, "output": "num", "data": {}}
-                              }
-                            },
-                            "num2": {
-                              "connections": {
-                                "3218-num-undefined": {"node": 3218, "output": "num", "data": {}}
-                              }
-                            }
-                          },
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3213-undefined-num1": {"node": 3213, "input": "num1", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {"plot": false, "logicOperator": "And", "inputKeys": []}
-                        },
-                        "3218": {
-                          "id": 3218,
-                          "name": "Logic",
-                          "x": 382.5921755501119,
-                          "y": 178.39350048108568,
-                          "inputs": {
-                            "num1": {
-                              "connections": {
-                                "3186-num-undefined": {"node": 3186, "output": "num", "data": {}}
-                              }
-                            },
-                            "num2": {
-                              "connections": {
-                                "3219-num-undefined": {"node": 3219, "output": "num", "data": {}}
-                              }
-                            }
-                          },
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3217-undefined-num2": {"node": 3217, "input": "num2", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {"plot": false, "logicOperator": "Greater Than", "inputKeys": []}
-                        },
-                        "3219": {
-                          "id": 3219,
-                          "name": "Number",
-                          "x": 185.9645386946577,
-                          "y": 276.7786425108403,
-                          "inputs": {},
-                          "outputs": {
-                            "num": {
-                              "connections": {
-                                "3218-undefined-num2": {"node": 3218, "input": "num2", "data": {}}
-                              }
-                            }
-                          },
-                          "data": {"plot": false, "nodeValueUnits": "", "inputKeys": []}
-                        }
-                      }
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Your challenge, should you choose to accept it...</strong></p>",
+                        "<p>Your goal in this final activity is to program the gripper to hold an egg without cracking it. Your DataFlow program should do two main things: (1) when a muscle is contracted, the signal is detected and triggers the gripper to close. (2) When the pressure applied on an object becomes too strong, the pressure sensor tells the gripper to keep its current position. This is meant to prevent the gripper from closing too strongly on the egg and cracking it. </p>",
+                        "<p>Hint: You will need to use a &quot;control&quot; block (see lesson 2.2). </p>",
+                        "<p>Before you test your program with a real egg, try pressing the sensor with your fingers and contracting your muscles at the same time. Does your gripper move? Why or why not?  </p>"
+                      ]
                     }
+                  },
+                  {
+                    "id": "Rqu8k407eNNyE-Co",
+                    "title": "Text 7",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Evaluate the design of the touch-sensitive gripper</strong></p>",
+                        "<p>With your team, discuss the strengths and weaknesses of the touch-sensitive gripper. Drag the following table to your workspace and fill it in:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Kyjs5g52AYRfAHnS",
+                    "title": "Table 1",
+                    "content": {
+                      "type": "Table",
+                      "name": "Gripper evaluation",
+                      "columns": [
+                        {"name":"Strengths","width":200},
+                        {"name":"Weaknesses","width":200}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "OpA7t27RXurcLg-k",
+                    "title": "Text 8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflection</strong></p>",
+                        "<p>At the end of the activity, please record your current thinking and learning in your learning journal (see Reflection tab). </p>"
+                      ]
                     }
                   }
                 ]
@@ -2818,13 +2529,28 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "B1Pt8JLDEVX4tU27",
+                    "id": "MZ4cKTjrMTzZuqX0",
+                    "title": "Text 10",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Evaluate your group&#x27;s design and discuss what can be improved. Think about the young woman who was portrayed in the video at the opening of the unit. How would touch sensors serve her in her day-to-day life? How the device could be further improved or modified? What other kinds of sensors might be employed to mimic human function? </p>",
-                        "<p>Write in your KWL Journal and reflect on this lesson.</p>"
+                        "<p>Add the following entry to your learning journal:</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "DUzt8TK2_FhTUBIJ",
+                    "title": "Text 9",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Lesson 2.3 Journal Entry</strong></p>",
+                        "<p>1. Today&#x27;s date:</p>",
+                        "<p>2. Today&#x27;s topic:</p>",
+                        "<p>3. Based on your analysis of the strengths and weaknesses of the touch-sensitive gripper, what modification would you make to improve the gripper&#x27;s functionality? </p>",
+                        "<p>4. Pressure receptors are just one type of sensor.  What sensors do you think would be most useful for Tilly (the girl with the bionic arms)?</p>"
                       ]
                     }
                   }
@@ -2846,34 +2572,15 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "-qO6jxoPXchdg7Ai",
+                    "id": "5LJacKvSPaRhh7ER",
+                    "title": "Text 1",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Prosthetics can help people live full productive lives. Robotically enhanced prosthetics can mimic organic limbs even more closely and sometimes can make prosthetics functional for people who could not benefit from non-interactive technology.</p>",
-                        "<p>In this lesson you will have the opportunity to design robotic solutions for one of several end users. Each case has different features to it. You should consider the specific issues to solve and brainstorm solutions with your group. </p>",
-                        "<p>Review the engineering design process document linked below. You will embark on the first step – empathize – by researching the experiences and challenges of someone who has a sensory or motor condition in the following lab section. Your group should select from among the case studies in the Lab. </p>",
-                        "<p>Resource:</p>",
-                        "<p>Design Thinking <a href='https://citl.illinois.edu/paradigms/design-thinking'>protocol</a></p>"
-                      ]
-                    }
-                  },
-                  {
-                    "id": "F9VOi053V8cis-la",
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p><strong>Design Journal Template</strong></p>",
-                        "<p>Who is your team helping?</p>",
-                        "<p></p>",
-                        "<p>What are the challenges experienced by this person?</p>",
-                        "<p></p>",
-                        "<p>Why is it important to help reduce these challenges?</p>",
-                        "<p></p>",
-                        "<p>How can we apply what we have learned throughout the unit to help this person?</p>",
-                        "<p></p>"
+                        "<p>In this lesson, you will have the opportunity to use what you have learned throughout the unit to design a technological solution for one of several end users. </p>",
+                        "<p><strong>Do Now</strong></p>",
+                        "<p>Think about a person (other than Tilly) who could benefit from the touch-sensitive gripper that you used in the previous lesson. Describe this person and their needs in your workspace. </p>"
                       ]
                     }
                   }
@@ -2884,6 +2591,18 @@
               "type": "labWork",
               "content": {
                 "tiles": [
+                  {
+                    "id": "grlntM-0y6HgUgUz",
+                    "title": "Text 3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Select a case study</strong></p>",
+                        "<p>The cases below describe people who have sensory or motor conditions that impact their life quality. Review these cases and decide who you would like to help today. </p>"
+                      ]
+                    }
+                  },
                   {
                     "id": "RhyzEuq9rqtjPydo",
                     "content": {
@@ -2947,6 +2666,60 @@
                       "url": "curriculum/neural-engineering/images/mrJohnson.jpg",
                       "filename": "curriculum/neural-engineering/images/mrJohnson.jpg"
                     }
+                  },
+                  {
+                    "id": "fMiM_-XAcQpyltf9",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Define the challenge</strong></p>",
+                        "<p>Please drag the following questions to your workspace and answer them: </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "v_CPokWvxhk24v59",
+                    "title": "Text 6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>What are the challenges experienced by the person that you chose?</p>",
+                        "<p>Why is it important to address these challenges?</p>",
+                        "<p>How can you apply what you have learned throughout the unit to help this individual?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "8-f3M22SSbCnVHb4",
+                    "title": "Text 7",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Idea generation</strong></p>",
+                        "<p>Using your knowledge of body systems and technology, propose a device that can help the person described in the case. Please sketch your proposed device on a whiteboard/chart paper, with annotations.  Take a picture when you&#x27;re done and upload it to your workspace. </p>",
+                        "<p>As you design your device, ask yourself: </p>",
+                        "<p>Will [person’s name] find the device safe?</p>",
+                        "<p>Will [person’s name] find the device easy to use?</p>",
+                        "<p>Will [person’s name] find the device comfortable?</p>",
+                        "<p>Will [person’s name] find the device useful?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "HZI_VSmXi1E9voqy",
+                    "title": "Text 8",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Reflection</strong></p>",
+                        "<p>At the end of the activity, please record your current thinking and learning in your learning journal (see Reflection tab). </p>"
+                      ]
+                    }
                   }
                 ]
               }
@@ -2956,23 +2729,27 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "UbyaMg3Omhhb5kV1",
+                    "id": "MVLY1WYwPf_jYVjt",
+                    "title": "Text 9",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>After you have completed illustrated and annotated models of your proposed products, publish your workspace to the class to share the design, including the design considerations that ensure Mrs.Marcus/Tilly would find the product </p>",
-                        "<ul><li>easy to use, </li><li>safe, </li><li>useful, and </li><li>comfortable. </li></ul>"
+                        "<p>Add the following entry to your learning journal:</p>"
                       ]
                     }
                   },
                   {
-                    "id": "-stXSYhQihn8cigqsaffs",
+                    "id": "TVmMZe8liETyai4R",
+                    "title": "Text 10",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Open your KWL Journal and add a row to the table to document your thoughts.</p>"
+                        "<p><strong>Lesson 2.4 Journal Entry</strong></p>",
+                        "<p>1. Today&#x27;s date:</p>",
+                        "<p>2. Today&#x27;s topic:</p>",
+                        "<p>3. Imagine yourself meeting the person who was described in your case. How do you think the person would react to the device that you designed?</p>"
                       ]
                     }
                   }
