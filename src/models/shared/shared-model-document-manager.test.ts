@@ -6,7 +6,7 @@ import { SharedModelDocumentManager } from "./shared-model-document-manager";
 import { registerSharedModelInfo } from "./shared-model-registry";
 import { registerTileComponentInfo } from "../tiles/tile-component-info";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
-import { ITileEnvironment, TileContentModel } from "../tiles/tile-types";
+import { ITileEnvironment, TileContentModel } from "../tiles/tile-content";
 import { DocumentContentModel } from "../document/document-content";
 import { createDocumentModel, DocumentModelType } from "../document/document";
 import { ProblemDocument } from "../document/document-types";

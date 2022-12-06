@@ -1,5 +1,5 @@
-import { TileMetadataModel } from "./tile-metadata";
-import { TileContentModel, ITileContentModel } from "./tile-types";
+import { ITileMetadataModel, TileMetadataModel } from "./tile-metadata";
+import { TileContentModel, ITileContentModel } from "./tile-content";
 import { AppConfigModelType } from "../stores/app-config-model";
 
 export interface IDefaultContentOptions {
@@ -66,4 +66,28 @@ export interface IDocumentExportOptions extends ITileExportOptions {
   includeTileIds?: boolean;
   appendComma?: boolean;
   transformImageUrl?: (url: string, filename?: string) => string;
+}
+
+export function isRegisteredTileType(type: string) {
+  return !!getTileContentInfo(type);
+}
+
+/*
+ * tile metadata
+ */
+interface IPrivate {
+  metadata: Record<string, ITileMetadataModel>;
+}
+
+export const _private: IPrivate = {
+  metadata: {}
+};
+export function findMetadata(type: string, id: string) {
+  const MetadataType = getTileContentInfo(type)?.metadataClass;
+  if (!MetadataType) return;
+
+  if (!_private.metadata[id]) {
+    _private.metadata[id] = MetadataType.create({ id });
+  }
+  return _private.metadata[id];
 }

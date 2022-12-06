@@ -1,5 +1,5 @@
 // import all tools so they are registered
-import "./models/tiles/unknown-content";
+import "./models/tiles/register-unknown-content";
 import "./models/tiles/placeholder/placeholder-registration";
 
 const gTileRegistration: Record<string, () => void> = {

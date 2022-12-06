@@ -1,8 +1,9 @@
 import { cloneDeep } from "lodash";
 import { getParent, getSnapshot, getType,
   Instance, SnapshotIn, SnapshotOut, types, ISerializedActionCall } from "mobx-state-tree";
-import { getTileContentInfo, ITileExportOptions } from "./tile-content-info";
-import { findMetadata, ITileContentModel, TileContentUnion } from "./tile-types";
+import { findMetadata, getTileContentInfo, ITileExportOptions } from "./tile-content-info";
+import { TileContentUnion } from "./tile-content-union";
+import { ITileContentModel } from "./tile-content";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 import { StringBuilder } from "../../utilities/string-builder";

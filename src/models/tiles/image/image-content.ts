@@ -4,7 +4,7 @@ import { ITileExportOptions, IDefaultContentOptions } from "../tile-content-info
 import { ITileMetadataModel } from "../tile-metadata";
 import { tileModelHooks } from "../tile-model-hooks";
 import { getTileModel, setTileTitleFromContent } from "../tile-model";
-import { TileContentModel } from "../tile-types";
+import { TileContentModel } from "../tile-content";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 

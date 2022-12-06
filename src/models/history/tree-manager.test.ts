@@ -2,7 +2,7 @@ import { getSnapshot, getType, Instance, types } from "mobx-state-tree";
 import { ITileProps } from "src/components/tiles/tile-component";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { registerSharedModelInfo } from "../shared/shared-model-registry";
-import { TileContentModel } from "../tiles/tile-types";
+import { TileContentModel } from "../tiles/tile-content";
 import { registerTileComponentInfo } from "../tiles/tile-component-info";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { DocumentContentModel, DocumentContentSnapshotType } from "../document/document-content";

@@ -5,7 +5,7 @@ import {
 } from "../tiles/placeholder/placeholder-content";
 import { kTextTileType } from "../tiles/text/text-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
-import { ITileContentModel } from "../tiles/tile-types";
+import { ITileContentModel } from "../tiles/tile-content";
 import {
   IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut
 } from "../tiles/tile-model";
