@@ -149,6 +149,7 @@ context('Diagram Tool Tile', function () {
       const newName = "vn2";
       const newValue = "47";
       const newUnit = "util";
+      drawTile.getDrawTile().click();
       drawTile.getVariableChip().click();
       drawTile.getDrawToolEditVariable().should("not.be.disabled").click();
       dialogField("name").clear();
