@@ -184,6 +184,9 @@ describe("DiagramContent", () => {
 
   it("handles off chance that updateAfterSharedModelChanges is called before things are ready", () => {
     const content = createDiagramContent();
-    expect(() => content.updateAfterSharedModelChanges()).not.toThrow();
+    jestSpyConsole("warn", spy => {
+      expect(() => content.updateAfterSharedModelChanges()).not.toThrow();
+      expect(spy).toBeCalledWith("updateAfterSharedModelChanges was called with no shared model present");
+    });
   });
 });
