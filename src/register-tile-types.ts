@@ -1,6 +1,6 @@
 // import all tools so they are registered
-import "./models/tiles/register-unknown-content";
 import "./models/tiles/placeholder/placeholder-registration";
+import "./models/tiles/unknown-content-registration";
 
 const gTileRegistration: Record<string, () => void> = {
   "DataCard": () => import(/* webpackChunkName: "DataCard" */"./plugins/data-card/data-card-registration"),

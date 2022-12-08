@@ -1,15 +1,15 @@
 import { destroy, Instance, types, getEnv, flow, SnapshotIn } from "mobx-state-tree";
 import { when } from "mobx";
 import { ITileProps } from "../../components/tiles/tile-component";
-import { SharedModel, SharedModelType } from "./shared-model";
+import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { SharedModelDocumentManager } from "./shared-model-document-manager";
-import { registerSharedModelInfo } from "./shared-model-registry";
+import { registerSharedModelInfo } from "../shared/shared-model-registry";
 import { registerTileComponentInfo } from "../tiles/tile-component-info";
 import { registerTileContentInfo } from "../tiles/tile-content-info";
 import { ITileEnvironment, TileContentModel } from "../tiles/tile-content";
-import { DocumentContentModel } from "../document/document-content";
-import { createDocumentModel, DocumentModelType } from "../document/document";
-import { ProblemDocument } from "../document/document-types";
+import { DocumentContentModel } from "./document-content";
+import { createDocumentModel, DocumentModelType } from "./document";
+import { ProblemDocument } from "./document-types";
 
 const mockValidateCommentableDocument_v1 = jest.fn();
 const mockPostDocumentComment_v1 = jest.fn();

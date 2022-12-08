@@ -20,7 +20,7 @@ import { getLocalTimeStamp } from "../../utilities/time";
 import { safeJsonParse } from "../../utilities/js-utils";
 import { Tree } from "../history/tree";
 import { TreeMonitor } from "../history/tree-monitor";
-import { ISharedModelDocumentManager, SharedModelDocumentManager } from "../shared/shared-model-document-manager";
+import { ISharedModelDocumentManager, SharedModelDocumentManager } from "./shared-model-document-manager";
 import { ITileEnvironment } from "../tiles/tile-content";
 import { TreeManager } from "../history/tree-manager";
 import { ESupportType } from "../curriculum/support";
