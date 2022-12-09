@@ -6,7 +6,7 @@ import {
   deserializeValueFromLegacy, Editor, htmlToSlate, serializeValueToLegacy, slateToHtml, textToSlate
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tile-content-info";
-import { TileContentModel } from "../tile-types";
+import { TileContentModel } from "../tile-content";
 import { SharedModelType } from "../../shared/shared-model";
 import { getAllTextPluginInfos } from "./text-plugin-info";
 

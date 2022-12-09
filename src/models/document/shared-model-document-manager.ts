@@ -1,8 +1,8 @@
 import { action, computed, makeObservable, observable } from "mobx";
 import { getParentOfType, hasParentOfType, IAnyStateTreeNode } from "mobx-state-tree";
-import { DocumentContentModelType } from "../document/document-content";
-import { SharedModelType } from "./shared-model";
-import { ISharedModelManager, SharedModelUnion } from "./shared-model-manager";
+import { DocumentContentModelType } from "./document-content";
+import { SharedModelType } from "../shared/shared-model";
+import { ISharedModelManager, SharedModelUnion } from "../shared/shared-model-manager";
 import { ITileModel, TileModel } from "../tiles/tile-model";
 
 

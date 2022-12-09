@@ -1,7 +1,8 @@
 import { getSnapshot } from "mobx-state-tree";
 import { kDefaultMinWidth, TileModel } from "./tile-model";
-import { kUnknownTileType, IUnknownContentModel } from "./tile-types";
 import { getTileTypes, getTileContentInfo } from "./tile-content-info";
+import { IUnknownContentModel } from "./unknown-content";
+import { kUnknownTileType } from "./unknown-types";
 
 // Define the built in tool ids explicitly as strings.
 // Strings are used because importing the tool id constant could trigger a

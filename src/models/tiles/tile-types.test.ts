@@ -1,5 +1,5 @@
-import { isRegisteredTileType } from "./tile-types";
 import { kTextTileType } from "./text/text-content";
+import { isRegisteredTileType } from "./tile-content-info";
 
 // This is needed so isRegisteredTileType knows about the text tool
 import { registerTileTypes } from "../../register-tile-types";

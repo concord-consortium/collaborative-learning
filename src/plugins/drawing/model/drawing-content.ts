@@ -5,7 +5,7 @@ import { StampModel, StampModelType } from "./stamp";
 import { ITileExportOptions, IDefaultContentOptions } from "../../../models/tiles/tile-content-info";
 import { TileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
-import { TileContentModel } from "../../../models/tiles/tile-types";
+import { TileContentModel } from "../../../models/tiles/tile-content";
 import { kDrawingStateVersion, kDrawingTileType } from "./drawing-types";
 import { ImageObjectType, isImageObjectSnapshot } from "../objects/image";
 import { DefaultToolbarSettings, ToolbarSettings } from "./drawing-basic-types";

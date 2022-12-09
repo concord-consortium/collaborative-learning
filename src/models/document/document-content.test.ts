@@ -2,8 +2,8 @@ import {
   cloneContentWithUniqueIds, DocumentContentModel, DocumentContentModelType, DocumentContentSnapshotType
 } from "./document-content";
 import { createDefaultSectionedContent } from "./sectioned-content";
+import { IDropRowInfo } from "./tile-row";
 import { SectionModel, SectionModelType } from "../curriculum/section";
-import { IDropRowInfo } from "../../models/document/document-content";
 import { cloneTileSnapshotWithoutId, IDragTileItem } from "../tiles/tile-model";
 import { TextContentModel } from "../tiles/text/text-content";
 import { IDocumentExportOptions } from "../tiles/tile-content-info";

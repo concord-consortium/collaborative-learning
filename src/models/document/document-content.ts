@@ -1,18 +1,19 @@
 import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn, getType, getEnv } from "mobx-state-tree";
-import { PlaceholderContentModel } from "../tiles/placeholder/placeholder-content";
+import {
+  getPlaceholderSectionId, isPlaceholderTile, PlaceholderContentModel
+} from "../tiles/placeholder/placeholder-content";
 import { kTextTileType } from "../tiles/text/text-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
-import { ITileContentModel } from "../tiles/tile-types";
+import { ITileContentModel } from "../tiles/tile-content";
 import {
   IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut
 } from "../tiles/tile-model";
 import {
-  TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
+  IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
 } from "../document/tile-row";
 import { migrateSnapshot } from "./document-content-import";
 import { IDocumentEnvironment } from "./document-environment";
-import { IDocumentAddTileOptions } from "./document-types";
 import { logTileCopyEvent } from "../tiles/log/log-tile-copy-event";
 import { logTileDocumentEvent } from "../tiles/log/log-tile-document-event";
 import { LogEventName } from "../../lib/logger-types";
@@ -20,6 +21,12 @@ import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { SharedModelUnion } from "../shared/shared-model-manager";
+
+export interface IDocumentAddTileOptions {
+  title?: string;
+  addSidecarNotes?: boolean;
+  url?: string;
+}
 
 export interface INewTileOptions {
   locationInRow?: string;
@@ -35,13 +42,6 @@ export interface INewRowTile {
   additionalTileIds?: string[];
 }
 export type NewRowTileArray = Array<INewRowTile | undefined>;
-
-export interface IDropRowInfo {
-  rowInsertIndex: number;
-  rowDropIndex?: number;
-  rowDropLocation?: string;
-  updateTimestamp?: number;
-}
 
 export interface IDocumentContentAddTileOptions extends IDocumentAddTileOptions {
   insertRowInfo?: IDropRowInfo;
@@ -158,8 +158,8 @@ export const DocumentContentModel = types
         return (row.tileCount > 0) &&
                 row.tiles.every((entry, index) => {
                   const tileId = row.getTileIdAtIndex(index);
-                  const tile = tileId && self.tileMap.get(tileId);
-                  return tile ? tile.isPlaceholder : false;
+                  const tile = tileId ? self.tileMap.get(tileId) : undefined;
+                  return isPlaceholderTile(tile);
                 });
       },
       getSectionIdForTile(tileId: string) {
@@ -262,7 +262,7 @@ export const DocumentContentModel = types
     getSectionTypeForPlaceholderRow(row: TileRowModelType) {
       if (!self.isPlaceholderRow(row)) return;
       const tile = self.getTile(row.tiles[0].tileId);
-      return tile && tile.placeholderSectionId;
+      return getPlaceholderSectionId(tile);
     },
     get defaultInsertRow() {
       // next tile comes after the last visible row with content
@@ -299,7 +299,7 @@ export const DocumentContentModel = types
       rows.forEach(row => {
         row.tiles
           .map(tileLayout => self.tileMap.get(tileLayout.tileId))
-          .forEach(tile => tile && !tile.isPlaceholder && tiles.push(tile));
+          .forEach(tile => tile && !isPlaceholderTile(tile) && tiles.push(tile));
       });
       return tiles;
     },
@@ -490,11 +490,11 @@ export const DocumentContentModel = types
       }
     },
     removePlaceholderTilesFromRow(rowIndex: number) {
-      const isPlaceholderTile = (tileId: string) => {
+      const isPlaceholderTileId = (tileId: string) => {
         return self.getTileType(tileId) === "Placeholder";
       };
       const row = self.getRowByIndex(rowIndex);
-      row?.removeTilesFromRow(isPlaceholderTile);
+      row?.removeTilesFromRow(isPlaceholderTileId);
     }
   }))
   .actions(self => ({

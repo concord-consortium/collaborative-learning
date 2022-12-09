@@ -7,7 +7,7 @@ import { kDiagramTileType } from "../diagram-viewer/diagram-types";
 import { DrawingContentModelType } from "../drawing/model/drawing-content";
 import { kDrawingTileType } from "../drawing/model/drawing-types";
 import { kTextTileType } from "../../models/tiles/text/text-content";
-import { ITileContentModel } from "../../models/tiles/tile-types";
+import { ITileContentModel } from "../../models/tiles/tile-content";
 
 const getTileVariables = (content: ITileContentModel) => {
   if (content.type === kDiagramTileType) {

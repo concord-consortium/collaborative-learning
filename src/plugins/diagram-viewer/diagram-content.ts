@@ -3,7 +3,7 @@ import { getSnapshot, types, Instance, destroy, SnapshotIn,
 import { reaction } from "mobx";
 import { DQRoot } from "@concord-consortium/diagram-view";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tiles/tile-content-info";
-import { TileContentModel } from "../../models/tiles/tile-types";
+import { TileContentModel } from "../../models/tiles/tile-content";
 import { kDiagramTileType, kDiagramToolStateVersion } from "./diagram-types";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 

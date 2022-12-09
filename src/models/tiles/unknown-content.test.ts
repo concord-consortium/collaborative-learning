@@ -1,5 +1,6 @@
 import { getSnapshot } from "mobx-state-tree";
-import { kUnknownTileType, UnknownContentModel } from "./tile-types";
+import { UnknownContentModel } from "./unknown-content";
+import { kUnknownTileType } from "./unknown-types";
 
 describe("UnknownContentModel", () => {
 

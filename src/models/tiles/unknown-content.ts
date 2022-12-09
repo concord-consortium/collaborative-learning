@@ -1,21 +1,20 @@
-import { registerTileComponentInfo } from "./tile-component-info";
-import { registerTileContentInfo } from "./tile-content-info";
-import { kUnknownTileType, UnknownContentModel, IUnknownContentModel } from "./tile-types";
-import PlaceholderTileComponent from "../../components/tiles/placeholder/placeholder-tile";
+import { Instance, types } from "mobx-state-tree";
+import { TileContentModel } from "./tile-content";
+import { kUnknownTileType } from "./unknown-types";
 
-export function defaultContent(): IUnknownContentModel {
-  return UnknownContentModel.create();
-}
-
-registerTileContentInfo({
-  type: kUnknownTileType,
-  modelClass: UnknownContentModel,
-  defaultContent
-});
-
-registerTileComponentInfo({
-  type: kUnknownTileType,
-  Component: PlaceholderTileComponent,
-  tileEltClass: "placeholder-tile",
-  tileHandlesOwnSelection: true
-});
+export const UnknownContentModel = TileContentModel
+  .named("UnknownContentModel")
+  .props({
+    type: types.optional(types.literal(kUnknownTileType), kUnknownTileType),
+    original: types.maybe(types.string)
+  })
+  .preProcessSnapshot(snapshot => {
+    const type = snapshot?.type;
+    return type && (type !== kUnknownTileType)
+            ? {
+              type: kUnknownTileType,
+              original: JSON.stringify(snapshot)
+            }
+            : snapshot;
+  });
+export interface IUnknownContentModel extends Instance<typeof UnknownContentModel> {}

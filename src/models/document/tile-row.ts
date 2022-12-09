@@ -1,8 +1,14 @@
 import { types, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { ITileModel } from "../tiles/tile-model";
-import { IDropRowInfo } from "../document/document-content";
 import { uniqueId } from "../../utilities/js-utils";
 import { withoutUndo } from "../history/tree-monitor";
+
+export interface IDropRowInfo {
+  rowInsertIndex: number;
+  rowDropIndex?: number;
+  rowDropLocation?: string;
+  updateTimestamp?: number;
+}
 
 export const TileLayoutModel = types
   .model("TileLayout", {
