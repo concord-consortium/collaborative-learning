@@ -7,7 +7,7 @@ export interface ITextPluginInfo {
   Icon: FunctionComponent<SVGProps<SVGSVGElement>>;
   toolTip: string;
   createSlatePlugin:
-    (textContent: TextContentModelType) => string; //FIXME: this is not the write type 
+    (textContent: TextContentModelType) => any; //FIXME: this is not the right type 
   command: string;
   updateTextContentAfterSharedModelChanges?:
     (textContent: TextContentModelType, sharedModel?: SharedModelType) => void;
@@ -26,13 +26,14 @@ export function getTextPluginInfo(id: string) {
 // TODO: perhaps this should only add the plugins that have been configured
 // as tools by the app-config.
 export function getTextPluginInstances(textContent: TextContentModelType) {
-  // const pluginInstances:  HtmlSerializablePlugin[] = [];
-  // Object.values(gTextPluginInfoMap).forEach(pluginInfo => {
-  //   if (pluginInfo?.createSlatePlugin) {
-  //     pluginInstances.push(pluginInfo.createSlatePlugin(textContent));
-  //   }
-  // });
-  // return pluginInstances;
+  //FIXME: need to figure out what this should be
+  const pluginInstances:  any[] = []; // FIXME type
+  Object.values(gTextPluginInfoMap).forEach(pluginInfo => {
+    if (pluginInfo?.createSlatePlugin) {
+      pluginInstances.push(pluginInfo.createSlatePlugin(textContent));
+    }
+  });
+  return pluginInstances;
  return [];  // FIXME replace the guts here
 }
 

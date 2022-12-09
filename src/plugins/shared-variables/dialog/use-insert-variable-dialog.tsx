@@ -2,7 +2,7 @@ import React from "react";
 import classNames from "classnames";
 import { useSelectMultipleVariables, VariableChipList, VariableType } from "@concord-consortium/diagram-view";
 
-//import { useCustomModal } from "../../../hooks/use-custom-modal";
+import { useCustomModal } from "../../../hooks/use-custom-modal";
 
 import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
 import "./variable-dialog.scss";
@@ -87,31 +87,28 @@ export const useInsertVariableDialog =
   const handleOk = () => insertVariables(selectedVariables);
 
   const onClose = clearSelectedVariables;
-  const showModal = () => {console.log('showModal')};
-  const hideModal = () => {console.log('hideModal')};
-  // FIXME: useCustomModal was getting the wrong type
-  // const [showModal, hideModal] = useCustomModal({
-  //   Icon: Icon || InsertVariableChipIcon,
-  //   title: "Insert Variables",
-  //   Content: InsertVariableContent,
-  //   contentProps: {
-  //     disallowSelf,
-  //     onClick: toggleVariable,
-  //     selectedVariables,
-  //     otherVariables,
-  //     selfVariables,
-  //     unusedVariables
-  //   },
-  //   buttons: [
-  //     { label: "Cancel" },
-  //     { label: "Insert Variables",
-  //       isDefault: true,
-  //       isDisabled: false,
-  //       onClick: handleOk
-  //     }
-  //   ],
-  //   onClose
-  // }, [selectedVariables, otherVariables, selfVariables, unusedVariables ]);
+  const [showModal, hideModal] = useCustomModal({
+    Icon: Icon || InsertVariableChipIcon,
+    title: "Insert Variables",
+    Content: InsertVariableContent,
+    contentProps: {
+      disallowSelf,
+      onClick: toggleVariable,
+      selectedVariables,
+      otherVariables,
+      selfVariables,
+      unusedVariables
+    },
+    buttons: [
+      { label: "Cancel" },
+      { label: "Insert Variables",
+        isDefault: true,
+        isDisabled: false,
+        onClick: handleOk
+      }
+    ],
+    onClose
+  }, [selectedVariables, otherVariables, selfVariables, unusedVariables ]);
 
   return [showModal, hideModal];
 };

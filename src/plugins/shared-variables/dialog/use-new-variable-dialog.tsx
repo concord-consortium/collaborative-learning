@@ -22,23 +22,20 @@ export const useNewVariableDialog = () => {
     setNewVariable(Variable.create({}));
   };
 
-  const showModal = () => {console.log('show')};
-  const hideModal = () => {console.log('hide')};
-  // FIXME: we're sending the wrong type in the modal, this was an attempt to bypass that.
-  // const [showModal, hideModal] = useCustomModal({
-  //   Icon: AddVariableChipIcon,
-  //   title: "New Variable",
-  //   Content: EditVariableDialogContent,
-  //   contentProps: { variable: newVariable },
-  //   buttons: [
-  //     { label: "Cancel" },
-  //     { label: "OK",
-  //       isDefault: true,
-  //       isDisabled: false,
-  //       onClick: handleClick
-  //     }
-  //   ]
-  // }, [newVariable]);
+  const [showModal, hideModal] = useCustomModal({
+    Icon: AddVariableChipIcon,
+    title: "New Variable",
+    Content: EditVariableDialogContent,
+    contentProps: { variable: newVariable },
+    buttons: [
+      { label: "Cancel" },
+      { label: "OK",
+        isDefault: true,
+        isDisabled: false,
+        onClick: handleClick
+      }
+    ]
+  }, [newVariable]);
 
   return [showModal, hideModal];
 };

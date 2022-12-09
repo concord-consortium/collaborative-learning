@@ -134,7 +134,6 @@
     "@types/react-dom": "^17.0.17",
     "@types/react-modal": "^3.13.1",
     "@types/react-tabs": "^2.3.4",
-    "slate-react": "^0.83.2",
     "@types/superagent": "^4.1.15",
     "@types/uuid": "^8.3.4",
     "@types/w3c-web-serial": "^1.0.2",

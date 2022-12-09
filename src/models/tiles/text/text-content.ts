@@ -1,6 +1,6 @@
-import { types, Instance } from "mobx-state-tree";
+import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import {
-  htmlToSlate, slateToHtml, textToSlate, EditorValue, slateToText
+  htmlToSlate, slateToHtml, textToSlate, EditorValue, slateToText, serializeValue, convertDocument, slate47to50, serializeDocument, CustomEditor
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tile-content-info";
 import { TileContentModel } from "../tile-types";
@@ -22,7 +22,7 @@ export const TextContentModel = TileContentModel
     format: types.maybe(types.string)
   })
   .volatile(self => ({
-    editor: undefined
+    editor:  undefined as CustomEditor | undefined,
   }))
   .views(self => ({
     get joinText() {
@@ -32,20 +32,37 @@ export const TextContentModel = TileContentModel
 
     },
     getSlate() {
-      return !self.text || Array.isArray(self.text)
-              ? textToSlate("")
-              : self.text; // THIS IS WRONG
+      if (!self.text || Array.isArray(self.text)) {
+        return textToSlate("");
+      }
+
+      let parsed = null;
+      try {
+        parsed = JSON.parse(self.text);
+        // If this is old style json
+        if (parsed.document?.nodes) {
+          const convertedDoc = convertDocument(parsed.document);
+          return convertedDoc.children;
+        }
+        // If this is new style
+
+        return parsed.document.children;
+      } catch (e) {
+        console.log('json did not parse');
+      }
+      return textToSlate(self.text);
     }
   }))
   .views(self => ({
-    asSlate(): any {
+    asSlate(): EditorValue {
       switch (self.format) {
         case "slate":
           return self.getSlate();
         case "html":
           return htmlToSlate(self.joinText);
         case "markdown":
-          return self.joinText;
+          // TODO: figure out what to do about markdown
+          return []; // return self.joinText;
           //return MarkdownSerializer.deserialize(self.joinText);
         default:
           return textToSlate(self.joinText);
@@ -83,11 +100,11 @@ export const TextContentModel = TileContentModel
     },
     setSlate(value: EditorValue) {
       self.format = "slate";
-      self.text = slateToText(value);  // FIXME: This is probably wrong
+      const serialized = serializeValue(value);
+      self.text = JSON.stringify(serialized);
     },
     setEditor(editor?: any) { // FIXME: type here is wrong
-      console.log('calling set editor....');
-;      self.editor = editor;
+;     self.editor = editor;
     }
   }))
   .actions(self => ({
@@ -99,3 +116,10 @@ export const TextContentModel = TileContentModel
   }));
 
 export type TextContentModelType = Instance<typeof TextContentModel>;
+
+// FIXME: Replace the textContent provider with a tile level one.
+export function createTextContent(snapshot?: SnapshotIn<typeof TextContentModel>) {
+  return TextContentModel.create({
+    ...snapshot
+  });
+}

@@ -1,4 +1,5 @@
 import { VariableType } from "@concord-consortium/diagram-view";
+import { ClueVariableElement, CustomElement, EFormat, isInlineOfType, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
 import { getType } from "mobx-state-tree";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
@@ -71,7 +72,6 @@ export function getOrFindSharedModel(textContent: TextContentModelType) {
 
 export function updateAfterSharedModelChanges(
     textContent: TextContentModelType, sharedModel?: SharedModelType) {
-  console.log('variables text content needs fixing');
   const {editor} = textContent;
 
   // Look for chips in the document (editor.value)
@@ -80,23 +80,24 @@ export function updateAfterSharedModelChanges(
   if (!editor) {
     return;
   }
- // FIXME: This needs updating to the new slate constructs
-  // const variables = getVariables(textContent);
+  const variables = getVariables(textContent);
 
-  // const document = editor.value.document;
-  // const variableNodes = document.filterDescendants((node) => {
-  //   return Inline.isInline(node) && node.type === kVariableSlateType;
-  // });
-  // variableNodes.forEach((node) => {
-  //   if (!node) {
-  //     // For some reason Immutable iterable.forEach can return undefined values
-  //     return;
-  //   }
-  //   const inlineNode = node as Inline;
+  const document = editor.value.document;
+  const variableNodes = document.filterDescendants((node: Element) => {
+    return isInlineOfType(node, EFormat.clueVariable);
+  });
+  variableNodes.forEach((node: ClueVariableElement) => {
+    if (!node) {
+      // For some reason Immutable iterable.forEach can return undefined values
+      return;
+    }
+    const inlineNode = node as ClueVariableElement;
 
-  //   // Does this variable exist in our list?
-  //   if(!variables.find(v => v.id === inlineNode.data.get("reference"))){
-  //     editor.removeNodeByKey(inlineNode.key);
-  //   }
-  // });
+    // Does this variable exist in our list?
+    const {reference} = inlineNode;
+    if(!variables.find(v => v.id === reference)){
+      const nodePath = node && ReactEditor.findPath(editor, node);
+      Transforms.removeNodes(editor, { at: nodePath });
+    }
+  });
 }

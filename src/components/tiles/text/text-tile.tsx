@@ -1,12 +1,11 @@
-import React from "react";
-import {ReactEditor} from "slate-react";
+import React, { useMemo } from "react";
 import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
-  CustomEditor, Editable, EditorValue, SlateEditor
+ isMarkActive, Editor, CustomEditor, Editable, EditorValue, SlateEditor, ReactEditor, withReact, withHistory, createEditor, Slate, EFormat, isBlockActive
 } from "@concord-consortium/slate-editor";
 import "@concord-consortium/slate-editor/dist/index.css";
-
+import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
 import { BaseComponent } from "../../base";
 import { debouncedSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
@@ -17,6 +16,7 @@ import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
 import { getTextPluginInstances, getTextPluginIds } from "../../../models/tiles/text/text-plugin-info";
 import { LogEventName } from "../../../lib/logger-types";
+import { withClueVariables } from "../../../plugins/shared-variables/slate/variables-plugin";
 
 import "./text-tile.sass";
 
@@ -95,23 +95,21 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private editor: CustomEditor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarTileApi: ITileApi | undefined;
+  private plugins: any[] | undefined; // FIXME
   private textOnFocus: string | string [] | undefined;
 
   // map from slate type string to button icon name
-  private slateMap: Record<string, string> = {
-    // This table is needed to translate between Slate's block and mark types
-    // and the parameters required for event handling. (Sometimes the name
-    // differences are a little subtle.)
-    "bold": "bold",
-    "italic": "italic",
-    "underlined": "underline",
-    "superscript": "superscript",
-    "subscript": "subscript",
-    "bulleted-list": "list-ul",
-    "ordered-list": "list-ol",
-    // include the plugin ids here
+  private slateToButtonType: Partial<Record<EFormat, string>> =  {
+    [EFormat.bold]: "bold",
+    [EFormat.italic]: "italic",
+    [EFormat.underlined]: "underline",
+    [EFormat.superscript]: "superscript",
+    [EFormat.subscript]: "subscript",
+    [EFormat.bulletedList]: "list-ul",
+    [EFormat.numberedList]: "list-ol",
+    //include the plugin ids here
     ...getTextPluginIds().reduce((idMap, id) => ({...idMap, [id]: id}), {})
-  };
+  }
 
   public componentDidMount() {
     const initialTextContent = this.getContent();
@@ -120,6 +118,11 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.setState({
       value: initialValue
     });
+    this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
+    // FIXME: Loop over all the plugins instead of just the one
+    const options: any = {};
+    options["onInitEditor"] = this.plugins[0]?.onInitEditor;
+    this.editor = withHistory(withReact(createEditor(options)));
 
     this.disposers = [];
     this.disposers.push(reaction(
@@ -170,8 +173,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       }
     });
 
-
-    //this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
   }
 
   public componentWillUnmount() {
@@ -187,29 +188,34 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     // used here for a while now and cypress tests depend on it. Should transition
     // to using 'text-tool-editor' for these purposes moving forward.
     const classes = `text-tool text-tool-editor ${editableClass}`;
-
     if (!editorValue) return null;
 
     return (
       // Ideally, this would just be 'text-tool' for consistency with other tools,
       // but 'text-tool` is used for the internal editor (cf. 'classes' above),
       // which is used for cypress tests and other purposes.
+      // FIXME: replace this provider with one at the tile level so we get it for free.
+      // and then replace the drawing one with that as well
+      <TextContentModelContext.Provider value={this.getContent()} >
       <div className={`text-tool-wrapper ${readOnly ? "" : "editable"}`}
         data-testid="text-tool-wrapper"
         ref={elt => this.textTileDiv = elt}
         onMouseDown={this.handleMouseDownInWrapper}>
-        
+         <Slate
+            editor={this.editor as ReactEditor}
+            value={editorValue}
+            onChange={this.handleChange}>
         <SlateEditor
-          className={classes}
-          //onEditorRef={this.handleEditorRef}
           value={editorValue}
-          //placeholder={placeholderText}
-          //readOnly={readOnly}
-          //plugins={this.plugins}
+          placeholder={placeholderText}
+          readOnly={readOnly}
           onChange={this.handleChange}
-          //onFocus={this.handleFocus}
-          //onBlur={this.handleBlur}
+          onFocus={this.handleFocus}
+          onBlur={this.handleBlur}
+          className={`ccrte-editor slate-editor ${classes || ""}`}
         >
+       
+        </SlateEditor>
         <TextToolbarComponent
           documentContent={documentContent}
           tileElt={tileElt}
@@ -220,8 +226,10 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
           onRegisterTileApi={this.handleRegisterToolApi}
           onUnregisterTileApi={this.handleUnregisterToolApi}
         />
-        </SlateEditor>
+        </Slate>
       </div>
+      </TextContentModelContext.Provider>
+
     );
   }
 
@@ -240,8 +248,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   private handleIsEnabled = () => {
     // text toolbar is based on editor focus rather than tile selection
-    return !!(this.editor && ReactEditor.isFocused(this.editor));
-    //return !!this.state.value?.selection.isFocused;
+    return ReactEditor.isFocused(this.editor as ReactEditor);
   };
 
   private handleChange = (value: EditorValue) => {
@@ -263,31 +270,16 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   };
 
   private getSelectedIcons(value: EditorValue): string[] {
-    const listOfMarks = this.editor?.marks;
-
     const buttonList: string[] = ["undo"];  // Always show "undo" as selected.
-
-    // listOfMarks?.forEach((mark:any) => {
-    //   if (mark?.type) {
-    //     const buttonIconName = this.slateMap[mark.type];
-    //     buttonIconName && buttonList.push(buttonIconName);
-    //   }
-    // });
-
-    // const { children, selection } = this.editor;
-    // const currentRange = this.editor.create(
-    //   {
-    //     anchor: selection.anchor,
-    //     focus: selection.focus
-    //   }
-    // );
-    // const nodes = children.getDescendantsAtRange(currentRange);
-    // ["ordered-list", "bulleted-list"].forEach((slateType) => {
-    //   if (nodes.some((node: any) => node.type === slateType)) {
-    //     const buttonIconName = this.slateMap[slateType];
-    //     buttonIconName && buttonList.push(buttonIconName);
-    //   }
-    // });
+    for (const key in this.slateToButtonType) {
+      if (isMarkActive(this.editor as CustomEditor, key as EFormat) ||
+        isBlockActive(this.editor as CustomEditor, key as EFormat)) {
+        const buttonType = this.slateToButtonType[key as EFormat];
+        if (buttonType) {
+          buttonList.push(buttonType);
+        }
+      }
+    }
     return buttonList;
   }
 
@@ -320,8 +312,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.textOnFocus = this.getContent().text;
     this.setState({ editing: true });
   };
-  private handleEditorRef = (editor?: CustomEditor) => {
-    this.editor = editor;
-    editor && this.getContent()?.setEditor(editor);
-  };
 }
+
+

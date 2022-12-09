@@ -12,7 +12,7 @@ import {
 } from "../../models/tiles/tile-model";
 import { BaseComponent } from "../base";
 import PlaceholderTileComponent from "./placeholder/placeholder-tile";
-import { ITileApi, TileResizeEntry, TileApiInterfaceContext } from "./tile-api";
+import { ITileApi, TileResizeEntry, TileApiInterfaceContext} from "./tile-api";
 import { HotKeys } from "../../utilities/hot-keys";
 import { TileCommentsComponent } from "./tile-comments";
 import { LinkIndicatorComponent } from "./link-indicator";
@@ -133,7 +133,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
   static contextType = TileApiInterfaceContext;
   declare context: React.ContextType<typeof TileApiInterfaceContext>;
-
   private modelId: string;
   private domElement: HTMLDivElement | null;
   private resizeObserver: ResizeObserver;

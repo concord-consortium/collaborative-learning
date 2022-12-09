@@ -1,9 +1,8 @@
 import { CustomEditor, DisplayDialogSettings, FieldType, IDialogController,
-  IFieldValues, IModalDialogProps, ModalDialog } from "@concord-consortium/slate-editor";
+  IFieldValues, IModalDialogProps, ModalDialog, ReactEditor } from "@concord-consortium/slate-editor";
 import { clone } from "lodash";
 import { useCallback, useMemo, useRef } from "react";
-import { ReactEditor } from "slate-react";
-//import { useCustomModal } from "../../../hooks/use-custom-modal";
+import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { useForceUpdate } from "../hooks/use-force-update";
 
 interface IProps {
@@ -68,15 +67,12 @@ export const useTextToolDialog = ({editor}: IProps) => {
     onClose: handleClose,
   };
 
-  // const [showDialog, hideDialog] = useCustomModal({
-  //   title: settingsRef.current?.title || "",
-  //   Content: ModalDialog,
-  //   contentProps: dialogProps,
-  //   buttons: []
-  // }, [dialogProps]);
- // FIXME: A type in customModal is broken
-  const showDialog = ()=> console.log('show dialog');
-  const hideDialog = ()=> console.log('hide dialog');
+  const [showDialog, hideDialog] = useCustomModal({
+    title: settingsRef.current?.title || "",
+    Content: ModalDialog,
+    contentProps: dialogProps,
+    buttons: []
+  }, [dialogProps]);
   
   const dialogController: IDialogController = useMemo(() => ({
     display: (settings: DisplayDialogSettings) => {
