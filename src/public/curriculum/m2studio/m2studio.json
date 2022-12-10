@@ -4,6 +4,7 @@
   "title": "M2Studio",
   "subtitle": "Multiple Representations",
   "config": {
+    "enableHistoryRoles": ["teacher"],
     "autoAssignStudentsToIndividualGroups": false,
     "autoSectionProblemDocuments": false,
     "disablePublish": [

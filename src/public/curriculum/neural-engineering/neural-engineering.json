@@ -5,6 +5,7 @@
   "subtitle": "",
   "placeholderText": "Add your thoughts here.",
   "config": {
+    "enableHistoryRoles": ["teacher"],
     "placeholderText": "Document your thoughts",
     "autoSectionProblemDocuments": true,
     "defaultDocumentTemplate": {
