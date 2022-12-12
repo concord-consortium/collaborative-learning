@@ -2356,24 +2356,104 @@
               "content": {
                 "tiles": [
                   {
-                    "id": "nPZ2t8qjTw72Qzmf",
+                    "id": "rJt5kDc73bJomWKx",
                     "title": "Text 2",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Working with pressure sensors</strong></p>",
-                        "<p>Today we will work with pressure sensors to make the gripper &quot;feel&quot; objects. To do so, you will need a gripper kit with two &quot;mittens.&quot; If you look closely, you will notice that there is a sensor attached to one of the &quot;mittens.&quot; This sensor can measure the level of pressure applied by the gripper on objects.</p>"
+                        "<p>Today we will work with pressure sensors to make the gripper &quot;feel&quot; objects. To do so, you will need to attach sensing &quot;mittens&quot; to your gripper:</p>",
+                        "<p>Step 1: Flip the gripper over so the black battery is facing up and lay the mittens in front of the gripper so the arcs of the mittens are facing each other:</p>"
                       ]
                     }
                   },
                   {
-                    "id": "5GoFVnia1ZflBMk6",
-                    "title": "Pressure sensor mounted on the gripper",
+                    "id": "tXdlGWYpv6_5OdO-",
+                    "title": "Step 1",
                     "content": {
                       "type": "Image",
-                      "url": "curriculum/neural-engineering/images/mittens.jpg",
-                      "filename": "curriculum/neural-engineering/images/mittens.jpg"
+                      "url": "curriculum/neural-engineering/images/mittensStep1.png"
+                    }
+                  },
+                  {
+                    "id": "UOXrVRlQ4v_mvtFT",
+                    "title": "Text 12",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Step 2: Slide the mitten under the gripper like so, and gently push on the orange arm into the mitten. It should be a snug fit. Repeat with the other mitten. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "isT7GydSe_TamHum",
+                    "title": "Step 2",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/mittensStep2.png",
+                      "filename": "curriculum/neural-engineering/images/mittensStep2.png"
+                    }
+                  },
+                  {
+                    "id": "xtGortNUEVAPNJi2",
+                    "title": "Text 13",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Step 3: If the mittens do not fit the arm of the gripper snug, then repeat step two,  but pull the mitten up while holding the gripper arm steady. The mitten should tighten around the arm of the gripper.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "v1xEmofre1JL7gtz",
+                    "title": "Step 3",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/mittensStep3.png",
+                      "filename": "curriculum/neural-engineering/images/mittensStep3.png"
+                    }
+                  },
+                  {
+                    "id": "10p-RetC503aMsaJ",
+                    "title": "Text 14",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Step 4: After the mittens are securely attached to the gripper arm, you will need to attach the touch sensor (if the sensor is already attached to one of the mittens, skip steps #4-5). Guide the pressure sensor through the small slit of one of the mittens (doesn&#x27;t matter which one):</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "LB59H45EIKOgrqFs",
+                    "title": "Step 4",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/mittensStep4.png",
+                      "filename": "curriculum/neural-engineering/images/mittensStep4.png"
+                    }
+                  },
+                  {
+                    "id": "3Q71M0ZjYeGFj4el",
+                    "title": "Text 15",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Step 5: Take a small piece of double sided tape and attach the sensor to the arc of the mitten.Push the back of the pressure sensor into the double-sided tape. Make sure that the striped side of the sensor is facing OUT (note: The pressure sensor will not work if the wrong side is taped):</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "zCgYPSTozc_REVqg",
+                    "title": "Step 5",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/neural-engineering/images/mittensStep5.png",
+                      "filename": "curriculum/neural-engineering/images/mittensStep5.png"
                     }
                   },
                   {
@@ -2383,7 +2463,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>The first step is to connect the pressure sensor to the Muscle Spiker Shield (orange board).  You will notice that there are three wires coming out of the sensor: red, black, and blue. Plug these wires to the following sockets:</p>"
+                        "<p>The next step is to connect the pressure sensor to the Muscle Spiker Shield (orange board).  You will notice that there are three wires coming out of the sensor: red, black, and blue. Plug these wires to the following sockets:</p>"
                       ]
                     }
                   },
