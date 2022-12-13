@@ -694,45 +694,48 @@
                   "content": {
                     "tiles": [
                       {
-                        "id": "aJWvt4HE4URJ3xVH",
+                        "id": "2iOE6nuoDzd9RKTm",
+                        "title": "Text 1",
                         "content": {
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<h3>Introduction</h3>",
-                            "<p>Students will apply knowledge and skills developed in prior activities to design an EMG-controlled device that can grab an egg without cracking it. Students will then consider the experiences and perspectives of the device users.</p>",
-                            "<p>Materials for each group:</p>",
-                            "<ul><li>The Claw Kit</li><li>Two Claw “Mittens” (with a pressure sensor on one of them)</li><li>10 kΩ ohm resistor</li><li>1 breadboard</li><li>2 segments of wire</li><li>A plastic egg or a hollow egg </li></ul>"
+                            "<h3>Lesson 2.3 TEACHER GUIDE</h3>",
+                            "<h3>Overview</h3>",
+                            "<p>In this lesson, students are challenged to assemble and program an EMG-controlled gripper that can grab an egg without cracking it. In this process, students will explore how tactile feedback affects how we manipulate objects. </p>",
+                            "<p>Materials for each group of students:</p>",
+                            "<ul><li>The gripper kit</li><li>Two gripper “mittens” (with a pressure sensor attached to one of them with double-sided tape)</li><li>A plastic egg or a hollow (drained) egg </li></ul>"
                           ]
                         }
                       }
                     ]
-                  },
-                  "supports": [ ]
+                  }
                 },
                 {
                   "type": "teach",
                   "content": {
                     "tiles": [
                       {
-                        "id": "tDSrW0ugqjgdt3pO",
+                        "id": "-bQohjopzRSMHLYu",
+                        "title": "Text 3",
                         "content": {
                           "type": "Text",
                           "format": "html",
                           "text": [
+                            "<h3>Instructional Sequence</h3>",
                             "<p><em>10 min</em></p>",
-                            "<p>In small groups, ask students to discuss how what they learned in lesson 2.1  (the impact of sensory information on movement) and lesson 2.2 (how the nervous system processes sensory information) can be incorporated in the design of the claw. Inform students that the goal of the next few lessons is to design and test a device that can replicate these natural processes.</p>",
+                            "<p>In small groups, ask students to discuss how what they learned in lesson 2.1  (the impact of sensory information on movement) and lesson 2.2 (how the nervous system processes sensory information) can be incorporated into the design of the gripper. Inform students that the goal of this lesson is to assemble and program a gripper that can sense objects and adapt its movement accordingly. </p>",
                             "<p><em>40 min</em></p>",
-                            "<p>Design challenge: Can you grab an egg (with the claw) without cracking it?</p>",
-                            "<p>Students will work in groups to incorporate touch sensors in the design of the claw (see student handout). </p>",
+                            "<p>Design Challenge: Can you grab an egg (with the gripper) without cracking it?</p>",
+                            "<p>Students will work in groups to incorporate touch sensors in the design of the gripper (see student-facing lesson). </p>",
                             "<p><em>10 min</em></p>",
-                            "<p>Ask each group of students to showcase their design by crossing the room while holding a plastic egg or a drained egg with their claw.</p>",
+                            "<p>Ask each group of students to showcase their design by crossing the room while holding a plastic egg or a drained egg with their gripper.</p>",
                             "<p><em>15 min</em></p>",
-                            "<p>In their team, ask students to evaluate the design and discuss what can be improved. Remind students of the young woman who was portrayed in the video at the opening of the unit and think about how the touch sensors can serve her in her day-to-day life (for example, when putting on makeup).</p>",
+                            "<p>In their team, ask students to evaluate the design of the gripper and discuss what can be improved. Remind students of the young woman who was portrayed at the opening of the unit (Tilly) and think about how the touch sensors can serve her in her day-to-day life (for example, when putting on makeup).</p>",
                             "<p><em>10 min</em></p>",
-                            "<p>Facilitate a class discussion as to how the device could be further improved or modified (e.g., using a stronger servomotor, reshaping the tips of the claw, making the touch sensors more reliable/sensitive). </p>",
+                            "<p>Facilitate a class discussion as to how the gripper could be further improved or modified (e.g., using a stronger servomotor, reshaping the tips of the claw, making the touch sensors more reliable/sensitive). </p>",
                             "<p><em>5 min</em></p>",
-                            "<p>Using their Learning Journals, ask each student to revise what they know, wonder, and learned about the design of bionic arms. Introduce students to temperature sensors and ask them to start thinking about how these sensors may help people with impaired senses (e.g. due to nerve damage). Students will develop these ideas in the next lesson (2.4). </p>"
+                            "<p>Using their Learning Journals, ask each student to think about other types of sensors that could improve the operation of the gripper (e.g., temperature sensors) and help people with sensory or motor conditions.  Students will further develop these ideas in the closing lesson (2.4). </p>"
                           ]
                         }
                       }
@@ -759,13 +762,25 @@
                           "type": "Text",
                           "format": "html",
                           "text": [
-                            "<p><strong>Lesson 2.4: Putting it all together</strong></p>",
-                            "<p><strong>Lesson Overview</strong>:</p>",
+                            "<p><strong>Lesson 2.4: Introduction</strong></p>",
                             "<p>Using knowledge and skills gained in the module, students will co-design a new device to improve the lives of specific users. Each student team will prepare an illustration of the proposed device. </p>",
                             "<p><strong>Materials:</strong></p>",
                             "<p>White boards, dry erase markers, case scenarios </p>",
                             "<p><strong>Learning Objectives:</strong></p>",
                             "<p>Students will design and evaluate engineering solutions that can help improve the lives of patients with sensory-motor impairments (i.e., a human-machine interface). </p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "KFjJz6Bn8nSYVlt8",
+                        "title": "Text 4",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Resources</strong></p>",
+                            "<p><a href='https://web.stanford.edu/~mshanks/MichaelShanks/files/509554.pdf'>Introduction to design thinking</a></p>",
+                            "<p>Case studies (see student-facing lesson)</p>"
                           ]
                         }
                       }
@@ -790,8 +805,8 @@
                             "<p>5 minutes</p>",
                             "<p>Survey students as to which case they would like to support. This can be introduced in two ways:</p>",
                             "<p>Option 1:</p>",
-                            "<p>Present the following two cases to students:</p>",
-                            "<ul><li>Help Mrs. Marcus</li><li>Help Tilly</li><li>Help Mr. Johnson</li><li>Help Julio and Mr. Paulino</li></ul>",
+                            "<p>Present the following cases to students (see student-facing lesson):</p>",
+                            "<ul><li>Help Mrs. Marcus</li><li>Help Tilly</li><li>Help Mr. Johnson</li></ul>",
                             "<p>Survey students as to which person they would like to help and organize teams of three or four students based on their responses (try to have two teams per case)</p>",
                             "<p>Option 2:</p>",
                             "<p>Ask each pre-established group to review the four cases and decide who they want to help.</p>",
@@ -810,20 +825,8 @@
                             "<p>Will [person’s name] find the product comfortable?</p>",
                             "<p>Will [person’s name] find the product useful?</p>",
                             "<p><em>20 minutes</em></p>",
-                            "<p>After students have completed their illustrated and annotated models of the proposed products, ask each team to share their design, including the design considerations made to ensure that the person they are helping would find the product easy to use, safe, useful, and comfortable. This can be accomplished much like a professional science meeting poster session – one team member can represent the work to others, while the rest of the team visits other teams’ posters to gain insight and provide feedback (ask students to write down questions and comments on sticky notes and attach them to the poster).</p>",
-                            "<p><strong>Resources</strong>:</p>",
-                            "<p>Links to four case studies (Aaron is reviewing them for accuracy and feasibility)</p>",
-                            "<p><a href='https://web.stanford.edu/~mshanks/MichaelShanks/files/509554.pdf'>Introduction to design thinking</a> process </p>"
+                            "<p>After students have completed their illustrated and annotated models of the proposed products, ask each team to share their design, including the design considerations made to ensure that the person they are helping would find the product easy to use, safe, useful, and comfortable. This can be accomplished much like a professional science meeting poster session – one team member can represent the work to others, while the rest of the team visits other teams’ posters to gain insight and provide feedback (ask students to write down questions and comments on sticky notes and attach them to the poster).</p>"
                           ]
-                        }
-                      },
-                      {
-                        "id": "mYRpW2l97Pljfw2y",
-                        "title": "Human hand with thumb and forefinger pinched together",
-                        "content": {
-                          "type": "Image",
-                          "url": "curriculum/neural-engineering/images/thumbPinch.png",
-                          "filename": "curriculum/neural-engineering/images/thumbPinch.png"
                         }
                       }
                     ]

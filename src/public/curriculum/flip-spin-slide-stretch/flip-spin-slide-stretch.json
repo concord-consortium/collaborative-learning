@@ -1,11 +1,18 @@
 {
-  "code": "lfp",
-  "abbrevTitle": "LFP",
-  "title": "Looking for Pythagoras",
-  "subtitle": "The Pythagorean Theorem and the Real Numbers",
+  "code": "fsss",
+  "abbrevTitle": "FSSS",
+  "title": "Flip, Spin, Slide and Strech",
+  "subtitle": "Exploring Transformations",
   "config": {
     "enableHistoryRoles": ["teacher"],
-    "placeholderText": "Enter notes here"
+    "placeholderText": "Enter notes here",
+    "stamps": [
+    ],
+    "settings": {
+      "table": {
+        "numFormat": ".2~f"
+      }
+    }
   },
   "sections": {
     "introduction": {
@@ -28,7 +35,7 @@
       "title": "Now What Do You Know?",
       "placeholder": "Work area for\nNow What Do You Know? section"
     },
-     "MathReflection1": {
+    "MathReflection1": {
       "initials": "R1",
       "title": "Math Reflection 1",
       "placeholder": "Work area for\nMathematical Reflection 1 section"
@@ -85,169 +92,12 @@
     {
       "description": "Investigation 1",
       "ordinal": 1,
-      "title": "LFP Investigation 1 Getting Around Euclid: Locating Points and Finding Distances",
-      "introduction": {
-        "tiles": []
-      },
+      "title": "Investigation 1: Transformations",
       "problems": [
         {
           "description": "Problem 1.1",
           "ordinal": 1,
-          "title": "LFP 1.1 Helicopter or Car",
-          "subtitle": "Finding Distances",
-          "sections": [
-                        {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
-                        "supports": []
-                        },
-                        {
-                          "type": "initialChallenge",
-                          "content": {
-                            "tiles": []
-                          },
-                          "supports": []
-                        },
-                        {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        }
-                      ]
-        },
-        {
-          "description": "Problem 1.2",
-          "ordinal": 2,
-          "title": "LFP 1.2 Park Designs",
-          "subtitle": "Finding Area",
-          "sections": [
-                        {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
-                        "supports": []
-                        },
-                        {
-                          "type": "initialChallenge",
-                          "content": {
-                            "tiles": []
-                          },
-                          "supports": []
-                        },
-                        {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        }
-                      ]
-        },
-        {
-          "description": "Problem 1.3",
-          "ordinal": 3,
-          "title": "LFP 1.3 Finding Squares",
-          "subtitle": "",
-          "sections": [
-              {
-              "type": "introduction",
-              "content": {
-              "tiles": []
-              },
-              "supports": []
-              },
-              {
-                "type": "initialChallenge",
-                "content": {
-                  "tiles": []
-                },
-                "supports": []
-              },
-              {
-                "type": "whatIf",
-                "content": {
-                  "tiles": [],
-                  "supports": []
-                }
-              },
-              {
-                "type": "nowWhatDoYouKnow",
-                "content": {
-                  "tiles": [],
-                  "supports": []
-                }
-              }
-            ]
-        },
-        {
-          "description": "Problem 1.4",
-          "ordinal": 4,
-          "title": "LFP 1.4 Using Squares to Find Lengths",
-          "subtitle": "The Square Root Connection",
-          "sections": [
-              {
-              "type": "introduction",
-              "content": {
-              "tiles": []
-              },
-              "supports": []
-              },
-              {
-                "type": "initialChallenge",
-                "content": {
-                  "tiles": []
-                },
-                "supports": []
-              },
-              {
-                "type": "whatIf",
-                "content": {
-                  "tiles": [],
-                  "supports": []
-                }
-              },
-              {
-                "type": "nowWhatDoYouKnow",
-                "content": {
-                  "tiles": [],
-                  "supports": []
-                }
-              }
-            ]
-        }
-      ],
-      "supports": []
-    },
-    {
-      "description": "Investigation 2",
-      "ordinal": 2,
-      "title": "LFP Investigation 2 The Pythagorean Theorem",
-      "introduction": {
-      },
-      "problems": [
-        {
-          "description": "Problem 2.1",
-          "ordinal": 1,
-          "title": "LFP 2.1 Discovering the Pythagorean Theorem",
+          "title": "FSSS 1.1 Flipping Over: Reflections",
           "subtitle": "",
           "disabled": [],
           "sections": [
@@ -282,9 +132,133 @@
                       ]
         },
         {
+          "description": "Problem 1.2",
+          "ordinal": 2,
+          "title": "FSSS  1.2 Sliding Around: Translations",
+          "subtitle": "",
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ]
+        },
+        {
+          "description": "Problem 1.3",
+          "ordinal": 3,
+          "title": "FSSS 1.3 In a Spin Spinning Around: Rotations",
+          "subtitle": "",
+          "sections": [
+          ],
+          "supports": []
+        },
+        {
+          "description": "Problem 1.4",
+          "ordinal": 4,
+          "title": "FSSS 1.4 Predicting Transformations",
+          "subtitle": "",
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ]
+        }
+      ]
+    },
+    {
+      "description": "Investigation 2",
+      "ordinal": 2,
+      "title": "Investigation 2. Transformations and Congruence",
+      "problems": [
+        {
+          "description": "Problem 2.1",
+          "ordinal": 1,
+          "title": "FSSS 2.1 Transformations and Congruence",
+          "subtitle": "",
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ]
+        },
+        {
           "description": "Problem 2.2",
           "ordinal": 2,
-          "title": "LFP 2.2 Proving the Pythagorean Theorem",
+          "title": "FSSS 2.2 The Clue Game: Congruent Triangles",
           "subtitle": "",
           "sections": [
                         {
@@ -320,88 +294,24 @@
         {
           "description": "Problem 2.3",
           "ordinal": 3,
-          "title": "LFP 2.3 Using the Pythagorean Theorem to Find Distances",
-          "subtitle": "",
+          "title": "FSSS 2.3 Transformations with Parallel Lines, Transversals, and Angle Sums",
+          "subtitle":"",
           "sections": [
-                        {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
-                        "supports": []
-                        },
-                        {
-                          "type": "initialChallenge",
-                          "content": {
-                            "tiles": []
-                          },
-                          "supports": []
-                        },
-                        {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        }
-                      ]
-        },
-        {
-          "description": "Problem 2.4",
-          "ordinal": 4,
-          "title": "LFP 2.4 Stopping Sneaky Sally",
-          "subtitle": "Finding Unknown Side Lengths",
-          "sections": [
-                        {
-                        "type": "introduction",
-                        "content": {
-                        "tiles": []
-                        },
-                        "supports": []
-                        },
-                        {
-                          "type": "initialChallenge",
-                          "content": {
-                            "tiles": []
-                          },
-                          "supports": []
-                        },
-                        {
-                          "type": "whatIf",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        },
-                        {
-                          "type": "nowWhatDoYouKnow",
-                          "content": {
-                            "tiles": [],
-                            "supports": []
-                          }
-                        }
-                      ]
+          ],
+          "supports": []
         }
-      ],
-      "supports": []
+      ]
     },
     {
       "description": "Investigation 3",
       "ordinal": 3,
-      "title": "LFP Investigation 3 Using the Pythagorean Theorem: Understanding Real Numbers",
+      "title": "FSSS Investigation 3 Transforming Coordinates",
       "problems": [
         {
           "description": "Problem 3.1",
           "ordinal": 1,
-          "title": "LFP 3.1. Analyzing the Wheel of Theodorus",
-          "subtitle": "Square Roots on a Number Line",
+          "title": "FSSS 3.1 Flipping on a Grid: Coordinate Rules for Reflection",
+          "subtitle": "",
           "sections": [
                         {
                         "type": "introduction",
@@ -436,7 +346,7 @@
         {
           "description": "Problem 3.2",
           "ordinal": 2,
-          "title": "LFP  3.2. Cube Roots",
+          "title": "FSSS 3.2 Sliding on a Grid: Coordinate Rules for Translations",
           "subtitle": "",
           "sections": [
                         {
@@ -472,281 +382,231 @@
         {
           "description": "Problem 3.3",
           "ordinal": 3,
-          "title": "LFP 3.3. Representing Fractions as Decimals",
+          "title": "FSSS  3.3 Spinning on A Grid: Coordinate Rules for Rotations",
           "subtitle": "",
           "sections": [
-              {
-              "type": "introduction",
-              "content": {
-              "tiles": []
-              },
-              "supports": []
-              },
-              {
-                "type": "initialChallenge",
-                "content": {
-                  "tiles": []
-                },
-                "supports": []
-              },
-              {
-                "type": "whatIf",
-                "content": {
-                  "tiles": [],
-                  "supports": []
-                }
-              },
-              {
-                "type": "nowWhatDoYouKnow",
-                "content": {
-                  "tiles": [],
-                  "supports": []
-                }
-              }
-            ]
-        },
-        {
-          "description": "Problem 3.4",
-          "ordinal": 4,
-          "title": "LFP 3.4. Representing Decimals as Fractions",
-          "subtitle": "",
-          "sections": [
-            {
-              "type": "introduction",
-              "content": {
-              "tiles": []
-              }
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              }
-            },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
-              }
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              }
-            }
-          ]
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ]
         }
       ]
     },
-        {
+    {
       "description": "Investigation 4",
       "ordinal": 4,
-      "title": "LFP Investigation 4 The Pythagorean Theorem: Analyzing Triangles and Circles",
+      "title": "FSSS Investigation 4 Dilations and Similar Triangles",
       "problems": [
         {
           "description": "Problem 4.1",
           "ordinal": 1,
-          "title": "LFP 4.1 Measuring the Egyptian Way",
-          "subtitle": "Lengths that Form a Right Triangle",
+          "title": "FSSS 4.1 Revisiting the Rubber Band Stretcher: A Focus on Dilations",
+          "subtitle": "",
           "sections": [
-            {
-              "type": "introduction",
-              "content": {
-              "tiles": []
-              }
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              }
-            },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
-              }
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              }
-            }
-          ],
-          "supports": []
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ]
         },
         {
           "description": "Problem 4.2",
           "ordinal": 2,
-          "title": "LFP 4.2 Analyzing Triangles",
+          "title": "FSSS 4.2 Return of the Super Sleuth: Similarity Transformations",
           "subtitle": "",
           "sections": [
-            {
-              "type": "introduction",
-              "content": {
-              "tiles": []
-              }
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              }
-            },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
-              }
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              }
-            }
-          ]
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ]
         },
         {
           "description": "Problem 4.3",
           "ordinal": 3,
-          "title": "LFP 4.3 Analyzing Circles",
-          "subtitle": "",
+          "title": "FSSS 4.3 Checking Similarity without Transformations",
+          "subtitle": "Operations with Scientific Notation",
           "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": []
-              }
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              }
-            },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
-              }
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              }
-            }
-          ]
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ]
         },
         {
           "description": "Problem 4.4",
           "ordinal": 4,
-          "title": "LFP 4.4 Back to Polygons",
+          "title": "FSSS 4.4 Moving Around the Plane Game: Pulling it All Together",
           "subtitle": "",
           "sections": [
-            {
-              "type": "introduction",
-              "content": {
-                "tiles": []
-              }
-            },
-            {
-              "type": "initialChallenge",
-              "content": {
-                "tiles": []
-              }
-            },
-            {
-              "type": "whatIf",
-              "content": {
-                "tiles": []
-              }
-            },
-            {
-              "type": "nowWhatDoYouKnow",
-              "content": {
-                "tiles": []
-              }
-            }
-          ]
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ]
         }
       ]
     },
     {
       "description": "Mathematical Reflections",
       "ordinal": 5,
-      "title": "LFP MR1 - MR4",
+      "title": "FSSS MR1 - MR4",
       "problems": [
         {
           "description": "Mathematical Reflections",
           "ordinal": 1,
-          "title": "Looking for Pythagoras Reflections",
+          "title": "FSSS Mathematical Reflections",
           "subtitle": "",
           "sections": [
             {
               "type": "MathReflection1",
               "content": {
                 "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        ""
-                      ]
-                    }
-                  }
                 ]
-              }
+              },
+              "supports": [ ]
             },
             {
               "type": "MathReflection2",
               "content": {
                 "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        ""
-                      ]
-                    }
-                  }
                 ]
-              }
+              },
+              "supports": [ ]
             },
             {
               "type": "MathReflection3",
               "content": {
                 "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        ""
-                      ]
-                    }
-                  }
                 ]
-              }
+              },
+              "supports": [ ]
             },
             {
               "type": "MathReflection4",
               "content": {
                 "tiles": [
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        ""
-                      ]
-                    }
-                  }
                 ]
               }
             }
