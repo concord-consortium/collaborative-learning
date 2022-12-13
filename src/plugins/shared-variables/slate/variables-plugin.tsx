@@ -1,19 +1,19 @@
-import React, { ReactNode, useContext } from "react";
+import React, { useContext } from "react";
 import classNames from "classnames/dedupe";
-import clone from "lodash/clone";
 import {
-  Editor,  IFieldValues,
-  IDialogController, EFormat, IRow,
+  Editor,
+  IDialogController, IRow,
   RenderElementProps,
   useSerializing,
   CustomElement,
   useSelected,
-  ClueVariableElement,
   ReactEditor,
   Transforms,
   registerElement,
   useSlateStatic,
   CustomEditor,
+  BaseElement,
+  EditorValue,
 } from "@concord-consortium/slate-editor";
 import { Variable, VariableChip, VariableType } from "@concord-consortium/diagram-view";
 import { getVariables, getOrFindSharedModel } from "./variables-text-content";
@@ -22,32 +22,34 @@ import { TextContentModelContext } from "../../../models/tiles/text/text-content
 
 const kVariableClass = "slate-variable-chip";
 const kSlateVoidClass = "cc-slate-void";
+const kVariableFormat = "clueVariable";
 
 // FIXME: Clean up these types and this interface.
 export function VariablePlugin(textContent: TextContentModelType): any {
   return {
     onInitEditor: (editor: CustomEditor) => withClueVariables(editor, textContent) 
-  }
-};
-
-interface IRenderOptions {
-  textTile: TextContentModelType;
-  isSerializing?: boolean;
-  isHighlighted?: boolean;
-  onClick?: () => void; // FIXME: I think this can be removed
-  onDoubleClick?: () => void;
+  };
 }
 
-export const isClueVariableElement = (element: CustomElement): element is ClueVariableElement => { // FIXME: VariableElement needs to be registered not defined in slate
-  return element.type === EFormat.clueVariable;
+export interface VariableElement extends BaseElement { 
+  type: "clueVariable",
+  reference: string,
+  children: EditorValue
+}
+
+export const isVariableElement = (element: CustomElement): element is VariableElement => {
+  return element.type === kVariableFormat;
 };
 
 export const ClueVariableComponent = ({ attributes, children, element }: RenderElementProps) => {
-  if (!isClueVariableElement(element)) return null;
   const textContent = useContext(TextContentModelContext);
   const isHighlighted =  useSelected(); 
   const isSerializing = useSerializing();
-  const editor = isSerializing ? null : useSlateStatic();
+  const e = useSlateStatic();
+  const editor = isSerializing ? null : e;
+
+  if (!isVariableElement(element)) return null;
+ 
   const {reference} = element;
 
   // This works because slate-editor has a built in emit command which triggers
@@ -62,13 +64,14 @@ export const ClueVariableComponent = ({ attributes, children, element }: RenderE
   // direct access to it.
   const _onDoubleClick = () => {
     editor.emitEvent("configureVariable", element);
-  }
+  };
+
   const onDoubleClick = isSerializing ? undefined : _onDoubleClick; // Don't serialize click handler
   const classes = classNames(kSlateVoidClass, kVariableClass) || undefined;
   const selectedClass = isHighlighted && !isSerializing ? "slate-selected" : undefined;
   const variables = getVariables(textContent); 
   const variable = variables.find(v => v.id === reference);
-  // FIXME: Test HTML serialization/deserializatin. The way this is written, we'll pick up the VariableChip html which maybe we don't want to do...
+  // FIXME: HTML serialization/deserialization. This will serialize the VariableChip too.
   return (
     <span className={classes} onDoubleClick={onDoubleClick} {...attributes} contentEditable={false}>
       {children}
@@ -80,15 +83,14 @@ export const ClueVariableComponent = ({ attributes, children, element }: RenderE
   );
 };
 
-export function withClueVariables(editor: Editor, textContent: TextContentModelType) { // FIXME: Makre sure we're not serializing textContet. I was butI don't think I am now
-  const { configureElement, isElementEnabled, isInline, isVoid } = editor;
-  editor.isInline = (element: { type: EFormat; }) => (element.type === EFormat.clueVariable) || isInline(element);
-  editor.isVoid = (element: { type: EFormat; }) => (element.type === EFormat.clueVariable) || isVoid(element);
+export function withClueVariables(editor: Editor, textContent: TextContentModelType) {
+  const { isInline, isVoid } = editor;
+  editor.isInline = (element:BaseElement) => (element.type === kVariableFormat) || isInline(element);
+  editor.isVoid = (element:BaseElement) => (element.type === kVariableFormat) || isVoid(element);
 
-  editor.configureElement = (format: string, dialogController: IDialogController, element?: ClueVariableElement) =>{
+  editor.configureElement = (format: string, dialogController: IDialogController, element?: VariableElement) =>{
     const variables = getVariables(textContent); 
-    const {selection} = editor;
-    const hasVariable = editor.isElementActive(EFormat.clueVariable);
+    const hasVariable = editor.isElementActive(kVariableFormat);
 
     // If there is a selected node we do not allow the user to change this node
     // so the options only have this variable
@@ -160,23 +162,23 @@ export function withClueVariables(editor: Editor, textContent: TextContentModelT
           sharedModel.addVariable(variable);
           reference = variable.id;
         }
-        const varElt: ClueVariableElement = { type: EFormat.clueVariable, reference: reference, children: [{text: "" }]};
+        const varElt: VariableElement = { type: "clueVariable", reference, children: [{text: "" }]};
         const nodePath = element && ReactEditor.findPath(_editor, element);
         nodePath && Transforms.removeNodes(_editor, { at: nodePath });
         Transforms.insertNodes(_editor, varElt, { select: element != null });
       }
     });
   };
-  registerElement(EFormat.clueVariable, props => <ClueVariableComponent {...props}/>);
+  registerElement(kVariableFormat, props => <ClueVariableComponent {...props}/>);
   return editor;
-};
+}
 
-function getReferenceFromNode(node?: ClueVariableElement) {
+function getReferenceFromNode(node?: VariableElement) {
   const { reference } = node || {};
   return reference;
 }
 
-function getDialogValuesFromNode(editor: Editor, variables: VariableType[], node: ClueVariableElement | undefined) {
+function getDialogValuesFromNode(editor: Editor, variables: VariableType[], node: VariableElement | undefined) {
   const values: Record<string, string> = {};
   const highlightedText = Editor.string(editor, editor.selection);
   const reference = getReferenceFromNode(node);
@@ -200,7 +202,7 @@ function getDialogValuesFromNode(editor: Editor, variables: VariableType[], node
   return values;
 }
 
-function getNodeVariable(variables: VariableType[], node?: ClueVariableElement) {
+function getNodeVariable(variables: VariableType[], node?: VariableElement) {
   const {reference} = node || {};
   return variables.find(v => v.id === reference);
 }

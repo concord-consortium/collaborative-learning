@@ -1,16 +1,12 @@
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
-//import { EFormat} from "@concord-consortium/slate-editor";
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { TextToolbarButton } from "./text-toolbar-button";
 import { useTextToolDialog } from "./text-tile-dialog";
 import { IRegisterTileApiProps } from "../tile-component";
 import { getTextPluginInfo } from "../../../models/tiles/text/text-plugin-info";
-// TODO: This should be exported by slate-editor, and we should import it from there.
-// Currently it is not listed as a direct dependency of CLUE.
-import { CustomEditor, EFormat, ReactEditor, toggleMark, toggleSuperSubscript, toggleBlock } from "@concord-consortium/slate-editor";
-import EventEmitter from "eventemitter3";
+import { EFormat, toggleMark, toggleSuperSubscript, toggleBlock } from "@concord-consortium/slate-editor";
 
 import { isMac } from "../../../utilities/browser";
 import BoldToolIcon from "../../../assets/icons/text/bold-text-icon.svg";
@@ -113,10 +109,11 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
         break;
       case "undo":
         editor.undo();
+        break;
       case "m2s-variables": 
         // FIXME: make this work as part of plugin instead.
         // I *think* we could repurpose toolInfo.command to the the plugin type and use that instead.
-        editor.configureElement(EFormat.clueVariable, dialogController);
+        editor.configureElement("clueVariable", dialogController);
         break;
       default: {
         const toolInfo = getTextPluginInfo(buttonIconName);
@@ -142,7 +139,7 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   // listen for configuration requests from plugins
   useEffect(() => {
     const handler = (event: string, ...args: any) => {
-      editor.configureElement(EFormat.clueVariable, dialogController, event);
+      editor.configureElement("clueVariable", dialogController, event);
     };
     editor?.onEvent("configureVariable", handler);
     return () => {

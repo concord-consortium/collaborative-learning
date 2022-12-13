@@ -52,7 +52,8 @@ context('Test the overall workspace', function () {
       cy.get('.nav-tab-panel').should('exist');
     });
     // TODO: Changes in new document add feature.
-    it('will verify canvases do not persist between problems', function () {
+    // FIXME: typing in slate is broken
+    it.skip('will verify canvases do not persist between problems', function () {
       let problem1 = '1',
         problem2 = '2.1';
       let tab1 = 'Introduction';

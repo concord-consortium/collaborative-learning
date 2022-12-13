@@ -1,8 +1,7 @@
-/*import { HtmlSerializablePlugin } from "@concord-consortium/slate-editor";
 import { getAllTextPluginInfos, getTextPluginIds, getTextPluginInfo, 
   getTextPluginInstances, registerTextPluginInfo } from "./text-plugin-info";
 
-const testTextPluginInstance = {from: "testTextPluginInfo"} as HtmlSerializablePlugin;
+const testTextPluginInstance = {from: "testTextPluginInfo"} as any;
 const testTextPluginInfo = {
   iconName: "test",
   Icon: () => null,
@@ -10,7 +9,7 @@ const testTextPluginInfo = {
   createSlatePlugin: jest.fn(() => testTextPluginInstance),
   command: ""
 };
-const testTextPluginWithUpdateInstance = {from: "testTextPluginInfoWithUpdate"}  as HtmlSerializablePlugin;
+const testTextPluginWithUpdateInstance = {from: "testTextPluginInfoWithUpdate"}  as any;
 const testTextPluginInfoWithUpdate = {
   iconName: "testWithUpdate",
   Icon: () => null,
@@ -52,4 +51,5 @@ describe("TextPluginInfo", () => {
     expect(pluginInfos).toHaveLength(2);
     expect(pluginInfos).toContain(testTextPluginInfo);
     expect(pluginInfos).toContain(testTextPluginInfoWithUpdate);
-  });*/
+  });
+});

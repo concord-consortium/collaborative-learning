@@ -1,9 +1,10 @@
 import { VariableType } from "@concord-consortium/diagram-view";
-import { ClueVariableElement, CustomElement, EFormat, isInlineOfType, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
+import { CustomElement, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
 import { getType } from "mobx-state-tree";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
+import { isVariableElement, VariableElement } from "./variables-plugin";
 
 export const kVariableSlateType = "m2s-variable";
 
@@ -83,15 +84,15 @@ export function updateAfterSharedModelChanges(
   const variables = getVariables(textContent);
 
   const document = editor.value.document;
-  const variableNodes = document.filterDescendants((node: Element) => {
-    return isInlineOfType(node, EFormat.clueVariable);
+  const variableNodes = document.filterDescendants((node: CustomElement) => {
+    return isVariableElement(node);
   });
-  variableNodes.forEach((node: ClueVariableElement) => {
+  variableNodes.forEach((node: VariableElement) => {
     if (!node) {
       // For some reason Immutable iterable.forEach can return undefined values
       return;
     }
-    const inlineNode = node as ClueVariableElement;
+    const inlineNode = node as VariableElement;
 
     // Does this variable exist in our list?
     const {reference} = inlineNode;

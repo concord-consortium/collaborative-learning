@@ -1,10 +1,9 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
- isMarkActive, Editor, CustomEditor, Editable, EditorValue, SlateEditor, ReactEditor, withReact, withHistory, createEditor, Slate, EFormat, isBlockActive
+ isMarkActive, CustomEditor, EditorValue, SlateEditor, ReactEditor, withReact, withHistory, createEditor, Slate, EFormat, isBlockActive
 } from "@concord-consortium/slate-editor";
-import "@concord-consortium/slate-editor/dist/index.css";
 import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
 import { BaseComponent } from "../../base";
 import { debouncedSelectTile } from "../../../models/stores/ui";
@@ -16,7 +15,6 @@ import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
 import { getTextPluginInstances, getTextPluginIds } from "../../../models/tiles/text/text-plugin-info";
 import { LogEventName } from "../../../lib/logger-types";
-import { withClueVariables } from "../../../plugins/shared-variables/slate/variables-plugin";
 
 import "./text-tile.sass";
 
@@ -109,7 +107,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     [EFormat.numberedList]: "list-ol",
     //include the plugin ids here
     ...getTextPluginIds().reduce((idMap, id) => ({...idMap, [id]: id}), {})
-  }
+  };
 
   public componentDidMount() {
     const initialTextContent = this.getContent();
@@ -121,7 +119,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
     // FIXME: Loop over all the plugins instead of just the one
     const options: any = {};
-    options["onInitEditor"] = this.plugins[0]?.onInitEditor;
+    options.onInitEditor = this.plugins[0]?.onInitEditor;
     this.editor = withHistory(withReact(createEditor(options)));
 
     this.disposers = [];
@@ -150,8 +148,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         return selectedTileIds.includes(id);
       },
       isTileSelected => {
-        const { value } = this.state;
-        //const isFocused = !!value?.selection.isFocused;
         const isFocused = this.editor && ReactEditor.isFocused(this.editor);
         if (isFocused && !isTileSelected) {
           this.editor && ReactEditor.blur(this.editor);
@@ -197,39 +193,35 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       // FIXME: replace this provider with one at the tile level so we get it for free.
       // and then replace the drawing one with that as well
       <TextContentModelContext.Provider value={this.getContent()} >
-      <div className={`text-tool-wrapper ${readOnly ? "" : "editable"}`}
-        data-testid="text-tool-wrapper"
-        ref={elt => this.textTileDiv = elt}
-        onMouseDown={this.handleMouseDownInWrapper}>
-         <Slate
-            editor={this.editor as ReactEditor}
-            value={editorValue}
-            onChange={this.handleChange}>
-        <SlateEditor
-          value={editorValue}
-          placeholder={placeholderText}
-          readOnly={readOnly}
-          onChange={this.handleChange}
-          onFocus={this.handleFocus}
-          onBlur={this.handleBlur}
-          className={`ccrte-editor slate-editor ${classes || ""}`}
-        >
-       
-        </SlateEditor>
-        <TextToolbarComponent
-          documentContent={documentContent}
-          tileElt={tileElt}
-          scale={scale}
-          selectedButtons={selectedButtons || []}
-          editor={this.editor}
-          onIsEnabled={this.handleIsEnabled}
-          onRegisterTileApi={this.handleRegisterToolApi}
-          onUnregisterTileApi={this.handleUnregisterToolApi}
-        />
-        </Slate>
-      </div>
+        <div className={`text-tool-wrapper ${readOnly ? "" : "editable"}`}
+          data-testid="text-tool-wrapper"
+          ref={elt => this.textTileDiv = elt}
+          onMouseDown={this.handleMouseDownInWrapper}>
+          <Slate
+              editor={this.editor as ReactEditor}
+              value={editorValue}
+              onChange={this.handleChange}>
+            <SlateEditor
+              value={editorValue}
+              placeholder={placeholderText}
+              readOnly={readOnly}
+              onFocus={this.handleFocus}
+              onBlur={this.handleBlur}
+              className={`ccrte-editor slate-editor ${classes || ""}`}
+            />
+            <TextToolbarComponent
+              documentContent={documentContent}
+              tileElt={tileElt}
+              scale={scale}
+              selectedButtons={selectedButtons || []}
+              editor={this.editor}
+              onIsEnabled={this.handleIsEnabled}
+              onRegisterTileApi={this.handleRegisterToolApi}
+              onUnregisterTileApi={this.handleUnregisterToolApi}
+            />
+          </Slate>
+        </div>
       </TextContentModelContext.Provider>
-
     );
   }
 

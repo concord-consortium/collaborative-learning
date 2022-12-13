@@ -2,7 +2,7 @@ import { registerSharedModelInfo } from "../../models/shared/shared-model-regist
 import { registerTextPluginInfo } from "../../models/tiles/text/text-plugin-info";
 import { kSharedVariablesID, SharedVariables } from "./shared-variables";
 import VariablesToolIcon from "./slate/variables.svg";
-import { VariablePlugin, withClueVariables } from "./slate/variables-plugin";
+import { VariablePlugin} from "./slate/variables-plugin";
 import { updateAfterSharedModelChanges } from "./slate/variables-text-content";
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
 import { EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject }

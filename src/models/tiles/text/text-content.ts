@@ -1,6 +1,6 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import {
-  htmlToSlate, slateToHtml, textToSlate, EditorValue, slateToText, serializeValue, convertDocument, slate47to50, serializeDocument, CustomEditor
+  htmlToSlate, slateToHtml, textToSlate, EditorValue, serializeValue, convertDocument, CustomEditor, Editor
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tile-content-info";
 import { TileContentModel } from "../tile-types";
@@ -103,8 +103,8 @@ export const TextContentModel = TileContentModel
       const serialized = serializeValue(value);
       self.text = JSON.stringify(serialized);
     },
-    setEditor(editor?: any) { // FIXME: type here is wrong
-;     self.editor = editor;
+    setEditor(editor?: Editor) { // FIXME: type here is wrong
+     self.editor = editor;
     }
   }))
   .actions(self => ({
