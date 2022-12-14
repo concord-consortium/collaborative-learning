@@ -14,23 +14,11 @@ const problemDoc = '2.1 Drawing Wumps';
 const ptsDoc = 'Points';
 const polyDoc = 'Polygon';
 
-context('Graph Tool', function() {
-    before(function(){
-        const queryParams = `${Cypress.config("queryParams")}`;
-        cy.clearQAData('all');
-
-        cy.visit(queryParams);
-        cy.waitForLoad();
-        cy.closeResourceTabs();
-    });
-
-    context('Test graph tool functionalities', function(){
         describe('adding points and polygons to a graph', function(){
             it('dummy test', function () {
                 expect(true).to.equal(true);
             });
         });
-    });
             // it('will add a point to the origin', function(){
             //     clueCanvas.addTile('geometry');
             //     graphToolTile.addPointToGraph(0,0);
