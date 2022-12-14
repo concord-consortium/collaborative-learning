@@ -33,5 +33,6 @@ export const useEditVariableDialog = ({ variable }: IProps) => {
       }
     ]
   }, [variable]);
+
   return [showModal, hideModal];
 };

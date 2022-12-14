@@ -25,7 +25,7 @@ const kSlateVoidClass = "cc-slate-void";
 const kVariableFormat = "clueVariable";
 
 // FIXME: Clean up these types and this interface.
-export function VariablePlugin(textContent: TextContentModelType): any {
+export function VariablesPlugin(textContent: TextContentModelType): any {
   return {
     onInitEditor: (editor: CustomEditor) => withClueVariables(editor, textContent) 
   };

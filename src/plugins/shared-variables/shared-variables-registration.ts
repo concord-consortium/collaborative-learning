@@ -2,7 +2,7 @@ import { registerSharedModelInfo } from "../../models/shared/shared-model-regist
 import { registerTextPluginInfo } from "../../models/tiles/text/text-plugin-info";
 import { kSharedVariablesID, SharedVariables } from "./shared-variables";
 import VariablesToolIcon from "./slate/variables.svg";
-import { VariablePlugin} from "./slate/variables-plugin";
+import { VariablesPlugin} from "./slate/variables-plugin";
 import { updateAfterSharedModelChanges } from "./slate/variables-text-content";
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
 import { EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject }
@@ -17,7 +17,7 @@ registerTextPluginInfo({
   iconName: "m2s-variables",
   Icon: VariablesToolIcon,
   toolTip: "Variables",
-  createSlatePlugin: textContent=>VariablePlugin(textContent),
+  createSlatePlugin: textContent=> VariablesPlugin(textContent),
   command: "configureVariable",
   updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges
 });

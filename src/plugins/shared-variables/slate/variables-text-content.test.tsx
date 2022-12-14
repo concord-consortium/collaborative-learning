@@ -5,7 +5,7 @@ import { ISharedModelManager } from "../../../models/shared/shared-model-manager
 import { TextContentModel, TextContentModelType } from "../../../models/tiles/text/text-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 import { getOrFindSharedModel, updateAfterSharedModelChanges } from "./variables-text-content";
-import { VariablePlugin } from "./variables-plugin";
+import { VariablesPlugin } from "./variables-plugin";
 
 const TestContainer = types.model("TestContainer", {
   content: TextContentModel,
@@ -71,7 +71,7 @@ const setupContainer = (content: TextContentModelType, variables?: SharedVariabl
 // };
 const getEditor = (textContent: TextContentModelType) =>{
   const options = {
-    onInitEditor:  (tc: any)=>VariablePlugin(tc),
+    onInitEditor:  (tc: any) => VariablesPlugin(tc),
   };
   return withHistory(withReact(createEditor(options)));
 };

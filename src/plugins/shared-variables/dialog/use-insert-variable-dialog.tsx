@@ -87,6 +87,7 @@ export const useInsertVariableDialog =
   const handleOk = () => insertVariables(selectedVariables);
 
   const onClose = clearSelectedVariables;
+  
   const [showModal, hideModal] = useCustomModal({
     Icon: Icon || InsertVariableChipIcon,
     title: "Insert Variables",
