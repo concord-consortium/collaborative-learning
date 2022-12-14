@@ -76,15 +76,12 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   }
 
   const handleToolBarButtonClick = (buttonIconName: string, event: React.MouseEvent) => {
-    console.log('toolbar click');
     event.preventDefault();
     if (!editor) {
       // In theory the editor can be undefined. Cut that option off
       // here so we don't need to worry about it below
-      console.log('the editor does not exist in toolbar');
       return;
     }
-  //FIXME: Need to add all the toolbar buttons in. 
     switch (buttonIconName) {
       case "bold":
         toggleMark(editor, EFormat.bold);
