@@ -130,6 +130,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.editor = createEditor(options);
 
     this.disposers = [];
+    // Synchronize slate with model changes. e.g. changes to any text in another tile is refelected here.
     this.disposers.push(reaction(
       () => {
         const readOnly = this.props.readOnly;
@@ -142,6 +143,12 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
           if (this.prevText !== text) {
             const textContent = this.getContent();
             this.setState({ value: textContent.asSlate() });
+            // Tell the editor to update since the value prop is only used for the initial value in slate.
+            // See the bottom of https://docs.slatejs.org/walkthroughs/06-saving-to-a-database.
+            if (this.editor) {
+              this.editor.children = textContent.asSlate();
+              this.editor.onChange();
+            }
             this.prevText = text;
           }
         }
