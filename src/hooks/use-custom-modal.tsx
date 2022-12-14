@@ -99,7 +99,6 @@ export const useCustomModal = <IContentProps,>({
         </div>
         <div className="modal-content">
           <Content {...(contentProps)}/>
-
         </div>
         <div className="modal-footer">
           {buttons.map((b, i) => {

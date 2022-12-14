@@ -126,7 +126,8 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       return e;
     };
     options.onInitEditor = onInitEditor;
-    this.editor = withHistory(withReact(createEditor(options)));
+    options.history = true;
+    this.editor = createEditor(options);
 
     this.disposers = [];
     this.disposers.push(reaction(
