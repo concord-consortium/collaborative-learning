@@ -1,9 +1,9 @@
 import { cloneDeep } from "lodash";
 import { getParent, getSnapshot, getType,
   Instance, SnapshotIn, SnapshotOut, types, ISerializedActionCall } from "mobx-state-tree";
-import { isPlaceholderContent } from "./placeholder/placeholder-content";
-import { getTileContentInfo, ITileExportOptions } from "./tile-content-info";
-import { findMetadata, ITileContentModel, TileContentUnion } from "./tile-types";
+import { findMetadata, getTileContentInfo, ITileExportOptions } from "./tile-content-info";
+import { TileContentUnion } from "./tile-content-union";
+import { ITileContentModel } from "./tile-content";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 import { StringBuilder } from "../../utilities/string-builder";
@@ -83,12 +83,6 @@ export const TileModel = types
     },
     get isUserResizable() {
       return !!(self.content as any).isUserResizable;
-    },
-    get isPlaceholder() {
-      return isPlaceholderContent(self.content);
-    },
-    get placeholderSectionId() {
-      return isPlaceholderContent(self.content) ? (self.content).sectionId : undefined;
     },
     exportJson(options?: ITileExportOptions): string | undefined {
       const { includeId, excludeTitle, ...otherOptions } = options || {};

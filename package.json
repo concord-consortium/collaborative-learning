@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "3.2.0",
+  "version": "3.4.1",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "config": {
@@ -189,12 +189,13 @@
     "xhr-mock": "^2.5.1"
   },
   "dependencies": {
-    "@concord-consortium/diagram-view": "^0.0.20",
+    "@concord-consortium/diagram-view": "^0.0.23",
     "@concord-consortium/mobx-state-tree": "5.1.5-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",
     "@concord-consortium/rete-react-render-plugin": "^0.2.1-cc.2",
-    "@concord-consortium/slate-editor": "0.9.0-beta.2",
+    "@concord-consortium/slate-editor": "^0.9.0-beta.2",
+    "@dnd-kit/core": "^6.0.5",
     "chart.js": "^2.9.4",
     "classnames": "^2.3.1",
     "color-string": "^1.9.1",

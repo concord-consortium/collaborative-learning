@@ -6,8 +6,10 @@ class DiagramToolTile {
   getDiagramTile(workspaceClass) {
     return cy.get(`${canvasArea(workspaceClass)} .diagram-tool-tile`);
   }
-  getDiagramToolbar(workspaceClass) {
-    this.getDiagramTile(workspaceClass).click();
+  getDiagramToolbar(workspaceClass, skipClick) {
+    if (!skipClick) {
+      this.getDiagramTile(workspaceClass).click();
+    }
     return cy.get(`${canvasArea(workspaceClass)} .diagram-toolbar`);
   }
   getDiagramToolbarButton(buttonClass, workspaceClass, skipClick) {

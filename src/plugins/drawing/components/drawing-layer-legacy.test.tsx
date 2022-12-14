@@ -10,6 +10,7 @@ import { RectangleObjectSnapshot } from "../objects/rectangle";
 import { EllipseObjectSnapshot } from "../objects/ellipse";
 import { ImageObjectSnapshot } from "../objects/image";
 import { DrawingMigrator } from "../model/drawing-migrator";
+import { EntryStatus, gImageMap, ImageMapEntry } from "../../../models/image-map";
 
 // The drawing tile needs to be registered so the TileModel.create
 // knows it is a supported tile type
@@ -170,13 +171,30 @@ describe("Drawing Layer Components", () => {
   });
 
   describe("Image", () => {
+    const mockImageUrl = "my/image/url";
+
     const imageData: ImageObjectSnapshot = {
       type: "image",
       id: "567",
-      url: "my/image/url",
+      url: mockImageUrl,
       x: 10, y: 10,
       width: 10, height: 10,
     };
+    beforeEach(() => {
+      // The rendering of the image drawing object causes a image map lookup.
+      // Without the following mocking, the first render will return the
+      // placeholder image which in the tests is "test-file-stub". This is
+      // because the image map will be just starting to fetch the image. Then
+      // an async error will happen when the image map fails to fetch the fake
+      // URL. The following mocking short circuits the async behavior and just
+      // returns a constant image map entry for every lookup.
+      const imageMapEntry = ImageMapEntry.create({
+        contentUrl: mockImageUrl,
+        displayUrl: mockImageUrl,
+        status: EntryStatus.Ready
+      });
+      jest.spyOn(gImageMap, "getImageEntry").mockImplementation(() => imageMapEntry);
+    });
     it("adds an image", () => {
       content = DrawingMigrator.create({changes:[
         JSON.stringify({action: "create", data: imageData})

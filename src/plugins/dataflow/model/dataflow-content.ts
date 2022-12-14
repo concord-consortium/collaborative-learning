@@ -5,7 +5,7 @@ import { DataflowProgramModel } from "./dataflow-program-model";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
-import { TileContentModel } from "../../../models/tiles/tile-types";
+import { TileContentModel } from "../../../models/tiles/tile-content";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { getTileModel, setTileTitleFromContent } from "../../../models/tiles/tile-model";
 

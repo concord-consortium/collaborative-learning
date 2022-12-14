@@ -9,7 +9,7 @@ import {
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileModelHooks } from "../tile-model-hooks";
-import { TileContentModel } from "../tile-types";
+import { TileContentModel } from "../tile-content";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
 import { SharedModelType } from "../../shared/shared-model";
@@ -218,6 +218,11 @@ export const TableContentModel = TileContentModel
     },
     parseExpression(expr: string) {
       return self.metadata.parseExpression(expr);
+    }
+  }))
+  .views(self => ({
+    get title() {
+      return self.dataSet.name;
     }
   }))
   .views(self => ({

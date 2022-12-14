@@ -1,5 +1,6 @@
 import { types, Instance, SnapshotOut } from "mobx-state-tree";
-import { TileContentModel } from "../tile-types";
+import { ITileModel } from "../tile-model";
+import { TileContentModel } from "../tile-content";
 
 export const kPlaceholderTileType = "Placeholder";
 
@@ -20,4 +21,12 @@ export type PlaceholderContentSnapshotOutType = SnapshotOut<typeof PlaceholderCo
 
 export function isPlaceholderContent(content: any): content is PlaceholderContentModelType {
   return content?.type === kPlaceholderTileType;
+}
+
+export function isPlaceholderTile(tile?: ITileModel): tile is ITileModel {
+  return tile?.content?.type === kPlaceholderTileType;
+}
+
+export function getPlaceholderSectionId(tile?: ITileModel) {
+  return tile && isPlaceholderContent(tile.content) ? tile.content.sectionId : undefined;
 }

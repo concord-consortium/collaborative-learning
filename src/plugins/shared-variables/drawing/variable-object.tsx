@@ -8,6 +8,7 @@ import { addChipToContent, findVariable, getOrFindSharedModel } from "./drawing-
 import { useEditVariableDialog } from "../dialog/use-edit-variable-dialog";
 import { useInsertVariableDialog } from "../dialog/use-insert-variable-dialog";
 import { useNewVariableDialog } from "../dialog/use-new-variable-dialog";
+import { SharedVariablesType } from "../shared-variables";
 import { variableBuckets } from "../shared-variables-utils";
 import { DrawingObject, IDrawingComponentProps, IToolbarManager,
   typeField } from "../../drawing/objects/drawing-object";
@@ -148,7 +149,13 @@ interface INewVariableButtonProps {
   toolbarManager: IToolbarManager;
 }
 export const NewVariableButton = observer(({ toolbarManager }: INewVariableButtonProps) => {
-  const [showVariableDialog] = useNewVariableDialog();
+  const drawingContent = useContext(DrawingContentModelContext);
+  const sharedModel = getOrFindSharedModel(drawingContent) as SharedVariablesType;
+  const addVariable = (variable: VariableType) => {
+    const variableId = variable.id;
+    addChipToContent(drawingContent, variableId);
+  };
+  const [showVariableDialog] = useNewVariableDialog({ addVariable, sharedModel });
 
   const disabled = toolbarManager.hasSelectedObjects;
   const onClick = () => {

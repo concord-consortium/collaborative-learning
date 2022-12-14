@@ -6,7 +6,7 @@ import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/t
 import { ITileMetadataModel } from "../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../models/tiles/tile-model-hooks";
 import { getTileModel, setTileTitleFromContent } from "../../models/tiles/tile-model";
-import { TileContentModel } from "../../models/tiles/tile-types";
+import { TileContentModel } from "../../models/tiles/tile-content";
 import {
   addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet, DataSet
 } from "../../models/data/data-set";

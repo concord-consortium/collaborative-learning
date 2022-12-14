@@ -109,7 +109,7 @@ export const useInsertVariableDialog =
       }
     ],
     onClose
-  }, [selectedVariables, otherVariables, selfVariables, unusedVariables ]);
+  }, [selectedVariables, otherVariables, selfVariables, unusedVariables]);
 
   return [showModal, hideModal];
 };

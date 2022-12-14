@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { IGridContext } from "./table-types";
 import { TableContentModelType } from "../../../models/tiles/table/table-content";
@@ -15,11 +15,10 @@ export const useTableTitle = ({
   gridContext, content, readOnly, onRequestUniqueTitle, onSetTableTitle, requestRowHeight
 }: IProps) => {
 
-  const getTitle = useCallback(() => content.dataSet.name, [content]);
-  const editingTitle = useCurrent(getTitle());
+  const editingTitle = useCurrent(content.title);
 
   const onBeginTitleEdit = () => {
-    editingTitle.current = getTitle();
+    editingTitle.current = content.title;
     gridContext.onClearSelection();
     return !readOnly;
   };
@@ -46,5 +45,5 @@ export const useTableTitle = ({
     return () => onRequestUniqueTitleRef.current = undefined;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return { getTitle, onBeginTitleEdit, onEndTitleEdit };
+  return { onBeginTitleEdit, onEndTitleEdit };
 };

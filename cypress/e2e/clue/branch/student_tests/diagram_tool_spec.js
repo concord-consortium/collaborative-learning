@@ -3,13 +3,20 @@ import DiagramToolTile from '../../../../support/elements/clue/DiagramToolTile';
 import DrawToolTile from '../../../../support/elements/clue/DrawToolTile';
 
 let clueCanvas = new ClueCanvas,
-  diagramToolTile = new DiagramToolTile,
+  diagramTile = new DiagramToolTile,
   drawTile = new DrawToolTile;
 
 context('Diagram Tool Tile', function () {
   const dialogField = (field) => cy.get(`#evd-${field}`);
+  // The following functions specify undefined, true as parameters to avoid clicking on the tile and therefore deselecting a variable card
+  const diagramNewVariableButton = () => diagramTile.getDiagramToolbarButton("button-add-variable", undefined, true);
+  const diagramInsertVariableButton = () => diagramTile.getDiagramToolbarButton("button-insert-variable", undefined, true);
+  const diagramEditVariableButton = () => diagramTile.getDiagramToolbarButton("button-edit-variable", undefined, true);
+  const lockLayoutButton = () => diagramTile.getDiagramToolbarButton("button-lock-layout", undefined, true);
+  const hideNavigatorButton = () => diagramTile.getDiagramToolbarButton("button-hide-navigator", undefined, true);
+  const diagramDeleteButton = () => diagramTile.getDiagramToolbarButton("button-delete", undefined, true);
   const dialogOkButton = () => cy.get(".modal-button").last();
-  before(function () {
+  beforeEach(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=m2s";
     cy.clearQAData('all');
 
@@ -17,33 +24,101 @@ context('Diagram Tool Tile', function () {
     cy.waitForLoad();
     cy.closeResourceTabs();
   });
-  describe("Diagram Tile", () => {
-    it("renders diagram tile", () => {
+  describe("Shared Variable Tiles (Diagram, Drawing)", () => {
+    it("Diagram tile, toolbar, and dialogs", () => {
       clueCanvas.addTile("diagram");
-      diagramToolTile.getDiagramTile().should("exist");
-      diagramToolTile.getDiagramToolbar().should("exist");
-      diagramToolTile.getDiagramToolbarButton("button-dialog").should("exist");
-      diagramToolTile.getDiagramToolbarButton("button-delete").should("exist");
+
+      // Tile, toolbar, and buttons render
+      diagramTile.getDiagramTile().should("exist").click();
+      diagramTile.getDiagramToolbar().should("exist");
+      diagramNewVariableButton().should("exist");
+      diagramInsertVariableButton().should("exist").should("be.disabled"); // Insert variable button is disabled when no variables have been created
+      diagramEditVariableButton().should("exist").should("be.disabled");
+      diagramTile.getDiagramToolbarButton("button-zoom-in").should("be.enabled");
+      diagramTile.getDiagramToolbarButton("button-zoom-out").should("be.enabled");
+      diagramTile.getDiagramToolbarButton("button-fit-view").should("be.enabled");
+      lockLayoutButton().should("exist");
+      hideNavigatorButton().should("exist");
+      diagramDeleteButton().should("exist").should("be.disabled");
+
+      // Navigator can be hidden and shown
+      const navigator = () => diagramTile.getDiagramTile().find(".react-flow__minimap");
+      navigator().should("exist");
+      hideNavigatorButton().click();
+      navigator().should("not.exist");
+      hideNavigatorButton().click();
+      navigator().should("exist");
+
+      // New variable dialog works
+      diagramTile.getVariableCard().should("not.exist");
+      diagramNewVariableButton().click();
+      diagramTile.getDiagramDialog().should("exist");
+      const name = "name1";
+      dialogField("name").should("exist").type(name);
+      dialogOkButton().click();
+      diagramTile.getVariableCard().should("exist");
+      diagramTile.getVariableCardField("name").should("have.value", name);
+
+      // Insert variable button is disabled when all variables are in the diagram
+      diagramInsertVariableButton().should("be.disabled");
+
+      // Lock layout button prevents nodes from being selected
+      lockLayoutButton().click();
+      diagramDeleteButton().should("be.disabled");
+      diagramTile.getVariableCard().should("have.css", "pointer-events", "none");
+      lockLayoutButton().click();
+      diagramTile.getVariableCard().click();
+      diagramDeleteButton().should("be.enabled");
+
+      // Edit variable dialog works
+      const vName = "name3";
+      const vValue = "999.999";
+      const vUnit = "C";
+      diagramEditVariableButton().should("be.enabled").click();
+      dialogField("name").clear();
+      dialogField("name").type(vName);
+      dialogField("value").clear();
+      dialogField("value").type(vValue);
+      dialogField("units").clear();
+      dialogField("units").type(vUnit);
+      dialogOkButton().click();
+      diagramTile.getVariableCardField("name").should("have.value", vName);
+      diagramTile.getVariableCardField("value").should("have.value", vValue);
+      diagramTile.getVariableCardField("unit").should("have.value", vUnit);
+
+      // Delete button works
+      diagramDeleteButton().should("be.enabled").click();
+      diagramTile.getVariableCard().should("not.exist");
+
+      // Insert variable dialog shows unused variables
+      diagramInsertVariableButton().should("be.enabled").click();
+      diagramTile.getDiagramDialog().should("contain.text", "Unused variables:");
+      diagramTile.getDiagramDialogCloseButton().click();
+
+      // Can drag new variable button to create a new variable card
+      // TODO Couldn't figure out how to test dragging
+      const skipDragTest = true;
+      if (!skipDragTest) {
+        const dataTransfer = new DataTransfer;
+        const draggable = () => diagramTile.getDiagramToolbar(undefined, true).find("div").first();
+        draggable().trigger("dragstart", { dataTransfer });
+        diagramTile.getDiagramTile().trigger("drop", { force: true, dataTransfer });
+        draggable().trigger("dragend");
+        diagramTile.getVariableCard().should("exist");
+      }
     });
-    it("renders dialogs", () => {
-      diagramToolTile.getDiagramToolbarButton("button-dialog").should("be.disabled");
-      // TODO Add these tests back in after we have a convenient way of adding cards to the tile
-      // diagramToolTile.getDiagramToolbarButton("button-dialog").click();
-      // diagramToolTile.getDiagramDialog().should("exist");
-      // diagramToolTile.getDiagramDialogCloseButton().click();
-      // diagramToolTile.getDiagramDialog().should("not.exist");
-    });
-  });
-  describe("Drawing Tile with Variables", () => {
-    const dialogInsertVariableButton = () => diagramToolTile.getDiagramToolbarButton("button-insert-variable");
-    it("drawing tile has proper toolbar buttons", () => {
+
+    it("Drawing tile, toolbar, dialogs, and interactions between tiles", () => {
+      clueCanvas.addTile("diagram");
       clueCanvas.addTile("drawing");
+
+      // Draw tile and toolbar buttons render
       drawTile.getDrawTile().should("exist");
-      drawTile.getDrawToolNewVariable().should("exist").should("not.be.disabled");
+      drawTile.getDrawToolNewVariable().should("exist").should("be.enabled");
       drawTile.getDrawToolEditVariable().should("exist").should("be.disabled");
       drawTile.getDrawToolInsertVariable().should("exist").should("be.disabled");
-    });
-    it("new variable dialog works", () => {
+
+      // New variable dialog works
       const vName = "variable-name";
       const vValue = "1.2";
       const vUnit = "meter";
@@ -58,21 +133,23 @@ context('Diagram Tool Tile', function () {
       drawTile.getVariableChip().should("contain", vName);
       drawTile.getVariableChip().should("contain", vValue);
       drawTile.getVariableChip().should("contain", vUnit);
-    });
-    it("can add the new variable to the diagram tile", () => {
-      const dialogChip = () => diagramToolTile.getDiagramDialog().find(".variable-chip");
-      diagramToolTile.getVariableCard().should("not.exist");
-      dialogInsertVariableButton().should("be.enabled").click();
-      diagramToolTile.getDiagramDialog().should("contain.text", "other tiles:");
+
+      // Diagram tile can insert variable created by another tile
+      const dialogChip = () => diagramTile.getDiagramDialog().find(".variable-chip");
+      diagramTile.getDiagramTile().click();
+      diagramTile.getVariableCard().should("not.exist");
+      diagramInsertVariableButton().should("be.enabled").click();
+      diagramTile.getDiagramDialog().should("contain.text", "other tiles:");
       dialogChip().click();
       dialogOkButton().click();
-      diagramToolTile.getVariableCard().should("exist");
-      dialogInsertVariableButton().should("be.disabled");
-    });
-    const newName = "vn2";
-    const newValue = "47";
-    const newUnit = "util";
-    it("edit variable dialog works", () => {
+      diagramTile.getVariableCard().should("exist");
+      diagramInsertVariableButton().should("be.disabled");
+
+      // Draw tile edit variable dialog works
+      const newName = "vn2";
+      const newValue = "47";
+      const newUnit = "util";
+      drawTile.getDrawTile().click();
       drawTile.getVariableChip().click();
       drawTile.getDrawToolEditVariable().should("not.be.disabled").click();
       dialogField("name").clear();
@@ -85,31 +162,13 @@ context('Diagram Tool Tile', function () {
       drawTile.getVariableChip().should("contain", newName);
       drawTile.getVariableChip().should("contain", newValue);
       drawTile.getVariableChip().should("contain", newUnit);
-    });
-    it("updates in diagram tile", () => {
-      diagramToolTile.getVariableCardField("name").should("have.value", newName);
-      diagramToolTile.getVariableCardField("value").should("have.value", newValue);
-      diagramToolTile.getVariableCardField("unit").should("have.value", newUnit);
-    });
-    it("diagram tile edit variable dialog", () => {
-      // TODO Move this to the diagram tile section when the new variable dialog is added to it
-      const vName = "name3";
-      const vValue = "999.999";
-      const vUnit = "C";
-      diagramToolTile.getVariableCard().click();
-      diagramToolTile.getDiagramToolbarButton("button-dialog", undefined, true).should("not.be.disabled").click();
-      dialogField("name").clear();
-      dialogField("name").type(vName);
-      dialogField("value").clear();
-      dialogField("value").type(vValue);
-      dialogField("units").clear();
-      dialogField("units").type(vUnit);
-      dialogOkButton().click();
-      diagramToolTile.getVariableCardField("name").should("have.value", vName);
-      diagramToolTile.getVariableCardField("value").should("have.value", vValue);
-      diagramToolTile.getVariableCardField("unit").should("have.value", vUnit);
-    });
-    it("insert variable dialog works", () => {
+
+      // Editing variable in drawing tile also changes it in dialog tile
+      diagramTile.getVariableCardField("name").should("have.value", newName);
+      diagramTile.getVariableCardField("value").should("have.value", newValue);
+      diagramTile.getVariableCardField("unit").should("have.value", newUnit);
+
+      // Draw tile insert variable dialog works
       const listChip = otherClass => cy.get(`.variable-chip-list .variable-chip${otherClass || ""}`);
       drawTile.getDrawTile().click();
       drawTile.getVariableChip().click();
@@ -123,19 +182,8 @@ context('Diagram Tool Tile', function () {
       listChip().click();
       dialogOkButton().click();
       drawTile.getVariableChip().should("exist");
-    });
-    it("diagram tile delete works", () => {
-      const deleteButton = () => diagramToolTile.getDiagramToolbarButton("button-delete", undefined, true);
       drawTile.getVariableChip().click();
       drawTile.getDrawToolDelete().click();
-      diagramToolTile.getDiagramTile().click();
-      deleteButton().should("be.disabled");
-      diagramToolTile.getVariableCard().click();
-      deleteButton().should("be.enabled").click();
-      diagramToolTile.getVariableCard().should("not.exist");
-      dialogInsertVariableButton().click();
-      diagramToolTile.getDiagramDialog().should("contain.text", "Unused variables:");
-      diagramToolTile.getDiagramDialogCloseButton().click();
     });
   });
 });

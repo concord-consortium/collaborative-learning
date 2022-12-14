@@ -88,7 +88,10 @@ describe("documents model", () => {
   it("does not allow duplicate documents to be added", () => {
     documents.add(document);
     expect(documents.all.length).toBe(1);
-    documents.add(document);
+    jestSpyConsole("warn", spy => {
+      documents.add(document);
+      expect(spy).toBeCalledWith("Document with the same key already exists");
+    });
     expect(documents.all.length).toBe(1);
   });
 

@@ -5,7 +5,7 @@ import { ITileApiInterface, TileApiInterfaceContext } from "./tile-api";
 import { TileComponent } from "./tile-component";
 import { specStores } from "../../models/stores/spec-stores";
 import { TileModel } from "../../models/tiles/tile-model";
-import { UnknownContentModel } from "../../models/tiles/tile-types";
+import { UnknownContentModel } from "../../models/tiles/unknown-content";
 
 // required before tile creation
 import "../../register-tile-types";

@@ -3,7 +3,7 @@ import { applySnapshot, getSnapshot, getType, Instance, SnapshotIn, types } from
 import { kDefaultBoardModelInputProps, kGeometryTileType } from "./geometry-types";
 import { uniqueId } from "../../../utilities/js-utils";
 import { typeField } from "../../../utilities/mst-utils";
-import { TileContentModel } from "../tile-types";
+import { TileContentModel } from "../tile-content";
 import { ESegmentLabelOption, JXGChange, JXGPositionProperty } from "./jxg-changes";
 import { imageChangeAgent } from "./jxg-image";
 import { movableLineChangeAgent } from "./jxg-movable-line";

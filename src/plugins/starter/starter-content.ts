@@ -1,5 +1,5 @@
 import { types, Instance } from "mobx-state-tree";
-import { TileContentModel } from "../../models/tiles/tile-types";
+import { TileContentModel } from "../../models/tiles/tile-content";
 import { kStarterTileType } from "./starter-types";
 
 export function defaultStarterContent(): StarterContentModelType {

@@ -2317,7 +2317,7 @@
           "ordinal": 1,
           "title": "SAS 2.1 Drawing Wumps",
           "subtitle": "Making Similar Figures",
-          "disabled": ["GeometryLinkedTables"],
+          "disabled": [],
           "sections": [
             {
               "type": "introduction",

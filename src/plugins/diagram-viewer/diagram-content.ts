@@ -3,13 +3,14 @@ import { getSnapshot, types, Instance, destroy, SnapshotIn,
 import { reaction } from "mobx";
 import { DQRoot } from "@concord-consortium/diagram-view";
 import { ITileExportOptions, IDefaultContentOptions } from "../../models/tiles/tile-content-info";
-import { TileContentModel } from "../../models/tiles/tile-types";
+import { TileContentModel } from "../../models/tiles/tile-content";
 import { kDiagramTileType, kDiagramToolStateVersion } from "./diagram-types";
 import { SharedVariables, SharedVariablesType } from "../shared-variables/shared-variables";
 
 export const DiagramContentModel = TileContentModel
   .named("DiagramTool")
   .props({
+    hideNavigator: types.maybe(types.boolean),
     type: types.optional(types.literal(kDiagramTileType), kDiagramTileType),
     version: types.optional(types.literal(kDiagramToolStateVersion), kDiagramToolStateVersion),
     root: types.optional(DQRoot, getSnapshot(DQRoot.create())),
@@ -117,6 +118,11 @@ export const DiagramContentModel = TileContentModel
         // somehow we do
         console.warn("updateAfterSharedModelChanges was called with no shared model present");
       }
+    }
+  }))
+  .actions(self => ({
+    setHideNavigator(val: boolean) {
+      self.hideNavigator = val;
     }
   }));
 
