@@ -1,3 +1,4 @@
+import { BaseElement } from "@concord-consortium/slate-editor";
 import { FunctionComponent, SVGProps } from "react";
 import { SharedModelType } from "../../shared/shared-model";
 import { TextContentModelType } from "./text-content";
@@ -34,7 +35,6 @@ export function getTextPluginInstances(textContent: TextContentModelType) {
     }
   });
   return pluginInstances;
- return [];  // FIXME replace the guts here
 }
 
 export function getTextPluginIds() {

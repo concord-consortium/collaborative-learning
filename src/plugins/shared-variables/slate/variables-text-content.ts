@@ -1,5 +1,5 @@
 import { VariableType } from "@concord-consortium/diagram-view";
-import { CustomElement, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
+import { BaseElement, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
 import { getType } from "mobx-state-tree";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
@@ -84,7 +84,7 @@ export function updateAfterSharedModelChanges(
   const variables = getVariables(textContent);
 
   const document = editor.value.document;
-  const variableNodes = document.filterDescendants((node: CustomElement) => {
+  const variableNodes = document.filterDescendants((node: BaseElement) => {
     return isVariableElement(node);
   });
   variableNodes.forEach((node: VariableElement) => {
@@ -96,7 +96,7 @@ export function updateAfterSharedModelChanges(
 
     // Does this variable exist in our list?
     const {reference} = inlineNode;
-    if(!variables.find(v => v.id === reference)){
+    if (!variables.find(v => v.id === reference)) {
       const nodePath = node && ReactEditor.findPath(editor, node);
       Transforms.removeNodes(editor, { at: nodePath });
     }

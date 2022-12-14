@@ -1,8 +1,8 @@
 import React from "react";
 import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
-import {
- isMarkActive, CustomEditor, EditorValue, SlateEditor, ReactEditor, withReact, withHistory, createEditor, Slate, EFormat, isBlockActive
+import { isMarkActive, CustomEditor, EditorValue, SlateEditor, ReactEditor, withReact,
+  withHistory, createEditor, Slate, EFormat, isBlockActive, Editor
 } from "@concord-consortium/slate-editor";
 import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
 import { BaseComponent } from "../../base";
@@ -90,7 +90,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private disposers: IReactionDisposer[];
   private prevText: any;
   private textTileDiv: HTMLElement | null;
-  private editor: CustomEditor | undefined;
+  private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarTileApi: ITileApi | undefined;
   private plugins: any[] | undefined; // FIXME
@@ -117,9 +117,15 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       value: initialValue
     });
     this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
-    // FIXME: Loop over all the plugins instead of just the one
-    const options: any = {};
-    options.onInitEditor = this.plugins[0]?.onInitEditor;
+    const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate    
+    // Gather all the plugin init functions and pass that to slate.
+    const onInitEditor = (e: Editor) => {
+       this.plugins?.forEach(plugin => {
+        e = plugin.onInitEditor(e);
+       });
+      return e;
+    };
+    options.onInitEditor = onInitEditor;
     this.editor = withHistory(withReact(createEditor(options)));
 
     this.disposers = [];
