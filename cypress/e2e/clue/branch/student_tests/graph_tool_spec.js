@@ -29,6 +29,8 @@ context('Graph Tool', function() {
             it('dummy test', function () {
                 expect(true).to.equal(true);
             });
+        });
+    });
             // it('will add a point to the origin', function(){
             //     clueCanvas.addTile('geometry');
             //     graphToolTile.addPointToGraph(0,0);
@@ -57,7 +59,6 @@ context('Graph Tool', function() {
             //     graphToolTile.getGraphPoint().last().click({force:true}).click({force:true});
             //     graphToolTile.getGraphPolygon().should('exist');
             // });
-        });
 
         // describe('restore points to canvas', function(){
         //     it('will verify restore of point at origin', function(){
@@ -237,23 +238,20 @@ context('Graph Tool', function() {
         //         });
         //     });
 
-            describe.skip('movable line tests',()=>{
-                // it('verify add a movable line', function(){
-                //     canvas.createNewExtraDocumentFromFileMenu(lineDoc, "my-work");
-                //     clueCanvas.addTile('geometry');
-                //     graphToolTile.addMovableLine();
+            // describe.skip('movable line tests',()=>{
+            //     // it('verify add a movable line', function(){
+            //     //     canvas.createNewExtraDocumentFromFileMenu(lineDoc, "my-work");
+            //     //     clueCanvas.addTile('geometry');
+            //     //     graphToolTile.addMovableLine();
 
-                // });
-                // it.skip('verify move the movable line', function () {
+            //     // });
+            //     // it.skip('verify move the movable line', function () {
 
-                // });
-                // it.skip('verify rotate the movable line', function () {
+            //     // });
+            //     // it.skip('verify rotate the movable line', function () {
 
-                // });
-                // it.skip('verify movable line equation edit', function () {
+            //     // });
+            //     // it.skip('verify movable line equation edit', function () {
 
-                // });
-            });
-        });
-    });
-});
+            //     // });
+            // });
