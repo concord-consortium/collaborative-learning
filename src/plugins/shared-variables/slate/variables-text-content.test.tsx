@@ -1,5 +1,5 @@
 import { IAnyStateTreeNode, IAnyType, types, castToSnapshot } from "mobx-state-tree";
-import { createEditor, Editor, withHistory, withReact } from "@concord-consortium/slate-editor";
+import { createEditor, withHistory, withReact } from "@concord-consortium/slate-editor";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { TextContentModel, TextContentModelType } from "../../../models/tiles/text/text-content";
@@ -71,12 +71,12 @@ const setupContainer = (content: TextContentModelType, variables?: SharedVariabl
 // };
 const getEditor = (textContent: TextContentModelType) =>{
   const options = {
-    onInitEditor:  (tc: TextContentModelType)=>VariablePlugin(tc),
+    onInitEditor:  (tc: any)=>VariablePlugin(tc),
   };
   return withHistory(withReact(createEditor(options)));
 };
 
-const getValueParagraphNodes = (editor: Editor) => {
+const getValueParagraphNodes = (editor: any) => { //FIXME: type
   // for some reason the types don't match the structure returned by toJSON()
   //return editor.value;
   return (editor.value?.document?.nodes?.[0] as any)?.nodes || [];

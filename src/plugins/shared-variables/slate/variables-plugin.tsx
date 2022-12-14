@@ -63,7 +63,7 @@ export const ClueVariableComponent = ({ attributes, children, element }: RenderE
   // text-toolbar so the configuredVariable command defined above doesn't have
   // direct access to it.
   const _onDoubleClick = () => {
-    editor.emitEvent("configureVariable", element);
+    editor?.emitEvent("configureVariable", element);
   };
 
   const onDoubleClick = isSerializing ? undefined : _onDoubleClick; // Don't serialize click handler
@@ -88,7 +88,7 @@ export function withClueVariables(editor: Editor, textContent: TextContentModelT
   editor.isInline = (element:BaseElement) => (element.type === kVariableFormat) || isInline(element);
   editor.isVoid = (element:BaseElement) => (element.type === kVariableFormat) || isVoid(element);
 
-  editor.configureElement = (format: string, dialogController: IDialogController, element?: VariableElement) =>{
+  editor.configureElement = (format: string, dialogController: IDialogController, element?: any) =>{ // FIXME: type
     const variables = getVariables(textContent); 
     const hasVariable = editor.isElementActive(kVariableFormat);
 
@@ -180,7 +180,7 @@ function getReferenceFromNode(node?: VariableElement) {
 
 function getDialogValuesFromNode(editor: Editor, variables: VariableType[], node: VariableElement | undefined) {
   const values: Record<string, string> = {};
-  const highlightedText = Editor.string(editor, editor.selection);
+  const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
   const reference = getReferenceFromNode(node);
   if (reference) {
     // I think the only time this will happen is when the user double clicked on a

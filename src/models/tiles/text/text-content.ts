@@ -22,7 +22,7 @@ export const TextContentModel = TileContentModel
     format: types.maybe(types.string)
   })
   .volatile(self => ({
-    editor:  undefined as CustomEditor | undefined,
+    editor:  undefined as any | undefined, // FIXME: type
   }))
   .views(self => ({
     get joinText() {
