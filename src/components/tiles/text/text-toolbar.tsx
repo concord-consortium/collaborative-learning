@@ -6,7 +6,7 @@ import { TextToolbarButton } from "./text-toolbar-button";
 import { useTextToolDialog } from "./text-tile-dialog";
 import { IRegisterTileApiProps } from "../tile-component";
 import { getTextPluginInfo } from "../../../models/tiles/text/text-plugin-info";
-import { EFormat, toggleMark, toggleSuperSubscript, toggleBlock } from "@concord-consortium/slate-editor";
+import { EFormat, toggleMark, toggleSuperSubscript, toggleBlock, Editor, BaseElement } from "@concord-consortium/slate-editor";
 
 import { isMac } from "../../../utilities/browser";
 import BoldToolIcon from "../../../assets/icons/text/bold-text-icon.svg";
@@ -26,7 +26,7 @@ interface IButtonDef {
 
 interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
   selectedButtons: string[];
-  editor?: any; // FIXME: Which editor type is this? CustomEditor?
+  editor?: Editor;
 }
 
 const kShortcutPrefix = isMac() ? "Cmd-" : "Ctrl-";
@@ -107,14 +107,8 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
       case "undo":
         editor.undo();
         break;
-      case "m2s-variables": 
-        // FIXME: make this work as part of plugin instead.
-        // I *think* we could repurpose toolInfo.command to the the plugin type and use that instead.
-        editor.configureElement("clueVariable", dialogController);
-        break;
       default: {
         const toolInfo = getTextPluginInfo(buttonIconName);
-
         // Handle Text Plugins
         if (!toolInfo?.command) {
           console.warn("Can't find text plugin command for", buttonIconName);
@@ -128,15 +122,15 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
         // order. The reason is that I hope we can provide additional
         // controllers or services that plugins can use. This change should be
         // made in slate-editor too for consistency.
-        editor.command(toolInfo?.command, dialogController);
+        editor.configureElement(toolInfo?.command, dialogController);
       }
     }
   };
 
   // listen for configuration requests from plugins
   useEffect(() => {
-    const handler = (event: string, ...args: any) => {
-      editor.configureElement("clueVariable", dialogController, event);
+    const handler = (event: BaseElement, ...args: any) => {
+      editor?.configureElement("clueVariable", dialogController, event);
     };
     editor?.onEvent("configureVariable", handler);
     return () => {

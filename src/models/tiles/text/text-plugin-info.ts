@@ -1,4 +1,3 @@
-import { BaseElement } from "@concord-consortium/slate-editor";
 import { FunctionComponent, SVGProps } from "react";
 import { SharedModelType } from "../../shared/shared-model";
 import { TextContentModelType } from "./text-content";
@@ -8,7 +7,7 @@ export interface ITextPluginInfo {
   Icon: FunctionComponent<SVGProps<SVGSVGElement>>;
   toolTip: string;
   createSlatePlugin:
-    (textContent: TextContentModelType) => any; //FIXME: this is not the right type 
+    (textContent: TextContentModelType) => any; //FIXME: This needs a type.
   command: string;
   updateTextContentAfterSharedModelChanges?:
     (textContent: TextContentModelType, sharedModel?: SharedModelType) => void;
