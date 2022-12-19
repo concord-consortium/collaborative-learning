@@ -90,7 +90,7 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
       }
     });
   
-  };
+  }
   const [showEditVariableDialog] = useEditVariableDialog (
     { variable: selectedVariable }
   );
@@ -107,14 +107,14 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
     Transforms.insertNodes(editor, varElt);
   };
 
-  const insertVariables = (variables: VariableType[]) => { 
+  const insertVariables = (varsToInsert: VariableType[]) => { 
     if (!editor) {
       console.warn("inserting variable but there is no editor");
       return;
     }
-    variables.forEach((variable) =>{
+    varsToInsert.forEach((variable) =>{
       insertVariable(variable);
-   })
+   });
   };
   const sharedModel = getOrFindSharedModel(textContent);
   const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
