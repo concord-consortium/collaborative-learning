@@ -37,7 +37,7 @@ export interface VariableElement extends BaseElement {
   children: EditorValue
 }
 
-export const isVariableElement = (element: CustomElement): element is VariableElement => {
+export const isVariableElement = (element: BaseElement): element is VariableElement => {
   return element.type === kVariableFormat;
 };
 
@@ -63,6 +63,7 @@ export const ClueVariableComponent = ({ attributes, children, element }: RenderE
   // text-toolbar so the configuredVariable command defined above doesn't have
   // direct access to it.
   const _onDoubleClick = () => {
+    console.log('double click variable');
     editor?.emitEvent("configureVariable", element);
   };
 

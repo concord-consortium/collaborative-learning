@@ -96,7 +96,7 @@ describe("VariablesTextContent", () => {
     });
     setupContainer(textContent, variables);
     const editor = getEditor(textContent);
-    textContent.setEditor(editor);
+    //textContent.setEditor(editor);
 
     const initialNodes: any = [
       {

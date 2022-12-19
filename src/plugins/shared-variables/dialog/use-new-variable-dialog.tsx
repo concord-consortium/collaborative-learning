@@ -9,17 +9,21 @@ import { SharedVariablesType } from "../shared-variables";
 interface IUseNewVariableDialog {
   addVariable: (variable: VariableType ) => void;
   sharedModel: SharedVariablesType;
+  namePrefill? : string // FIXME
 }
-export const useNewVariableDialog = ({ addVariable, sharedModel }: IUseNewVariableDialog) => {
-  const [newVariable, setNewVariable] = useState(Variable.create({}));
+export const useNewVariableDialog = ({ addVariable, sharedModel, namePrefill }: IUseNewVariableDialog) => {
+  // FIXME: This doesn't work because the variable isn't getting created every time the prop changes.
+  // What should I do instead?
+  const [newVariable, setNewVariable] = useState(Variable.create({name: namePrefill || undefined}));
 
   const handleClick = () => {
+    console.log('handle click');
     sharedModel.addVariable(newVariable);
     const sharedVariable = sharedModel?.variables.find(v => v === newVariable);
     if (sharedVariable) {
       addVariable(sharedVariable);
     }
-    setNewVariable(Variable.create({}));
+    setNewVariable(Variable.create({name: namePrefill || undefined}));
   };
 
   const [showModal, hideModal] = useCustomModal({

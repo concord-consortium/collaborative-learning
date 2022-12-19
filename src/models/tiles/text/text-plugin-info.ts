@@ -6,7 +6,7 @@ export interface ITextPluginInfo {
   iconName: string;
   Icon: FunctionComponent<SVGProps<SVGSVGElement>>;
   toolTip: string;
-  createSlatePlugin:
+  createSlatePlugin?:
     (textContent: TextContentModelType) => any; //FIXME: This needs a type.
   command: string;
   updateTextContentAfterSharedModelChanges?:
