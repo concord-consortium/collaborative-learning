@@ -181,11 +181,11 @@
           "subtitle": "y-intercepts Other than 1",
           "sections": [
                         {
-                        "type": "introduction",
-                        "content": {
-                            "tiles": []
-                        },
-                        "supports": []
+                            "type": "introduction",
+                            "content": {
+                                "tiles": []
+                            },
+                            "supports": []
                         },
                         {
                             "type": "initialChallenge",
