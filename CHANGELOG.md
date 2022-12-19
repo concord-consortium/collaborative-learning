@@ -1,5 +1,5 @@
 # Changelog
-## Version 3.6.0 - Dec 13, 2022
+## Version 3.6.0 - Dec 19, 2022
 
 Version 3.6.0 updates CLUE to use the AWS Log Ingester in place of the old Heroku Log Ingester and there are also content updates to the unti Growing Growing Growing's 1.3 and 2.3 questions to show the problem sections.
 
