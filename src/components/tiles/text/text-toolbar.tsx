@@ -7,6 +7,7 @@ import { useTextToolDialog } from "./text-tile-dialog";
 import { IRegisterTileApiProps } from "../tile-component";
 import { getTextPluginInfo } from "../../../models/tiles/text/text-plugin-info";
 import { EFormat, toggleMark, toggleSuperSubscript, toggleBlock, Editor, BaseElement, useSelected, CustomElement, Transforms } from "@concord-consortium/slate-editor";
+import { observer } from "mobx-react";
 
 import { isMac } from "../../../utilities/browser";
 import BoldToolIcon from "../../../assets/icons/text/bold-text-icon.svg";
@@ -31,7 +32,6 @@ import InsertVariableCardIcon from "../../../plugins/shared-variables/assets/ins
 
 import { VariableType } from "@concord-consortium/diagram-view";
 import { useInsertVariableDialog } from "../../../plugins/shared-variables/dialog/use-insert-variable-dialog";
-//import { useEditVariableDialog } from "./plugins/shared-variables/dialog/use-edit-variable-dialog";
 interface IButtonDef {
   iconName: string;  // icon name for this button.
   Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>; // icon for the button
@@ -95,7 +95,6 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
     { variable: selectedVariable }
   );
 
-  
   // MOVE ME: probably doesn't belong in the toolbar?
   const insertVariable = (variable: VariableType) => { 
     if (!editor) {
@@ -118,17 +117,15 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   };
   const sharedModel = getOrFindSharedModel(textContent);
   const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
-  //console.log("highlight: " + highlightedText);
   const [showNewVariableDialog] =
     useNewVariableDialog(
       { addVariable: insertVariable,
         sharedModel: sharedModel as SharedVariablesType,
-        namePrefill: highlightedText // FIXME: this isn't working
+        namePrefill: highlightedText
       });
   
   const { selfVariables, otherVariables, unusedVariables } = variableBuckets(textContent, sharedModel);
   const [showInsertVariableDialog] = useInsertVariableDialog({
-    disallowSelf: true,
     Icon: InsertVariableCardIcon,
     insertVariables,
     otherVariables,

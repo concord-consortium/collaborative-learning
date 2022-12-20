@@ -20,22 +20,13 @@ registerSharedModelInfo({
 // Should one registerPlugin call add all the variable buttons? Probably.
 // Adding it this way (multiple registrations and buttons specified in the settings of app config for now
 // so I can work on the funtionality of the buttons.
-// Remove this one once the other three work
-registerTextPluginInfo({
-  iconName: "m2s-variables",
-  Icon: VariablesToolIcon,
-  toolTip: "Variables",
-  // This is required for all the variable buttons, but we only need to do it once
-  createSlatePlugin: textContent=> VariablesPlugin(textContent),
-  command: "configureVariable",
-  updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges
-});
 
 //"new-variable", "insert-variable", "edit-variable"
 registerTextPluginInfo({
   iconName: "new-variable",
   Icon: AddVariableChipIcon,
   toolTip: "New Variable",
+  createSlatePlugin: textContent=> VariablesPlugin(textContent),
   command: "new-text-variable",
   updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges
 });

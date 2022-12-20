@@ -94,10 +94,9 @@ export function getOrFindSharedModel(textContent: TextContentModelType) {
 export function updateAfterSharedModelChanges(
     textContent: TextContentModelType, sharedModel?: SharedModelType) {
   //const {editor} = textContent;
-  // FIXME: DO WE STILL NEED THIS??? Returning early so this doesn't run because
-  // when a variable is deleted from the diagram or drawing tile, 
-  // we don't seem to be deleting it.
-  // If we do still want, this, I believe the code would look something like this:
+  // FIXME: DO WE STILL NEED THIS??? I don't think we need it now that we have
+  // the unused variable list in the dialog.
+  // If we do still want, this, I believe the new code would look something like this:
   // if (textContent.editor) {
   //   const variables = getVariables(textContent);
   //   for (const [node, path] of Editor.nodes(textContent.editor, {at: [], mode: 'all'})) {

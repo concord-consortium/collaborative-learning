@@ -63,8 +63,9 @@ export const ClueVariableComponent = ({ attributes, children, element }: RenderE
   // text-toolbar so the configuredVariable command defined above doesn't have
   // direct access to it.
   const _onDoubleClick = () => {
+    // FIXME: call same function as the toolbar once that code is cleaner.
     console.log('double click variable');
-    editor?.emitEvent("configureVariable", element);
+
   };
 
   const onDoubleClick = isSerializing ? undefined : _onDoubleClick; // Don't serialize click handler
