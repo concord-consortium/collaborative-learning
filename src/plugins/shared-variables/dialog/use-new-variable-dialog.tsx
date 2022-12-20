@@ -44,7 +44,7 @@ export const useNewVariableDialog = ({ addVariable, sharedModel, namePrefill }: 
       newVariable.setName(namePrefill);
     }
     show();
-  }, [namePrefill, newVariable])
+  }, [namePrefill, newVariable]);
 
   return [showModal, hideModal];
 };
