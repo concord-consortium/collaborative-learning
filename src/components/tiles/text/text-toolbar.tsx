@@ -1,14 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useContext } from "react";
 import ReactDOM from "react-dom";
+import _ from "lodash";
+import { EFormat, toggleMark, toggleSuperSubscript, toggleBlock, Editor} from "@concord-consortium/slate-editor";
+
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { TextToolbarButton } from "./text-toolbar-button";
 import { useTextToolDialog } from "./text-tile-dialog";
 import { IRegisterTileApiProps } from "../tile-component";
-import { getTextPluginInfo } from "../../../models/tiles/text/text-plugin-info";
-import { EFormat, toggleMark, toggleSuperSubscript, toggleBlock, Editor, BaseElement } from "@concord-consortium/slate-editor";
-
+import { getAllTextPluginInfos, getTextPluginInfo } from "../../../models/tiles/text/text-plugin-info";
+import { variableBuckets } from "../../../plugins/shared-variables/shared-variables-utils";
+import { TextContentModelType } from "../../../models/tiles/text/text-content";
+import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
+import { getVariables, getOrFindSharedModel } from "../../../plugins/shared-variables/slate/variables-text-content";
+import { findSelectedVariable, insertTextVariable, insertTextVariables} from "../../../plugins/shared-variables/slate/variables-plugin";
 import { isMac } from "../../../utilities/browser";
+
+
 import BoldToolIcon from "../../../assets/icons/text/bold-text-icon.svg";
 import ItalicToolIcon from "../../../assets/icons/text/italic-text-icon.svg";
 import UnderlineToolIcon from "../../../assets/icons/text/underline-text-icon.svg";
@@ -16,8 +24,11 @@ import SuperscriptToolIcon from "../../../assets/icons/text/superscript-text-ico
 import SubscriptToolIcon from "../../../assets/icons/text/subscript-text-icon.svg";
 import NumberedListToolIcon from "../../../assets/icons/text/numbered-list-text-icon.svg";
 import BulletedListToolIcon from "../../../assets/icons/text/bulleted-list-text-icon.svg";
+import InsertVariableCardIcon from "../../../plugins/shared-variables/assets/insert-variable-chip-icon.svg";
+
 
 import "./text-toolbar.sass";
+
 interface IButtonDef {
   iconName: string;  // icon name for this button.
   Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>; // icon for the button
@@ -27,6 +38,7 @@ interface IButtonDef {
 interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
   selectedButtons: string[];
   editor?: Editor;
+  textContent?: TextContentModelType,
 }
 
 const kShortcutPrefix = isMac() ? "Cmd-" : "Ctrl-";
@@ -49,6 +61,39 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   const { documentContent, editor, selectedButtons, onIsEnabled, ...others } = props;
   const toolbarSetting = useSettingFromStores("tools", "text") as unknown as string[];
   const enabled = onIsEnabled();
+  const textContent = useContext(TextContentModelContext);
+  const selectedElements = editor?.selectedElements(); // FIXME: selectedElements reports the wrong return type.
+  const variables = getVariables(textContent); 
+  const hasVariable = editor?.isElementActive("clueVariable"); // FIXME: use const
+  const selectedVariable = hasVariable ? findSelectedVariable(selectedElements, variables) : undefined;
+  const sharedModel = getOrFindSharedModel(textContent);
+  const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
+  
+  const plugins = getAllTextPluginInfos();
+  const pluginModalHandlers: Record<string, ()=> void> = {}; 
+  plugins.forEach(plugin => {
+    if (plugin?.command) {
+      const { selfVariables, otherVariables, unusedVariables } = variableBuckets(textContent, sharedModel);
+      // FIXME: I doubt this is the best way to do this... Each of the variable dialog modals needs a different
+      // set of parameters, but I just sent them all to make this code semi-generic.
+      const [showDialog] = plugin.command (
+        { variable: selectedVariable,
+          textContent,
+          sharedModel,
+          Icon: InsertVariableCardIcon,
+          addVariable: _.bind(insertTextVariable, null, _, editor),
+          namePrefill: highlightedText,
+          insertVariables: _.bind(insertTextVariables, null, _, editor),
+          otherVariables,
+          selfVariables,
+          unusedVariables
+        }
+      );
+      const name = plugin.iconName;
+      pluginModalHandlers[name] = showDialog;
+    }
+  });
+
   const toolbarLocation = useFloatingToolbarLocation({
                             documentContent,
                             toolbarHeight: 29,
@@ -110,33 +155,14 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
       default: {
         const toolInfo = getTextPluginInfo(buttonIconName);
         // Handle Text Plugins
-        if (!toolInfo?.command) {
-          console.warn("Can't find text plugin command for", buttonIconName);
+        if (!toolInfo || !pluginModalHandlers[toolInfo.iconName]) {
+          console.warn("Can't find text plugin handler for", buttonIconName);
           break;
         }
-        // Send the dialogController to all plugins
-        //
-        // TODO: I think this should be an object: `{dialogController}`
-        // instead of a raw param. This way we can add more props to it
-        // without changing the method signature and worrying about argument
-        // order. The reason is that I hope we can provide additional
-        // controllers or services that plugins can use. This change should be
-        // made in slate-editor too for consistency.
-        editor.configureElement(toolInfo?.command, dialogController);
+        pluginModalHandlers[toolInfo.iconName]();
       }
     }
   };
-
-  // listen for configuration requests from plugins
-  useEffect(() => {
-    const handler = (event: BaseElement, ...args: any) => {
-      editor?.configureElement("clueVariable", dialogController, event);
-    };
-    editor?.onEvent("configureVariable", handler);
-    return () => {
-      editor?.offEvent("configureVariable", handler);
-    };
-  }, [editor, dialogController]);
 
   return documentContent
     ? ReactDOM.createPortal(

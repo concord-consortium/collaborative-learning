@@ -1,5 +1,5 @@
 import { VariableType } from "@concord-consortium/diagram-view";
-import { BaseElement, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
+import { BaseElement, Node, Editor, CustomElement, EditorValue, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
 import { getType } from "mobx-state-tree";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
@@ -25,6 +25,26 @@ function getSharedVariablesModel(textContent: TextContentModelType) {
 export function getVariables(textContent: TextContentModelType): VariableType[] {
   const sharedModel = getOrFindSharedModel(textContent);
   return sharedModel ? sharedModel.variables : [];
+}
+
+export const getTileTextVariables = (textContent: TextContentModelType) => {
+  const variableIds: string[] = [];
+  if (textContent.editor) {
+    for (const [node, path] of Editor.nodes(textContent.editor, {at: [], mode: 'all'})) {
+      if (Editor.isInline(textContent.editor, node) && isVariableElement(node)) {
+        variableIds.push(node.reference);
+      }
+    }
+  }   
+  const variables = variableIds.map(id => findVariable(textContent, id));
+  const filteredVariables = variables.filter(variable => variable !== undefined);
+  return filteredVariables as VariableType[];
+};
+
+export function findVariable(textContent: TextContentModelType, variableId: string) {
+  const variables = getVariables(textContent);
+  const variable = variables.find(v => v.id === variableId);
+  return variable;
 }
 
 export function getOrFindSharedModel(textContent: TextContentModelType) {
@@ -73,32 +93,18 @@ export function getOrFindSharedModel(textContent: TextContentModelType) {
 
 export function updateAfterSharedModelChanges(
     textContent: TextContentModelType, sharedModel?: SharedModelType) {
-  const {editor} = textContent;
-
-  // Look for chips in the document (editor.value)
-  // If any of these chips reference variables that no long exist, delete
-  // them from the document.
-  if (!editor) {
-    return;
-  }
-  const variables = getVariables(textContent);
-
-  const document = editor.value.document;
-  const variableNodes = document.filterDescendants((node: BaseElement) => {
-    return isVariableElement(node);
-  });
-  variableNodes.forEach((node: VariableElement) => {
-    if (!node) {
-      // For some reason Immutable iterable.forEach can return undefined values
-      return;
-    }
-    const inlineNode = node as VariableElement;
-
-    // Does this variable exist in our list?
-    const {reference} = inlineNode;
-    if (!variables.find(v => v.id === reference)) {
-      const nodePath = node && ReactEditor.findPath(editor, node);
-      Transforms.removeNodes(editor, { at: nodePath });
-    }
-  });
+  //const {editor} = textContent;
+  // FIXME: DO WE STILL NEED THIS??? I don't think we need it now that we have
+  // the unused variable list in the dialog.
+  // If we do still want, this, I believe the new code would look something like this:
+  // if (textContent.editor) {
+  //   const variables = getVariables(textContent);
+  //   for (const [node, path] of Editor.nodes(textContent.editor, {at: [], mode: 'all'})) {
+  //     if (Editor.isInline(textContent.editor, node) && isVariableElement(node)) {
+  //       if (!variables.find(v => v.id === node.reference)) {
+  //         Transforms.removeNodes(editor, { at: path });
+  //       }
+  //     }
+  //   }
+  // }   
 }

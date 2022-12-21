@@ -121,13 +121,16 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     // Gather all the plugin init functions and pass that to slate.
     const onInitEditor = (e: Editor) => {
        this.plugins?.forEach(plugin => {
-        e = plugin.onInitEditor(e);
+          if (plugin.onInitEditor) {
+            e = plugin.onInitEditor(e);
+          }
        });
       return e;
     };
     options.onInitEditor = onInitEditor;
     options.history = true;
     this.editor = createEditor(options);
+    this.getContent().setEditor(this.editor);
 
     this.disposers = [];
     // Synchronize slate with model changes. e.g. changes to any text in another tile is refelected here.
