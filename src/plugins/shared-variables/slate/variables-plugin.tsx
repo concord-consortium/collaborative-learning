@@ -1,21 +1,19 @@
 import React, { useContext } from "react";
 import classNames from "classnames/dedupe";
+import _ from "lodash";
+
 import {
   Editor,
-  IDialogController, IRow,
   RenderElementProps,
   useSerializing,
-  CustomElement,
   useSelected,
-  ReactEditor,
   Transforms,
   registerElement,
-  useSlateStatic,
   CustomEditor,
   BaseElement,
   EditorValue,
 } from "@concord-consortium/slate-editor";
-import { VariableChip } from "@concord-consortium/diagram-view";
+import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
 import { getVariables } from "./variables-text-content";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
@@ -41,6 +39,43 @@ export const isVariableElement = (element: BaseElement): element is VariableElem
   return element.type === kVariableFormat;
 };
 
+export const insertTextVariable = (variable: VariableType, editor?: Editor) => {
+  if (!editor) {
+    console.warn("inserting variable but there is no editor");
+    return;
+  }
+  const reference = variable.id;
+  const varElt: VariableElement = { type: "clueVariable", reference, children: [{text: "" }]};
+  Transforms.insertNodes(editor, varElt);
+};
+
+export const findSelectedVariable = (selectedElements: any, variables: VariableType[]) => {
+  let selected = undefined;
+    // FIXME: The editor.selectedElements claims that it returns a BaseElement[] but it really returns a NodeEntry
+    // which is a list of pairs. [Node, Path] 
+    // https://docs.slatejs.org/api/nodes/node-entry
+    // There's some weirdness below to work around that, but
+    // we should either update the return type our slate lib or just return the BaseElement list.
+  selectedElements?.forEach((selectedItem: any) => {
+    const baseElement = (selectedItem as any)[0];
+    if (isVariableElement(baseElement)) {
+      const {reference} = baseElement;
+      selected = variables.find(v => v.id === reference);
+    }
+  });
+  return selected;
+};
+
+export const insertTextVariables = (variables: VariableType[], editor?: Editor) => {
+  if (!editor) {
+    console.warn("inserting variable but there is no editor");
+    return;
+  }
+  variables.forEach((variable) =>{
+    insertTextVariable(variable, editor);
+ });
+};
+
 export const ClueVariableComponent = ({ attributes, children, element }: RenderElementProps) => {
   const textContent = useContext(TextContentModelContext);
   const isHighlighted =  useSelected(); 
@@ -52,8 +87,6 @@ export const ClueVariableComponent = ({ attributes, children, element }: RenderE
 
   const _onDoubleClick = () => {
     // FIXME: call same function as the toolbar once that code is cleaner.
-    console.log('double click variable');
-
   };
 
   const onDoubleClick = isSerializing ? undefined : _onDoubleClick; // Don't serialize click handler

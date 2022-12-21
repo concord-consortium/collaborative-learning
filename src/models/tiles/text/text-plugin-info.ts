@@ -1,4 +1,7 @@
+import { VariableType } from "@concord-consortium/diagram-view";
+import { ModalType } from "@concord-consortium/react-modal-hook";
 import { FunctionComponent, SVGProps } from "react";
+import { SharedVariablesType } from "src/plugins/shared-variables/shared-variables";
 import { SharedModelType } from "../../shared/shared-model";
 import { TextContentModelType } from "./text-content";
 
@@ -8,7 +11,7 @@ export interface ITextPluginInfo {
   toolTip: string;
   createSlatePlugin?:
     (textContent: TextContentModelType) => any; //FIXME: This needs a type.
-  command: string;
+  command: (args?:any)=> any; // FIXME: types
   updateTextContentAfterSharedModelChanges?:
     (textContent: TextContentModelType, sharedModel?: SharedModelType) => void;
 }
@@ -26,7 +29,7 @@ export function getTextPluginInfo(id: string) {
 // TODO: perhaps this should only add the plugins that have been configured
 // as tools by the app-config.
 export function getTextPluginInstances(textContent: TextContentModelType) {
-  //FIXME: need to figure out what this should be
+  // FIXME: need to figure out what this should be
   const pluginInstances:  any[] = []; // FIXME type
   Object.values(gTextPluginInfoMap).forEach(pluginInfo => {
     if (pluginInfo?.createSlatePlugin) {

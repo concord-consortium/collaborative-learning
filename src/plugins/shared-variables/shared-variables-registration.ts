@@ -1,7 +1,6 @@
 import { registerSharedModelInfo } from "../../models/shared/shared-model-registry";
 import { registerTextPluginInfo } from "../../models/tiles/text/text-plugin-info";
 import { kSharedVariablesID, SharedVariables } from "./shared-variables";
-import VariablesToolIcon from "./slate/variables.svg";
 import AddVariableChipIcon from "./assets/add-variable-chip-icon.svg";
 import InsertVariableChipIcon from "./assets/insert-variable-chip-icon.svg";
 import VariableEditorIcon from "./assets/variable-editor-icon.svg";
@@ -10,6 +9,9 @@ import { updateAfterSharedModelChanges } from "./slate/variables-text-content";
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
 import { EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject }
   from "./drawing/variable-object";
+import { useEditVariableDialog } from "./dialog/use-edit-variable-dialog";
+import { useNewVariableDialog } from "./dialog/use-new-variable-dialog";
+import { useInsertVariableDialog } from "./dialog/use-insert-variable-dialog";
 
 registerSharedModelInfo({
   type: kSharedVariablesID,
@@ -27,21 +29,21 @@ registerTextPluginInfo({
   Icon: AddVariableChipIcon,
   toolTip: "New Variable",
   createSlatePlugin: textContent=> VariablesPlugin(textContent),
-  command: "new-text-variable",
+  command: useNewVariableDialog,
   updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges
 });
 registerTextPluginInfo({
   iconName: "insert-variable",
   Icon: InsertVariableChipIcon,
   toolTip: "Insert Variable",
-  command: "insert-text-variable",
+  command: useInsertVariableDialog,
   updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges
 });
 registerTextPluginInfo({
   iconName: "edit-variable",
   Icon: VariableEditorIcon,
   toolTip: "Edit Variable",
-  command: "edit-text-variable",
+  command: useEditVariableDialog,
   updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges
 });
 

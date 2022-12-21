@@ -1,15 +1,22 @@
-import React, { useEffect, useContext } from "react";
+import React, { useContext } from "react";
 import ReactDOM from "react-dom";
+import _ from "lodash";
+import { EFormat, toggleMark, toggleSuperSubscript, toggleBlock, Editor} from "@concord-consortium/slate-editor";
+
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { TextToolbarButton } from "./text-toolbar-button";
 import { useTextToolDialog } from "./text-tile-dialog";
 import { IRegisterTileApiProps } from "../tile-component";
-import { getTextPluginInfo } from "../../../models/tiles/text/text-plugin-info";
-import { EFormat, toggleMark, toggleSuperSubscript, toggleBlock, Editor, BaseElement, useSelected, CustomElement, Transforms } from "@concord-consortium/slate-editor";
-import { observer } from "mobx-react";
-
+import { getAllTextPluginInfos, getTextPluginInfo } from "../../../models/tiles/text/text-plugin-info";
+import { variableBuckets } from "../../../plugins/shared-variables/shared-variables-utils";
+import { TextContentModelType } from "../../../models/tiles/text/text-content";
+import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
+import { getVariables, getOrFindSharedModel } from "../../../plugins/shared-variables/slate/variables-text-content";
+import { findSelectedVariable, insertTextVariable, insertTextVariables} from "../../../plugins/shared-variables/slate/variables-plugin";
 import { isMac } from "../../../utilities/browser";
+
+
 import BoldToolIcon from "../../../assets/icons/text/bold-text-icon.svg";
 import ItalicToolIcon from "../../../assets/icons/text/italic-text-icon.svg";
 import UnderlineToolIcon from "../../../assets/icons/text/underline-text-icon.svg";
@@ -17,21 +24,11 @@ import SuperscriptToolIcon from "../../../assets/icons/text/superscript-text-ico
 import SubscriptToolIcon from "../../../assets/icons/text/subscript-text-icon.svg";
 import NumberedListToolIcon from "../../../assets/icons/text/numbered-list-text-icon.svg";
 import BulletedListToolIcon from "../../../assets/icons/text/bulleted-list-text-icon.svg";
-
-import "./text-toolbar.sass";
-import { variableBuckets } from "../../../plugins/shared-variables/shared-variables-utils";
-import { useEditVariableDialog } from "../../../plugins/shared-variables/dialog/use-edit-variable-dialog";
-import { TextContentModelType } from "../../../models/tiles/text/text-content";
-import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
-import { getVariables, getOrFindSharedModel } from "../../../plugins/shared-variables/slate/variables-text-content";
-import { isVariableElement, VariableElement } from "../../../plugins/shared-variables/slate/variables-plugin";
-import { useNewVariableDialog } from "../../../plugins/shared-variables/dialog/use-new-variable-dialog";
-import { SharedVariablesType } from "../../../plugins/shared-variables/shared-variables";
 import InsertVariableCardIcon from "../../../plugins/shared-variables/assets/insert-variable-chip-icon.svg";
 
 
-import { VariableType } from "@concord-consortium/diagram-view";
-import { useInsertVariableDialog } from "../../../plugins/shared-variables/dialog/use-insert-variable-dialog";
+import "./text-toolbar.sass";
+
 interface IButtonDef {
   iconName: string;  // icon name for this button.
   Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>; // icon for the button
@@ -65,73 +62,38 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   const toolbarSetting = useSettingFromStores("tools", "text") as unknown as string[];
   const enabled = onIsEnabled();
   const textContent = useContext(TextContentModelContext);
-  const selectedElements = editor?.selectedElements();
- 
+  const selectedElements = editor?.selectedElements(); // FIXME: selectedElements reports the wrong return type.
   const variables = getVariables(textContent); 
   const hasVariable = editor?.isElementActive("clueVariable"); // FIXME: use const
-  let selectedVariable = undefined;
-  
-  // FIXME: Move some of this code around. It probably doesn't belong here.
-  if (hasVariable) {
-    // FIXME: What if multiple variables are selected?. This just picks one...
-    //    PRobably the button should be disabled unless exactly 1 is selected? 
-    // FIXME: This function says it returns a BaseElement[] but it really returns a NodeEntry which
-    // is a list of pairs. [Node, Path] 
-    // https://docs.slatejs.org/api/nodes/node-entry
-    // There's some weirdness below to work around that, but
-    // we should either update the return type our slate lib or just return the BaseElement list.
-    selectedElements?.forEach((selectedItem) => {
-      const baseElement = (selectedItem as any)[0];
-      if (isVariableElement(baseElement)) {
-        const {reference} = baseElement;
-        selectedVariable = variables.find(v => v.id === reference);
-      }
-    });
-  
-  }
-  const [showEditVariableDialog] = useEditVariableDialog (
-    { variable: selectedVariable }
-  );
-
-  // MOVE ME: probably doesn't belong in the toolbar?
-  const insertVariable = (variable: VariableType) => { 
-    if (!editor) {
-      console.warn("inserting variable but there is no editor");
-      return;
-    }
-    const reference = variable.id;
-    const varElt: VariableElement = { type: "clueVariable", reference, children: [{text: "" }]};
-    Transforms.insertNodes(editor, varElt);
-  };
-
-  const insertVariables = (varsToInsert: VariableType[]) => { 
-    if (!editor) {
-      console.warn("inserting variable but there is no editor");
-      return;
-    }
-    varsToInsert.forEach((variable) =>{
-      insertVariable(variable);
-   });
-  };
+  const selectedVariable = hasVariable ? findSelectedVariable(selectedElements, variables) : undefined;
   const sharedModel = getOrFindSharedModel(textContent);
   const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
-  const [showNewVariableDialog] =
-    useNewVariableDialog(
-      { addVariable: insertVariable,
-        sharedModel: sharedModel as SharedVariablesType,
-        namePrefill: highlightedText
-      });
   
-  const { selfVariables, otherVariables, unusedVariables } = variableBuckets(textContent, sharedModel);
-  const [showInsertVariableDialog] = useInsertVariableDialog({
-    Icon: InsertVariableCardIcon,
-    insertVariables,
-    otherVariables,
-    selfVariables,
-    unusedVariables
+  const plugins = getAllTextPluginInfos();
+  const pluginModalHandlers: Record<string, ()=> void> = {}; 
+  plugins.forEach(plugin => {
+    if (plugin?.command) {
+      const { selfVariables, otherVariables, unusedVariables } = variableBuckets(textContent, sharedModel);
+      // FIXME: I doubt this is the best way to do this... Each of the variable dialog modals needs a different
+      // set of parameters, but I just sent them all to make this code semi-generic.
+      const [showDialog] = plugin.command (
+        { variable: selectedVariable,
+          textContent,
+          sharedModel,
+          Icon: InsertVariableCardIcon,
+          addVariable: _.bind(insertTextVariable, null, _, editor),
+          namePrefill: highlightedText,
+          insertVariables: _.bind(insertTextVariables, null, _, editor),
+          otherVariables,
+          selfVariables,
+          unusedVariables
+        }
+      );
+      const name = plugin.iconName;
+      pluginModalHandlers[name] = showDialog;
+    }
   });
 
-  
   const toolbarLocation = useFloatingToolbarLocation({
                             documentContent,
                             toolbarHeight: 29,
@@ -193,38 +155,14 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
       default: {
         const toolInfo = getTextPluginInfo(buttonIconName);
         // Handle Text Plugins
-        if (!toolInfo?.command) {
-          console.warn("Can't find text plugin command for", buttonIconName);
+        if (!toolInfo || !pluginModalHandlers[toolInfo.iconName]) {
+          console.warn("Can't find text plugin handler for", buttonIconName);
           break;
         }
-        if (toolInfo.command === 'edit-text-variable') {
-          // FIXME: Change the toolInfo api to be this function instead
-          // or somehow get rid of this weird if statement. 
-          console.log('edt text variable');
-          showEditVariableDialog();
-          break;
-        } else if (toolInfo.command === 'new-text-variable') {
-          showNewVariableDialog();
-          console.log('new text variable');
-          break;
-        } else if (toolInfo.command === 'insert-text-variable') {
-          console.log('insert variable');
-          showInsertVariableDialog();
-          break;
-        }
-        // Send the dialogController to all plugins
-        //
-        // TODO: I think this should be an object: `{dialogController}`
-        // instead of a raw param. This way we can add more props to it
-        // without changing the method signature and worrying about argument
-        // order. The reason is that I hope we can provide additional
-        // controllers or services that plugins can use. This change should be
-        // made in slate-editor too for consistency.
-        editor.configureElement(toolInfo?.command, dialogController);
+        pluginModalHandlers[toolInfo.iconName]();
       }
     }
   };
-
 
   return documentContent
     ? ReactDOM.createPortal(
