@@ -146,6 +146,9 @@ export const UnitModel = types.snapshotProcessor(ModernUnitModel, {
 export interface UnitModelType extends Instance<typeof UnitModel> {}
 
 function getUnitSpec(unitId: string | undefined, appConfig: AppConfigModelType) {
+  if (unitId?.match(/https?:\/\//)) {
+    return {content: unitId, guide: ""};
+  }
   const requestedUnit = unitId ? appConfig.getUnit(unitId) : undefined;
   if (unitId && !requestedUnit) {
     console.warn(`unitId "${unitId}" not found in appConfig.units`);

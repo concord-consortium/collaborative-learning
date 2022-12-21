@@ -418,7 +418,10 @@ const createOfferingIdFromProblem = (unitCode: string, problemOrdinal: string) =
   // create fake offeringIds per problem so we keep section documents separate
   const [major, minor] = problemOrdinal.split(".");
   const toNumber = (s: string, fallback: number) => isNaN(parseInt(s, 10)) ? fallback : parseInt(s, 10);
-  return `${unitCode}${(toNumber(major, 1) * 100) + toNumber(minor, 0)}`;
+  // FIXME: this is a hack to just get things working, we might want to hash the URL or
+  // do some other approach like using the unit code from the loaded unit JSON
+  const offeringPrefix = unitCode.match(/https?:\/\//) ? "external" : unitCode;
+  return `${offeringPrefix}${(toNumber(major, 1) * 100) + toNumber(minor, 0)}`;
 };
 
 export const parseUrl = (url: string) => {
