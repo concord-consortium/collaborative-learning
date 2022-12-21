@@ -66,19 +66,17 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   const enabled = onIsEnabled();
   const textContent = useContext(TextContentModelContext);
   const selectedElements = editor?.selectedElements();
-  //const slateSelection = useSelected();
  
   const variables = getVariables(textContent); 
   const hasVariable = editor?.isElementActive("clueVariable"); // FIXME: use const
   let selectedVariable = undefined;
+  
   // FIXME: Move some of this code around. It probably doesn't belong here.
   if (hasVariable) {
     // FIXME: What if multiple variables are selected?. This just picks one...
     //    PRobably the button should be disabled unless exactly 1 is selected? 
-    // FIXME: This function says it returns a BaseElement[] but for some reason
-    // it returns a list of arrays where the first element in each one is
-    // as BaseElement. 
-    // Ah hah, I think what it realy returns is a NodeEntry: 
+    // FIXME: This function says it returns a BaseElement[] but it really returns a NodeEntry which
+    // is a list of pairs. [Node, Path] 
     // https://docs.slatejs.org/api/nodes/node-entry
     // There's some weirdness below to work around that, but
     // we should either update the return type our slate lib or just return the BaseElement list.
@@ -227,17 +225,6 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
     }
   };
 
-  // listen for configuration requests from plugins
-  useEffect(() => {
-    const handler = (event: BaseElement, ...args: any) => {
-      editor?.configureElement("clueVariable", dialogController, event);
-    };
-    editor?.onEvent("configureVariable", handler);
-    return () => {
-      editor?.offEvent("configureVariable", handler);
-    };
-    
-  }, [editor, dialogController]);
 
   return documentContent
     ? ReactDOM.createPortal(

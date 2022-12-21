@@ -15,8 +15,8 @@ import {
   BaseElement,
   EditorValue,
 } from "@concord-consortium/slate-editor";
-import { Variable, VariableChip, VariableType } from "@concord-consortium/diagram-view";
-import { getVariables, getOrFindSharedModel } from "./variables-text-content";
+import { VariableChip } from "@concord-consortium/diagram-view";
+import { getVariables } from "./variables-text-content";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
 
@@ -45,8 +45,6 @@ export const ClueVariableComponent = ({ attributes, children, element }: RenderE
   const textContent = useContext(TextContentModelContext);
   const isHighlighted =  useSelected(); 
   const isSerializing = useSerializing();
-  const e = useSlateStatic();
-  const editor = isSerializing ? null : e;
 
   if (!isVariableElement(element)) return null;
  
