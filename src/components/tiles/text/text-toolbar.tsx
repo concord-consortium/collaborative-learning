@@ -33,6 +33,7 @@ interface IButtonDef {
   iconName: string;  // icon name for this button.
   Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>; // icon for the button
   toolTip: string;   // Text for the button's tool-tip.
+  buttonEnabled?: (args: any) => boolean; // Decides when the button should be enabled.
 }
 
 interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
@@ -70,12 +71,12 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
   
   const plugins = getAllTextPluginInfos();
+  // Build up a map from plugin => toolbar click handlers.
+  // This assumes the plugin is registering a modal which is not the most generic choice.
   const pluginModalHandlers: Record<string, ()=> void> = {}; 
   plugins.forEach(plugin => {
     if (plugin?.command) {
       const { selfVariables, otherVariables, unusedVariables } = variableBuckets(textContent, sharedModel);
-      // FIXME: I doubt this is the best way to do this... Each of the variable dialog modals needs a different
-      // set of parameters, but I just sent them all to make this code semi-generic.
       const [showDialog] = plugin.command (
         { variable: selectedVariable,
           textContent,
@@ -169,7 +170,11 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
         <div className={`text-toolbar ${enabled && toolbarLocation ? "enabled" : "disabled"}`}
               style={toolbarLocation} onMouseDown={handleMouseDown}>
           {toolbarButtons.map(button => {
-            const { iconName, Icon, toolTip } = button;
+            const { iconName, Icon, toolTip, buttonEnabled } = button;
+            let bEnabled = enabled;
+            if (buttonEnabled) {
+              bEnabled = buttonEnabled(selectedVariable);
+            }
             const isSelected = !!selectedButtons.find(b => b === iconName);
             const handleClick = (event: React.MouseEvent) => {
               if (editor && enabled) {
@@ -177,7 +182,7 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
               }
             };
             return (
-              <TextToolbarButton key={iconName} iconName={iconName} Icon={Icon} enabled={enabled}
+              <TextToolbarButton key={iconName} iconName={iconName} Icon={Icon} enabled={bEnabled}
                 tooltip={toolTip} isSelected={isSelected} onClick={handleClick} />
             );
           })}

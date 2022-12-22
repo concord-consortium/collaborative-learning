@@ -76,6 +76,11 @@ export const insertTextVariables = (variables: VariableType[], editor?: Editor) 
  });
 };
 
+export const shouldShowEditVariableButton = (selectedVariable?: VariableType) => {
+  // Only show the Edit Variable button when there's a variable selected.
+  return selectedVariable ? true : false;
+};
+
 export const ClueVariableComponent = ({ attributes, children, element }: RenderElementProps) => {
   const textContent = useContext(TextContentModelContext);
   const isHighlighted =  useSelected(); 

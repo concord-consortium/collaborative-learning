@@ -14,6 +14,7 @@ export interface ITextPluginInfo {
   command: (args?:any)=> any; // FIXME: types
   updateTextContentAfterSharedModelChanges?:
     (textContent: TextContentModelType, sharedModel?: SharedModelType) => void;
+  buttonEnabled?: (args:any)=>any,  // FIXME: types
 }
 
 const gTextPluginInfoMap: Record<string, ITextPluginInfo | undefined> = {};

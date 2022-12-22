@@ -19,10 +19,12 @@ export const TextToolbarButton: React.FC<IProps> = ({
             }: IProps) => {
   const tooltipOptions = useTooltipOptions({ distance: kTooltipYDistance });
 
+
   return (
     <Tooltip title={tooltip} {...tooltipOptions}>
-      <div className={classNames("button-with-tool-tip", isSelected ? "on" : "off", { enabled })} key={iconName}>
-        <Icon className={classNames("button-icon", isSelected ? "on" : "off", { enabled })} onClick={onClick} />
+      <div className={classNames("button-with-tool-tip", isSelected ? "on" : "off",  enabled ? 'enabled' : 'disabled'  )} key={iconName}>
+        <Icon className={classNames("button-icon", isSelected ? "on" : "off",  enabled ? "eanbled" : "disabled" )} 
+          onClick={enabled ? onClick : undefined} />
       </div>
     </Tooltip>
   );

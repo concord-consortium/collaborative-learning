@@ -4,7 +4,7 @@ import { kSharedVariablesID, SharedVariables } from "./shared-variables";
 import AddVariableChipIcon from "./assets/add-variable-chip-icon.svg";
 import InsertVariableChipIcon from "./assets/insert-variable-chip-icon.svg";
 import VariableEditorIcon from "./assets/variable-editor-icon.svg";
-import { VariablesPlugin} from "./slate/variables-plugin";
+import { VariablesPlugin, shouldShowEditVariableButton} from "./slate/variables-plugin";
 import { updateAfterSharedModelChanges } from "./slate/variables-text-content";
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
 import { EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject }
@@ -30,21 +30,24 @@ registerTextPluginInfo({
   toolTip: "New Variable",
   createSlatePlugin: textContent=> VariablesPlugin(textContent),
   command: useNewVariableDialog,
-  updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges
+  updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges,
+  buttonEnabled: () => true
 });
 registerTextPluginInfo({
   iconName: "insert-variable",
   Icon: InsertVariableChipIcon,
   toolTip: "Insert Variable",
   command: useInsertVariableDialog,
-  updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges
+  updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges,
+  buttonEnabled: () => true
 });
 registerTextPluginInfo({
   iconName: "edit-variable",
   Icon: VariableEditorIcon,
   toolTip: "Edit Variable",
   command: useEditVariableDialog,
-  updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges
+  updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges,
+  buttonEnabled: shouldShowEditVariableButton,
 });
 
 registerDrawingObjectInfo({
