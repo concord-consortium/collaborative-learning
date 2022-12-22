@@ -89,18 +89,13 @@ export const ClueVariableComponent = ({ attributes, children, element }: RenderE
  
   const {reference} = element;
 
-  const _onDoubleClick = () => {
-    // FIXME: call same function as the toolbar once that code is cleaner.
-  };
-
-  const onDoubleClick = isSerializing ? undefined : _onDoubleClick; // Don't serialize click handler
   const classes = classNames(kSlateVoidClass, kVariableClass) || undefined;
   const selectedClass = isHighlighted && !isSerializing ? "slate-selected" : undefined;
   const variables = getVariables(textContent); 
   const variable = variables.find(v => v.id === reference);
   // FIXME: HTML serialization/deserialization. This will serialize the VariableChip too.
   return (
-    <span className={classes} onDoubleClick={onDoubleClick} {...attributes} contentEditable={false}>
+    <span className={classes} {...attributes} contentEditable={false}>
       {children}
       { variable ?
         <VariableChip variable={variable} className={selectedClass} /> :
