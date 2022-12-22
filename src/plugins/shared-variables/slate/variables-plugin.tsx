@@ -22,7 +22,6 @@ const kVariableClass = "slate-variable-chip";
 const kSlateVoidClass = "cc-slate-void";
 const kVariableFormat = "clueVariable";
 
-// FIXME: Clean up these types and this interface.
 export function VariablesPlugin(textContent: TextContentModelType): any {
   return {
     onInitEditor: (editor: CustomEditor) => withClueVariables(editor, textContent) 
@@ -45,7 +44,7 @@ export const insertTextVariable = (variable: VariableType, editor?: Editor) => {
     return;
   }
   const reference = variable.id;
-  const varElt: VariableElement = { type: "clueVariable", reference, children: [{text: "" }]};
+  const varElt: VariableElement = { type: kVariableFormat, reference, children: [{text: "" }]};
   Transforms.insertNodes(editor, varElt);
 };
 
