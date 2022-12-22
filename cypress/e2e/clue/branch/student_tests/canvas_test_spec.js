@@ -1,7 +1,7 @@
 import ResourcesPanel from '../../../../support/elements/clue/ResourcesPanel';
 import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
-import PrimaryWorkspace from '../../../../support/elements/common/PrimaryWorkspace';
+// import PrimaryWorkspace from '../../../../support/elements/common/PrimaryWorkspace';
 import GraphToolTile from '../../../../support/elements/clue/GraphToolTile';
 import ImageToolTile from '../../../../support/elements/clue/ImageToolTile';
 import DrawToolTile from '../../../../support/elements/clue/DrawToolTile';
@@ -11,7 +11,7 @@ import TableToolTile from '../../../../support/elements/clue/TableToolTile';
 let resourcesPanel = new ResourcesPanel;
 let canvas = new Canvas;
 let clueCanvas = new ClueCanvas;
-let primaryWorkspace = new PrimaryWorkspace;
+// let primaryWorkspace = new PrimaryWorkspace;
 let graphToolTile = new GraphToolTile;
 let imageToolTile = new ImageToolTile;
 let drawToolTile = new DrawToolTile;
@@ -20,8 +20,8 @@ let tableToolTile = new TableToolTile;
 
 let studentWorkspace = 'My Student Test Workspace';
 let copyTitle = 'Personal Workspace Copy';
-let newDocTitleToPublish = 'New User Doc To Publish';
-let renameTitle = "Renamed Title title";
+// let newDocTitleToPublish = 'New User Doc To Publish';
+// let renameTitle = "Renamed Title title";
 let renameTitlePencil = "Renamed Title pencil";
 
 context('Test Canvas', function () {
@@ -40,10 +40,6 @@ context('Test Canvas', function () {
 
   context('test canvas tools', function () {
     describe('test header elements', function () {
-          it('dummy test', function () {
-      expect(true).to.equal(true);
-    });
-
       it('verify investigation header UI', () => { // element functionality are tested in common
         canvas.getEditTitleIcon().should('not.exist');
         canvas.getPublishIcon().should('be.visible');
@@ -311,6 +307,7 @@ context('Test Canvas', function () {
     });
   });
 
+  // FIXME: This test broke
   // context('delete elements from canvas', function () {
   //   before(() => {
   //     //star a document to verify delete
