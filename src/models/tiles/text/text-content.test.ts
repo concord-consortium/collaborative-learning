@@ -1,18 +1,13 @@
+import { Editor, EditorValue, slateToText } from "@concord-consortium/slate-editor";
 import { TextContentModel, kTextTileType } from "./text-content";
 import { registerTextPluginInfo } from "./text-plugin-info";
 
-// const emptyJson = {
-//         document: {
-//           nodes: [{
-//             object: "block",
-//             type: "paragraph",
-//             nodes: [{
-//               object: "text",
-//               text: ""
-//             }]
-//           }]
-//         }
-//       };
+const empty: EditorValue = [
+  {
+    type: 'paragraph',
+    children: [{ text: '' }],
+  },
+];
 
 const testTextPluginInfo = {
   iconName: "test",
@@ -66,52 +61,31 @@ describe("TextContentModel", () => {
     expect(model.text).toBe(flat);
   });
 
-  // it("handles slate format strings", () => {
-  //   const model = TextContentModel.create();
-  //   model.setSlate(Value.fromJSON(emptyJson));
-  //   const slate = model.getSlate();
-  //   expect(Plain.serialize(slate)).toBe("");
+  it("handles slate format strings", () => {
+    const model = TextContentModel.create();
+    model.setSlate(empty);
+    const slate = model.getSlate();
+    expect(slateToText(slate)).toBe("");
 
-  //   // handles errors gracefully
-  //   const bogus1 = TextContentModel.create({ format: "slate", text: "foo" });
-  //   expect(bogus1.getSlate()).toBeDefined();
-  //   const bogus2 = TextContentModel.create({ format: "slate", text: ["foo", "bar"] });
-  //   expect(bogus2.asSlate()).toBeDefined();
-  // });
+    // handles errors gracefully
+    const bogus1 = TextContentModel.create({ format: "slate", text: "foo" });
+    expect(bogus1.getSlate()).toBeDefined();
+    const bogus2 = TextContentModel.create({ format: "slate", text: ["foo", "bar"] });
+    expect(bogus2.asSlate()).toBeDefined();
+  });
 
-  // const fooJson: ValueJSON = {
-  //               document: {
-  //                 nodes: [{
-  //                   object: "block",
-  //                   type: "paragraph",
-  //                   nodes: [{
-  //                     object: "text",
-  //                     text: "foo"
-  //                   }]
-  //                 }]
-  //               }
-  //             };
+  const value: EditorValue = [
+    {
+      type: 'paragraph',
+      children: [{ text: 'foo' }],
+    },
+  ];
 
-  // it("converts to slate correctly", () => {
-  //   const foo = "foo";
-  //   const model = TextContentModel.create({ text: foo });
-  //   expect(Plain.serialize(model.asSlate())).toBe(foo);
-
-  //   jestSpyConsole("warn", mockConsole => {
-  //     // triggers console warning about "the `leaves` property of Text nodes has been removed"
-  //     model.setMarkdown("foo");
-  //     expect(model.format).toBe("markdown");
-  //     expect(Plain.serialize(model.asSlate())).toBe(foo);
-
-  //     // failure of this test => the console mock can be removed
-  //     expect(mockConsole).toHaveBeenCalled();
-  //   });
-
-  //   const fooValue = Value.fromJSON(fooJson);
-  //   model.setSlate(fooValue);
-  //   expect(model.format).toBe("slate");
-  //   expect(Plain.serialize(model.asSlate())).toBe(foo);
-  // });
+  it("converts to slate correctly", () => {
+    const foo = "foo";
+    const model = TextContentModel.create({ text: foo });
+    expect(slateToText(model.asSlate())).toBe(foo);
+  });
 
   it("calls updateTextContentAfterSharedModelChanges on each plugin that provides it", () => {
     const model = TextContentModel.create({ text: "foo" });
