@@ -1467,32 +1467,32 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
   });
 });
 
-// describe("DocumentContentModel -- user-logging actions", () => {
-//   const documentContent = DocumentContentModel.create({});
-//   mockLogTileDocumentEvent.mockReset();
+describe("DocumentContentModel -- user-logging actions", () => {
+  const documentContent = DocumentContentModel.create({});
+  mockLogTileDocumentEvent.mockReset();
 
-//   it("logs user adding/removing tiles", () => {
-//     const newTile = documentContent.userAddTile("text");
-//     const newTileId = newTile?.tileId;
-//     expect(newTileId).toBeDefined();
-//     expect(mockLogTileDocumentEvent).toHaveBeenCalledTimes(1);
+  it("logs user adding/removing tiles", () => {
+    const newTile = documentContent.userAddTile("text");
+    const newTileId = newTile?.tileId;
+    expect(newTileId).toBeDefined();
+    expect(mockLogTileDocumentEvent).toHaveBeenCalledTimes(1);
 
-//     documentContent.userDeleteTile(newTileId!);
-//     expect(mockLogTileDocumentEvent).toHaveBeenCalledTimes(2);
+    documentContent.userDeleteTile(newTileId!);
+    expect(mockLogTileDocumentEvent).toHaveBeenCalledTimes(2);
 
-//     // deleting it again has no effect
-//     documentContent.userDeleteTile(newTileId!);
-//     expect(mockLogTileDocumentEvent).toHaveBeenCalledTimes(2);
-//   });
-// });
+    // deleting it again has no effect
+    documentContent.userDeleteTile(newTileId!);
+    expect(mockLogTileDocumentEvent).toHaveBeenCalledTimes(2);
+  });
+});
 
-// describe("DocumentContentModel -- createDefaultSectionedContent", () => {
-//   it("creates sectioned content", () => {
-//     const sections: SectionModelType[] = [
-//             SectionModel.create({ type: "foo" }),
-//             SectionModel.create({ type: "bar" })
-//           ];
-//     const content = createDefaultSectionedContent({ sections });
-//     expect(content.rowCount).toBe(4);
-//   });
-// });
+describe("DocumentContentModel -- createDefaultSectionedContent", () => {
+  it("creates sectioned content", () => {
+    const sections: SectionModelType[] = [
+            SectionModel.create({ type: "foo" }),
+            SectionModel.create({ type: "bar" })
+          ];
+    const content = createDefaultSectionedContent({ sections });
+    expect(content.rowCount).toBe(4);
+  });
+});
