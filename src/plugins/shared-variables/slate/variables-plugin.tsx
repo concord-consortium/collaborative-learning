@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
 import classNames from "classnames/dedupe";
-import _ from "lodash";
 
 import {
   Editor,

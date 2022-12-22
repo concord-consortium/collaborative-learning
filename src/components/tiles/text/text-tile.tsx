@@ -1,8 +1,7 @@
 import React from "react";
 import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
-import { isMarkActive, CustomEditor, EditorValue, SlateEditor, ReactEditor, withReact,
-  withHistory, createEditor, Slate, EFormat, isBlockActive, Editor
+import { isMarkActive, CustomEditor, EditorValue, SlateEditor, ReactEditor, createEditor, Slate, EFormat, isBlockActive, Editor
 } from "@concord-consortium/slate-editor";
 import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
 import { BaseComponent } from "../../base";

@@ -22,7 +22,10 @@ export const TextToolbarButton: React.FC<IProps> = ({
 
   return (
     <Tooltip title={tooltip} {...tooltipOptions}>
-      <div className={classNames("button-with-tool-tip", isSelected ? "on" : "off",  enabled ? 'enabled' : 'disabled'  )} key={iconName}>
+      <div 
+        className={classNames("button-with-tool-tip", isSelected ? "on" : "off",  enabled ? "enabled" : "disabled" )}
+        key={iconName}
+      >
         <Icon className={classNames("button-icon", isSelected ? "on" : "off",  enabled ? "eanbled" : "disabled" )} 
           onClick={enabled ? onClick : undefined} />
       </div>

@@ -29,7 +29,7 @@ export function getVariables(textContent: TextContentModelType): VariableType[] 
 export const getTileTextVariables = (textContent: TextContentModelType) => {
   const variableIds: string[] = [];
   if (textContent.editor) {
-    for (const [node, path] of Editor.nodes(textContent.editor, {at: [], mode: 'all'})) {
+    for (const [node] of Editor.nodes(textContent.editor, {at: [], mode: 'all'})) {
       if (Editor.isInline(textContent.editor, node) && isVariableElement(node)) {
         variableIds.push(node.reference);
       }

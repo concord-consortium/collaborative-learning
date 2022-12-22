@@ -6,14 +6,14 @@ import { EFormat, toggleMark, toggleSuperSubscript, toggleBlock, Editor} from "@
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { TextToolbarButton } from "./text-toolbar-button";
-import { useTextToolDialog } from "./text-tile-dialog";
 import { IRegisterTileApiProps } from "../tile-component";
 import { getAllTextPluginInfos, getTextPluginInfo } from "../../../models/tiles/text/text-plugin-info";
 import { variableBuckets } from "../../../plugins/shared-variables/shared-variables-utils";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
 import { getVariables, getOrFindSharedModel } from "../../../plugins/shared-variables/slate/variables-text-content";
-import { findSelectedVariable, insertTextVariable, insertTextVariables} from "../../../plugins/shared-variables/slate/variables-plugin";
+import { findSelectedVariable, insertTextVariable, insertTextVariables}
+  from "../../../plugins/shared-variables/slate/variables-plugin";
 import { isMac } from "../../../utilities/browser";
 
 
@@ -103,7 +103,6 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
                             enabled,
                             ...others
                           });
-  const dialogController = useTextToolDialog({editor});
   let toolbarButtons: IButtonDef[] = [];
   if (toolbarSetting) {
     toolbarSetting.forEach( setting => {

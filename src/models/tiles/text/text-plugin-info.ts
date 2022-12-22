@@ -1,7 +1,4 @@
-import { VariableType } from "@concord-consortium/diagram-view";
-import { ModalType } from "@concord-consortium/react-modal-hook";
 import { FunctionComponent, SVGProps } from "react";
-import { SharedVariablesType } from "src/plugins/shared-variables/shared-variables";
 import { SharedModelType } from "../../shared/shared-model";
 import { TextContentModelType } from "./text-content";
 

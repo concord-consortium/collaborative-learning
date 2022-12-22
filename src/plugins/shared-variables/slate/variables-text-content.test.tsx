@@ -1,11 +1,9 @@
 import { IAnyStateTreeNode, IAnyType, types, castToSnapshot } from "mobx-state-tree";
-import { createEditor, withHistory, withReact } from "@concord-consortium/slate-editor";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { TextContentModel, TextContentModelType } from "../../../models/tiles/text/text-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 import { getOrFindSharedModel} from "./variables-text-content";
-import { VariablesPlugin } from "./variables-plugin";
 
 const TestContainer = types.model("TestContainer", {
   content: TextContentModel,
