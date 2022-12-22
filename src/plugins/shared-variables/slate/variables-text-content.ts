@@ -40,7 +40,7 @@ export const getTileTextVariables = (textContent: TextContentModelType) => {
   return filteredVariables as VariableType[];
 };
 
-export function findVariable(textContent: TextContentModelType, variableId: string) {
+function findVariable(textContent: TextContentModelType, variableId: string) {
   const variables = getVariables(textContent);
   const variable = variables.find(v => v.id === variableId);
   return variable;
