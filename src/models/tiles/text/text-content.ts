@@ -22,7 +22,7 @@ export const TextContentModel = TileContentModel
     format: types.maybe(types.string)
   })
   .volatile(self => ({
-    editor:  undefined as any | undefined, // FIXME: type
+    editor:  undefined as Editor | undefined,
   }))
   .views(self => ({
     get joinText() {
@@ -103,7 +103,7 @@ export const TextContentModel = TileContentModel
       const serialized = serializeValue(value);
       self.text = JSON.stringify(serialized);
     },
-    setEditor(editor?: Editor) { // FIXME: type here is wrong
+    setEditor(editor?: Editor) {
      self.editor = editor;
     }
   }))
