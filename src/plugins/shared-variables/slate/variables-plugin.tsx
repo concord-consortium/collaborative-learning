@@ -19,7 +19,7 @@ import { TextContentModelContext } from "../../../models/tiles/text/text-content
 
 const kVariableClass = "slate-variable-chip";
 const kSlateVoidClass = "cc-slate-void";
-const kVariableFormat = "clueVariable";
+export const kVariableFormat = "clueVariable";
 
 export function VariablesPlugin(textContent: TextContentModelType): any {
   return {

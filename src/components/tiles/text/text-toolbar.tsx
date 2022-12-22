@@ -12,7 +12,7 @@ import { variableBuckets } from "../../../plugins/shared-variables/shared-variab
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
 import { getVariables, getOrFindSharedModel } from "../../../plugins/shared-variables/slate/variables-text-content";
-import { findSelectedVariable, insertTextVariable, insertTextVariables}
+import { findSelectedVariable, insertTextVariable, insertTextVariables, kVariableFormat}
   from "../../../plugins/shared-variables/slate/variables-plugin";
 import { isMac } from "../../../utilities/browser";
 
@@ -63,9 +63,9 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   const toolbarSetting = useSettingFromStores("tools", "text") as unknown as string[];
   const enabled = onIsEnabled();
   const textContent = useContext(TextContentModelContext);
-  const selectedElements = editor?.selectedElements(); // FIXME: selectedElements reports the wrong return type.
+  const selectedElements = editor?.selectedElements();
   const variables = getVariables(textContent); 
-  const hasVariable = editor?.isElementActive("clueVariable"); // FIXME: use const
+  const hasVariable = editor?.isElementActive(kVariableFormat);
   const selectedVariable = hasVariable ? findSelectedVariable(selectedElements, variables) : undefined;
   const sharedModel = getOrFindSharedModel(textContent);
   const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
