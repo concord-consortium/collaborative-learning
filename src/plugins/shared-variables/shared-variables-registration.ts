@@ -5,7 +5,6 @@ import AddVariableChipIcon from "./assets/add-variable-chip-icon.svg";
 import InsertVariableChipIcon from "./assets/insert-variable-chip-icon.svg";
 import VariableEditorIcon from "./assets/variable-editor-icon.svg";
 import { VariablesPlugin, shouldShowEditVariableButton} from "./slate/variables-plugin";
-import { updateAfterSharedModelChanges } from "./slate/variables-text-content";
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
 import { EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject }
   from "./drawing/variable-object";
@@ -30,7 +29,6 @@ registerTextPluginInfo({
   toolTip: "New Variable",
   createSlatePlugin: textContent=> VariablesPlugin(textContent),
   command: useNewVariableDialog,
-  updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges,
   buttonEnabled: () => true
 });
 registerTextPluginInfo({
@@ -38,7 +36,6 @@ registerTextPluginInfo({
   Icon: InsertVariableChipIcon,
   toolTip: "Insert Variable",
   command: useInsertVariableDialog,
-  updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges,
   buttonEnabled: () => true
 });
 registerTextPluginInfo({
@@ -46,7 +43,6 @@ registerTextPluginInfo({
   Icon: VariableEditorIcon,
   toolTip: "Edit Variable",
   command: useEditVariableDialog,
-  updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges,
   buttonEnabled: shouldShowEditVariableButton,
 });
 

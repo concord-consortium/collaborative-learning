@@ -4,7 +4,7 @@ import { SharedModelType } from "../../../models/shared/shared-model";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { TextContentModel, TextContentModelType } from "../../../models/tiles/text/text-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
-import { getOrFindSharedModel, updateAfterSharedModelChanges } from "./variables-text-content";
+import { getOrFindSharedModel} from "./variables-text-content";
 import { VariablesPlugin } from "./variables-plugin";
 
 const TestContainer = types.model("TestContainer", {
@@ -96,7 +96,7 @@ describe("VariablesTextContent", () => {
     });
     setupContainer(textContent, variables);
     const editor = getEditor(textContent);
-    //textContent.setEditor(editor);
+    textContent.setEditor(editor);
 
     const initialNodes: any = [
       {
@@ -148,36 +148,6 @@ describe("VariablesTextContent", () => {
     // add variable to the text
     expect(getValueParagraphNodes(editor)).toMatchObject(withVariableNodes);
 
-    // Make sure it doesn't change when we haven't changed the variables
-    updateAfterSharedModelChanges(textContent);
-    expect(getValueParagraphNodes(editor)).toMatchObject(withVariableNodes);
-
-    // Make sure it doesn't change when we add a new variable that isn't referenced
-    variables.createVariable();
-    updateAfterSharedModelChanges(textContent);
-    expect(getValueParagraphNodes(editor)).toMatchObject(withVariableNodes);
-
-    // It should change after removing the variable that we references
-    variables.removeVariable(variables.variables[0]);
-    updateAfterSharedModelChanges(textContent);
-    expect(getValueParagraphNodes(editor)).toMatchObject(afterRemoveNodes);
-  });
-
-  test("updateAfterSharedModelChanges handles no editor", () => {
-    const textContent = TextContentModel.create({});
-    const variables = SharedVariables.create({
-      variables: [
-        {
-          id: "variable1",
-          name: "test variable"
-        }
-      ]
-    });
-    setupContainer(textContent, variables);
-
-    expect(() => {
-      updateAfterSharedModelChanges(textContent);
-    }).not.toThrow();
   });
 
   test("getOrFindSharedModel warns if things aren't setup", async () => {

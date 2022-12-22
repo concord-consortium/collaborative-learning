@@ -1,10 +1,9 @@
 import { VariableType } from "@concord-consortium/diagram-view";
-import { BaseElement, Node, Editor, CustomElement, EditorValue, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
+import { Editor } from "@concord-consortium/slate-editor";
 import { getType } from "mobx-state-tree";
-import { SharedModelType } from "../../../models/shared/shared-model";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
-import { isVariableElement, VariableElement } from "./variables-plugin";
+import { isVariableElement } from "./variables-plugin";
 
 export const kVariableSlateType = "m2s-variable";
 
@@ -89,22 +88,4 @@ export function getOrFindSharedModel(textContent: TextContentModelType) {
   }
 
   return sharedModel;
-}
-
-export function updateAfterSharedModelChanges(
-    textContent: TextContentModelType, sharedModel?: SharedModelType) {
-  //const {editor} = textContent;
-  // FIXME: DO WE STILL NEED THIS??? I don't think we need it now that we have
-  // the unused variable list in the dialog.
-  // If we do still want, this, I believe the new code would look something like this:
-  // if (textContent.editor) {
-  //   const variables = getVariables(textContent);
-  //   for (const [node, path] of Editor.nodes(textContent.editor, {at: [], mode: 'all'})) {
-  //     if (Editor.isInline(textContent.editor, node) && isVariableElement(node)) {
-  //       if (!variables.find(v => v.id === node.reference)) {
-  //         Transforms.removeNodes(editor, { at: path });
-  //       }
-  //     }
-  //   }
-  // }   
 }
