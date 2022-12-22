@@ -17,32 +17,29 @@ registerSharedModelInfo({
   modelClass: SharedVariables
 });
 
-// FIXME: clean this up.
-// Should one registerPlugin call add all the variable buttons? Probably.
-// Adding it this way (multiple registrations and buttons specified in the settings of app config for now
-// so I can work on the funtionality of the buttons.
-
-//"new-variable", "insert-variable", "edit-variable"
+// The slate plugin is required for all 3 variable plugins but only registered on the first.
 registerTextPluginInfo({
   iconName: "new-variable",
   Icon: AddVariableChipIcon,
   toolTip: "New Variable",
   createSlatePlugin: textContent=> VariablesPlugin(textContent),
-  command: useNewVariableDialog,
+  modalHook: useNewVariableDialog,
   buttonEnabled: () => true
 });
+
 registerTextPluginInfo({
   iconName: "insert-variable",
   Icon: InsertVariableChipIcon,
   toolTip: "Insert Variable",
-  command: useInsertVariableDialog,
+  modalHook: useInsertVariableDialog,
   buttonEnabled: () => true
 });
+
 registerTextPluginInfo({
   iconName: "edit-variable",
   Icon: VariableEditorIcon,
   toolTip: "Edit Variable",
-  command: useEditVariableDialog,
+  modalHook: useEditVariableDialog,
   buttonEnabled: shouldShowEditVariableButton,
 });
 

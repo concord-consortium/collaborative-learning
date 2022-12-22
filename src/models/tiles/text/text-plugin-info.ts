@@ -7,11 +7,11 @@ export interface ITextPluginInfo {
   Icon: FunctionComponent<SVGProps<SVGSVGElement>>;
   toolTip: string;
   createSlatePlugin?:
-    (textContent: TextContentModelType) => any; //FIXME: This needs a type.
-  command: (args?:any)=> any; // FIXME: types
+    (textContent: TextContentModelType) => any; //FIXME: any type.
+  modalHook: (args?:any) => any; // FIXME: any type.
   updateTextContentAfterSharedModelChanges?:
     (textContent: TextContentModelType, sharedModel?: SharedModelType) => void;
-  buttonEnabled?: (args:any)=>any,  // FIXME: types
+  buttonEnabled?: () => boolean,
 }
 
 const gTextPluginInfoMap: Record<string, ITextPluginInfo | undefined> = {};

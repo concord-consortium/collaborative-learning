@@ -75,9 +75,9 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   // This assumes the plugin is registering a modal which is not the most generic choice.
   const pluginModalHandlers: Record<string, ()=> void> = {}; 
   plugins.forEach(plugin => {
-    if (plugin?.command) {
+    if (plugin?.modalHook) {
       const { selfVariables, otherVariables, unusedVariables } = variableBuckets(textContent, sharedModel);
-      const [showDialog] = plugin.command (
+      const [showDialog] = plugin.modalHook (
         { variable: selectedVariable,
           textContent,
           sharedModel,

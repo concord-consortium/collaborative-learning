@@ -7,7 +7,7 @@ const testTextPluginInfo = {
   Icon: () => null,
   toolTip: "",
   createSlatePlugin: jest.fn(() => testTextPluginInstance),
-  command: jest.fn()
+  modalHook: jest.fn()
 };
 const testTextPluginWithUpdateInstance = {from: "testTextPluginInfoWithUpdate"}  as any;
 const testTextPluginInfoWithUpdate = {
@@ -15,7 +15,7 @@ const testTextPluginInfoWithUpdate = {
   Icon: () => null,
   toolTip: "",
   createSlatePlugin: jest.fn(() => testTextPluginWithUpdateInstance),
-  command: jest.fn(),
+  modalHook: jest.fn(),
   updateTextContentAfterSharedModelChanges: jest.fn()
 };
 
