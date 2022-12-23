@@ -24,23 +24,20 @@ context('Text tool tile functionalities', function(){
                 cy.log('title is: '+title);
             });
     });
-    it('dummy test', function () {
-        expect(true).to.equal(true);
+    it('adds text tool and types Hello World', function(){
+        clueCanvas.addTile('text');
+        textToolTile.enterText('Hello World');
+        textToolTile.getTextTile().last().should('contain', 'Hello World');
     });
-    // FIXME: typing in text tiles broken
-    // it('adds text tool and types Hello World', function(){
-    //     clueCanvas.addTile('text');
-    //     textToolTile.enterText('Hello World');
-    //     textToolTile.getTextTile().last().should('contain', 'Hello World');
-    // });
-    // it('verifies restore of text field content',()=>{
-    //     canvas.createNewExtraDocumentFromFileMenu('text tool test','my-work');
-    //     cy.wait(2000);
-    //     textToolTile.getTextTile().should('not.exist');
-    //     //re-open investigation
-    //     canvas.openDocumentWithTitle('workspaces',title);
-    //     textToolTile.getTextTile().last().should('exist').and('contain', 'Hello World');
-    // });
+    it('verifies restore of text field content',()=>{
+        canvas.createNewExtraDocumentFromFileMenu('text tool test','my-work');
+        cy.wait(2000);
+        textToolTile.getTextTile().should('not.exist');
+        //re-open investigation
+        canvas.openDocumentWithTitle('workspaces',title);
+        textToolTile.getTextTile().last().should('exist').and('contain', 'Hello World');
+    });
+     // FIXME: These test broke post slate upgrade. The focus doesn't seem to be working.
     // it('clicks the same text field and allows user to edit text', function(){
     //     textToolTile.getTextTile().last().focus();
     //     textToolTile.enterText('Adding more text to see if it gets added. ');

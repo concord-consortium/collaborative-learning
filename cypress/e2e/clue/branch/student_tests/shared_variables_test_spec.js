@@ -39,7 +39,7 @@ context('Shared Variables', function () {
 
   const addLastCard = () => addCard(true);
 
-  // FIXME: these are broken because typing into the slate editor in cypress is broken.
+  // FIXME: these are likely broken because the toolbar buttons changed in the text tile.
   // describe("Text tile", () => {
   //   it('can add a variable chip to the text tool', function() {
   //     clueCanvas.addTile('text');
