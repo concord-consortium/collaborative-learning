@@ -19,6 +19,8 @@ const polyDoc = 'Polygon';
                 expect(true).to.equal(true);
             });
         });
+        // FIXME: These tests seem to be failing because
+        // text tile deletion isn't working.
             // it('will add a point to the origin', function(){
             //     clueCanvas.addTile('geometry');
             //     graphToolTile.addPointToGraph(0,0);
