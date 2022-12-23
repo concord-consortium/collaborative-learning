@@ -3,8 +3,8 @@ import DataflowToolTile from '../../../../support/elements/clue/DataflowToolTile
 
 let clueCanvas = new ClueCanvas,
   dataflowToolTile = new DataflowToolTile;
-context('Dataflow Tool Tile', function () {
 
+context('Dataflow Tool Tile', function () {
   before(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=dfe";
     cy.clearQAData('all');
