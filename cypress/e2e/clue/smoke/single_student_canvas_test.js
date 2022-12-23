@@ -130,54 +130,53 @@ context('single student functional test',()=>{
             textToolTile.getTextTile().should('not.exist');
         });
         // FIXME: post slate upgrade failure
-        // describe('verify that canvas is saved from various locations', function(){
-        //     it('will restore from My Work tab', function() {
-        //         // //open the my work tab, click a different canvas, verify canvas is shown, open the my work tab, click the introduction canvas, verify intro canvas is showing
+        describe('verify that canvas is saved from various locations', function(){
+            it('will restore from My Work tab', function() {
+                // //open the my work tab, click a different canvas, verify canvas is shown, open the my work tab, click the introduction canvas, verify intro canvas is showing
 
-        //         cy.openTopTab('my-work');
-        //         cy.openSection('my-work', 'workspaces');
-        //         cy.openDocumentWithTitle('my-work', 'workspaces', this.title );
-        //         textToolTile.getTextTile().should('exist');
-        //         graphToolTile.getGraphTile().first().should('exist');
-        //         drawToolTile.getDrawTile().should('exist');
-        //         imageToolTile.getImageTile().should('exist');
-        //         tableToolTile.getTableTile().should('exist');
-        //     });
-        // });
+                cy.openTopTab('my-work');
+                cy.openSection('my-work', 'workspaces');
+                cy.openDocumentWithTitle('my-work', 'workspaces', this.title );
+                textToolTile.getTextTile().should('exist');
+                graphToolTile.getGraphTile().first().should('exist');
+                drawToolTile.getDrawTile().should('exist');
+                imageToolTile.getImageTile().should('exist');
+                tableToolTile.getTableTile().should('exist');
+            });
+        });
         // TODO: Class Work changed with new feature changes.
-        // describe('publish canvas', ()=>{
-        //     it('verify published canvas thumbnail', () => {
-        //       cy.openTopTab('class-work');
-        //       cy.openSection('class-work','workspaces');
-        //       cy.getCanvasItemTitle('workspaces').should('have.length',1);
-        //     });
-        //     it('verify publish canvas thumbnail appears in Class Work Published List',()=>{
-        //         canvas.publishCanvas("investigation");
-        //         cy.openTopTab('class-work');
-        //         cy.openSection('class-work','workspaces');
-        //         cy.getCanvasItemTitle('workspaces').should('have.length',2);
-        //         cy.getCanvasItemTitle('workspaces').first().should('contain', 'v2');
-        //     });
-        //     it('verify student name appears under thumbnail',()=>{
-        //         cy.get('[data-test=user-name]').then(($el)=>{
-        //             const user = $el.text();
-        //             cy.getCanvasItemTitle('workspaces').first().find('.info div').should('contain',user);
-        //         });
-        //     } );
-            // FIXME: typing in text is broken
-            // it('verify restore of published canvas', ()=>{
-            //   cy.openTopTab("class-work");
-            //   cy.openSection("class-work", "workspaces");
-            //     cy.get('[data-test=user-name]').then(($el)=>{
-            //         const user = $el.text();
-            //         cy.getCanvasItemTitle('workspaces', user).first().click();
-            //     });
-            //     cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.text-tool').should('exist').and('contain','This is a smoke test');
-            //     cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.geometry-content').should('exist');
-            //     cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.drawing-tool').should('exist');
-            //     cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.image-tool').should('exist');
-            //     cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.table-tool-tile').should('exist');
-            // });
-        //});
+        describe('publish canvas', ()=>{
+            it('verify published canvas thumbnail', () => {
+              cy.openTopTab('class-work');
+              cy.openSection('class-work','workspaces');
+              cy.getCanvasItemTitle('workspaces').should('have.length',1);
+            });
+            it('verify publish canvas thumbnail appears in Class Work Published List',()=>{
+                canvas.publishCanvas("investigation");
+                cy.openTopTab('class-work');
+                cy.openSection('class-work','workspaces');
+                cy.getCanvasItemTitle('workspaces').should('have.length',2);
+                cy.getCanvasItemTitle('workspaces').first().should('contain', 'v2');
+            });
+            it('verify student name appears under thumbnail',()=>{
+                cy.get('[data-test=user-name]').then(($el)=>{
+                    const user = $el.text();
+                    cy.getCanvasItemTitle('workspaces').first().find('.info div').should('contain',user);
+                });
+            } );
+            it('verify restore of published canvas', ()=>{
+              cy.openTopTab("class-work");
+              cy.openSection("class-work", "workspaces");
+                cy.get('[data-test=user-name]').then(($el)=>{
+                    const user = $el.text();
+                    cy.getCanvasItemTitle('workspaces', user).first().click();
+                });
+                cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.text-tool').should('exist').and('contain','This is a smoke test');
+                cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.geometry-content').should('exist');
+                cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.drawing-tool').should('exist');
+                cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.image-tool').should('exist');
+                cy.get(".document-tabs.class-work .documents-panel .canvas-area").find('.table-tool-tile').should('exist');
+            });
+        });
     });
 });
