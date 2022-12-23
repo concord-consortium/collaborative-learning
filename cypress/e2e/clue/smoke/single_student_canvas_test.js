@@ -129,7 +129,6 @@ context('single student functional test',()=>{
             canvas.getPersonalDocTitle().should('contain', canvas2);
             textToolTile.getTextTile().should('not.exist');
         });
-
         describe('verify that canvas is saved from various locations', function(){
             it('will restore from My Work tab', function() {
                 // //open the my work tab, click a different canvas, verify canvas is shown, open the my work tab, click the introduction canvas, verify intro canvas is showing
