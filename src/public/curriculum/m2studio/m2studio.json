@@ -31,7 +31,7 @@
         "numFormat": ".3~f"
       },
       "text": {
-        "tools": ["bold", "italic", "list-ul", "subscript", "superscript", "m2s-variables", "new-variable", "insert-variable", "edit-variable"]
+        "tools": ["link", "bold", "italic", "list-ul", "subscript", "superscript", "m2s-variables", "new-variable", "insert-variable", "edit-variable"]
       },
       "drawing": {"tools": ["select", "line", "vector", "rectangle", "ellipse", "stamp", "stroke-color", "fill-color", "image-upload", "new-variable", "insert-variable", "edit-variable", "delete"]}
     },

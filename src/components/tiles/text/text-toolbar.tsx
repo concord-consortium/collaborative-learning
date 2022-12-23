@@ -28,6 +28,7 @@ import InsertVariableCardIcon from "../../../plugins/shared-variables/assets/ins
 
 
 import "./text-toolbar.sass";
+import { useTextToolDialog } from "./text-tile-dialog";
 
 interface IButtonDef {
   iconName: string;  // icon name for this button.
@@ -52,6 +53,7 @@ const buttonDefs: IButtonDef[] = [
   { iconName: "superscript", Icon: SuperscriptToolIcon,   toolTip: `Superscript`},
   { iconName: "list-ol",     Icon: NumberedListToolIcon,  toolTip: `Numbered List`},
   { iconName: "list-ul",     Icon: BulletedListToolIcon,  toolTip: `Bulleted List`},
+  { iconName: "link",        Icon: NumberedListToolIcon,  toolTip: `link`},
 ];
 
 const handleMouseDown = (event: React.MouseEvent) => {
@@ -69,6 +71,7 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   const selectedVariable = hasVariable ? findSelectedVariable(selectedElements, variables) : undefined;
   const sharedModel = getOrFindSharedModel(textContent);
   const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
+  const dialogController = useTextToolDialog({editor});
   
   const plugins = getAllTextPluginInfos();
   // Build up a map from plugin => toolbar click handlers.
@@ -149,6 +152,9 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
       case "list-ul":
         toggleBlock(editor, EFormat.bulletedList);
         break;
+      case "link":
+        editor.configureElement(EFormat.link, dialogController);
+        break;  
       case "undo":
         editor.undo();
         break;
