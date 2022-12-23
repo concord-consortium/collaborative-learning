@@ -93,33 +93,33 @@ context('single student functional test',()=>{
             canvas.getPublishIcon().should('exist');
         });
     });
-    // context('test the tool palette', function(){//This should test the tools in the tool shelf
-    //     // Tool palettes for Graph, Image, Draw,and Table are tested in respective tool spec test
-    //     //Selection tool is tested as a functionality of graph tool tiles
+    context('test the tool palette', function(){//This should test the tools in the tool shelf
+        // Tool palettes for Graph, Image, Draw,and Table are tested in respective tool spec test
+        //Selection tool is tested as a functionality of graph tool tiles
 
-    //     it('adds text tool', function(){
-    //         clueCanvas.addTile('text');
-    //         textToolTile.getTextTile().should('exist');
-    //         textToolTile.enterText('This is a smoke test');
-    //     });
-    //     it('adds a graph tool', function(){
-    //         clueCanvas.addTile('geometry');
-    //         graphToolTile.getGraphTile().should('exist');
-    //         graphToolTile.addPointToGraph(0,0);
-    //     });
-    //     it('adds an image tool', function(){
-    //         clueCanvas.addTile('image');
-    //         imageToolTile.getImageTile().should('exist');
-    //     });
-    //     it('adds a draw tool', function(){
-    //         clueCanvas.addTile('drawing');
-    //         drawToolTile.getDrawTile().should('exist');
-    //     });
-    //     it('adds a table tool', function(){
-    //         clueCanvas.addTile('table');
-    //         tableToolTile.getTableTile().should('exist');
-    //     });
-    // });
+        it('adds text tool', function(){
+            clueCanvas.addTile('text');
+            textToolTile.getTextTile().should('exist');
+            textToolTile.enterText('This is a smoke test');
+        });
+        it('adds a graph tool', function(){
+            clueCanvas.addTile('geometry');
+            graphToolTile.getGraphTile().should('exist');
+            graphToolTile.addPointToGraph(0,0);
+        });
+        it('adds an image tool', function(){
+            clueCanvas.addTile('image');
+            imageToolTile.getImageTile().should('exist');
+        });
+        it('adds a draw tool', function(){
+            clueCanvas.addTile('drawing');
+            drawToolTile.getDrawTile().should('exist');
+        });
+        it('adds a table tool', function(){
+            clueCanvas.addTile('table');
+            tableToolTile.getTableTile().should('exist');
+        });
+    });
     context('save and restore of canvas', function(){
         // let canvas1='Document 1';
         let canvas2='Document 2';
