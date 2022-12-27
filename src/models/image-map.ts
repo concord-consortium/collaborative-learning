@@ -3,6 +3,7 @@ import {
   getImageDimensions, IImageDimensions, ISimpleImage, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
 } from "../utilities/image-utils";
 import { getAssetUrl } from "../utilities/asset-utils";
+import { urlParams } from "../utilities/url-params";
 import { DB } from "../lib/db";
 import placeholderImage from "../assets/image_placeholder.png";
 
@@ -251,6 +252,7 @@ export const ImageMapModel = types
         self.registerHandler(firebaseRealTimeDBImagesHandler);
         self.registerHandler(firebaseStorageImagesHandler);
         self.registerHandler(localAssetsImagesHandler);
+        self.registerHandler(remoteAssetsImagesHandler);
         self.registerHandler(externalUrlImagesHandler);
       },
 
@@ -413,6 +415,18 @@ export const localAssetsImagesHandler: IImageHandler = {
   priority: 2,
 
   match(url: string) {
+    // only match if the unit param is not a URL
+    // FIXME: this approach will cause problems with student or teacher content
+    // that includes relative paths. They might be the legacy style and not be available
+    // relative to the unit param URL.  If I remember right when a user copies an
+    // image from the curriculum to their document it briefly has this relative URL.
+    // then that is replaced with the firebase URL. But I don't know if that was always
+    // the case. Even if not it means if there are bugs or network issues then the relative
+    // URL could have been saved in the student or teacher content.
+    if (urlParams.unit?.match(/https?:\/\//)) {
+      return false;
+    }
+
     return url ? url.startsWith("assets/") || url.startsWith("curriculum/") : false;
   },
 
@@ -423,6 +437,44 @@ export const localAssetsImagesHandler: IImageHandler = {
                     .replace("assets/tools/drawing-tool/stamps",
                              "curriculum/moving-straight-ahead/stamps");
     return { contentUrl: _url, displayUrl: getAssetUrl(_url), success: true  };
+  }
+};
+
+/*
+ * remoteAssetsImagesHandler
+ */
+export const remoteAssetsImagesHandler: IImageHandler = {
+  name: kLocalAssetsHandlerName,
+  priority: 2,
+
+  match(url: string) {
+    // only match if the unit code/id is a URL
+    // see the FIXME above for problems with this approach
+    const unitCode = urlParams.unit;
+
+    // We are only going to match the newer curriculum paths.
+    // The older paths should only exist in student and teacher documents
+    return !!(unitCode?.match(/https?:\/\//) && url.startsWith("curriculum/"));
+  },
+
+  async store(url: string) {
+    const unitCode = urlParams.unit;
+
+    // Need to strip off curriculum/unit-name/unit.json from the unit URL
+    // In the future we probably want to migrate the content so the URLs are
+    // relative to the unit json itself which is a more standard way of using
+    // relative URLs.
+    const baseUrl = new URL("../..", unitCode);
+    const absoluteUrl = new URL(url, baseUrl);
+
+    // FIXME: we might want to set the contentUrl to be the absoluteUrl here
+    // I think in this case the cache will add a second entry. One with the
+    // relative url key and one with the absoluteUrl key. This way if the
+    // same image is referenced different ways it won't be downloaded
+    // more than once. However I think that also means the content will be
+    // updated to reference the absolute URL which we might not want to
+    // do.
+    return { contentUrl: url, displayUrl: absoluteUrl.toString(), success: true  };
   }
 };
 
