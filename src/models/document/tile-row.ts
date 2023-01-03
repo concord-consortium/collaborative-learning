@@ -1,7 +1,7 @@
 import { types, Instance, SnapshotIn, SnapshotOut } from "mobx-state-tree";
 import { ITileModel } from "../tiles/tile-model";
 import { uniqueId } from "../../utilities/js-utils";
-import { withoutUndo } from "../history/tree-monitor";
+import { withoutUndo } from "../history/without-undo";
 
 export interface IDropRowInfo {
   rowInsertIndex: number;

@@ -1,7 +1,7 @@
 import { reaction } from "mobx";
 import { addDisposer, getType, Instance, types } from "mobx-state-tree";
 import { kDataCardTileType, kDefaultLabel, kDefaultLabelPrefix } from "./data-card-types";
-import { withoutUndo } from "../../models/history/tree-monitor";
+import { withoutUndo } from "../../models/history/without-undo";
 import { IDefaultContentOptions, ITileExportOptions } from "../../models/tiles/tile-content-info";
 import { ITileMetadataModel } from "../../models/tiles/tile-metadata";
 import { tileModelHooks } from "../../models/tiles/tile-model-hooks";

@@ -55,6 +55,7 @@ export const DocumentModel = Tree.named("Document")
     supportContentType: types.maybe(types.enumeration<ESupportType>("SupportType", Object.values(ESupportType)))
   })
   .volatile(self => ({
+    treeMonitor: undefined as TreeMonitor | undefined,
     queryPromise: undefined as Promise<UseQueryResult<IGetNetworkDocumentResponse>> | undefined,
     contentStatus: ContentStatus.Valid,
     invalidContent: undefined as object | undefined,
