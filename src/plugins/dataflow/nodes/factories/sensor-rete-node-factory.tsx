@@ -23,7 +23,7 @@ export class SensorReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
-    outputs.num = node.data.nodeValue;
+    outputs.num = isFinite(node.data.nodeValue as number) ? node.data.nodeValue : 0;
 
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
