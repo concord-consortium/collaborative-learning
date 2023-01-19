@@ -54,11 +54,12 @@ interface TopbarProps {
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { serialDevice } = props;
+  const knownBoard = serialDevice.deviceInfo?.usbProductId === 67;
   const lastMsg = localStorage.getItem("last-connect-message");
   const classes = classNames(
     "icon-serial",
     { "physical-connection": lastMsg === "connect"},
-    { "no-physical-connection": lastMsg === "disconnect"},
+    { "no-physical-connection": lastMsg === "disconnect" && knownBoard},
     serialDevice.serialNodesCount > 0 ? "nodes-in-need" : "no-serial-needed",
     serialDevice.hasPort() ? "has-port" : "no-port"
   );
@@ -66,7 +67,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   function serialMessage(){
     // nodes that use serial, but no device physically connected
     if (lastMsg !== "connect" && serialDevice.serialNodesCount > 0){
-      return "connect a device";
+      return knownBoard ? "connect a device" : ""
     }
     // physical connection has been made but user action needed
     if (lastMsg === "connect"
@@ -74,6 +75,9 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         && serialDevice.serialNodesCount > 0
     ){
       return "click to finish connecting";
+    }
+    else {
+      return ""
     }
   }
 
