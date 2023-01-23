@@ -54,6 +54,9 @@ interface TopbarProps {
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { serialDevice } = props;
+  // Of the boards tested, only authentic Arduinos (usbProductId === 67) raise the browser `connect` event
+  // Which we use to track physical connection independently of port state
+  // So we only warn of a lack of physical connection when using an known board
   const knownBoard = serialDevice.deviceInfo?.usbProductId === 67;
   const lastMsg = localStorage.getItem("last-connect-message");
   const classes = classNames(
