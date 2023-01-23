@@ -23,7 +23,9 @@ export class SensorReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   public worker(node: NodeData, inputs: any, outputs: any) {
-    outputs.num = node.data.nodeValue;
+
+    const makeZero = node.data.type === "fsr-reading" && isNaN(node.data.nodeValue as number);
+    outputs.num = makeZero ? 0 : node.data.nodeValue;
 
     if (this.editor) {
       const _node = this.editor.nodes.find((n: { id: any; }) => n.id === node.id);
