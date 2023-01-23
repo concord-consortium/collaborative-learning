@@ -72,10 +72,14 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const renderToolButtons = (toolbarModel: IToolbarModel) => {
       const { ui: { selectedTileIds } } = this.stores;
       return toolbarModel.map(toolButton => {
+        const { document } = this.props;
+        const diagramTileCount = document.content?.getTilesOfType("Diagram").length || 0;
+        const isDisabled = (toolButton.id === "Diagram" && diagramTileCount > 0) ||
+                           (toolButton.id === "delete" && !selectedTileIds.length);
         const buttonProps: IToolbarButtonProps = {
           toolButton,
           isActive: toolButton === this.state.activeTool,
-          isDisabled: toolButton.id === "delete" && !selectedTileIds.length,
+          isDisabled,
           onSetToolActive: handleSetActiveTool,
           onClick: handleClickTool,
           onDragStart: handleDragTool,
