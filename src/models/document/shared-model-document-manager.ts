@@ -4,7 +4,6 @@ import { DocumentContentModelType } from "./document-content";
 import { SharedModelType } from "../shared/shared-model";
 import { ISharedModelManager, SharedModelUnion } from "../shared/shared-model-manager";
 import { ITileModel, TileModel } from "../tiles/tile-model";
-import { assignIndexOfType, SharedModelWithProvider } from "../tiles/geometry/shared-model-color-map";
 
 function getTileModel(tileContentModel: IAnyStateTreeNode) {
   if (!hasParentOfType(tileContentModel, TileModel)) {
@@ -27,6 +26,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       isReady: computed,
       setDocument: action,
       findFirstSharedModelByType: action,
+      assignIndexOfType: action,
       addTileSharedModel: action,
       removeTileSharedModel: action
     });
@@ -38,6 +38,11 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
 
   setDocument(document: DocumentContentModelType) {
     this.document = document;
+
+    // assign shared model indices by type when document is specified
+    for(const sharedModelEntry of this.document.sharedModelMap.values()) {
+      this.assignIndexOfType(sharedModelEntry.sharedModel);
+    }
   }
 
   findFirstSharedModelByType<IT extends typeof SharedModelUnion>(
@@ -52,7 +57,25 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     return this.document?.getSharedModelsByType<IT>(type) || [];
   }
 
-  addTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType | SharedModelWithProvider, isProvider = false): void {
+  assignIndexOfType(sharedModel: SharedModelType) {
+    if (sharedModel.indexOfType < 0) {
+      const usedIndices = new Set<number>();
+      const sharedModels = this.document?.getSharedModelsByType(sharedModel.type);
+      sharedModels?.forEach(model => {
+        if (model.indexOfType >= 0) {
+          usedIndices.add(model.indexOfType);
+        }
+      });
+      for (let i = 0; sharedModel.indexOfType < 0; ++i) {
+        if (!usedIndices.has(i)) {
+          sharedModel.setIndexOfType(i);
+          break;
+        }
+      }
+    }
+  }
+
+  addTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType, isProvider = false): void {
     if (!this.document) {
       console.warn("addTileSharedModel has no document. this will have no effect");
       return;
@@ -66,7 +89,7 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     }
 
     // assign an indexOfType if necessary
-    assignIndexOfType(sharedModel as SharedModelWithProvider, this.document);
+    this.assignIndexOfType(sharedModel);
 
     // register it with the document if necessary.
     // This won't re-add it if it is already there
@@ -103,7 +126,6 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     const sharedModels: SharedModelType[] = [];
     for(const sharedModelEntry of this.document.sharedModelMap.values()) {
       if (sharedModelEntry.tiles.includes(tile)) {
-        assignIndexOfType(sharedModelEntry.sharedModel as SharedModelWithProvider, this.document);
         sharedModels.push(sharedModelEntry.sharedModel);
       }
     }

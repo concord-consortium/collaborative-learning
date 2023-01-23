@@ -1,8 +1,7 @@
 import React from "react";
 import SvgLinkedTileIcon from "../../assets/icons/linked-tile-icon";
-import { getTableLinkColors } from "../../models/tiles/table-links";
+import { getColorMapEntry } from "../../models/shared/shared-data-set-colors";
 import { IconButtonSvg } from "../utilities/icon-button-svg";
-import { getColorMapEntry } from "../../models/tiles/geometry/shared-model-color-map";
 
 // cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
 import styles from "./link-indicator.scss";

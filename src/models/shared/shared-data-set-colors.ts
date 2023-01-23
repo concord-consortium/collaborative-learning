@@ -1,6 +1,5 @@
-import { SharedModelType } from "../../shared/shared-model";
-import { DocumentContentModelType } from "../../document/document-content";
-import styles from "../table-links.scss";
+import { SharedDataSetType } from "./shared-data-set";
+import styles from "../tiles/table-links.scss";
 
 interface ColorSet {
   fill: string,
@@ -9,21 +8,12 @@ interface ColorSet {
   selectedStroke: string
 }
 
-interface colorMapping {
+interface ColorMapEntry {
   tableId?: string,
   sharedModelId: string,
   colorSet: ColorSet
   indexOfType: number
 }
-
-export interface SharedModelWithProvider extends SharedModelType {
-  providerId: string
-}
-
-const fallBackColorSet = {
-  fill: styles.linkColor0Light, stroke: styles.linkColor0Dark,
-  selectedFill: styles.linkColor0Dark, selectedStroke: styles.linkColor0Dark
-};
 
 // TODO - did original behavior specify a hover state color?
 const colorSets = [
@@ -53,23 +43,23 @@ const colorSets = [
   }
 ];
 
-export const colorMap = new Map<string, colorMapping>;
+const colorMap = new Map<string, ColorMapEntry>;
 
-export function setColorMapEntry(anyId: string, mappingObj: colorMapping){
-  return colorMap.set(anyId, mappingObj) || fallBackColorSet;
+function setColorMapEntry(anyId: string, mappingObj: ColorMapEntry) {
+  colorMap.set(anyId, mappingObj);
 }
 
-export function getColorMapEntry(anyId: string){
+export function getColorMapEntry(anyId: string) {
   return colorMap.get(anyId);
 }
 
-export function maintainSharedModelsColorMap(sharedModels: SharedModelWithProvider[]){
-  sharedModels.forEach((m:any) => {
+export function updateSharedDataSetColors(sharedModels: SharedDataSetType[]) {
+  sharedModels.forEach(m => {
     setColorMapEntryPair(m);
   });
 }
 
-export function setColorMapEntryPair(sharedModel: SharedModelWithProvider) {
+function setColorMapEntryPair(sharedModel: SharedDataSetType) {
   const mappingObj = {
     tableId: sharedModel.providerId,
     sharedModelId: sharedModel.id,
@@ -78,26 +68,6 @@ export function setColorMapEntryPair(sharedModel: SharedModelWithProvider) {
   };
   // set entries with duplicate values - one with tableId as key, one with sharedModel as key
   // This is in anticipation of future access from non-table originated models
-  setColorMapEntry(sharedModel.providerId, mappingObj);
+  sharedModel.providerId && setColorMapEntry(sharedModel.providerId, mappingObj);
   setColorMapEntry(sharedModel.id, mappingObj);
-}
-
-export function assignIndexOfType(sharedModel: SharedModelWithProvider, document: DocumentContentModelType) {
-  if (sharedModel.indexOfType < 0) {
-    const usedIndices = new Set<number>();
-    const sharedModels = document.getSharedModelsByType(sharedModel.type);
-    sharedModels?.forEach(model => {
-      if (model.indexOfType >= 0) {
-        usedIndices.add(model.indexOfType);
-      }
-    });
-
-    for (let i = 1; sharedModel.indexOfType < 0; ++i) {
-      if (!usedIndices.has(i)) {
-        // reassignment of existing indexOfType
-        sharedModel.setIndexOfType(i);
-        break;
-      }
-    }
-  }
 }

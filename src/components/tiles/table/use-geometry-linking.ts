@@ -1,14 +1,14 @@
 import { useCallback, useEffect } from "react";
 import { useCurrent } from "../../../hooks/use-current";
 import { useFeatureFlag } from "../../../hooks/use-stores";
+import { getColorMapEntry } from "../../../models/shared/shared-data-set-colors";
 import { kGeometryTileType } from "../../../models/tiles/geometry/geometry-types";
 import { ITileLinkMetadata } from "../../../models/tiles/table-link-types";
 import {
-  addTableToDocumentMap, getLinkedTableIndex, getTableLinkColors, removeTableFromDocumentMap
+  addTableToDocumentMap, getLinkedTableIndex, removeTableFromDocumentMap
 } from "../../../models/tiles/table-links";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { useLinkGeometryDialog } from "./use-link-geometry-dialog";
-import { getColorMapEntry } from "../../../models/tiles/geometry/shared-model-color-map";
 
 interface IProps {
   documentId?: string;
