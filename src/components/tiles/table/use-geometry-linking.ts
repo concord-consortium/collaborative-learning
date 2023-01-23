@@ -8,6 +8,7 @@ import {
 } from "../../../models/tiles/table-links";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { useLinkGeometryDialog } from "./use-link-geometry-dialog";
+import { getColorMapEntry } from "../../../models/tiles/geometry/shared-model-color-map";
 
 interface IProps {
   documentId?: string;
@@ -24,7 +25,8 @@ export const useGeometryLinking = ({
   const showLinkButton = useFeatureFlag("GeometryLinkedTables");
   const geometryTiles = useLinkableGeometryTiles({ model, onRequestTilesOfType });
   const isLinkEnabled = hasLinkableRows && (geometryTiles.length > 0);
-  const linkColors = getTableLinkColors(modelId);
+  const colorMapEntry = getColorMapEntry(modelId);
+  const linkColors = colorMapEntry?.colorSet;
 
   const [showLinkGeometryDialog] =
           useLinkGeometryDialog({ geometryTiles, model, onLinkGeometryTile, onUnlinkGeometryTile });
