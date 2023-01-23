@@ -39,6 +39,7 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { logTileChangeEvent } from "../log/log-tile-change-event";
 import { LogEventName } from "../../../lib/logger-types";
 import { gImageMap } from "../../image-map";
+import { maintainSharedModelsColorMap, getColorMapEntry } from "./shared-model-color-map";
 
 export type onCreateCallback = (elt: JXG.GeometryElement) => void;
 
@@ -124,10 +125,16 @@ export type GeometryMetadataModelType = Instance<typeof GeometryMetadataModel>;
 export function setElementColor(board: JXG.Board, id: string, selected: boolean) {
   const element = getObjectById(board, id);
   if (element) {
-    const fillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
-    const strokeColor = element.getAttribute("clientStrokeColor") || kPointDefaults.strokeColor;
-    const selectedFillColor = element.getAttribute("clientSelectedFillColor") || kPointDefaults.selectedFillColor;
-    const selectedStrokeColor = element.getAttribute("clientSelectedStrokeColor") || kPointDefaults.selectedStrokeColor;
+    const { linkedtableid } = element.visProp;
+    const foundColorSet = getColorMapEntry(linkedtableid)?.colorSet;
+    const fillColor = foundColorSet?.fill || kPointDefaults.fillColor;
+    const strokeColor = foundColorSet?.stroke || kPointDefaults.strokeColor;
+    const selectedFillColor = foundColorSet?.selectedFill || kPointDefaults.selectedFillColor;
+    const selectedStrokeColor = foundColorSet?.selectedStroke || kPointDefaults.selectedStrokeColor;
+
+    // Previously, we looked for "clientFillColor", e.g.
+    // const fillColor = element.getAttribute("clientFillColor") || kPointDefaults.fillColor;
+    // TODO - remove other implementations of that if possible?
     const clientCssClass = selected
                             ? element.getAttribute("clientSelectedCssClass")
                             : element.getAttribute("clientCssClass");
@@ -166,9 +173,11 @@ export const GeometryContentModel = GeometryBaseContentModel
       // eslint-disable-next-line no-unused-expressions
       self.updateSharedModels;
       const sharedModelManager = self.tileEnv?.sharedModelManager;
-      return sharedModelManager?.isReady
-              ? sharedModelManager.getTileSharedModels(self) as SharedDataSetType[]
-              : [];
+      const foundSharedModels = sharedModelManager?.isReady
+        ? sharedModelManager.getTileSharedModels(self) as SharedDataSetType[]
+        : [];
+      maintainSharedModelsColorMap(foundSharedModels); // TODO - side effect, consider moving to sharedModelManager?
+      return foundSharedModels;
     }
   }))
   .views(self => ({

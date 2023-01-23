@@ -3,6 +3,7 @@ import { uniqueId } from "../../../utilities/js-utils";
 import { JXGChangeAgent, JXGCoordPair, JXGUnsafeCoordPair } from "./jxg-changes";
 import { objectChangeAgent, isPositionGraphable, getGraphablePosition } from "./jxg-object";
 import { prepareToDeleteObjects } from "./jxg-polygon";
+import { getColorMapEntry } from "./shared-model-color-map";
 
 // For snap to grid
 const kPrevSnapUnit = 0.2;
@@ -21,13 +22,23 @@ const defaultProps = {
       };
 
 // fillColor/strokeColor are ephemeral properties that change with selection;
-// we store the desired colors in clientFillColor/clientStrokeColor for persistence.
+// we stored the desired colors in clientFillColor/clientStrokeColor for persistence
+// now they are replaced by colors from shared-table-colors map
+// TODO: find where client colors can be removed
 export function syncClientColors(props: any) {
+  const colorMapEntry = getColorMapEntry(props.linkedTableId);
   const { selectedFillColor, selectedStrokeColor, ...p } = props || {} as any;
-  if (p.fillColor) p.clientFillColor = p.fillColor;
-  if (p.strokeColor) p.clientStrokeColor = p.strokeColor;
-  if (selectedFillColor) p.clientSelectedFillColor = selectedFillColor;
-  if (selectedStrokeColor) p.clientSelectedStrokeColor = selectedStrokeColor;
+  p.fillColor = colorMapEntry?.colorSet.fill;
+  p.strokeColor = colorMapEntry?.colorSet.stroke;
+  p.clientFillColor = colorMapEntry?.colorSet.fill;
+  p.clientStrokeColor = colorMapEntry?.colorSet.stroke;
+
+  // if(selectedFillColor) p.clientSelectedFillColor = selectedFill
+  // if(selectedStrokeColor) p.clientSelectedStrokeColor = selectedStroke
+  // if (p.fillColor) p.clientFillColor = p.fillColor;
+  // if (p.strokeColor) p.clientStrokeColor = p.strokeColor;
+  // if (selectedFillColor) p.clientSelectedFillColor = selectedFillColor;
+  // if (selectedStrokeColor) p.clientSelectedStrokeColor = selectedStrokeColor;
   return p;
 }
 
