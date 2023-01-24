@@ -1,5 +1,5 @@
 # Changelog
-## Version 3.6.1 - Jan 24, 2022
+## Version 3.6.1 - Jan 24, 2023
 
 Version 3.6.1 has a few bug fixes related to 4-up views, pressure sensors and document loading problems.
 
