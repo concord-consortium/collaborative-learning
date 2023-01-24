@@ -1,4 +1,53 @@
 # Changelog
+## Version 3.6.1 - Jan 24, 2022
+
+Version 3.6.1 has a few bug fixes related to 4-up views, pressure sensors and document loading problems.
+
+### Features/Improvements
+- Pressure Sensor should range from 0 [#184186983](https://www.pivotaltracker.com/story/show/184186983)
+
+### Bug Fixes
+- Four-up view allows editing other users' documents [#184276344](https://www.pivotaltracker.com/story/show/184276344)
+- Dragger handle on the Diagram Tile doesn't move tile [#184163782](https://www.pivotaltracker.com/story/show/184163782)
+- Error loading document [#184275225](https://www.pivotaltracker.com/story/show/184275225)
+- DF Corner indicator should only flash when disconnected [#184186985](https://www.pivotaltracker.com/story/show/184186985)
+
+### Asset Sizes
+| File                                                                                  | Size | % Change from Previous Release |
+| ------------------------------------------------------------------------------------- | ---- | ------------------------------ |
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.1c62df70.js | 51K  |                             0% |
+| common-Dataflow-Geometry.0bd31c83.js                                                  | 26K  |                             0% |
+| common-Diagram-SharedVariables-Drawing.64a66322.js                                    | 26K  |                             0% |
+| common-Diagram-SharedVariables.275323cc.js                                            | 627K |                             0% |
+| common-Diagram-SharedVariables.2d734bc7.js                                            | 12K  |                             0% |
+| DataCard.a7a58744.js                                                                  | 18K  |                             0% |
+| Dataflow.1a1e3c22.js                                                                  | 736K |                             0% |
+| Diagram.fa0656df.js                                                                   | 23K  |                             0% |
+| Drawing.81438ecd.js                                                                   | 33K  |                             0% |
+| Geometry.6d9db0d6.js                                                                  | 887K |                          0.11% |
+| Image.e9ec3d1f.js                                                                     | 16K  |                             0% |
+| index.d1c025ba9324610db71f.js                                                         | 409K |                          0.25% |
+| SharedDataSet.a14fff08.js                                                             | 253B |                             0% |
+| SharedVariables.e3c850d4.js                                                           | 6.4K |                             0% |
+| Starter.f2715137.js                                                                   | 1.2K |                             0% |
+| Table.4da05066.js                                                                     | 84K  |                             0% |
+| Text.e29bbe93.js                                                                      | 16K  |                             0% |
+| vendor-main.7d31434b.js                                                               | 2.2M |                             0% |
+
+| File                         | Size | % Change from Previous Release |
+| ---------------------------- | ---- | ------------------------------ |
+| DataCard.2e433f7b.css        | 8.4K |                             0% |
+| Dataflow.c735c05f.css        |  32K |                             0% |
+| Diagram.9f4d7345.css         |  20K |                             0% |
+| Drawing.3a0cc2a5.css         | 5.2K |                             0% |
+| Geometry.a98f59a6.css        |  10K |                             0% |
+| Image.7ad40067.css           | 6.3K |                             0% |
+| main.bceb0803.css            | 165K |                             0% |
+| SharedVariables.6b645629.css | 433B |                             0% |
+| Starter.c4ceb644.css         | 207B |                             0% |
+| Table.2faa7c77.css           |  10K |                             0% |
+| Text.b1e5e4d2.css            | 4.5K |                             0% |
+
 ## Version 3.6.0 - Dec 19, 2022
 
 Version 3.6.0 updates CLUE to use the AWS Log Ingester in place of the old Heroku Log Ingester and there are also content updates to the unti Growing Growing Growing's 1.3 and 2.3 questions to show the problem sections.
