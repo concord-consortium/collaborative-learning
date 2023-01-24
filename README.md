@@ -156,6 +156,7 @@ To enable per component debugging set the "debug" localstorage key with one or m
 - `canvas` this will show the document key over the canvas, useful for looking up documents in Firebase
 - `document` this will add the active document as `window.currentDocument`, you can use MST's hidden toJSON() like `currentDocument.toJSON()` to views its content.
 - `history` this will print some info the console as the history system records changes in the document.
+- `images` this will set `window.imageMap` so you can look at the status and URLs of images that have been loaded.
 - `listeners` console log the adding, removing, and firing of firebase listeners
 - `logger` console log all messages sent to the logging service
 - `stores` this will set `window.stores` so you can monitor the stores global from the browser console.
