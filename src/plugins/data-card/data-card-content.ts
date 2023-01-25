@@ -10,7 +10,8 @@ import { TileContentModel } from "../../models/tiles/tile-content";
 import {
   addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet, DataSet
 } from "../../models/data/data-set";
-import { SharedDataSet, SharedDataSetType } from "../../models/shared/shared-data-set";
+import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../../models/shared/shared-data-set";
+import { updateSharedDataSetColors } from "../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../models/shared/shared-model";
 import { uniqueId, uniqueTitle } from "../../utilities/js-utils";
 
@@ -169,6 +170,10 @@ export const DataCardContentModel = TileContentModel
           // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, sharedDataSet);
         }
+
+        // update the colors
+        const dataSets = sharedModelManager.getSharedModelsByType(kSharedDataSetType) as SharedDataSetType[];
+        updateSharedDataSetColors(dataSets);
       },
       {name: "sharedModelSetup", fireImmediately: true}));
     },
