@@ -508,6 +508,11 @@
               "supports": []
             }
           ],
+          "config": {
+            "settings": {
+              "limitedTileTypes": { "Diagram": 1 }
+            }
+          },
           "supports": []
         },
         {

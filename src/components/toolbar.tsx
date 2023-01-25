@@ -70,11 +70,14 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       this.handleDragNewTile(tool, e);
     };
     const renderToolButtons = (toolbarModel: IToolbarModel) => {
-      const { ui: { selectedTileIds } } = this.stores;
+      const { problem, ui: { selectedTileIds } } = this.stores;
+      const { document } = this.props;
       return toolbarModel.map(toolButton => {
-        const { document } = this.props;
-        const diagramTileCount = document.content?.getTilesOfType("Diagram").length || 0;
-        const isDisabled = (toolButton.id === "Diagram" && diagramTileCount > 0) ||
+        const tilesOfTypeCount = document.content?.getTilesOfType(toolButton.id).length || 0;
+        const limitedTileTypes = problem.config?.settings?.limitedTileTypes as Record<string, number>;
+        const limitTileInstances = limitedTileTypes &&
+                                   tilesOfTypeCount >= limitedTileTypes[toolButton.id];
+        const isDisabled = limitTileInstances ||
                            (toolButton.id === "delete" && !selectedTileIds.length);
         const buttonProps: IToolbarButtonProps = {
           toolButton,

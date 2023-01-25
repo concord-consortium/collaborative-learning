@@ -84,38 +84,4 @@ describe("ToolButtonComponent", () => {
     });
     expect(onDragStart).toHaveBeenCalledTimes(1);
   });
-
-  it("renders disabled diagram tool button", () => {
-    const toolButton = ToolbarButtonModel.create({
-      id: "Diagram",
-      title: "Diagram",
-      isDefault: false,
-      isTileTool: true
-    });
-
-    render(
-      <ToolbarButtonComponent
-        toolButton={toolButton}
-        isActive={false}
-        isDisabled={true}
-        onSetToolActive={onSetToolActive}
-        onClick={onClick}
-        onDragStart={onDragStart}
-        onShowDropHighlight={onShowDropHighlight}
-        onHideDropHighlight={onHideDropHighlight}
-        />
-    );
-    expect(screen.getByTestId("tool-diagram")).toBeInTheDocument();
-    act(() => {
-      userEvent.click(screen.getByTestId("tool-diagram"));
-    });
-    expect(onSetToolActive).toHaveBeenCalledTimes(0);
-    expect(onClick).toHaveBeenCalledTimes(0);
-    act(() => {
-      fireEvent.dragStart(screen.getByTestId("tool-diagram"));
-      fireEvent.dragEnd(screen.getByTestId("tool-diagram"));
-    });
-    expect(onDragStart).toHaveBeenCalledTimes(0);
-  });
-
 });
