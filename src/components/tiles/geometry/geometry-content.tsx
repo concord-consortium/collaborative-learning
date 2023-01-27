@@ -622,7 +622,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       }
       const pts = applyChange(board, { operation: "create", target: "linkedPoint", parents, properties, links });
       castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
-      this.syncLinkedPolygons(board) // call from here, or go up a level and call from a few locations?
+      this.syncLinkedPolygons(board); // call from here, or go up a level and call from a few locations?
     });
   }
 
@@ -631,34 +631,26 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const allObjectsArr = Array.from(objectsMap, ([key, value]) => ({key,value}));
 
     // If object is a polygon, extract its id and dependent point ids
-    const polygonIdSets: any[] = []
+    const changes: JXGChange[] = [];
     allObjectsArr.forEach((o) => {
       if (o.value.type === "polygon"){
         const ids: string[] = [];
-        const idSet = {
-          polygonId: o.value.id,
-          pointIds: ids
-        };
+        const idSet = { polygonId: o.value.id, pointIds: ids };
         (o.value as any).points.forEach((k:string) => {
           const pointId = k;
           idSet.pointIds.push(pointId);
-        })
-        polygonIdSets.push(idSet);
+        });
+        // convert idSet to a change
+        const polygonChangeObject: JXGChange = {
+          operation: "create",
+          target: "polygon",
+          targetID: idSet.polygonId,
+          parents: idSet.pointIds,
+          properties: { id: idSet.polygonId }
+        };
+        changes.push(polygonChangeObject);
       }
-    })
-
-    // convert idSets to changes
-    const changes: JXGChange[] = []
-    polygonIdSets.forEach((idSet:any) => {
-      const polygonChangeObject: JXGChange = {
-        operation: "create",
-        target: "polygon",
-        targetID: idSet.polygonId,
-        parents: idSet.pointIds,
-        properties: { id: idSet.polygonId }
-      };
-      changes.push(polygonChangeObject);
-    })
+    });
     applyChanges(board, changes);
   }
 
