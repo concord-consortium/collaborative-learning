@@ -20,8 +20,8 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           isDragTargetOrAncestor } from "../../../models/tiles/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
-import { ESegmentLabelOption, ILinkProperties, JXGCoordPair } from "../../../models/tiles/geometry/jxg-changes";
-import { applyChange } from "../../../models/tiles/geometry/jxg-dispatcher";
+import { ESegmentLabelOption, ILinkProperties, JXGCoordPair, JXGChange } from "../../../models/tiles/geometry/jxg-changes";
+import { applyChange, applyChanges } from "../../../models/tiles/geometry/jxg-dispatcher";
 import { kSnapUnit } from "../../../models/tiles/geometry/jxg-point";
 import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
@@ -598,6 +598,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     // TODO: A more tailored response would match up the existing points with the data set and only
     // change the affected points, which would eliminate some visual flashing that occurs when
     // unchanged points are re-created and would allow derived polygons to be preserved.
+    // for now, derived polygons persist in model, and are now sent to JXG as changes
+    // on each load/creation so that they render
     const ids = getAllLinkedPoints(board);
     applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
 
@@ -620,8 +622,46 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       }
       const pts = applyChange(board, { operation: "create", target: "linkedPoint", parents, properties, links });
       castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
+      this.syncLinkedPolygons(board) // call from here, or go up a level and call from a few locations?
     });
   }
+
+  syncLinkedPolygons(board: JXG.Board){
+    const objectsMap = this.getContent().objects;
+    const allObjectsArr = Array.from(objectsMap, ([key, value]) => ({key,value}));
+
+    // If object is a polygon, extract its id and dependent point ids
+    const polygonIdSets: any[] = []
+    allObjectsArr.forEach((o) => {
+      if (o.value.type === "polygon"){
+        const ids: string[] = [];
+        const idSet = {
+          polygonId: o.value.id,
+          pointIds: ids
+        };
+        (o.value as any).points.forEach((k:string) => {
+          const pointId = k;
+          idSet.pointIds.push(pointId);
+        })
+        polygonIdSets.push(idSet);
+      }
+    })
+
+    // convert idSets to changes
+    const changes: JXGChange[] = []
+    polygonIdSets.forEach((idSet:any) => {
+      const polygonChangeObject: JXGChange = {
+        operation: "create",
+        target: "polygon",
+        targetID: idSet.polygonId,
+        parents: idSet.pointIds,
+        properties: { id: idSet.polygonId }
+      };
+      changes.push(polygonChangeObject);
+    })
+    applyChanges(board, changes);
+  }
+
 
   private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {
     const { board } = this.state;
