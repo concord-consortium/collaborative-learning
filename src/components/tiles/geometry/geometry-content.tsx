@@ -642,7 +642,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         });
         // convert idSet to a change
         const polygonChangeObject: JXGChange = {
-          operation: "create",
+          operation: "create", // not "update" at the moment. This does not create a duplicate
           target: "polygon",
           targetID: idSet.polygonId,
           parents: idSet.pointIds,
@@ -653,7 +653,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     });
     applyChanges(board, changes);
   }
-
 
   private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {
     const { board } = this.state;
