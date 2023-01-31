@@ -6,8 +6,9 @@ import { DiagramContentModelType } from "../diagram-viewer/diagram-content";
 import { kDiagramTileType } from "../diagram-viewer/diagram-types";
 import { DrawingContentModelType } from "../drawing/model/drawing-content";
 import { kDrawingTileType } from "../drawing/model/drawing-types";
-import { kTextTileType } from "../../models/tiles/text/text-content";
+import { kTextTileType, TextContentModelType } from "../../models/tiles/text/text-content";
 import { ITileContentModel } from "../../models/tiles/tile-content";
+import { getTileTextVariables} from "./slate/variables-text-content";
 
 const getTileVariables = (content: ITileContentModel) => {
   if (content.type === kDiagramTileType) {
@@ -15,8 +16,7 @@ const getTileVariables = (content: ITileContentModel) => {
   } else if (content.type === kDrawingTileType) {
     return drawingVariables(content as DrawingContentModelType);
   } else if (content.type === kTextTileType) {
-    // TODO Get variables used by text tiles
-    return [];
+    return getTileTextVariables(content as TextContentModelType);
   } else {
     return [];
   }

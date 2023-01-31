@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { EditVariableDialogContent, Variable, VariableType } from "@concord-consortium/diagram-view";
 
@@ -9,9 +9,10 @@ import { SharedVariablesType } from "../shared-variables";
 interface IUseNewVariableDialog {
   addVariable: (variable: VariableType ) => void;
   sharedModel: SharedVariablesType;
+  namePrefill? : string
 }
-export const useNewVariableDialog = ({ addVariable, sharedModel }: IUseNewVariableDialog) => {
-  const [newVariable, setNewVariable] = useState(Variable.create({}));
+export const useNewVariableDialog = ({ addVariable, sharedModel, namePrefill }: IUseNewVariableDialog) => {
+  const [newVariable, setNewVariable] = useState(Variable.create({name: namePrefill || undefined}));
 
   const handleClick = () => {
     sharedModel.addVariable(newVariable);
@@ -19,10 +20,10 @@ export const useNewVariableDialog = ({ addVariable, sharedModel }: IUseNewVariab
     if (sharedVariable) {
       addVariable(sharedVariable);
     }
-    setNewVariable(Variable.create({}));
+    setNewVariable(Variable.create({name: namePrefill || undefined}));
   };
 
-  const [showModal, hideModal] = useCustomModal({
+  const [show, hideModal] = useCustomModal({
     Icon: AddVariableChipIcon,
     title: "New Variable",
     Content: EditVariableDialogContent,
@@ -36,6 +37,14 @@ export const useNewVariableDialog = ({ addVariable, sharedModel }: IUseNewVariab
       }
     ]
   }, [addVariable, newVariable]);
+
+  // Wrap useCustomModal's show so we can prefill with variable name
+  const showModal = useCallback(() => {
+    if (namePrefill) {
+      newVariable.setName(namePrefill);
+    }
+    show();
+  }, [namePrefill, newVariable, show]);
 
   return [showModal, hideModal];
 };

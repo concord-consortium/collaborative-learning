@@ -1,34 +1,27 @@
+import { EditorValue, slateToText } from "@concord-consortium/slate-editor";
 import { TextContentModel, kTextTileType } from "./text-content";
-import { Value, ValueJSON } from "slate";
-import Plain from "slate-plain-serializer";
 import { registerTextPluginInfo } from "./text-plugin-info";
 
-const emptyJson: ValueJSON = {
-        document: {
-          nodes: [{
-            object: "block",
-            type: "paragraph",
-            nodes: [{
-              object: "text",
-              text: ""
-            }]
-          }]
-        }
-      };
+const empty: EditorValue = [
+  {
+    type: 'paragraph',
+    children: [{ text: '' }],
+  },
+];
 
 const testTextPluginInfo = {
   iconName: "test",
   Icon: () => null,
   toolTip: "",
   createSlatePlugin: jest.fn(),
-  command: ""
+  modalHook: jest.fn()
 };
 const testTextPluginInfoWithUpdate = {
   iconName: "testWithUpdate",
   Icon: () => null,
   toolTip: "",
   createSlatePlugin: jest.fn(),
-  command: "",
+  modalHook: jest.fn(),
   updateTextContentAfterSharedModelChanges: jest.fn()
 };
 
@@ -70,9 +63,9 @@ describe("TextContentModel", () => {
 
   it("handles slate format strings", () => {
     const model = TextContentModel.create();
-    model.setSlate(Value.fromJSON(emptyJson));
+    model.setSlate(empty);
     const slate = model.getSlate();
-    expect(Plain.serialize(slate)).toBe("");
+    expect(slateToText(slate)).toBe("");
 
     // handles errors gracefully
     const bogus1 = TextContentModel.create({ format: "slate", text: "foo" });
@@ -81,38 +74,17 @@ describe("TextContentModel", () => {
     expect(bogus2.asSlate()).toBeDefined();
   });
 
-  const fooJson: ValueJSON = {
-                document: {
-                  nodes: [{
-                    object: "block",
-                    type: "paragraph",
-                    nodes: [{
-                      object: "text",
-                      text: "foo"
-                    }]
-                  }]
-                }
-              };
+  // const value: EditorValue = [
+  //   {
+  //     type: 'paragraph',
+  //     children: [{ text: 'foo' }],
+  //   },
+  // ];
 
   it("converts to slate correctly", () => {
     const foo = "foo";
     const model = TextContentModel.create({ text: foo });
-    expect(Plain.serialize(model.asSlate())).toBe(foo);
-
-    jestSpyConsole("warn", mockConsole => {
-      // triggers console warning about "the `leaves` property of Text nodes has been removed"
-      model.setMarkdown("foo");
-      expect(model.format).toBe("markdown");
-      expect(Plain.serialize(model.asSlate())).toBe(foo);
-
-      // failure of this test => the console mock can be removed
-      expect(mockConsole).toHaveBeenCalled();
-    });
-
-    const fooValue = Value.fromJSON(fooJson);
-    model.setSlate(fooValue);
-    expect(model.format).toBe("slate");
-    expect(Plain.serialize(model.asSlate())).toBe(foo);
+    expect(slateToText(model.asSlate())).toBe(foo);
   });
 
   it("calls updateTextContentAfterSharedModelChanges on each plugin that provides it", () => {

@@ -1,9 +1,9 @@
 import { VariableType } from "@concord-consortium/diagram-view";
+import { Editor } from "@concord-consortium/slate-editor";
 import { getType } from "mobx-state-tree";
-import { Inline } from "slate";
-import { SharedModelType } from "../../../models/shared/shared-model";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
+import { isVariableElement } from "./variables-plugin";
 
 export const kVariableSlateType = "m2s-variable";
 
@@ -23,7 +23,27 @@ function getSharedVariablesModel(textContent: TextContentModelType) {
 
 export function getVariables(textContent: TextContentModelType): VariableType[] {
   const sharedModel = getOrFindSharedModel(textContent);
-  return sharedModel ? sharedModel.variables : [];
+  return sharedModel?.variables ?? [];
+}
+
+export const getTileTextVariables = (textContent: TextContentModelType) => {
+  const variableIds: string[] = [];
+  if (textContent.editor) {
+    for (const [node] of Editor.nodes(textContent.editor, {at: [], mode: 'all'})) {
+      if (Editor.isInline(textContent.editor, node) && isVariableElement(node)) {
+        variableIds.push(node.reference);
+      }
+    }
+  }
+  const variables = variableIds.map(id => findVariable(textContent, id));
+  const filteredVariables = variables.filter(variable => variable !== undefined);
+  return filteredVariables as VariableType[];
+};
+
+function findVariable(textContent: TextContentModelType, variableId: string) {
+  const variables = getVariables(textContent);
+  const variable = variables.find(v => v.id === variableId);
+  return variable;
 }
 
 export function getOrFindSharedModel(textContent: TextContentModelType) {
@@ -68,36 +88,4 @@ export function getOrFindSharedModel(textContent: TextContentModelType) {
   }
 
   return sharedModel;
-}
-
-export function updateAfterSharedModelChanges(
-    textContent: TextContentModelType, sharedModel?: SharedModelType) {
-
-  const {editor} = textContent;
-
-  // Look for chips in the document (editor.value)
-  // If any of these chips reference variables that no long exist, delete
-  // them from the document.
-  if (!editor) {
-    return;
-  }
-
-  const variables = getVariables(textContent);
-
-  const document = editor.value.document;
-  const variableNodes = document.filterDescendants((node) => {
-    return Inline.isInline(node) && node.type === kVariableSlateType;
-  });
-  variableNodes.forEach((node) => {
-    if (!node) {
-      // For some reason Immutable iterable.forEach can return undefined values
-      return;
-    }
-    const inlineNode = node as Inline;
-
-    // Does this variable exist in our list?
-    if(!variables.find(v => v.id === inlineNode.data.get("reference"))){
-      editor.removeNodeByKey(inlineNode.key);
-    }
-  });
 }

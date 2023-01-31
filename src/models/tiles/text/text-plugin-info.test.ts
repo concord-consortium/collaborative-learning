@@ -1,22 +1,21 @@
-import { HtmlSerializablePlugin } from "@concord-consortium/slate-editor";
 import { getAllTextPluginInfos, getTextPluginIds, getTextPluginInfo, 
   getTextPluginInstances, registerTextPluginInfo } from "./text-plugin-info";
 
-const testTextPluginInstance = {from: "testTextPluginInfo"} as HtmlSerializablePlugin;
+const testTextPluginInstance = {from: "testTextPluginInfo"} as any;
 const testTextPluginInfo = {
   iconName: "test",
   Icon: () => null,
   toolTip: "",
   createSlatePlugin: jest.fn(() => testTextPluginInstance),
-  command: ""
+  modalHook: jest.fn()
 };
-const testTextPluginWithUpdateInstance = {from: "testTextPluginInfoWithUpdate"}  as HtmlSerializablePlugin;
+const testTextPluginWithUpdateInstance = {from: "testTextPluginInfoWithUpdate"}  as any;
 const testTextPluginInfoWithUpdate = {
   iconName: "testWithUpdate",
   Icon: () => null,
   toolTip: "",
   createSlatePlugin: jest.fn(() => testTextPluginWithUpdateInstance),
-  command: "",
+  modalHook: jest.fn(),
   updateTextContentAfterSharedModelChanges: jest.fn()
 };
 

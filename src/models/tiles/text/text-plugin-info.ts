@@ -1,4 +1,3 @@
-import { HtmlSerializablePlugin } from "@concord-consortium/slate-editor";
 import { FunctionComponent, SVGProps } from "react";
 import { SharedModelType } from "../../shared/shared-model";
 import { TextContentModelType } from "./text-content";
@@ -7,11 +6,12 @@ export interface ITextPluginInfo {
   iconName: string;
   Icon: FunctionComponent<SVGProps<SVGSVGElement>>;
   toolTip: string;
-  createSlatePlugin:
-    (textContent: TextContentModelType) => HtmlSerializablePlugin;
-  command: string;
+  createSlatePlugin?:
+    (textContent: TextContentModelType) => any; //FIXME: any type.
+  modalHook: (args?:any) => any; // FIXME: any type.
   updateTextContentAfterSharedModelChanges?:
     (textContent: TextContentModelType, sharedModel?: SharedModelType) => void;
+  buttonEnabled?: () => boolean,
 }
 
 const gTextPluginInfoMap: Record<string, ITextPluginInfo | undefined> = {};
@@ -27,7 +27,8 @@ export function getTextPluginInfo(id: string) {
 // TODO: perhaps this should only add the plugins that have been configured
 // as tools by the app-config.
 export function getTextPluginInstances(textContent: TextContentModelType) {
-  const pluginInstances:  HtmlSerializablePlugin[] = [];
+  // FIXME: need to figure out what this should be
+  const pluginInstances:  any[] = []; // FIXME type
   Object.values(gTextPluginInfoMap).forEach(pluginInfo => {
     if (pluginInfo?.createSlatePlugin) {
       pluginInstances.push(pluginInfo.createSlatePlugin(textContent));

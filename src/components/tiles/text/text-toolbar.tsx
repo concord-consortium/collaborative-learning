@@ -1,17 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useContext } from "react";
 import ReactDOM from "react-dom";
-import { Editor, EFormat, handleToggleSuperSubscript } from "@concord-consortium/slate-editor";
+import _ from "lodash";
+import { Editor, EFormat } from "@concord-consortium/slate-editor";
+
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { TextToolbarButton } from "./text-toolbar-button";
-import { useTextToolDialog } from "./text-tile-dialog";
 import { IRegisterTileApiProps } from "../tile-component";
-import { getTextPluginInfo } from "../../../models/tiles/text/text-plugin-info";
-// TODO: This should be exported by slate-editor, and we should import it from there.
-// Currently it is not listed as a direct dependency of CLUE.
-import EventEmitter from "eventemitter3";
-
+import { getAllTextPluginInfos, getTextPluginInfo } from "../../../models/tiles/text/text-plugin-info";
+import { variableBuckets } from "../../../plugins/shared-variables/shared-variables-utils";
+import { TextContentModelType } from "../../../models/tiles/text/text-content";
+import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
+import { getVariables, getOrFindSharedModel } from "../../../plugins/shared-variables/slate/variables-text-content";
+import { findSelectedVariable, insertTextVariable, insertTextVariables, kVariableFormat}
+  from "../../../plugins/shared-variables/slate/variables-plugin";
 import { isMac } from "../../../utilities/browser";
+
+
 import BoldToolIcon from "../../../assets/icons/text/bold-text-icon.svg";
 import ItalicToolIcon from "../../../assets/icons/text/italic-text-icon.svg";
 import UnderlineToolIcon from "../../../assets/icons/text/underline-text-icon.svg";
@@ -19,6 +24,8 @@ import SuperscriptToolIcon from "../../../assets/icons/text/superscript-text-ico
 import SubscriptToolIcon from "../../../assets/icons/text/subscript-text-icon.svg";
 import NumberedListToolIcon from "../../../assets/icons/text/numbered-list-text-icon.svg";
 import BulletedListToolIcon from "../../../assets/icons/text/bulleted-list-text-icon.svg";
+import InsertVariableCardIcon from "../../../plugins/shared-variables/assets/insert-variable-chip-icon.svg";
+
 
 import "./text-toolbar.sass";
 
@@ -26,11 +33,13 @@ interface IButtonDef {
   iconName: string;  // icon name for this button.
   Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>; // icon for the button
   toolTip: string;   // Text for the button's tool-tip.
+  buttonEnabled?: (args: any) => boolean; // Decides when the button should be enabled.
 }
 
 interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
   selectedButtons: string[];
   editor?: Editor;
+  textContent?: TextContentModelType,
 }
 
 const kShortcutPrefix = isMac() ? "Cmd-" : "Ctrl-";
@@ -53,6 +62,39 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   const { documentContent, editor, selectedButtons, onIsEnabled, ...others } = props;
   const toolbarSetting = useSettingFromStores("tools", "text") as unknown as string[];
   const enabled = onIsEnabled();
+  const textContent = useContext(TextContentModelContext);
+  const selectedElements = editor?.selectedElements();
+  const variables = getVariables(textContent);
+  const hasVariable = editor?.isElementActive(kVariableFormat);
+  const selectedVariable = hasVariable ? findSelectedVariable(selectedElements, variables) : undefined;
+  const sharedModel = getOrFindSharedModel(textContent);
+  const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
+
+  const plugins = getAllTextPluginInfos();
+  // Build up a map from plugin => toolbar click handlers.
+  // This assumes the plugin is registering a modal which is not the most generic choice.
+  const pluginModalHandlers: Record<string, ()=> void> = {};
+  plugins.forEach(plugin => {
+    if (plugin?.modalHook) {
+      const { selfVariables, otherVariables, unusedVariables } = variableBuckets(textContent, sharedModel);
+      const [showDialog] = plugin.modalHook (
+        { variable: selectedVariable,
+          textContent,
+          sharedModel,
+          Icon: InsertVariableCardIcon,
+          addVariable: _.bind(insertTextVariable, null, _, editor),
+          namePrefill: highlightedText,
+          insertVariables: _.bind(insertTextVariables, null, _, editor),
+          otherVariables,
+          selfVariables,
+          unusedVariables
+        }
+      );
+      const name = plugin.iconName;
+      pluginModalHandlers[name] = showDialog;
+    }
+  });
+
   const toolbarLocation = useFloatingToolbarLocation({
                             documentContent,
                             toolbarHeight: 29,
@@ -61,7 +103,6 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
                             enabled,
                             ...others
                           });
-  const dialogController = useTextToolDialog({editor});
   let toolbarButtons: IButtonDef[] = [];
   if (toolbarSetting) {
     toolbarSetting.forEach( setting => {
@@ -81,77 +122,58 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
 
   const handleToolBarButtonClick = (buttonIconName: string, event: React.MouseEvent) => {
     event.preventDefault();
-
     if (!editor) {
       // In theory the editor can be undefined. Cut that option off
       // here so we don't need to worry about it below
       return;
     }
-
     switch (buttonIconName) {
       case "bold":
-        editor.command("toggleMark", EFormat.bold);
+        editor.toggleMark(EFormat.bold);
         break;
       case "italic":
-        editor.command("toggleMark", EFormat.italic);
+        editor.toggleMark(EFormat.italic);
         break;
       case "underline":
-        editor.command("toggleMark", EFormat.underlined);
+        editor.toggleMark(EFormat.underlined);
         break;
       case "subscript":
-        handleToggleSuperSubscript(EFormat.subscript, editor);
+        editor.toggleSuperSubscript(EFormat.subscript);
         break;
       case "superscript":
-        handleToggleSuperSubscript(EFormat.superscript, editor);
+        editor.toggleSuperSubscript(EFormat.superscript);
         break;
       case "list-ol":
-        editor.command("toggleBlock", EFormat.numberedList);
+        editor.toggleElement(EFormat.numberedList);
         break;
       case "list-ul":
-        editor.command("toggleBlock", EFormat.bulletedList);
+        editor.toggleElement(EFormat.bulletedList);
         break;
       case "undo":
         editor.undo();
         break;
       default: {
         const toolInfo = getTextPluginInfo(buttonIconName);
-
         // Handle Text Plugins
-        if (!toolInfo?.command) {
-          console.warn("Can't find text plugin command for", buttonIconName);
+        if (!toolInfo || !pluginModalHandlers[toolInfo.iconName]) {
+          console.warn("Can't find text plugin handler for", buttonIconName);
           break;
         }
-        // Send the dialogController to all plugins
-        //
-        // TODO: I think this should be an object: `{dialogController}`
-        // instead of a raw param. This way we can add more props to it
-        // without changing the method signature and worrying about argument
-        // order. The reason is that I hope we can provide additional
-        // controllers or services that plugins can use. This change should be
-        // made in slate-editor too for consistency.
-        editor.command(toolInfo?.command, dialogController);
+        pluginModalHandlers[toolInfo.iconName]();
       }
     }
   };
-
-  // listen for configuration requests from plugins
-  useEffect(() => {
-    const emitter: EventEmitter | undefined = editor?.query("emitter");
-    const handler = (event: string, ...args: any) => {
-      editor?.command(event, dialogController, ...args);
-    };
-    emitter?.on("toolbarDialog", handler);
-    return () => {
-      emitter?.off("toolbarDialog", handler);
-    };
-  }, [editor, dialogController]);
 
   return documentContent
     ? ReactDOM.createPortal(
         <div className={`text-toolbar ${enabled && toolbarLocation ? "enabled" : "disabled"}`}
               style={toolbarLocation} onMouseDown={handleMouseDown}>
           {toolbarButtons.map(button => {
-            const { iconName, Icon, toolTip } = button;
+            const { iconName, Icon, toolTip, buttonEnabled } = button;
+            let bEnabled = enabled;
+            if (buttonEnabled) {
+              bEnabled = buttonEnabled(selectedVariable);
+            }
             const isSelected = !!selectedButtons.find(b => b === iconName);
             const handleClick = (event: React.MouseEvent) => {
               if (editor && enabled) {
@@ -159,7 +181,7 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
               }
             };
             return (
-              <TextToolbarButton key={iconName} iconName={iconName} Icon={Icon} enabled={enabled}
+              <TextToolbarButton key={iconName} iconName={iconName} Icon={Icon} enabled={bEnabled}
                 tooltip={toolTip} isSelected={isSelected} onClick={handleClick} />
             );
           })}
