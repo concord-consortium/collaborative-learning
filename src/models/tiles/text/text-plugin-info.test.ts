@@ -1,21 +1,17 @@
-import { getAllTextPluginInfos, getTextPluginIds, getTextPluginInfo, 
+import { getAllTextPluginInfos, getTextPluginIds, getTextPluginInfo,
   getTextPluginInstances, registerTextPluginInfo } from "./text-plugin-info";
 
 const testTextPluginInstance = {from: "testTextPluginInfo"} as any;
 const testTextPluginInfo = {
-  iconName: "test",
-  Icon: () => null,
-  toolTip: "",
+  pluginName: "test",
   createSlatePlugin: jest.fn(() => testTextPluginInstance),
-  modalHook: jest.fn()
+  buttonDefs: {}
 };
 const testTextPluginWithUpdateInstance = {from: "testTextPluginInfoWithUpdate"}  as any;
 const testTextPluginInfoWithUpdate = {
-  iconName: "testWithUpdate",
-  Icon: () => null,
-  toolTip: "",
+  pluginName: "testWithUpdate",
   createSlatePlugin: jest.fn(() => testTextPluginWithUpdateInstance),
-  modalHook: jest.fn(),
+  buttonDefs: {},
   updateTextContentAfterSharedModelChanges: jest.fn()
 };
 

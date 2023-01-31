@@ -31,7 +31,7 @@
         "numFormat": ".3~f"
       },
       "text": {
-        "tools": ["bold", "italic", "list-ul", "subscript", "superscript", "m2s-variables", "new-variable", "insert-variable", "edit-variable"]
+        "tools": ["bold", "italic", "list-ul", "subscript", "superscript", "new-variable", "insert-variable", "edit-variable"]
       },
       "drawing": {"tools": ["select", "line", "vector", "rectangle", "ellipse", "stamp", "stroke-color", "fill-color", "image-upload", "new-variable", "insert-variable", "edit-variable", "delete"]}
     },
@@ -813,7 +813,7 @@
                         "<p></p>"
                       ]
                     }
-                  }                                                      
+                  }
                 ]
               },
               "supports": []
@@ -872,7 +872,7 @@
                         "<p></p>"
                       ]
                     }
-                  }                                                                       
+                  }
                 ]
               },
               "supports": []
@@ -930,7 +930,7 @@
                         "<p></p>"
                       ]
                     }
-                  }                                                 
+                  }
                 ]
               },
               "supports": []
@@ -996,7 +996,7 @@
                     "type": "Diagram",
                     "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}
                   }
-                }        
+                }
               ]
             }
           },

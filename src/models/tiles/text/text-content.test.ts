@@ -10,18 +10,14 @@ const empty: EditorValue = [
 ];
 
 const testTextPluginInfo = {
-  iconName: "test",
-  Icon: () => null,
-  toolTip: "",
+  pluginName: "test",
   createSlatePlugin: jest.fn(),
-  modalHook: jest.fn()
+  buttonDefs: {},
 };
 const testTextPluginInfoWithUpdate = {
-  iconName: "testWithUpdate",
-  Icon: () => null,
-  toolTip: "",
+  pluginName: "testWithUpdate",
   createSlatePlugin: jest.fn(),
-  modalHook: jest.fn(),
+  buttonDefs: {},
   updateTextContentAfterSharedModelChanges: jest.fn()
 };
 

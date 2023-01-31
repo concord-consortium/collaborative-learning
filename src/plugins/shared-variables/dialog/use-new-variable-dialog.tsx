@@ -8,14 +8,14 @@ import { SharedVariablesType } from "../shared-variables";
 
 interface IUseNewVariableDialog {
   addVariable: (variable: VariableType ) => void;
-  sharedModel: SharedVariablesType;
+  sharedModel?: SharedVariablesType;
   namePrefill? : string
 }
 export const useNewVariableDialog = ({ addVariable, sharedModel, namePrefill }: IUseNewVariableDialog) => {
   const [newVariable, setNewVariable] = useState(Variable.create({name: namePrefill || undefined}));
 
   const handleClick = () => {
-    sharedModel.addVariable(newVariable);
+    sharedModel?.addVariable(newVariable);
     const sharedVariable = sharedModel?.variables.find(v => v === newVariable);
     if (sharedVariable) {
       addVariable(sharedVariable);

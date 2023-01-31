@@ -1,13 +1,14 @@
 import { VariableType } from "@concord-consortium/diagram-view";
 import { Editor } from "@concord-consortium/slate-editor";
 import { getType } from "mobx-state-tree";
+import { DEBUG_SHARED_MODELS } from "../../../lib/debug";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 import { isVariableElement } from "./variables-plugin";
 
 export const kVariableSlateType = "m2s-variable";
 
-function getSharedVariablesModel(textContent: TextContentModelType) {
+export function getSharedVariablesModel(textContent: TextContentModelType) {
   const sharedModelManager = textContent.tileEnv?.sharedModelManager;
   // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
   // just like findFirstSharedModelByType does
@@ -34,7 +35,7 @@ export const getTileTextVariables = (textContent: TextContentModelType) => {
         variableIds.push(node.reference);
       }
     }
-  }   
+  }
   const variables = variableIds.map(id => findVariable(textContent, id));
   const filteredVariables = variables.filter(variable => variable !== undefined);
   return filteredVariables as VariableType[];
@@ -44,6 +45,11 @@ function findVariable(textContent: TextContentModelType, variableId: string) {
   const variables = getVariables(textContent);
   const variable = variables.find(v => v.id === variableId);
   return variable;
+}
+
+export function isSharedModelManagerReady(textContent: TextContentModelType) {
+  const sharedModelManager = textContent.tileEnv?.sharedModelManager;
+  return !!sharedModelManager?.isReady;
 }
 
 export function getOrFindSharedModel(textContent: TextContentModelType) {
@@ -56,13 +62,17 @@ export function getOrFindSharedModel(textContent: TextContentModelType) {
     if (!sharedModelManager || !sharedModelManager.isReady) {
       // In this case we can't do anything.
       // Print a warning because it should be unusual
-      console.warn("shared model manager isn't available");
+      if (DEBUG_SHARED_MODELS) {
+        console.warn("shared model manager isn't available");
+      }
       return;
     }
 
     const containerSharedModel = sharedModelManager.findFirstSharedModelByType(SharedVariables);
     if (!containerSharedModel) {
-      console.warn("no shared variables model in the document");
+      if (DEBUG_SHARED_MODELS) {
+        console.warn("no shared variables model in the document");
+      }
       // If we need to create a new shared variables model when there is just a
       // text tile in the container, this code needs to be changed.
       //

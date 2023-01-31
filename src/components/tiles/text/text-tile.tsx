@@ -1,9 +1,10 @@
 import React from "react";
 import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
-import { isMarkActive, CustomEditor, EditorValue, SlateEditor, ReactEditor, createEditor, Slate, EFormat, isBlockActive, Editor
+import { EditorValue, SlateEditor, ReactEditor, createEditor,
+  Slate, EFormat, Editor
 } from "@concord-consortium/slate-editor";
-import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
+import { TextContentModelContext } from "./text-content-context";
 import { BaseComponent } from "../../base";
 import { debouncedSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
@@ -16,6 +17,7 @@ import { getTextPluginInstances, getTextPluginIds } from "../../../models/tiles/
 import { LogEventName } from "../../../lib/logger-types";
 
 import "./text-tile.sass";
+import { TextPluginsContext } from "./text-plugins-context";
 
 /*
   The Slate internal data model uses, among other things, "marks" and "blocks"
@@ -78,48 +80,37 @@ import "./text-tile.sass";
 
 interface IState {
   value?: EditorValue;
-  selectedButtons?: string[];
+  valueRevision: number;
   editing?: boolean;
 }
 
 @inject("stores")
 @observer
 export default class TextToolComponent extends BaseComponent<ITileProps, IState> {
-  public state: IState = {};
+  public state: IState = {valueRevision: 0};
   private disposers: IReactionDisposer[];
   private prevText: any;
   private textTileDiv: HTMLElement | null;
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarTileApi: ITileApi | undefined;
-  private plugins: any[] | undefined; // FIXME
+  private plugins: Record<string, any>; // FIXME
   private textOnFocus: string | string [] | undefined;
-
-  // map from slate type string to button icon name
-  private slateToButtonType: Partial<Record<EFormat, string>> =  {
-    [EFormat.bold]: "bold",
-    [EFormat.italic]: "italic",
-    [EFormat.underlined]: "underline",
-    [EFormat.superscript]: "superscript",
-    [EFormat.subscript]: "subscript",
-    [EFormat.bulletedList]: "list-ul",
-    [EFormat.numberedList]: "list-ol",
-    //include the plugin ids here
-    ...getTextPluginIds().reduce((idMap, id) => ({...idMap, [id]: id}), {})
-  };
 
   public componentDidMount() {
     const initialTextContent = this.getContent();
     this.prevText = initialTextContent.text;
     const initialValue = initialTextContent.asSlate();
     this.setState({
-      value: initialValue
+      value: initialValue,
+      valueRevision: 0
     });
+    // This will be changed to return a {[pluginName]: pluginInstance}
     this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
-    const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate    
+    const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate
     // Gather all the plugin init functions and pass that to slate.
     const onInitEditor = (e: Editor) => {
-       this.plugins?.forEach(plugin => {
+       Object.values(this.plugins).forEach(plugin => {
           if (plugin.onInitEditor) {
             e = plugin.onInitEditor(e);
           }
@@ -193,7 +184,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   public render() {
     const { documentContent, tileElt, readOnly, scale } = this.props;
-    const { value: editorValue, selectedButtons } = this.state;
+    const { value: editorValue, valueRevision } = this.state;
     const { appConfig: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
@@ -209,34 +200,39 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       // FIXME: replace this provider with one at the tile level so we get it for free.
       // and then replace the drawing one with that as well
       <TextContentModelContext.Provider value={this.getContent()} >
-        <div className={`text-tool-wrapper ${readOnly ? "" : "editable"}`}
-          data-testid="text-tool-wrapper"
-          ref={elt => this.textTileDiv = elt}
-          onMouseDown={this.handleMouseDownInWrapper}>
-          <Slate
-              editor={this.editor as ReactEditor}
-              value={editorValue}
-              onChange={this.handleChange}>
-            <SlateEditor
-              value={editorValue}
-              placeholder={placeholderText}
-              readOnly={readOnly}
-              onFocus={this.handleFocus}
-              onBlur={this.handleBlur}
-              className={`ccrte-editor slate-editor ${classes || ""}`}
-            />
-            <TextToolbarComponent
-              documentContent={documentContent}
-              tileElt={tileElt}
-              scale={scale}
-              selectedButtons={selectedButtons || []}
-              editor={this.editor}
-              onIsEnabled={this.handleIsEnabled}
-              onRegisterTileApi={this.handleRegisterToolApi}
-              onUnregisterTileApi={this.handleUnregisterToolApi}
-            />
-          </Slate>
-        </div>
+        <TextPluginsContext.Provider value={this.plugins} >
+          <div className={`text-tool-wrapper ${readOnly ? "" : "editable"}`}
+            data-testid="text-tool-wrapper"
+            ref={elt => this.textTileDiv = elt}
+            onMouseDown={this.handleMouseDownInWrapper}>
+            <Slate
+                editor={this.editor as ReactEditor}
+                value={editorValue}
+                onChange={this.handleChange}>
+              <SlateEditor
+                value={editorValue}
+                placeholder={placeholderText}
+                readOnly={readOnly}
+                onFocus={this.handleFocus}
+                onBlur={this.handleBlur}
+                className={`ccrte-editor slate-editor ${classes || ""}`}
+              />
+              {/* We need to pass the plugin instances to the toolbar so it can pass the right one
+                to the plugin's button */}
+              <TextToolbarComponent
+                documentContent={documentContent}
+                valueRevision={valueRevision}
+                tileElt={tileElt}
+                scale={scale}
+                editor={this.editor}
+                pluginInstances={this.plugins}
+                onIsEnabled={this.handleIsEnabled}
+                onRegisterTileApi={this.handleRegisterToolApi}
+                onUnregisterTileApi={this.handleUnregisterToolApi}
+              />
+            </Slate>
+          </div>
+        </TextPluginsContext.Provider>
       </TextContentModelContext.Provider>
     );
   }
@@ -272,24 +268,10 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       content.setSlate(value);
       this.setState({
         value,
-        selectedButtons: this.getSelectedIcons(value).sort()
+        valueRevision: this.state.valueRevision + 1
       });
     }
   };
-
-  private getSelectedIcons(value: EditorValue): string[] {
-    const buttonList: string[] = ["undo"];  // Always show "undo" as selected.
-    for (const key in this.slateToButtonType) {
-      if (isMarkActive(this.editor as CustomEditor, key as EFormat) ||
-        isBlockActive(this.editor as CustomEditor, key as EFormat)) {
-        const buttonType = this.slateToButtonType[key as EFormat];
-        if (buttonType) {
-          buttonList.push(buttonType);
-        }
-      }
-    }
-    return buttonList;
-  }
 
   private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
     const { ui } = this.stores;

@@ -16,6 +16,13 @@ const getTileVariables = (content: ITileContentModel) => {
   } else if (content.type === kDrawingTileType) {
     return drawingVariables(content as DrawingContentModelType);
   } else if (content.type === kTextTileType) {
+    // FIXME: To reduce duplicate code this should create a VariablesPlugin with the content
+    // and use that to get all of the variables
+    // It'll be a little less efficient but seems cleaner
+    // Either approach will have a problem though if this is called before the shared variable manager
+    // is ready or if there isn't a shared variables model in the document.
+    // To fix that we need to call this from an observing function and we need to find the
+    // the plugin instance associated with this specific tile content model
     return getTileTextVariables(content as TextContentModelType);
   } else {
     return [];

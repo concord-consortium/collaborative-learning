@@ -1,21 +1,17 @@
-import React, { useContext } from "react";
+import React, { FunctionComponent, SVGProps } from "react";
 import ReactDOM from "react-dom";
 import _ from "lodash";
-import { EFormat, toggleMark, toggleSuperSubscript, toggleBlock, Editor} from "@concord-consortium/slate-editor";
+import { EFormat, toggleMark, toggleSuperSubscript, toggleBlock, Editor,
+  CustomEditor, isMarkActive, isBlockActive} from "@concord-consortium/slate-editor";
 
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { TextToolbarButton } from "./text-toolbar-button";
 import { IRegisterTileApiProps } from "../tile-component";
-import { getAllTextPluginInfos, getTextPluginInfo } from "../../../models/tiles/text/text-plugin-info";
-import { variableBuckets } from "../../../plugins/shared-variables/shared-variables-utils";
+import { ButtonDefComponent, getAllTextPluginInfos } from "../../../models/tiles/text/text-plugin-info";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
-import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
-import { getVariables, getOrFindSharedModel } from "../../../plugins/shared-variables/slate/variables-text-content";
-import { findSelectedVariable, insertTextVariable, insertTextVariables, kVariableFormat}
-  from "../../../plugins/shared-variables/slate/variables-plugin";
-import { isMac } from "../../../utilities/browser";
 
+import { isMac } from "../../../utilities/browser";
 
 import BoldToolIcon from "../../../assets/icons/text/bold-text-icon.svg";
 import ItalicToolIcon from "../../../assets/icons/text/italic-text-icon.svg";
@@ -24,74 +20,121 @@ import SuperscriptToolIcon from "../../../assets/icons/text/superscript-text-ico
 import SubscriptToolIcon from "../../../assets/icons/text/subscript-text-icon.svg";
 import NumberedListToolIcon from "../../../assets/icons/text/numbered-list-text-icon.svg";
 import BulletedListToolIcon from "../../../assets/icons/text/bulleted-list-text-icon.svg";
-import InsertVariableCardIcon from "../../../plugins/shared-variables/assets/insert-variable-chip-icon.svg";
 
 
 import "./text-toolbar.sass";
 
-interface IButtonDef {
-  iconName: string;  // icon name for this button.
-  Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>; // icon for the button
-  toolTip: string;   // Text for the button's tool-tip.
-  buttonEnabled?: (args: any) => boolean; // Decides when the button should be enabled.
-}
-
 interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
-  selectedButtons: string[];
   editor?: Editor;
   textContent?: TextContentModelType,
+  // TODO: Need a type for pluginInstances
+  pluginInstances: Record<string, any>,
+  valueRevision: number;
+}
+
+interface IButtonDef {
+  pluginName?: string,
+  component: ButtonDefComponent
 }
 
 const kShortcutPrefix = isMac() ? "Cmd-" : "Ctrl-";
 
-const buttonDefs: IButtonDef[] = [
-  { iconName: "bold",        Icon: BoldToolIcon,          toolTip: `Bold (${kShortcutPrefix}b)`},
-  { iconName: "italic",      Icon: ItalicToolIcon,        toolTip: `Italic (${kShortcutPrefix}i)`},
-  { iconName: "underline",   Icon: UnderlineToolIcon,     toolTip: `Underline (${kShortcutPrefix}u)`},
-  { iconName: "subscript",   Icon: SubscriptToolIcon,     toolTip: `Subscript`},
-  { iconName: "superscript", Icon: SuperscriptToolIcon,   toolTip: `Superscript`},
-  { iconName: "list-ol",     Icon: NumberedListToolIcon,  toolTip: `Numbered List`},
-  { iconName: "list-ul",     Icon: BulletedListToolIcon,  toolTip: `Bulleted List`},
-];
+// These are the built in tool definitions
+const buttonDefs = new Map<string, IButtonDef>([
+  [ "bold", {
+    component: props => <BuiltInToolbarButton
+      iconName="bold"
+      Icon={BoldToolIcon}
+      toolTip={`Bold (${kShortcutPrefix}b)`}
+      slateType={EFormat.bold}
+      command={() => toggleMark(props.editor, EFormat.bold) }
+      {...props}
+      />
+    }],
+  [ "italic", {
+    component: props => <BuiltInToolbarButton
+      iconName="italic"
+      Icon={ItalicToolIcon}
+      toolTip={`Italic (${kShortcutPrefix}i)`}
+      slateType={EFormat.italic}
+      command={() => toggleMark(props.editor, EFormat.italic) }
+      {...props}
+      />
+    }],
+  [ "underline", {
+    component: props => <BuiltInToolbarButton
+      iconName="underline"
+      Icon={UnderlineToolIcon}
+      toolTip={`Underline (${kShortcutPrefix}u)`}
+      slateType={EFormat.underlined}
+      command={() => toggleMark(props.editor, EFormat.underlined) }
+      {...props}
+      />
+    }],
+  [ "subscript", {
+    component: props => <BuiltInToolbarButton
+      iconName="subscript"
+      Icon={SubscriptToolIcon}
+      toolTip={`Subscript`}
+      slateType={EFormat.subscript}
+      command={() => toggleSuperSubscript(props.editor, EFormat.subscript) }
+      {...props}
+      />
+    }],
+  [ "superscript", {
+    component: props => <BuiltInToolbarButton
+      iconName="superscript"
+      Icon={SuperscriptToolIcon}
+      toolTip={`Superscript`}
+      slateType={EFormat.superscript}
+      command={() => toggleSuperSubscript(props.editor, EFormat.superscript) }
+      {...props}
+      />
+    }],
+  [ "list-ol", {
+    component: props => <BuiltInToolbarButton
+      iconName="list-ol"
+      Icon={NumberedListToolIcon}
+      toolTip={`Numbered List`}
+      slateType={EFormat.numberedList}
+      command={() => toggleBlock(props.editor, EFormat.numberedList) }
+      {...props}
+      />
+    }],
+  ["list-ul", {
+    component: props => <BuiltInToolbarButton
+      iconName="list-ul"
+      Icon={BulletedListToolIcon}
+      toolTip={`Bulleted List`}
+      slateType={EFormat.bulletedList}
+      command={() => toggleBlock(props.editor, EFormat.bulletedList) }
+      {...props}
+      />
+    }],
+]);
 
 const handleMouseDown = (event: React.MouseEvent) => {
   event.preventDefault();
 };
 
 export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
-  const { documentContent, editor, selectedButtons, onIsEnabled, ...others } = props;
+  const { documentContent, editor, pluginInstances, onIsEnabled, valueRevision, ...others } = props;
   const toolbarSetting = useSettingFromStores("tools", "text") as unknown as string[];
   const enabled = onIsEnabled();
-  const textContent = useContext(TextContentModelContext);
-  const selectedElements = editor?.selectedElements();
-  const variables = getVariables(textContent); 
-  const hasVariable = editor?.isElementActive(kVariableFormat);
-  const selectedVariable = hasVariable ? findSelectedVariable(selectedElements, variables) : undefined;
-  const sharedModel = getOrFindSharedModel(textContent);
-  const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
-  
+
   const plugins = getAllTextPluginInfos();
-  // Build up a map from plugin => toolbar click handlers.
-  // This assumes the plugin is registering a modal which is not the most generic choice.
-  const pluginModalHandlers: Record<string, ()=> void> = {}; 
   plugins.forEach(plugin => {
-    if (plugin?.modalHook) {
-      const { selfVariables, otherVariables, unusedVariables } = variableBuckets(textContent, sharedModel);
-      const [showDialog] = plugin.modalHook (
-        { variable: selectedVariable,
-          textContent,
-          sharedModel,
-          Icon: InsertVariableCardIcon,
-          addVariable: _.bind(insertTextVariable, null, _, editor),
-          namePrefill: highlightedText,
-          insertVariables: _.bind(insertTextVariables, null, _, editor),
-          otherVariables,
-          selfVariables,
-          unusedVariables
-        }
-      );
-      const name = plugin.iconName;
-      pluginModalHandlers[name] = showDialog;
+
+    if (!plugin) {
+      return;
+    }
+
+    for (const [iconName, pluginButtonDefComponent] of Object.entries(plugin.buttonDefs)) {
+      // only add this plugin button def if there isn't one there already
+      // buttonDefs is a global so each toolbar component will share this
+      if (!buttonDefs.has(iconName)) {
+        buttonDefs.set(iconName, {pluginName: plugin.pluginName, component: pluginButtonDefComponent});
+      }
     }
   });
 
@@ -103,88 +146,63 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
                             enabled,
                             ...others
                           });
-  let toolbarButtons: IButtonDef[] = [];
+  let toolbarButtons = new Map<string, IButtonDef>();
   if (toolbarSetting) {
     toolbarSetting.forEach( setting => {
-      const builtInButton = buttonDefs.find(b => b.iconName === setting);
-      if (builtInButton) {
-        toolbarButtons.push(builtInButton);
-        return;
-      }
-      const pluginButton = getTextPluginInfo(setting);
-      if (pluginButton) {
-        toolbarButtons.push(pluginButton);
+      const buttonDef = buttonDefs.get(setting);
+      if (buttonDef) {
+        toolbarButtons.set(setting, buttonDef);
+      } else {
+        console.error(`Cannot find buttonDef for ${setting}`);
       }
     });
   } else {
+
     toolbarButtons = buttonDefs;
   }
 
-  const handleToolBarButtonClick = (buttonIconName: string, event: React.MouseEvent) => {
-    event.preventDefault();
-    if (!editor) {
-      // In theory the editor can be undefined. Cut that option off
-      // here so we don't need to worry about it below
-      return;
-    }
-    switch (buttonIconName) {
-      case "bold":
-        toggleMark(editor, EFormat.bold);
-        break;
-      case "italic":
-        toggleMark(editor, EFormat.italic);
-        break;
-      case "underline":
-        toggleMark(editor, EFormat.underlined);
-        break;
-      case "subscript":
-        toggleSuperSubscript(editor, EFormat.subscript);
-        break;
-      case "superscript":
-        toggleSuperSubscript(editor, EFormat.superscript);
-        break;
-      case "list-ol":
-        toggleBlock(editor, EFormat.numberedList);
-        break;
-      case "list-ul":
-        toggleBlock(editor, EFormat.bulletedList);
-        break;
-      case "undo":
-        editor.undo();
-        break;
-      default: {
-        const toolInfo = getTextPluginInfo(buttonIconName);
-        // Handle Text Plugins
-        if (!toolInfo || !pluginModalHandlers[toolInfo.iconName]) {
-          console.warn("Can't find text plugin handler for", buttonIconName);
-          break;
-        }
-        pluginModalHandlers[toolInfo.iconName]();
-      }
-    }
-  };
+  if (!editor) {
+    console.warn("editor not defined");
+    return null;
+  }
 
   return documentContent
     ? ReactDOM.createPortal(
         <div className={`text-toolbar ${enabled && toolbarLocation ? "enabled" : "disabled"}`}
               style={toolbarLocation} onMouseDown={handleMouseDown}>
-          {toolbarButtons.map(button => {
-            const { iconName, Icon, toolTip, buttonEnabled } = button;
-            let bEnabled = enabled;
-            if (buttonEnabled) {
-              bEnabled = buttonEnabled(selectedVariable);
-            }
-            const isSelected = !!selectedButtons.find(b => b === iconName);
-            const handleClick = (event: React.MouseEvent) => {
-              if (editor && enabled) {
-                handleToolBarButtonClick(iconName, event);
-              }
-            };
-            return (
-              <TextToolbarButton key={iconName} iconName={iconName} Icon={Icon} enabled={bEnabled}
-                tooltip={toolTip} isSelected={isSelected} onClick={handleClick} />
-            );
+          {Array.from(toolbarButtons, ([iconName, buttonDef]) => {
+            const ToolbarButton = buttonDef.component;
+            // TODO: make pluginName required for buttonDefs
+            // This would come after the refactor of the default buttons
+            const pluginInstance = buttonDef.pluginName && pluginInstances[buttonDef.pluginName];
+            return <ToolbarButton key={iconName} editor={editor}
+              pluginInstance={pluginInstance} valueRevision={valueRevision}/>;
           })}
         </div>, documentContent)
     : null;
+};
+
+interface IBuiltInToolbarButtonProps {
+  iconName: string;
+  Icon: FunctionComponent<SVGProps<SVGSVGElement>>;
+  toolTip: string;
+  slateType: string;
+  command: () => void;
+  editor: Editor;
+  valueRevision: number;
+}
+
+const BuiltInToolbarButton: React.FC<IBuiltInToolbarButtonProps> = ({
+  iconName, Icon, toolTip, slateType, command, editor
+}: IBuiltInToolbarButtonProps) => {
+  const isSelected =
+    isMarkActive(editor as CustomEditor, slateType as EFormat) ||
+    isBlockActive(editor as CustomEditor, slateType as EFormat);
+  const handleClick = (event: React.MouseEvent) => {
+      event.preventDefault();
+      command();
+  };
+  // Built in buttons are always enabled
+  return <TextToolbarButton iconName={iconName} Icon={Icon} enabled={true}
+           tooltip={toolTip} isSelected={isSelected} onClick={handleClick} />;
 };
