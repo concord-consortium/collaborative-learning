@@ -23,7 +23,7 @@ function getSharedVariablesModel(textContent: TextContentModelType) {
 
 export function getVariables(textContent: TextContentModelType): VariableType[] {
   const sharedModel = getOrFindSharedModel(textContent);
-  return sharedModel ? sharedModel.variables : [];
+  return sharedModel?.variables ?? [];
 }
 
 export const getTileTextVariables = (textContent: TextContentModelType) => {
@@ -34,7 +34,7 @@ export const getTileTextVariables = (textContent: TextContentModelType) => {
         variableIds.push(node.reference);
       }
     }
-  }   
+  }
   const variables = variableIds.map(id => findVariable(textContent, id));
   const filteredVariables = variables.filter(variable => variable !== undefined);
   return filteredVariables as VariableType[];

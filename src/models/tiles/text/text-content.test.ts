@@ -1,4 +1,4 @@
-import { Editor, EditorValue, slateToText } from "@concord-consortium/slate-editor";
+import { EditorValue, slateToText } from "@concord-consortium/slate-editor";
 import { TextContentModel, kTextTileType } from "./text-content";
 import { registerTextPluginInfo } from "./text-plugin-info";
 
@@ -74,12 +74,12 @@ describe("TextContentModel", () => {
     expect(bogus2.asSlate()).toBeDefined();
   });
 
-  const value: EditorValue = [
-    {
-      type: 'paragraph',
-      children: [{ text: 'foo' }],
-    },
-  ];
+  // const value: EditorValue = [
+  //   {
+  //     type: 'paragraph',
+  //     children: [{ text: 'foo' }],
+  //   },
+  // ];
 
   it("converts to slate correctly", () => {
     const foo = "foo";

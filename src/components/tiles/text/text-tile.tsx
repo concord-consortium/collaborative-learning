@@ -1,7 +1,8 @@
 import React from "react";
 import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
-import { isMarkActive, CustomEditor, EditorValue, SlateEditor, ReactEditor, createEditor, Slate, EFormat, isBlockActive, Editor
+import {
+  createEditor, Editor, EditorValue, EFormat, ReactEditor, Slate, SlateEditor
 } from "@concord-consortium/slate-editor";
 import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
 import { BaseComponent } from "../../base";
@@ -116,7 +117,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       value: initialValue
     });
     this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
-    const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate    
+    const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate
     // Gather all the plugin init functions and pass that to slate.
     const onInitEditor = (e: Editor) => {
        this.plugins?.forEach(plugin => {
@@ -216,9 +217,8 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
           <Slate
               editor={this.editor as ReactEditor}
               value={editorValue}
-              onChange={this.handleChange}>
+              onChange={this.handleChange as any}> {/* FIXME: type */}
             <SlateEditor
-              value={editorValue}
               placeholder={placeholderText}
               readOnly={readOnly}
               onFocus={this.handleFocus}
@@ -280,8 +280,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private getSelectedIcons(value: EditorValue): string[] {
     const buttonList: string[] = ["undo"];  // Always show "undo" as selected.
     for (const key in this.slateToButtonType) {
-      if (isMarkActive(this.editor as CustomEditor, key as EFormat) ||
-        isBlockActive(this.editor as CustomEditor, key as EFormat)) {
+      if (this.editor?.isMarkActive(key) || this.editor?.isElementActive(key)) {
         const buttonType = this.slateToButtonType[key as EFormat];
         if (buttonType) {
           buttonList.push(buttonType);
@@ -321,5 +320,3 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.setState({ editing: true });
   };
 }
-
-

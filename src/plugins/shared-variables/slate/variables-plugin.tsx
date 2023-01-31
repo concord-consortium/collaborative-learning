@@ -2,15 +2,8 @@ import React, { useContext } from "react";
 import classNames from "classnames/dedupe";
 
 import {
-  Editor,
-  RenderElementProps,
-  useSerializing,
-  useSelected,
-  Transforms,
-  registerElement,
-  CustomEditor,
-  BaseElement,
-  EditorValue,
+  BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
+  RenderElementProps, Transforms, useSelected, useSerializing,
 } from "@concord-consortium/slate-editor";
 import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
 import { getVariables } from "./variables-text-content";
@@ -18,22 +11,20 @@ import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
 
 const kVariableClass = "slate-variable-chip";
-const kSlateVoidClass = "cc-slate-void";
 export const kVariableFormat = "clueVariable";
 
 export function VariablesPlugin(textContent: TextContentModelType): any {
   return {
-    onInitEditor: (editor: CustomEditor) => withClueVariables(editor, textContent) 
+    onInitEditor: (editor: CustomEditor) => withClueVariables(editor, textContent)
   };
 }
 
-export interface VariableElement extends BaseElement { 
-  type: "clueVariable",
-  reference: string,
-  children: EditorValue
+export interface VariableElement extends BaseElement {
+  type: "clueVariable";
+  reference: string;
 }
 
-export const isVariableElement = (element: BaseElement): element is VariableElement => {
+export const isVariableElement = (element: CustomElement): element is VariableElement => {
   return element.type === kVariableFormat;
 };
 
@@ -50,7 +41,7 @@ export const insertTextVariable = (variable: VariableType, editor?: Editor) => {
 export const findSelectedVariable = (selectedElements: any, variables: VariableType[]) => {
   let selected = undefined;
     // FIXME: The editor.selectedElements claims that it returns a BaseElement[] but it really returns a NodeEntry
-    // which is a list of pairs. [Node, Path] 
+    // which is a list of pairs. [Node, Path]
     // https://docs.slatejs.org/api/nodes/node-entry
     // There's some weirdness below to work around that, but
     // we should either update the return type our slate lib or just return the BaseElement list.
@@ -81,16 +72,16 @@ export const shouldShowEditVariableButton = (selectedVariable?: VariableType) =>
 
 export const ClueVariableComponent = ({ attributes, children, element }: RenderElementProps) => {
   const textContent = useContext(TextContentModelContext);
-  const isHighlighted =  useSelected(); 
+  const isHighlighted = useSelected();
   const isSerializing = useSerializing();
 
   if (!isVariableElement(element)) return null;
- 
+
   const {reference} = element;
 
-  const classes = classNames(kSlateVoidClass, kVariableClass) || undefined;
+  const classes = classNames(kSlateVoidClass, kVariableClass);
   const selectedClass = isHighlighted && !isSerializing ? "slate-selected" : undefined;
-  const variables = getVariables(textContent); 
+  const variables = getVariables(textContent);
   const variable = variables.find(v => v.id === reference);
   // FIXME: HTML serialization/deserialization. This will serialize the VariableChip too.
   return (
@@ -104,11 +95,24 @@ export const ClueVariableComponent = ({ attributes, children, element }: RenderE
   );
 };
 
-export function withClueVariables(editor: Editor, textContent: TextContentModelType) {
-  const { isInline, isVoid } = editor;
-  editor.isInline = (element:BaseElement) => (element.type === kVariableFormat) || isInline(element);
-  editor.isVoid = (element:BaseElement) => (element.type === kVariableFormat) || isVoid(element);
+let isRegistered = false;
 
-  registerElement(kVariableFormat, props => <ClueVariableComponent {...props}/>);
+export function registerClueVariables() {
+  if (isRegistered) return;
+
+  registerElementComponent(kVariableFormat, props => <ClueVariableComponent {...props}/>);
+
+  // TODO: register deserializer
+
+  isRegistered = true;
+}
+
+export function withClueVariables(editor: Editor, textContent: TextContentModelType) {
+  registerClueVariables();
+
+  const { isInline, isVoid } = editor;
+  editor.isInline = element => (element.type === kVariableFormat) || isInline(element);
+  editor.isVoid = element => (element.type === kVariableFormat) || isVoid(element);
+
   return editor;
 }

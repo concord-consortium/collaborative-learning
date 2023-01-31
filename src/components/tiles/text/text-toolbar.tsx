@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import ReactDOM from "react-dom";
 import _ from "lodash";
-import { EFormat, toggleMark, toggleSuperSubscript, toggleBlock, Editor} from "@concord-consortium/slate-editor";
+import { Editor, EFormat } from "@concord-consortium/slate-editor";
 
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
@@ -64,16 +64,16 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   const enabled = onIsEnabled();
   const textContent = useContext(TextContentModelContext);
   const selectedElements = editor?.selectedElements();
-  const variables = getVariables(textContent); 
+  const variables = getVariables(textContent);
   const hasVariable = editor?.isElementActive(kVariableFormat);
   const selectedVariable = hasVariable ? findSelectedVariable(selectedElements, variables) : undefined;
   const sharedModel = getOrFindSharedModel(textContent);
   const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
-  
+
   const plugins = getAllTextPluginInfos();
   // Build up a map from plugin => toolbar click handlers.
   // This assumes the plugin is registering a modal which is not the most generic choice.
-  const pluginModalHandlers: Record<string, ()=> void> = {}; 
+  const pluginModalHandlers: Record<string, ()=> void> = {};
   plugins.forEach(plugin => {
     if (plugin?.modalHook) {
       const { selfVariables, otherVariables, unusedVariables } = variableBuckets(textContent, sharedModel);
@@ -129,25 +129,25 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
     }
     switch (buttonIconName) {
       case "bold":
-        toggleMark(editor, EFormat.bold);
+        editor.toggleMark(EFormat.bold);
         break;
       case "italic":
-        toggleMark(editor, EFormat.italic);
+        editor.toggleMark(EFormat.italic);
         break;
       case "underline":
-        toggleMark(editor, EFormat.underlined);
+        editor.toggleMark(EFormat.underlined);
         break;
       case "subscript":
-        toggleSuperSubscript(editor, EFormat.subscript);
+        editor.toggleSuperSubscript(EFormat.subscript);
         break;
       case "superscript":
-        toggleSuperSubscript(editor, EFormat.superscript);
+        editor.toggleSuperSubscript(EFormat.superscript);
         break;
       case "list-ol":
-        toggleBlock(editor, EFormat.numberedList);
+        editor.toggleElement(EFormat.numberedList);
         break;
       case "list-ul":
-        toggleBlock(editor, EFormat.bulletedList);
+        editor.toggleElement(EFormat.bulletedList);
         break;
       case "undo":
         editor.undo();
