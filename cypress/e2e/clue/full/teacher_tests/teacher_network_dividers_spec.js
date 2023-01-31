@@ -27,7 +27,8 @@ const clueTeacher1 = {
 };
 
 describe('Teachers can see network dividers', () => {
-  it('verify network dividers in My Work tab for teacher in network', () => {
+  // TODO: Re-instate the skipped tests below once learn.staging.concord.org is fully functional again
+  it.skip('verify network dividers in My Work tab for teacher in network', () => {
     chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("my-work");
     cy.openSection('my-work', 'workspaces');
@@ -43,7 +44,7 @@ describe('Teachers can see network dividers', () => {
     teacherNetwork.verifyDividerLabel('learning-log', 'my-network');
   });
 
-  it('verify network dividers in Class Work tab for teacher in network', () => {
+  it.skip('verify network dividers in Class Work tab for teacher in network', () => {
     cy.openTopTab("class-work");
     cy.openSection('class-work', 'workspaces');
     teacherNetwork.verifyDividerLabel('workspaces', 'my-classes');

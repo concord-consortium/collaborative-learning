@@ -166,9 +166,10 @@ export const GeometryContentModel = GeometryBaseContentModel
       // eslint-disable-next-line no-unused-expressions
       self.updateSharedModels;
       const sharedModelManager = self.tileEnv?.sharedModelManager;
-      return sharedModelManager?.isReady
-              ? sharedModelManager.getTileSharedModels(self) as SharedDataSetType[]
-              : [];
+      const foundSharedModels = sharedModelManager?.isReady
+        ? sharedModelManager.getTileSharedModels(self) as SharedDataSetType[]
+        : [];
+      return foundSharedModels;
     }
   }))
   .views(self => ({

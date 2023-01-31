@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "3.4.1",
+  "version": "3.6.1",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "config": {
@@ -189,7 +189,7 @@
     "xhr-mock": "^2.5.1"
   },
   "dependencies": {
-    "@concord-consortium/diagram-view": "^0.0.23",
+    "@concord-consortium/diagram-view": "^0.0.25",
     "@concord-consortium/mobx-state-tree": "5.1.5-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",

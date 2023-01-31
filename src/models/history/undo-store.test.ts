@@ -1,4 +1,6 @@
+import { cloneDeep } from "lodash";
 import { flow, getSnapshot, getType, Instance, types } from "mobx-state-tree";
+import { nanoid } from "nanoid";
 import { ITileProps } from "src/components/tiles/tile-component";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { registerSharedModelInfo } from "../shared/shared-model-registry";
@@ -11,9 +13,7 @@ import { ProblemDocument } from "../document/document-types";
 import { when } from "mobx";
 import { CDocument, TreeManager } from "./tree-manager";
 import { HistoryEntrySnapshot } from "./history";
-import { nanoid } from "nanoid";
-import { cloneDeep } from "lodash";
-import { withoutUndo } from "./tree-monitor";
+import { withoutUndo } from "./without-undo";
 
 // way to get a writable reference to libDebug
 const libDebug = require("../../lib/debug");

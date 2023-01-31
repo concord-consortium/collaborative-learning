@@ -29,12 +29,13 @@ const clueTeacher2 = {
 };
 
 describe('Teachers can communicate back and forth in chat panel', () => {
-  it("login teacher1 and setup clue chat", () => {
+  // TODO: Re-instate the skipped tests below once learn.staging.concord.org is fully functional again
+  it.skip("login teacher1 and setup clue chat", () => {
     chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
   });
-  it("verify teacher1 can post document and tile comments", () => {
+  it.skip("verify teacher1 can post document and tile comments", () => {
     // Teacher 1 document comment
     chatPanel.verifyProblemCommentClass();
     cy.wait(1000);
@@ -43,12 +44,12 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     cy.clickProblemResourceTile('introduction');
     chatPanel.addCommentAndVerify("This is a teacher1 tile comment");
   });
-  it("login teacher2 and setup clue chat", () => {
+  it.skip("login teacher2 and setup clue chat", () => {
     chatPanel.openTeacherChat(portalUrl, clueTeacher2, reportUrl2);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
   });
-  it("verify teacher2 can view teacher1's comments and add more comments", () => {
+  it.skip("verify teacher2 can view teacher1's comments and add more comments", () => {
     // Teacher 2 document comment
     chatPanel.verifyProblemCommentClass();
     chatPanel.verifyCommentThreadContains("This is a teacher1 document comment");
@@ -58,12 +59,12 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     chatPanel.verifyCommentThreadContains("This is a teacher1 tile comment");
     chatPanel.addCommentAndVerify("This is a teacher2 tile comment");
   });
-  it("verify reopening teacher1's clue chat in the same network", () => {
+  it.skip("verify reopening teacher1's clue chat in the same network", () => {
     chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
   });
-  it("verify teacher1 can view teacher2's comments", () => {
+  it.skip("verify teacher1 can view teacher2's comments", () => {
     // Teacher 1 document comment
     chatPanel.verifyProblemCommentClass();
     chatPanel.verifyCommentThreadContains("This is a teacher2 document comment");

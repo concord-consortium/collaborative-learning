@@ -9,8 +9,8 @@ import { timeZoneOffsetString } from "../utilities/js-utils";
 type LoggerEnvironment = "dev" | "production";
 
 const logManagerUrl: Record<LoggerEnvironment, string> = {
-  dev: "//cc-log-manager-dev.herokuapp.com/api/logs",
-  production: "//cc-log-manager.herokuapp.com/api/logs"
+  dev: "https://logger.concordqa.org/logs",
+  production: "https://logger.concord.org/logs"
 };
 
 const productionPortal = "learn.concord.org";

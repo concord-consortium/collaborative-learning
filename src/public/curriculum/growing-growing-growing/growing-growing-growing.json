@@ -180,6 +180,34 @@
           "title": "GGG 1.3 Killer Plant Strikes Lake Victoria",
           "subtitle": "y-intercepts Other than 1",
           "sections": [
+                        {
+                            "type": "introduction",
+                            "content": {
+                                "tiles": []
+                            },
+                            "supports": []
+                        },
+                        {
+                            "type": "initialChallenge",
+                            "content": {
+                                "tiles": []
+                            },
+                            "supports": []
+                        },
+                        {
+                            "type": "whatIf",
+                            "content": {
+                                "tiles": [],
+                                "supports": []
+                            }
+                        },
+                        {
+                            "type": "nowWhatDoYouKnow",
+                            "content": {
+                                "tiles": [],
+                                "supports": []
+                            }
+                        }
           ],
           "supports": []
         },
@@ -307,6 +335,34 @@
           "title": "GGG 2.3 Making a Difference",
           "subtitle":"Connecting Initial Populations to Growth Factors",
           "sections": [
+                        {
+                            "type": "introduction",
+                            "content": {
+                                "tiles": []
+                            },
+                            "supports": []
+                        },
+                        {
+                            "type": "initialChallenge",
+                            "content": {
+                                "tiles": []
+                            },
+                            "supports": []
+                        },
+                        {
+                            "type": "whatIf",
+                            "content": {
+                                "tiles": [],
+                                "supports": []
+                            }
+                        },
+                        {
+                            "type": "nowWhatDoYouKnow",
+                            "content": {
+                                "tiles": [],
+                                "supports": []
+                            }
+                        }
           ],
           "supports": []
         }
