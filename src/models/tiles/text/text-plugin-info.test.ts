@@ -30,9 +30,9 @@ describe("TextPluginInfo", () => {
     const pluginInstances = getTextPluginInstances(textContent);
     expect(testTextPluginInfo.createSlatePlugin).toBeCalledWith(textContent);
     expect(testTextPluginInfoWithUpdate.createSlatePlugin).toBeCalledWith(textContent);
-    expect(pluginInstances).toHaveLength(2);
-    expect(pluginInstances).toContain(testTextPluginInstance);
-    expect(pluginInstances).toContain(testTextPluginWithUpdateInstance);
+    expect(Object.entries(pluginInstances)).toHaveLength(2);
+    expect(pluginInstances.test).toBe(testTextPluginInstance);
+    expect(pluginInstances.testWithUpdate).toBe(testTextPluginWithUpdateInstance);
   });
 
   test("getTextPluginIds", () => {

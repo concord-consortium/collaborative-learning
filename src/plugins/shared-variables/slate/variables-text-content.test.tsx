@@ -5,6 +5,8 @@ import { TextContentModel, TextContentModelType } from "../../../models/tiles/te
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 import { getOrFindSharedModel} from "./variables-text-content";
 
+const libDebug = require("../../../lib/debug");
+
 const TestContainer = types.model("TestContainer", {
   content: TextContentModel,
   variables: types.maybe(SharedVariables)
@@ -55,7 +57,8 @@ const setupContainer = (content: TextContentModelType, variables?: SharedVariabl
 };
 
 describe("VariablesTextContent", () => {
-  test("getOrFindSharedModel warns if things aren't setup", async () => {
+  test("getOrFindSharedModel warns if things aren't setup with DEBUG_SHARED_MODELS", async () => {
+    libDebug.DEBUG_SHARED_MODELS = true;
     const textContent = TextContentModel.create({});
 
     await jestSpyConsole("warn", mockConsole => {
@@ -69,6 +72,25 @@ describe("VariablesTextContent", () => {
     await jestSpyConsole("warn", mockConsole => {
       getOrFindSharedModel(textContent);
       expect(mockConsole).toBeCalled();
+    });
+
+    libDebug.DEBUG_SHARED_MODELS = false;
+  });
+
+  test("getOrFindSharedModel does not warn if things aren't setup without DEBUG_SHARED_MODELS", async () => {
+    const textContent = TextContentModel.create({});
+
+    await jestSpyConsole("warn", mockConsole => {
+      getOrFindSharedModel(textContent);
+      expect(mockConsole).not.toBeCalled();
+    });
+
+    // setup the environment without a shared model
+    setupContainer(textContent);
+
+    await jestSpyConsole("warn", mockConsole => {
+      getOrFindSharedModel(textContent);
+      expect(mockConsole).not.toBeCalled();
     });
   });
 
