@@ -594,12 +594,21 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const board = _board || this.state.board;
     if (!board) return;
 
+    // const justThePoints = board.objectsList.filter((o) => o.elType === "point")
+    // can I gain x,y ordered pairs from dataSet from this point
+
     // remove/recreate all linked points
     // TODO: A more tailored response would match up the existing points with the data set and only
     // change the affected points, which would eliminate some visual flashing that occurs when
     // unchanged points are re-created and would allow derived polygons to be preserved.
     const ids = getAllLinkedPoints(board);
     applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
+
+    // set up to track found minimums and maximums among all shared points
+    let xMin = -1
+    let xMax = 1
+    let yMin = -1
+    let yMax = 1
 
     // create new points for each linked table
     this.getContent().linkedDataSets.forEach(link => {
@@ -613,6 +622,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
           const y = attr.numericValue(ci);
           if (isFinite(x) && isFinite(y)) {
+            if ( x < xMin ) xMin = x - 1
+            if ( x > xMax ) xMax = x + 1
+            if ( x < yMin ) yMin = y - 1
+            if ( x > yMax ) yMax = y + 1
             parents.push([x, y]);
             properties.push({ id });
           }
@@ -621,6 +634,9 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const pts = applyChange(board, { operation: "create", target: "linkedPoint", parents, properties, links });
       castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
     });
+    // Working but does not include native points
+    // though can anyone create a native point that is not in visible space?
+    this.rescaleBoardAndAxes({ xMax, yMax, xMin, yMin });
   }
 
   private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {
