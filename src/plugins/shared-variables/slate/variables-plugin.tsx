@@ -11,16 +11,16 @@ import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
 
 const kVariableClass = "slate-variable-chip";
-export const kVariableFormat = "clueVariable";
+export const kVariableFormat = "m2s-variable";
 
 export function VariablesPlugin(textContent: TextContentModelType): any {
   return {
-    onInitEditor: (editor: CustomEditor) => withClueVariables(editor, textContent)
+    onInitEditor: (editor: CustomEditor) => withVariables(editor, textContent)
   };
 }
 
 export interface VariableElement extends BaseElement {
-  type: "clueVariable";
+  type: typeof kVariableFormat;
   reference: string;
 }
 
@@ -70,7 +70,7 @@ export const shouldShowEditVariableButton = (selectedVariable?: VariableType) =>
   return !!selectedVariable;
 };
 
-export const ClueVariableComponent = ({ attributes, children, element }: RenderElementProps) => {
+export const VariableComponent = ({ attributes, children, element }: RenderElementProps) => {
   const textContent = useContext(TextContentModelContext);
   const isHighlighted = useSelected();
   const isSerializing = useSerializing();
@@ -97,18 +97,18 @@ export const ClueVariableComponent = ({ attributes, children, element }: RenderE
 
 let isRegistered = false;
 
-export function registerClueVariables() {
+export function registerVariables() {
   if (isRegistered) return;
 
-  registerElementComponent(kVariableFormat, props => <ClueVariableComponent {...props}/>);
+  registerElementComponent(kVariableFormat, props => <VariableComponent {...props}/>);
 
   // TODO: register deserializer
 
   isRegistered = true;
 }
 
-export function withClueVariables(editor: Editor, textContent: TextContentModelType) {
-  registerClueVariables();
+export function withVariables(editor: Editor, textContent: TextContentModelType) {
+  registerVariables();
 
   const { isInline, isVoid } = editor;
   editor.isInline = element => (element.type === kVariableFormat) || isInline(element);
