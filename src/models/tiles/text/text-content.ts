@@ -48,7 +48,7 @@ export const TextContentModel = TileContentModel
 
         return parsed.document.children;
       } catch (e) {
-        console.log('json did not parse');
+        console.warn('json did not parse');
       }
       return textToSlate(self.text);
     }

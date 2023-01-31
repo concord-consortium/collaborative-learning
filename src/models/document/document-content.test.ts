@@ -15,6 +15,10 @@ import placeholderImage from "../../assets/image_placeholder.png";
 import { registerTileTypes } from "../../register-tile-types";
 registerTileTypes(["Drawing", "Geometry", "Image", "Table", "Text"]);
 
+// This is needed so MST can deserialize snapshots referring to slate-based text tiles
+import { registerPlugins } from "@concord-consortium/slate-editor";
+registerPlugins();
+
 // mock uniqueId so we can recognize auto-generated IDs
 jest.mock("../../utilities/js-utils", () => {
   const { uniqueId, ...others } = jest.requireActual("../../utilities/js-utils");

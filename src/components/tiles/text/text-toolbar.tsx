@@ -1,8 +1,7 @@
 import React, { FunctionComponent, SVGProps } from "react";
 import ReactDOM from "react-dom";
 import _ from "lodash";
-import { EFormat, toggleMark, toggleSuperSubscript, toggleBlock, Editor,
-  CustomEditor, isMarkActive, isBlockActive} from "@concord-consortium/slate-editor";
+import { EFormat, Editor } from "@concord-consortium/slate-editor";
 
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
@@ -47,7 +46,7 @@ const buttonDefs = new Map<string, IButtonDef>([
       Icon={BoldToolIcon}
       toolTip={`Bold (${kShortcutPrefix}b)`}
       slateType={EFormat.bold}
-      command={() => toggleMark(props.editor, EFormat.bold) }
+      command={() => props.editor.toggleMark(EFormat.bold) }
       {...props}
       />
     }],
@@ -57,7 +56,7 @@ const buttonDefs = new Map<string, IButtonDef>([
       Icon={ItalicToolIcon}
       toolTip={`Italic (${kShortcutPrefix}i)`}
       slateType={EFormat.italic}
-      command={() => toggleMark(props.editor, EFormat.italic) }
+      command={() => props.editor.toggleMark(EFormat.italic) }
       {...props}
       />
     }],
@@ -67,7 +66,7 @@ const buttonDefs = new Map<string, IButtonDef>([
       Icon={UnderlineToolIcon}
       toolTip={`Underline (${kShortcutPrefix}u)`}
       slateType={EFormat.underlined}
-      command={() => toggleMark(props.editor, EFormat.underlined) }
+      command={() => props.editor.toggleMark(EFormat.underlined) }
       {...props}
       />
     }],
@@ -77,7 +76,7 @@ const buttonDefs = new Map<string, IButtonDef>([
       Icon={SubscriptToolIcon}
       toolTip={`Subscript`}
       slateType={EFormat.subscript}
-      command={() => toggleSuperSubscript(props.editor, EFormat.subscript) }
+      command={() => props.editor.toggleSuperSubscript(EFormat.subscript) }
       {...props}
       />
     }],
@@ -87,7 +86,7 @@ const buttonDefs = new Map<string, IButtonDef>([
       Icon={SuperscriptToolIcon}
       toolTip={`Superscript`}
       slateType={EFormat.superscript}
-      command={() => toggleSuperSubscript(props.editor, EFormat.superscript) }
+      command={() => props.editor.toggleSuperSubscript(EFormat.superscript) }
       {...props}
       />
     }],
@@ -97,7 +96,7 @@ const buttonDefs = new Map<string, IButtonDef>([
       Icon={NumberedListToolIcon}
       toolTip={`Numbered List`}
       slateType={EFormat.numberedList}
-      command={() => toggleBlock(props.editor, EFormat.numberedList) }
+      command={() => props.editor.toggleElement(EFormat.numberedList) }
       {...props}
       />
     }],
@@ -107,7 +106,7 @@ const buttonDefs = new Map<string, IButtonDef>([
       Icon={BulletedListToolIcon}
       toolTip={`Bulleted List`}
       slateType={EFormat.bulletedList}
-      command={() => toggleBlock(props.editor, EFormat.bulletedList) }
+      command={() => props.editor.toggleElement(EFormat.bulletedList) }
       {...props}
       />
     }],
@@ -196,8 +195,8 @@ const BuiltInToolbarButton: React.FC<IBuiltInToolbarButtonProps> = ({
   iconName, Icon, toolTip, slateType, command, editor
 }: IBuiltInToolbarButtonProps) => {
   const isSelected =
-    isMarkActive(editor as CustomEditor, slateType as EFormat) ||
-    isBlockActive(editor as CustomEditor, slateType as EFormat);
+    editor.isMarkActive(slateType as EFormat) ||
+    editor.isElementActive(slateType as EFormat);
   const handleClick = (event: React.MouseEvent) => {
       event.preventDefault();
       command();

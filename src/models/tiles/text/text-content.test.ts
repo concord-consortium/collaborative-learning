@@ -70,13 +70,6 @@ describe("TextContentModel", () => {
     expect(bogus2.asSlate()).toBeDefined();
   });
 
-  const value: EditorValue = [
-    {
-      type: 'paragraph',
-      children: [{ text: 'foo' }],
-    },
-  ];
-
   it("converts to slate correctly", () => {
     const foo = "foo";
     const model = TextContentModel.create({ text: foo });

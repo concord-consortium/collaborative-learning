@@ -24,7 +24,7 @@ export function getSharedVariablesModel(textContent: TextContentModelType) {
 
 export function getVariables(textContent: TextContentModelType): VariableType[] {
   const sharedModel = getOrFindSharedModel(textContent);
-  return sharedModel ? sharedModel.variables : [];
+  return sharedModel?.variables ?? [];
 }
 
 export const getTileTextVariables = (textContent: TextContentModelType) => {

@@ -209,8 +209,9 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                 editor={this.editor as ReactEditor}
                 value={editorValue}
                 onChange={this.handleChange}>
+                {/* CHECKME: Kirk had a `this.handleChange as any` above but it doesn't
+                    seem necessary. */}
               <SlateEditor
-                value={editorValue}
                 placeholder={placeholderText}
                 readOnly={readOnly}
                 onFocus={this.handleFocus}

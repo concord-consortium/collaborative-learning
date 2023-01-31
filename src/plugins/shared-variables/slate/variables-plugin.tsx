@@ -7,10 +7,10 @@ import {
   useSerializing,
   useSelected,
   Transforms,
-  registerElement,
   CustomEditor,
   BaseElement,
-  EditorValue,
+  CustomElement,
+  registerElementComponent,
 } from "@concord-consortium/slate-editor";
 import { getType } from "mobx-state-tree";
 import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
@@ -35,7 +35,7 @@ import { SharedVariables, SharedVariablesType } from "../shared-variables";
 
 const kVariableClass = "slate-variable-chip";
 const kSlateVoidClass = "cc-slate-void";
-export const kVariableFormat = "clueVariable";
+export const kVariableFormat = "m2s-variable";
 
 export class VariablesPlugin {
   public textContent;
@@ -109,17 +109,16 @@ export class VariablesPlugin {
   }
 
   onInitEditor(editor: CustomEditor) {
-    return withClueVariables(editor, this.textContent);
+    return withVariables(editor, this.textContent);
   }
 }
 
 export interface VariableElement extends BaseElement {
-  type: "clueVariable",
-  reference: string,
-  children: EditorValue
+  type: typeof kVariableFormat;
+  reference: string;
 }
 
-export const isVariableElement = (element: BaseElement): element is VariableElement => {
+export const isVariableElement = (element: CustomElement): element is VariableElement => {
   return element.type === kVariableFormat;
 };
 
@@ -160,19 +159,19 @@ export const insertTextVariables = (variables: VariableType[], editor?: Editor) 
  });
 };
 
-export const ClueVariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
+export const VariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
   const plugins = useContext(TextPluginsContext);
   // FIXME: need a const for the plugin name
   // FIXME: need error handling of the plugin doesn't exist for some reason
   const variablesPlugin = plugins.Variables as VariablesPlugin;
-  const isHighlighted =  useSelected();
+  const isHighlighted = useSelected();
   const isSerializing = useSerializing();
 
   if (!isVariableElement(element)) return null;
 
   const {reference} = element;
 
-  const classes = classNames(kSlateVoidClass, kVariableClass) || undefined;
+  const classes = classNames(kSlateVoidClass, kVariableClass);
   const selectedClass = isHighlighted && !isSerializing ? "slate-selected" : undefined;
   // TODO: this will return an empty array if the sharedModelManager is not ready yet
   // because this component is not observing it might not be updated when the
@@ -191,12 +190,25 @@ export const ClueVariableComponent = observer(function({ attributes, children, e
   );
 });
 
-export function withClueVariables(editor: Editor, textContent: TextContentModelType) {
-  const { isInline, isVoid } = editor;
-  editor.isInline = (element:BaseElement) => (element.type === kVariableFormat) || isInline(element);
-  editor.isVoid = (element:BaseElement) => (element.type === kVariableFormat) || isVoid(element);
+let isRegistered = false;
 
-  registerElement(kVariableFormat, props => <ClueVariableComponent {...props}/>);
+export function registerVariables() {
+  if (isRegistered) return;
+
+  registerElementComponent(kVariableFormat, props => <VariableComponent {...props}/>);
+
+  // TODO: register deserializer
+
+  isRegistered = true;
+}
+
+export function withVariables(editor: Editor, textContent: TextContentModelType) {
+  registerVariables();
+
+  const { isInline, isVoid } = editor;
+  editor.isInline = element => (element.type === kVariableFormat) || isInline(element);
+  editor.isVoid = element => (element.type === kVariableFormat) || isVoid(element);
+
   return editor;
 }
 
