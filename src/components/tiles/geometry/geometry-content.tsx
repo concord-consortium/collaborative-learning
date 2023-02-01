@@ -600,7 +600,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     // unchanged points are re-created and would allow derived polygons to be preserved.
     // for now, derived polygons persist in model, and are now sent to JXG as changes
     // on each load/creation so that they render
+
+    // like this , this only has a value to delete at the moment a share happens. Even with the applyChange(delete change) below commented out.
     const ids = getAllLinkedPoints(board);
+    console.log("theIds here: ", ids)
     applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
 
     // set up to track found minimums and maximums among all shared points
@@ -640,11 +643,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   syncLinkedPolygons(board: JXG.Board){
     const justThePoints = board.objectsList.filter((o) => o.elType === "point")
-    console.log("NOICE found ", justThePoints.length, " points")
-
     const sharedPointIds = getAllLinkedPoints(board)
-    console.log("NOICE found ", sharedPointIds.length, " shared points")
-
     const objectsMap = this.getContent().objects;
     const allObjectsArr = Array.from(objectsMap, ([key, value]) => ({key,value}));
 
