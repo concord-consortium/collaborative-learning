@@ -54,7 +54,7 @@ describe("TextContentModel", () => {
     const text = ["some", "array", "strings"];
     const model = TextContentModel.create({ text });
     expect(model.text).toEqual(text);
-    expect(model.joinText).toBe(text.join(""));
+    expect(model.joinText).toBe(text.join("\n"));
 
     const flat = "flat string";
     model.setText(flat);
