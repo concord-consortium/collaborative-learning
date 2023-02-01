@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import classNames from "classnames/dedupe";
 
 import {
-  BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, ReactEditor, registerElementComponent,
+  BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
   RenderElementProps, Transforms, useSelected, useSerializing,
 } from "@concord-consortium/slate-editor";
 import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
