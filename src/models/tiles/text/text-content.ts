@@ -27,7 +27,7 @@ export const TextContentModel = TileContentModel
   .views(self => ({
     get joinText() {
       return Array.isArray(self.text)
-              ? self.text.join("\n")
+              ? self.text.join("")
               : self.text as string;
 
     },
