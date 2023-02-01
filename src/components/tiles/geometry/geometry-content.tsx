@@ -603,6 +603,12 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const ids = getAllLinkedPoints(board);
     applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
 
+    // set up to track found minimums and maximums among all shared points
+    let xMin = -1
+    let xMax = 1
+    let yMin = -1
+    let yMax = 1
+
     // create new points for each linked table
     this.getContent().linkedDataSets.forEach(link => {
       const links: ILinkProperties = { tileIds: [link.providerId] };
@@ -615,6 +621,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
           const y = attr.numericValue(ci);
           if (isFinite(x) && isFinite(y)) {
+            if ( x < xMin ) xMin = x - 1
+            if ( x > xMax ) xMax = x + 1
+            if ( x < yMin ) yMin = y - 1
+            if ( x > yMax ) yMax = y + 1
             parents.push([x, y]);
             properties.push({ id });
           }
@@ -622,11 +632,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       }
       const pts = applyChange(board, { operation: "create", target: "linkedPoint", parents, properties, links });
       castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
-      this.syncLinkedPolygons(board); // call from here, or go up a level and call from a few locations?
     });
+
+    this.rescaleBoardAndAxes({ xMax, yMax, xMin, yMin });
+    this.syncLinkedPolygons(board);
   }
 
   syncLinkedPolygons(board: JXG.Board){
+    const justThePoints = board.objectsList.filter((o) => o.elType === "point")
+    console.log("NOICE found ", justThePoints.length, " points")
+
+    const sharedPointIds = getAllLinkedPoints(board)
+    console.log("NOICE found ", sharedPointIds.length, " shared points")
+
     const objectsMap = this.getContent().objects;
     const allObjectsArr = Array.from(objectsMap, ([key, value]) => ({key,value}));
 
@@ -653,6 +671,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     });
     applyChanges(board, changes);
   }
+
 
   private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {
     const { board } = this.state;

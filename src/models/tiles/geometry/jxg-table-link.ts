@@ -48,7 +48,10 @@ function createLinkedPoint(board: JXG.Board, parents: JXGCoordPair, props: any, 
 export function getAllLinkedPoints(board: JXG.Board) {
   const ids: string[] = [];
   board.objectsList.forEach(obj => {
-    if (obj.elType === "point" && obj.getAttribute("clientType") === "linkedPoint") {
+    const clientTypeIsLinked = obj.getAttribute("clientType") === "linkedPoint";
+    const hasLinkedStyleId = obj.id.indexOf(":") === 16; // not sure if ^^^ will always be true?
+    const isLinkedPoint = clientTypeIsLinked || hasLinkedStyleId;
+    if (obj.elType === "point" && isLinkedPoint) {
       ids.push(obj.id);
     }
   });
