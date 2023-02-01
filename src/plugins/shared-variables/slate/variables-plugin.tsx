@@ -36,7 +36,6 @@ export const insertTextVariable = (variable: VariableType, editor?: Editor) => {
   const reference = variable.id;
   const varElt: VariableElement = { type: kVariableFormat, reference, children: [{text: "" }]};
   Transforms.insertNodes(editor, varElt);
-  Transforms.move(editor, { distance: 1, unit: "word" });
 };
 
 export const findSelectedVariable = (selectedElements: any, variables: VariableType[]) => {

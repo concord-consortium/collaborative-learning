@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import ReactDOM from "react-dom";
 import _ from "lodash";
-import { Editor, EFormat, ReactEditor } from "@concord-consortium/slate-editor";
+import { Editor, EFormat, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
 
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
@@ -62,6 +62,7 @@ function handleClose(editor: Editor) {
   // focus the editor after closing the dialog, which is what the user expects and
   // also required for certain slate selection synchronization mechanisms to work.
   // focusing twice shouldn't be necessary, but sometimes seems to help ¯\_(ツ)_/¯
+  Transforms.move(editor, { distance: 1, unit: "word" });
   ReactEditor.focus(editor);
   setTimeout(() => {
     ReactEditor.focus(editor);
