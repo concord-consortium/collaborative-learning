@@ -56,13 +56,15 @@ export function getOrFindSharedModel(textContent: TextContentModelType) {
     if (!sharedModelManager || !sharedModelManager.isReady) {
       // In this case we can't do anything.
       // Print a warning because it should be unusual
-      console.warn("shared model manager isn't available");
+      // TODO: re-enable warning once we're encountering it less frequently
+      // console.warn("shared model manager isn't available");
       return;
     }
 
     const containerSharedModel = sharedModelManager.findFirstSharedModelByType(SharedVariables);
     if (!containerSharedModel) {
-      console.warn("no shared variables model in the document");
+      // TODO: re-enable warning once we're encountering it less frequently
+      // console.warn("no shared variables model in the document");
       // If we need to create a new shared variables model when there is just a
       // text tile in the container, this code needs to be changed.
       //

@@ -60,7 +60,8 @@ describe("VariablesTextContent", () => {
 
     await jestSpyConsole("warn", mockConsole => {
       getOrFindSharedModel(textContent);
-      expect(mockConsole).toBeCalled();
+      // TODO: re-enable warning expectation after re-enabling warning
+      expect(mockConsole).not.toBeCalled();
     });
 
     // setup the environment without a shared model
@@ -68,7 +69,8 @@ describe("VariablesTextContent", () => {
 
     await jestSpyConsole("warn", mockConsole => {
       getOrFindSharedModel(textContent);
-      expect(mockConsole).toBeCalled();
+      // TODO: re-enable warning expectation after re-enabling warning
+      expect(mockConsole).not.toBeCalled();
     });
   });
 
