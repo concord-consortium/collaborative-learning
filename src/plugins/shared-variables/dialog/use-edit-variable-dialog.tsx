@@ -9,8 +9,9 @@ import './variable-dialog.scss';
 
 interface IProps {
   variable?: VariableType;
+  onClose?: () => void;
 }
-export const useEditVariableDialog = ({ variable }: IProps) => {
+export const useEditVariableDialog = ({ variable, onClose }: IProps) => {
   const variableClone = useMemo(() => Variable.create(variable ? getSnapshot(variable) : {}), [variable]);
 
   const handleClick = () => {
@@ -31,7 +32,8 @@ export const useEditVariableDialog = ({ variable }: IProps) => {
         isDisabled: !variable,
         onClick: handleClick
       }
-    ]
+    ],
+    onClose
   }, [variable]);
 
   return [showModal, hideModal];
