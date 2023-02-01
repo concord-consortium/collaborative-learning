@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import ReactDOM from "react-dom";
 import _ from "lodash";
-import { Editor, EFormat } from "@concord-consortium/slate-editor";
+import { Editor, EFormat, ReactEditor } from "@concord-consortium/slate-editor";
 
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
@@ -58,6 +58,10 @@ const handleMouseDown = (event: React.MouseEvent) => {
   event.preventDefault();
 };
 
+function handleClose(editor: Editor) {
+  ReactEditor.focus(editor);
+}
+
 export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   const { documentContent, editor, selectedButtons, onIsEnabled, ...others } = props;
   const toolbarSetting = useSettingFromStores("tools", "text") as unknown as string[];
@@ -77,19 +81,19 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   plugins.forEach(plugin => {
     if (plugin?.modalHook) {
       const { selfVariables, otherVariables, unusedVariables } = variableBuckets(textContent, sharedModel);
-      const [showDialog] = plugin.modalHook (
-        { variable: selectedVariable,
-          textContent,
-          sharedModel,
-          Icon: InsertVariableCardIcon,
-          addVariable: _.bind(insertTextVariable, null, _, editor),
-          namePrefill: highlightedText,
-          insertVariables: _.bind(insertTextVariables, null, _, editor),
-          otherVariables,
-          selfVariables,
-          unusedVariables
-        }
-      );
+      const [showDialog] = plugin.modalHook({
+        variable: selectedVariable,
+        textContent,
+        sharedModel,
+        Icon: InsertVariableCardIcon,
+        addVariable: _.bind(insertTextVariable, null, _, editor),
+        namePrefill: highlightedText,
+        insertVariables: _.bind(insertTextVariables, null, _, editor),
+        otherVariables,
+        selfVariables,
+        unusedVariables,
+        onClose: () => editor && handleClose(editor)
+      });
       const name = plugin.iconName;
       pluginModalHandlers[name] = showDialog;
     }

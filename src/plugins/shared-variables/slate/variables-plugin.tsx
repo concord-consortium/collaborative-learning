@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import classNames from "classnames/dedupe";
 
 import {
-  BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
+  BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, ReactEditor, registerElementComponent,
   RenderElementProps, Transforms, useSelected, useSerializing,
 } from "@concord-consortium/slate-editor";
 import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
@@ -36,6 +36,7 @@ export const insertTextVariable = (variable: VariableType, editor?: Editor) => {
   const reference = variable.id;
   const varElt: VariableElement = { type: kVariableFormat, reference, children: [{text: "" }]};
   Transforms.insertNodes(editor, varElt);
+  Transforms.move(editor, { distance: 1, unit: "word" });
 };
 
 export const findSelectedVariable = (selectedElements: any, variables: VariableType[]) => {
