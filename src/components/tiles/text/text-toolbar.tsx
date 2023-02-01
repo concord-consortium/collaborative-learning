@@ -59,7 +59,13 @@ const handleMouseDown = (event: React.MouseEvent) => {
 };
 
 function handleClose(editor: Editor) {
+  // focus the editor after closing the dialog, which is what the user expects and
+  // also required for certain slate selection synchronization mechanisms to work.
+  // focusing twice shouldn't be necessary, but sometimes seems to help ¯\_(ツ)_/¯
   ReactEditor.focus(editor);
+  setTimeout(() => {
+    ReactEditor.focus(editor);
+  }, 10);
 }
 
 export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
