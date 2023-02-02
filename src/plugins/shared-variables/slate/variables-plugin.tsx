@@ -47,7 +47,6 @@ export class VariablesPlugin {
       onInitEditor: action
     });
     this.textContent = textContent;
-    this.addTileSharedModelIfNecessary();
   }
 
   get sharedModel() {
@@ -72,7 +71,7 @@ export class VariablesPlugin {
   /**
    * Add the shared model to the text tile when it is ready.
    */
-  private addTileSharedModelIfNecessary() {
+  addTileSharedModelWhenReady() {
     // TODO: add a disposer
     autorun(() => {
       // Make sure there is a sharedModelManage and it is ready
@@ -112,6 +111,26 @@ export class VariablesPlugin {
   onInitEditor(editor: CustomEditor) {
     return withVariables(editor, this.textContent);
   }
+
+  get chipVariables() {
+    const {editor} = this.textContent;
+    const variableIds: string[] = [];
+    if (editor) {
+      for (const [node] of Editor.nodes(editor, {at: [], mode: 'all'})) {
+        if (Editor.isInline(editor, node) && isVariableElement(node)) {
+          variableIds.push(node.reference);
+        }
+      }
+    }
+    const variables = variableIds.map(id => this.findVariable(id));
+    const filteredVariables = variables.filter(variable => variable !== undefined);
+    return filteredVariables as VariableType[];
+  }
+
+  findVariable(variableId: string) {
+    return this.variables.find(v => v.id === variableId);
+  }
+
 }
 
 export interface VariableElement extends BaseElement {

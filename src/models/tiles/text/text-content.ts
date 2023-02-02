@@ -1,6 +1,6 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import {
-  htmlToSlate, slateToHtml, textToSlate, EditorValue, serializeValue, convertDocument, Editor
+  htmlToSlate, slateToHtml, textToSlate, EditorValue, serializeValue, convertDocument, Editor, CustomEditor
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tile-content-info";
 import { TileContentModel } from "../tile-content";
@@ -22,7 +22,7 @@ export const TextContentModel = TileContentModel
     format: types.maybe(types.string)
   })
   .volatile(self => ({
-    editor:  undefined as Editor | undefined,
+    editor:  undefined as CustomEditor | undefined,
   }))
   .views(self => ({
     get joinText() {

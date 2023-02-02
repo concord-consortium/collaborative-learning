@@ -14,7 +14,11 @@ registerSharedModelInfo({
 
 registerTextPluginInfo({
   pluginName: "Variables",
-  createSlatePlugin: textContent=> new VariablesPlugin(textContent),
+  createSlatePlugin(textContent) {
+    const plugin = new VariablesPlugin(textContent);
+    plugin.addTileSharedModelWhenReady();
+    return plugin;
+  },
   // FIXME: These strings are used in a few places they should be shared
   buttonDefs: {
     "new-variable": NewVariableTextButton,

@@ -8,7 +8,7 @@ import { DrawingContentModelType } from "../drawing/model/drawing-content";
 import { kDrawingTileType } from "../drawing/model/drawing-types";
 import { kTextTileType, TextContentModelType } from "../../models/tiles/text/text-content";
 import { ITileContentModel } from "../../models/tiles/tile-content";
-import { getTileTextVariables} from "./slate/variables-text-content";
+import { VariablesPlugin } from "./slate/variables-plugin";
 
 const getTileVariables = (content: ITileContentModel) => {
   if (content.type === kDiagramTileType) {
@@ -16,14 +16,17 @@ const getTileVariables = (content: ITileContentModel) => {
   } else if (content.type === kDrawingTileType) {
     return drawingVariables(content as DrawingContentModelType);
   } else if (content.type === kTextTileType) {
-    // FIXME: To reduce duplicate code this should create a VariablesPlugin with the content
-    // and use that to get all of the variables
-    // It'll be a little less efficient but seems cleaner
-    // Either approach will have a problem though if this is called before the shared variable manager
-    // is ready or if there isn't a shared variables model in the document.
-    // To fix that we need to call this from an observing function and we need to find the
-    // the plugin instance associated with this specific tile content model
-    return getTileTextVariables(content as TextContentModelType);
+    // Note: This isn't the most efficient. But it reduces duplicate
+    // code. One way to improve this would be to make plugins to tiles
+    // more official. Then we could maintain a document level structure
+    // that lists all a tiles plugins. Then we could use this to lookup
+    // the text tile's plugin.
+    const textContent = content as TextContentModelType;
+    const textPlugin = new VariablesPlugin(textContent);
+    // FIXME: The intention here is to return unique variables used by the.
+    // Currently this will return a variable object for each chip in the text
+    // tile and there might be multiple chips per variable
+    return textPlugin.chipVariables;
   } else {
     return [];
   }

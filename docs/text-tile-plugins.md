@@ -77,6 +77,7 @@ Steps:
 - [x] figure out why the shared variable buttons don't enable when diagram tile adds the shared variable model
 - [x] remove underscore binding stuff
 - [x] move all of the variable references back in the variables folder
+- [ ] clean up variables-text-content it is used by shared-variable-utils, have it create a VariablesPlugin instance instead, but that currently creates an autorun on instantiation ugh.
 - [ ] clean up the variables-plugin.tsx it should probably be broken up, it has the VariablePlugin object as well as the NewVariableTextButton, InsertVariableTextButton, EditVariableTextButton components, and the VariableComponent.
 - [ ] review all of the TODOs and FIXMEs
 - [ ] update text tile plugin documentation
