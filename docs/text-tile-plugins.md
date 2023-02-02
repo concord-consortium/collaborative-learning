@@ -17,6 +17,10 @@ To be consistent with the rest of the TextTile toolbar buttons these ButtonDefCo
 
 If the plugin is creating a "void" slate element it should add the `kSlateVoidClass` to the top level element it renders. This is so cut and paste and focus works. I'm not sure if this is still needed with the latest version of Slate.
 
+The toolbar buttons and any components rendered within the Slate editor have access to two React contexts:
+- `TextContentModelContext` this provides the text content model. In the future this might be made more general so any components of any tile can access their tile's content model.
+- `TextPluginsContext` this provides the plugins that were registered with the text tile. Toolbar buttons don't need this because they are passed the plugin instance that registered them. This context is useful for components rendered within the rich text. For example the SharedVariables chip component uses it to look up the shared variables.
+
 Note: There has been an issue with the combination of CLUE, Slate and Cypress, so it might be difficult to test your plugin with Cypress.
 
 Note: The slate-editor defines a EFormat.variable which it shouldn't be doing. It is not necessary to modify the slate-editor library in order for a plugin to add new element or mark types.
