@@ -1,5 +1,5 @@
 import { splitLinkedPointId } from "../table-link-types";
-import { resumeBoardUpdates, suspendBoardUpdates, syncLinkedPoints } from "./jxg-board";
+import { resumeBoardUpdates, suspendBoardUpdates, boardSyncLinkedPoints } from "./jxg-board";
 import { ILinkProperties, ITableLinkProperties, JXGChange, JXGChangeAgent, JXGCoordPair } from "./jxg-changes";
 import { createPoint, pointChangeAgent } from "./jxg-point";
 import { isPoint } from "./jxg-types";
@@ -72,7 +72,7 @@ export const linkedPointChangeAgent: JXGChangeAgent = {
       result = createLinkedPoint(board as JXG.Board, change.parents as JXGCoordPair, change.properties, change.links);
     }
 
-    syncLinkedPoints(board as JXG.Board, change.links as ITableLinkProperties);
+    boardSyncLinkedPoints(board as JXG.Board, change.links as ITableLinkProperties);
 
     return result;
   },
@@ -82,7 +82,7 @@ export const linkedPointChangeAgent: JXGChangeAgent = {
   delete: (board, change) => {
     pointChangeAgent.delete(board, change);
 
-    syncLinkedPoints(board, change.links as ITableLinkProperties);
+    boardSyncLinkedPoints(board, change.links as ITableLinkProperties);
   }
 };
 

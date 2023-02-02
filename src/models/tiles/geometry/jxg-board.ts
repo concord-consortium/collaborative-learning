@@ -48,7 +48,8 @@ export function getPointsByCaseId(board: JXG.Board, caseId: string) {
   return board.objectsList.filter(obj => isPoint(obj) && (obj.id.split(":")[0] === caseId));
 }
 
-export function syncLinkedPoints(board: JXG.Board, links: ITableLinkProperties) {
+// defines-sync-linked-points
+export function boardSyncLinkedPoints(board: JXG.Board, links: ITableLinkProperties) {
   if (board && links?.labels) {
     // build map of points associated with each case
     const ptsForCaseMap: Record<string, JXG.GeometryElement[]> = {};

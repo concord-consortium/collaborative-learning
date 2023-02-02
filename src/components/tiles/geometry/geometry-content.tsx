@@ -51,6 +51,7 @@ import placeholderImage from "../../../assets/image_placeholder.png";
 import { LinkTableButton } from "./link-table-button";
 import ErrorAlert from "../../utilities/error-alert";
 import SingleStringDialog from "../../utilities/single-string-dialog";
+import { getBoardModelDiff, getBoardObjectIds, updateBoardPoints, updateBoardPolygons } from "./update-with-shared-data";
 
 import "./geometry-tile.sass";
 
@@ -277,7 +278,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     // respond to linked table/shared model changes
     this.disposers.push(reaction(
       () => this.getContent().updateSharedModels,
-      () => this.syncLinkedPoints()
+      () => this.contentSyncLinkedPoints()
     ));
 
     this.disposers.push(onSnapshot(this.getContent(), () => {
@@ -505,6 +506,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private async initializeBoard(): Promise<JXG.Board> {
+    console.log("all1: initialize board!")
     return new Promise((resolve, reject) => {
       isGeometryContentReady(this.getContent()).then(() => {
         const board = this.getContent().initializeBoard(this.elementId, this.handleCreateElements);
@@ -514,7 +516,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           if (url) {
             this.updateImageUrl(url, filename);
           }
-          this.syncLinkedPoints(board);
+          this.contentSyncLinkedPoints(board);
           this.setState({ board });
           resolve(board);
         }
@@ -523,11 +525,13 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private destroyBoard() {
+    console.log("all1: destroy board!")
     const { board } = this.state;
     board && JXG.JSXGraph.freeBoard(board);
   }
 
   private async initializeContent() {
+    console.log("all1: initialize content!")
     const content = this.getContent();
     content.metadata.setSharedSelection(this.stores.selection);
     const domElt = document.getElementById(this.elementId);
@@ -556,6 +560,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private rescaleBoardAndAxes(params: IAxesParams) {
+    console.log("all1: rescaleBoardAndAxes!")
     const { board } = this.state;
     if (board) {
       this.applyChange(() => {
@@ -590,7 +595,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  syncLinkedPoints(_board?: JXG.Board) {
+  // defines-sync-linked-points
+  contentSyncLinkedPoints(_board?: JXG.Board) {
     const board = _board || this.state.board;
     if (!board) return;
 
@@ -600,6 +606,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     // unchanged points are re-created and would allow derived polygons to be preserved.
     // for now, derived polygons persist in model, and are now sent to JXG as changes
     // on each load/creation so that they render
+
+    // REALIZED
+    // GOING TO PACKAGE ALL THIS IN A FUNCTION THAT IS CALLED INSTEAD OF zyncLInkedPoints
+    // it would be called from same spot, but called syncGeometryWithSharedData - which will have sub functions
+    // it will combine all the stuff
+    // I will write it in another file
+    // I looked through all this and nothing else (except few "linked" moments, are about shared)
+    // it will need applyChanges, access to model.getContent() and board
+    // search "const content" and u will find examples of bringing model in
 
     // like this , this only has a value to delete at the moment a share happens. Even with the applyChange(delete change) below commented out.
     const ids = getAllLinkedPoints(board);

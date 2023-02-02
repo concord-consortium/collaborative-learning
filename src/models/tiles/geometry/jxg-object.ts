@@ -1,4 +1,4 @@
-import { sortByCreation, kReverse, getObjectById, syncLinkedPoints } from "./jxg-board";
+import { sortByCreation, kReverse, getObjectById, boardSyncLinkedPoints } from "./jxg-board";
 import {
   ITableLinkProperties, JXGChangeAgent, JXGCoordPair, JXGPositionProperty, JXGProperties
 } from "./jxg-changes";
@@ -87,7 +87,7 @@ export const objectChangeAgent: JXGChangeAgent = {
         }
       }
     });
-    if (hasLinkedPoints) syncLinkedPoints(board, change.links as ITableLinkProperties);
+    if (hasLinkedPoints) boardSyncLinkedPoints(board, change.links as ITableLinkProperties);
     if (hasSuspendedTextUpdates) board.suspendUpdate();
     board.update();
     return undefined;
