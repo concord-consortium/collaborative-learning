@@ -25,11 +25,10 @@ import { TextPluginsContext } from "../../../components/tiles/text/text-plugins-
 import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
 import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
 import VariableEditorIcon from "../assets/variable-editor-icon.svg";
-import _ from "lodash";
 import { useInsertVariableDialog } from "../dialog/use-insert-variable-dialog";
 import { useEditVariableDialog } from "../dialog/use-edit-variable-dialog";
 import { observer } from "mobx-react";
-import { autorun, computed, makeObservable, observable } from "mobx";
+import { action, autorun, computed, makeObservable, observable } from "mobx";
 import { DEBUG_SHARED_MODELS } from "../../../lib/debug";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 
@@ -39,12 +38,15 @@ export const kVariableFormat = "m2s-variable";
 
 export class VariablesPlugin {
   public textContent;
+  public editor: CustomEditor;
 
   constructor(textContent: TextContentModelType) {
     makeObservable(this, {
       textContent: observable,
+      editor: observable,
       sharedModel: computed,
-      variables: computed
+      variables: computed,
+      onInitEditor: action
     });
     this.textContent = textContent;
     this.addTileSharedModelIfNecessary();
@@ -110,7 +112,28 @@ export class VariablesPlugin {
   }
 
   onInitEditor(editor: CustomEditor) {
+    this.editor = editor;
     return withVariables(editor, this.textContent);
+  }
+
+  insertTextVariable(variable: VariableType) {
+    if (!this.editor) {
+      console.warn("inserting variable but there is no editor");
+      return;
+    }
+    const reference = variable.id;
+    const varElt: VariableElement = { type: kVariableFormat, reference, children: [{text: "" }]};
+    Transforms.insertNodes(this.editor, varElt);
+  }
+
+  insertTextVariables(variables: VariableType[]) {
+    if (!this.editor) {
+      console.warn("inserting variables but there is no editor");
+      return;
+    }
+    variables.forEach((variable) =>{
+      this.insertTextVariable(variable);
+   });
   }
 }
 
@@ -121,16 +144,6 @@ export interface VariableElement extends BaseElement {
 
 export const isVariableElement = (element: CustomElement): element is VariableElement => {
   return element.type === kVariableFormat;
-};
-
-export const insertTextVariable = (variable: VariableType, editor?: Editor) => {
-  if (!editor) {
-    console.warn("inserting variable but there is no editor");
-    return;
-  }
-  const reference = variable.id;
-  const varElt: VariableElement = { type: kVariableFormat, reference, children: [{text: "" }]};
-  Transforms.insertNodes(editor, varElt);
 };
 
 export const findSelectedVariable = (selectedElements: any, variables: VariableType[]) => {
@@ -150,16 +163,6 @@ export const findSelectedVariable = (selectedElements: any, variables: VariableT
   return selected;
 };
 
-export const insertTextVariables = (variables: VariableType[], editor?: Editor) => {
-  if (!editor) {
-    console.warn("inserting variable but there is no editor");
-    return;
-  }
-  variables.forEach((variable) =>{
-    insertTextVariable(variable, editor);
- });
-};
-
 export const VariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
   const plugins = useContext(TextPluginsContext);
   // FIXME: need a const for the plugin name
@@ -174,9 +177,6 @@ export const VariableComponent = observer(function({ attributes, children, eleme
 
   const classes = classNames(kSlateVoidClass, kVariableClass);
   const selectedClass = isHighlighted && !isSerializing ? "slate-selected" : undefined;
-  // TODO: this will return an empty array if the sharedModelManager is not ready yet
-  // because this component is not observing it might not be updated when the
-  // sharedModelManager is ready.
   const variables = variablesPlugin.variables;
   const variable = variables.find(v => v.id === reference);
   // FIXME: HTML serialization/deserialization. This will serialize the VariableChip too.
@@ -230,41 +230,17 @@ export const NewVariableTextButton = observer(function NewVariableTextButton(
 
   const isSelected = false;
 
-  // TODO: this will return undefined when the sharedModelManager is not available and when
-  // there is no shared variables model in the document.
-  // Because this can change (the sharedModelManager can become available and the user could
-  // add a diagram view tile), this component should be an observing component.
-  // Currently the DEBUG_SHARED_MODELS flag will cause these cases to print a warning.
-  // We might want to find a way to capture the reason for no shared model and provide it as
-  // a roll over message explaining why the button is disabled.
-  //
-  // FIXME: this causes a React error sometimes. The DiagramToolComponent is observing the shared
-  // model manager state, so when when this updates it by adding the shared variables model to the
-  // text tile, it triggers an update of the DiagramToolComponent. This is update is triggered via
-  // a setState call by mobx-react.
-  // I guess the result is that we should never call things that modify state from within the render
-  // We can put this in a useEffect, but then we'd have to store the sharedModel in our react state.
-  // Instead of this getOrFindSharedModel just looked for an existing shared model
-  // and we are an observing component. The getOrFindSharedModel could do the useEffect itself.
-  // So then we should change it to a hook like `useSharedModel(textContent)`;
-  // But this seems like mixing frameworks. Since we are using observers it'd be better to use
-  // some kind of MobX object to manage this.
-  // So then the issue is where store this MobX object. It would be specific to these 3 toolbar buttons
-  // it could possibly be a plugin instance that the text tile automatically passes to them, like
-  // it passes the editor.
   const sharedModel = variablesPlugin.sharedModel;
 
-  // FIXME: even though this is an observing component when the text tile is added without
-  // a diagram, and then the diagram is added the button doesn't become enabled automatically
   const enabled = !!sharedModel;
 
-  // addVariable: (variable: VariableType ) => void;
-  // sharedModel: SharedVariablesType;
-  // namePrefill? : string
-  const addVariable = _.bind(insertTextVariable, null, _, editor);
   const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
   const namePrefill = highlightedText;
-  const [showDialog] = useNewVariableDialog({addVariable, sharedModel, namePrefill});
+  const [showDialog] = useNewVariableDialog({
+    addVariable(variable) {
+      variablesPlugin.insertTextVariable(variable);
+    },
+    sharedModel, namePrefill});
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
     showDialog();
@@ -292,7 +268,6 @@ export const InsertVariableTextButton = observer(function InsertVariableTextButt
 
 
   const isSelected = false;
-  const insertVariables = _.bind(insertTextVariables, null, _, editor);
   const textContent = useContext(TextContentModelContext);
   const sharedModel = variablesPlugin.sharedModel;
   const enabled = !!sharedModel;
@@ -301,7 +276,10 @@ export const InsertVariableTextButton = observer(function InsertVariableTextButt
 
   const [showDialog] = useInsertVariableDialog({
     Icon: InsertVariableChipIcon,
-    insertVariables, otherVariables, selfVariables, unusedVariables });
+    insertVariables(variables){
+      variablesPlugin.insertTextVariables(variables);
+    },
+    otherVariables, selfVariables, unusedVariables });
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
     showDialog();
