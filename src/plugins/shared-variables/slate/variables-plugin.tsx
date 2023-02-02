@@ -38,12 +38,10 @@ export const kVariableFormat = "m2s-variable";
 
 export class VariablesPlugin {
   public textContent;
-  public editor: CustomEditor;
 
   constructor(textContent: TextContentModelType) {
     makeObservable(this, {
       textContent: observable,
-      editor: observable,
       sharedModel: computed,
       variables: computed,
       onInitEditor: action
@@ -112,28 +110,7 @@ export class VariablesPlugin {
   }
 
   onInitEditor(editor: CustomEditor) {
-    this.editor = editor;
     return withVariables(editor, this.textContent);
-  }
-
-  insertTextVariable(variable: VariableType) {
-    if (!this.editor) {
-      console.warn("inserting variable but there is no editor");
-      return;
-    }
-    const reference = variable.id;
-    const varElt: VariableElement = { type: kVariableFormat, reference, children: [{text: "" }]};
-    Transforms.insertNodes(this.editor, varElt);
-  }
-
-  insertTextVariables(variables: VariableType[]) {
-    if (!this.editor) {
-      console.warn("inserting variables but there is no editor");
-      return;
-    }
-    variables.forEach((variable) =>{
-      this.insertTextVariable(variable);
-   });
   }
 }
 
@@ -161,6 +138,26 @@ export const findSelectedVariable = (selectedElements: any, variables: VariableT
     }
   });
   return selected;
+};
+
+export const insertTextVariable = (variable: VariableType, editor?: Editor) => {
+  if (!editor) {
+    console.warn("inserting variable but there is no editor");
+    return;
+  }
+  const reference = variable.id;
+  const varElt: VariableElement = { type: kVariableFormat, reference, children: [{text: "" }]};
+  Transforms.insertNodes(editor, varElt);
+};
+
+export const insertTextVariables = (variables: VariableType[], editor?: Editor) => {
+  if (!editor) {
+    console.warn("inserting variable but there is no editor");
+    return;
+  }
+  variables.forEach((variable) =>{
+    insertTextVariable(variable, editor);
+ });
 };
 
 export const VariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
@@ -238,7 +235,7 @@ export const NewVariableTextButton = observer(function NewVariableTextButton(
   const namePrefill = highlightedText;
   const [showDialog] = useNewVariableDialog({
     addVariable(variable) {
-      variablesPlugin.insertTextVariable(variable);
+      insertTextVariable(variable, editor);
     },
     sharedModel, namePrefill});
   const handleClick = (event: React.MouseEvent) => {
@@ -277,7 +274,7 @@ export const InsertVariableTextButton = observer(function InsertVariableTextButt
   const [showDialog] = useInsertVariableDialog({
     Icon: InsertVariableChipIcon,
     insertVariables(variables){
-      variablesPlugin.insertTextVariables(variables);
+      insertTextVariables(variables, editor);
     },
     otherVariables, selfVariables, unusedVariables });
   const handleClick = (event: React.MouseEvent) => {

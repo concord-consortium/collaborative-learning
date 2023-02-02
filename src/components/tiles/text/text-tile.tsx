@@ -94,7 +94,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarTileApi: ITileApi | undefined;
-  private plugins: Record<string, any>; // FIXME
+  private plugins: Record<string, any>; // FIXME: need to type the plugins
   private textOnFocus: string | string [] | undefined;
 
   public componentDidMount() {
@@ -110,11 +110,11 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate
     // Gather all the plugin init functions and pass that to slate.
     const onInitEditor = (e: Editor) => {
-       Object.values(this.plugins).forEach(plugin => {
-          if (plugin.onInitEditor) {
-            e = plugin.onInitEditor(e);
-          }
-       });
+      Object.values(this.plugins).forEach(plugin => {
+        if (plugin.onInitEditor) {
+          e = plugin.onInitEditor(e);
+        }
+      });
       return e;
     };
     options.onInitEditor = onInitEditor;
