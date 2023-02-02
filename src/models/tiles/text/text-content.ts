@@ -27,9 +27,14 @@ export const TextContentModel = TileContentModel
   .views(self => ({
     get joinText() {
       return Array.isArray(self.text)
-              ? self.text.join("\n")
-              : self.text as string;
+        ? self.text.join("\n")
+        : self.text as string;
 
+    },
+    get joinHtml() {
+      return Array.isArray(self.text)
+        ? self.text.join("")
+        : self.text as string;
     },
     getSlate() {
       if (!self.text || Array.isArray(self.text)) {
@@ -59,7 +64,7 @@ export const TextContentModel = TileContentModel
         case "slate":
           return self.getSlate();
         case "html":
-          return htmlToSlate(self.joinText);
+          return htmlToSlate(self.joinHtml);
         case "markdown":
           // TODO: figure out what to do about markdown
           return []; // return self.joinText;

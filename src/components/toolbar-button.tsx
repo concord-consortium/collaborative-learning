@@ -38,6 +38,7 @@ export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
   };
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isTileTool && isDisabled) return;
     onClick(e, toolButton);
   };
 
@@ -53,10 +54,10 @@ export const ToolbarButtonComponent: React.FC<IToolbarButtonProps> =
         title={title}
         onMouseDown={handleMouseDown}
         onClick={handleClick}
-        onDragStart={isTileTool ? handleDrag : undefined}
-        draggable={isTileTool || false}
-        onMouseEnter={isTileTool ? onShowDropHighlight : undefined}
-        onMouseLeave={isTileTool ? onHideDropHighlight : undefined}>
+        onDragStart={isTileTool && !isDisabled ? handleDrag : undefined}
+        draggable={(isTileTool && !isDisabled) || false}
+        onMouseEnter={isTileTool && !isDisabled ? onShowDropHighlight : undefined}
+        onMouseLeave={isTileTool && !isDisabled ? onHideDropHighlight : undefined}>
       {Icon && <Icon />}
     </div>
   );

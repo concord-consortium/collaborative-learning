@@ -1,14 +1,11 @@
-import {
-    types, Instance, flow, getParent
-} from "mobx-state-tree";
-import { TreeManager } from "./tree-manager";
-
-import { HistoryEntry, HistoryOperation } from "./history";
+import { types, Instance, flow, getParent } from "mobx-state-tree";
 import { nanoid } from "nanoid";
+import { HistoryEntry, HistoryOperation } from "./history";
+import { TreeManager } from "./tree-manager";
 import { DEBUG_UNDO } from "../../lib/debug";
 
 export interface IUndoManager {
-  undoLevels : number; 
+  undoLevels : number;
   redoLevels : number;
   canUndo : boolean;
   canRedo : boolean;
@@ -54,7 +51,7 @@ export const UndoStore = types
     // Start a non-undoable action with this id
     // TODO: we are using a fake tree id of "manager" here. This is currently
     // working, but we probably want to review this approach.
-    const historyEntry = 
+    const historyEntry =
         manager.createHistoryEntry(historyEntryId, exchangeId, opType, "manager", false);
 
     // Collect the trees that we are going to work with
@@ -74,12 +71,12 @@ export const UndoStore = types
     const applyPromises = treePatchRecords.map(treePatchRecord => {
       // console.log(`send tile entry to ${opType} to the tree`, getSnapshot(treeEntry));
 
-      // If there are multiple trees, and a patch is applied to shared model 
-      // owned by a tree. The tree will send an updated snapshot of the 
-      // shared model to the tree manager. The tree manager will send this 
+      // If there are multiple trees, and a patch is applied to shared model
+      // owned by a tree. The tree will send an updated snapshot of the
+      // shared model to the tree manager. The tree manager will send this
       // snapshot to all of other trees that have a views of this shared
       // model. If this is working properly the promise returned by
-      // the owning tree's applyPatchesFromManager will not resolve until all 
+      // the owning tree's applyPatchesFromManager will not resolve until all
       // trees with views of this shared model have updated their views.
 
       // We use a new exchangeId for each tree's apply call, so the tree
@@ -88,7 +85,7 @@ export const UndoStore = types
       manager.startExchange(historyEntryId, applyExchangeId, "UndoStore.applyPatchesToTrees.apply");
 
       const tree = manager.trees[treePatchRecord.tree];
-      return tree.applyPatchesFromManager(historyEntryId,  applyExchangeId, 
+      return tree.applyPatchesFromManager(historyEntryId,  applyExchangeId,
           treePatchRecord.getPatches(opType));
     });
     yield Promise.all(applyPromises);
@@ -112,7 +109,7 @@ export const UndoStore = types
     // The top level exchange after the finish Promises is called. This
     // way each tree has a chance to add a new exchange to the history
     // entry which will keep it "recording" until that new exchange is
-    // also finished. 
+    // also finished.
     manager.endExchange(historyEntry, exchangeId);
   });
 
@@ -123,7 +120,7 @@ export const UndoStore = types
       // TreePatchRecord is added to the HistoryEntry. If the
       // HistoryEntry has already been added then we don't modify it,
       // but we do always reset the undoIdx to the end of the history.
-      
+
       if (DEBUG_UNDO) {
         // eslint-disable-next-line no-console
         console.log(`adding to undo history`, (entry as any).toJSON()/*.action*/);
@@ -141,18 +138,18 @@ export const UndoStore = types
       // doing new things they can no longer 'redo' what was undone before.
       //
       // The fact that the undoIdx is reset in all cases even with an existing
-      // entry is kind of confusing. This happens because if additional patches 
-      // are being added to an existing entry these are still user triggered 
+      // entry is kind of confusing. This happens because if additional patches
+      // are being added to an existing entry these are still user triggered
       // patches. So this needs to prevent the ability to redo.
       self.undoIdx = self.history.length;
     },
 
     // TODO: The MST undo manager that this code is based on, used atomic
     // operations for this. That way if the was an error applying the patch, then
-    // the whole set of changes would be aborted. We do not currently take this 
-    // approach because it is harder to support when we have multiple trees. 
+    // the whole set of changes would be aborted. We do not currently take this
+    // approach because it is harder to support when we have multiple trees.
     // Each tree would have to tell the tree manager if it succeeded or
-    // failed to apply the patches. And then if one of them failed all of the trees 
+    // failed to apply the patches. And then if one of them failed all of the trees
     // that succeeded would have to be reverted by the tree manager.
     undo() {
       if (!self.canUndo) {
@@ -184,6 +181,6 @@ export const UndoStore = types
       applyPatchesToTrees(entryToRedo, HistoryOperation.Redo);
 
       self.undoIdx++;
-    },        
+    },
   };
 });

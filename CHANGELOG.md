@@ -1,4 +1,149 @@
 # Changelog
+## Version 3.6.1 - Jan 24, 2023
+
+Version 3.6.1 has a few bug fixes related to 4-up views, pressure sensors and document loading problems.
+
+### Features/Improvements
+- Pressure Sensor should range from 0 [#184186983](https://www.pivotaltracker.com/story/show/184186983)
+
+### Bug Fixes
+- Four-up view allows editing other users' documents [#184276344](https://www.pivotaltracker.com/story/show/184276344)
+- Dragger handle on the Diagram Tile doesn't move tile [#184163782](https://www.pivotaltracker.com/story/show/184163782)
+- Error loading document [#184275225](https://www.pivotaltracker.com/story/show/184275225)
+- DF Corner indicator should only flash when disconnected [#184186985](https://www.pivotaltracker.com/story/show/184186985)
+
+### Asset Sizes
+| File                                                                                  | Size | % Change from Previous Release |
+| ------------------------------------------------------------------------------------- | ---- | ------------------------------ |
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.1c62df70.js | 51K  |                             0% |
+| common-Dataflow-Geometry.0bd31c83.js                                                  | 26K  |                             0% |
+| common-Diagram-SharedVariables-Drawing.64a66322.js                                    | 26K  |                             0% |
+| common-Diagram-SharedVariables.275323cc.js                                            | 627K |                             0% |
+| common-Diagram-SharedVariables.2d734bc7.js                                            | 12K  |                             0% |
+| DataCard.a7a58744.js                                                                  | 18K  |                             0% |
+| Dataflow.1a1e3c22.js                                                                  | 736K |                             0% |
+| Diagram.fa0656df.js                                                                   | 23K  |                             0% |
+| Drawing.81438ecd.js                                                                   | 33K  |                             0% |
+| Geometry.6d9db0d6.js                                                                  | 887K |                          0.11% |
+| Image.e9ec3d1f.js                                                                     | 16K  |                             0% |
+| index.d1c025ba9324610db71f.js                                                         | 409K |                          0.25% |
+| SharedDataSet.a14fff08.js                                                             | 253B |                             0% |
+| SharedVariables.e3c850d4.js                                                           | 6.4K |                             0% |
+| Starter.f2715137.js                                                                   | 1.2K |                             0% |
+| Table.4da05066.js                                                                     | 84K  |                             0% |
+| Text.e29bbe93.js                                                                      | 16K  |                             0% |
+| vendor-main.7d31434b.js                                                               | 2.2M |                             0% |
+
+| File                         | Size | % Change from Previous Release |
+| ---------------------------- | ---- | ------------------------------ |
+| DataCard.2e433f7b.css        | 8.4K |                             0% |
+| Dataflow.c735c05f.css        |  32K |                             0% |
+| Diagram.9f4d7345.css         |  20K |                             0% |
+| Drawing.3a0cc2a5.css         | 5.2K |                             0% |
+| Geometry.a98f59a6.css        |  10K |                             0% |
+| Image.7ad40067.css           | 6.3K |                             0% |
+| main.bceb0803.css            | 165K |                             0% |
+| SharedVariables.6b645629.css | 433B |                             0% |
+| Starter.c4ceb644.css         | 207B |                             0% |
+| Table.2faa7c77.css           |  10K |                             0% |
+| Text.b1e5e4d2.css            | 4.5K |                             0% |
+
+## Version 3.6.0 - Dec 19, 2022
+
+Version 3.6.0 updates CLUE to use the AWS Log Ingester in place of the old Heroku Log Ingester and there are also content updates to the unti Growing Growing Growing's 1.3 and 2.3 questions to show the problem sections.
+
+### Features/Improvements
+- [CLUE] Create section headers for GGG 1.3 and 2.3 [#184065115](https://www.pivotaltracker.com/story/show/184065115)
+- Logging URL Update [#184067926](https://www.pivotaltracker.com/story/show/184067926)
+
+### Asset Sizes
+| File                                                                                  | Size | % Change from Previous Release |
+| ------------------------------------------------------------------------------------- | ---- | ------------------------------ |
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.1c62df70.js | 51K  |                             0% |
+| common-Dataflow-Geometry.0bd31c83.js                                                  | 26K  |                             0% |
+| common-Diagram-SharedVariables-Drawing.a0c028e4.js                                    | 26K  |                             0% |
+| common-Diagram-SharedVariables.74cc94e5.js                                            | 627K |                             0% |
+| common-Diagram-SharedVariables.a9911ab7.js                                            | 12K  |                             0% |
+| DataCard.707c6496.js                                                                  | 18K  |                             0% |
+| Dataflow.1205a5c4.js                                                                  | 736K |                             0% |
+| Diagram.fa0656df.js                                                                   | 23K  |                             0% |
+| Drawing.81438ecd.js                                                                   | 33K  |                             0% |
+| Geometry.e51d9174.js                                                                  | 886K |                             0% |
+| Image.e9ec3d1f.js                                                                     | 16K  |                             0% |
+| index.5e239de19171999f1f34.js                                                         | 408K |                             0% |
+| SharedDataSet.a14fff08.js                                                             | 253B |                             0% |
+| SharedVariables.e3c850d4.js                                                           | 6.4K |                             0% |
+| Starter.f2715137.js                                                                   | 1.2K |                             0% |
+| Table.4da05066.js                                                                     | 84K  |                             0% |
+| Text.e29bbe93.js                                                                      | 16K  |                             0% |
+| vendor-main.7d31434b.js                                                               | 2.2M |                             0% |
+
+| File                         | Size | % Change from Previous Release |
+| ---------------------------- | ---- | ------------------------------ |
+| DataCard.2bbb9270.css        | 8.4K |                             0% |
+| Dataflow.97d9f685.css        | 32K  |                             0% |
+| Diagram.f9944429.css         | 20K  |                             0% |
+| Drawing.98029fbe.css         | 5.2K |                             0% |
+| Geometry.672b0a98.css        | 10K  |                             0% |
+| Image.06c1a46e.css           | 6.3K |                             0% |
+| main.2f6dc86e.css            | 165K |                             0% |
+| SharedVariables.6acf4707.css | 433B |                             0% |
+| Starter.794e1267.css         | 207B |                             0% |
+| Table.995b6730.css           | 10K  |                             0% |
+| Text.466623d2.css            | 4.5K |                             0% |
+
+## Version 3.5.0 - Dec 13, 2022
+
+Version 3.5.0 adds a new variable card button on diagram tiles, adds formatting for variable cards, fixes a diagram tile crash with keyboard DELETE key and fixes some console errors. There are also content changes for Brain and Math units.
+
+### Features/Improvements
+- Format Var Name [#183570281](https://www.pivotaltracker.com/story/show/183570281)
+- Format Card Color Selector [#183691861](https://www.pivotaltracker.com/story/show/183691861)
+- Color Variable Chips to match Card [#183915153](https://www.pivotaltracker.com/story/show/183915153)
+- Format Variable cards [#183644075](https://www.pivotaltracker.com/story/show/183644075)
+- Add Variable card button on diagram toolbar [#183644160](https://www.pivotaltracker.com/story/show/183644160)
+- Format Value and Unit Field [#183570351](https://www.pivotaltracker.com/story/show/183570351)
+
+### Bug Fixes
+- Fix MST detach warning when reversing the add of a table tile [#183773409](https://www.pivotaltracker.com/story/show/183773409)
+- Diagram view causes crash when variable card deleted via keyboard DELETE key [#183929844](https://www.pivotaltracker.com/story/show/183929844)
+
+### Asset Sizes
+| File                                                                                  | Size | % Change from Previous Release |
+| ------------------------------------------------------------------------------------- | ---- | ------------------------------ |
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.1c62df70.js | 51K  |                             0% |
+| common-Dataflow-Geometry.0bd31c83.js                                                  | 26K  |                             0% |
+| common-Diagram-SharedVariables-Drawing.a0c028e4.js                                    | 26K  |                             0% |
+| common-Diagram-SharedVariables.a87c0ee1.js                                            | 627K |                          0.48% |
+| common-Diagram-SharedVariables.a9911ab7.js                                            | 12K  |                          9.00% |
+| DataCard.707c6496.js                                                                  | 18K  |                             0% |
+| Dataflow.1205a5c4.js                                                                  | 736K |                             0% |
+| Diagram.fa0656df.js                                                                   | 23K  |                        109.09% |
+| Drawing.81438ecd.js                                                                   | 33K  |                             0% |
+| Geometry.e51d9174.js                                                                  | 886K |                             0% |
+| Image.e9ec3d1f.js                                                                     | 16K  |                             0% |
+| index.e3b3fb015f0c0a90812f.js                                                         | 408K |                             0% |
+| SharedDataSet.a14fff08.js                                                             | 253B |                             0% |
+| SharedVariables.e3c850d4.js                                                           | 6.4K |                             0% |
+| Starter.f2715137.js                                                                   | 1.2K |                             0% |
+| Table.4da05066.js                                                                     | 84K  |                             0% |
+| Text.e29bbe93.js                                                                      | 16K  |                             0% |
+| vendor-main.7d31434b.js                                                               | 2.2M |                          4.76% |
+
+| File                         | Size | % Change from Previous Release |
+| ---------------------------- | ---- | ------------------------------ |
+| DataCard.2bbb9270.css        | 8.4K |                             0% |
+| Dataflow.97d9f685.css        | 32K  |                             0% |
+| Diagram.f9944429.css         | 20K  |                         66.67% |
+| Drawing.98029fbe.css         | 5.2K |                             0% |
+| Geometry.672b0a98.css        | 10K  |                             0% |
+| Image.06c1a46e.css           | 6.3K |                             0% |
+| main.2fbfa1ca.css            | 165K |                             0% |
+| SharedVariables.6acf4707.css | 433B |                         30.03% |
+| Starter.794e1267.css         | 207B |                             0% |
+| Table.995b6730.css           | 10K  |                             0% |
+| Text.466623d2.css            | 4.5K |                             0% |
+
 ## Version 3.4.1 - Nov 29, 2022
 
 Version 3.4.1 makes CAS corrections and fixes some console errors.

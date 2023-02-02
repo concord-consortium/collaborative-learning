@@ -9,9 +9,10 @@ import { SharedVariablesType } from "../shared-variables";
 interface IUseNewVariableDialog {
   addVariable: (variable: VariableType ) => void;
   sharedModel?: SharedVariablesType;
-  namePrefill? : string
+  namePrefill? : string;
+  onClose?: () => void;
 }
-export const useNewVariableDialog = ({ addVariable, sharedModel, namePrefill }: IUseNewVariableDialog) => {
+export const useNewVariableDialog = ({ addVariable, sharedModel, namePrefill, onClose }: IUseNewVariableDialog) => {
   const [newVariable, setNewVariable] = useState(Variable.create({name: namePrefill || undefined}));
 
   const handleClick = () => {
@@ -35,7 +36,8 @@ export const useNewVariableDialog = ({ addVariable, sharedModel, namePrefill }: 
         isDisabled: false,
         onClick: handleClick
       }
-    ]
+    ],
+    onClose
   }, [addVariable, newVariable]);
 
   // Wrap useCustomModal's show so we can prefill with variable name

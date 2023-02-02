@@ -2,14 +2,8 @@ import React, { useContext } from "react";
 import classNames from "classnames/dedupe";
 
 import {
-  Editor,
-  RenderElementProps,
-  useSerializing,
-  useSelected,
-  CustomEditor,
-  BaseElement,
-  CustomElement,
-  registerElementComponent,
+  BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
+  RenderElementProps, useSelected, useSerializing
 } from "@concord-consortium/slate-editor";
 import { action, autorun, computed, makeObservable, observable } from "mobx";
 import { getType } from "mobx-state-tree";
@@ -22,7 +16,6 @@ import { DEBUG_SHARED_MODELS } from "../../../lib/debug";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
 
 const kVariableClass = "slate-variable-chip";
-const kSlateVoidClass = "cc-slate-void";
 export const kVariableFormat = "m2s-variable";
 
 export class VariablesPlugin {

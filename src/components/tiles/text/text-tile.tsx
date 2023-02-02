@@ -1,8 +1,8 @@
 import React from "react";
 import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
-import { EditorValue, SlateEditor, ReactEditor, createEditor,
-  Slate, Editor
+import {
+  createEditor, Editor, EditorValue, ReactEditor, Slate, SlateEditor
 } from "@concord-consortium/slate-editor";
 import { TextContentModelContext } from "./text-content-context";
 import { BaseComponent } from "../../base";
@@ -209,8 +209,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                 editor={this.editor as ReactEditor}
                 value={editorValue}
                 onChange={this.handleChange}>
-                {/* CHECKME: Kirk had a `this.handleChange as any` above but it doesn't
-                    seem necessary. */}
               <SlateEditor
                 placeholder={placeholderText}
                 readOnly={readOnly}
@@ -218,8 +216,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
                 onBlur={this.handleBlur}
                 className={`ccrte-editor slate-editor ${classes || ""}`}
               />
-              {/* We need to pass the plugin instances to the toolbar so it can pass the right one
-                to the plugin's button */}
               <TextToolbarComponent
                 documentContent={documentContent}
                 valueRevision={valueRevision}
@@ -304,5 +300,3 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.setState({ editing: true });
   };
 }
-
-

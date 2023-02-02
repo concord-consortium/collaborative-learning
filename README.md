@@ -46,8 +46,9 @@ To deploy a production release:
 1. Verify that everything builds correctly
     - `npm run lint && npm run build && npm run test`
 1. Copy asset size markdown table from previous release and change sizes to match new sizes in `dist`
-    - `ls -lhS dist/*.js | awk '{print "|", $9, "|", $5, "|"}'`
-    - `ls -lhS dist/*.css | awk '{print "|", $9, "|", $5, "|"}'`
+    - `cd dist`
+    - `ls -lhS *.js | awk '{print "|", $9, "|", $5, "|"}'`
+    - `ls -lhS *.css | awk '{print "|", $9, "|", $5, "|"}'`
 1. Create `release-<version>` branch and commit changes, push to GitHub, create PR and merge
 1. Test the master build at: https://collaborative-learning.concord.org/index-master.html
 1. Push a version tag to GitHub and/or use https://github.com/concord-consortium/collaborative-learning/releases to create a new GitHub release
@@ -155,6 +156,7 @@ To enable per component debugging set the "debug" localstorage key with one or m
 - `canvas` this will show the document key over the canvas, useful for looking up documents in Firebase
 - `document` this will add the active document as `window.currentDocument`, you can use MST's hidden toJSON() like `currentDocument.toJSON()` to views its content.
 - `history` this will print some info the console as the history system records changes in the document.
+- `images` this will set `window.imageMap` so you can look at the status and URLs of images that have been loaded.
 - `listeners` console log the adding, removing, and firing of firebase listeners
 - `logger` console log all messages sent to the logging service
 - `stores` this will set `window.stores` so you can monitor the stores global from the browser console.
