@@ -1,4 +1,4 @@
-import { Editor, EditorValue, slateToText } from "@concord-consortium/slate-editor";
+import { EditorValue, slateToText } from "@concord-consortium/slate-editor";
 import { TextContentModel, kTextTileType } from "./text-content";
 import { registerTextPluginInfo } from "./text-plugin-info";
 

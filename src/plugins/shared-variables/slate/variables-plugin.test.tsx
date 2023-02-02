@@ -1,5 +1,4 @@
 import { IAnyStateTreeNode, IAnyType, types, castToSnapshot } from "mobx-state-tree";
-import { contextType } from "react-modal";
 import { SharedModelType } from "../../../models/shared/shared-model";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { TextContentModel, TextContentModelType } from "../../../models/tiles/text/text-content";

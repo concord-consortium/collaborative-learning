@@ -2,7 +2,7 @@ import React from "react";
 import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import { EditorValue, SlateEditor, ReactEditor, createEditor,
-  Slate, EFormat, Editor
+  Slate, Editor
 } from "@concord-consortium/slate-editor";
 import { TextContentModelContext } from "./text-content-context";
 import { BaseComponent } from "../../base";
@@ -13,7 +13,7 @@ import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { TextToolbarComponent } from "./text-toolbar";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
-import { getTextPluginInstances, getTextPluginIds } from "../../../models/tiles/text/text-plugin-info";
+import { getTextPluginInstances } from "../../../models/tiles/text/text-plugin-info";
 import { LogEventName } from "../../../lib/logger-types";
 
 import "./text-tile.sass";

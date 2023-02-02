@@ -1,8 +1,8 @@
 import { registerSharedModelInfo } from "../../models/shared/shared-model-registry";
 import { registerTextPluginInfo } from "../../models/tiles/text/text-plugin-info";
 import { kSharedVariablesID, SharedVariables } from "./shared-variables";
-import { VariablesPlugin, NewVariableTextButton, InsertVariableTextButton,
-  EditVariableTextButton} from "./slate/variables-plugin";
+import { NewVariableTextButton, InsertVariableTextButton, EditVariableTextButton} from "./slate/text-tile-buttons";
+import { VariablesPlugin } from "./slate/variables-plugin";
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
 import { EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject }
   from "./drawing/variable-object";

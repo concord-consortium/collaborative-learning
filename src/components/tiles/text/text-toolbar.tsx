@@ -1,6 +1,5 @@
 import React, { FunctionComponent, SVGProps } from "react";
 import ReactDOM from "react-dom";
-import _ from "lodash";
 import { EFormat, Editor } from "@concord-consortium/slate-editor";
 
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
