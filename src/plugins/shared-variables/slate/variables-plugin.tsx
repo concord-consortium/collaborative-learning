@@ -73,6 +73,7 @@ export class VariablesPlugin {
    * Add the shared model to the text tile when it is ready.
    */
   private addTileSharedModelIfNecessary() {
+    // TODO: add a disposer
     autorun(() => {
       // Make sure there is a sharedModelManage and it is ready
       // TODO this is duplicate code from `get sharedModel`

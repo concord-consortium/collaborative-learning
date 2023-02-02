@@ -26,7 +26,6 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
       document: observable,
       isReady: computed,
       setDocument: action,
-      findFirstSharedModelByType: action,
       addTileSharedModel: action,
       removeTileSharedModel: action
     });
@@ -40,6 +39,11 @@ export class SharedModelDocumentManager implements ISharedModelDocumentManager {
     this.document = document;
   }
 
+  // NOTE: MobX doesn't allow views that take properties, but it will watch all of the stuff
+  // read in a plain function like this so if this.document changes any observer calling
+  // this will be recomputed.
+  // Also this cannot be marked as an `action`. Doing that will cause it to not watch the
+  // stuff it reads.
   findFirstSharedModelByType<IT extends typeof SharedModelUnion>(
     sharedModelType: IT, providerId?: string): IT["Type"] | undefined {
     if (!this.document) {

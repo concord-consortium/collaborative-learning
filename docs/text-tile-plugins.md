@@ -73,7 +73,8 @@ Steps:
       `selectedVariable` was computed with `const selectedVariable = hasVariable ? findSelectedVariable(selectedElements, variables) : undefined;`
 - [x] manually test the functionality of the editor with and without variables
 - [x] look at the built js files to see if the variable stuff is still separated out
-- [ ] deal with the warning about the shared variable when there isn't diagram, consider disabling the buttons
+- [x] deal with the warning about the shared variable when there isn't diagram, consider disabling the buttons
+- [x] figure out why the shared variable buttons don't enable when diagram tile adds the shared variable model
 - [ ] remove underscore binding stuff
 - [ ] clean up the shared-variables-registration.tsx it should probably be broken up, there is probably also existing files that should be used for the NewVariableTextButton, InsertVariableTextButton, EditVariableTextButton
 - [ ] move all of the variable references back in the variables folder
