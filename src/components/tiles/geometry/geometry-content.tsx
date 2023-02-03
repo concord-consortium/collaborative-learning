@@ -1,4 +1,4 @@
-import { castArray, each, filter, find, keys as _keys, throttle, values } from "lodash";
+import { castArray, uniq, each, filter, find, keys as _keys, throttle, values } from "lodash";
 import { observe, reaction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
@@ -20,7 +20,7 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           isDragTargetOrAncestor } from "../../../models/tiles/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
-import { ESegmentLabelOption, ILinkProperties, JXGCoordPair, JXGChange } from "../../../models/tiles/geometry/jxg-changes";
+import { ESegmentLabelOption, ILinkProperties, JXGCoordPair, JXGChange, JXGObjectType } from "../../../models/tiles/geometry/jxg-changes";
 import { applyChange, applyChanges } from "../../../models/tiles/geometry/jxg-dispatcher";
 import { kSnapUnit } from "../../../models/tiles/geometry/jxg-point";
 import {
@@ -51,7 +51,7 @@ import placeholderImage from "../../../assets/image_placeholder.png";
 import { LinkTableButton } from "./link-table-button";
 import ErrorAlert from "../../utilities/error-alert";
 import SingleStringDialog from "../../utilities/single-string-dialog";
-import { ObjectMapEntry, getBoardObjectsMap, updateBoardPoints, updateBoardPolygons, getBoardDataExtents, getModelObjectMap } from "./update-with-shared-data";
+import { getBoardObjectsMap, getBoardDataExtents  } from "./update-with-shared-data";
 
 import "./geometry-tile.sass";
 
@@ -595,56 +595,55 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  modelJXGIsClean(board: JXG.Board){
-    // find any points or polygons in model but not in JXG
-    let inModelButNotInJXG = [];
-    let redundancies = [];
+  modelJXGCleanCheck(board: JXG.Board){
+    // find any points or polygons in model but not in JXG and/or any redundancies
+    let missingFromJXG: Array<any> = [];
+    let hasRedundancies = false;
 
-    const jxgSummary = Array.from(getBoardObjectsMap(board),([key, value]) => {
-      return ({id: key, type: value.elType, })
+    let jxgSummary: Array<any> = [];
+    const matchAll = (obj: JXG.GeometryElement) => obj.elType !== undefined
+    const allJXGObjects = this.getContent().findObjects(board, matchAll)
+    allJXGObjects.forEach((o) => {
+      jxgSummary.push({ id: o.id, type: o.elType })
     })
 
-    let modelSummary: Array<any> = []
+    hasRedundancies = uniq(jxgSummary) as any === jxgSummary.length
 
+    let modelSummary: Array<object> = [];
     for (let [key, value] of this.getContent().objects){
       const mo = this.getContent().getObject(key)
       if (mo){
         modelSummary.push({id: key, type: mo.type})
       }
     }
-    //const modelSummary = getModelObjectMap(this.getContent().objects)
 
-    console.log("comparison time: ... ")
-
-
-    console.log("comparison time:          ", {jxgSummary});
-    console.log("comparison time:          ", {modelSummary});
-
-    for (let [key, value] of this.getContent().objects) {
-      if (value.type === "point"){
-        const modelPointFoundInJXG = this.getContent().getObject(key)?.id === key
-        !modelPointFoundInJXG && inModelButNotInJXG.push(key)
+    modelSummary.forEach((modelSummaryItem: any) => {
+      const foundMatchingJXG = jxgSummary.find((jxgItem: any) => jxgItem.id === modelSummaryItem.id);
+      if (!foundMatchingJXG){
+        missingFromJXG.push(modelSummaryItem);
       }
+    })
+    console.log("missing from jxg: ", missingFromJXG)
 
-      if (value.type === "polygon"){
-        const modelPolygonFoundInJXG = this.getContent().getObject(key)?.id === key
-        !modelPolygonFoundInJXG && inModelButNotInJXG.push(key)
-      }
-    }
-
-
-
-
-    return inModelButNotInJXG.length === 0 && redundancies.length === 0
+    //return !hasRedundancies && missingFromJXG.length === 0;
+    return { hasRedundancies, missingList: missingFromJXG, missingCount: missingFromJXG.length }
   }
+
 
   contentSyncGeometry(_board?: JXG.Board) {
     const board = _board || this.state.board;
     if (!board) return;
 
-    // [ 1 ] If everything in model is in JXG, and we have no redundancies
-    //       look at shared model, and bring in data from underlying dataset to create points
-    if (this.modelJXGIsClean(board)){
+
+    const report1 = this.modelJXGCleanCheck(board)
+    const missingAtStart = report1.missingList;
+    console.log("z missingAtStart: ", missingAtStart)
+
+    // Find points through linked data and create them
+    // Checks for missing are accurate, but running this on condition of missing polygon
+    // prevents native points from rerendering on share
+    // need to look into "update" or running the native points create regardless
+    // if (missingAtStart.length > 0){
       this.getContent().linkedDataSets.forEach(link => {
         const links: ILinkProperties = { tileIds: [link.providerId] };
         const parents: JXGCoordPair[] = [];
@@ -665,57 +664,48 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         const pts = applyChange(board, ptsChange as JXGChange);
         castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
       });
-    }
+   // } // cancelled check
 
-    // [ 2 ] If everything in model is in JXG, and we have no redundancies
-    //       Look at model and see if any un-rendered Polygons are here
-    //       If so, render them
-    if (this.modelJXGIsClean(board)){
-      const modelObjectsMap = this.getContent().objects;
-      const allObjectsArr = Array.from(modelObjectsMap, ([key, value]) => ({key,value}));
 
-      // If object is a polygon, extract its id and dependent point ids
-      const changes: JXGChange[] = [];
-      allObjectsArr.forEach((o) => {
-        if (o.value.type === "polygon"){
-          const ids: string[] = [];
-          const idSet = { polygonId: o.value.id, pointIds: ids };
-          (o.value as any).points.forEach((k:string) => {
-            const pointId = k;
-            idSet.pointIds.push(pointId);
-          });
-          // FINISH TASK 1 check for shared citizen
-          const polygonChangeObject: JXGChange = {
-            operation: "create", // not "update" at the moment. This does not create a duplicate
-            target: "polygon",
-            targetID: idSet.polygonId,
-            parents: idSet.pointIds,
-            properties: { id: idSet.polygonId }
-          };
-          changes.push(polygonChangeObject);
-        }
-      });
-      applyChanges(board, changes);
-    }
+    const modelObjectsMap = this.getContent().objects;
+    const allObjectsArr = Array.from(modelObjectsMap, ([key, value]) => ({key,value}));
+    // If object is a polygon, extract its id and dependent point ids
+    const changes: JXGChange[] = [];
+    allObjectsArr.forEach((o) => {
+      if (o.value.type === "polygon"){
+        const ids: string[] = [];
+        const idSet = { polygonId: o.value.id, pointIds: ids };
+        (o.value as any).points.forEach((k:string) => {
+          const pointId = k;
+          k.includes(":") && idSet.pointIds.push(pointId); // silly/weak check? has not broke w out?
+        });
+        const polygonChangeObject: JXGChange = {
+          operation: "create", // This does not create a duplicate
+          target: "polygon",
+          targetID: idSet.polygonId,
+          parents: idSet.pointIds,
+          properties: { id: idSet.polygonId }
+        };
+        changes.push(polygonChangeObject);
+      }
+    });
+
+    applyChanges(board, changes);
 
     // account for all points, shared and native, and rescale accordingly
     const boardMap = getBoardObjectsMap(board)
     const extents = getBoardDataExtents(boardMap)
     this.rescaleBoardAndAxes(extents);
+
+    // TODO - what if any of these checks do not pass?
+    const { hasRedundancies, missingCount} = this.modelJXGCleanCheck(board)
+    console.log("cleanCheck: hasRedundancies: ", hasRedundancies, "missingCount: ", missingCount)
+
+    const report2 = this.modelJXGCleanCheck(board)
+    const missingAtEnd = report2.missingList;
+    console.log("z missingAtEnd: ", missingAtEnd)
+
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {

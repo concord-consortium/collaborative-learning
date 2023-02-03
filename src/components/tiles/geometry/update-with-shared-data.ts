@@ -1,8 +1,3 @@
-import { GeometryContentSnapshotType } from "../../../models/tiles/geometry/geometry-content";
-import { applyChange, applyChanges } from "../../../models/tiles/geometry/jxg-dispatcher";
-import { getAllLinkedPoints, injectGetTableLinkColorsFunction } from "../../../models/tiles/geometry/jxg-table-link";
-import { JXGCoordPair, ILinkProperties } from "../../../models/tiles/geometry/jxg-changes";
-import { linkedPointId } from "../../../models/tiles/table-link-types";
 
 export interface ObjectMapEntry {
   id: string,
@@ -31,13 +26,6 @@ export function getBoardDataExtents(objectsMap: Map<string, ObjectMapEntry>){
     }
   }
   return { xMax, yMax, xMin, yMin } // matches type that can be passed to rescaleBoardAndAxes()
-}
-
-export function getModelObjectMap(modelContent:any){
-  const modelObjectsMap = new Map<string, ObjectMapEntry>;
-  for (let [key, value] of modelContent.data_){
-    console.log("nice value to be: ", value.value_)
-  }
 }
 
 export function getBoardObjectsMap(board: JXG.Board){
@@ -77,15 +65,4 @@ export function getBoardObjectsMap(board: JXG.Board){
 
   return boardObjectsMap
 }
-
-export function updateBoardPoints(board: JXG.Board, linkedData: any){
-  console.log("all1: updateBoardPoints", {board}, {linkedData})
-}
-
-export function updateBoardPolygons(board: JXG.Board, linkedData: any){
-  console.log("all1: updateBoardPolygons", {board}, {linkedData})
-}
-
-
-
 
