@@ -22,6 +22,11 @@ import BulletedListToolIcon from "../../../assets/icons/text/bulleted-list-text-
 
 import "./text-toolbar.sass";
 
+interface IButtonDef {
+  pluginName: string,
+  component: ButtonDefComponent
+}
+
 interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
   editor?: Editor;
   textContent?: TextContentModelType,
@@ -30,86 +35,49 @@ interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
   valueRevision: number;
 }
 
-interface IButtonDef {
-  pluginName?: string,
-  component: ButtonDefComponent
-}
-
 const kShortcutPrefix = isMac() ? "Cmd-" : "Ctrl-";
 
-// These are the built in tool definitions
-const buttonDefs = new Map<string, IButtonDef>([
-  [ "bold", {
-    component: props => <BuiltInToolbarButton
-      iconName="bold"
-      Icon={BoldToolIcon}
-      toolTip={`Bold (${kShortcutPrefix}b)`}
-      slateType={EFormat.bold}
-      command={() => props.editor.toggleMark(EFormat.bold) }
-      {...props}
-      />
-    }],
-  [ "italic", {
-    component: props => <BuiltInToolbarButton
-      iconName="italic"
-      Icon={ItalicToolIcon}
-      toolTip={`Italic (${kShortcutPrefix}i)`}
-      slateType={EFormat.italic}
-      command={() => props.editor.toggleMark(EFormat.italic) }
-      {...props}
-      />
-    }],
-  [ "underline", {
-    component: props => <BuiltInToolbarButton
-      iconName="underline"
-      Icon={UnderlineToolIcon}
-      toolTip={`Underline (${kShortcutPrefix}u)`}
-      slateType={EFormat.underlined}
-      command={() => props.editor.toggleMark(EFormat.underlined) }
-      {...props}
-      />
-    }],
-  [ "subscript", {
-    component: props => <BuiltInToolbarButton
-      iconName="subscript"
-      Icon={SubscriptToolIcon}
-      toolTip={`Subscript`}
-      slateType={EFormat.subscript}
-      command={() => props.editor.toggleSuperSubscript(EFormat.subscript) }
-      {...props}
-      />
-    }],
-  [ "superscript", {
-    component: props => <BuiltInToolbarButton
-      iconName="superscript"
-      Icon={SuperscriptToolIcon}
-      toolTip={`Superscript`}
-      slateType={EFormat.superscript}
-      command={() => props.editor.toggleSuperSubscript(EFormat.superscript) }
-      {...props}
-      />
-    }],
-  [ "list-ol", {
-    component: props => <BuiltInToolbarButton
-      iconName="list-ol"
-      Icon={NumberedListToolIcon}
-      toolTip={`Numbered List`}
-      slateType={EFormat.numberedList}
-      command={() => props.editor.toggleElement(EFormat.numberedList) }
-      {...props}
-      />
-    }],
-  ["list-ul", {
-    component: props => <BuiltInToolbarButton
-      iconName="list-ul"
-      Icon={BulletedListToolIcon}
-      toolTip={`Bulleted List`}
-      slateType={EFormat.bulletedList}
-      command={() => props.editor.toggleElement(EFormat.bulletedList) }
-      {...props}
-      />
-    }],
-]);
+const buttonDefs = new Map<string, IButtonDef>();
+
+/**
+ *  Configure a built in button. The short name is so the full config fits on one line.
+ */
+function bi(
+  iconName: string,
+  Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>,
+  slateType: EFormat,
+  toggleFunc: (editor: Editor, format: EFormat) => void,
+  toolTip: string
+) {
+  buttonDefs.set(iconName, {
+    pluginName: "built-in",
+    component({editor}) {
+      const isSelected = editor.isMarkActive(slateType) || editor.isElementActive(slateType);
+      const handleClick = (event: React.MouseEvent) => {
+        event.preventDefault();
+        toggleFunc(editor, slateType);
+      };
+      // Built in buttons are always enabled
+      return <TextToolbarButton iconName={iconName} Icon={Icon} enabled={true}
+              tooltip={toolTip} isSelected={isSelected} onClick={handleClick} />;
+    }
+  });
+}
+
+const toggleMark =
+  (editor: Editor, format: EFormat) => editor.toggleMark(format);
+const toggleSupSub =
+  (editor: Editor, format: EFormat) => editor.toggleSuperSubscript(format as EFormat.subscript | EFormat.superscript);
+const toggleElement =
+  (editor: Editor, format: EFormat) => editor.toggleElement(format);
+
+bi("bold",        BoldToolIcon,         EFormat.bold,         toggleMark,    `Bold (${kShortcutPrefix}b)`);
+bi("italic",      ItalicToolIcon,       EFormat.italic,       toggleMark,    `Italic (${kShortcutPrefix}i)`);
+bi("underline",   UnderlineToolIcon,    EFormat.underlined,   toggleMark,    `Underline (${kShortcutPrefix}u)`);
+bi("subscript",   SubscriptToolIcon,    EFormat.subscript,    toggleSupSub,  `Subscript`);
+bi("superscript", SuperscriptToolIcon,  EFormat.superscript,  toggleSupSub,  `Superscript`);
+bi("list-ol",     NumberedListToolIcon, EFormat.numberedList, toggleElement, `Numbered List`);
+bi("list-ul",     BulletedListToolIcon, EFormat.bulletedList, toggleElement, `Bulleted List`);
 
 const handleMouseDown = (event: React.MouseEvent) => {
   event.preventDefault();
@@ -142,7 +110,7 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
 
     for (const [iconName, pluginButtonDefComponent] of Object.entries(plugin.buttonDefs)) {
       // only add this plugin button def if there isn't one there already
-      // buttonDefs is a global so each toolbar component will share this
+      // buttonDefs is a global so every toolbar component will share this
       if (!buttonDefs.has(iconName)) {
         buttonDefs.set(iconName, {pluginName: plugin.pluginName, component: pluginButtonDefComponent});
       }
@@ -193,27 +161,3 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
     : null;
 };
 
-interface IBuiltInToolbarButtonProps {
-  iconName: string;
-  Icon: FunctionComponent<SVGProps<SVGSVGElement>>;
-  toolTip: string;
-  slateType: string;
-  command: () => void;
-  editor: Editor;
-  valueRevision: number;
-}
-
-const BuiltInToolbarButton: React.FC<IBuiltInToolbarButtonProps> = ({
-  iconName, Icon, toolTip, slateType, command, editor
-}: IBuiltInToolbarButtonProps) => {
-  const isSelected =
-    editor.isMarkActive(slateType as EFormat) ||
-    editor.isElementActive(slateType as EFormat);
-  const handleClick = (event: React.MouseEvent) => {
-      event.preventDefault();
-      command();
-  };
-  // Built in buttons are always enabled
-  return <TextToolbarButton iconName={iconName} Icon={Icon} enabled={true}
-           tooltip={toolTip} isSelected={isSelected} onClick={handleClick} />;
-};

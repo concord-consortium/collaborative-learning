@@ -45,5 +45,5 @@ TODO:
 - [x] clean up the variables-plugin.tsx it should probably be broken up, it has the VariablePlugin object as well as the NewVariableTextButton, InsertVariableTextButton, EditVariableTextButton components, and the VariableComponent.
 - [x] merge master to resolve conflicts
 - [x] update text tile plugin documentation
-- [ ] reduce the duplication in the built in tools
+- [x] reduce the duplication in the built in tools
 - [ ] review all of the TODOs and FIXMEs
