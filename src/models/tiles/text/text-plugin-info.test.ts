@@ -1,5 +1,5 @@
 import { getAllTextPluginInfos, getTextPluginIds, getTextPluginInfo,
-  getTextPluginInstances, registerTextPluginInfo } from "./text-plugin-info";
+  createTextPluginInstances, registerTextPluginInfo } from "./text-plugin-info";
 
 const testTextPluginInstance = {from: "testTextPluginInfo"} as any;
 const testTextPluginInfo = {
@@ -27,7 +27,7 @@ describe("TextPluginInfo", () => {
 
   test("getTextPluginInstances", () => {
     const textContent: any = {foo: "bar"};
-    const pluginInstances = getTextPluginInstances(textContent);
+    const pluginInstances = createTextPluginInstances(textContent);
     expect(testTextPluginInfo.createSlatePlugin).toBeCalledWith(textContent);
     expect(testTextPluginInfoWithUpdate.createSlatePlugin).toBeCalledWith(textContent);
     expect(Object.entries(pluginInstances)).toHaveLength(2);

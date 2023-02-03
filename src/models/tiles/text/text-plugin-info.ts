@@ -4,6 +4,7 @@ import { TextContentModelType } from "./text-content";
 
 export interface ITextPlugin {
   onInitEditor?: (editor: Editor) => Editor;
+  dispose?: () => void;
 }
 
 export interface IButtonDefProps {
@@ -35,7 +36,7 @@ export function getTextPluginInfo(id: string) {
 
 // TODO: perhaps this should only add the plugins that have been configured
 // as tools by the app-config.
-export function getTextPluginInstances(textContent: TextContentModelType) {
+export function createTextPluginInstances(textContent: TextContentModelType) {
   const pluginInstances:  Record<string, ITextPlugin> = {};
   Object.values(gTextPluginInfoMap).forEach(pluginInfo => {
     if (pluginInfo?.createSlatePlugin) {

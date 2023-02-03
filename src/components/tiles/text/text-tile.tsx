@@ -13,7 +13,7 @@ import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { TextToolbarComponent } from "./text-toolbar";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
-import { getTextPluginInstances, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
+import { createTextPluginInstances, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { LogEventName } from "../../../lib/logger-types";
 import { TextPluginsContext } from "./text-plugins-context";
 
@@ -94,7 +94,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarTileApi: ITileApi | undefined;
-  private plugins: Record<string, ITextPlugin>;
+  private plugins: Record<string, ITextPlugin|undefined>;
   private textOnFocus: string | string [] | undefined;
 
   public componentDidMount() {
@@ -105,12 +105,12 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       value: initialValue,
       valueRevision: 0
     });
-    this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
+    this.plugins = createTextPluginInstances(this.props.model.content as TextContentModelType);
     const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate
     // Gather all the plugin init functions and pass that to slate.
     const onInitEditor = (e: Editor) => {
       Object.values(this.plugins).forEach(plugin => {
-        if (plugin.onInitEditor) {
+        if (plugin?.onInitEditor) {
           e = plugin.onInitEditor(e);
         }
       });
@@ -179,6 +179,9 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   public componentWillUnmount() {
     this.disposers.forEach(disposer => disposer());
+    for (const plugin of Object.values(this.plugins)) {
+      plugin?.dispose?.();
+    }
   }
 
   public render() {

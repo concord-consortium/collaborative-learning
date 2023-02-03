@@ -68,7 +68,7 @@ describe("VariablesPlugin", () => {
         expect(mockConsole).toBeCalled();
       });
 
-      // FIXME: need to dispose the autorun
+      plugin.dispose();
       libDebug.DEBUG_SHARED_MODELS = false;
     });
 
@@ -81,7 +81,7 @@ describe("VariablesPlugin", () => {
         expect(mockConsole).not.toBeCalled();
       });
 
-      // FIXME: need to dispose the autorun
+      plugin.dispose();
     });
 
     it("logs if there is no shared model with DEBUG_SHARED_MODELS", async () => {
@@ -97,7 +97,7 @@ describe("VariablesPlugin", () => {
         expect(mockConsole).toBeCalled();
       });
 
-      // FIXME: need to dispose the autorun
+      plugin.dispose();
       libDebug.DEBUG_SHARED_MODELS = false;
     });
 
@@ -113,7 +113,7 @@ describe("VariablesPlugin", () => {
         expect(mockConsole).not.toBeCalled();
       });
 
-      // FIXME: need to dispose the autorun
+      plugin.dispose();
     });
 
     it("adds the shared model to the tile", async () => {
@@ -130,7 +130,7 @@ describe("VariablesPlugin", () => {
       const plugin = new VariablesPlugin(textContent);
       plugin.addTileSharedModelWhenReady();
 
-      // FIXME: need to dispose the autorun
+      plugin.dispose();
 
       expect(addSharedModelSpy).toHaveBeenCalled();
     });

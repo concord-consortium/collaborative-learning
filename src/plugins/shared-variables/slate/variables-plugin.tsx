@@ -5,7 +5,7 @@ import {
   BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
   RenderElementProps, useSelected, useSerializing
 } from "@concord-consortium/slate-editor";
-import { action, autorun, computed, makeObservable, observable } from "mobx";
+import { action, autorun, computed, IReactionDisposer, makeObservable, observable } from "mobx";
 import { getType } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
@@ -22,6 +22,7 @@ export const kVariableTextPluginName = "variables";
 
 export class VariablesPlugin implements ITextPlugin{
   public textContent;
+  private disposeSharedModelManagerAutorun: IReactionDisposer|undefined;
 
   constructor(textContent: TextContentModelType) {
     makeObservable(this, {
@@ -56,8 +57,7 @@ export class VariablesPlugin implements ITextPlugin{
    * Add the shared model to the text tile when it is ready.
    */
   addTileSharedModelWhenReady() {
-    // TODO: add a disposer
-    autorun(() => {
+    this.disposeSharedModelManagerAutorun = autorun(() => {
       // Make sure there is a sharedModelManage and it is ready
       // TODO this is duplicate code from `get sharedModel`
       const sharedModelManager = this.textContent.tileEnv?.sharedModelManager;
@@ -89,11 +89,20 @@ export class VariablesPlugin implements ITextPlugin{
       // We found a SharedVariables model, and we don't have one on the textContent yet
       // So add it
       sharedModelManager.addTileSharedModel(this.textContent, containerSharedModel);
+
+      // We could dispose the autorun here, but we aren't. There is a chance
+      // that the shared model will be removed from the document and a new one
+      // added. This is not currently supported, but it seems pretty harmless to
+      // leave the autorun in place just in case we support this later.
     });
   }
 
   onInitEditor(editor: CustomEditor) {
     return withVariables(editor, this.textContent);
+  }
+
+  dispose() {
+    this.disposeSharedModelManagerAutorun?.();
   }
 
   get chipVariables() {
