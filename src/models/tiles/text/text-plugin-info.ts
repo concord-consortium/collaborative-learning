@@ -2,10 +2,13 @@ import { Editor} from "@concord-consortium/slate-editor";
 import { SharedModelType } from "../../shared/shared-model";
 import { TextContentModelType } from "./text-content";
 
+export interface ITextPlugin {
+  onInitEditor?: (editor: Editor) => Editor;
+}
+
 export interface IButtonDefProps {
   editor: Editor;
-  // FIXME: should type this some how
-  pluginInstance: any;
+  pluginInstance: ITextPlugin;
   valueRevision: number;
 }
 
@@ -14,7 +17,7 @@ export type ButtonDefComponent = React.FC<IButtonDefProps>;
 export interface ITextPluginInfo {
   pluginName: string;
   createSlatePlugin?:
-    (textContent: TextContentModelType) => any; //FIXME: any type.
+    (textContent: TextContentModelType) => ITextPlugin;
   updateTextContentAfterSharedModelChanges?:
     (textContent: TextContentModelType, sharedModel?: SharedModelType) => void;
   buttonDefs: Record<string, ButtonDefComponent>,
@@ -33,7 +36,7 @@ export function getTextPluginInfo(id: string) {
 // TODO: perhaps this should only add the plugins that have been configured
 // as tools by the app-config.
 export function getTextPluginInstances(textContent: TextContentModelType) {
-  const pluginInstances:  Record<string, any> = {}; // FIXME type
+  const pluginInstances:  Record<string, ITextPlugin> = {};
   Object.values(gTextPluginInfoMap).forEach(pluginInfo => {
     if (pluginInfo?.createSlatePlugin) {
       pluginInstances[pluginInfo.pluginName] = pluginInfo.createSlatePlugin(textContent);

@@ -62,105 +62,83 @@ export const findSelectedVariable = (selectedElements: any, variables: VariableT
 //     },
 //   },
 export const NewVariableTextButton = observer(function NewVariableTextButton(
-  {editor, pluginInstance}: IButtonDefProps) {
+    {editor, pluginInstance}: IButtonDefProps) {
 
-// TODO: perhaps the pluginInstance is undefined?
-const variablesPlugin = pluginInstance as VariablesPlugin;
+  // TODO: perhaps the pluginInstance is undefined?
+  const variablesPlugin = pluginInstance as VariablesPlugin;
 
-const isSelected = false;
+  const isSelected = false;
+  const sharedModel = variablesPlugin.sharedModel;
+  const enabled = !!sharedModel;
 
-const sharedModel = variablesPlugin.sharedModel;
-
-const enabled = !!sharedModel;
-
-const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
-const namePrefill = highlightedText;
-const [showDialog] = useNewVariableDialog({
-  addVariable(variable) {
-    insertTextVariable(variable, editor);
-  },
-  sharedModel, namePrefill});
-const handleClick = (event: React.MouseEvent) => {
-  event.preventDefault();
-  showDialog();
-};
-return (
-  <TextToolbarButton iconName="new-variable" Icon={AddVariableChipIcon}
-    tooltip={"New Variable"}  enabled={enabled} isSelected={isSelected}
-    onClick={handleClick} />
-);
+  const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
+  const namePrefill = highlightedText;
+  const [showDialog] = useNewVariableDialog({
+    addVariable(variable) {
+      insertTextVariable(variable, editor);
+    },
+    sharedModel, namePrefill});
+  const handleClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    showDialog();
+  };
+  return (
+    <TextToolbarButton iconName="new-variable" Icon={AddVariableChipIcon}
+      tooltip={"New Variable"}  enabled={enabled} isSelected={isSelected}
+      onClick={handleClick} />
+  );
 });
 
-//   {
-//     iconName: "insert-variable",
-//     Icon: InsertVariableChipIcon,
-//     toolTip: "Insert Variable",
-//     buttonEnabled: () => true,
-//     command(editor) {
-//       // do something like useInsertVariableDialog
-//     },
-//   },
 export const InsertVariableTextButton = observer(function InsertVariableTextButton(
    {editor, pluginInstance}: IButtonDefProps) {
-// TODO: perhaps the pluginInstance is undefined?
-const variablesPlugin = pluginInstance as VariablesPlugin;
+  // TODO: perhaps the pluginInstance is undefined?
+  const variablesPlugin = pluginInstance as VariablesPlugin;
 
+  const isSelected = false;
+  const textContent = useContext(TextContentModelContext);
+  const sharedModel = variablesPlugin.sharedModel;
+  const enabled = !!sharedModel;
 
-const isSelected = false;
-const textContent = useContext(TextContentModelContext);
-const sharedModel = variablesPlugin.sharedModel;
-const enabled = !!sharedModel;
+  const { selfVariables, otherVariables, unusedVariables } = variableBuckets(textContent, sharedModel);
 
-const { selfVariables, otherVariables, unusedVariables } = variableBuckets(textContent, sharedModel);
-
-const [showDialog] = useInsertVariableDialog({
-  Icon: InsertVariableChipIcon,
-  insertVariables(variables){
-    insertTextVariables(variables, editor);
-  },
-  otherVariables, selfVariables, unusedVariables });
-const handleClick = (event: React.MouseEvent) => {
-  event.preventDefault();
-  showDialog();
-};
-return (
-  <TextToolbarButton iconName="insert-variable" Icon={InsertVariableChipIcon}
-    tooltip={"Insert Variable"}  enabled={enabled} isSelected={isSelected}
-    onClick={handleClick} />
-);
+  const [showDialog] = useInsertVariableDialog({
+    Icon: InsertVariableChipIcon,
+    insertVariables(variables){
+      insertTextVariables(variables, editor);
+    },
+    otherVariables, selfVariables, unusedVariables });
+  const handleClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    showDialog();
+  };
+  return (
+    <TextToolbarButton iconName="insert-variable" Icon={InsertVariableChipIcon}
+      tooltip={"Insert Variable"}  enabled={enabled} isSelected={isSelected}
+      onClick={handleClick} />
+  );
 });
 
-//   {
-//     iconName: "edit-variable",
-//     Icon: VariableEditorIcon,
-//     toolTip: "Edit Variable",
-//     buttonEnabled: shouldShowEditVariableButton,
-//     command(editor) {
-//       // do something like useEditVariableDialog
-//     },
-//   }
 export const EditVariableTextButton = observer(function EditVariableTextButton(
-  {editor, pluginInstance}: IButtonDefProps) {
-// TODO: perhaps the pluginInstance is undefined?
-const variablesPlugin = pluginInstance as VariablesPlugin;
+    {editor, pluginInstance}: IButtonDefProps) {
+  // TODO: perhaps the pluginInstance is undefined?
+  const variablesPlugin = pluginInstance as VariablesPlugin;
 
-const isSelected = false;
+  const isSelected = false;
+  const selectedElements = editor?.selectedElements();
+  const variables = variablesPlugin.variables;
+  const hasVariable = editor?.isElementActive(kVariableFormat);
+  const selectedVariable = hasVariable ? findSelectedVariable(selectedElements, variables) : undefined;
+  const enabled = !!selectedVariable;
 
-const selectedElements = editor?.selectedElements();
-const variables = variablesPlugin.variables;
-const hasVariable = editor?.isElementActive(kVariableFormat);
-const selectedVariable = hasVariable ? findSelectedVariable(selectedElements, variables) : undefined;
-const enabled = !!selectedVariable;
+  const [showDialog] = useEditVariableDialog({variable: selectedVariable});
+  const handleClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    showDialog();
+  };
 
-const [showDialog] = useEditVariableDialog({variable: selectedVariable});
-const handleClick = (event: React.MouseEvent) => {
-  event.preventDefault();
-  showDialog();
-};
-
-return (
-  <TextToolbarButton iconName="edit-variable" Icon={VariableEditorIcon}
-    tooltip={"Edit Variable"} enabled={enabled} isSelected={isSelected}
-    onClick={handleClick} />
-);
+  return (
+    <TextToolbarButton iconName="edit-variable" Icon={VariableEditorIcon}
+      tooltip={"Edit Variable"} enabled={enabled} isSelected={isSelected}
+      onClick={handleClick} />
+  );
 });

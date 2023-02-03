@@ -10,6 +10,7 @@ import { getType } from "mobx-state-tree";
 import { observer } from "mobx-react";
 import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
+import { ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { TextPluginsContext } from "../../../components/tiles/text/text-plugins-context";
 
 import { DEBUG_SHARED_MODELS } from "../../../lib/debug";
@@ -18,7 +19,7 @@ import { SharedVariables, SharedVariablesType } from "../shared-variables";
 const kVariableClass = "slate-variable-chip";
 export const kVariableFormat = "m2s-variable";
 
-export class VariablesPlugin {
+export class VariablesPlugin implements ITextPlugin{
   public textContent;
 
   constructor(textContent: TextContentModelType) {

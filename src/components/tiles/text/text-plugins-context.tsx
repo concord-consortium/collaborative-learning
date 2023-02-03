@@ -1,4 +1,4 @@
 import React from "react";
+import { ITextPlugin } from "src/models/tiles/text/text-plugin-info";
 
-// FIXME: need a type for the plugin instances
-export const TextPluginsContext = React.createContext<Record<string, any>>({});
+export const TextPluginsContext = React.createContext<Record<string, ITextPlugin>>({});

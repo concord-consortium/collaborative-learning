@@ -13,11 +13,11 @@ import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { TextToolbarComponent } from "./text-toolbar";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
-import { getTextPluginInstances } from "../../../models/tiles/text/text-plugin-info";
+import { getTextPluginInstances, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { LogEventName } from "../../../lib/logger-types";
+import { TextPluginsContext } from "./text-plugins-context";
 
 import "./text-tile.sass";
-import { TextPluginsContext } from "./text-plugins-context";
 
 /*
   The Slate internal data model uses, among other things, "marks" and "blocks"
@@ -94,7 +94,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarTileApi: ITileApi | undefined;
-  private plugins: Record<string, any>; // FIXME: need to type the plugins
+  private plugins: Record<string, ITextPlugin>;
   private textOnFocus: string | string [] | undefined;
 
   public componentDidMount() {
@@ -105,7 +105,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       value: initialValue,
       valueRevision: 0
     });
-    // This will be changed to return a {[pluginName]: pluginInstance}
     this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
     const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate
     // Gather all the plugin init functions and pass that to slate.
@@ -197,7 +196,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       // Ideally, this would just be 'text-tool' for consistency with other tools,
       // but 'text-tool` is used for the internal editor (cf. 'classes' above),
       // which is used for cypress tests and other purposes.
-      // FIXME: replace this provider with one at the tile level so we get it for free.
+      // TODO: replace this provider with one at the tile level so we get it for free.
       // and then replace the drawing one with that as well
       <TextContentModelContext.Provider value={this.getContent()} >
         <TextPluginsContext.Provider value={this.plugins} >

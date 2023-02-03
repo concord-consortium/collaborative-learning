@@ -3,6 +3,5 @@ import { TextContentModelType, createTextContent } from "../../../models/tiles/t
 
 // This default text content should never be used, but it is necessary
 // so code using this context doesn't have to check for undefined
-// FIXME: replace this with generic TileModel content instead
-// FIXME: do we have to start this out with an empty content?
+// TODO: replace this with generic TileModel content instead
 export const TextContentModelContext = React.createContext<TextContentModelType>(createTextContent());

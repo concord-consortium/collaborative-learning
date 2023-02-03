@@ -122,7 +122,7 @@ export const TextContentModel = TileContentModel
 
 export type TextContentModelType = Instance<typeof TextContentModel>;
 
-// FIXME: Replace the textContent provider with a tile level one.
+// TODO: Replace the textContent provider with a tile level one.
 export function createTextContent(snapshot?: SnapshotIn<typeof TextContentModel>) {
   return TextContentModel.create({
     ...snapshot

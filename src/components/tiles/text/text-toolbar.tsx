@@ -6,7 +6,7 @@ import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-
 import { useSettingFromStores } from "../../../hooks/use-stores";
 import { TextToolbarButton } from "./text-toolbar-button";
 import { IRegisterTileApiProps } from "../tile-component";
-import { ButtonDefComponent, getAllTextPluginInfos } from "../../../models/tiles/text/text-plugin-info";
+import { ButtonDefComponent, getAllTextPluginInfos, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 
 import { isMac } from "../../../utilities/browser";
@@ -29,9 +29,9 @@ interface IButtonDef {
 
 interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
   editor?: Editor;
+  // TODO: The next two fields could be replaced by context lookups, should they?
   textContent?: TextContentModelType,
-  // TODO: Need a type for pluginInstances
-  pluginInstances: Record<string, any>,
+  pluginInstances: Record<string, ITextPlugin>,
   valueRevision: number;
 }
 
