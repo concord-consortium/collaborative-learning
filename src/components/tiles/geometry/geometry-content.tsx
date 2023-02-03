@@ -278,7 +278,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     // respond to linked table/shared model changes
     this.disposers.push(reaction(
       () => this.getContent().updateSharedModels,
-      () => this.contentSyncLinkedPoints()
+      () => this.contentSyncGeometry()
     ));
 
     this.disposers.push(onSnapshot(this.getContent(), () => {
@@ -516,7 +516,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           if (url) {
             this.updateImageUrl(url, filename);
           }
-          this.contentSyncLinkedPoints(board);
+          this.contentSyncGeometry(board);
           this.setState({ board });
           resolve(board);
         }
@@ -595,150 +595,115 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
+  jxgIsUpToDate(){
+    let inModelButNotInJXG = [];
 
+    for (let [key, value] of this.getContent().objects) {
+      if (value.type === "point"){
+        const modelPointInJXG = this.getContent().getObject(key)?.id === key
+        console.log("all17 a point in model: ", value.id, " w/ match in JXG: ", modelPointInJXG)
+        !modelPointInJXG && inModelButNotInJXG.push(key)
+      }
 
+      if (value.type === "polygon"){
+        const modelPolygonInJXG = this.getContent().getObject(key)?.id === key
+        console.log("all17 a polygon in model: ", value.id, " w/ match in JXG: ", modelPolygonInJXG)
+        !modelPolygonInJXG && inModelButNotInJXG.push(key)
+      }
+    }
 
+    // TODO Implement something like below (have not found case when needed to)
+    // if (inModelButNotInJXG.length > 0 ){
+    //  createAndApplyChanges(inModelButNotInJXG)
+    // }
 
+    return inModelButNotInJXG.length === 0
 
+  }
 
-
-
-
-
-
-
-  contentSyncLinkedPoints(_board?: JXG.Board) {
+  contentSyncGeometry(_board?: JXG.Board) {
     const board = _board || this.state.board;
     if (!board) return;
 
-    // take inventory of the model
+    // 1
+    // check each object in MST model, verifying all points and polygons are in JXG
+    // (points and polygons are only object type in both JXG and MST)
+    // collect any unrendered to pass on to changes if needed
 
-
-    // take inventory of JXG
-
-
-    // do they match?
-
-
-    // what shared data are here and need to be rendered?
-
-
-    // render them
-
-    // points, polygons, and comments
-    const matchPoints = (obj: JXG.GeometryElement) => obj.elType === "point"
-    const matchPolygons = (obj: JXG.GeometryElement) => obj.elType === "polygon"
-    const matchAll = (obj: JXG.GeometryElement) => obj.elType !== undefined
-
-    const linkedData = this.getContent().linkedDataSets;
-    // now not sure if this represents model or not
-    // I should export and see!
-    // const modelPoints = this.getContent().findObjects(board, matchPoints)
-    const allJXGObjects = this.getContent().findObjects(board, matchAll)
-
-    //const allObjects = this.getContent().findObjects(board)
-    const allModelObjectsMap = this.getContent().objects;
-
-    for (let [key, value] of allModelObjectsMap) {
-      console.log("all15 an object in the model: ", key,  " -> ",  value.id, value.type);
+    // 2
+    // Look at linkedDataSets and create points based on underling data
+    if (this.jxgIsUpToDate()){
+      this.getContent().linkedDataSets.forEach(link => {
+        const links: ILinkProperties = { tileIds: [link.providerId] };
+        const parents: JXGCoordPair[] = [];
+        const properties: Array<{ id: string }> = [];
+        for (let ci = 0; ci < link.dataSet.cases.length; ++ci) {
+          const x = link.dataSet.attributes[0]?.numericValue(ci);
+          for (let ai = 1; ai < link.dataSet.attributes.length; ++ai) {
+            const attr = link.dataSet.attributes[ai];
+            const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
+            const y = attr.numericValue(ci);
+            if (isFinite(x) && isFinite(y)) {
+              parents.push([x, y]);
+              properties.push({ id });
+            }
+          }
+        }
+        const pts = applyChange(board, { operation: "create", target: "linkedPoint", parents, properties, links });
+        castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
+      });
     }
 
-    // You learned a lot making this function, but findObjects does it already :shrug:
-    // or wait, because I am getting it through getContent does that mean it is in the model?
-    // const initialObjectsMap = getBoardObjectMap(board);
-    //const initialExtents = getBoardDataExtents(initialObjectsMap)
 
-    //console.log("all15 compare...")
-    console.log("all15 allJXGObjects: ", allJXGObjects)
-    //console.log("all15 allModelObjects: ", allModelObjectsMap)
-    //console.log("all15 ", {initialObjectsMap})
 
-    getBoardModelDiff(board, linkedData)
-    updateBoardPoints(board, linkedData)
-    updateBoardPolygons(board, linkedData)
+    // 3 clean sweep and now we can render the polygons knowing we have 1:1
+    // NOW
+    // below works again, but refactor to use your fancy map maybe, and/or methods
+    // on model as used above, findObjects...matchPoints .... that thing
+    // then make sure you are just rendering/creating/upadating as necessary
+    // showing awareness of which points and polygons are shared
+    // then do the rescale
+    const nextSweepClean = this.jxgIsUpToDate()
+    //console.log("all17 nextSweep: ", nextSweep)
+    if (nextSweepClean){
+      const justThePoints = board.objectsList.filter((o) => o.elType === "point")
+    const sharedPointIds = getAllLinkedPoints(board)
+    const objectsMap = this.getContent().objects;
+    const allObjectsArr = Array.from(objectsMap, ([key, value]) => ({key,value}));
+
+    // If object is a polygon, extract its id and dependent point ids
+    const changes: JXGChange[] = [];
+    allObjectsArr.forEach((o) => {
+      if (o.value.type === "polygon"){
+        const ids: string[] = [];
+        const idSet = { polygonId: o.value.id, pointIds: ids };
+        (o.value as any).points.forEach((k:string) => {
+          const pointId = k;
+          idSet.pointIds.push(pointId);
+        });
+        // convert idSet to a change
+        const polygonChangeObject: JXGChange = {
+          operation: "create", // not "update" at the moment. This does not create a duplicate
+          target: "polygon",
+          targetID: idSet.polygonId,
+          parents: idSet.pointIds,
+          properties: { id: idSet.polygonId }
+        };
+        changes.push(polygonChangeObject);
+      }
+    });
+    applyChanges(board, changes);
+    }
+
+
+    // account for all points, and then rescale
+    const boardMap = getBoardObjectMap(board) // this is nice actually
+    console.log("boardMap: ", boardMap)
+    const extents = getBoardDataExtents(boardMap)
+    console.log("extents: :", extents)
+    this.rescaleBoardAndAxes(extents);
+
   }
-
-
-  // {
-  //   "id": "tqkjJ4N4ugUZnRof",
-  //   "title": "Graph 1",
-  //   "content": {
-  //     "type": "Geometry",
-  //     "board": {
-  //       "properties": {
-  //         "axisMin": [-4.186, -2.093],
-  //         "axisRange": [26.23, 17.486],
-  //         "axisNames": ["x", "y"],
-  //         "axisLabels": ["x", "y"]
-  //       }
-  //     },
-  //     "objects": [
-  //       { "type": "point", "parents": [10.700000000000001, 4.800000000000001], "properties": {"id":"xTOi4MJpMU9GKb1Q","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-  //       { "type": "point", "parents": [2.2, -1.5], "properties": {"id":"pcCqnznl525SVMFd","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-  //       { "type": "point", "parents": [1, 9], "properties": {"id":"XM3Q6AcKodunzlXt","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-  //       { "type": "point", "parents": [-2.9000000000000004, 2], "properties": {"id":"4rnaYhIyZAhOghFk","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-  //       { "type": "polygon", "parents": ["xTOi4MJpMU9GKb1Q", "pcCqnznl525SVMFd", "XM3Q6AcKodunzlXt", "4rnaYhIyZAhOghFk"],"properties": {"id":"Qi5S3Bf6kDVnQiVg"} }
-  //     ]
-  //   }
-  // }
-
-  // {
-  //   "id": "tqkjJ4N4ugUZnRof",
-  //   "title": "Graph 1",
-  //   "content": {
-  //     "type": "Geometry",
-  //     "board": {
-  //       "properties": {
-  //         "axisMin": [-4.186, -2.093],
-  //         "axisRange": [26.23, 17.486],
-  //         "axisNames": ["x", "y"],
-  //         "axisLabels": ["x", "y"]
-  //       }
-  //     },
-  //     "objects": [
-  //       { "type": "point", "parents": [10.700000000000001, 4.800000000000001], "properties": {"id":"xTOi4MJpMU9GKb1Q","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-  //       { "type": "point", "parents": [2.2, -1.5], "properties": {"id":"pcCqnznl525SVMFd","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-  //       { "type": "point", "parents": [1, 9], "properties": {"id":"XM3Q6AcKodunzlXt","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-  //       { "type": "point", "parents": [-2.9000000000000004, 2], "properties": {"id":"4rnaYhIyZAhOghFk","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-  //       { "type": "polygon", "parents": ["xTOi4MJpMU9GKb1Q", "pcCqnznl525SVMFd", "XM3Q6AcKodunzlXt", "4rnaYhIyZAhOghFk"],"properties": {"id":"Qi5S3Bf6kDVnQiVg"} }
-  //     ]
-  //   }
-  // }
-
-  // {
-  //   "id": "tqkjJ4N4ugUZnRof",
-  //   "title": "Graph 1",
-  //   "content": {
-  //     "type": "Geometry",
-  //     "board": {
-  //       "properties": {
-  //         "axisMin": [-4.186, -2.093],
-  //         "axisRange": [26.23, 17.486],
-  //         "axisNames": ["x", "y"],
-  //         "axisLabels": ["x", "y"]
-  //       }
-  //     },
-  //     "objects": [
-  //       { "type": "point", "parents": [10.700000000000001, 4.800000000000001], "properties": {"id":"xTOi4MJpMU9GKb1Q","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-  //       { "type": "point", "parents": [2.2, -1.5], "properties": {"id":"pcCqnznl525SVMFd","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-  //       { "type": "point", "parents": [1, 9], "properties": {"id":"XM3Q6AcKodunzlXt","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-  //       { "type": "point", "parents": [-2.9000000000000004, 2], "properties": {"id":"4rnaYhIyZAhOghFk","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-  //       { "type": "polygon", "parents": ["xTOi4MJpMU9GKb1Q", "pcCqnznl525SVMFd", "XM3Q6AcKodunzlXt", "4rnaYhIyZAhOghFk"],"properties": {"id":"Qi5S3Bf6kDVnQiVg"} },
-  //       { "type": "comment", "parents": [null, null], "properties": {"id":"Zsmgy-JBgrsQzCzO","text":"this is a nice angle","anchor":"pcCqnznl525SVMFd"} },
-  //       { "type": "point", "parents": [-0.06267076502732286, 18.819629439890704], "properties": {"id":"idTeGksDaf95W85U","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
-  //       { "type": "comment", "parents": [null, null], "properties": {"id":"HxdqScZwZMn42r5a","text":"where is comment stored?","anchor":"xTOi4MJpMU9GKb1Q"} },
-  //       { "type": "point", "parents": [11.69407445355191, 15.126195355191253], "properties": {"id":"6HB8I30EEPoWDc6Q","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} }
-  //     ]
-  //   }
-  // }
-
-
-
-
-
-
-
-
 
 
 

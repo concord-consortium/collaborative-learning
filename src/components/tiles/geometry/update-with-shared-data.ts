@@ -40,6 +40,7 @@ export function getBoardDataExtents(objectsMap: Map<string, ObjectMapEntry>){
   return { xMax, yMax, xMin, yMin } // can be passed to rescaleBoardAndAxes()
 }
 
+// this will still be useful, but call after you create the points and polygons that need to be created
 export function getBoardObjectMap(board: JXG.Board){
   const boardObjectMap = new Map<string, ObjectMapEntry>;
 
@@ -78,6 +79,24 @@ export function getBoardObjectMap(board: JXG.Board){
 
   return boardObjectMap
 }
+
+// export function checkJXGForModelContent(objectsMap: any){
+//   let inModelButNotInJXG = [];
+
+//   for (let [key, value] of objectsMap) {
+//     if (value.type === "point"){
+//       //console.log("all17 a point in the model: ", value.id)
+//       const modelPointInJXG = this.getContent().getObject(key)?.id === key
+//       !modelPointInJXG && inModelButNotInJXG.push(key)
+//     }
+
+//     if (value.type === "polygon"){
+//       //console.log("all17 a polygon in the model: ", value.id)
+//       const modelPolygonInJXG = this.getContent().getObject(key)?.id === key
+//       !modelPolygonInJXG && inModelButNotInJXG.push(key)
+//     }
+//   }
+// }
 
 export function updateBoardPoints(board: JXG.Board, linkedData: any /*GeometryContentSnapshotType */){
   console.log("all1: updateBoardPoints", {board}, {linkedData})
