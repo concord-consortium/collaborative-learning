@@ -136,7 +136,6 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
       }
     });
   } else {
-
     toolbarButtons = buttonDefs;
   }
 
@@ -149,14 +148,13 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
     ? ReactDOM.createPortal(
         <div className={`text-toolbar ${enabled && toolbarLocation ? "enabled" : "disabled"}`}
               style={toolbarLocation} onMouseDown={handleMouseDown}>
-          {Array.from(toolbarButtons, ([iconName, buttonDef]) => {
-            const ToolbarButton = buttonDef.component;
-            // TODO: make pluginName required for buttonDefs
-            // This would come after the refactor of the default buttons
-            const pluginInstance = buttonDef.pluginName && pluginInstances[buttonDef.pluginName];
-            return <ToolbarButton key={iconName} editor={editor}
-              pluginInstance={pluginInstance} valueRevision={valueRevision}/>;
-          })}
+          { Array.from(toolbarButtons, ([iconName, buttonDef]) => {
+              const ToolbarButton = buttonDef.component;
+              const pluginInstance = pluginInstances[buttonDef.pluginName];
+              return <ToolbarButton key={iconName} editor={editor}
+                pluginInstance={pluginInstance} valueRevision={valueRevision}/>;
+            })
+          }
         </div>, documentContent)
     : null;
 };
