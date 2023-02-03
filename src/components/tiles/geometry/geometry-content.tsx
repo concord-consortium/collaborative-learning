@@ -623,7 +623,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
         missingFromJXG.push(modelSummaryItem);
       }
     })
-    console.log("missing from jxg: ", missingFromJXG)
+    console.log("found object(s) missing from jxg? : ", missingFromJXG)
 
     //return !hasRedundancies && missingFromJXG.length === 0;
     return { hasRedundancies, missingList: missingFromJXG, missingCount: missingFromJXG.length }
@@ -637,35 +637,31 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     const report1 = this.modelJXGCleanCheck(board)
     const missingAtStart = report1.missingList;
-    console.log("z missingAtStart: ", missingAtStart)
+    console.log("missingAtStart: ", missingAtStart)
 
     // Find points through linked data and create them
-    // Checks for missing are accurate, but running this on condition of missing polygon
-    // prevents native points from rerendering on share
-    // need to look into "update" or running the native points create regardless
-    // if (missingAtStart.length > 0){
-      this.getContent().linkedDataSets.forEach(link => {
-        const links: ILinkProperties = { tileIds: [link.providerId] };
-        const parents: JXGCoordPair[] = [];
-        const properties: Array<{ id: string }> = [];
-        for (let ci = 0; ci < link.dataSet.cases.length; ++ci) {
-          const x = link.dataSet.attributes[0]?.numericValue(ci);
-          for (let ai = 1; ai < link.dataSet.attributes.length; ++ai) {
-            const attr = link.dataSet.attributes[ai];
-            const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
-            const y = attr.numericValue(ci);
-            if (isFinite(x) && isFinite(y)) {
-              parents.push([x, y]);
-              properties.push({ id });
-            }
+    // Checks for missing are accurate, but running this on condition of missing polygons
+    // at the moment prevents native points from rerendering on share
+    this.getContent().linkedDataSets.forEach(link => {
+      const links: ILinkProperties = { tileIds: [link.providerId] };
+      const parents: JXGCoordPair[] = [];
+      const properties: Array<{ id: string }> = [];
+      for (let ci = 0; ci < link.dataSet.cases.length; ++ci) {
+        const x = link.dataSet.attributes[0]?.numericValue(ci);
+        for (let ai = 1; ai < link.dataSet.attributes.length; ++ai) {
+          const attr = link.dataSet.attributes[ai];
+          const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
+          const y = attr.numericValue(ci);
+          if (isFinite(x) && isFinite(y)) {
+            parents.push([x, y]);
+            properties.push({ id });
           }
         }
-        const ptsChange = { operation: "create", target: "linkedPoint", parents, properties, links }
-        const pts = applyChange(board, ptsChange as JXGChange);
-        castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
-      });
-   // } // cancelled check
-
+      }
+      const ptsChange = { operation: "create", target: "linkedPoint", parents, properties, links }
+      const pts = applyChange(board, ptsChange as JXGChange);
+      castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
+    });
 
     const modelObjectsMap = this.getContent().objects;
     const allObjectsArr = Array.from(modelObjectsMap, ([key, value]) => ({key,value}));
@@ -697,13 +693,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const extents = getBoardDataExtents(boardMap)
     this.rescaleBoardAndAxes(extents);
 
-    // TODO - what if any of these checks do not pass?
-    const { hasRedundancies, missingCount} = this.modelJXGCleanCheck(board)
-    console.log("cleanCheck: hasRedundancies: ", hasRedundancies, "missingCount: ", missingCount)
 
     const report2 = this.modelJXGCleanCheck(board)
     const missingAtEnd = report2.missingList;
-    console.log("z missingAtEnd: ", missingAtEnd)
+    const anyRedundancies = report2.hasRedundancies;
+    console.log("missingAtEnd: ", missingAtEnd, "anyRedundancies: ", anyRedundancies)
 
   }
 
