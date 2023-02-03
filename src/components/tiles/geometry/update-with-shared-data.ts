@@ -2,119 +2,91 @@ import { GeometryContentSnapshotType } from "../../../models/tiles/geometry/geom
 import { applyChange, applyChanges } from "../../../models/tiles/geometry/jxg-dispatcher";
 import { getAllLinkedPoints, injectGetTableLinkColorsFunction } from "../../../models/tiles/geometry/jxg-table-link";
 
+interface ObjectMapEntry {
+  id: string,
+  elType: string,
+  dataSource: string,
+  x?: number | undefined,
+  y?: number | undefined
+}
+
 /**
- * Get an object of points and polygons by source
+ * some of these may return updated stuff...
  */
 
-export function getBoardModelDiff(board: JXG.Board, modelData: any){
-  console.log("all1: getBoardModelDiff")
+export function getBoardModelDiff(board: JXG.Board, linkedData: any){
+  console.log("all1: getBoardModelDiff: ",   {board}, {linkedData});
 }
 
-export function getBoardObjectIds(board: JXG.Board){
-  console.log("all1: getBoardObjectIds")
-}
+export function getBoardDataExtents(objectsMap: Map<string, ObjectMapEntry>){
+  let xMax = 1;
+  let yMax = 1;
+  let xMin = -1;
+  let yMin = -1;
 
-export function updateBoardPoints(board: JXG.Board, modelData: any /*GeometryContentSnapshotType */){
-  console.log("all1: updateBoardPoints")
-}
-
-export function updateBoardPolygons(board: JXG.Board, modelData: any /*GeometryContentSnapshotType */){
-  console.log("all1: updateBoardPolygons")
-}
-
-
-
-
-/*
-
-zyncLinkedPoints(_board?: JXG.Board) {
-  const board = _board || this.state.board;
-  if (!board) return;
-
-  // remove/recreate all linked points
-  // TODO: A more tailored response would match up the existing points with the data set and only
-  // change the affected points, which would eliminate some visual flashing that occurs when
-  // unchanged points are re-created and would allow derived polygons to be preserved.
-  // for now, derived polygons persist in model, and are now sent to JXG as changes
-  // on each load/creation so that they render
-
-  // REALIZED
-  // GOING TO PACKAGE ALL THIS IN A FUNCTION THAT IS CALLED INSTEAD OF zyncLInkedPoints
-  // it would be called from same spot, but called syncGeometryWithSharedData - which will have sub functions
-  // it will combine all the stuff
-  // I will write it in another file
-  // I looked through all this and nothing else (except few "linked" moments, are about shared)
-  // it will need applyChanges, access to model.getContent() and board
-  // search "const content" and u will find examples of bringing model in
-
-  // like this , this only has a value to delete at the moment a share happens. Even with the applyChange(delete change) below commented out.
-  const ids = getAllLinkedPoints(board);
-  console.log("theIds here: ", ids)
-  applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
-
-  // set up to track found minimums and maximums among all shared points
-  let xMin = -1
-  let xMax = 1
-  let yMin = -1
-  let yMax = 1
-
-  // create new points for each linked table
-  this.getContent().linkedDataSets.forEach(link => {
-    const links: ILinkProperties = { tileIds: [link.providerId] };
-    const parents: JXGCoordPair[] = [];
-    const properties: Array<{ id: string }> = [];
-    for (let ci = 0; ci < link.dataSet.cases.length; ++ci) {
-      const x = link.dataSet.attributes[0]?.numericValue(ci);
-      for (let ai = 1; ai < link.dataSet.attributes.length; ++ai) {
-        const attr = link.dataSet.attributes[ai];
-        const id = linkedPointId(link.dataSet.cases[ci].__id__, attr.id);
-        const y = attr.numericValue(ci);
-        if (isFinite(x) && isFinite(y)) {
-          if ( x < xMin ) xMin = x - 1
-          if ( x > xMax ) xMax = x + 1
-          if ( x < yMin ) yMin = y - 1
-          if ( x > yMax ) yMax = y + 1
-          parents.push([x, y]);
-          properties.push({ id });
-        }
-      }
+  for (let [key, value] of objectsMap){
+    const validPoint = value.elType === "point"
+    const graphable = value.dataSource === "shared" || value.dataSource === "local"
+    if (validPoint && graphable){
+      const pointX = value.x || 0
+      const pointY = value.y || 0
+      if (pointX < xMin) xMin = pointX - 1
+      if (pointX > xMax) xMax = pointX + 1
+      if (pointY < yMin) yMin = pointY - 1
+      if (pointY > yMax) yMax = pointY + 1
     }
-    const pts = applyChange(board, { operation: "create", target: "linkedPoint", parents, properties, links });
-    castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
+  }
+
+  return { xMax, yMax, xMin, yMin } // can be passed to rescaleBoardAndAxes()
+}
+
+export function getBoardObjectMap(board: JXG.Board){
+  const boardObjectMap = new Map<string, ObjectMapEntry>;
+
+  // collect info on all points
+  const points = board.objectsList.filter((o) => o.elType === "point");
+  points.forEach((point:any) => {
+    const hasSharedPointId = point.id.includes(":");
+    const hasAxisPointId = point.id.includes("jxgBoard");
+    const hasLocalCreatedId = !hasSharedPointId && !hasAxisPointId && point.id.length === 16;
+
+    let pointSource = "" // these possible values should be enumerated in a type of some kind?
+    if (hasSharedPointId) pointSource = "shared";
+    if (hasAxisPointId) pointSource = "axis";
+    if (hasLocalCreatedId) pointSource = "local";
+
+    boardObjectMap.set(point.id, {
+      id: point.id,
+      elType: "point",
+      dataSource: pointSource,
+      x: Math.round(point.coords.usrCoords[1]),
+      y: Math.round(point.coords.usrCoords[2])
+    });
   });
 
-  this.rescaleBoardAndAxes({ xMax, yMax, xMin, yMin });
-  this.syncLinkedPolygons(board);
+  const polygons = board.objectsList.filter((o) => o.elType === "polygon")
+  polygons.forEach((polygon:any) => {
+    const constituentPoints = polygon.inherits[0]
+    const isShared = constituentPoints.find((pt:any) => pt.id.includes(":"))
+
+    boardObjectMap.set(polygon.id, {
+      id: polygon.id,
+      elType: "polygon",
+      dataSource: isShared ? "shared" : "local"
+    })
+  })
+
+  return boardObjectMap
 }
 
-syncLinkedPolygons(board: JXG.Board){
-  const justThePoints = board.objectsList.filter((o) => o.elType === "point")
-  const sharedPointIds = getAllLinkedPoints(board)
-  const objectsMap = this.getContent().objects;
-  const allObjectsArr = Array.from(objectsMap, ([key, value]) => ({key,value}));
-
-  // If object is a polygon, extract its id and dependent point ids
-  const changes: JXGChange[] = [];
-  allObjectsArr.forEach((o) => {
-    if (o.value.type === "polygon"){
-      const ids: string[] = [];
-      const idSet = { polygonId: o.value.id, pointIds: ids };
-      (o.value as any).points.forEach((k:string) => {
-        const pointId = k;
-        idSet.pointIds.push(pointId);
-      });
-      // convert idSet to a change
-      const polygonChangeObject: JXGChange = {
-        operation: "create", // not "update" at the moment. This does not create a duplicate
-        target: "polygon",
-        targetID: idSet.polygonId,
-        parents: idSet.pointIds,
-        properties: { id: idSet.polygonId }
-      };
-      changes.push(polygonChangeObject);
-    }
-  });
-  applyChanges(board, changes);
+export function updateBoardPoints(board: JXG.Board, linkedData: any /*GeometryContentSnapshotType */){
+  console.log("all1: updateBoardPoints", {board}, {linkedData})
 }
 
-*/
+export function updateBoardPolygons(board: JXG.Board, linkedData: any /*GeometryContentSnapshotType */){
+  console.log("all1: updateBoardPolygons", {board}, {linkedData})
+}
+
+
+
+
