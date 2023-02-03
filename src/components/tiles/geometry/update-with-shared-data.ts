@@ -1,21 +1,15 @@
 import { GeometryContentSnapshotType } from "../../../models/tiles/geometry/geometry-content";
 import { applyChange, applyChanges } from "../../../models/tiles/geometry/jxg-dispatcher";
 import { getAllLinkedPoints, injectGetTableLinkColorsFunction } from "../../../models/tiles/geometry/jxg-table-link";
+import { JXGCoordPair, ILinkProperties } from "../../../models/tiles/geometry/jxg-changes";
+import { linkedPointId } from "../../../models/tiles/table-link-types";
 
-interface ObjectMapEntry {
+export interface ObjectMapEntry {
   id: string,
   elType: string,
   dataSource: string,
   x?: number | undefined,
   y?: number | undefined
-}
-
-/**
- * some of these may return updated stuff...
- */
-
-export function getBoardModelDiff(board: JXG.Board, linkedData: any){
-  console.log("all1: getBoardModelDiff: ",   {board}, {linkedData});
 }
 
 export function getBoardDataExtents(objectsMap: Map<string, ObjectMapEntry>){
@@ -36,15 +30,19 @@ export function getBoardDataExtents(objectsMap: Map<string, ObjectMapEntry>){
       if (pointY > yMax) yMax = pointY + 1
     }
   }
-
-  return { xMax, yMax, xMin, yMin } // can be passed to rescaleBoardAndAxes()
+  return { xMax, yMax, xMin, yMin } // matches type that can be passed to rescaleBoardAndAxes()
 }
 
-// this will still be useful, but call after you create the points and polygons that need to be created
-export function getBoardObjectMap(board: JXG.Board){
-  const boardObjectMap = new Map<string, ObjectMapEntry>;
+export function getModelObjectMap(modelContent:any){
+  const modelObjectsMap = new Map<string, ObjectMapEntry>;
+  for (let [key, value] of modelContent.data_){
+    console.log("nice value to be: ", value.value_)
+  }
+}
 
-  // collect info on all points
+export function getBoardObjectsMap(board: JXG.Board){
+  const boardObjectsMap = new Map<string, ObjectMapEntry>;
+
   const points = board.objectsList.filter((o) => o.elType === "point");
   points.forEach((point:any) => {
     const hasSharedPointId = point.id.includes(":");
@@ -56,7 +54,7 @@ export function getBoardObjectMap(board: JXG.Board){
     if (hasAxisPointId) pointSource = "axis";
     if (hasLocalCreatedId) pointSource = "local";
 
-    boardObjectMap.set(point.id, {
+    boardObjectsMap.set(point.id, {
       id: point.id,
       elType: "point",
       dataSource: pointSource,
@@ -70,39 +68,21 @@ export function getBoardObjectMap(board: JXG.Board){
     const constituentPoints = polygon.inherits[0]
     const isShared = constituentPoints.find((pt:any) => pt.id.includes(":"))
 
-    boardObjectMap.set(polygon.id, {
+    boardObjectsMap.set(polygon.id, {
       id: polygon.id,
       elType: "polygon",
       dataSource: isShared ? "shared" : "local"
     })
   })
 
-  return boardObjectMap
+  return boardObjectsMap
 }
 
-// export function checkJXGForModelContent(objectsMap: any){
-//   let inModelButNotInJXG = [];
-
-//   for (let [key, value] of objectsMap) {
-//     if (value.type === "point"){
-//       //console.log("all17 a point in the model: ", value.id)
-//       const modelPointInJXG = this.getContent().getObject(key)?.id === key
-//       !modelPointInJXG && inModelButNotInJXG.push(key)
-//     }
-
-//     if (value.type === "polygon"){
-//       //console.log("all17 a polygon in the model: ", value.id)
-//       const modelPolygonInJXG = this.getContent().getObject(key)?.id === key
-//       !modelPolygonInJXG && inModelButNotInJXG.push(key)
-//     }
-//   }
-// }
-
-export function updateBoardPoints(board: JXG.Board, linkedData: any /*GeometryContentSnapshotType */){
+export function updateBoardPoints(board: JXG.Board, linkedData: any){
   console.log("all1: updateBoardPoints", {board}, {linkedData})
 }
 
-export function updateBoardPolygons(board: JXG.Board, linkedData: any /*GeometryContentSnapshotType */){
+export function updateBoardPolygons(board: JXG.Board, linkedData: any){
   console.log("all1: updateBoardPolygons", {board}, {linkedData})
 }
 

@@ -51,7 +51,7 @@ import placeholderImage from "../../../assets/image_placeholder.png";
 import { LinkTableButton } from "./link-table-button";
 import ErrorAlert from "../../utilities/error-alert";
 import SingleStringDialog from "../../utilities/single-string-dialog";
-import { getBoardModelDiff, getBoardObjectMap, updateBoardPoints, updateBoardPolygons, getBoardDataExtents } from "./update-with-shared-data";
+import { ObjectMapEntry, getBoardObjectsMap, updateBoardPoints, updateBoardPolygons, getBoardDataExtents, getModelObjectMap } from "./update-with-shared-data";
 
 import "./geometry-tile.sass";
 
@@ -595,44 +595,56 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  jxgIsUpToDate(){
+  modelJXGIsClean(board: JXG.Board){
+    // find any points or polygons in model but not in JXG
     let inModelButNotInJXG = [];
+    let redundancies = [];
+
+    const jxgSummary = Array.from(getBoardObjectsMap(board),([key, value]) => {
+      return ({id: key, type: value.elType, })
+    })
+
+    let modelSummary: Array<any> = []
+
+    for (let [key, value] of this.getContent().objects){
+      const mo = this.getContent().getObject(key)
+      if (mo){
+        modelSummary.push({id: key, type: mo.type})
+      }
+    }
+    //const modelSummary = getModelObjectMap(this.getContent().objects)
+
+    console.log("comparison time: ... ")
+
+
+    console.log("comparison time:          ", {jxgSummary});
+    console.log("comparison time:          ", {modelSummary});
 
     for (let [key, value] of this.getContent().objects) {
       if (value.type === "point"){
-        const modelPointInJXG = this.getContent().getObject(key)?.id === key
-        console.log("all17 a point in model: ", value.id, " w/ match in JXG: ", modelPointInJXG)
-        !modelPointInJXG && inModelButNotInJXG.push(key)
+        const modelPointFoundInJXG = this.getContent().getObject(key)?.id === key
+        !modelPointFoundInJXG && inModelButNotInJXG.push(key)
       }
 
       if (value.type === "polygon"){
-        const modelPolygonInJXG = this.getContent().getObject(key)?.id === key
-        console.log("all17 a polygon in model: ", value.id, " w/ match in JXG: ", modelPolygonInJXG)
-        !modelPolygonInJXG && inModelButNotInJXG.push(key)
+        const modelPolygonFoundInJXG = this.getContent().getObject(key)?.id === key
+        !modelPolygonFoundInJXG && inModelButNotInJXG.push(key)
       }
     }
 
-    // TODO Implement something like below (have not found case when needed to)
-    // if (inModelButNotInJXG.length > 0 ){
-    //  createAndApplyChanges(inModelButNotInJXG)
-    // }
 
-    return inModelButNotInJXG.length === 0
 
+
+    return inModelButNotInJXG.length === 0 && redundancies.length === 0
   }
 
   contentSyncGeometry(_board?: JXG.Board) {
     const board = _board || this.state.board;
     if (!board) return;
 
-    // 1
-    // check each object in MST model, verifying all points and polygons are in JXG
-    // (points and polygons are only object type in both JXG and MST)
-    // collect any unrendered to pass on to changes if needed
-
-    // 2
-    // Look at linkedDataSets and create points based on underling data
-    if (this.jxgIsUpToDate()){
+    // [ 1 ] If everything in model is in JXG, and we have no redundancies
+    //       look at shared model, and bring in data from underlying dataset to create points
+    if (this.modelJXGIsClean(board)){
       this.getContent().linkedDataSets.forEach(link => {
         const links: ILinkProperties = { tileIds: [link.providerId] };
         const parents: JXGCoordPair[] = [];
@@ -649,60 +661,47 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
             }
           }
         }
-        const pts = applyChange(board, { operation: "create", target: "linkedPoint", parents, properties, links });
+        const ptsChange = { operation: "create", target: "linkedPoint", parents, properties, links }
+        const pts = applyChange(board, ptsChange as JXGChange);
         castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
       });
     }
 
+    // [ 2 ] If everything in model is in JXG, and we have no redundancies
+    //       Look at model and see if any un-rendered Polygons are here
+    //       If so, render them
+    if (this.modelJXGIsClean(board)){
+      const modelObjectsMap = this.getContent().objects;
+      const allObjectsArr = Array.from(modelObjectsMap, ([key, value]) => ({key,value}));
 
-
-    // 3 clean sweep and now we can render the polygons knowing we have 1:1
-    // NOW
-    // below works again, but refactor to use your fancy map maybe, and/or methods
-    // on model as used above, findObjects...matchPoints .... that thing
-    // then make sure you are just rendering/creating/upadating as necessary
-    // showing awareness of which points and polygons are shared
-    // then do the rescale
-    const nextSweepClean = this.jxgIsUpToDate()
-    //console.log("all17 nextSweep: ", nextSweep)
-    if (nextSweepClean){
-      const justThePoints = board.objectsList.filter((o) => o.elType === "point")
-    const sharedPointIds = getAllLinkedPoints(board)
-    const objectsMap = this.getContent().objects;
-    const allObjectsArr = Array.from(objectsMap, ([key, value]) => ({key,value}));
-
-    // If object is a polygon, extract its id and dependent point ids
-    const changes: JXGChange[] = [];
-    allObjectsArr.forEach((o) => {
-      if (o.value.type === "polygon"){
-        const ids: string[] = [];
-        const idSet = { polygonId: o.value.id, pointIds: ids };
-        (o.value as any).points.forEach((k:string) => {
-          const pointId = k;
-          idSet.pointIds.push(pointId);
-        });
-        // convert idSet to a change
-        const polygonChangeObject: JXGChange = {
-          operation: "create", // not "update" at the moment. This does not create a duplicate
-          target: "polygon",
-          targetID: idSet.polygonId,
-          parents: idSet.pointIds,
-          properties: { id: idSet.polygonId }
-        };
-        changes.push(polygonChangeObject);
-      }
-    });
-    applyChanges(board, changes);
+      // If object is a polygon, extract its id and dependent point ids
+      const changes: JXGChange[] = [];
+      allObjectsArr.forEach((o) => {
+        if (o.value.type === "polygon"){
+          const ids: string[] = [];
+          const idSet = { polygonId: o.value.id, pointIds: ids };
+          (o.value as any).points.forEach((k:string) => {
+            const pointId = k;
+            idSet.pointIds.push(pointId);
+          });
+          // FINISH TASK 1 check for shared citizen
+          const polygonChangeObject: JXGChange = {
+            operation: "create", // not "update" at the moment. This does not create a duplicate
+            target: "polygon",
+            targetID: idSet.polygonId,
+            parents: idSet.pointIds,
+            properties: { id: idSet.polygonId }
+          };
+          changes.push(polygonChangeObject);
+        }
+      });
+      applyChanges(board, changes);
     }
 
-
-    // account for all points, and then rescale
-    const boardMap = getBoardObjectMap(board) // this is nice actually
-    console.log("boardMap: ", boardMap)
+    // account for all points, shared and native, and rescale accordingly
+    const boardMap = getBoardObjectsMap(board)
     const extents = getBoardDataExtents(boardMap)
-    console.log("extents: :", extents)
     this.rescaleBoardAndAxes(extents);
-
   }
 
 
