@@ -15,6 +15,10 @@ import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
 import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
 import VariableEditorIcon from "../assets/variable-editor-icon.svg";
 
+export const kNewVariableButtonName = "new-variable";
+export const kInsertVariableButtonName = "insert-variable";
+export const kEditVariableButtonName = "edit-variable";
+
 export function insertTextVariable(variable: VariableType, editor?: Editor) {
   if (!editor) {
     console.warn("inserting variable but there is no editor");
@@ -99,7 +103,7 @@ export const NewVariableTextButton = observer(function NewVariableTextButton(
     showDialog();
   };
   return (
-    <TextToolbarButton iconName="new-variable" Icon={AddVariableChipIcon}
+    <TextToolbarButton iconName={kNewVariableButtonName} Icon={AddVariableChipIcon}
       tooltip={"New Variable"}  enabled={enabled} isSelected={isSelected}
       onClick={handleClick} />
   );
@@ -129,7 +133,7 @@ export const InsertVariableTextButton = observer(function InsertVariableTextButt
     showDialog();
   };
   return (
-    <TextToolbarButton iconName="insert-variable" Icon={InsertVariableChipIcon}
+    <TextToolbarButton iconName={kInsertVariableButtonName} Icon={InsertVariableChipIcon}
       tooltip={"Insert Variable"}  enabled={enabled} isSelected={isSelected}
       onClick={handleClick} />
   );
@@ -156,7 +160,7 @@ export const EditVariableTextButton = observer(function EditVariableTextButton(
   };
 
   return (
-    <TextToolbarButton iconName="edit-variable" Icon={VariableEditorIcon}
+    <TextToolbarButton iconName={kEditVariableButtonName} Icon={VariableEditorIcon}
       tooltip={"Edit Variable"} enabled={enabled} isSelected={isSelected}
       onClick={handleClick} />
   );
