@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { VariableType } from "@concord-consortium/diagram-view";
-import { Editor, Transforms } from "@concord-consortium/slate-editor";
+import { Editor, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
 import { observer } from "mobx-react";
 import { IButtonDefProps, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { TextToolbarButton } from "../../../components/tiles/text/text-toolbar-button";
@@ -65,6 +65,17 @@ function castToVariablesPlugin(plugin?: ITextPlugin): VariablesPlugin|undefined 
   console.warn("plugin is not a VariablesPlugin in toolbar button");
 }
 
+function handleClose(editor: Editor) {
+  // focus the editor after closing the dialog, which is what the user expects and
+  // also required for certain slate selection synchronization mechanisms to work.
+  // focusing twice shouldn't be necessary, but sometimes seems to help ¯\_(ツ)_/¯
+  Transforms.move(editor, { distance: 1, unit: "word" });
+  ReactEditor.focus(editor);
+  setTimeout(() => {
+    ReactEditor.focus(editor);
+  }, 10);
+}
+
 export const NewVariableTextButton = observer(function NewVariableTextButton(
     {editor, pluginInstance}: IButtonDefProps) {
 
@@ -80,7 +91,9 @@ export const NewVariableTextButton = observer(function NewVariableTextButton(
     addVariable(variable) {
       insertTextVariable(variable, editor);
     },
-    sharedModel, namePrefill});
+    sharedModel, namePrefill,
+    onClose: () => handleClose(editor)
+  });
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
     showDialog();
@@ -108,7 +121,9 @@ export const InsertVariableTextButton = observer(function InsertVariableTextButt
     insertVariables(variables){
       insertTextVariables(variables, editor);
     },
-    otherVariables, selfVariables, unusedVariables });
+    otherVariables, selfVariables, unusedVariables,
+    onClose: () => handleClose(editor)
+   });
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
     showDialog();
@@ -131,7 +146,10 @@ export const EditVariableTextButton = observer(function EditVariableTextButton(
   const selectedVariable = hasVariable ? findSelectedVariable(selectedElements, variables) : undefined;
   const enabled = !!selectedVariable;
 
-  const [showDialog] = useEditVariableDialog({variable: selectedVariable});
+  const [showDialog] = useEditVariableDialog({
+    variable: selectedVariable,
+    onClose: () => handleClose(editor)
+  });
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();
     showDialog();

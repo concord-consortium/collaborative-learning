@@ -1,6 +1,6 @@
-import React, { FunctionComponent, SVGProps } from "react";
+import React from "react";
 import ReactDOM from "react-dom";
-import { Editor, EFormat, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
+import { Editor, EFormat } from "@concord-consortium/slate-editor";
 
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
@@ -83,19 +83,6 @@ const handleMouseDown = (event: React.MouseEvent) => {
   event.preventDefault();
 };
 
-// FIXME: need to call this when dialogs are closed, easiest way to do that
-// I think is to move it to variables/text-buttons
-function handleClose(editor: Editor) {
-  // focus the editor after closing the dialog, which is what the user expects and
-  // also required for certain slate selection synchronization mechanisms to work.
-  // focusing twice shouldn't be necessary, but sometimes seems to help ¯\_(ツ)_/¯
-  Transforms.move(editor, { distance: 1, unit: "word" });
-  ReactEditor.focus(editor);
-  setTimeout(() => {
-    ReactEditor.focus(editor);
-  }, 10);
-}
-
 export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
   const { documentContent, editor, pluginInstances, onIsEnabled, valueRevision, ...others } = props;
   const toolbarSetting = useSettingFromStores("tools", "text") as unknown as string[];
@@ -158,4 +145,3 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
         </div>, documentContent)
     : null;
 };
-
