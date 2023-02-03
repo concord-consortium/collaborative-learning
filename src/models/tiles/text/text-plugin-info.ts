@@ -8,7 +8,7 @@ export interface ITextPlugin {
 
 export interface IButtonDefProps {
   editor: Editor;
-  pluginInstance: ITextPlugin;
+  pluginInstance?: ITextPlugin;
   valueRevision: number;
 }
 

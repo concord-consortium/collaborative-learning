@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { VariableType } from "@concord-consortium/diagram-view";
 import { Editor, Transforms } from "@concord-consortium/slate-editor";
 import { observer } from "mobx-react";
-import { IButtonDefProps } from "../../../models/tiles/text/text-plugin-info";
+import { IButtonDefProps, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { TextToolbarButton } from "../../../components/tiles/text/text-toolbar-button";
 import { TextContentModelContext } from "../../../components/tiles/text/text-content-context";
 import { useNewVariableDialog } from "../dialog/use-new-variable-dialog";
@@ -15,7 +15,7 @@ import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
 import InsertVariableChipIcon from "../assets/insert-variable-chip-icon.svg";
 import VariableEditorIcon from "../assets/variable-editor-icon.svg";
 
-export const insertTextVariable = (variable: VariableType, editor?: Editor) => {
+export function insertTextVariable(variable: VariableType, editor?: Editor) {
   if (!editor) {
     console.warn("inserting variable but there is no editor");
     return;
@@ -23,9 +23,9 @@ export const insertTextVariable = (variable: VariableType, editor?: Editor) => {
   const reference = variable.id;
   const varElt: VariableElement = { type: kVariableFormat, reference, children: [{text: "" }]};
   Transforms.insertNodes(editor, varElt);
-};
+}
 
-export const insertTextVariables = (variables: VariableType[], editor?: Editor) => {
+export function insertTextVariables(variables: VariableType[], editor?: Editor) {
   if (!editor) {
     console.warn("inserting variable but there is no editor");
     return;
@@ -33,9 +33,9 @@ export const insertTextVariables = (variables: VariableType[], editor?: Editor) 
   variables.forEach((variable) =>{
     insertTextVariable(variable, editor);
  });
-};
+}
 
-export const findSelectedVariable = (selectedElements: any, variables: VariableType[]) => {
+export function findSelectedVariable(selectedElements: any, variables: VariableType[]) {
   let selected = undefined;
     // FIXME: The editor.selectedElements claims that it returns a BaseElement[] but it really returns a NodeEntry
     // which is a list of pairs. [Node, Path]
@@ -50,25 +50,28 @@ export const findSelectedVariable = (selectedElements: any, variables: VariableT
     }
   });
   return selected;
-};
+}
 
-//   {
-//     iconName: "new-variable",
-//     Icon: AddVariableChipIcon,
-//     toolTip: "New Variable",
-//     buttonEnabled: () => true,
-//     command(editor) {
-//       // do something like useNewVariableDialog
-//     },
-//   },
+function castToVariablesPlugin(plugin?: ITextPlugin): VariablesPlugin|undefined {
+  if (!plugin) {
+    console.warn("undefined plugin in toolbar button");
+    return;
+  }
+
+  if (plugin instanceof VariablesPlugin) {
+    return plugin;
+  }
+
+  console.warn("plugin is not a VariablesPlugin in toolbar button");
+}
+
 export const NewVariableTextButton = observer(function NewVariableTextButton(
     {editor, pluginInstance}: IButtonDefProps) {
 
-  // TODO: perhaps the pluginInstance is undefined?
-  const variablesPlugin = pluginInstance as VariablesPlugin;
+  const variablesPlugin = castToVariablesPlugin(pluginInstance);
 
   const isSelected = false;
-  const sharedModel = variablesPlugin.sharedModel;
+  const sharedModel = variablesPlugin?.sharedModel;
   const enabled = !!sharedModel;
 
   const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
@@ -90,13 +93,12 @@ export const NewVariableTextButton = observer(function NewVariableTextButton(
 });
 
 export const InsertVariableTextButton = observer(function InsertVariableTextButton(
-   {editor, pluginInstance}: IButtonDefProps) {
-  // TODO: perhaps the pluginInstance is undefined?
-  const variablesPlugin = pluginInstance as VariablesPlugin;
+    {editor, pluginInstance}: IButtonDefProps) {
+  const variablesPlugin = castToVariablesPlugin(pluginInstance);
 
   const isSelected = false;
   const textContent = useContext(TextContentModelContext);
-  const sharedModel = variablesPlugin.sharedModel;
+  const sharedModel = variablesPlugin?.sharedModel;
   const enabled = !!sharedModel;
 
   const { selfVariables, otherVariables, unusedVariables } = variableBuckets(textContent, sharedModel);
@@ -120,12 +122,11 @@ export const InsertVariableTextButton = observer(function InsertVariableTextButt
 
 export const EditVariableTextButton = observer(function EditVariableTextButton(
     {editor, pluginInstance}: IButtonDefProps) {
-  // TODO: perhaps the pluginInstance is undefined?
-  const variablesPlugin = pluginInstance as VariablesPlugin;
+  const variablesPlugin = castToVariablesPlugin(pluginInstance);
 
   const isSelected = false;
   const selectedElements = editor?.selectedElements();
-  const variables = variablesPlugin.variables;
+  const variables = variablesPlugin?.variables || [];
   const hasVariable = editor?.isElementActive(kVariableFormat);
   const selectedVariable = hasVariable ? findSelectedVariable(selectedElements, variables) : undefined;
   const enabled = !!selectedVariable;

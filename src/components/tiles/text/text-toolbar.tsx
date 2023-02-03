@@ -31,7 +31,7 @@ interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
   editor?: Editor;
   // TODO: The next two fields could be replaced by context lookups, should they?
   textContent?: TextContentModelType,
-  pluginInstances: Record<string, ITextPlugin>,
+  pluginInstances: Record<string, ITextPlugin|undefined>,
   valueRevision: number;
 }
 

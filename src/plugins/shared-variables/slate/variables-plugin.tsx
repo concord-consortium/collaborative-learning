@@ -18,6 +18,7 @@ import { SharedVariables, SharedVariablesType } from "../shared-variables";
 
 const kVariableClass = "slate-variable-chip";
 export const kVariableFormat = "m2s-variable";
+export const kVariableTextPluginName = "variables";
 
 export class VariablesPlugin implements ITextPlugin{
   public textContent;
@@ -127,9 +128,7 @@ export const isVariableElement = (element: CustomElement): element is VariableEl
 
 export const VariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
   const plugins = useContext(TextPluginsContext);
-  // FIXME: need a const for the plugin name
-  // FIXME: need error handling of the plugin doesn't exist for some reason
-  const variablesPlugin = plugins.Variables as VariablesPlugin;
+  const variablesPlugin = plugins[kVariableTextPluginName] as VariablesPlugin|undefined;
   const isHighlighted = useSelected();
   const isSerializing = useSerializing();
 
@@ -139,8 +138,7 @@ export const VariableComponent = observer(function({ attributes, children, eleme
 
   const classes = classNames(kSlateVoidClass, kVariableClass);
   const selectedClass = isHighlighted && !isSerializing ? "slate-selected" : undefined;
-  const variables = variablesPlugin.variables;
-  const variable = variables.find(v => v.id === reference);
+  const variable = variablesPlugin?.variables.find(v => v.id === reference);
   // FIXME: HTML serialization/deserialization. This will serialize the VariableChip too.
   return (
     <span className={classes} {...attributes} contentEditable={false}>
