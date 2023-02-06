@@ -1,9 +1,10 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import {
-  htmlToSlate, slateToHtml, textToSlate, EditorValue, serializeValue, convertDocument, Editor
+  BaseSelection, htmlToSlate, slateToHtml, textToSlate, EditorValue, serializeValue, convertDocument, Editor
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tile-content-info";
 import { TileContentModel } from "../tile-content";
+import { withoutUndo } from "../../history/without-undo";
 import { SharedModelType } from "../../shared/shared-model";
 import { getAllTextPluginInfos } from "./text-plugin-info";
 
@@ -19,7 +20,8 @@ export const TextContentModel = TileContentModel
     type: types.optional(types.literal(kTextTileType), kTextTileType),
     text: types.optional(types.union(types.string, types.array(types.string)), ""),
     // e.g. "html", "markdown", "slate", "quill", empty => plain text
-    format: types.maybe(types.string)
+    format: types.maybe(types.string),
+    selection: types.maybe(types.string)
   })
   .volatile(self => ({
     editor:  undefined as Editor | undefined,
@@ -56,6 +58,10 @@ export const TextContentModel = TileContentModel
         console.warn('json did not parse');
       }
       return textToSlate(self.text);
+    },
+    getSelection() {
+      if (!self.selection) return {};
+      return JSON.parse(self.selection);
     }
   }))
   .views(self => ({
@@ -108,8 +114,20 @@ export const TextContentModel = TileContentModel
       const serialized = serializeValue(value);
       self.text = JSON.stringify(serialized);
     },
+    setSelection(selection?: BaseSelection) {
+      withoutUndo();
+      if (selection) {
+        self.selection = JSON.stringify(selection);
+      }
+    },
     setEditor(editor?: Editor) {
      self.editor = editor;
+    }
+  }))
+  .actions(self => ({
+    setSlateAndSelection(value: EditorValue, selection?: BaseSelection) {
+      self.setSlate(value);
+      self.setSelection(selection);
     }
   }))
   .actions(self => ({
