@@ -80,14 +80,13 @@ import "./text-tile.sass";
 
 interface IState {
   value?: EditorValue;
-  valueRevision: number;
   editing?: boolean;
 }
 
 @inject("stores")
 @observer
 export default class TextToolComponent extends BaseComponent<ITileProps, IState> {
-  public state: IState = {valueRevision: 0};
+  public state: IState = {};
   private disposers: IReactionDisposer[];
   private prevText: any;
   private textTileDiv: HTMLElement | null;
@@ -104,8 +103,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.prevText = initialTextContent.text;
     const initialValue = initialTextContent.asSlate();
     this.setState({
-      value: initialValue,
-      valueRevision: 0
+      value: initialValue
     });
     this.plugins = createTextPluginInstances(this.props.model.content as TextContentModelType);
     const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate
@@ -188,7 +186,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   public render() {
     const { documentContent, tileElt, readOnly, scale } = this.props;
-    const { value: editorValue, valueRevision } = this.state;
+    const { value: editorValue } = this.state;
     const { appConfig: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
@@ -222,11 +220,8 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
               />
               <TextToolbarComponent
                 documentContent={documentContent}
-                valueRevision={valueRevision}
                 tileElt={tileElt}
                 scale={scale}
-                editor={this.editor}
-                pluginInstances={this.plugins}
                 onIsEnabled={this.handleIsEnabled}
                 onRegisterTileApi={this.handleRegisterToolApi}
                 onUnregisterTileApi={this.handleUnregisterToolApi}
@@ -268,8 +263,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     if (content.type === "Text" && !readOnly) {
       content.setSlate(value);
       this.setState({
-        value,
-        valueRevision: this.state.valueRevision + 1
+        value
       });
     }
   };

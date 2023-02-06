@@ -1,15 +1,14 @@
-import React from "react";
+import React, { useContext } from "react";
 import ReactDOM from "react-dom";
-import { Editor, EFormat } from "@concord-consortium/slate-editor";
+import { Editor, EFormat, useSlate } from "@concord-consortium/slate-editor";
 
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 import { useSettingFromStores } from "../../../hooks/use-stores";
-import { TextToolbarButton } from "./text-toolbar-button";
 import { IRegisterTileApiProps } from "../tile-component";
-import { ButtonDefComponent, getAllTextPluginInfos, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
-import { TextContentModelType } from "../../../models/tiles/text/text-content";
-
+import { ButtonDefComponent, getAllTextPluginInfos } from "../../../models/tiles/text/text-plugin-info";
 import { isMac } from "../../../utilities/browser";
+import { TextToolbarButton } from "./text-toolbar-button";
+import { TextPluginsContext } from "./text-plugins-context";
 
 import BoldToolIcon from "../../../assets/icons/text/bold-text-icon.svg";
 import ItalicToolIcon from "../../../assets/icons/text/italic-text-icon.svg";
@@ -24,16 +23,10 @@ import "./text-toolbar.sass";
 
 interface IButtonDef {
   pluginName: string,
-  component: ButtonDefComponent
+  ButtonComponent: ButtonDefComponent
 }
 
-interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {
-  editor?: Editor;
-  // TODO: The next two fields could be replaced by context lookups, should they?
-  textContent?: TextContentModelType,
-  pluginInstances: Record<string, ITextPlugin|undefined>,
-  valueRevision: number;
-}
+interface IProps extends IFloatingToolbarProps, IRegisterTileApiProps {}
 
 const kShortcutPrefix = isMac() ? "Cmd-" : "Ctrl-";
 
@@ -51,7 +44,8 @@ function btn(
 ) {
   buttonDefs.set(iconName, {
     pluginName: "built-in",
-    component({editor}) {
+    ButtonComponent() {
+      const editor = useSlate();
       const isSelected = editor.isMarkActive(slateType) || editor.isElementActive(slateType);
       const handleClick = (event: React.MouseEvent) => {
         event.preventDefault();
@@ -84,7 +78,9 @@ const handleMouseDown = (event: React.MouseEvent) => {
 };
 
 export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
-  const { documentContent, editor, pluginInstances, onIsEnabled, valueRevision, ...others } = props;
+  const { documentContent, onIsEnabled, ...others } = props;
+  const editor = useSlate();
+  const pluginInstances = useContext(TextPluginsContext);
   const toolbarSetting = useSettingFromStores("tools", "text") as unknown as string[];
   const enabled = onIsEnabled();
 
@@ -99,7 +95,7 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
       // only add this plugin button def if there isn't one there already
       // buttonDefs is a global so every toolbar component will share this
       if (!buttonDefs.has(iconName)) {
-        buttonDefs.set(iconName, {pluginName: plugin.pluginName, component: pluginButtonDefComponent});
+        buttonDefs.set(iconName, {pluginName: plugin.pluginName, ButtonComponent: pluginButtonDefComponent});
       }
     }
   });
@@ -136,10 +132,9 @@ export const TextToolbarComponent: React.FC<IProps> = (props: IProps) => {
         <div className={`text-toolbar ${enabled && toolbarLocation ? "enabled" : "disabled"}`}
               style={toolbarLocation} onMouseDown={handleMouseDown}>
           { Array.from(toolbarButtons, ([iconName, buttonDef]) => {
-              const ToolbarButton = buttonDef.component;
+              const ToolbarButton = buttonDef.ButtonComponent;
               const pluginInstance = pluginInstances[buttonDef.pluginName];
-              return <ToolbarButton key={iconName} editor={editor}
-                pluginInstance={pluginInstance} valueRevision={valueRevision}/>;
+              return <ToolbarButton key={iconName} pluginInstance={pluginInstance} />;
             })
           }
         </div>, documentContent)
