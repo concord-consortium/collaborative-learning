@@ -4,7 +4,7 @@ These plugins are added by calling `registerTextPluginInfo`. The one example so 
 
 A text tile plugin has to provide the following info:
 - `pluginName`: this is used to identify the plugin. It should be unique among all plugins added to the text tile. It is not serialized.
-- `createSlatePlugin`: this is a function called with a parameter of the text content model. The function is called when the text tile is mounted. The function should return a plugin instance. This plugin instance needs to have an `onInitEditor(editor: Editor)` function which should return a the slate editor wrapped with the plugin. The plugin instance will also be available any button components the plugin adds
+- `createSlatePlugin`: this is a function called with a parameter of the text content model. The function is called when the text tile is mounted. The function should return a plugin instance. This plugin instance needs to have an `onInitEditor(editor: Editor)` function which should return its `editor` argument wrapped with the plugin. The plugin instance will also be available to any button components the plugin adds.
 - `buttonDefs` a map of button ids to button components. These button ids need to be added to the CLUE configuration for the unit so the button shows up on the toolbar.
 - `updateTextContentAfterSharedModelChanges`: this is an optional function. If provided, it will be called by the text content model when any of the shared models linked with the text content model changes.  The text content model will not create these links itself. It is the job of the plugin to link these shared models. In the variables text plugin, this link is created if it doesn't exist when the plugin instance is created.
 

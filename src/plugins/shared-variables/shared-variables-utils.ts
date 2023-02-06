@@ -23,7 +23,7 @@ const getTileVariables = (content: ITileContentModel) => {
     // the text tile's plugin.
     const textContent = content as TextContentModelType;
     const textPlugin = new VariablesPlugin(textContent);
-    // FIXME: The intention here is to return unique variables used by the.
+    // FIXME: The intention here is to return unique variables used by the plugin.
     // Currently this will return a variable object for each chip in the text
     // tile and there might be multiple chips per variable
     return textPlugin.chipVariables;

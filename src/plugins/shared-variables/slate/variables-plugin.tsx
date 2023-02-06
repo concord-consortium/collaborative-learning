@@ -20,7 +20,7 @@ const kVariableClass = "slate-variable-chip";
 export const kVariableFormat = "m2s-variable";
 export const kVariableTextPluginName = "variables";
 
-export class VariablesPlugin implements ITextPlugin{
+export class VariablesPlugin implements ITextPlugin {
   public textContent;
   private disposeSharedModelManagerAutorun: IReactionDisposer|undefined;
 
@@ -50,7 +50,7 @@ export class VariablesPlugin implements ITextPlugin{
   }
 
   get variables() {
-    return this.sharedModel ? this.sharedModel.variables : [];
+    return this.sharedModel?.variables || [];
   }
 
   /**
@@ -58,7 +58,7 @@ export class VariablesPlugin implements ITextPlugin{
    */
   addTileSharedModelWhenReady() {
     this.disposeSharedModelManagerAutorun = autorun(() => {
-      // Make sure there is a sharedModelManage and it is ready
+      // Make sure there is a sharedModelManager and it is ready
       // TODO this is duplicate code from `get sharedModel`
       const sharedModelManager = this.textContent.tileEnv?.sharedModelManager;
       if (!sharedModelManager || !sharedModelManager.isReady) {
@@ -110,7 +110,7 @@ export class VariablesPlugin implements ITextPlugin{
     const variableIds: string[] = [];
     if (editor) {
       for (const [node] of Editor.nodes(editor, {at: [], mode: 'all'})) {
-        if (Editor.isInline(editor, node) && isVariableElement(node)) {
+        if (isVariableElement(node)) {
           variableIds.push(node.reference);
         }
       }

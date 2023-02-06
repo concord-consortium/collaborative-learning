@@ -116,7 +116,7 @@ describe("VariablesPlugin", () => {
       libDebug.DEBUG_SHARED_MODELS = false;
     });
 
-    it("does not logs if there is no shared model with DEBUG_SHARED_MODELS", async () => {
+    it("does not log if there is no shared model with DEBUG_SHARED_MODELS", async () => {
       const textContent = TextContentModel.create({});
 
       // This adds the manager without a shared model
