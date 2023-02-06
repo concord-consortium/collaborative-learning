@@ -74,7 +74,7 @@ export class VariablesPlugin implements ITextPlugin {
         return;
       }
 
-      // We don't have a shared model, see if the there a SharedVariables model
+      // Our text tile doesn't have a shared model, see if the document has one
       const containerSharedModel = sharedModelManager.findFirstSharedModelByType(SharedVariables);
       if (!containerSharedModel) {
         if (DEBUG_SHARED_MODELS) {
