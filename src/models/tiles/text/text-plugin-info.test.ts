@@ -1,21 +1,17 @@
-import { getAllTextPluginInfos, getTextPluginIds, getTextPluginInfo, 
-  getTextPluginInstances, registerTextPluginInfo } from "./text-plugin-info";
+import { getAllTextPluginInfos, getTextPluginIds, getTextPluginInfo,
+  createTextPluginInstances, registerTextPluginInfo } from "./text-plugin-info";
 
 const testTextPluginInstance = {from: "testTextPluginInfo"} as any;
 const testTextPluginInfo = {
-  iconName: "test",
-  Icon: () => null,
-  toolTip: "",
+  pluginName: "test",
   createSlatePlugin: jest.fn(() => testTextPluginInstance),
-  modalHook: jest.fn()
+  buttonDefs: {}
 };
 const testTextPluginWithUpdateInstance = {from: "testTextPluginInfoWithUpdate"}  as any;
 const testTextPluginInfoWithUpdate = {
-  iconName: "testWithUpdate",
-  Icon: () => null,
-  toolTip: "",
+  pluginName: "testWithUpdate",
   createSlatePlugin: jest.fn(() => testTextPluginWithUpdateInstance),
-  modalHook: jest.fn(),
+  buttonDefs: {},
   updateTextContentAfterSharedModelChanges: jest.fn()
 };
 
@@ -31,12 +27,12 @@ describe("TextPluginInfo", () => {
 
   test("getTextPluginInstances", () => {
     const textContent: any = {foo: "bar"};
-    const pluginInstances = getTextPluginInstances(textContent);
+    const pluginInstances = createTextPluginInstances(textContent);
     expect(testTextPluginInfo.createSlatePlugin).toBeCalledWith(textContent);
     expect(testTextPluginInfoWithUpdate.createSlatePlugin).toBeCalledWith(textContent);
-    expect(pluginInstances).toHaveLength(2);
-    expect(pluginInstances).toContain(testTextPluginInstance);
-    expect(pluginInstances).toContain(testTextPluginWithUpdateInstance);
+    expect(Object.entries(pluginInstances)).toHaveLength(2);
+    expect(pluginInstances.test).toBe(testTextPluginInstance);
+    expect(pluginInstances.testWithUpdate).toBe(testTextPluginWithUpdateInstance);
   });
 
   test("getTextPluginIds", () => {

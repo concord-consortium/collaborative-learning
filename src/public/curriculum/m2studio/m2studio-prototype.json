@@ -27,7 +27,7 @@
         "numFormat": ".2~f"
       },
       "text": {
-        "tools": ["bold", "subscript", "superscript", "m2s-variables", "new-variable", "insert-variable", "edit-variable"]
+        "tools": ["bold", "subscript", "superscript", "new-variable", "insert-variable", "edit-variable"]
       }
     },
     "defaultStamps": [],

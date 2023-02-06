@@ -2,9 +2,9 @@ import React from "react";
 import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
-  createEditor, Editor, EditorValue, EFormat, ReactEditor, Slate, SlateEditor
+  createEditor, Editor, EditorValue, ReactEditor, Slate, SlateEditor
 } from "@concord-consortium/slate-editor";
-import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
+import { TextContentModelContext } from "./text-content-context";
 import { BaseComponent } from "../../base";
 import { debouncedSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
@@ -13,8 +13,9 @@ import { hasSelectionModifier } from "../../../utilities/event-utils";
 import { TextToolbarComponent } from "./text-toolbar";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
-import { getTextPluginInstances, getTextPluginIds } from "../../../models/tiles/text/text-plugin-info";
+import { createTextPluginInstances, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { LogEventName } from "../../../lib/logger-types";
+import { TextPluginsContext } from "./text-plugins-context";
 
 import "./text-tile.sass";
 
@@ -79,52 +80,42 @@ import "./text-tile.sass";
 
 interface IState {
   value?: EditorValue;
-  selectedButtons?: string[];
+  valueRevision: number;
   editing?: boolean;
 }
 
 @inject("stores")
 @observer
 export default class TextToolComponent extends BaseComponent<ITileProps, IState> {
-  public state: IState = {};
+  public state: IState = {valueRevision: 0};
   private disposers: IReactionDisposer[];
   private prevText: any;
   private textTileDiv: HTMLElement | null;
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarTileApi: ITileApi | undefined;
-  private plugins: any[] | undefined; // FIXME
   private textOnFocus: string | string [] | undefined;
 
-  // map from slate type string to button icon name
-  private slateToButtonType: Partial<Record<EFormat, string>> =  {
-    [EFormat.bold]: "bold",
-    [EFormat.italic]: "italic",
-    [EFormat.underlined]: "underline",
-    [EFormat.superscript]: "superscript",
-    [EFormat.subscript]: "subscript",
-    [EFormat.bulletedList]: "list-ul",
-    [EFormat.numberedList]: "list-ol",
-    //include the plugin ids here
-    ...getTextPluginIds().reduce((idMap, id) => ({...idMap, [id]: id}), {})
-  };
+  // plugins are exposed to making testing easier
+  plugins: Record<string, ITextPlugin|undefined>;
 
   public componentDidMount() {
     const initialTextContent = this.getContent();
     this.prevText = initialTextContent.text;
     const initialValue = initialTextContent.asSlate();
     this.setState({
-      value: initialValue
+      value: initialValue,
+      valueRevision: 0
     });
-    this.plugins = getTextPluginInstances(this.props.model.content as TextContentModelType);
+    this.plugins = createTextPluginInstances(this.props.model.content as TextContentModelType);
     const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate
     // Gather all the plugin init functions and pass that to slate.
     const onInitEditor = (e: Editor) => {
-       this.plugins?.forEach(plugin => {
-          if (plugin.onInitEditor) {
-            e = plugin.onInitEditor(e);
-          }
-       });
+      Object.values(this.plugins).forEach(plugin => {
+        if (plugin?.onInitEditor) {
+          e = plugin.onInitEditor(e);
+        }
+      });
       return e;
     };
     options.onInitEditor = onInitEditor;
@@ -190,11 +181,14 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   public componentWillUnmount() {
     this.disposers.forEach(disposer => disposer());
+    for (const plugin of Object.values(this.plugins)) {
+      plugin?.dispose?.();
+    }
   }
 
   public render() {
     const { documentContent, tileElt, readOnly, scale } = this.props;
-    const { value: editorValue, selectedButtons } = this.state;
+    const { value: editorValue, valueRevision } = this.state;
     const { appConfig: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
@@ -207,36 +201,39 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       // Ideally, this would just be 'text-tool' for consistency with other tools,
       // but 'text-tool` is used for the internal editor (cf. 'classes' above),
       // which is used for cypress tests and other purposes.
-      // FIXME: replace this provider with one at the tile level so we get it for free.
+      // TODO: replace this provider with one at the tile level so we get it for free.
       // and then replace the drawing one with that as well
       <TextContentModelContext.Provider value={this.getContent()} >
-        <div className={`text-tool-wrapper ${readOnly ? "" : "editable"}`}
-          data-testid="text-tool-wrapper"
-          ref={elt => this.textTileDiv = elt}
-          onMouseDown={this.handleMouseDownInWrapper}>
-          <Slate
-              editor={this.editor as ReactEditor}
-              value={editorValue}
-              onChange={this.handleChange as any}> {/* FIXME: type */}
-            <SlateEditor
-              placeholder={placeholderText}
-              readOnly={readOnly}
-              onFocus={this.handleFocus}
-              onBlur={this.handleBlur}
-              className={`ccrte-editor slate-editor ${classes || ""}`}
-            />
-            <TextToolbarComponent
-              documentContent={documentContent}
-              tileElt={tileElt}
-              scale={scale}
-              selectedButtons={selectedButtons || []}
-              editor={this.editor}
-              onIsEnabled={this.handleIsEnabled}
-              onRegisterTileApi={this.handleRegisterToolApi}
-              onUnregisterTileApi={this.handleUnregisterToolApi}
-            />
-          </Slate>
-        </div>
+        <TextPluginsContext.Provider value={this.plugins} >
+          <div className={`text-tool-wrapper ${readOnly ? "" : "editable"}`}
+            data-testid="text-tool-wrapper"
+            ref={elt => this.textTileDiv = elt}
+            onMouseDown={this.handleMouseDownInWrapper}>
+            <Slate
+                editor={this.editor as ReactEditor}
+                value={editorValue}
+                onChange={this.handleChange}>
+              <SlateEditor
+                placeholder={placeholderText}
+                readOnly={readOnly}
+                onFocus={this.handleFocus}
+                onBlur={this.handleBlur}
+                className={`ccrte-editor slate-editor ${classes || ""}`}
+              />
+              <TextToolbarComponent
+                documentContent={documentContent}
+                valueRevision={valueRevision}
+                tileElt={tileElt}
+                scale={scale}
+                editor={this.editor}
+                pluginInstances={this.plugins}
+                onIsEnabled={this.handleIsEnabled}
+                onRegisterTileApi={this.handleRegisterToolApi}
+                onUnregisterTileApi={this.handleUnregisterToolApi}
+              />
+            </Slate>
+          </div>
+        </TextPluginsContext.Provider>
       </TextContentModelContext.Provider>
     );
   }
@@ -272,23 +269,10 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       content.setSlate(value);
       this.setState({
         value,
-        selectedButtons: this.getSelectedIcons(value).sort()
+        valueRevision: this.state.valueRevision + 1
       });
     }
   };
-
-  private getSelectedIcons(value: EditorValue): string[] {
-    const buttonList: string[] = ["undo"];  // Always show "undo" as selected.
-    for (const key in this.slateToButtonType) {
-      if (this.editor?.isMarkActive(key) || this.editor?.isElementActive(key)) {
-        const buttonType = this.slateToButtonType[key as EFormat];
-        if (buttonType) {
-          buttonList.push(buttonType);
-        }
-      }
-    }
-    return buttonList;
-  }
 
   private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
     const { ui } = this.stores;
