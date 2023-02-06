@@ -866,9 +866,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "* Is Daphne's claim correct? Is it possible to use the magazine and the picture to estimate the teacher's height? Explain."
+                        "<ul><li> Is Daphne's claim correct? Is it possible to use the magazine and the picture to estimate the teacher's height? Explain.</li></ul>"
                       ]
                     }
                   },
@@ -887,9 +887,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "* Could you find the height of the teacher if you did not know that the magazine was 10 inches tall? Explain."
+                        "<ul><li> Could you find the height of the teacher if you did not know that the magazine was 10 inches tall? Explain.</li></ul>"
                       ]
                     }
                   },
@@ -917,12 +917,12 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "**Situation A. Daphne’s Reasoning**",
+                        "<strong>Situation A. Daphne’s Reasoning</strong>",
                         "Daphne’s Reasoning",
-                        "I used ratios to find the height of the teacher. For every inch measured of the PI magazine, there are 10 inches in real life. I used the PI magazine height to measure the height of the teacher.",
-                        "How could ratios help her find the height of the teachers? "
+                        "<p>I used ratios to find the height of the teacher. For every inch measured of the PI magazine, there are 10 inches in real life. I used the PI magazine height to measure the height of the teacher.",
+                        "How could ratios help her find the height of the teachers? </p>"
                       ]
                     }
                   },
@@ -974,11 +974,10 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "Answers will vary. Possible answers:",
-                        "* You might want to use a photograph to estimate the size of a large item you plan to buy, such as a large bookshelf. Estimating its size can help you determine whether or not it will fit in its designated spot.  ",
-                        "* You could also take a close-up shot of something small, like an insect, next to an object with a standard size, like a penny. Then you can compare the features of the insect, such as its size, to pictures in a reference book. "
+                        "<ul><li> You might want to use a photograph to estimate the size of a large item you plan to buy, such as a large bookshelf. Estimating its size can help you determine whether or not it will fit in its designated spot. </li><li> You could also take a close-up shot of something small, like an insect, next to an object with a standard size, like a penny. Then you can compare the features of the insect, such as its size, to pictures in a reference book. </li></ul>"
                       ]
                     }
                   }
@@ -1211,16 +1210,12 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "In Problem 1.1 A, Daphne used ratio relationships to solve the mystery. She reasoned:",
-                        "> _For every inch measured on the PI magazine, there are 10 inches of the PI magazine in real life. I used the PI magazine height to measure the height of the teacher. The teacher is 7 PI magazines tall. So, in real life the teacher is 7 x 10 inches or 70 inches tall._",
+                        "<p><em>For every inch measured on the PI magazine, there are 10 inches of the PI magazine in real life. I used the PI magazine height to measure the height of the teacher. The teacher is 7 PI magazines tall. So, in real life the teacher is 7 x 10 inches or 70 inches tall.</em></p>",
                         "Daphne’s reasoning is similar to the reasoning you have done in the _Comparing Quantities_ unit where you used ratios to describe and compare quantities. Recall that a **ratio** is a comparison of two quantities which have a multiplicative relationship, such as two lengths.",
-                        "* 1 PI magazine height to the height of the teacher (7 PI magazines)",
-                        "**or**",
-                        "* 1 PI magazine: 7 PI magazines",
-                        "**or**",
-                        "* 10 in: 70 in",
+                        "<ul><li>1 PI magazine height to the height of the teacher (7 PI magazines) </li><li> **or**  </li><li> 1 PI magazine: 7 PI magazines </li><li> **or** </li><li> 10 in: 70 in </li></ul>",
                         "Using ratio relationships to solve problems is also called proportional reasoning."
                       ]
                     }
@@ -1236,7 +1231,7 @@
                    {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "Michelle, Daphne, and Mukesh are officers of the Mystery Club. Mukesh designs a flier to attract new members.",
                         "Daphne is making a large poster to publicize the next meeting. She wants to redraw the club’s logo, “Super Sleuth,” in a larger size. Michelle shows her a clever way to enlarge the figure by using rubber bands."
@@ -1254,26 +1249,20 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "## Equipment",
-                        "* Rubber bands – identical size, bands about 3 inches long work well",
-                        "* Learning Aid – with a shape to enlarge and anchor point",
-                        "* Blank paper",
-                        "* Tape"
+                        "<strong>Equipment</strong>",
+                        "<ul><li> Rubber bands – identical size, bands about 3 inches long work well</li><li> Learning Aid – with a shape to enlarge and anchor point</li><li> Blank paper</li><li> Tape </li></ul>"
                       ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "Instructions for Stretching a Figure",
-                        "* Make a “two-band stretcher” by tying the ends of the rubber bands together.",
-                        "* Tape the Learning Aid to your desk. Next to it, tape a blank sheet of paper. ",
-                        "If you are right-handed, put the blank paper on the right.",
-                        " If you are left-handed, put the blank paper on the left. "
+                        "<ul><li> Make a “two-band stretcher” by tying the ends of the rubber bands together.</li><li> Tape the Learning Aid to your desk. Next to it, tape a blank sheet of paper. </li><li> If you are right-handed, put the blank paper on the right.</li><li> If you are left-handed, put the blank paper on the left.</li></ul> "
                       ]
                     }
                   },
@@ -1288,21 +1277,19 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "Instructions for Stretching a Figure",
-                        "* With your finger, hold down one end of the rubber-band stretcher on point P. Point P is called the anchor point.",
-                        "* Put a pencil in the other hand of the stretcher. Stretch the rubber bands with the pencil until the knot is on the outline of the shape.",
-                        "* Keep the rubber bands taut (stretched). Move your pencil to guide the knot around the picture. Your pencil will draw a copy of the shape. The new picture is called the image of the original. It is also a scale drawing of the original."
+                        "<ul><li> With your finger, hold down one end of the rubber-band stretcher on point P. Point P is called the anchor point.</li><li> Put a pencil in the other hand of the stretcher. Stretch the rubber bands with the pencil until the knot is on the outline of the shape.</li><li>  Keep the rubber bands taut (stretched). Move your pencil to guide the knot around the picture. Your pencil will draw a copy of the shape. The new picture is called the image of the original. It is also a scale drawing of the original.</li></ul>"
                       ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "* Use the rubber-band method to enlarge the figure on the Mystery Club flier. Draw the figure as carefully as you can, so you can compare the size and shape of the image to the size and shape of the original figure."
+                        "<ul><li> Use the rubber-band method to enlarge the figure on the Mystery Club flier. Draw the figure as carefully as you can, so you can compare the size and shape of the image to the size and shape of the original figure.</li></ul>"
                       ]
                     }
                   },
@@ -1321,9 +1308,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "* How are the original figure and its image alike? Different? What is your evidence?"
+                        "<ul><li> How are the original figure and its image alike? Different? What is your evidence?</li></ul>"
                       ]
                     }
                   },
@@ -1361,17 +1348,15 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "### Situation A. Making Comparisons",
+                        "<p><strong>Situation A. Making Comparisons</strong></p>",
                         "Ms. Marvel’s class made several comparison statements about the original figure and the image.",
                         "Merve’s Comparison: The lengths of the sides of the image are twice the lengths of the original.",
                         "Ashley’s Comparison: The distance from a point on the original figure to anchor point P is equal to the distance from the image of the point to P.  ",
                         "Eli’s Comparison: The measure of an angle in the original figure has the same measure as the image of the angle.",
                         "Soro’s Comparison: The area of the hat of the original figure is about ¼ the area of the hat of image.",
-                        "* Which of these statements are true? Explain your reasoning.",
-                        "* Which of these statements represent ratios? Write these as ratio statements.",
-                        "* Use your rubber band stretcher to enlarge another figure, such as a circle or square. Which of the comparisons are true for the original figure and its image?"
+                        "<ul><li>Which of these statements are true? Explain your reasoning.</li><li> Which of these statements represent ratios? Write these as ratio statements.</li><li> Use your rubber band stretcher to enlarge another figure, such as a circle or square. Which of the comparisons are true for the original figure and its image?</li></ul>"
                       ]
                     }
                   },
@@ -1379,10 +1364,9 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "* Any of these are ratios, see examples below:",
-                        "* The same comparisons would be true for the original figure and its image."
+                        "<ul><li>Any of these are ratios, see examples below:</li><li> The same comparisons would be true for the original figure and its image.</li></ul>"
                       ]
                     }
                   },
@@ -1498,13 +1482,13 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "### Situation B. Changing the Anchor Point and Number of Bands",
+                        "<p><strong>Situation B. Changing the Anchor Point and Number of Bands</strong></p>",
                         "Several students had questions about the anchor point and the number of rubber bands. What is your response to each question?",
-                        "DaShawn’s Question: What if we change the position of the anchor point? How does this affect the image?",
-                        "Sunyoung’s Question: What if we use three rubber bands? We would still trace the figure using the knot closest to the anchor point. How will this affect the image?  ",
-                        "Amy’s Question: The rubber bands seem to be acting like multipliers. Since there is a multiplying effect, we can use ratios. How can I use ratio language to describe what happens to corresponding side lengths?"
+                        "<p>DaShawn’s Question: What if we change the position of the anchor point? How does this affect the image?</p>",
+                        "<p>Sunyoung’s Question: What if we use three rubber bands? We would still trace the figure using the knot closest to the anchor point. How will this affect the image?  </p>",
+                        "<p>Amy’s Question: The rubber bands seem to be acting like multipliers. Since there is a multiplying effect, we can use ratios. How can I use ratio language to describe what happens to corresponding side lengths?</p>"
                       ]
                     }
                   },
@@ -1974,9 +1958,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "* What percent size multiplier did Daphne use to create Copy 1 and Copy 2? Explain your reasoning."
+                        "<ul><li>What percent size multiplier did Daphne use to create Copy 1 and Copy 2? Explain your reasoning.</li></ul>"
                       ]
                     }
                   },
@@ -2022,9 +2006,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "* How are the copies like the original? How are they different?"
+                        "<ul><li> How are the copies like the original? How are they different?</li></ul>"
                       ]
                     }
                   },
@@ -2326,19 +2310,18 @@
                     {
                       "content": {
                         "type": "Text",
-                        "format": "markdown",
+                        "format": "html",
                         "text": [
-                          "The Computer Club at P.I. Middle School also meets monthly. Zack and Marta suggested that the club design a computer game that involves several animated characters. They ask Marta’s uncle Carlos, a programmer for a video game company, about computer animation.",
-                          "Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, we need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions.",
-                          "Sometimes the figures in a computer game need to change size. A change in the programming code can make a figure larger or smaller. We can code a rule for finding key points from the original figure. In this Investigation, we will explore answers to these questions.",
-                          "Do the rules create scale drawings? That is, are the two figures similar?",
+                          "<p>The Computer Club at P.I. Middle School also meets monthly. Zack and Marta suggested that the club design a computer game that involves several animated characters. They ask Marta’s uncle Carlos, a programmer for a video game company, about computer animation.</p>",
+                          "<p>Carlos explains that the computer screen can be thought of as a grid made up of thousands of tiny points, called pixels. To animate a figure, we need to enter the coordinates of key points on the figure. The computer uses these points to draw the figure in different positions.</p>",
+                          "<p>Sometimes the figures in a computer game need to change size. A change in the programming code can make a figure larger or smaller. We can code a rule for finding key points from the original figure. In this Investigation, we will explore answers to these questions.</p>",
+                          "<p>Do the rules create scale drawings? That is, are the two figures similar?</p>",
                           "The following problems will help us answer these questions"
                         ]
                       }
                     }
                 ]
-              },
-              "supports": [ ]
+              }
             },
             {
               "type": "initialChallenge",
@@ -2357,24 +2340,21 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "### The Mug Experiment",
+                        "<h2>The Mug Experiment</h2>",
                         "Equipment",
-                        "* Table of Coordinates for the Wump Game Characters",
-                        "* First Quadrant Grids to plot the Wump Characters/Digital graph"
+                        "<ul><li> Table of Coordinates for the Wump Game Characters</li><li> First Quadrant Grids to plot the Wump Characters/Digital graph</li></ul>"
                       ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "### Instructions for Plotting the Wumps",
-                        "* Plot Mug – Use the coordinate pairs in the “Mug Wump” column to draw Mug on grid paper. For Parts 1-3 of the figure, plot the points in order. Connect them as you go along. For Part 4, plot the two points, but do not connect them.",
-                        "* Find Coordinates for the other Wump characters – Use the given rules to find the new coordinates for each shape. Record the coordinates in the columns Zug, Lug, Bug, and Glug. For example, the rule for Zug is (2x, 2y). This means that you multiply each of Mug’s coordinates by 2. Point A on Mug is (0, 1), so the corresponding point A on Zug is (0, 2). Point B on Mug is (2, 1), so the corresponding point B on Zug is (4, 2).",
-                        "* Plot the other Wump characters – Plot and connect the points from A to X for each Wump character, just as you did for Mug. Put each shape on separate axes."
+                        "<p><strong>Instructions for Plotting the Wumps</strong></p>",
+                        "<ul><li> Plot Mug – Use the coordinate pairs in the “Mug Wump” column to draw Mug on grid paper. For Parts 1-3 of the figure, plot the points in order. Connect them as you go along. For Part 4, plot the two points, but do not connect them. </li><li> Find Coordinates for the other Wump characters – Use the given rules to find the new coordinates for each shape. Record the coordinates in the columns Zug, Lug, Bug, and Glug. For example, the rule for Zug is (2x, 2y). This means that you multiply each of Mug’s coordinates by 2. Point A on Mug is (0, 1), so the corresponding point A on Zug is (0, 2). Point B on Mug is (2, 1), so the corresponding point B on Zug is (4, 2).</li><li> Plot the other Wump characters – Plot and connect the points from A to X for each Wump character, just as you did for Mug. Put each shape on separate axes.</li></ul>"
                       ]
                     }
                   },
@@ -2716,9 +2696,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "* Look at the figures created by Marta’s rules. Which family members are similar to Mug? Which figures appear not to be similar, and thus “imposters”? How do you know?"
+                        "<ul><li> Look at the figures created by Marta’s rules. Which family members are similar to Mug? Which figures appear not to be similar, and thus “imposters”? How do you know? </li></ul>"
                       ]
                     }
                   },
@@ -2891,13 +2871,12 @@
                     "content":
                     {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "Students should discuss enlarging geometric figures using coordinate grids and rules that produce both similar and non-similar figures. ",
+                        "<p>Students should discuss enlarging geometric figures using coordinate grids and rules that produce both similar and non-similar figures. </p>",
                         "If the coordinates for the original figure is (x, y), then the coordinates for the similar image is (kx, ky), which means that each x-coordinate and y- coordinate for the similar image is multiplied by the same number k to the original coordinates. ",
                         "Also, students should expand understanding which attributes change and which stay the same: ",
-                        "* corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.",
-                        "* corresponding side lengths from the original shape to the similar figure increase by the multiplier used to create a new rule. "
+                        "<ul><li>corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.</li><li> corresponding side lengths from the original shape to the similar figure increase by the multiplier used to create a new rule.</li></ul> "
                       ]
                     }
                   },
@@ -3184,9 +3163,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "* Look at each rule and predict what will happen to the hat with each rule."
+                        "<ul><li> Look at each rule and predict what will happen to the hat with each rule.</li></ul>"
                       ]
                     }
                   },
@@ -3194,7 +3173,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "Students’ predictions will vary. At this time, many students may not have connected the stretching and shrinking to a multiplicative relationship. They may predict that adding will make a shape enlarge and subtracting will make a shape shrink. If so, students may predict that Hat 1 and Hat 5 will look the same."
                       ]
@@ -3203,9 +3182,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "* Test each rule. How does your result compare with your prediction? "
+                        "<ul><li> Test each rule. How does your result compare with your prediction? </li></ul>"
                       ]
                     }
                   },
@@ -3213,7 +3192,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "Answers will vary. Predictions may or may not have matched what happened to the shapes.",
                         "* Hat 1 will move 2 units to the right and 3 units up without changing its size or shape. (congruent and similar)",
@@ -3442,12 +3421,12 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "### Situation A. Writing New Hat Rules",
+                        "<p><strong>Situation A. Writing New Hat Rules</strong></p>",
                         "Several members of the computer club wrote different design criteria that would produce hats similar to the original Mug hat. ",
-                        "What rule would you write for each design?",
-                        "**Syrah’s Design:** The side lengths are one third as long as Mug’s hat?"
+                        "<p>What rule would you write for each design?</p>",
+                        "<strong>Syrah’s Design:</strong> The side lengths are one third as long as Mug’s hat?"
                       ]
                     }
                   },
@@ -3455,7 +3434,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "(1/3 x, 1/3 y)"
                       ]
@@ -3464,9 +3443,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "**Joe’s Design:** The side lengths are 1.5 times as long as Mug’s hat?"
+                        "<strong>Joe’s Design:</strong> The side lengths are 1.5 times as long as Mug’s hat?"
                       ]
                     }
                   },
@@ -3474,7 +3453,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "(1.5 x, 1.5 y)"
                       ]
@@ -3483,9 +3462,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "**Viola’s Design:**The hat is the same size as Mug’s hat but has moved right 1 unit and up 5 units?"
+                        "<strong>Viola’s Design:</strong> The hat is the same size as Mug’s hat but has moved right 1 unit and up 5 units?"
                       ]
                     }
                   },
@@ -3493,7 +3472,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "(x + 1, y - 5)"
                       ]
@@ -3502,9 +3481,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "**Kathy's Design:** The image is in another quadrant of the graph?"
+                        "<strong>Kathy's Design:</strong> The image is in another quadrant of the graph?"
                       ]
                     }
                   },
@@ -4282,9 +4261,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "* Identify pairs of similar shapes. Provide evidence that your shapes are similar. What is the scale factor? "
+                        "<ul><li> Identify pairs of similar shapes. Provide evidence that your shapes are similar. What is the scale factor? </li><ul>"
                       ]
                     }
                   },
@@ -4773,9 +4752,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "* Which shapes are a rep-tile? Make a sketch to show how the copies fit together."
+                        "<ul><li> Which shapes are a rep-tile? Make a sketch to show how the copies fit together.</li></ul>"
                       ]
                     }
                   },
@@ -5540,9 +5519,9 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "To make the new Rectangle P that is similar to A, multiply the scale factor, 2.5, by each side length of rectangle A. The size of rectangle A is 4 x 8. So, you can get 4 x 2.5 = 10, 8 x 2.5 =20, which becomes a 10 x 20 rectangle. The lengths are 2.5 times larger. The perimeter increases from 24 units to 60 units. This is an increase of 2.5 times. 24 • 2.5 = 60. The area increases from 32 square units to 200 square units. This is an increase of 6.25 times. 32 • 6.25 = 200. Using the Commutative Property, we can see that the area of P is (2.5 • 4) • (2.5 • 8) = 2.5 • 2.5 • 4 • 8 = 6.25 • 32."
+                        "<p>To make the new Rectangle P that is similar to A, multiply the scale factor, 2.5, by each side length of rectangle A. The size of rectangle A is 4 x 8. So, you can get 4 x 2.5 = 10, 8 x 2.5 =20, which becomes a 10 x 20 rectangle. The lengths are 2.5 times larger. The perimeter increases from 24 units to 60 units. This is an increase of 2.5 times. 24 • 2.5 = 60. The area increases from 32 square units to 200 square units. This is an increase of 6.25 times. 32 • 6.25 = 200. Using the Commutative Property, we can see that the area of P is (2.5 • 4) • (2.5 • 8) = 2.5 • 2.5 • 4 • 8 = 6.25 • 32.</p>"
                       ]
                     }
                   },
@@ -5558,9 +5537,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "* **Rectangle Q** The perimeter of Rectangle Q is three times the perimeter of Rectangle A."
+                        "<ul><li> <strong>Rectangle Q</strong> The perimeter of Rectangle Q is three times the perimeter of Rectangle A.</li>"
                       ]
                     }
                   },
@@ -5568,7 +5547,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "If the perimeter of the new rectangle 3 is three times the perimeter of A, each side length of Rectangle Q will be three times the corresponding side length of A. We will have 4 x 3 = 12, 8 x 3 = 24, which becomes a 12 x 24 rectangle."
                       ]
@@ -5587,7 +5566,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "The lengths are 3 times larger. The perimeter increases from 24 units to72 units. This is an increase of 3 times. 24 • 3 = 72. The area increases from 32 square units to 288 square units. This is an increase of 9 times. 32 • 9 = 288. Using the Commutative Property, we can see that the area of P is (3 • 4) • (3 • 8) = 3 • 3 • 4 • 8 = 9 • 32. "
                       ]
@@ -5596,9 +5575,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "* **Rectangle R** The area of Rectangle R is 1/4 the area of Rectangle A."
+                        "<ul><li> <strong>Rectangle R</strong> The area of Rectangle R is 1/4 the area of Rectangle A.</li></ul>"
                       ]
                     }
                   },
@@ -5606,7 +5585,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "If the new Rectangle R is ¼ the area of the rectangle A, there are four congruent Rectangle Rs in the rectangle A. To divide the rectangle A into four of them, you should divide each side length of the rectangle A into two. So, the side lengths of the rectangle R are 2 and 4.  "
                       ]
@@ -5625,7 +5604,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "The lengths are ½ the size of the original. The perimeter decreases from 24 units to 12 units. This is decrease of 0.5 times. 24 • 0.5 = 12. The area decreases from 32 square units to 8 square units. The new area is ¼ of the original. 32 • ¼  = 8. Using the Commutative Property, we can see that the area of P is (½ • 4) • (½ • 8) = ½ • ½ • 4 • 8 = ¼ • 32.  "
                       ]
@@ -5705,9 +5684,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "### Criteria for Triangles",
+                        "<p><strong>Criteria for Triangles</strong></p>",
                         "For each part, draw a triangle similar to Triangle B that fits the given description. Explain your reasoning.",
                         "**Triangle X** The area of the Triangle X is 16 times the area of Triangle B."
                       ]
@@ -5717,7 +5696,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "If the new Rectangle R is ¼ the area of the rectangle A, there are four congruent Rectangle Rs in the rectangle A. To divide the rectangle A into four of them, you should divide each side length of the rectangle A into two. So, the side lengths of the rectangle R are 2 and 4. "
                       ]
@@ -5735,9 +5714,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "**Triangle Y** The scale factor from Triangle B to Triangle X is 1/2."
+                        "<strong>Triangle Y</strong> The scale factor from Triangle B to Triangle X is 1/2."
                       ]
                     }
                   },
@@ -5745,7 +5724,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "For the triangle B, the base length is 7 and the height is 4. Using the scale factor ½ to make a similar triangle X, the base length of the Triangle Y will be 3.5 and the height will be 2.  "
                       ]
@@ -5763,9 +5742,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "**Triangle Z** The ratio of corresponding side lengths of Triangle B to Triangle Z is 2:3."
+                        "<strong>Triangle Z</strong> The ratio of corresponding side lengths of Triangle B to Triangle Z is 2:3."
                       ]
                     }
                   },
@@ -5773,7 +5752,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "When the ratio of corresponding side lengths from Triangle B to Triangle Z is 2:3, the scale factor will be 3/2. For every length of 2 on Triangle B, we would have a length of 3 on Triangle Z. This means that the side increase 1.5 times. The base length of the Triangle Z will be 7 x 1.5 = 10.5 and the height of the Triangle 3 will be 4 x 1.5 = 6.  "
                       ]
@@ -5821,18 +5800,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-                {
-                  "text": "How do you find the scale factor between two similar figures?"
-                },
-                {
-                  "text": "If the scale factor from one shape to the other is 2, how do corresponding sides, perimeters, areas, and angles change from the original figure to its image?"
-                },
-                {
-                  "text": "What is the area of Rectangle A? What is the perimeter of Rectangle A?"
-                }
-              ]
+              }
             },
             {
               "type": "whatIf",
@@ -5859,7 +5827,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "4cm. Side AD corresponds to side EH, and side CD corresponds to side EF."
                       ]
@@ -5887,7 +5855,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "The scale factor from one figure to the other is 7.5 ÷ 6, or 1.25. Side DF is 3.75 cm since 3 × 1.25 is 3.75. Side FE is 6.25 cm (5 × 1.25 = 6.25). Because the triangles are similar, the corresponding angle measures are the same. So, the measure of angle F is 94°. Angle B and corresponding angle E are each 30° since 180 – (94 + 56) = 30. Note: Students will need to use the fact that the sum of the interior angles of a triangle is 180°."
                       ]
@@ -5941,12 +5909,12 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "With lengths of similar figures, you can multiply each length of the original figure by the scale factor to get the corresponding length on the image. Keeping all the angle measures the same as the original, you can draw the similar figures. ",
-                          "To find missing information about angles, you do not need to use scale factors because the corresponding angle measures of similar figures stay the same as the original. ",
-                          "To find missing information about area, you can use scale factors. When the scale factor from the original to the similar figure is *x*, the area of the similar figure will be *x* times *x* or *x^2* times the area of the original.",
-                          "Perimeter is the sum of lengths. So, every relationship for length and scale factor is the same for perimeter and scale factor. To find missing information about perimeter, you can use scale factors. When the scale factor from the original to the similar figure is *x*, the perimeter of the similar figure will be *x* times the perimeter of the original perimeter. "
+                        "<p>With lengths of similar figures, you can multiply each length of the original figure by the scale factor to get the corresponding length on the image. Keeping all the angle measures the same as the original, you can draw the similar figures.</p> ",
+                        "To find missing information about angles, you do not need to use scale factors because the corresponding angle measures of similar figures stay the same as the original. ",
+                        "<p>To find missing information about area, you can use scale factors. When the scale factor from the original to the similar figure is *x*, the area of the similar figure will be *x* times *x* or *x^2* times the area of the original.</p>",
+                        "Perimeter is the sum of lengths. So, every relationship for length and scale factor is the same for perimeter and scale factor. To find missing information about perimeter, you can use scale factors. When the scale factor from the original to the similar figure is *x*, the perimeter of the similar figure will be *x* times the perimeter of the original perimeter. "
                       ]
                     }
                   }
@@ -8032,7 +8000,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "Corresponding lengths of similar figures increase by the scale factor.",
                         "Corresponding angles of similar figures have the same measure.",
@@ -8053,11 +8021,11 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "### Situation A. More Claims",
+                        "<p><strong>Situation A. More Claims</strong></p>",
                         "Ms. Cho’s students also made the following claims. Do you agree? Explain why.",
-                        "**Mitch’s Claim** All squares are similar."
+                        "<strong>Mitch’s Claim</strong> All squares are similar."
                       ]
                     }
                   },
@@ -8074,9 +8042,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "**Freda’s Claim** All circles are similar."
+                        "<strong>Freda’s Claim</strong> All circles are similar."
                       ]
                     }
                   },
@@ -8093,9 +8061,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "**Juan’s Claim** All quadrilaterals are similar."
+                        "<strong>Juan’s Claim</strong> All quadrilaterals are similar."
                       ]
                     }
                   },
@@ -8122,9 +8090,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "**Sze’s Claim** All triangles are similar if their corresponding angles are equal."
+                        "<strong>Sze’s Claim</strong> All triangles are similar if their corresponding angles are equal."
                       ]
                     }
                   },
@@ -8178,9 +8146,9 @@
                   {
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
-                        "**Matt’s Claim** Circles are not similar since the do not have angles or side lengths."
+                        "<strong>Matt’s Claim</strong> Circles are not similar since the do not have angles or side lengths."
                       ]
                     }
                   },
@@ -8190,7 +8158,6 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>SOLUTION:</strong></p>",
                         "<p>Circles are not polygons. However, like any other shape, circles can be scaled.</p>",
                         "<p>Circles have measures, such as, the radius or diameter.</p>"
                       ]
@@ -8453,7 +8420,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "Proportional reasoning can be used to compare lengths, angles, and areas of similar figures. Students may discuss some of the ratio relationships between the shapes in the Investigation.",
                         "For figures with the same basic shape (similar figures), student should begin to realize that some measurement change and some stay the same.",
@@ -8489,7 +8456,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "With similar figures, some attributes of the shape change and some stay the same: ",
                         "* corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.",
@@ -8520,7 +8487,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "Students should express which attributes change and which stay the same when one figure is scaled to make an image: ",
                         "* corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.",
@@ -8550,7 +8517,7 @@
                     "display": "teacher",
                     "content": {
                       "type": "Text",
-                      "format": "markdown",
+                      "format": "html",
                       "text": [
                         "When scaling figures, some attributes change and some stay the same.",
                         "* corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.",

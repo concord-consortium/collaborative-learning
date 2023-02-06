@@ -94,6 +94,50 @@
     ]
   },
   "investigations": [
+    { 
+      "description": "Investigation 0",
+      "ordinal": 0,
+      "title": "GGG Investigation 0 Introduction to CLUE",
+      "problems": [
+        {
+          "description": "Problem 0.1",
+          "ordinal": 1,
+          "title": "GGG 0.1 Introduction to CLUE",
+          "subtitle": "",
+          "disabled": [],
+           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
+          ]
+        }
+      ]
+    },
     {
       "description": "Investigation 1",
       "ordinal": 1,
