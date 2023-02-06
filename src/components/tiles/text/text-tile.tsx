@@ -81,7 +81,6 @@ import "./text-tile.sass";
 
 interface IState {
   valueRevision: number;
-  editing?: boolean;
 }
 
 @inject("stores")
@@ -93,7 +92,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarTileApi: ITileApi | undefined;
-  private previousValue: EditorValue;
   private textOnFocus: string | string [] | undefined;
   private isHandlingUserChange = false;
   private initialValue: EditorValue;
@@ -103,7 +101,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   public componentDidMount() {
     this.initialValue = this.getContent().asSlate();
-    this.previousValue = this.initialValue;
     this.setState({
       valueRevision: 0
     });
@@ -129,23 +126,14 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       () => this.getContent().text,
       () => {
         // Update slate when content model changes
-        console.log(`*** model change start`, this.isHandlingUserChange);
         if (!this.isHandlingUserChange) {
           const textContent = this.getContent();
           this.setState({ valueRevision: this.state.valueRevision + 1 });
           if (this.editor) {
-            this.previousValue = textContent.asSlate();
-            this.editor.children = this.previousValue;
-            const selection = textContent.getSelection();
-            console.log(`selection`, JSON.stringify(selection, undefined, 2));
-            if (selection && !this.props.readOnly) {
-              Transforms.select(this.editor, selection);
-            }
+            this.editor.children = textContent.asSlate();
             normalizeSelection(this.editor);
-            console.log(`editor`, JSON.stringify(this.editor, undefined, 2));
           }
         }
-        console.log(` ** model change end`, this.isHandlingUserChange);
       }
     ));
     // blur editor when tile is deselected
@@ -188,7 +176,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   public render() {
     const { documentContent, tileElt, readOnly, scale } = this.props;
-    const { valueRevision } = this.state;
     const { appConfig: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
@@ -225,7 +212,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
               />
               <TextToolbarComponent
                 documentContent={documentContent}
-                valueRevision={valueRevision}
+                valueRevision={this.state.valueRevision}
                 tileElt={tileElt}
                 scale={scale}
                 editor={this.editor}
@@ -269,23 +256,10 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     }
 
     this.isHandlingUserChange = true;
-    console.log(`--- user change start`, this.isHandlingUserChange);
-    if (value !== this.previousValue) {
-      // Update content model when user changes slate
-      // content.setSlateAndSelection(value, this.editor?.selection);
-      console.log(`settingSlate`, JSON.stringify(value, undefined, 2));
-      content.setSlate(value);
-      this.previousValue = value;
-      this.setState({
-        valueRevision: this.state.valueRevision + 1
-      });
-      console.log(`done setting slate`, JSON.stringify(content, undefined, 2));
-    } else {
-      console.log(`saving selection`, JSON.stringify(this.editor?.selection, undefined, 2));
-      content.setSelection(this.editor?.selection);
-    }
+    // Update content model when user changes slate
+    content.setSlate(value);
+    this.setState({ valueRevision: this.state.valueRevision + 1 });
     this.isHandlingUserChange = false;
-    console.log(` -- user change end`, this.isHandlingUserChange);
   };
 
   private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {

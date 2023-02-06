@@ -16,15 +16,12 @@ export const useNewVariableDialog = ({ addVariable, sharedModel, namePrefill, on
   const [newVariable, setNewVariable] = useState(Variable.create({name: namePrefill || undefined}));
 
   const handleClick = () => {
-    console.log(`adding and inserting variable`);
     sharedModel?.addAndInsertVariable(newVariable, () => {
       const sharedVariable = sharedModel?.variables.find(v => v === newVariable);
       if (sharedVariable) {
-        console.log(`adding variable`);
         addVariable(sharedVariable);
       }
     });
-    console.log(`setting new variable variable`);
     setNewVariable(Variable.create({name: namePrefill || undefined}));
   };
 
