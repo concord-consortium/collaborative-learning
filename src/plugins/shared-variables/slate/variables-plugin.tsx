@@ -110,7 +110,7 @@ export class VariablesPlugin implements ITextPlugin {
     const variableIds: string[] = [];
     if (editor) {
       for (const [node] of Editor.nodes(editor, {at: [], mode: 'all'})) {
-        if (isVariableElement(node)) {
+        if (Editor.isInline(editor, node) && isVariableElement(node)) {
           variableIds.push(node.reference);
         }
       }

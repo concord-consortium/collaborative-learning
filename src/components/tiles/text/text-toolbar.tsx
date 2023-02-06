@@ -42,7 +42,7 @@ const buttonDefs = new Map<string, IButtonDef>();
 /**
  *  Configure a built in button. The short name is so the full config fits on one line.
  */
-function bi(
+function btn(
   iconName: string,
   Icon: React.FunctionComponent<React.SVGProps<SVGSVGElement>>,
   slateType: EFormat,
@@ -71,13 +71,13 @@ const toggleSupSub =
 const toggleElement =
   (editor: Editor, format: EFormat) => editor.toggleElement(format);
 
-bi("bold",        BoldToolIcon,         EFormat.bold,         toggleMark,    `Bold (${kShortcutPrefix}b)`);
-bi("italic",      ItalicToolIcon,       EFormat.italic,       toggleMark,    `Italic (${kShortcutPrefix}i)`);
-bi("underline",   UnderlineToolIcon,    EFormat.underlined,   toggleMark,    `Underline (${kShortcutPrefix}u)`);
-bi("subscript",   SubscriptToolIcon,    EFormat.subscript,    toggleSupSub,  `Subscript`);
-bi("superscript", SuperscriptToolIcon,  EFormat.superscript,  toggleSupSub,  `Superscript`);
-bi("list-ol",     NumberedListToolIcon, EFormat.numberedList, toggleElement, `Numbered List`);
-bi("list-ul",     BulletedListToolIcon, EFormat.bulletedList, toggleElement, `Bulleted List`);
+btn("bold",        BoldToolIcon,         EFormat.bold,         toggleMark,    `Bold (${kShortcutPrefix}b)`);
+btn("italic",      ItalicToolIcon,       EFormat.italic,       toggleMark,    `Italic (${kShortcutPrefix}i)`);
+btn("underline",   UnderlineToolIcon,    EFormat.underlined,   toggleMark,    `Underline (${kShortcutPrefix}u)`);
+btn("subscript",   SubscriptToolIcon,    EFormat.subscript,    toggleSupSub,  `Subscript`);
+btn("superscript", SuperscriptToolIcon,  EFormat.superscript,  toggleSupSub,  `Superscript`);
+btn("list-ol",     NumberedListToolIcon, EFormat.numberedList, toggleElement, `Numbered List`);
+btn("list-ul",     BulletedListToolIcon, EFormat.bulletedList, toggleElement, `Bulleted List`);
 
 const handleMouseDown = (event: React.MouseEvent) => {
   event.preventDefault();
