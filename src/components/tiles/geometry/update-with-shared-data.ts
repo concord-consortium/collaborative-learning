@@ -13,19 +13,19 @@ export function getBoardDataExtents(objectsMap: Map<string, ObjectMapEntry>){
   let xMin = -1;
   let yMin = -1;
 
-  for (let [key, value] of objectsMap){
-    const validPoint = value.elType === "point"
-    const graphable = value.dataSource === "shared" || value.dataSource === "local"
+  for (const [key, value] of objectsMap){
+    const validPoint = value.elType === "point";
+    const graphable = value.dataSource === "shared" || value.dataSource === "local";
     if (validPoint && graphable){
-      const pointX = value.x || 0
-      const pointY = value.y || 0
-      if (pointX < xMin) xMin = pointX - 1
-      if (pointX > xMax) xMax = pointX + 1
-      if (pointY < yMin) yMin = pointY - 1
-      if (pointY > yMax) yMax = pointY + 1
+      const pointX = value.x || 0;
+      const pointY = value.y || 0;
+      if (pointX < xMin) xMin = pointX - 1;
+      if (pointX > xMax) xMax = pointX + 1;
+      if (pointY < yMin) yMin = pointY - 1;
+      if (pointY > yMax) yMax = pointY + 1;
     }
   }
-  return { xMax, yMax, xMin, yMin } // matches type that can be passed to rescaleBoardAndAxes()
+  return { xMax, yMax, xMin, yMin }; // matches type that can be passed to rescaleBoardAndAxes()
 }
 
 export function getBoardObjectsMap(board: JXG.Board){
@@ -37,7 +37,7 @@ export function getBoardObjectsMap(board: JXG.Board){
     const hasAxisPointId = point.id.includes("jxgBoard");
     const hasLocalCreatedId = !hasSharedPointId && !hasAxisPointId && point.id.length === 16;
 
-    let pointSource = "" // these possible values should be enumerated in a type of some kind?
+    let pointSource = ""; // these possible values should be enumerated in a type of some kind?
     if (hasSharedPointId) pointSource = "shared";
     if (hasAxisPointId) pointSource = "axis";
     if (hasLocalCreatedId) pointSource = "local";
@@ -51,18 +51,18 @@ export function getBoardObjectsMap(board: JXG.Board){
     });
   });
 
-  const polygons = board.objectsList.filter((o) => o.elType === "polygon")
+  const polygons = board.objectsList.filter((o) => o.elType === "polygon");
   polygons.forEach((polygon:any) => {
-    const constituentPoints = polygon.inherits[0]
-    const isShared = constituentPoints.find((pt:any) => pt.id.includes(":"))
+    const constituentPoints = polygon.inherits[0];
+    const isShared = constituentPoints.find((pt:any) => pt.id.includes(":"));
 
     boardObjectsMap.set(polygon.id, {
       id: polygon.id,
       elType: "polygon",
       dataSource: isShared ? "shared" : "local"
-    })
-  })
+    });
+  });
 
-  return boardObjectsMap
+  return boardObjectsMap;
 }
 

@@ -20,7 +20,9 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           isDragTargetOrAncestor } from "../../../models/tiles/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
-import { ESegmentLabelOption, ILinkProperties, JXGCoordPair, JXGChange, JXGObjectType } from "../../../models/tiles/geometry/jxg-changes";
+import {
+  ESegmentLabelOption, ILinkProperties, JXGCoordPair, JXGChange
+} from "../../../models/tiles/geometry/jxg-changes";
 import { applyChange, applyChanges } from "../../../models/tiles/geometry/jxg-dispatcher";
 import { kSnapUnit } from "../../../models/tiles/geometry/jxg-point";
 import {
@@ -34,7 +36,7 @@ import {
 import {
   getVertexAngle, updateVertexAngle, updateVertexAnglesFromObjects
 } from "../../../models/tiles/geometry/jxg-vertex-angle";
-import { getAllLinkedPoints, injectGetTableLinkColorsFunction } from "../../../models/tiles/geometry/jxg-table-link";
+import { injectGetTableLinkColorsFunction } from "../../../models/tiles/geometry/jxg-table-link";
 import { extractDragTileType, kDragTileContent, kDragTileId, dragTileSrcDocId } from "../tile-component";
 import { ImageMapEntryType, gImageMap } from "../../../models/image-map";
 import { linkedPointId } from "../../../models/tiles/table-link-types";
@@ -506,7 +508,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private async initializeBoard(): Promise<JXG.Board> {
-    console.log("all1: initialize board!")
     return new Promise((resolve, reject) => {
       isGeometryContentReady(this.getContent()).then(() => {
         const board = this.getContent().initializeBoard(this.elementId, this.handleCreateElements);
@@ -525,13 +526,11 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private destroyBoard() {
-    console.log("all1: destroy board!")
     const { board } = this.state;
     board && JXG.JSXGraph.freeBoard(board);
   }
 
   private async initializeContent() {
-    console.log("all1: initialize content!")
     const content = this.getContent();
     content.metadata.setSharedSelection(this.stores.selection);
     const domElt = document.getElementById(this.elementId);
@@ -560,7 +559,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   private rescaleBoardAndAxes(params: IAxesParams) {
-    console.log("all1: rescaleBoardAndAxes!")
     const { board } = this.state;
     if (board) {
       this.applyChange(() => {
@@ -597,23 +595,23 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   modelJXGCleanCheck(board: JXG.Board){
     // find any points or polygons in model but not in JXG and/or any redundancies
-    let missingFromJXG: Array<any> = [];
+    const missingFromJXG: Array<any> = [];
     let hasRedundancies = false;
 
-    let jxgSummary: Array<any> = [];
-    const matchAll = (obj: JXG.GeometryElement) => obj.elType !== undefined
-    const allJXGObjects = this.getContent().findObjects(board, matchAll)
+    const jxgSummary: Array<any> = [];
+    const matchAll = (obj: JXG.GeometryElement) => obj.elType !== undefined;
+    const allJXGObjects = this.getContent().findObjects(board, matchAll);
     allJXGObjects.forEach((o) => {
-      jxgSummary.push({ id: o.id, type: o.elType })
-    })
+      jxgSummary.push({ id: o.id, type: o.elType });
+    });
 
-    hasRedundancies = uniq(jxgSummary) as any === jxgSummary.length
+    hasRedundancies = uniq(jxgSummary) as any === jxgSummary.length;
 
-    let modelSummary: Array<object> = [];
-    for (let [key, value] of this.getContent().objects){
-      const mo = this.getContent().getObject(key)
+    const modelSummary: Array<object> = [];
+    for (const [key, value] of this.getContent().objects){
+      const mo = this.getContent().getObject(key);
       if (mo){
-        modelSummary.push({id: key, type: mo.type})
+        modelSummary.push({id: key, type: mo.type});
       }
     }
 
@@ -622,22 +620,14 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (!foundMatchingJXG){
         missingFromJXG.push(modelSummaryItem);
       }
-    })
-    console.log("found object(s) missing from jxg? : ", missingFromJXG)
-
-    //return !hasRedundancies && missingFromJXG.length === 0;
-    return { hasRedundancies, missingList: missingFromJXG, missingCount: missingFromJXG.length }
+    });
+    return { hasRedundancies, missingList: missingFromJXG, missingCount: missingFromJXG.length };
   }
 
 
   contentSyncGeometry(_board?: JXG.Board) {
     const board = _board || this.state.board;
     if (!board) return;
-
-
-    const report1 = this.modelJXGCleanCheck(board)
-    const missingAtStart = report1.missingList;
-    console.log("missingAtStart: ", missingAtStart)
 
     // Find points through linked data and create them
     // Checks for missing are accurate, but running this on condition of missing polygons
@@ -658,7 +648,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           }
         }
       }
-      const ptsChange = { operation: "create", target: "linkedPoint", parents, properties, links }
+      const ptsChange = { operation: "create", target: "linkedPoint", parents, properties, links };
       const pts = applyChange(board, ptsChange as JXGChange);
       castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
     });
@@ -689,16 +679,17 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     applyChanges(board, changes);
 
     // account for all points, shared and native, and rescale accordingly
-    const boardMap = getBoardObjectsMap(board)
-    const extents = getBoardDataExtents(boardMap)
+    const boardMap = getBoardObjectsMap(board);
+    const extents = getBoardDataExtents(boardMap);
     this.rescaleBoardAndAxes(extents);
 
 
-    const report2 = this.modelJXGCleanCheck(board)
+    const report2 = this.modelJXGCleanCheck(board);
     const missingAtEnd = report2.missingList;
     const anyRedundancies = report2.hasRedundancies;
-    console.log("missingAtEnd: ", missingAtEnd, "anyRedundancies: ", anyRedundancies)
-
+    if (missingAtEnd.length > 0 || anyRedundancies){
+      console.warn(report2);
+    }
   }
 
 
