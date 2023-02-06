@@ -94,8 +94,10 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarTileApi: ITileApi | undefined;
-  private plugins: Record<string, ITextPlugin|undefined>;
   private textOnFocus: string | string [] | undefined;
+
+  // plugins are exposed to making testing easier
+  plugins: Record<string, ITextPlugin|undefined>;
 
   public componentDidMount() {
     const initialTextContent = this.getContent();

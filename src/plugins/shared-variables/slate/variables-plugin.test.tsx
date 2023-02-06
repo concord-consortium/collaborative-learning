@@ -1,14 +1,29 @@
-import { IAnyStateTreeNode, IAnyType, types, castToSnapshot } from "mobx-state-tree";
-import { SharedModelType } from "../../../models/shared/shared-model";
+import { IAnyType, types, castToSnapshot } from "mobx-state-tree";
+import {screen} from "@testing-library/react";
+import { specTextTile } from "../../../components/tiles/text/spec-text-tile";
 import { ISharedModelManager } from "../../../models/shared/shared-model-manager";
 import { TextContentModel, TextContentModelType } from "../../../models/tiles/text/text-content";
 import { SharedVariables, SharedVariablesType } from "../shared-variables";
-import { VariablesPlugin } from "./variables-plugin";
+import { kVariableTextPluginName, VariablesPlugin } from "./variables-plugin";
+import { insertTextVariable } from "./text-tile-buttons";
+import { TileModel } from "../../../models/tiles/tile-model";
+
+// The text tile needs to be registered so the TileModel.create
+// knows it is a supported tile type
+import "../../../models/tiles/text/text-registration";
+
+// Register the variables plugin so the text tile will load it
+import "../shared-variables-registration";
 
 const libDebug = require("../../../lib/debug");
 
-const TestContainer = types.model("TestContainer", {
-  content: TextContentModel,
+const TestTileModelContainer = types.model("TestTileModelContainer", {
+  child: TileModel,
+  variables: types.maybe(SharedVariables)
+});
+
+const TestTextContentModelContainer = types.model("TestTileContentModelContainer", {
+  child: TextContentModel,
   variables: types.maybe(SharedVariables)
 });
 
@@ -21,19 +36,19 @@ const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelMa
     getSharedModelsByType<IT extends IAnyType>(type: string): IT["Type"][] {
       return [variables];
     },
-    addTileSharedModel(tileContentModel: IAnyStateTreeNode): SharedModelType | undefined {
+    addTileSharedModel(tileContentModel) {
       return variables;
     },
-    removeTileSharedModel(tileContentModel: IAnyStateTreeNode, sharedModel: SharedModelType): void {
+    removeTileSharedModel(tileContentModel, sharedModel) {
       // ignore this for now
     },
-    getTileSharedModels(tileContentModel: IAnyStateTreeNode): SharedModelType[] {
+    getTileSharedModels(tileContentModel) {
       return variables ? [variables] : [];
     },
-    getSharedModelTiles(sharedModel?: SharedModelType) {
+    getSharedModelTiles(sharedModel) {
       return [];
     },
-    getSharedModelTileIds(sharedModel?: SharedModelType) {
+    getSharedModelTileIds(sharedModel) {
       // ignore linked tiles for now
       return [];
     }
@@ -45,8 +60,8 @@ const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelMa
 // the updates
 const setupContainer = (content: TextContentModelType, variables?: SharedVariablesType) => {
   const sharedModelManager = makeSharedModelManager(variables);
-  TestContainer.create(
-    {content: castToSnapshot(content), variables: castToSnapshot(variables)},
+  TestTextContentModelContainer.create(
+    {child: castToSnapshot(content), variables: castToSnapshot(variables)},
     {sharedModelManager}
   );
 
@@ -120,7 +135,7 @@ describe("VariablesPlugin", () => {
       const textContent = TextContentModel.create({});
       const variables = SharedVariables.create();
 
-      // setup the environment without a shared model
+      // setup the environment with a shared model
       const {sharedModelManager} = setupContainer(textContent, variables);
 
       // override getTileSharedModels so it always returns undefined
@@ -137,4 +152,49 @@ describe("VariablesPlugin", () => {
 
   });
 
+  describe("used in TextToolComponent", () => {
+
+    it("renders successfully and creates the VariablesPlugin", () => {
+      const {plugins, textTile} = specTextTile({});
+      expect(screen.getByTestId("text-tool-wrapper")).toBeInTheDocument();
+      expect(screen.getByTestId("ccrte-editor")).toBeInTheDocument();
+      const plugin = plugins?.[kVariableTextPluginName];
+      expect(plugin).toBeDefined();
+      expect(plugin).toBeInstanceOf(VariablesPlugin);
+      expect(textTile).toBeDefined();
+    });
+
+    it("finds no chips with empty content and no configured shared model", () => {
+      const {plugins} = specTextTile({});
+      const plugin = plugins?.[kVariableTextPluginName] as VariablesPlugin;
+      expect(plugin.chipVariables).toHaveLength(0);
+    });
+
+    it("can insert a variable", () => {
+      const content = TextContentModel.create({});
+      const variables = SharedVariables.create();
+
+      // setup the environment with a shared model
+      const sharedModelManager = makeSharedModelManager(variables);
+      const tileModel = TileModel.create({content});
+
+      // Create an MST tree with both the TileModel and the shared variables
+      // and the sharedModelManager in the MST tree environment
+      TestTileModelContainer.create(
+        {child: castToSnapshot(tileModel), variables: castToSnapshot(variables)},
+        {sharedModelManager}
+      );
+
+      const {plugins} = specTextTile({tileModel});
+
+      const plugin = plugins?.[kVariableTextPluginName] as VariablesPlugin;
+      const editor = content.editor;
+      const variable = variables.createVariable();
+      variable.setName("a");
+      insertTextVariable(variable, editor);
+      expect(plugin.chipVariables).toHaveLength(1);
+      expect(plugin.chipVariables[0]).toBe(variable);
+    });
+
+  });
 });

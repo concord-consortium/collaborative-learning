@@ -37,7 +37,7 @@ export function getTextPluginInfo(id: string) {
 // TODO: perhaps this should only add the plugins that have been configured
 // as tools by the app-config.
 export function createTextPluginInstances(textContent: TextContentModelType) {
-  const pluginInstances:  Record<string, ITextPlugin> = {};
+  const pluginInstances:  Record<string, ITextPlugin|undefined> = {};
   Object.values(gTextPluginInfoMap).forEach(pluginInfo => {
     if (pluginInfo?.createSlatePlugin) {
       pluginInstances[pluginInfo.pluginName] = pluginInfo.createSlatePlugin(textContent);
