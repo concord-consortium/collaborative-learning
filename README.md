@@ -159,6 +159,7 @@ To enable per component debugging set the "debug" localstorage key with one or m
 - `images` this will set `window.imageMap` so you can look at the status and URLs of images that have been loaded.
 - `listeners` console log the adding, removing, and firing of firebase listeners
 - `logger` console log all messages sent to the logging service
+- `sharedModels` console log messages about shared models, currently this is only used in the variables shared model
 - `stores` this will set `window.stores` so you can monitor the stores global from the browser console.
 - `undo` this will print information about each action that is added to the undo stack.
 
