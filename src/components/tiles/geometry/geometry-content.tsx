@@ -1,4 +1,4 @@
-import { castArray, each, filter, find, keys as _keys, throttle, values } from "lodash";
+import { castArray, each, filter, find, keys as _keys, throttle, uniq, values } from "lodash";
 import { observe, reaction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
@@ -14,14 +14,16 @@ import {
 } from "../../../models/tiles/geometry/geometry-content";
 import { convertModelObjectsToChanges } from "../../../models/tiles/geometry/geometry-migrate";
 import {
-  cloneGeometryObject, GeometryObjectModelType, isPointModel
+  cloneGeometryObject, GeometryObjectModelType, isPointModel, createObject
 } from "../../../models/tiles/geometry/geometry-model";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tiles/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
-import { ESegmentLabelOption, ILinkProperties, JXGCoordPair } from "../../../models/tiles/geometry/jxg-changes";
-import { applyChange } from "../../../models/tiles/geometry/jxg-dispatcher";
+import {
+  ESegmentLabelOption, ILinkProperties, JXGCoordPair, JXGChange
+} from "../../../models/tiles/geometry/jxg-changes";
+import { applyChange, applyChanges } from "../../../models/tiles/geometry/jxg-dispatcher";
 import { kSnapUnit } from "../../../models/tiles/geometry/jxg-point";
 import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
@@ -106,6 +108,11 @@ interface IPasteContent {
   pasteId: string;
   isSameTile: boolean;
   objects: GeometryObjectModelType[];
+}
+
+interface ObjectSummary {
+  id: string,
+  type: string
 }
 
 let sInstanceId = 0;
@@ -277,7 +284,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     // respond to linked table/shared model changes
     this.disposers.push(reaction(
       () => this.getContent().updateSharedModels,
-      () => this.syncLinkedPoints()
+      () => this.syncLinkedGeometry()
     ));
 
     this.disposers.push(onSnapshot(this.getContent(), () => {
@@ -514,7 +521,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           if (url) {
             this.updateImageUrl(url, filename);
           }
-          this.syncLinkedPoints(board);
+          this.syncLinkedGeometry(board);
           this.setState({ board });
           resolve(board);
         }
@@ -568,40 +575,54 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     }
   }
 
-  private autoRescaleBoardAndAxes(dataSet: IDataSet) {
-    const { board } = this.state;
-    if (board && (dataSet.attributes.length >= 2) && (dataSet.cases.length >= 1)) {
-      const dataBounds = getDataSetBounds(dataSet);
-      if (dataBounds.every((b, i) => (i >= 2) || (isFinite(b.min) && isFinite(b.max)))) {
-        const xDataMin = Math.floor(dataBounds[0].min - 1);
-        const xDataMax = Math.ceil(dataBounds[0].max + 1);
-        const yDataMin = Math.floor(dataBounds[1].min - 1);
-        const yDataMax = Math.ceil(dataBounds[1].max + 1);
+  private getBoardPointsExtents(board: JXG.Board){
+    let xMax = 1;
+    let yMax = 1;
+    let xMin = -1;
+    let yMin = -1;
 
-        const boundingBox = board.getBoundingBox();
-        let [xMin, yMax, xMax, yMin] = boundingBox;
-        if (xDataMin < xMin) xMin = xDataMin;
-        if (xDataMax > xMax) xMax = xDataMax;
-        if (yDataMin < yMin) yMin = yDataMin;
-        if (yDataMax > yMax) yMax = yDataMax;
+    board.objectsList.forEach((obj: any) => {
+      if (obj.elType === "point"){
+        const pointX = obj.coords.usrCoords[1]
+        const pointY = obj.coords.usrCoords[2]
 
-        this.rescaleBoardAndAxes({ xMax, yMax, xMin, yMin });
+        // leave a proportional amount of room for title
+        const extraY = Math.abs(pointY) * .15
+
+        if (pointX < xMin) xMin = pointX - 1;
+        if (pointX > xMax) xMax = pointX + 1;
+        if (pointY < yMin) yMin = pointY - 1;
+        if (pointY > yMax) yMax = pointY + 1 + extraY;
       }
-    }
+    })
+    return { xMax, yMax, xMin, yMin };
   }
 
-  syncLinkedPoints(_board?: JXG.Board) {
+  syncLinkedGeometry(_board?: JXG.Board) {
     const board = _board || this.state.board;
     if (!board) return;
 
-    // remove/recreate all linked points
-    // TODO: A more tailored response would match up the existing points with the data set and only
-    // change the affected points, which would eliminate some visual flashing that occurs when
-    // unchanged points are re-created and would allow derived polygons to be preserved.
+    this.recreateSharedPoints(board);
+
+    const syncCheck = this.checkCleanJXG(board)
+    if (syncCheck.jxgMissing.length > 0){
+      const modelObjectsToConvert: GeometryObjectModelType[] = [];
+      syncCheck.jxgMissing.forEach((o: ObjectSummary) => {
+        const modelObject = this.getContent().getObject(o.id)
+        if (modelObject) modelObjectsToConvert.push(modelObject)
+      })
+      const changesToApply = convertModelObjectsToChanges(modelObjectsToConvert)
+      applyChanges(board, changesToApply)
+    }
+
+    const extents = this.getBoardPointsExtents(board)
+    this.rescaleBoardAndAxes(extents)
+  }
+
+  recreateSharedPoints(board: JXG.Board){
     const ids = getAllLinkedPoints(board);
     applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
 
-    // create new points for each linked table
     this.getContent().linkedDataSets.forEach(link => {
       const links: ILinkProperties = { tileIds: [link.providerId] };
       const parents: JXGCoordPair[] = [];
@@ -621,6 +642,31 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const pts = applyChange(board, { operation: "create", target: "linkedPoint", parents, properties, links });
       castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
     });
+  }
+
+  checkCleanJXG(board: JXG.Board){
+    const modelSummary: ObjectSummary[] = [];
+    const jxgSummary: ObjectSummary[] = [];
+    const jxgMissing: ObjectSummary[] = [];
+
+    for (const [key] of this.getContent().objects){
+      const objectInModel = this.getContent().getObject(key);
+      if (objectInModel) modelSummary.push({id: key, type: objectInModel.type});
+    }
+
+    const matchAll = (obj: JXG.GeometryElement) => obj.elType !== undefined;
+    const allJXGObjects = this.getContent().findObjects(board, matchAll);
+    allJXGObjects.forEach(o => jxgSummary.push({ id: o.id, type: o.elType }));
+
+    const uniques = uniq(allJXGObjects)
+    const jxgHasRedundancies = allJXGObjects.length > uniques.length
+
+    modelSummary.forEach((modelSummaryItem: ObjectSummary) => {
+      const foundMatchingJXG = jxgSummary.find((jxgItem: any) => jxgItem.id === modelSummaryItem.id);
+      if (!foundMatchingJXG) jxgMissing.push(modelSummaryItem);
+    });
+
+    return { jxgMissing, jxgHasRedundancies }
   }
 
   private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {
