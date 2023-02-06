@@ -8,7 +8,7 @@ import { SharedVariablesType } from "../shared-variables";
 
 interface IUseNewVariableDialog {
   addVariable: (variable: VariableType ) => void;
-  sharedModel: SharedVariablesType;
+  sharedModel?: SharedVariablesType;
   namePrefill? : string;
   onClose?: () => void;
 }
@@ -17,7 +17,7 @@ export const useNewVariableDialog = ({ addVariable, sharedModel, namePrefill, on
 
   const handleClick = () => {
     console.log(`adding and inserting variable`);
-    sharedModel.addAndInsertVariable(newVariable, () => {
+    sharedModel?.addAndInsertVariable(newVariable, () => {
       const sharedVariable = sharedModel?.variables.find(v => v === newVariable);
       if (sharedVariable) {
         console.log(`adding variable`);

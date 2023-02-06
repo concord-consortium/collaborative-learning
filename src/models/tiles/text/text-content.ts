@@ -1,6 +1,7 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import {
-  BaseSelection, htmlToSlate, slateToHtml, textToSlate, EditorValue, serializeValue, convertDocument, Editor
+  BaseSelection, convertDocument, CustomEditor, Editor, EditorValue, htmlToSlate, serializeValue, slateToHtml,
+  textToSlate
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tile-content-info";
 import { TileContentModel } from "../tile-content";
@@ -24,7 +25,7 @@ export const TextContentModel = TileContentModel
     selection: types.maybe(types.string)
   })
   .volatile(self => ({
-    editor:  undefined as Editor | undefined,
+    editor:  undefined as CustomEditor | undefined,
   }))
   .views(self => ({
     get joinText() {
@@ -140,7 +141,7 @@ export const TextContentModel = TileContentModel
 
 export type TextContentModelType = Instance<typeof TextContentModel>;
 
-// FIXME: Replace the textContent provider with a tile level one.
+// TODO: Replace the textContent provider with a tile level one.
 export function createTextContent(snapshot?: SnapshotIn<typeof TextContentModel>) {
   return TextContentModel.create({
     ...snapshot

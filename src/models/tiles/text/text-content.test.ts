@@ -10,18 +10,14 @@ const empty: EditorValue = [
 ];
 
 const testTextPluginInfo = {
-  iconName: "test",
-  Icon: () => null,
-  toolTip: "",
+  pluginName: "test",
   createSlatePlugin: jest.fn(),
-  modalHook: jest.fn()
+  buttonDefs: {},
 };
 const testTextPluginInfoWithUpdate = {
-  iconName: "testWithUpdate",
-  Icon: () => null,
-  toolTip: "",
+  pluginName: "testWithUpdate",
   createSlatePlugin: jest.fn(),
-  modalHook: jest.fn(),
+  buttonDefs: {},
   updateTextContentAfterSharedModelChanges: jest.fn()
 };
 
@@ -73,13 +69,6 @@ describe("TextContentModel", () => {
     const bogus2 = TextContentModel.create({ format: "slate", text: ["foo", "bar"] });
     expect(bogus2.asSlate()).toBeDefined();
   });
-
-  // const value: EditorValue = [
-  //   {
-  //     type: 'paragraph',
-  //     children: [{ text: 'foo' }],
-  //   },
-  // ];
 
   it("converts to slate correctly", () => {
     const foo = "foo";

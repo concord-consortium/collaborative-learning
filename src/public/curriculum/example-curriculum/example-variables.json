@@ -32,7 +32,7 @@
         "numFormat": ".2~f"
       },
       "text": {
-        "tools": ["bold", "subscript", "superscript", "m2s-variables", "new-variable", "insert-variable", "edit-variable"]
+        "tools": ["bold", "subscript", "superscript", "new-variable", "insert-variable", "edit-variable"]
       },
       "drawing": {"tools": ["select", "line", "vector", "rectangle", "ellipse", "stamp", "stroke-color", "fill-color", "new-variable", "insert-variable", "edit-variable", "delete"]}
     },

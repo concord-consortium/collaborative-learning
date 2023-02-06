@@ -3,20 +3,127 @@ import classNames from "classnames/dedupe";
 
 import {
   BaseElement, CustomEditor, CustomElement, Editor, kSlateVoidClass, registerElementComponent,
-  RenderElementProps, Transforms, useSelected, useSerializing,
+  RenderElementProps, useSelected, useSerializing
 } from "@concord-consortium/slate-editor";
+import { action, autorun, computed, IReactionDisposer, makeObservable, observable } from "mobx";
+import { getType } from "mobx-state-tree";
+import { observer } from "mobx-react";
 import { VariableChip, VariableType } from "@concord-consortium/diagram-view";
-import { getVariables } from "./variables-text-content";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
-import { TextContentModelContext } from "../../../models/tiles/text/text-content-context";
+import { ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
+import { TextPluginsContext } from "../../../components/tiles/text/text-plugins-context";
+
+import { DEBUG_SHARED_MODELS } from "../../../lib/debug";
+import { SharedVariables, SharedVariablesType } from "../shared-variables";
 
 const kVariableClass = "slate-variable-chip";
 export const kVariableFormat = "m2s-variable";
+export const kVariableTextPluginName = "variables";
 
-export function VariablesPlugin(textContent: TextContentModelType): any {
-  return {
-    onInitEditor: (editor: CustomEditor) => withVariables(editor, textContent)
-  };
+export class VariablesPlugin implements ITextPlugin {
+  public textContent;
+  private disposeSharedModelManagerAutorun: IReactionDisposer|undefined;
+
+  constructor(textContent: TextContentModelType) {
+    makeObservable(this, {
+      textContent: observable,
+      sharedModel: computed,
+      variables: computed,
+      onInitEditor: action
+    });
+    this.textContent = textContent;
+  }
+
+  get sharedModel() {
+    const sharedModelManager = this.textContent.tileEnv?.sharedModelManager;
+    // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
+    // just like findFirstSharedModelByType does
+    //
+    // For now we are checking the type ourselves, and we are assuming the shared model we want
+    // is the first one.
+    // TODO: can this handle the case when the sharedModelManager is not ready yet?
+    const firstSharedModel = sharedModelManager?.getTileSharedModels(this.textContent)?.[0];
+    if (!firstSharedModel || getType(firstSharedModel) !== SharedVariables) {
+      return undefined;
+    }
+    return firstSharedModel as SharedVariablesType;
+  }
+
+  get variables() {
+    return this.sharedModel?.variables || [];
+  }
+
+  /**
+   * Add the shared model to the text tile when it is ready.
+   */
+  addTileSharedModelWhenReady() {
+    this.disposeSharedModelManagerAutorun = autorun(() => {
+      // Make sure there is a sharedModelManager and it is ready
+      // TODO this is duplicate code from `get sharedModel`
+      const sharedModelManager = this.textContent.tileEnv?.sharedModelManager;
+      if (!sharedModelManager || !sharedModelManager.isReady) {
+        // So we need to keep waiting until the sharedModelManager is ready
+        if (DEBUG_SHARED_MODELS) {
+          console.log("shared model manager isn't available");
+        }
+        return;
+      }
+
+      if (this.sharedModel) {
+        // We already have a shared model so we don't need to do anything
+        return;
+      }
+
+      // Our text tile doesn't have a shared model, see if the document has one
+      const containerSharedModel = sharedModelManager.findFirstSharedModelByType(SharedVariables);
+      if (!containerSharedModel) {
+        if (DEBUG_SHARED_MODELS) {
+          console.log("no shared variables model in the document");
+        }
+
+        // If we want to automatically create a shared model this would be the
+        // place to put it.
+        return;
+      }
+
+      // We found a SharedVariables model, and we don't have one on the textContent yet
+      // So add it
+      sharedModelManager.addTileSharedModel(this.textContent, containerSharedModel);
+
+      // We could dispose the autorun here, but we aren't. There is a chance
+      // that the shared model will be removed from the document and a new one
+      // added. This is not currently supported, but it seems pretty harmless to
+      // leave the autorun in place just in case we support this later.
+    });
+  }
+
+  onInitEditor(editor: CustomEditor) {
+    return withVariables(editor, this.textContent);
+  }
+
+  dispose() {
+    this.disposeSharedModelManagerAutorun?.();
+  }
+
+  get chipVariables() {
+    const {editor} = this.textContent;
+    const variableIds: string[] = [];
+    if (editor) {
+      for (const [node] of Editor.nodes(editor, {at: [], mode: 'all'})) {
+        if (Editor.isInline(editor, node) && isVariableElement(node)) {
+          variableIds.push(node.reference);
+        }
+      }
+    }
+    const variables = variableIds.map(id => this.findVariable(id));
+    const filteredVariables = variables.filter(variable => variable !== undefined);
+    return filteredVariables as VariableType[];
+  }
+
+  findVariable(variableId: string) {
+    return this.variables.find(v => v.id === variableId);
+  }
+
 }
 
 export interface VariableElement extends BaseElement {
@@ -28,50 +135,9 @@ export const isVariableElement = (element: CustomElement): element is VariableEl
   return element.type === kVariableFormat;
 };
 
-export const insertTextVariable = (variable: VariableType, editor?: Editor) => {
-  if (!editor) {
-    console.warn("inserting variable but there is no editor");
-    return;
-  }
-  const reference = variable.id;
-  const varElt: VariableElement = { type: kVariableFormat, reference, children: [{text: "" }]};
-  Transforms.insertNodes(editor, varElt);
-};
-
-export const findSelectedVariable = (selectedElements: any, variables: VariableType[]) => {
-  let selected = undefined;
-    // FIXME: The editor.selectedElements claims that it returns a BaseElement[] but it really returns a NodeEntry
-    // which is a list of pairs. [Node, Path]
-    // https://docs.slatejs.org/api/nodes/node-entry
-    // There's some weirdness below to work around that, but
-    // we should either update the return type our slate lib or just return the BaseElement list.
-  selectedElements?.forEach((selectedItem: any) => {
-    const baseElement = (selectedItem as any)[0];
-    if (isVariableElement(baseElement)) {
-      const {reference} = baseElement;
-      selected = variables.find(v => v.id === reference);
-    }
-  });
-  return selected;
-};
-
-export const insertTextVariables = (variables: VariableType[], editor?: Editor) => {
-  if (!editor) {
-    console.warn("inserting variable but there is no editor");
-    return;
-  }
-  variables.forEach((variable) =>{
-    insertTextVariable(variable, editor);
- });
-};
-
-export const shouldShowEditVariableButton = (selectedVariable?: VariableType) => {
-  // Only show the Edit Variable button when there's a variable selected.
-  return !!selectedVariable;
-};
-
-export const VariableComponent = ({ attributes, children, element }: RenderElementProps) => {
-  const textContent = useContext(TextContentModelContext);
+export const VariableComponent = observer(function({ attributes, children, element }: RenderElementProps) {
+  const plugins = useContext(TextPluginsContext);
+  const variablesPlugin = plugins[kVariableTextPluginName] as VariablesPlugin|undefined;
   const isHighlighted = useSelected();
   const isSerializing = useSerializing();
 
@@ -81,8 +147,7 @@ export const VariableComponent = ({ attributes, children, element }: RenderEleme
 
   const classes = classNames(kSlateVoidClass, kVariableClass);
   const selectedClass = isHighlighted && !isSerializing ? "slate-selected" : undefined;
-  const variables = getVariables(textContent);
-  const variable = variables.find(v => v.id === reference);
+  const variable = variablesPlugin?.variables.find(v => v.id === reference);
   // FIXME: HTML serialization/deserialization. This will serialize the VariableChip too.
   return (
     <span className={classes} {...attributes} contentEditable={false}>
@@ -93,7 +158,7 @@ export const VariableComponent = ({ attributes, children, element }: RenderEleme
       }
     </span>
   );
-};
+});
 
 let isRegistered = false;
 
