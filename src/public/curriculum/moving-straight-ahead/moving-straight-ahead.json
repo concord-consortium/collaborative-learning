@@ -336,9 +336,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-              ]
+              }
             },
             {
               "type": "whatIf",
@@ -5676,8 +5674,7 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "initialChallenge",
@@ -5745,12 +5742,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-                {"text": "Can you explain the meaning of the equation in your own words?  "},
-                {"text": "How much will it cost Fabian to make 1 cake? 2 cakes?  "},
-                {"text": "What does it mean by “making a profit”? "}
-              ]
+              }
             },
             {
               "type": "whatIf",
@@ -8007,8 +7999,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [ ]
+              }
             },
             {
               "type": "MathReflection2",
@@ -8055,8 +8046,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [ ]
+              }
             },
             {
               "type": "MathReflection3",
@@ -10143,8 +10133,7 @@
                   }
                 }
                 ]
-              },
-              "supports": [ ]
+              }
             },
             {
               "type": "MathReflection4",
@@ -10185,15 +10174,11 @@
                     }
                   }
                 ]
-              },
-              "supports": [ ]
+              }
             }
           ]
         }
-      ],
-      "supports": [
       ]
     }
-  ],
-  "supports": []
+  ]
 }
