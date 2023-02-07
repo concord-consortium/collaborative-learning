@@ -14,14 +14,14 @@ import {
 } from "../../../models/tiles/geometry/geometry-content";
 import { convertModelObjectsToChanges } from "../../../models/tiles/geometry/geometry-migrate";
 import {
-  cloneGeometryObject, GeometryObjectModelType, isPointModel, createObject
+  cloneGeometryObject, GeometryObjectModelType, isPointModel
 } from "../../../models/tiles/geometry/geometry-model";
 import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObjectUnderMouse,
           isDragTargetOrAncestor } from "../../../models/tiles/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
 import {
-  ESegmentLabelOption, ILinkProperties, JXGCoordPair, JXGChange
+  ESegmentLabelOption, ILinkProperties, JXGCoordPair
 } from "../../../models/tiles/geometry/jxg-changes";
 import { applyChange, applyChanges } from "../../../models/tiles/geometry/jxg-dispatcher";
 import { kSnapUnit } from "../../../models/tiles/geometry/jxg-point";
@@ -44,7 +44,6 @@ import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
-import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
 import AxisSettingsDialog from "./axis-settings-dialog";
 import { EditableTileTitle } from "../editable-tile-title";
 import LabelSegmentDialog from "./label-segment-dialog";
@@ -583,18 +582,16 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     board.objectsList.forEach((obj: any) => {
       if (obj.elType === "point"){
-        const pointX = obj.coords.usrCoords[1]
-        const pointY = obj.coords.usrCoords[2]
-
+        const pointX = obj.coords.usrCoords[1];
+        const pointY = obj.coords.usrCoords[2];
         // leave a proportional amount of room for title
-        const extraY = Math.abs(pointY) * .15
-
+        const extraY = Math.abs(pointY) * .15;
         if (pointX < xMin) xMin = pointX - 1;
         if (pointX > xMax) xMax = pointX + 1;
         if (pointY < yMin) yMin = pointY - 1;
         if (pointY > yMax) yMax = pointY + 1 + extraY;
       }
-    })
+    });
     return { xMax, yMax, xMin, yMin };
   }
 
@@ -604,19 +601,19 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     this.recreateSharedPoints(board);
 
-    const syncCheck = this.checkCleanJXG(board)
+    const syncCheck = this.checkCleanJXG(board);
     if (syncCheck.jxgMissing.length > 0){
       const modelObjectsToConvert: GeometryObjectModelType[] = [];
       syncCheck.jxgMissing.forEach((o: ObjectSummary) => {
-        const modelObject = this.getContent().getObject(o.id)
-        if (modelObject) modelObjectsToConvert.push(modelObject)
-      })
-      const changesToApply = convertModelObjectsToChanges(modelObjectsToConvert)
-      applyChanges(board, changesToApply)
+        const modelObject = this.getContent().getObject(o.id);
+        if (modelObject) modelObjectsToConvert.push(modelObject);
+      });
+      const changesToApply = convertModelObjectsToChanges(modelObjectsToConvert);
+      applyChanges(board, changesToApply);
     }
 
-    const extents = this.getBoardPointsExtents(board)
-    this.rescaleBoardAndAxes(extents)
+    const extents = this.getBoardPointsExtents(board);
+    this.rescaleBoardAndAxes(extents);
   }
 
   recreateSharedPoints(board: JXG.Board){
@@ -658,15 +655,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     const allJXGObjects = this.getContent().findObjects(board, matchAll);
     allJXGObjects.forEach(o => jxgSummary.push({ id: o.id, type: o.elType }));
 
-    const uniques = uniq(allJXGObjects)
-    const jxgHasRedundancies = allJXGObjects.length > uniques.length
+    const uniques = uniq(allJXGObjects);
+    const jxgHasRedundancies = allJXGObjects.length > uniques.length;
 
     modelSummary.forEach((modelSummaryItem: ObjectSummary) => {
       const foundMatchingJXG = jxgSummary.find((jxgItem: any) => jxgItem.id === modelSummaryItem.id);
       if (!foundMatchingJXG) jxgMissing.push(modelSummaryItem);
     });
 
-    return { jxgMissing, jxgHasRedundancies }
+    return { jxgMissing, jxgHasRedundancies };
   }
 
   private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {
