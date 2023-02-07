@@ -167,17 +167,11 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleDocumentUndo = () => {
-    const { document } = this.props;
-    if (document?.treeManagerAPI?.undoManager.canUndo) {
-      document?.undoLastAction();
-    }
+    this.props.document?.undoLastAction();
   };
 
   private handleDocumentRedo = () => {
-    const { document } = this.props;
-    if (document?.treeManagerAPI?.undoManager.canRedo) {
-      document?.redoLastAction();
-    }
+    this.props.document?.redoLastAction();
   };
 
   private handleTogglePlaybackControlComponent = () => {

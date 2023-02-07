@@ -166,17 +166,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
   }
 
   private handleUndo() {
-    const document = this.props.document;
-    if (document.treeManagerAPI?.undoManager.canUndo) {
-      document.undoLastAction();
-    }
+    this.props.document.undoLastAction();
   }
 
   private handleRedo() {
-    const document = this.props.document;
-    if (document.treeManagerAPI?.undoManager.canRedo) {
-      document.redoLastAction();
-    }
+    this.props.document.redoLastAction();
   }
 
   private handleDelete() {
