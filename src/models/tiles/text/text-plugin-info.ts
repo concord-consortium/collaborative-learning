@@ -8,9 +8,7 @@ export interface ITextPlugin {
 }
 
 export interface IButtonDefProps {
-  editor: Editor;
   pluginInstance?: ITextPlugin;
-  valueRevision: number;
 }
 
 export type ButtonDefComponent = React.FC<IButtonDefProps>;

@@ -44,4 +44,6 @@ TODO:
 - [x] merge master to resolve conflicts
 - [x] update text tile plugin documentation
 - [x] reduce the duplication in the built in tools
-- [ ] review all of the TODOs and FIXMEs
+- [x] review all of the TODOs and FIXMEs
+- [x] prevent the re-rendering of the whole text tile when the editor value is updated. We really only need to refresh the toolbar at this point. Maybe the toolbar can just listen to the editor and update its state instead of relying on the text-tile to do this for it.
+- [x] use context instead of props in text-toolbar.tsx for textContent and pluginInstances. Both of these are available in context.

@@ -2,8 +2,7 @@ import React from "react";
 import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
-  createEditor, defaultHotkeyMap, Editor, EditorValue, normalizeSelection, ReactEditor, Slate, SlateEditor,
-  Transforms
+  createEditor, defaultHotkeyMap, Editor, EditorValue, normalizeSelection, ReactEditor, Slate, SlateEditor
 } from "@concord-consortium/slate-editor";
 import { TextContentModelContext } from "./text-content-context";
 import { BaseComponent } from "../../base";
@@ -80,13 +79,13 @@ import "./text-tile.sass";
 */
 
 interface IState {
-  valueRevision: number;
+  revision: number;
 }
 
 @inject("stores")
 @observer
 export default class TextToolComponent extends BaseComponent<ITileProps, IState> {
-  public state: IState = {valueRevision: 0};
+  public state: IState = { revision: 0 };
   private disposers: IReactionDisposer[];
   private textTileDiv: HTMLElement | null;
   private editor: Editor | undefined;
@@ -101,9 +100,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   public componentDidMount() {
     this.initialValue = this.getContent().asSlate();
-    this.setState({
-      valueRevision: 0
-    });
     this.plugins = createTextPluginInstances(this.props.model.content as TextContentModelType);
     const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate
     // Gather all the plugin init functions and pass that to slate.
@@ -128,10 +124,10 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
         // Update slate when content model changes
         if (!this.isHandlingUserChange) {
           const textContent = this.getContent();
-          this.setState({ valueRevision: this.state.valueRevision + 1 });
           if (this.editor) {
             this.editor.children = textContent.asSlate();
             normalizeSelection(this.editor);
+            this.setState({ revision: this.state.revision + 1 }); // Force a rerender
           }
         }
       }
@@ -212,11 +208,8 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
               />
               <TextToolbarComponent
                 documentContent={documentContent}
-                valueRevision={this.state.valueRevision}
                 tileElt={tileElt}
                 scale={scale}
-                editor={this.editor}
-                pluginInstances={this.plugins}
                 onIsEnabled={this.handleIsEnabled}
                 onRegisterTileApi={this.handleRegisterToolApi}
                 onUnregisterTileApi={this.handleUnregisterToolApi}
@@ -258,7 +251,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     this.isHandlingUserChange = true;
     // Update content model when user changes slate
     content.setSlate(value);
-    this.setState({ valueRevision: this.state.valueRevision + 1 });
     this.isHandlingUserChange = false;
   };
 

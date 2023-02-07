@@ -189,12 +189,12 @@
     "xhr-mock": "^2.5.1"
   },
   "dependencies": {
-    "@concord-consortium/diagram-view": "^0.0.27",
+    "@concord-consortium/diagram-view": "^0.0.28",
     "@concord-consortium/mobx-state-tree": "5.1.5-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",
     "@concord-consortium/rete-react-render-plugin": "^0.2.1-cc.2",
-    "@concord-consortium/slate-editor": "^0.9.0-pre.6",
+    "@concord-consortium/slate-editor": "^0.9.0-pre.7",
     "@dnd-kit/core": "^6.0.5",
     "chart.js": "^2.9.4",
     "classnames": "^2.3.1",

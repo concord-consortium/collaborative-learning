@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { VariableType } from "@concord-consortium/diagram-view";
-import { Editor, ReactEditor, Transforms } from "@concord-consortium/slate-editor";
+import { Editor, ReactEditor, Transforms, useSlate } from "@concord-consortium/slate-editor";
 import { observer } from "mobx-react";
 import { IButtonDefProps, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
 import { TextToolbarButton } from "../../../components/tiles/text/text-toolbar-button";
@@ -81,8 +81,9 @@ function handleClose(editor: Editor) {
 }
 
 export const NewVariableTextButton = observer(function NewVariableTextButton(
-    {editor, pluginInstance}: IButtonDefProps) {
+    {pluginInstance}: IButtonDefProps) {
 
+  const editor = useSlate();
   const variablesPlugin = castToVariablesPlugin(pluginInstance);
 
   const isSelected = false;
@@ -110,7 +111,8 @@ export const NewVariableTextButton = observer(function NewVariableTextButton(
 });
 
 export const InsertVariableTextButton = observer(function InsertVariableTextButton(
-    {editor, pluginInstance}: IButtonDefProps) {
+    {pluginInstance}: IButtonDefProps) {
+  const editor = useSlate();
   const variablesPlugin = castToVariablesPlugin(pluginInstance);
 
   const isSelected = false;
@@ -140,8 +142,9 @@ export const InsertVariableTextButton = observer(function InsertVariableTextButt
 });
 
 export const EditVariableTextButton = observer(function EditVariableTextButton(
-    {editor, pluginInstance}: IButtonDefProps) {
-  const variablesPlugin = castToVariablesPlugin(pluginInstance);
+    {pluginInstance}: IButtonDefProps) {
+    const editor = useSlate();
+    const variablesPlugin = castToVariablesPlugin(pluginInstance);
 
   const isSelected = false;
   const selectedElements = editor?.selectedElements();
