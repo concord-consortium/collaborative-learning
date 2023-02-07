@@ -1,7 +1,7 @@
 {
   "name": "functions",
   "scripts": {
-    "lint": "eslint \"src/**/*\"",
+    "lint": "eslint \"src/**/*\" \"test/**/*\"",
     "build": "./node_modules/typescript/bin/tsc",
     "serve": "npm run build && firebase emulators:start",
     "serve:functions": "npm run build && firebase emulators:start --only functions",
