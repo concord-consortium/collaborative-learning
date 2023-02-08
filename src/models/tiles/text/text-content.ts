@@ -1,6 +1,6 @@
 import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import {
-  htmlToSlate, slateToHtml, textToSlate, EditorValue, serializeValue, convertDocument, Editor, CustomEditor
+  convertDocument, CustomEditor, Editor, EditorValue, htmlToSlate, serializeValue, slateToHtml, textToSlate
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tile-content-info";
 import { TileContentModel } from "../tile-content";

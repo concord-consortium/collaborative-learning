@@ -120,6 +120,10 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const { document: { content } } = this.props;
     const { appConfig: { settings }, ui: { selectedTileIds } } = this.stores;
 
+    const undoManager = this.props.document.treeManagerAPI?.undoManager;
+    if (toolButton.id === "undo" && !undoManager?.canUndo) return true;
+    if (toolButton.id === "redo" && !undoManager?.canRedo) return true;
+
     // If no tiles are selected, disable the delete button.
     if (toolButton.id === "delete" && !selectedTileIds.length) return true;
 

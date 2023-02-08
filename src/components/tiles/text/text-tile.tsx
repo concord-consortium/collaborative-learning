@@ -2,7 +2,7 @@ import React from "react";
 import { IReactionDisposer, reaction } from "mobx";
 import { observer, inject } from "mobx-react";
 import {
-  createEditor, Editor, EditorValue, ReactEditor, Slate, SlateEditor
+  createEditor, defaultHotkeyMap, Editor, EditorValue, normalizeSelection, ReactEditor, Slate, SlateEditor
 } from "@concord-consortium/slate-editor";
 import { TextContentModelContext } from "./text-content-context";
 import { BaseComponent } from "../../base";
@@ -79,32 +79,27 @@ import "./text-tile.sass";
 */
 
 interface IState {
-  value?: EditorValue;
-  editing?: boolean;
+  revision: number;
+  initialValue?: EditorValue;
 }
 
 @inject("stores")
 @observer
 export default class TextToolComponent extends BaseComponent<ITileProps, IState> {
-  public state: IState = {};
+  public state: IState = { revision: 0 };
   private disposers: IReactionDisposer[];
-  private prevText: any;
   private textTileDiv: HTMLElement | null;
   private editor: Editor | undefined;
   private tileContentRect: DOMRectReadOnly;
   private toolbarTileApi: ITileApi | undefined;
   private textOnFocus: string | string [] | undefined;
+  private isHandlingUserChange = false;
 
   // plugins are exposed to making testing easier
   plugins: Record<string, ITextPlugin|undefined>;
 
   public componentDidMount() {
-    const initialTextContent = this.getContent();
-    this.prevText = initialTextContent.text;
-    const initialValue = initialTextContent.asSlate();
-    this.setState({
-      value: initialValue
-    });
+    this.setState({ initialValue: this.getContent().asSlate() });
     this.plugins = createTextPluginInstances(this.props.model.content as TextContentModelType);
     const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate
     // Gather all the plugin init functions and pass that to slate.
@@ -117,31 +112,22 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       return e;
     };
     options.onInitEditor = onInitEditor;
-    options.history = true;
+    options.history = false;
     this.editor = createEditor(options);
     this.getContent().setEditor(this.editor);
 
     this.disposers = [];
     // Synchronize slate with model changes. e.g. changes to any text in another tile is refelected here.
     this.disposers.push(reaction(
+      () => this.getContent().text,
       () => {
-        const readOnly = this.props.readOnly;
-        const editing = this.state.editing;
-        const text = this.getContent().text;
-        return { readOnly, editing, text };
-      },
-      ({ readOnly, editing, text }) => {
-        if (readOnly || !editing) {
-          if (this.prevText !== text) {
-            const textContent = this.getContent();
-            this.setState({ value: textContent.asSlate() });
-            // Tell the editor to update since the value prop is only used for the initial value in slate.
-            // See the bottom of https://docs.slatejs.org/walkthroughs/06-saving-to-a-database.
-            if (this.editor) {
-              this.editor.children = textContent.asSlate();
-              this.editor.onChange();
-            }
-            this.prevText = text;
+        // Update slate when content model changes
+        if (!this.isHandlingUserChange) {
+          const textContent = this.getContent();
+          if (this.editor) {
+            this.editor.children = textContent.asSlate();
+            normalizeSelection(this.editor);
+            this.setState({ revision: this.state.revision + 1 }); // Force a rerender
           }
         }
       }
@@ -186,14 +172,13 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
 
   public render() {
     const { documentContent, tileElt, readOnly, scale } = this.props;
-    const { value: editorValue } = this.state;
     const { appConfig: { placeholderText } } = this.stores;
     const editableClass = readOnly ? "read-only" : "editable";
     // Ideally this would just be 'text-tool-editor', but 'text-tool' has been
     // used here for a while now and cypress tests depend on it. Should transition
     // to using 'text-tool-editor' for these purposes moving forward.
     const classes = `text-tool text-tool-editor ${editableClass}`;
-    if (!editorValue) return null;
+    if (!this.state.initialValue) return null;
 
     return (
       // Ideally, this would just be 'text-tool' for consistency with other tools,
@@ -206,13 +191,16 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
           <div className={`text-tool-wrapper ${readOnly ? "" : "editable"}`}
             data-testid="text-tool-wrapper"
             ref={elt => this.textTileDiv = elt}
-            onMouseDown={this.handleMouseDownInWrapper}>
+            onMouseDown={this.handleMouseDownInWrapper}
+          >
             <Slate
-                editor={this.editor as ReactEditor}
-                value={editorValue}
-                onChange={this.handleChange}>
+              editor={this.editor as ReactEditor}
+              value={this.state.initialValue}
+              onChange={this.handleChange}
+            >
               <SlateEditor
                 placeholder={placeholderText}
+                hotkeyMap={defaultHotkeyMap}
                 readOnly={readOnly}
                 onFocus={this.handleFocus}
                 onBlur={this.handleBlur}
@@ -252,7 +240,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   };
 
   private handleChange = (value: EditorValue) => {
-    const { readOnly, model } = this.props;
+    const { model } = this.props;
     const content = this.getContent();
     const { ui } = this.stores;
 
@@ -260,12 +248,10 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       debouncedSelectTile(ui, model);
     }
 
-    if (content.type === "Text" && !readOnly) {
-      content.setSlate(value);
-      this.setState({
-        value
-      });
-    }
+    this.isHandlingUserChange = true;
+    // Update content model when user changes slate
+    content.setSlate(value);
+    this.isHandlingUserChange = false;
   };
 
   private handleMouseDownInWrapper = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -285,16 +271,15 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   }
 
   private handleBlur = () => {
-    this.setState({ editing: false });
     // If the text has changed since the editor was focused, log the new text.
-    if (this.getContent().text !== this.textOnFocus) {
-      const change = {args:[{text: this.getContent().text}]};
+    const text = this.getContent().text;
+    if (text !== this.textOnFocus) {
+      const change = {args:[{ text }]};
       logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, { operation: 'update', change, tileId: this.props.model.id });
     }
   };
 
   private handleFocus = () => {
     this.textOnFocus = this.getContent().text;
-    this.setState({ editing: true });
   };
 }

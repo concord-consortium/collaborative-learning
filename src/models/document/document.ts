@@ -319,10 +319,16 @@ export const DocumentModel = Tree.named("Document")
       addDisposer(self, () => destroy(manager));
     },
     undoLastAction() {
-      self.treeManagerAPI?.undoManager.undo();
+      const undoManager = self.treeManagerAPI?.undoManager;
+      if (undoManager?.canUndo) {
+        undoManager.undo();
+      }
     },
     redoLastAction() {
-      self.treeManagerAPI?.undoManager.redo();
+      const undoManager = self.treeManagerAPI?.undoManager;
+      if (undoManager?.canRedo) {
+        undoManager.redo();
+      }
     },
   }));
 
