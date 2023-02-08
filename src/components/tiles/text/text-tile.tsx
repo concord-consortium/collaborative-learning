@@ -80,6 +80,7 @@ import "./text-tile.sass";
 
 interface IState {
   revision: number;
+  initialValue?: EditorValue;
 }
 
 @inject("stores")
@@ -93,13 +94,12 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   private toolbarTileApi: ITileApi | undefined;
   private textOnFocus: string | string [] | undefined;
   private isHandlingUserChange = false;
-  private initialValue: EditorValue;
 
   // plugins are exposed to making testing easier
   plugins: Record<string, ITextPlugin|undefined>;
 
   public componentDidMount() {
-    this.initialValue = this.getContent().asSlate();
+    this.setState({ initialValue: this.getContent().asSlate() });
     this.plugins = createTextPluginInstances(this.props.model.content as TextContentModelType);
     const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate
     // Gather all the plugin init functions and pass that to slate.
@@ -178,7 +178,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     // used here for a while now and cypress tests depend on it. Should transition
     // to using 'text-tool-editor' for these purposes moving forward.
     const classes = `text-tool text-tool-editor ${editableClass}`;
-    if (!this.initialValue) return null;
+    if (!this.state.initialValue) return null;
 
     return (
       // Ideally, this would just be 'text-tool' for consistency with other tools,
@@ -195,7 +195,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
           >
             <Slate
               editor={this.editor as ReactEditor}
-              value={this.initialValue}
+              value={this.state.initialValue}
               onChange={this.handleChange}
             >
               <SlateEditor
