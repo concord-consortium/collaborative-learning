@@ -1,4 +1,4 @@
-import { castArray, each, filter, find, keys as _keys, throttle, uniq, values } from "lodash";
+import { castArray, each, filter, find, keys as _keys, throttle, values } from "lodash";
 import { observe, reaction } from "mobx";
 import { inject, observer } from "mobx-react";
 import { getSnapshot, onSnapshot } from "mobx-state-tree";
@@ -107,11 +107,6 @@ interface IPasteContent {
   pasteId: string;
   isSameTile: boolean;
   objects: GeometryObjectModelType[];
-}
-
-interface ObjectSummary {
-  id: string,
-  type: string
 }
 
 let sInstanceId = 0;
@@ -601,13 +596,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
     this.recreateSharedPoints(board);
 
-    const syncCheck = this.checkCleanJXG(board);
-    if (syncCheck.jxgMissing.length > 0){
-      const modelObjectsToConvert: GeometryObjectModelType[] = [];
-      syncCheck.jxgMissing.forEach((o: ObjectSummary) => {
-        const modelObject = this.getContent().getObject(o.id);
-        if (modelObject) modelObjectsToConvert.push(modelObject);
-      });
+    // identify objects that exist in the model but not in JSXGraph
+    const modelObjectsToConvert: GeometryObjectModelType[] = [];
+    this.getContent().objects.forEach(obj => {
+      if (!board.objects[obj.id]) {
+        modelObjectsToConvert.push(obj);
+      }
+    });
+
+    if (modelObjectsToConvert.length > 0) {
       const changesToApply = convertModelObjectsToChanges(modelObjectsToConvert);
       applyChanges(board, changesToApply);
     }
@@ -616,6 +613,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     this.rescaleBoardAndAxes(extents);
   }
 
+  // remove/recreate all linked points
+  // TODO: A more tailored response would match up the existing points with the data set and only
+  // change the affected points, which would eliminate some visual flashing that occurs when
+  // unchanged points are re-created and would allow derived polygons to be preserved.
   recreateSharedPoints(board: JXG.Board){
     const ids = getAllLinkedPoints(board);
     applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
@@ -639,31 +640,6 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const pts = applyChange(board, { operation: "create", target: "linkedPoint", parents, properties, links });
       castArray(pts || []).forEach(pt => !isBoard(pt) && this.handleCreateElements(pt));
     });
-  }
-
-  checkCleanJXG(board: JXG.Board){
-    const modelSummary: ObjectSummary[] = [];
-    const jxgSummary: ObjectSummary[] = [];
-    const jxgMissing: ObjectSummary[] = [];
-
-    for (const [key] of this.getContent().objects){
-      const objectInModel = this.getContent().getObject(key);
-      if (objectInModel) modelSummary.push({id: key, type: objectInModel.type});
-    }
-
-    const matchAll = (obj: JXG.GeometryElement) => obj.elType !== undefined;
-    const allJXGObjects = this.getContent().findObjects(board, matchAll);
-    allJXGObjects.forEach(o => jxgSummary.push({ id: o.id, type: o.elType }));
-
-    const uniques = uniq(allJXGObjects);
-    const jxgHasRedundancies = allJXGObjects.length > uniques.length;
-
-    modelSummary.forEach((modelSummaryItem: ObjectSummary) => {
-      const foundMatchingJXG = jxgSummary.find((jxgItem: any) => jxgItem.id === modelSummaryItem.id);
-      if (!foundMatchingJXG) jxgMissing.push(modelSummaryItem);
-    });
-
-    return { jxgMissing, jxgHasRedundancies };
   }
 
   private handleArrowKeys = (e: React.KeyboardEvent, keys: string) => {
