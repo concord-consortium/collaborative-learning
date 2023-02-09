@@ -558,15 +558,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private rescaleBoardAndAxes(params: IAxesParams) {
     const { board } = this.state;
-    if (board) {
-      this.applyChange(() => {
-        const content = this.getContent();
-        const axes = content.rescaleBoard(board, params);
-        if (axes) {
-          axes.forEach(this.handleCreateAxis);
-        }
-      });
-    }
+    if (!board) return;
+
+    this.applyChange(() => {
+      const content = this.getContent();
+      const axes = content.rescaleBoard(board, params);
+      if (axes) {
+        axes.forEach(this.handleCreateAxis);
+      }
+    });
   }
 
   private getBoardPointsExtents(board: JXG.Board){
@@ -579,12 +579,10 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       if (obj.elType === "point"){
         const pointX = obj.coords.usrCoords[1];
         const pointY = obj.coords.usrCoords[2];
-        // leave a proportional amount of room for title
-        const extraY = Math.abs(pointY) * .15;
         if (pointX < xMin) xMin = pointX - 1;
         if (pointX > xMax) xMax = pointX + 1;
         if (pointY < yMin) yMin = pointY - 1;
-        if (pointY > yMax) yMax = pointY + 1 + extraY;
+        if (pointY > yMax) yMax = pointY + 1;
       }
     });
     return { xMax, yMax, xMin, yMin };
