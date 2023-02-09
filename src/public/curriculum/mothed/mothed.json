@@ -86,7 +86,7 @@
             },
             {
               "initials": "TB",
-              "title": "Trap Building",
+              "title": "Trapping",
               "type": "problem-documents"
             },
             {
@@ -184,7 +184,7 @@
     },
     "trapBuilding": {
       "initials": "TB",
-      "title": "Trap Building",
+      "title": "Trapping",
       "placeholder": "Document your moth traps"
     },
     "pinning": {
@@ -590,13 +590,13 @@
                     }
                   },
                   {
-                    "id": "i9HvFETZSIBEzeRF",
+                    "id": "7LsyQw_Y-vgn2tWN",
+                    "title": "Text 5",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>When ready, share with the group</strong></p>",
-                        "<p>Use the group controls so that you can see and share each others&#x27; notes. See the image for how to do that.  (Ignore the &quot;Publish&quot; feature for now). Discuss with each other, and when you are done, you can publish your answers to the class as shown in the picture below. </p>"
+                        "<p><strong>When ready, share with the group</strong></p><ol><li><strong>Use the group controls</strong> to see and share each others&#x27; notes. The image below shows how to do that. Then <strong>discuss the questions</strong> with each other and figure out an investigable research question for your group project. </li><li><strong>Decide</strong> which question your group wants to investigate. </li><p><em><a href='https://docs.google.com/document/d/1S8vVKR5Zggr6hWGxvshb_mN6SMjgGOl1NZ0GO2jnz5c/edit?usp=sharing'>Developing an investigable question</a></em></p><li><strong>Publish</strong> your group&#x27;s research question to the class. The image below shows how to do that.</li></ol><p><em></em></p><p>Here&#x27;s the link for above.  </p>"
                       ]
                     }
                   },
@@ -618,6 +618,25 @@
                 "tiles":
                 [
                   {
+                    "id": "1WaqeLKS-DKS5B5n",
+                    "title": "Text 2",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Building your trap</h2>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "-i5DaNf-CUUJSvUO2022",
+                    "title": "Diagram of the Trap You'll Build!",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/mothTrapAssembly.png"
+                    }
+                  },
+                  {
                     "id": "WgvCVh_rfY1KzMVH",
                     "content": {
                       "type": "Text",
@@ -629,11 +648,25 @@
                     }
                   },
                   {
-                    "id": "-i5DaNf-CUUJSvUO2022",
-                    "title": "Diagram of the Trap You'll Build!",
+                    "id": "EchD_qdsVvHLy-mu",
+                    "title": "Text 8",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/mothed/images/mothTrapAssembly.png"
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Design an experiment to answer your research question</h2>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "iqu4ljTFLIAWs2Gj",
+                    "title": "Text 4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>What are you investigating?  How will you investigate? What do you think you&#x27;ll find? Make your own notes in a text tile so your group can share and discuss.</p>"
+                      ]
                     }
                   }
                 ]
@@ -644,15 +677,76 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "XejN-F7hDWsdjxpt",
+                    "title": "Text 13",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Pin and organize your moths</h2>"
+                      ]
+                    }
+                  },
+                  {
                     "id": "R9NR96j-7MyF-Z2y",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Moth Pinning Video</strong></p>",
-                        "<p>Learn how to pin moths for studying, comparing, and identifying them.</p>",
+                        "<p>for studying, comparing, and identifying them.</p>",
                         "<p>MSU Team Moth <a href='https://drive.google.com/file/d/1sVzZNz_2TR9jvpveACbKpBR6M7JA4IhH/view?usp=drivesdk'>Pinning Tutorial</a></p>",
-                        "<p>Oregon State <a href='https://extension.oregonstate.edu/video/pinning-butterflies-moths'>Pinning Tutorial</a></p>"
+                        "<p>Oregon State <a href='https://extension.oregonstate.edu/video/pinning-butterflies-moths'>Pinning Tutorial</a></p>",
+                        "<p><strong>Organizing your moths</strong></p>",
+                        "Think about pinning the moths in categories that will help answer your group's research question. ",
+                        "<p><strong>Would data cards or a table help you get organized?</strong></p>",
+                        "You can start with the card below and add cards. Or to make your own, click the data card icon on the tool bar.  Decide which labels you want to add. "
+                      ]
+                    }
+                  },
+                  {
+                    "id": "MJR4ZpqhE9UX0GH4",
+                    "title": "Data Cards - press the fourth toolbar button",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/mothed/images/dataCard.png",
+                      "filename": "curriculum/mothed/images/dataCard.png"
+                    }
+                  },
+                  {
+                    "id": "1WcMxVhDjM_iQviT",
+                    "title": "Text 11",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Or, click the table icon in the toolbar and decide on column titles you want to add. You can start with the table below, or make your own. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "hmo9bA0tWyHk-f2t",
+                    "title": "Table 1",
+                    "content": {
+                      "type": "Table",
+                      "name": "Table 1",
+                      "columns": [
+                        {"name":"moth","width":80},
+                        {"name":"date","width":80},
+                        {"name":"weather","width":92},
+                        {"name":"color","width":80},
+                        {"name":"column title","width":94}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ffP5vaAz9sV-f2d5",
+                    "title": "Text 12",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Share your findings </strong></p><p>...with your group<strong> </strong>to discuss what you are learning.</p>"
                       ]
                     }
                   }
@@ -686,6 +780,17 @@
               "type": "summary",
               "content": {
                 "tiles": [
+                  {
+                    "id": "idJFe3ije4divnPF",
+                    "title": "Text 16",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Summarize your investigation</h2>"
+                      ]
+                    }
+                  },
                   {
                     "id": "Fy1q3E87LcaOpGRS",
                     "content": {
