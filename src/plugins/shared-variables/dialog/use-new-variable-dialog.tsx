@@ -24,10 +24,10 @@ export const useNewVariableDialog = ({ addVariable, sharedModel, namePrefill, on
     Icon: AddVariableChipIcon,
     title: "New Variable",
     Content: EditVariableDialogContent,
-    contentProps: { variable: newVariable },
+    contentProps: { variableClone: newVariable },
     buttons: [
       { label: "Cancel" },
-      { label: "OK",
+      { label: "Save",
         isDefault: true,
         isDisabled: false,
         onClick: handleClick

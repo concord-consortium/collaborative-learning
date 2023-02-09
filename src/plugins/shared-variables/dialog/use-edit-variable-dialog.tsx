@@ -24,10 +24,13 @@ export const useEditVariableDialog = ({ variable, onClose }: IProps) => {
     Icon: VariableEditorIcon,
     title: "Variable Editor",
     Content: EditVariableDialogContent,
-    contentProps: { variable: variableClone },
+    // Because variableClone is created from a snapshot, it will not have computed values
+    // related to the original variable's inputs. We will need to get those values from the
+    // original variable. So pass both variable and variableClone to EditVariableDialogContent
+    contentProps: { variable, variableClone },
     buttons: [
       { label: "Cancel" },
-      { label: "OK",
+      { label: "Save",
         isDefault: true,
         isDisabled: !variable,
         onClick: handleClick
