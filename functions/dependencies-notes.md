@@ -38,8 +38,13 @@ I found this blog post and repo:
 https://timo-santi.medium.com/jest-testing-firebase-functions-with-emulator-suite-409907f31f39
 https://github.com/diginikkari/jest-testing-firebase-functions-with-emulator-suite
 
-Which describes how to work with the emulator to unit test firebase functions. It does not use the rules-unit-testing package.   Instead it seems to just set the `FIRESTORE_EMULATOR_HOST` environment variable and then call `admin.initializeProject` with a different `projectId` on each test. This repo is out of date though, so I think a first step would be to clone it and then upgrade the dependencies to see if the approach still works with the latest firebase packages.
+And here is another one:
+https://laurentcazanove.com/articles/testing-firebase-functions-with-emulators-suite/
 
-A key thing for our tests would be an emulator of the firebase realtime database. The firebase emulator now supports this, so hopefully it could be used as well. And this would allow us to remove all mocking from the functions.
+They both describe the same pattern for working with the emulator to unit test firebase functions. They do not use the `rules-unit-testing package`.  Instead they use `firebase-functions-test` and set environment variables to modify the behavior of the firestore packages. In the first `FIRESTORE_EMULATOR_HOST` environment variable is used. In the second `FIREBASE_AUTH_EMULATOR_HOST` is used. `firebase-functions-test` provides methods for clearing the firestore data like `clearFirestoreData` that we are using from `rules-unit-testing package`.
+
+The first one also calls `admin.initializeProject` with a different `projectId` on each test. Both approaches are from 2021 though, so I think a first step would be to clone the first one and then upgrade the dependencies to see if the approach still works with the latest firebase packages.
+
+Something neither blog post describes is emulating the firebase realtime database. Our functions require this and the emulator supports it, so hopefully it is just another environment variable we can set. This would allow us to remove all mocking from the functions.
 
 It is likely that we'll have to populate the realtime database and firestore emulators with seed data before the tests can be successfully run.
