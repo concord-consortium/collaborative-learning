@@ -1,17 +1,13 @@
 import {
-  apps, clearFirestoreData, initializeAdminApp, useEmulators
-} from "@firebase/rules-unit-testing";
+  apps, clearFirestoreData, initializeAdminApp} from "@firebase/rules-unit-testing";
 import { getNetworkResources } from "../src/get-network-resources";
 import { IGetNetworkResourcesParams } from "../src/shared";
 import {
-  kClassHash, kOffering1Id, kOffering2Id, kOtherClassHash, kProblemPath,
+  configEmulators, kClassHash, kOffering1Id, kOffering2Id, kOtherClassHash, kProblemPath,
   kTeacherName, kTeacherNetwork, kUserId, specAuth, specUserContext
 } from "./test-utils";
 
-useEmulators({
-  database: { host: "localhost", port: 9000 },
-  firestore: { host: "localhost", port: 8088 }
-});
+configEmulators();
 
 // Considerable trial and error was required to come up with this mock
 // Initialize the mock admin app using initializeAdminApp from @firebase/rules-unit-testing
@@ -21,7 +17,7 @@ const mockAdmin = initializeAdminApp({ databaseName: kCLUEFirebaseProjectId, pro
 // by default get requests respond as though the requested data doesn't exist
 // test can override via mockDatabaseGet.mockImplementation(path => ...) to return
 // appropriate data based on the path requested.
-var mockDatabaseGet = jest.fn();
+const mockDatabaseGet = jest.fn();
 
 // Mock the actual "firebase-admin" module so that clients get our mock instead
 jest.mock('firebase-admin', () => {

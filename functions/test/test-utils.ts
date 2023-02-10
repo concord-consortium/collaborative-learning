@@ -1,7 +1,10 @@
+import { useEmulators } from "@firebase/rules-unit-testing";
 import { AuthData } from "firebase-functions/lib/common/providers/https";
 import { DeepPartial } from "utility-types";
 import { IRowMapEntry, ITileMapEntry, IUserContext } from "../src/shared";
 
+// You might need to switch this to "localhost" if 127.0.0.1 doesn't work for you
+export const kEmulatorHost = "127.0.0.1";
 export const kPortal = "test.portal";
 export const kClaimPortal = "https://test.portal";
 export const kCanonicalPortal = "test_portal";
@@ -31,6 +34,12 @@ export const kProblemPath = "abc/1/2";
 export const kCurriculumKey = `${kProblemPath}/intro`;
 export const kCreatedAt = Date.now();
 
+export const configEmulators = () => {
+  useEmulators({
+    database: { host: kEmulatorHost, port: 9000 },
+    firestore: { host: kEmulatorHost, port: 8088 }
+  });
+}
 
 export const specUserContext = (overrides?: Partial<IUserContext>, exclude?: string[]): IUserContext => {
   // default to authed mode unless another mode specified

@@ -1,20 +1,16 @@
 import {
-  apps, clearFirestoreData, initializeAdminApp, useEmulators
-} from "@firebase/rules-unit-testing";
+  apps, clearFirestoreData, initializeAdminApp} from "@firebase/rules-unit-testing";
 import { postDocumentComment } from "../src/post-document-comment";
 import {
   ICurriculumMetadata, IDocumentMetadata, IPostDocumentCommentParams, isCurriculumMetadata,
   IUserContext, networkDocumentKey
 } from "../src/shared";
 import {
-  kCanonicalPortal, kClassHash, kCurriculumKey, kDemoName, kDocumentKey, kDocumentType, kFirebaseUserId,
+  configEmulators, kCanonicalPortal, kCurriculumKey, kDemoName, kDocumentKey, kDocumentType, kFirebaseUserId,
   kTeacherName, kTeacherNetwork, kUserId, specAuth, specUserContext
 } from "./test-utils";
 
-useEmulators({
-  database: { host: "localhost", port: 9000 },
-  firestore: { host: "localhost", port: 8088 }
-});
+configEmulators();
 
 // Considerable trial and error was required to come up with this mock
 // Initialize the mock admin app using initializeAdminApp from @firebase/rules-unit-testing
