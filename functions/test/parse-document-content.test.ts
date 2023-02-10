@@ -15,7 +15,7 @@ describe("parseDocumentContent", () => {
     expect(await parseDocumentContent(kEmptyContent, identityCanonicalize)).toEqual({ content: kEmptyContent, images: {} });
   });
 
-  it("should parse a old single Image tile with legacy url", async () => {
+  it("should parse an old single Image tile with legacy url", async () => {
     const kClassHash = "class-hash";
     const canonicalUrl = buildFirebaseImageUrl(kClassHash, "image-key");
     const { legacyUrl } = parseFirebaseImageUrl(canonicalUrl);
@@ -84,7 +84,7 @@ describe("parseDocumentContent", () => {
       .toEqual({ content: updatedContent, images: { [legacyUrl1]: canonicalUrl1, [legacyUrl2]: canonicalUrl2 } });
   });
 
-  it("should support multiple images in an new Drawing tile", async () => {
+  it("should support multiple images in a new Drawing tile", async () => {
     const kClassHash = "class-hash";
     const canonicalUrl1 = buildFirebaseImageUrl(kClassHash, "image-1");
     const canonicalUrl2 = buildFirebaseImageUrl(kClassHash, "image-2");
@@ -105,7 +105,7 @@ describe("parseDocumentContent", () => {
       .toEqual({ content: updatedContent, images: { [legacyUrl1]: canonicalUrl1, [legacyUrl2]: canonicalUrl2 } });
   });
 
-  it("should support an image in an new Geometry tile", async () => {
+  it("should support an image in a new Geometry tile", async () => {
     const kClassHash = "class-hash";
     const canonicalUrl1 = buildFirebaseImageUrl(kClassHash, "image-1");
     const { legacyUrl: legacyUrl1 } = parseFirebaseImageUrl(canonicalUrl1);
