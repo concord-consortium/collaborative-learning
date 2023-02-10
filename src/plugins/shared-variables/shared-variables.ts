@@ -21,6 +21,13 @@ export const SharedVariables = SharedModel.named("SharedVariables")
   }
 }))
 .actions(self => ({
+  addAndInsertVariable(variable: VariableType, insertVariable: (variable: VariableType) => void) {
+    self.addVariable(variable);
+    const addedVariable = self.variables.find(v => v === variable);
+    if (addedVariable) {
+      insertVariable(addedVariable);
+    }
+  },
   createVariable(): VariableType {
     const variable = Variable.create();
     self.addVariable(variable);

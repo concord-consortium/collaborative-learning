@@ -70,12 +70,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       this.handleDragNewTile(tool, e);
     };
     const renderToolButtons = (toolbarModel: IToolbarModel) => {
-      const { ui: { selectedTileIds } } = this.stores;
       return toolbarModel.map(toolButton => {
         const buttonProps: IToolbarButtonProps = {
           toolButton,
           isActive: toolButton === this.state.activeTool,
-          isDisabled: toolButton.id === "delete" && !selectedTileIds.length,
+          isDisabled: this.isButtonDisabled(toolButton),
           onSetToolActive: handleSetActiveTool,
           onClick: handleClickTool,
           onDragStart: handleDragTool,
@@ -115,6 +114,29 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const { type, titleBase } = tileContentInfo;
     const getTileTitle = (tileId: string) => tileApiInterface?.getTileApi(tileId)?.getTitle?.();
     return titleBase && document.getUniqueTitle(type, titleBase, getTileTitle);
+  }
+
+  private isButtonDisabled(toolButton: IToolbarButtonModel) {
+    const { document: { content } } = this.props;
+    const { appConfig: { settings }, ui: { selectedTileIds } } = this.stores;
+
+    const undoManager = this.props.document.treeManagerAPI?.undoManager;
+    if (toolButton.id === "undo" && !undoManager?.canUndo) return true;
+    if (toolButton.id === "redo" && !undoManager?.canRedo) return true;
+
+    // If no tiles are selected, disable the delete button.
+    if (toolButton.id === "delete" && !selectedTileIds.length) return true;
+
+    if (toolButton.isTileTool && settings) {
+      // If a limit on the number of tiles of a certain type has been specified in settings,
+      // disable the related tile button when that limit is reached.
+      const tilesOfTypeCount = content?.getTilesOfType(toolButton.id).length || 0;
+      const tileSettings = settings[toolButton.id.toLowerCase()] as Record<string, any>;
+      const maxTilesOfType = tileSettings ? tileSettings.maxTiles : undefined;
+      if (maxTilesOfType && tilesOfTypeCount >= maxTilesOfType) return true;
+    }
+
+    return false;
   }
 
   private handleAddTile(tool: IToolbarButtonModel) {

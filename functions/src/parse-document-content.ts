@@ -2,11 +2,15 @@ import { IDocumentContent } from "./shared";
 import { matchAll, parseFirebaseImageUrl, replaceAll, safeJsonParse } from "./shared-utils";
 
 // regular expression for identifying firebase image urls in document content
-// capture group 1: "url" (Drawing, Image) or "parents" (Geometry)
-//                       |-------------------------|
-// capture group 2: image url                            |---------------------------------------|
-// capture group 3: image key (includes class hash for modern image urls)                 |-----|
-const kImageUrlRegex = /(\\"url\\":|\\"parents\\":\[)\\"(ccimg:\/\/fbrtdb\.concord\.org\/([^\\"]+))\\"/g;
+// In some tile state the image URLS are inside of a double escaped JSON. This means
+// they will be in a string like \"url\" because the quotes have to be escaped.
+// This is why in the regex below the URL is terminated either by \\" or "
+//
+// capture group 1: image url
+//                        |---------------------------------------|
+// capture group 2: image key (includes class hash for modern image urls)
+//                                                         |-----|
+const kImageUrlRegex = /"(ccimg:\/\/fbrtdb\.concord\.org\/([^\\"]+))\\?"/g;
 
 interface IImageInfo {
   url: string;
@@ -33,7 +37,7 @@ export async function parseDocumentContent(contentJson: string, canonicalizeUrl:
   imageTiles.forEach(({ type: tileType, content: tileContent }) => {
     const imageMatches = matchAll(kImageUrlRegex, tileContent)
                           .map(match => {
-                            const [ , , url, path] = match;
+                            const [ , url, path] = match;
                             const { imageKey: key = path, legacyUrl } = parseFirebaseImageUrl(url);
                             return { url, legacyUrl, key };
                           });

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { EditVariableDialogContent, Variable, VariableType } from "@concord-consortium/diagram-view";
 
@@ -8,21 +8,19 @@ import { SharedVariablesType } from "../shared-variables";
 
 interface IUseNewVariableDialog {
   addVariable: (variable: VariableType ) => void;
-  sharedModel: SharedVariablesType;
+  sharedModel?: SharedVariablesType;
+  namePrefill? : string;
+  onClose?: () => void;
 }
-export const useNewVariableDialog = ({ addVariable, sharedModel }: IUseNewVariableDialog) => {
-  const [newVariable, setNewVariable] = useState(Variable.create({}));
+export const useNewVariableDialog = ({ addVariable, sharedModel, namePrefill, onClose }: IUseNewVariableDialog) => {
+  const [newVariable, setNewVariable] = useState(Variable.create({name: namePrefill || undefined}));
 
   const handleClick = () => {
-    sharedModel.addVariable(newVariable);
-    const sharedVariable = sharedModel?.variables.find(v => v === newVariable);
-    if (sharedVariable) {
-      addVariable(sharedVariable);
-    }
-    setNewVariable(Variable.create({}));
+    sharedModel?.addAndInsertVariable(newVariable, (variable: VariableType) => addVariable(variable));
+    setNewVariable(Variable.create({name: namePrefill || undefined}));
   };
 
-  const [showModal, hideModal] = useCustomModal({
+  const [show, hideModal] = useCustomModal({
     Icon: AddVariableChipIcon,
     title: "New Variable",
     Content: EditVariableDialogContent,
@@ -34,8 +32,17 @@ export const useNewVariableDialog = ({ addVariable, sharedModel }: IUseNewVariab
         isDisabled: false,
         onClick: handleClick
       }
-    ]
+    ],
+    onClose
   }, [addVariable, newVariable]);
+
+  // Wrap useCustomModal's show so we can prefill with variable name
+  const showModal = useCallback(() => {
+    if (namePrefill) {
+      newVariable.setName(namePrefill);
+    }
+    show();
+  }, [namePrefill, newVariable, show]);
 
   return [showModal, hideModal];
 };

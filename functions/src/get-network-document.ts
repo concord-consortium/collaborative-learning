@@ -6,7 +6,7 @@ import { IGetNetworkDocumentUnionParams, isWarmUpParams } from "./shared";
 import { validateUserContext } from "./user-context";
 
 // update this when deploying updates to this function
-const version = "1.0.1";
+const version = "1.0.2";
 
 export async function getNetworkDocument(
                         params?: IGetNetworkDocumentUnionParams,

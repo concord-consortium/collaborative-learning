@@ -1,7 +1,10 @@
+import { useEmulators } from "@firebase/rules-unit-testing";
 import { AuthData } from "firebase-functions/lib/common/providers/https";
 import { DeepPartial } from "utility-types";
 import { IRowMapEntry, ITileMapEntry, IUserContext } from "../src/shared";
 
+// You might need to switch this to "localhost" if 127.0.0.1 doesn't work for you
+export const kEmulatorHost = "127.0.0.1";
 export const kPortal = "test.portal";
 export const kClaimPortal = "https://test.portal";
 export const kCanonicalPortal = "test_portal";
@@ -31,6 +34,12 @@ export const kProblemPath = "abc/1/2";
 export const kCurriculumKey = `${kProblemPath}/intro`;
 export const kCreatedAt = Date.now();
 
+export const configEmulators = () => {
+  useEmulators({
+    database: { host: kEmulatorHost, port: 9000 },
+    firestore: { host: kEmulatorHost, port: 8088 }
+  });
+}
 
 export const specUserContext = (overrides?: Partial<IUserContext>, exclude?: string[]): IUserContext => {
   // default to authed mode unless another mode specified
@@ -101,15 +110,32 @@ export const specAuth = (overrides?: DeepPartial<AuthData>, exclude?: string[]):
   };
 };
 
-export function specDocumentContent(tiles: Array<{ type: string, changes: Object[] }> = []) {
+interface ITileSpec {
+  type: string;
+  changes?: Object[];
+  [otherProperties: string]: unknown;
+}
+
+/**
+ * This will generate a document content from an array of tiles If the tile
+ * contains a `changes` property it will be converted to strings. This `changes`
+ * property was used in the old state format of tiles.
+ *
+ * @param tiles
+ * @returns
+ */
+export function specDocumentContent(tiles: Array<ITileSpec> = []) {
   const rowMap: Record<string, IRowMapEntry> = {};
   const rowOrder: string[] = [];
   const tileMap: Record<string, ITileMapEntry> = {};
   tiles.forEach((tile, i) => {
     // single tile per row for simplicity
-    const tileId = `tile-${i}`
-    const tileChanges = tile.changes.map(change => JSON.stringify(change));
-    const tileContent = { type: tile.type, changes: tileChanges };
+    const tileId = `tile-${i}`;
+    const tileContent = tile;
+    if (tile.changes) {
+      const tileChanges = tile.changes.map(change => JSON.stringify(change));
+      tile.changes = tileChanges;
+    }
     const row: IRowMapEntry = { id: `row-${i}`, tiles: [{ tileId }]};
     rowMap[row.id] = row;
     rowOrder.push(row.id);

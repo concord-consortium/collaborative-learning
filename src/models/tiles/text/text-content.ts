@@ -1,9 +1,6 @@
-import { types, Instance } from "mobx-state-tree";
-import { Value } from "slate";
-import Plain from "slate-plain-serializer";
-import Markdown from "slate-md-serializer";
+import { types, Instance, SnapshotIn } from "mobx-state-tree";
 import {
-  deserializeValueFromLegacy, Editor, htmlToSlate, serializeValueToLegacy, slateToHtml, textToSlate
+  convertDocument, CustomEditor, Editor, EditorValue, htmlToSlate, serializeValue, slateToHtml, textToSlate
 } from "@concord-consortium/slate-editor";
 import { ITileExportOptions } from "../tile-content-info";
 import { TileContentModel } from "../tile-content";
@@ -16,8 +13,6 @@ export function defaultTextContent() {
   return TextContentModel.create();
 }
 
-const MarkdownSerializer = new Markdown();
-
 export const TextContentModel = TileContentModel
   .named("TextContent")
   .props({
@@ -27,32 +22,55 @@ export const TextContentModel = TileContentModel
     format: types.maybe(types.string)
   })
   .volatile(self => ({
-    editor: undefined as Editor | undefined
+    editor:  undefined as CustomEditor | undefined,
   }))
   .views(self => ({
     get joinText() {
       return Array.isArray(self.text)
-              ? self.text.join("\n")
-              : self.text as string;
+        ? self.text.join("\n")
+        : self.text as string;
 
     },
+    get joinHtml() {
+      return Array.isArray(self.text)
+        ? self.text.join("")
+        : self.text as string;
+    },
     getSlate() {
-      return !self.text || Array.isArray(self.text)
-              ? textToSlate("")
-              : deserializeValueFromLegacy(self.text);
+      if (!self.text || Array.isArray(self.text)) {
+        return textToSlate("");
+      }
+
+      let parsed = null;
+      try {
+        parsed = JSON.parse(self.text);
+        // If this is old style json
+        if (parsed.document?.nodes) {
+          const convertedDoc = convertDocument(parsed.document);
+          return convertedDoc.children;
+        }
+        // If this is new style
+
+        return parsed.document.children;
+      } catch (e) {
+        console.warn('json did not parse');
+      }
+      return textToSlate(self.text);
     }
   }))
   .views(self => ({
-    asSlate(): Value {
+    asSlate(): EditorValue {
       switch (self.format) {
         case "slate":
           return self.getSlate();
         case "html":
-          return htmlToSlate(self.joinText);
+          return htmlToSlate(self.joinHtml);
         case "markdown":
-          return MarkdownSerializer.deserialize(self.joinText);
+          // TODO: figure out what to do about markdown
+          return []; // return self.joinText;
+          //return MarkdownSerializer.deserialize(self.joinText);
         default:
-          return Plain.deserialize(self.joinText);
+          return textToSlate(self.joinText);
       }
     }
   }))
@@ -85,12 +103,13 @@ export const TextContentModel = TileContentModel
       self.format = "markdown";
       self.text = text;
     },
-    setSlate(value: Value) {
+    setSlate(value: EditorValue) {
       self.format = "slate";
-      self.text = serializeValueToLegacy(value);
+      const serialized = serializeValue(value);
+      self.text = JSON.stringify(serialized);
     },
     setEditor(editor?: Editor) {
-      self.editor = editor;
+     self.editor = editor;
     }
   }))
   .actions(self => ({
@@ -102,3 +121,10 @@ export const TextContentModel = TileContentModel
   }));
 
 export type TextContentModelType = Instance<typeof TextContentModel>;
+
+// TODO: Replace the textContent provider with a tile level one.
+export function createTextContent(snapshot?: SnapshotIn<typeof TextContentModel>) {
+  return TextContentModel.create({
+    ...snapshot
+  });
+}

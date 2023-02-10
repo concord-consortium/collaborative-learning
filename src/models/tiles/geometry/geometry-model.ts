@@ -91,6 +91,23 @@ export const GeometryObjectModel = types.model("GeometryObject", {
 }));
 export interface GeometryObjectModelType extends Instance<typeof GeometryObjectModel> {}
 
+// JSON.stringify converts undefined to null, which is invalid for position values.
+// This function, suitable for use as a preProcessSnapshot handler, converts null
+// position values back to undefined. One might think that one could handle this with a
+// single preProcessSnapshot handler on the PositionedObjectModel, but that changes the
+// types of the models in ways that breaks the build. ¯\_(ツ)_/¯ Therefore, we reuse
+// this function in each final model that "derives" from PositionedObjectModel.
+function preProcessPositionInSnapshot(snap: any) {
+  return snap?.x === null || snap?.y === null
+    ? {
+        ...snap,
+        // convert nulls to undefined
+        x: snap.x ?? undefined,
+        y: snap.y ?? undefined
+      }
+    : snap;
+  }
+
 export const PositionedObjectModel = GeometryObjectModel
   .named("PositionedObject")
   .props({
@@ -118,6 +135,7 @@ export const CommentModel = PositionedObjectModel
     anchors: types.array(types.string), // ids of anchor objects
     text: types.maybe(types.string)
   })
+  .preProcessSnapshot(preProcessPositionInSnapshot)
   .views(self => ({
     get dependencies(): string[] {
       return self.anchors;
@@ -142,7 +160,8 @@ export const PointModel = PositionedObjectModel
     snapToGrid: types.maybe(types.boolean),
     snapSizeX: types.maybe(types.number),
     snapSizeY: types.maybe(types.number)
-  });
+  })
+  .preProcessSnapshot(preProcessPositionInSnapshot);
 export interface PointModelType extends Instance<typeof PointModel> {}
 
 export const isPointModel = (o?: GeometryObjectModelType): o is PointModelType => o?.type === "point";
@@ -263,6 +282,7 @@ export const ImageModel = PositionedObjectModel
     width: types.number,  // coordinate system size (not pixels)
     height: types.number  // coordinate system size (not pixels)
   })
+  .preProcessSnapshot(preProcessPositionInSnapshot)
   .actions(self => ({
     setUrl(url: string) {
       self.url = url;

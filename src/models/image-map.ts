@@ -4,6 +4,7 @@ import {
 } from "../utilities/image-utils";
 import { getAssetUrl } from "../utilities/asset-utils";
 import { DB } from "../lib/db";
+import { DEBUG_IMAGES } from "../lib/debug";
 import placeholderImage from "../assets/image_placeholder.png";
 
 export const kExternalUrlHandlerName = "externalUrl";
@@ -551,3 +552,6 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
 };
 
 export const gImageMap = ImageMapModel.create();
+if (DEBUG_IMAGES) {
+  (window as any).imageMap = gImageMap;
+}
