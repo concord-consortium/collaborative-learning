@@ -612,13 +612,18 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
   }
 
   // remove/recreate all linked points
-  // TODO: A more tailored response would match up the existing points with the data set and only
+  // Shared points are deleted, and in the process, so are the polygons that depend on them
+  // This is built into JSXGraph's Board#removeObject function, which descends through and deletes all children:
+  // https://github.com/jsxgraph/jsxgraph/blob/60a2504ed66b8c6fea30ef67a801e86877fb2e9f/src/base/board.js#L4775
+  // Ids persist in their recreation because they are ultimately derived from canonical values
+  // NOTE: A more tailored response would match up the existing points with the data set and only
   // change the affected points, which would eliminate some visual flashing that occurs when
-  // unchanged points are re-created and would allow derived polygons to be preserved.
+  // unchanged points are re-created and would allow derived polygons to be preserved rather than created anew.
   recreateSharedPoints(board: JXG.Board){
     const ids = getAllLinkedPoints(board);
-    applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
-
+    if (ids.length > 0){
+      applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
+    }
     this.getContent().linkedDataSets.forEach(link => {
       const links: ILinkProperties = { tileIds: [link.providerId] };
       const parents: JXGCoordPair[] = [];
