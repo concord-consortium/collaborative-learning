@@ -4655,11 +4655,65 @@
                     }
                   },
                   {
-                    "id": "y9mAnZEiG3xfOrnl",
-                    "title": "Nicole's strategy: solve in two equations",
+                    "id": "0CZk_zTaOhb-MZ5I",
+                    "title": "Nicole's strategy: Original Equation",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_WI_coins_pouches_350w.png"
+                      "type": "Drawing",
+                      "objects": [
+                        {"type": "image", "id": "OxK9Fqme1MVxgGNq", "x": 23, "y": 77.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "UCPXx63cE-cYeTje", "x": 58.5, "y": 39.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "YB8uyNr8rkaZsudv", "x": 59.5, "y": 84.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "ZucoBnKE3n-Iu41G", "x": 97, "y": 79.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "dLlZ_aLZsAswJv_T", "x": 133.5, "y": 40.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "WXeQKfjwlHPiL4hI", "x": 134.5, "y": 85.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "SR9h0KFGublBZHia", "x": 163.5, "y": 65.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+                        {"type": "image", "id": "7Af1kjGkwmGoAjOB", "x": 186.5, "y": 84.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Pk0yKkhyezQA5WW2", "x": 228.5, "y": 85.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "zGZpbBPUx72Euj8S", "x": 273.5, "y": 83.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "8Y3lCeD-maogWZXt", "x": 318.5, "y": 83.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Sm19UuzIrrknyo_b", "x": 365.5, "y": 81.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "zBoSpdsknKVHpV-W", "x": 410.5, "y": 81.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "8GcAKULtuPaQm-vp", "x": 184.5, "y": 42.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "gwpPWBhNojQqKd3l", "x": 228.5, "y": 41.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "VeLdMSSPPKfWs0B9", "x": 274.5, "y": 41.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "_78IekDheHxnyqtL", "x": 317.5, "y": 40.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "LNVXuzdhpMZaMU7t", "x": 365.5, "y": 40.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "g-fVge9XGNat0prV", "x": 409.5, "y": 40.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "mQzsdmkem_lX67Ux",
+                    "title": "Nicole's strategy: Step 1",
+                    "content": {
+                      "type": "Drawing",
+                      "objects": [
+                        {"type": "image", "id": "zX4az4Agpz-rCL6H", "x": 41, "y": 64.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "R7d-dsJLp5IYwNXa", "x": 79.5, "y": 44.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Rv8ms96ThZ4umZ0k", "x": 80.5, "y": 84.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "cYwYZWKmHu8L0ZJT", "x": 127.5, "y": 66.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+                        {"type": "image", "id": "INsK30BkFYvmo-6I", "x": 155.5, "y": 40.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "X-RIYjxb3jZbQKMv", "x": 155.5, "y": 87.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "LocdgqtoMU9cfmVE", "x": 200.5, "y": 38.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "sE6kFZ6kUBUmcS9k", "x": 203.5, "y": 86.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "CqaQ2eFXMfxhDhKA", "x": 250.5, "y": 37.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "P-cwcQZ8cu9Z1-MO", "x": 251.5, "y": 87.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "urXamCUsGAQHYA2d",
+                    "title": "Nicole's strategy: Step 2",
+                    "content": {
+                      "type": "Drawing",
+                      "objects": [
+                        {"type": "image", "id": "JVrN4a0MdHgYTFH9", "x": 39, "y": 66.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "RNpRmoRMUazT7Qnl", "x": 84.5, "y": 71.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+                        {"type": "image", "id": "gSmcndBVC_xIelKW", "x": 116.5, "y": 47.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "DSRjGVDoYzarudFf", "x": 169.5, "y": 46.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "a-fdvmNKe17XOqH7", "x": 120.5, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "ssnYHZKBIfcOZu1e", "x": 172.5, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+                      ]
                     }
                   },
                   {
@@ -4822,12 +4876,64 @@
                     }
                   },
                   {
-                    "id": "zz4jrh_yxaWEz5TC",
+                    "id": "A-MYreqsrU6Dm4Kk",
                     "display":"teacher",
-                    "title": "5 pouches and 10 coins = 35 coins",
+                    "title": "Aman's Clue",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3-1_SitB_Prob1.png"
+                      "type": "Drawing",
+                      "objects": [
+                        {"type": "image", "id": "tYU8LqbNjAsSUQOz", "x": 19, "y": 135.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "gFrz62N5177akSTs", "x": 60, "y": 136.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "nFpibv-7nAtPuykH", "x": 102, "y": 136.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "CJ7B_4y7cv8_YV_c", "x": 60, "y": 184.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "nL-HKte97uuY8_1d", "x": 104, "y": 183.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "CXbPmhWvOBokQfvy", "x": 152.5, "y": 188.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "rR58O5iB_4e_Slba", "x": 189.5, "y": 189.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "IvppfOt0ZoD8W-Wt", "x": 226.5, "y": 190.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "sIjtO5e_fPUoaJgt", "x": 263.5, "y": 190.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Qq56dppE4DHjGreL", "x": 302.5, "y": 190.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "hGwuERl39pCCV57p", "x": 150.5, "y": 142.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "bYUQQioxjyK1gb9R", "x": 189.5, "y": 143.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "wSdBt74ncUk79wIo", "x": 227.5, "y": 143.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "mu0LMYUPELmNmo9U", "x": 264.5, "y": 144.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Xstkvvgn4JtRK2iU", "x": 302.5, "y": 143.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "5jP3EZ8hFeh9KdvM", "x": 336.5, "y": 166.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+                        {"type": "image", "id": "Sf5ZZiSuY-f-UdfB", "x": 369.5, "y": 224.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "9QLpcLjyen9-buea", "x": 410.5, "y": 222.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "rK5GWwp0PTQxmBUJ", "x": 461.5, "y": 219.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "wsyEV5_Cks0cqkGz", "x": 505.5, "y": 220.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "T9JyYMfzApLHcyGc", "x": 550.5, "y": 219.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "qkJMP1-ndbZFG9zj", "x": 595.5, "y": 218.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "FpbF-P1G8c2OqROW", "x": 645.5, "y": 217.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "LYB7ol4JwaknMAeP", "x": 369.5, "y": 180.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "HFyz5JcvmvT3G5vk", "x": 409.5, "y": 178.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Qnr0CkMP2jZGREzl", "x": 459.5, "y": 178.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "RqqZtN05lAawbh7D", "x": 505.5, "y": 177.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "IjbAam5CvHtkw3SS", "x": 551.5, "y": 176.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "icW191tWUTWTUK6o", "x": 597.5, "y": 176.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "qha-Q2UHssVR9kZy", "x": 646.5, "y": 175.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "BS3q87BDSM4HTYzp", "x": 368.5, "y": 133.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "dDNaJYDL8r7PUZrl", "x": 410.5, "y": 131.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "-ffio9RZmLrIC80f", "x": 458.5, "y": 131.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "0v6_fzkPU4E6zkHR", "x": 502.5, "y": 131.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Pcw-OU8qRMVjNZOE", "x": 547.5, "y": 129.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "8RSAFtYyW6s5GliJ", "x": 598.5, "y": 130.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "_YmJBvhjULMnyf4h", "x": 644.5, "y": 129.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "iPmRBiTOQw6IfjzQ", "x": 365.5, "y": 88.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "lrp5UiKsTGlLXiyI", "x": 411.5, "y": 89.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "AQkeFoF7qLJFRv6n", "x": 458.5, "y": 88.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Rq5RGOIMcay8nyE4", "x": 501.5, "y": 88.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "km-FQGPRPlS-Wv3f", "x": 547.5, "y": 85.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "JB4_FnwV0xbdj8mZ", "x": 594.5, "y": 85.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "-hBEECLvdu4hRQN8", "x": 642.5, "y": 86.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Fwx2HHiiCJ93i1xu", "x": 364.5, "y": 47.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "JloroBHFt8DteP4D", "x": 413.5, "y": 46.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "nQZSILl-0m-Lg7gD", "x": 455.5, "y": 45.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "IL-m-LTNd2aESOlv", "x": 501.5, "y": 46.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "8We7Y4yx_1Xq_muC", "x": 547.5, "y": 45.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "3pn2_s6ZF0GJI0ff", "x": 595.5, "y": 43.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Ex-tb597uPhNMYvp", "x": 637.5, "y": 45.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+                      ]
                     }
                   },
                   {
@@ -5031,11 +5137,31 @@
                     }
                   },
                   {
-                    "id": "RDzPL7oE8lao6aqX",
+                    "id": "4bvWQIBD98yW6UbO",
                     "title": "2 pouches + 4 coins = 12 coins",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_1_IC_coins_pouches_2_350w.png"
+                      "type": "Drawing",
+                      "objects": [
+                        {"type": "image", "id": "-j3S9IL4McIMXiDq", "x": 24, "y": 103.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "OV4E1DSagw9yNuEa", "x": 103, "y": 103.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "dBCl8En7E4R-6FgI", "x": 65.5, "y": 109.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "48z-KMWSeG6vfRCE", "x": 66.5, "y": 60.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "KiC8yMCFuzZZcats", "x": 144.5, "y": 110.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "xGxegbKl2OeBE8zY", "x": 142.5, "y": 60.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "ZPWtz8wO4d2r9sz8", "x": 176.5, "y": 87.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+                        {"type": "image", "id": "-Kk5yJ-XZXQG8iWA", "x": 203.5, "y": 113.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "v6maf4nzhxshWGYU", "x": 242.5, "y": 113.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Jh9-n8hGbO6cECO4", "x": 282.5, "y": 114.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "ppbO7w52bxwqpgJg", "x": 323.5, "y": 114.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "UqZxwgr_qgUK5YdW", "x": 361.5, "y": 114.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "wLNfIDM3yH5K7-LT", "x": 404.5, "y": 114.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "dyX-ogOCxrNSjp2P", "x": 201.5, "y": 57.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "G-Rs0p14C5Og7-Bv", "x": 240.5, "y": 59.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "1kYACsLjyPzEYTl0", "x": 282.5, "y": 58.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "J8Ud7xEjZq6iqR2R", "x": 323.5, "y": 59.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "SjC4RHhYJWtCp2Ih", "x": 363.5, "y": 58.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "m1V26s56oGqs4h8S", "x": 404.5, "y": 58.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+                      ]
                     }
                   },
                   {
@@ -5113,11 +5239,37 @@
                     }
                   },
                   {
-                    "id": "fNT59r25NWUjVl0L",
+                    "id": "PkJUj2DNYNeQsJRd",
                     "title": "Code 7",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_1_350w.png"
+                      "type": "Drawing",
+                      "objects": [
+                        {"type": "image", "id": "BwwYa30qJqR9C58p", "x": 22, "y": 124.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "mrK9RdwwwrXcoRJ3", "x": 64, "y": 123.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "SeIQiigDLbU8GQ2A", "x": 22, "y": 68.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "FfzTFW0H3kT3WdKi", "x": 64, "y": 67.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "CYMpzZcGGX1KLPcK", "x": 103.5, "y": 120.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "O81NM3rhJeHizSR2", "x": 103.5, "y": 76.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "zZgfOTeDQ0Kjg3Cr", "x": 140.5, "y": 98.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+                        {"type": "image", "id": "bcZDFT8YWR6U0fJn", "x": 165.5, "y": 141.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Zpukwg2yY_cO6tDu", "x": 209.5, "y": 141.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "LrItLZHA8x8tPzfG", "x": 249.5, "y": 141.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "UMSPMVAwsoBfkvh_", "x": 290.5, "y": 141.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "2cD9vU8-38N6vpOj", "x": 334.5, "y": 141.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Oa-zRYQhDGnikvxn", "x": 375.5, "y": 139.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "3Dx-8XK5RIq2K3n1", "x": 163.5, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "rwXpSUUahOWUoS0D", "x": 206.5, "y": 96.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "eX46M6SAUBfvK1vp", "x": 246.5, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "8Al0KXsXSLxn2L3B", "x": 290.5, "y": 96.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "LaGHOEYsdIp4aYI2", "x": 334.5, "y": 96.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "aoncAv1CRwCF3Gq7", "x": 373.5, "y": 97.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "mj0G7QXApX4eUQYu", "x": 161.5, "y": 50.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "r1iVTA-7LzT6zpfg", "x": 205.5, "y": 50.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "fglIl08IfdhGB5sW", "x": 244.5, "y": 49.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Rm8muIEwHzhwYgpk", "x": 291.5, "y": 49.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "XodDc3Q7L3Xfy3Tk", "x": 334.5, "y": 48.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "B9WgQlDwyNSaAq-Y", "x": 371.5, "y": 47.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+                      ]
                     }
                   },
                   {
@@ -5136,11 +5288,34 @@
                     }
                   },
                   {
-                    "id": "WuWxB-87gjpTHvuA",
+                    "id": "o30-cRTY-Fs7sSf5",
                     "title": "Code 8",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_2_350w.png"
+                      "type": "Drawing",
+                      "objects": [
+                        {"type": "image", "id": "Z2THRNGm7RU0Bxdt", "x": 11, "y": 106.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "4dHblYUwhHKDZaXU", "x": 88, "y": 105.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "raCDw6ifydich9AJ", "x": 164, "y": 106.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "zVIUKE5O2ZBum1MP", "x": 50.5, "y": 110.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "HLlu-cIa7z3QSuKg", "x": 52.5, "y": 68.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Fhb8CIEJnCvZmB_f", "x": 125.5, "y": 112.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "52sP-ji_XoMjMdrm", "x": 126.5, "y": 69.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Be5uz4xysq4mbtH4", "x": 202.5, "y": 113.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "dLAhpnOtWPqNRMZ6", "x": 202.5, "y": 69.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "6fpz6VJT6_KFgeNx", "x": 233.5, "y": 94.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+                        {"type": "image", "id": "pcXWTG3qSzj3d6N3", "x": 257.5, "y": 116.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "uaS-pekXlk_KDyqa", "x": 295.5, "y": 115.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "cl_JjX1w0xf-Fhkj", "x": 335.5, "y": 114.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "0Sm7R9NW6FYicKJ4", "x": 375.5, "y": 115.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "sxcp3cgeMB8jjXbh", "x": 413.5, "y": 115.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "9AMnLlz_AnLeGRr-", "x": 452.5, "y": 114.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "_UReoo_ozaB87SYr", "x": 257.5, "y": 67.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "4YVC3wlbHtKvWyE0", "x": 295.5, "y": 68.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "8u9vUMN3PvOvTxaR", "x": 333.5, "y": 66.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "X6cE62Xbg8oQT2sl", "x": 372.5, "y": 66.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "q8Q07xQ3JAMOrifn", "x": 411.5, "y": 65.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "eVju3GjF6iQuJrUr", "x": 451.5, "y": 66.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+                      ]
                     }
                   },
                   {
@@ -5158,11 +5333,30 @@
                     }
                   },
                   {
-                    "id": "Vf9wZHQW3Qi1BTsb",
+                    "id": "e-hkfjQBHey5rZxi",
                     "title": "Code 9",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/MSA_3_2_IC_coins_pouches_3_350w.png"
+                      "type": "Drawing",
+                      "objects": [
+                        {"type": "image", "id": "RXoQF0G_f37419zr", "x": 13, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "K9ZZUFRog0nWi1tU", "x": 56, "y": 94.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "c2wwICsw42EAUiiO", "x": 105, "y": 93.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "liAxVQ-yOzA0X7Ej", "x": 143.5, "y": 56.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "PO-Yto-5rvcoxMu6", "x": 144.5, "y": 99.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "BbEeN7AYTQD0Z-DP", "x": 185.5, "y": 98.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "NxA0LyWB6T9Sbf0z", "x": 219.5, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+                        {"type": "image", "id": "LU-8BjtFOwJIUbgN", "x": 252, "y": 92.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "ODDUxs-6-l72TPZs", "x": 291, "y": 93.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "uKDMPChI5ZQXmo3s", "x": 334.5, "y": 102.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "wZFGYGQPQDAL-D3q", "x": 371.5, "y": 102.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "BR_93sG8f-Zp943l", "x": 410.5, "y": 104.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "8JGWXWk1Ec04nlCV", "x": 452.5, "y": 104.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "yRsFlfYuX6rMFB4D", "x": 329.5, "y": 48.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "01ZEtUSgMHBIVvhi", "x": 368.5, "y": 49.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "VX2wECHrSgCExRTE", "x": 407.5, "y": 49.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "K3pPxsadN5brXmEj", "x": 445.5, "y": 49.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "utv9YcFGoFzIltCo", "x": 486.5, "y": 49.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+                      ]
                     }
                   },
                   {
@@ -5181,12 +5375,26 @@
                     }
                   },
                   {
-                    "id": "aYxGZdBufpiy9g-R",
+                    "id": "h14I9N8JXPF2Eqmc",
                     "title": "Code 10",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/moving-straight-ahead/images/3.2_Code_10.png",
-                      "filename": "curriculum/moving-straight-ahead/images/3.2_Code_10.png"
+                      "type": "Drawing",
+                      "objects": [
+                        {"type": "image", "id": "u-n5x-P-oVnMuwHv", "x": 24, "y": 84.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "qPE5cJt2YOONkkvc", "x": 62, "y": 83.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "3sdXvte4KP6L4exo", "x": 105, "y": 82.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "WhqAj2ppGmbWyF5p", "x": 146.5, "y": 50.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "IszcOxfSLVMcVLec", "x": 146.5, "y": 92.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "LkPVvmwRhTQ-aTuP", "x": 186.5, "y": 93.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "M7JJriBQepKgxxgy", "x": 218.5, "y": 70.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+                        {"type": "image", "id": "357BglREH-Exm7kV", "x": 255.5, "y": 92.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Vdlvzk_2dj7ltLgU", "x": 292.5, "y": 94.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "ZNio2997k1Y8XYl3", "x": 334.5, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Ix3tUJ_Lpf5Z9yl_", "x": 376.5, "y": 96.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "wil964WbgAvLcD9x", "x": 253.5, "y": 44.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "xO79m3L2S7N7fne2", "x": 292.5, "y": 45.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "KzdVp3jcjCCE-Nvh", "x": 334.5, "y": 45.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+                      ]
                     }
                   },
                   {
@@ -5429,13 +5637,23 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "sdUFq1jp7_guukQg",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>To maintain the equality of two expressions, we can add, subtract, multiply, or divide each side of the equality by the same number. These are called the properties of equality. In the last Problem, we applied properties of equality and numbers to find a solution to an equation. </p>"
+                      ]
+                    }
+                  },
+                  {
                     "id": "JadcdZs_0xQojSby",
                     "title": "Text 1",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>To maintain the equality of two expressions, we can add, subtract, multiply, or divide each side of the equality by the same number. These are called the properties of equality. In the last Problem, we applied properties of equality and numbers to find a solution to an equation. </p>",
                         "<p><em>Does it make sense to think about negative numbers in a coin situation?</em></p>",
                         "<p><em>Does it make sense to think about fractions in a coin situation?</em></p>",
                         "<p><em>What are some situations where it makes sense to use fractions or negative </em></p>",
@@ -6090,6 +6308,81 @@
                         "<p>Yes, this equation will give the same result as Fabian’s. Her equation gives the profit for each cake and subtracts the fixed, monthly expenses.</p>"
                       ]
                     }
+                  },
+                  {
+                    "id": "sLAB5wertSfEV5sr",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Situation C. Fabian’s Profit Inequality</strong></p><p>Fabian and Billie are looking for ways to express how express how to find the number of cakes needed to make a profit. Explain why each representation does or does not make sense.</p><p></p>"
+                      ]
+                    }
+                  },
+                  [
+                    {
+                      "id": "t-qRqRF_JFU3Wfgx",
+                      "title": "Text 2",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>Fabian’s Representation: Inequality Statement</p><p>P &gt; 4.95n – 825</p><p></p>"
+                        ]
+                      }
+                    },
+                    {
+                      "id": "zWzG_Rl1fAGNQoBh",
+                      "title": "Billie's Representation: Number Line",
+                      "content": {
+                        "type": "Image",
+                        "url": "curriculum/moving-straight-ahead/images/numberline.png",
+                        "filename": "curriculum/moving-straight-ahead/images/numberline.png"
+                      }
+                    }
+                  ],
+                  {
+                    "id": "gJs40Tc560z8EH-Z",
+                    "display": "teacher",
+                    "title": "Text 3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>The inequality statement does make sense, because it says that they want their profit to be greater than their income – expenses. The number line does make sense because it shows all possible values of n for which they have a profit.</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "mU3m7ZJHxSJ13ecd",
+                    "title": "Text 4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Describe how you can solve an equation of the form ax + b  = y? </p><p>Describe how you can solve an inequality of the form ax + b &lt; c or ax + b &gt; c?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "HgNAIpQR3jMzHza6",
+                    "display": "teacher",
+                    "title": "Text 6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>If you have an equation of the form y = ax+b and you know what the value of y is, you can find the solution using a table, graph, or equation. </p><p>On a table, you can find the needed value of y and look at the value of x. This is the same as finding the coordinate pair on the graph. </p><p>Using a graph, you can find the point of intersection of y1 = ax + b and y2 = y to solve the equation. </p><p>You can use the equation: subtract b from y and divide by a to solve for x. If you have an equation of the form y = ax+b and you know what the value of x is, you can substitute the value of x into the equation and compute the value of y. </p><p>If you have an inequality of that form, then you can use algebraic methods to solve the associated equation as before. Then check a few values greater or less than the equation’s solution in the original inequality to determine if the solutions to the inequality should be greater than or less than the solution to the associated equation.</p>"
+                      ]
+                    }
                   }
                 ]
               }
@@ -6114,12 +6407,22 @@
               "content": {
                 "tiles": [
                   {
+                    "id": "U7aDP_NY4DhWhMk6",
+                    "title": "Text 2",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>All of the patterns of change you have explored in this Unit involved rates of change. For example, we worked with walking rates expressed in meters per second and pledge rates expressed in dollars per kilometer. In these situations, we found that the rate a affects the following in a linear relationship represented by y = ax + b: </p>"
+                      ]
+                    }
+                  },
+                  {
                     "id": "kJWeyO9LsxG4nvx8",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>All of the patterns of change you have explored in this Unit involved rates of change. For example, we worked with walking rates expressed in meters per second and pledge rates expressed in dollars per kilometer. In these situations, we found that the rate a affects the following in a linear relationship represented by y = ax + b: </p>",
                         "<ul><li>the steepness of the graph </li><li>how the y-values in the table change for each unit change in the x-values </li><li>and if b = 0, then the relationship is also proportional</li></ul>",
                         "<p>In this Investigation, we will explore another way to express the rates of change. </p>"
                       ]
@@ -6601,7 +6904,9 @@
                       "format": "html",
                       "text": [
                         "<p>The steepness of the line is the ratio of rise (vertical change) to run (horizontal change) for this step. We call this ratio the <em>rate of change</em> or <strong>slope</strong> of the line. </p>",
-                        "<p><br/>&nbsp;                  vertical change             rise<br/>Slope  =  __________________   =  ______<br/>                horizontal change          run</p>"
+                        "<p>                    vertical change            rise</p>",
+                        "<p>Slope  =  __________________   =  ______</p>",
+                        "                   horizontal change          run"
                       ]
                     }
                   },
@@ -6864,8 +7169,8 @@
                         "<p><strong>Situation B. Laneshia Uses Inequalities</strong></p>",
                         "<p>Laneshia wanted to find the number of students that make each of the following inequality statements true. </p>",
                         "<p>             Expenses  &lt; 255            Income &gt; 675</p>",
-                        "<p>              or                              or</p>",
-                        "<p>             $1.25n + $130 &lt; $255       $4.50n &gt; $675</p>"
+                        "<p>                            or                                  or</p>",
+                        "<p>       $1.25n + $130 &lt; $255       $4.50n &gt; $675</p>"
                       ]
                     }
                   },
