@@ -108,11 +108,15 @@ function shouldLogIndividualSupports(supportIndex: number, classHash?: TClassHas
 const kImageTileRegex = /"type":"(Drawing|Geometry|Image)"/g;
 
 // regular expression for identifying firebase image urls in document content
-// capture group 1: "url" (Drawing, Image) or "parents" (Geometry)
-//                       |-------------------------|
-// capture group 2: image url                            |---------------------------------------|
-// capture group 3: image key (includes class hash for modern image urls)                 |-----|
-const kImageUrlRegex = /(\\"url\\":|\\"parents\\":\[)\\"(ccimg:\/\/fbrtdb\.concord\.org\/([^\\"]+))\\"/g;
+// In some tile state the image URLS are inside of a double escaped JSON. This means
+// they will be in a string like \"url\" because the quotes have to be escaped.
+// This is why in the regex below the URL is terminated either by \\" or "
+//
+// capture group 1: image url
+//                        |---------------------------------------|
+// capture group 2: image key (includes class hash for modern image urls)
+//                                                         |-----|
+const kImageUrlRegex = /"(ccimg:\/\/fbrtdb\.concord\.org\/([^\\"]+))\\?"/g;
 
 function parseImageUrl(url: string) {
   const match = /ccimg:\/\/fbrtdb\.concord\.org\/([^/]+)(\/([^/]+))?/.exec(url);
@@ -191,7 +195,7 @@ admin.firestore()
           // find all the firebase image urls in the support content
           const imageMatches = [...(content?.matchAll(kImageUrlRegex) || [])]
                                 .map(match => {
-                                  const [ , , url, path] = match;
+                                  const [ , url, path] = match;
                                   const { imageKey: key = path, legacyUrl } = parseImageUrl(url);
                                   const { index: start = 0 } = match;
                                   const tileIndex = getTileIndex(start);
