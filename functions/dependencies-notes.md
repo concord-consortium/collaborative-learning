@@ -30,7 +30,7 @@ Without changing the code the best thing I've found to keep most of the dependen
 
 ## Best solution
 
-The best solution is to upgrade all of the firebase dependencies. Then we have to reactor the way the tests are working with the emulator and mocking the firebase admin object.
+The best solution is to upgrade all of the firebase dependencies. Then we have to refactor the way the tests are working with the emulator and mocking the firebase admin object.
 
 The official firebase documentation recommends unit testing firebase using a real firebase project. This is fragile, so we'd prefer to keep using our emulator based approach.
 

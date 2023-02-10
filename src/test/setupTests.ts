@@ -74,7 +74,8 @@ declare global {
    */
   function assertIsDefined<T>(value: T): asserts value is NonNullable<T>;
 }
-(global as any).jestSpyConsole = async (method: ConsoleMethod, fn: JestSpyConsoleFn, options?: IJestSpyConsoleOptions) => {
+(global as any).jestSpyConsole = async (method: ConsoleMethod, fn: JestSpyConsoleFn,
+    options?: IJestSpyConsoleOptions) => {
   // intercept and suppress console methods
   const consoleMethodSpy = jest.spyOn(global.console, method).mockImplementation((...args: any[]) => {
     if ((typeof options?.show === "boolean" && options.show) ||
