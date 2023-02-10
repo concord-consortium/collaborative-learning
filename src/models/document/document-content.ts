@@ -1,3 +1,4 @@
+import stringify from "json-stringify-pretty-compact";
 import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn, getType, getEnv } from "mobx-state-tree";
 import {
@@ -362,6 +363,10 @@ export const DocumentContentModel = types
     exportAsJson(options?: IDocumentExportOptions) {
       const builder = new StringBuilder();
       builder.pushLine("{");
+
+      const sharedModelsArray = Array.from(self.sharedModelMap.values())
+      builder.pushLine(`"sharedModels":${stringify(sharedModelsArray)}`, 2)
+
       builder.pushLine(`"tiles": [`, 2);
 
       // identify rows with exportable tiles
