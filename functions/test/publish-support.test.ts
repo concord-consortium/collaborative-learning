@@ -184,8 +184,11 @@ describe("publishSupport", () => {
     const canonicalUrls = [1, 2, 3].map(i => buildFirebaseImageUrl(kClassHash, `image-${i}`));
     const legacyUrls = canonicalUrls.map(url => parseFirebaseImageUrl(url).legacyUrl);
     const content = specDocumentContent([
-      { type: "Drawing", changes: [{ url: legacyUrls[0] }, { url: legacyUrls[1] }] },
-      { type: "Image", changes: [{ url: legacyUrls[0] }, { url: legacyUrls[2] }] }
+      { type: "Drawing", objects: [
+        { type: "image", url: legacyUrls[0], width: 100, height: 100 },
+        { type: "image", url: legacyUrls[1], width: 100, height: 100 }
+      ]},
+      { type: "Image", url: legacyUrls[2] }
     ]);
     const specSupportDoc = specPublicationRequest({ add: { content } });
     const params: IPublishSupportParams = { context, ...specSupportDoc };
@@ -238,8 +241,11 @@ describe("publishSupport", () => {
     });
     await Promise.all(imagePromises);
     const content = specDocumentContent([
-        { type: "Drawing", changes: [{ url: legacyUrls[0] }, { url: legacyUrls[1] }] },
-        { type: "Image", changes: [{ url: legacyUrls[0] }, { url: legacyUrls[2] }] }
+        { type: "Drawing", objects: [
+          { type: "image", url: legacyUrls[0], width: 100, height: 100 },
+          { type: "image", url: legacyUrls[1], width: 100, height: 100 }
+        ]},
+        { type: "Image", url: legacyUrls[2] }
       ]);
     const specSupportDoc = specPublicationRequest({ add: { content } });
     const params: IPublishSupportParams = { context, ...specSupportDoc };

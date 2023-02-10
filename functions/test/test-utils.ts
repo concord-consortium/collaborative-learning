@@ -110,15 +110,32 @@ export const specAuth = (overrides?: DeepPartial<AuthData>, exclude?: string[]):
   };
 };
 
-export function specDocumentContent(tiles: Array<{ type: string, changes: Object[] }> = []) {
+interface ITileSpec {
+  type: string;
+  changes?: Object[];
+  [otherProperties: string]: unknown;
+}
+
+/**
+ * This will generate a document content from an array of tiles If the tile
+ * contains a `changes` property it will be converted to strings. This `changes`
+ * property was used in the old state format of tiles.
+ *
+ * @param tiles
+ * @returns
+ */
+export function specDocumentContent(tiles: Array<ITileSpec> = []) {
   const rowMap: Record<string, IRowMapEntry> = {};
   const rowOrder: string[] = [];
   const tileMap: Record<string, ITileMapEntry> = {};
   tiles.forEach((tile, i) => {
     // single tile per row for simplicity
-    const tileId = `tile-${i}`
-    const tileChanges = tile.changes.map(change => JSON.stringify(change));
-    const tileContent = { type: tile.type, changes: tileChanges };
+    const tileId = `tile-${i}`;
+    const tileContent = tile;
+    if (tile.changes) {
+      const tileChanges = tile.changes.map(change => JSON.stringify(change));
+      tile.changes = tileChanges;
+    }
     const row: IRowMapEntry = { id: `row-${i}`, tiles: [{ tileId }]};
     rowMap[row.id] = row;
     rowOrder.push(row.id);
