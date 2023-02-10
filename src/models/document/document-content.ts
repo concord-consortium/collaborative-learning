@@ -364,8 +364,8 @@ export const DocumentContentModel = types
       const builder = new StringBuilder();
       builder.pushLine("{");
 
-      const sharedModelsArray = Array.from(self.sharedModelMap.values())
-      builder.pushLine(`"sharedModels":${stringify(sharedModelsArray)}`, 2)
+      const sharedModelsArray = Array.from(self.sharedModelMap.values());
+      builder.pushLine(`"sharedModels":${stringify(sharedModelsArray)}`, 2);
 
       builder.pushLine(`"tiles": [`, 2);
 
