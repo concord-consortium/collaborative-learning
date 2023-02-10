@@ -20,8 +20,10 @@ import { copyCoords, getEventCoords, getAllObjectsUnderMouse, getClickableObject
           isDragTargetOrAncestor } from "../../../models/tiles/geometry/geometry-utils";
 import { RotatePolygonIcon } from "./rotate-polygon-icon";
 import { getPointsByCaseId } from "../../../models/tiles/geometry/jxg-board";
-import { ESegmentLabelOption, ILinkProperties, JXGCoordPair } from "../../../models/tiles/geometry/jxg-changes";
-import { applyChange } from "../../../models/tiles/geometry/jxg-dispatcher";
+import {
+  ESegmentLabelOption, ILinkProperties, JXGCoordPair
+} from "../../../models/tiles/geometry/jxg-changes";
+import { applyChange, applyChanges } from "../../../models/tiles/geometry/jxg-dispatcher";
 import { kSnapUnit } from "../../../models/tiles/geometry/jxg-point";
 import {
   getAssociatedPolygon, getPointsForVertexAngle, getPolygonEdges
@@ -42,7 +44,6 @@ import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
 import { getParentWithTypeName } from "../../../utilities/mst-utils";
 import { safeJsonParse, uniqueId } from "../../../utilities/js-utils";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
-import { getDataSetBounds, IDataSet } from "../../../models/data/data-set";
 import AxisSettingsDialog from "./axis-settings-dialog";
 import { EditableTileTitle } from "../editable-tile-title";
 import LabelSegmentDialog from "./label-segment-dialog";
@@ -277,7 +278,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     // respond to linked table/shared model changes
     this.disposers.push(reaction(
       () => this.getContent().updateSharedModels,
-      () => this.syncLinkedPoints()
+      () => this.syncLinkedGeometry()
     ));
 
     this.disposers.push(onSnapshot(this.getContent(), () => {
@@ -514,7 +515,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
           if (url) {
             this.updateImageUrl(url, filename);
           }
-          this.syncLinkedPoints(board);
+          this.syncLinkedGeometry(board);
           this.setState({ board });
           resolve(board);
         }
@@ -557,51 +558,72 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
 
   private rescaleBoardAndAxes(params: IAxesParams) {
     const { board } = this.state;
-    if (board) {
-      this.applyChange(() => {
-        const content = this.getContent();
-        const axes = content.rescaleBoard(board, params);
-        if (axes) {
-          axes.forEach(this.handleCreateAxis);
-        }
-      });
-    }
-  }
+    if (!board) return;
 
-  private autoRescaleBoardAndAxes(dataSet: IDataSet) {
-    const { board } = this.state;
-    if (board && (dataSet.attributes.length >= 2) && (dataSet.cases.length >= 1)) {
-      const dataBounds = getDataSetBounds(dataSet);
-      if (dataBounds.every((b, i) => (i >= 2) || (isFinite(b.min) && isFinite(b.max)))) {
-        const xDataMin = Math.floor(dataBounds[0].min - 1);
-        const xDataMax = Math.ceil(dataBounds[0].max + 1);
-        const yDataMin = Math.floor(dataBounds[1].min - 1);
-        const yDataMax = Math.ceil(dataBounds[1].max + 1);
-
-        const boundingBox = board.getBoundingBox();
-        let [xMin, yMax, xMax, yMin] = boundingBox;
-        if (xDataMin < xMin) xMin = xDataMin;
-        if (xDataMax > xMax) xMax = xDataMax;
-        if (yDataMin < yMin) yMin = yDataMin;
-        if (yDataMax > yMax) yMax = yDataMax;
-
-        this.rescaleBoardAndAxes({ xMax, yMax, xMin, yMin });
+    this.applyChange(() => {
+      const content = this.getContent();
+      const axes = content.rescaleBoard(board, params);
+      if (axes) {
+        axes.forEach(this.handleCreateAxis);
       }
-    }
+    });
   }
 
-  syncLinkedPoints(_board?: JXG.Board) {
+  private getBoardPointsExtents(board: JXG.Board){
+    let xMax = 1;
+    let yMax = 1;
+    let xMin = -1;
+    let yMin = -1;
+
+    board.objectsList.forEach((obj: any) => {
+      if (obj.elType === "point"){
+        const pointX = obj.coords.usrCoords[1];
+        const pointY = obj.coords.usrCoords[2];
+        if (pointX < xMin) xMin = pointX - 1;
+        if (pointX > xMax) xMax = pointX + 1;
+        if (pointY < yMin) yMin = pointY - 1;
+        if (pointY > yMax) yMax = pointY + 1;
+      }
+    });
+    return { xMax, yMax, xMin, yMin };
+  }
+
+  syncLinkedGeometry(_board?: JXG.Board) {
     const board = _board || this.state.board;
     if (!board) return;
 
-    // remove/recreate all linked points
-    // TODO: A more tailored response would match up the existing points with the data set and only
-    // change the affected points, which would eliminate some visual flashing that occurs when
-    // unchanged points are re-created and would allow derived polygons to be preserved.
-    const ids = getAllLinkedPoints(board);
-    applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
+    this.recreateSharedPoints(board);
 
-    // create new points for each linked table
+    // identify objects that exist in the model but not in JSXGraph
+    const modelObjectsToConvert: GeometryObjectModelType[] = [];
+    this.getContent().objects.forEach(obj => {
+      if (!board.objects[obj.id]) {
+        modelObjectsToConvert.push(obj);
+      }
+    });
+
+    if (modelObjectsToConvert.length > 0) {
+      const changesToApply = convertModelObjectsToChanges(modelObjectsToConvert);
+      applyChanges(board, changesToApply);
+    }
+
+    const extents = this.getBoardPointsExtents(board);
+    this.rescaleBoardAndAxes(extents);
+  }
+
+  // remove/recreate all linked points
+  // Shared points are deleted, and in the process, so are the polygons that depend on them
+  // This is built into JSXGraph's Board#removeObject function, which descends through and deletes all children:
+  // https://github.com/jsxgraph/jsxgraph/blob/60a2504ed66b8c6fea30ef67a801e86877fb2e9f/src/base/board.js#L4775
+  // Ids persist in their recreation because they are ultimately derived from canonical values
+  // NOTE: A more tailored response would match up the existing points with the data set and only
+  // change the affected points, which would eliminate some visual flashing that occurs when
+  // unchanged points are re-created and would allow derived polygons to be preserved rather than created anew.
+  recreateSharedPoints(board: JXG.Board){
+    const ids = getAllLinkedPoints(board);
+    if (ids.length > 0){
+      applyChange(board, { operation: "delete", target: "linkedPoint", targetID: ids });
+    }
     this.getContent().linkedDataSets.forEach(link => {
       const links: ILinkProperties = { tileIds: [link.providerId] };
       const parents: JXGCoordPair[] = [];
