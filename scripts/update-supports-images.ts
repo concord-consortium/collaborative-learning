@@ -371,14 +371,19 @@ admin.firestore()
                         `(Towle/Jones: ${isTowleJones})`, "has", foundInOtherClass, "displaced images!");
           }
           // generate the list of `mcimages` entries required by this support
-          multiClassImagesMap[supportKey] = activeImages.map(({ url, legacyUrl, key }) => {
-            const { classes = [], resource_link_id = "", resource_url = "" } = docData || {};
-            const { classPath, context_id } = firestoreImages[key];
-            return {
-              url: legacyUrl, classes, classPath, network, supportKey,
-              platform_id, context_id, resource_link_id, resource_url
-            };
-          });
+          // TODO: I'm not sure this is right. It seems there could be cases of documents published by
+          // teachers that are not in a network. But perhaps in that case there isn't the need for an
+          // entry in the mcimages collection?
+          if (network) {
+            multiClassImagesMap[supportKey] = activeImages.map(({ url, legacyUrl, key }) => {
+              const { classes = [], resource_link_id = "", resource_url = "" } = docData || {};
+              const { classPath, context_id } = firestoreImages[key];
+              return {
+                url: legacyUrl, classes, classPath, network, supportKey,
+                platform_id, context_id, resource_link_id, resource_url
+              };
+            });
+          }
         }
       }
       // track the number of unique origin documents from which supports have been published
