@@ -95,6 +95,11 @@
               "type": "problem-documents"
             },
             {
+              "initials": "SORT",
+              "title": "Sorting",
+              "type": "problem-documents"
+            },
+            {
               "initials": "ID",
               "title": "Identifying",
               "type": "problem-documents"
@@ -191,6 +196,11 @@
       "initials": "PIN",
       "title": "Pinning",
       "placeholder": "Assemble your moth collection"
+    },
+    "sorting": {
+      "initials": "SORT",
+      "title": "Sorting",
+      "placeholder": "Categorize your moth collection"
     },
     "id": {
       "initials": "ID",
@@ -696,9 +706,18 @@
                         "<p><strong>Moth Pinning Video</strong></p>",
                         "<p>for studying, comparing, and identifying them.</p>",
                         "<p>MSU Team Moth <a href='https://drive.google.com/file/d/1sVzZNz_2TR9jvpveACbKpBR6M7JA4IhH/view?usp=drivesdk'>Pinning Tutorial</a></p>",
-                        "<p>Oregon State <a href='https://extension.oregonstate.edu/video/pinning-butterflies-moths'>Pinning Tutorial</a></p>",
+                        "<p>Oregon State <a href='https://extension.oregonstate.edu/video/pinning-butterflies-moths'>Pinning Tutorial</a></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "R9NsdfR96j-7MyF-Z2y",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
                         "<p><strong>Organizing your moths</strong></p>",
-                        "Think about pinning the moths in categories that will help answer your group's research question. ",
+                        "<p>Think about pinning the moths in categories that will help answer your group's research question.</p>",
                         "<p><strong>Would data cards or a table help you get organized?</strong></p>",
                         "You can start with the card below and add cards. Or to make your own, click the data card icon on the tool bar.  Decide which labels you want to add. "
                       ]
@@ -1249,6 +1268,44 @@
               }
             },
             {
+              "type": "sorting",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "Ub77fsa0IgrOifX5Y1a",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Sort and count your insects. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "OIHEOZsdffgHFldZzAgzP",
+                    "display": "teacher",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Step 3: Sorting Moths (Analyzing) </strong></p>",
+                        "<p>*Sorting</p>",
+                        "<p>*Using the binder</p>",
+                        "<p>*Laminate the Moth/Not a Moth cards</p>",
+                        "<p>*Have the students sort their discoveries into these 2 categories </p>",
+                        "<p>*Then take the moths and sort into micro and macro</p>",
+                        "<p>*Take all of the moths and have the students sort them into categories of their choosing.  Then have them explain why they chose those categories.</p>",
+                        "<p>*Next give them the color categories and have them sort by color</p>",
+                        "<p>*For the spring, increase the sorting categories to include patterns</p>",
+                        "<p></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
               "type": "pinning",
               "content": {
                 "tiles": [
@@ -1259,7 +1316,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Sort and count your insects. Pin or glue the moths</p>"
+                        "<p>Pin or glue the moths.</p>"
                       ]
                     }
                   },
