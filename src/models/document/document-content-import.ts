@@ -3,8 +3,8 @@ import { getSnapshot } from "mobx-state-tree";
 import { ITileModelSnapshotIn } from "../tiles/tile-model";
 import { DocumentContentModel, DocumentContentModelType, INewTileOptions } from "./document-content";
 import {
-  isOriginalAuthoredTileModel, isOriginalSectionHeaderContent,
-  OriginalAuthoredTileModel, OriginalTileModel, OriginalTilesSnapshot
+  IDocumentImportSnapshot, isOriginalAuthoredTileModel, isOriginalSectionHeaderContent,
+  OriginalAuthoredTileModel, OriginalTileModel
 } from "./document-content-import-types";
 
 function addImportedTileInNewRow(
@@ -57,9 +57,9 @@ function migrateRow(content: DocumentContentModelType, tiles: OriginalTileModel[
   });
 }
 
-export function migrateSnapshot(snapshot: any): any {
+export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
   const docContent = DocumentContentModel.create();
-  const tilesOrRows: OriginalTilesSnapshot = snapshot.tiles;
+  const { tiles: tilesOrRows, sharedModels } = snapshot;
   tilesOrRows.forEach(tileOrRow => {
     if (Array.isArray(tileOrRow)) {
       migrateRow(docContent, tileOrRow);
@@ -68,5 +68,6 @@ export function migrateSnapshot(snapshot: any): any {
       migrateTile(docContent, tileOrRow);
     }
   });
+  // do something with shared models
   return getSnapshot(docContent);
 }

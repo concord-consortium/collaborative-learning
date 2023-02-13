@@ -53,3 +53,12 @@ export function isOriginalAuthoredTileModel(tile: OriginalTileModel): tile is Or
 }
 
 export type OriginalTilesSnapshot = Array<OriginalTileModel | OriginalTileModel[]>;
+
+export interface IDocumentImportSnapshot {
+  sharedModels: any;  // FIXME
+  tiles: OriginalTilesSnapshot;
+}
+
+export function isImportDocument(snap: any): snap is IDocumentImportSnapshot {
+  return snap?.tiles != null;
+}

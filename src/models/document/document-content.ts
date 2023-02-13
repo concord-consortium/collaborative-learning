@@ -14,6 +14,7 @@ import {
   IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
 } from "../document/tile-row";
 import { migrateSnapshot } from "./document-content-import";
+import { isImportDocument } from "./document-content-import-types";
 import { IDocumentEnvironment } from "./document-environment";
 import { logTileCopyEvent } from "../tiles/log/log-tile-copy-event";
 import { logTileDocumentEvent } from "../tiles/log/log-tile-document-event";
@@ -89,9 +90,7 @@ export const DocumentContentModel = types
     sharedModelMap: types.map(SharedModelEntry),
   })
   .preProcessSnapshot(snapshot => {
-    return snapshot && (snapshot as any).tiles
-            ? migrateSnapshot(snapshot)
-            : snapshot;
+    return isImportDocument(snapshot) ? migrateSnapshot(snapshot) : snapshot;
   })
   .volatile(self => ({
     visibleRows: [] as string[],
