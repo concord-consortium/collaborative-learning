@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { getSnapshot } from "mobx-state-tree";
 import { EditVariableDialogContent, updateVariable, Variable, VariableType } from "@concord-consortium/diagram-view";
 
@@ -12,12 +12,23 @@ interface IProps {
   onClose?: () => void;
 }
 export const useEditVariableDialog = ({ variable, onClose }: IProps) => {
-  const variableClone = useMemo(() => Variable.create(variable ? getSnapshot(variable) : {}), [variable]);
+  // We use a clone of the variable for the edit dialog so the user can modify its properties but those
+  // changes won't be saved unless the Save button is pushed. If changes are made in the edit dialog but
+  // not saved, we need to reset the variable clone to match the original variable. To do that, every time
+  // the dialog is closed, we increment a counter that is used as a dependency in the useMemo call below.
+  const [count, setCount] = React.useState(1);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const variableClone = useMemo(() => Variable.create(variable ? getSnapshot(variable) : {}), [variable, count]);
 
   const handleClick = () => {
     if (variable) {
       updateVariable(variable, variableClone);
     }
+  };
+
+  const _onClose = () => {
+    setCount(c => c + 1);
+    onClose?.();
   };
 
   const [showModal, hideModal] = useCustomModal({
@@ -36,8 +47,8 @@ export const useEditVariableDialog = ({ variable, onClose }: IProps) => {
         onClick: handleClick
       }
     ],
-    onClose
-  }, [variable]);
+    onClose: _onClose
+  }, [variable, variableClone, count]);
 
   return [showModal, hideModal];
 };
