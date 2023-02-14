@@ -99,7 +99,6 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
   plugins: Record<string, ITextPlugin|undefined>;
 
   public componentDidMount() {
-    this.setState({ initialValue: this.getContent().asSlate() });
     this.plugins = createTextPluginInstances(this.props.model.content as TextContentModelType);
     const options: any = {}; // FIXME: type. ICreateEditorOptions is not currently exported from slate
     // Gather all the plugin init functions and pass that to slate.
@@ -115,6 +114,7 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     options.history = false;
     this.editor = createEditor(options);
     this.getContent().setEditor(this.editor);
+    this.setState({ initialValue: this.getContent().asSlate() });
 
     this.disposers = [];
     // Synchronize slate with model changes. e.g. changes to any text in another tile is refelected here.
