@@ -259,9 +259,9 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const { model, readOnly } = this.props;
     const isExtendingSelection = hasSelectionModifier(e);
     const isWrapperClick = e.target === this.textTileDiv;
+    ui.setSelectedTile(model, { append: isExtendingSelection });
     if (readOnly || isWrapperClick || isExtendingSelection) {
       isWrapperClick && this.editor && ReactEditor.focus(this.editor);
-      ui.setSelectedTile(model, { append: isExtendingSelection });
       e.preventDefault();
     }
   };
