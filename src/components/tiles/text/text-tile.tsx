@@ -259,9 +259,9 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
     const { model, readOnly } = this.props;
     const isExtendingSelection = hasSelectionModifier(e);
     const isWrapperClick = e.target === this.textTileDiv;
+    ui.setSelectedTile(model, { append: isExtendingSelection });
     if (readOnly || isWrapperClick || isExtendingSelection) {
       isWrapperClick && this.editor && ReactEditor.focus(this.editor);
-      ui.setSelectedTile(model, { append: isExtendingSelection });
       e.preventDefault();
     }
   };
@@ -277,9 +277,11 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       const change = {args:[{ text }]};
       logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, { operation: 'update', change, tileId: this.props.model.id });
     }
+    this.setState({ revision: this.state.revision + 1 }); // Force a rerender
   };
 
   private handleFocus = () => {
     this.textOnFocus = this.getContent().text;
+    this.setState({ revision: this.state.revision + 1 }); // Force a rerender
   };
 }
