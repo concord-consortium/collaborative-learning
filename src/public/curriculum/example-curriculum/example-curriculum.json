@@ -65,6 +65,16 @@
         "isTileTool": false
       },
       {
+        "id": "Dataflow",
+        "title": "Dataflow",
+        "isTileTool": true
+      },
+      {
+        "id": "Diagram",
+        "title": "Diagram",
+        "isTileTool": true
+      },
+      {
         "id": "redo",
         "title": "Redo",
         "iconId": "icon-redo-tool",
@@ -76,6 +86,7 @@
         "iconId": "icon-delete-tool",
         "isTileTool": false
       }
+
     ],
     "stamps": []
   },
