@@ -277,9 +277,11 @@ export default class TextToolComponent extends BaseComponent<ITileProps, IState>
       const change = {args:[{ text }]};
       logTileChangeEvent(LogEventName.TEXT_TOOL_CHANGE, { operation: 'update', change, tileId: this.props.model.id });
     }
+    this.setState({ revision: this.state.revision + 1 }); // Force a rerender
   };
 
   private handleFocus = () => {
     this.textOnFocus = this.getContent().text;
+    this.setState({ revision: this.state.revision + 1 }); // Force a rerender
   };
 }
