@@ -81,11 +81,6 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
         }
       };
 
-      const showGroupSupportClickHandler = () => {
-        Logger.log(LogEventName.VIEW_GROUP, {group: group.id, via: "dashboard-show-comparison-group"});
-        ui.setTeacherPanelKey(EPanelId.workspace);
-        ui.setActiveStudentGroup(group.id);
-      };
 
       return(
         <div className="group-header">
@@ -97,12 +92,6 @@ export class TeacherGroupSixPackFourUp extends BaseComponent<IProps, IState> {
               icon="sticky-note"
               key={`sticky-note-${focusedGroupUser ? `user-${focusedGroupUser.id}` : "group"}`}
               onClickButton={messageClickHandler} />
-            <IconButton
-              title="Support"
-              className="icon"
-              icon="support"
-              key="support"
-              onClickButton={showGroupSupportClickHandler} />
           </div>
         </div>
       );
