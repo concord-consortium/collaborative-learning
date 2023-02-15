@@ -59,23 +59,27 @@ To fix these issues once and for all, we need to make sure that (1) image data c
 
 This is an alternative way to look at the information above. The `getImageData` firebase function is how students and teachers can access images that are outside of their current class. Looking at this function's logic determines who can access which images.
 
+TODO: re-write this using user level terms. This documentation is too much like the actual code.
+
 1. It validates that the context param it is passed matches the auth info in the JWT that was passed in the header. This includes the portal, userId, and classHash (context_id).
 
-2. The url param has to match the ccimg url pattern and have an imageKey. The url param might optionally have a classHash in it.
+2. The url param has to match the ccimg url pattern and have an `imageKey`. The url param might optionally have a `imageClassHash` in it.
 
-3. If the user's classHash (from the auth info) matches the image's classHash then the image data is returned from: `${classPath}/images/${imageKey}`.
+3. A `legacyUrl` is created from the url param by striping off the `imageClassHash`.
+
+3. If the user's `classHash` (from the auth info) matches the `imageClassHash` then the image data is returned from: `${classPath}/images/${imageKey}`.
 
 4. 4 different imageClassPaths are searched for at the same time:
 
-    a. if the imageClassHash wasn't set (a legacyURL), the users classPath is attempted to be used. If there is an image at that path it will be used.
+    a. if the `imageClassHash` wasn't set (a legacyURL), the users classPath is attempted to be used. If there is an image at that path it will be used.
 
-    b. if the user is a teacher with a classHash and a network, then firestore is searched for class document with the imageClassHash and network of the teachers' network. If one is found then path is constructed as `${classPath.replace(userClassPath,imageClassHash)}}/images/${imageKey}`
+    b. if the user is a teacher with a `classHash` and a `network`, then firestore is searched for class document with a `classHash` of `imageClassHash` and `network` matching the teacher's network. If one is found then path is constructed as `${classPath.replace(userClassPath,imageClassHash)}}/images/${imageKey}`. This is different from "option d" below because the `mcimages` collection is not used. One case this will handle is if an image that was part of a document that was published to "This Class" and then accessed by another teacher in the same network. This is because publishes to "This Class" do not currently create documents in `mcimages`.
 
-    c. if there is mcimages doc with a matching legacyUrl and userClassHash is in the classes array of the mcimages doc, then the first classPath from these matching mcimages docs is used. This would apply to students or teachers where the image has been published to their current class. **Note** currently these mcimages docs are only created during a multi-class publish. If a teacher gets access to an image and does a "This Class" publish, one of these mcimage docs will not be created.
+    c. if there is a `mcimages` doc with a `url` matching the `legacyUrl` and the user's `classHash` is in the `classes` array of the `mcimages` doc, then the first `classPath` from these matching `mcimages` docs is used. This would apply to students or teachers where the image has been published to their current class. **Note** currently these `mcimages` docs are only created during a multi-class publish.
 
-    d. if the user is a teacher and there is a network then a mcimages doc is searched for the legacyUrl and network. The first classPath from these matching mcimages docs is used. This would be the case of a published image by another teacher in the same network as the current teacher.
+    d. if the user is a teacher and has a network then a `mcimages` doc is searched for the `legacyUrl` and `network`. The first classPath from these matching `mcimages` docs is used. This would be the case of a multi-class published image by another teacher in the same network as the current teacher. This overlaps with "option b". In theory this would pick up cases where there isn't a class document for the `imageClassHash`. That could happen if the image url param is actually a legacyUrl, or if the class document wasn't created perhaps because this clue document was published before class documents were supported.
 
-Note the supportKey, context_id, resource_link_id, and resource_url of the mcimages documents are not used. As far as I can tell these are stored to help track down the image.
+Note the supportKey, context_id, resource_link_id, and resource_url of the mcimages documents are not used. See below for what they contain.
 
 ## What publishSupport puts in an mcimages document
 
