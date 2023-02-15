@@ -54,3 +54,49 @@ To fix these issues once and for all, we need to make sure that (1) image data c
   - >This is step three of the work to support multi-class images in multi-class supports. In [part two](https://github.com/concord-consortium/collaborative-learning/pull/1174) we designed the firestore schema and implemented a script to migrate existing published supports to the new format. With this PR, we implement the firebase function that retrieves the image data making use of the new firestore collections where appropriate.
 4. Add `publishSupport()` firebase function ([PR #1180](https://github.com/concord-consortium/collaborative-learning/pull/1180))
   - >This is the final piece of the epic journey to support multi-class access to images published to multi-class supports and then potentially copied from there. In this piece, a new `publishSupport()` firebase function writes the multi-class support document to firestore (like before), but it also (a) canonicalizes image url references in the content so that image references copied from these multi-class supports will contain their class information and (b) writes a multi-class image entry to firestore for each image referenced in the support so that downstream clients will be able to determine which images have been published to which classes even after the image has been copied into another user context. For support of legacy images published as part of earlier multi-class supports, the new `publishSupport()` function consults the firestore `images` collection which maps legacy image url references to their correct locations and was constructed by the `update-supports-images` script implemented in step one of this epic.
+
+## How getImageData looks up an image
+
+This is an alternative way to look at the information above. The `getImageData` firebase function is how students and teachers can access images that are outside of their current class. Looking at this function's logic determines who can access which images.
+
+1. It validates that the context param it is passed matches the auth info in the JWT that was passed in the header. This includes the portal, userId, and classHash (context_id).
+
+2. The url param has to match the ccimg url pattern and have an imageKey. The url param might optionally have a classHash in it.
+
+3. If the user's classHash (from the auth info) matches the image's classHash then the image data is returned from: `${classPath}/images/${imageKey}`.
+
+4. 4 different imageClassPaths are searched for at the same time:
+
+    a. if the imageClassHash wasn't set (a legacyURL), the users classPath is attempted to be used. If there is an image at that path it will be used.
+
+    b. if the user is a teacher with a classHash and a network, then firestore is searched for class document with the imageClassHash and network of the teachers' network. If one is found then path is constructed as `${classPath.replace(userClassPath,imageClassHash)}}/images/${imageKey}`
+
+    c. if there is mcimages doc with a matching legacyUrl and userClassHash is in the classes array of the mcimages doc, then the first classPath from these matching mcimages docs is used. This would apply to students or teachers where the image has been published to their current class. **Note** currently these mcimages docs are only created during a multi-class publish. If a teacher gets access to an image and does a "This Class" publish, one of these mcimage docs will not be created.
+
+    d. if the user is a teacher and there is a network then a mcimages doc is searched for the legacyUrl and network. The first classPath from these matching mcimages docs is used. This would be the case of a published image by another teacher in the same network as the current teacher.
+
+Note the supportKey, context_id, resource_link_id, and resource_url of the mcimages documents are not used. As far as I can tell these are stored to help track down the image.
+
+## What publishSupport puts in an mcimages document
+
+This is the other side of the getImageData. How a mcimages document is created or updated when the firebase function `publishSupport` is called.
+
+Each publish results in a new mcsupports document. A `classPath` is constructed based on the context and auth information of the request. It will be `${root}/classes/${context.classHash}` where root varies depending on the auth information. This root is described in [./firebase-schema.md](./firebase-schema.md).
+
+For every image url found in the published document:
+
+1. the url is parsed to extract its `imageClassHash` and `imageKey`
+2. the `imageClassPath` is constructed from the `classPath` by replacing the `classHash` in the path with the `imageClassHash`.
+3. a mcimages document at `${firestoreRoot}/mcimages/${supportKey}_${imageKey}` is created, with:
+  - **url** the image url without the class hash segment of the path this is referred to the `legacyUrl` in the code.
+  - **classes** passed to the publishSupport as a parameter. These are the classes the support was published to.
+  - **classPath** `${firebaseRoot}/classes/${class hash where the actual image data is located}`
+  - **supportKey** id of the mcsupports firestore document
+  - network info
+  - **platform_id** portal identifier
+  - **context_id** class hash where the actual image is stored
+  - **resource_link_id** portal assignment or offering id of the published support.
+  - **resource_url** should be url of the resource that was assigned in the portal in which the teacher was running when they published the support.
+
+A key thing here is that just like mcsupports document, these mcimage documents are created on each publish. This is why there might be multiple matches for a particular network, or class. The same document could have been published more than once. Or the same image could be used in multiple documents that were published to the same network or class.
+
