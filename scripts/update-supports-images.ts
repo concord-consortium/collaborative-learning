@@ -153,7 +153,7 @@ function buildFirebaseImagePath(classPath: string, imageKey: string) {
 
 console.log(`***** Base Path: ${kFirestoreBasePath} *****`);
 
-// TODO: There is another type of documents which might reference images which
+// TODO: There is another type of document which might reference images which
 // need to be processed. If a teacher in one class publishes a document to "This
 // class" or "All Classes" and then the same or a different teacher uses an
 // image in one of these documents and publishes this document to a different
