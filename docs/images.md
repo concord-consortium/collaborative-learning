@@ -65,11 +65,11 @@ TODO: re-write this using user level terms. This documentation is too much like 
 
 2. The url param has to match the ccimg url pattern and have an `imageKey`. The url param might optionally have a `imageClassHash` in it.
 
-3. A `legacyUrl` is created from the url param by striping off the `imageClassHash`.
+3. A `legacyUrl` is created from the url param by stripping off the `imageClassHash`.
 
 3. If the user's `classHash` (from the auth info) matches the `imageClassHash` then the image data is returned from: `${classPath}/images/${imageKey}`.
 
-4. 4 different imageClassPaths are searched for at the same time:
+4. Four different imageClassPaths are searched for at the same time:
 
     a. if the `imageClassHash` wasn't set (a legacyURL), the users classPath is attempted to be used. If there is an image at that path it will be used.
 

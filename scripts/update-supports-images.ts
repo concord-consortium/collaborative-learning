@@ -108,7 +108,7 @@ function shouldLogIndividualSupports(supportIndex: number, classHash?: TClassHas
 const kImageTileRegex = /"type":"(Drawing|Geometry|Image)"/g;
 
 // regular expression for identifying firebase image urls in document content
-// In some tile state the image URLS are inside of a double escaped JSON. This means
+// In some tile states the image URLS are inside of a double escaped JSON. This means
 // they will be in a string like \"url\" because the quotes have to be escaped.
 // This is why in the regex below the URL is terminated either by \\" or "
 //
