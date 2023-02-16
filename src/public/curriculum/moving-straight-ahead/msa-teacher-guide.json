@@ -85,7 +85,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>Problem Overview</h2>",
+                        "<h3>Problem Overview</h3>",
                         "<p>This Problem introduces patterns of change between two variables in the context of a walkathon. Students determine their walking rates in meters per second as a ratio of distance to time. This Problem connects back to the rate work done in Comparing and Scaling while laying the foundation for using rate to look at patterns of change. Students answer questions about time and distance using their constant walking rates and write an equation that models the distance walked over time at their constant walking rates.</p>"
                       ]
                     }
@@ -115,7 +115,10 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Emerging Mathematical Ideas</strong>\nBegin making sense of a problem context that involves a proportional relationship between two variables (time, distance) described initially in words and connecting it to an equation and a graph of the relationship. \nBegin to notice/recognize:  <ul><li> rate is a way to describe how far you can travel in a fixed interval of time – e.g., in two seconds I can move 20 feet, and use phrases like “consistent rate” and “constant rate” to describe relationships like this one,</li><li> proportional relationships,</li><li> an understanding of rates can be connected to prior experiences with ratios and proportional reasoning (multiplicative reasoning), </li><li> the relationship between the length of time traveled and the distance covered at a particular rate can be described in words, e.g., if I walk at a rate of 5 meters per second, then I can find the distance I travel by multiplying the number of seconds I travel by 5 m/sec. (the unit rate),</li><li> the distance traveled (d) at a constant rate (r) for a period of time (t) can be described by the equation d = r x t, </li><li> the equation needed to describe the distance traveled for two different people will be the same except that the value for the rate will vary, and</li><li> when points for several different values of time and distance traveled (at a given rate) are graphed, the points will form a straight line.</li></ul>"
+                      "text":[ 
+                        "<strong>Emerging Mathematical Ideas</strong>",
+                        "Begin making sense of a problem context that involves a proportional relationship between two variables (time, distance) described initially in words and connecting it to an equation and a graph of the relationship. ",
+                        "Begin to notice/recognize:  <ul><li> rate is a way to describe how far you can travel in a fixed interval of time – e.g., in two seconds I can move 20 feet, and use phrases like “consistent rate” and “constant rate” to describe relationships like this one,</li><li> proportional relationships,</li><li> an understanding of rates can be connected to prior experiences with ratios and proportional reasoning (multiplicative reasoning), </li><li> the relationship between the length of time traveled and the distance covered at a particular rate can be described in words, e.g., if I walk at a rate of 5 meters per second, then I can find the distance I travel by multiplying the number of seconds I travel by 5 m/sec. (the unit rate),</li><li> the distance traveled (d) at a constant rate (r) for a period of time (t) can be described by the equation d = r x t, </li><li> the equation needed to describe the distance traveled for two different people will be the same except that the value for the rate will vary, and</li><li> when points for several different values of time and distance traveled (at a given rate) are graphed, the points will form a straight line.</li></ul>"]
                     }
                   },
                   {
@@ -151,7 +154,10 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Launch (Getting Started)</strong> \nConnecting to Prior Knowledge\n\nThe introduction to the Investigation revisits Adrian’s Bike Rental from Grade 6 Variables and Patterns. In that Unit, students used contextual situations, tables, graphs, and equations to represent patterns relating variables such as cost, income, and profit. They looked at both consistent relationships (such as linear patterns) and non-consistent relationships to explain the pattern of change between two variables.\n\nThe four questions in the introduction to the Investigation offer overarching questions that the students should explore throughout the unit. You may want to display these questions in the classroom in some way to help keep students focused on the big ideas in the Unit.",
+                        "<strong>Launch (Getting Started)</strong>",
+                        "Connecting to Prior Knowledge",
+                        "The introduction to the Investigation revisits Adrian’s Bike Rental from Grade 6 Variables and Patterns. In that Unit, students used contextual situations, tables, graphs, and equations to represent patterns relating variables such as cost, income, and profit. They looked at both consistent relationships (such as linear patterns) and non-consistent relationships to explain the pattern of change between two variables.",
+                        "The four questions in the introduction to the Investigation offer overarching questions that the students should explore throughout the unit. You may want to display these questions in the classroom in some way to help keep students focused on the big ideas in the Unit.",
                         "<ul><li> What are the variable in the problem?</li><li>Do the variables in the problem have a linear relationship to each other?</li><li>What patterns in the problem suggest that the relationship is linear? Proportional?</li><li> How can the linear relationship be represented with a verbal description, a table, a graph, or an equation?</li><li>How do changes in one variable affect changes in a related variable? How are these changes captured in a table, a graph, or an equation?</li><li>How can tables, graphs, equations, inequalities of linear relationships be used to solve problems?</li></ul>",
                         "After setting the scene for the Unit with the four questions, begin to introduce students to the context of the Problem.",
                         "Ask students to describe if they are fast or slow walkers and to describe their evidence."]
@@ -505,12 +511,9 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-              ]
+              }
             }
-          ],
-          "supports": []
+          ]
         },
         {
           "description": "Problem 1.2",
@@ -527,7 +530,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>Problem Overview</h2>",
+                        "<h3>Problem Overview</h3>",
                         "Students explore the walking rates of three students. They look at the walking rate and its effect on various representations of the relationship between distance and time. This Problem introduces ways to represent proportional linear relationships between two variables using tables, graphs, and equations. It is also the first time that students are asked to explain why a relationship is linear or to recognize a linear relationship from a table or an equation."
                       ]
                     }
@@ -577,8 +580,7 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "launch",
@@ -636,9 +638,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-              ]
+              }
             },
             {
               "type": "explore",
@@ -727,9 +727,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-              ]
+              }
             },
             {
               "type": "summarize",
@@ -947,7 +945,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<h2>Problem Overview</h2>",
+                        "<h3>Problem Overview</h3>",
                         "A new situation involving collecting money from sponsors for the walkathon helps student compare and contrast proportional to non-proportional relationships. The Problem furthers students’ understanding of rate of change between the two variables in a linear relationship. Students will compare the amount of money donated and the distance walked for a walkathon. Students see linear relationships in a new context and interpret information using verbal descriptions, tables, graphs, and equations. They also informally explore the y-intercept."
                       ]
                     }
@@ -1000,8 +998,7 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "launch",
@@ -1055,9 +1052,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-              ]
+              }
             },
             {
               "type": "explore",
@@ -1550,12 +1545,9 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-              ]
+              }
             }
-          ],
-          "supports": []
+          ]
         },
         {
           "description": "Problem 1.4",
@@ -1572,7 +1564,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Problem Overview</p>",
+                        "<h3>Problem Overview</h3>",
                         "<p>This Problem introduces negative rates of change (negative slope). It poses two situations involving a decreasing linear relationship. That is, for every unit change in the independent variable, the dependent variable decreases by a constant positive amount (which is equivalent to saying the dependent variable increases by a constant negative amount).</p>",
                         "<p>One situation uses a graphical representation, and the other uses a tabular representation. Students interpret and compare information from different representations and build on skills recognizing linear relationships from various representations. The y-intercept is named and students begin to interpret it as a point on a line, an entry in a table, or as the constant b in the equation y = ax + b.</p>"
                       ]
@@ -1584,7 +1576,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>AoL: Explore &amp; Analysis</p>",
+                        "<p>AoL: Linear Relationships: Explore & Algebraic Expressions and Equations: Analysis</p>",
                         "<p>CCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d, 7.EE.A.2, 7.EE.B.4</p>"
                       ]
                     }
@@ -1596,7 +1588,7 @@
                       "format": "html",
                       "text": [
                         "<p>NWDYK</p>",
-                        "<p>How can you tell from an equation, table, or graph if the linear pattern of change is decreasing? If a relationship is linear, explain how you can tell if it is proportional?</p>"
+                        "<p>If a relationship is linear, how can you tell if the pattern of change is decreasing, increasing, or neither?</p>"
                       ]
                     }
                   },
@@ -1635,8 +1627,7 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "launch",
@@ -1656,12 +1647,13 @@
                   }
                 },
                 {
-                  "id": "yO1ckvKvmJYsfO8_",
+                  "id": "KNgFTr5Hgl0uH6sU",
+                  "title": "Text 7",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><strong>Suggested Questions </strong></p>",
+                      "<p><strong>Suggested questions </strong></p>",
                       "<ul><li>How can you tell whether a relationship is linear? (Answers will vary and may not be polished at this point. Look for students to mention a rate of change and describe how to recognize a constant rate from different representations, including a table, graph, equation, or verbal description.)</li><li>Are all linear relationships proportional? (No. All have a rate of change. Some have a rate of change that is also the constant of proportionality/unit rate.)</li></ul>"
                     ]
                   }
@@ -1692,8 +1684,7 @@
                   }
                 }
                 ]
-              },
-              "supports": [ ]
+              }
             },
             {
               "type": "explore",
@@ -1719,28 +1710,20 @@
                     "text": [
                       "<p><strong>Suggested Questions </strong></p>",
                       "<ul><li>How can you represent this change in a table? (You can start with a row that shows the starting value is $144 and then for each new row, subtract $2 for each week.)</li></ul>",
-                      "<p>For Mr. Mamer’s data, students may need help finding the constant rate for the graph. Suggest that they make a table of values—this should help them find the constant rate. Be sure to have students share their strategies in the Summary.</p>"
-                    ]
-                  }
-                },
-                {
-                  "id": "i7DqYr-UD2LMw6UF",
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "<p><strong>Suggested Questions</strong></p>",
+                      "<p>For Mr. Mamer’s data, students may need help finding the constant rate for the graph. Suggest that they make a table of values—this should help them find the constant rate. Be sure to have students share their strategies in the Summary.</p>",
                       "<ul><li>How could you represent Mr. Mamer’s class data in a table? (The week in one column/row and the amount of money in the other column/row.)</li></ul>"
                     ]
                   }
                 },
                 {
+                  "id": "agv8VbgafEQzKY1Y",
+                  "title": "Table 1",
                   "content": {
                     "type": "Table",
                     "name": "Mr. Mamer's Class Data",
                     "columns": [
-                      {"name":"Week","values":["0","5","10","15","20","25","30"]},
-                      {"name":"Amount of Money ($)","values":["500","450","400","350","300","250","200"]}
+                      {"name":"Week","width":80,"values":["0","5","10","15","20","25","30"]},
+                      {"name":"Amount of Money ($)","width":140.23046875,"values":["500","450","400","350","300","250","200"]}
                     ]
                   }
                 },
@@ -1756,20 +1739,20 @@
                   }
                 },
                 {
-                  "id": "2P52eadUaAy1oH6k",
+                  "id": "iEJ145CzJR5FtpkC",
+                  "title": "Text 13",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
                       "<p><em>Now What Do You Know?</em></p>",
-                      "<p>How can you tell from an equation, table, or graph if the linear patter of change is decreasing?  If a relationship is linear, explain how you can tell if it is proportional?</p>"
+                      "<p><em><strong>If a relationship is linear, how can you tell if the pattern of change is decreasing, increasing, or neither?</strong></em></p>",
+                      "<p>Listen during the Explore for how students are describing what is happening with the money in the class accounts- are they noticing that on a table that as the number of weeks is increasing the amount of money is decreasing at a constant rate; that on a table the line will decrease (fall) from left to right; and in an equation the coefficient will be negative.  Listen for how students contrast these representations to those in previous problems.  Use their conversations to lead the summary. </p>"
                     ]
                   }
                 }
                 ]
-              },
-              "supports": [
-              ]
+              }
             },
             {
               "type": "summarize",
@@ -1796,7 +1779,6 @@
                       "<p><strong>Suggested Questions</strong></p>",
                       "<ul><li>Do the classes have the same thing happening in their bank accounts? (Answers may be general, such as both accounts are decreasing because the classes are using their money to donate items to the children’s ward. Or answers may be specific, such as Ms. Chang’s class uses more money a week than Mr. Mamer’s.)</li><li>What do you notice about the amount in the accounts for the two classes? (Students will have various answers that can guide how you proceed with asking other questions in the Summary.)</li></ul>",
                       "<p>You may begin by asking a few questions about solutions when an amount is given to have students analyze specific instances in the relationship.</p>",
-                      "<p><strong>Suggested Questions</strong></p>",
                       "<ul><li>What If Situation A asks about the amount of money at 10 weeks. We know the value of the x-variable (independent variable). How do we find the value of the other variable? (Various answers using the table, graph, and/or equations.) The basic idea is to see if given the value of x, students can find y.</li><li>What If Situation A asks about when the money is spent. Where would we see this in the table? (When the amount of money [y-variable or independent variable] is zero.) Where would we see this on the graph? (When the amount of money is zero, the line would hit the x-axis.) You could introduce the vocabulary of x-intercept at this time. But it is not necessary for all students to learn at this time.</li><li>In What if Situation B, what questions might the student have about the accounts? (In the equation, we know that the amount of money is $100. So the question asked would be: At what time does the account have $100? With the inequality, the question would be: When does the account have less than $100.) The basic idea is to see if given the value of y, can students make sense of finding x.</li></ul>"
                     ]
                   }
@@ -1825,6 +1807,7 @@
                 },
                 {
                   "id": "z8yG3uf1q9U5qciA",
+                  "title":"Patterns of change in tables",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/moving-straight-ahead/images/MSA_TG_4_3_table.jpg"
@@ -1842,6 +1825,7 @@
                 },
                 {
                   "id": "7WgohnddJTbceX9f",
+                  "title":"Closely spaced data for Mr. Mamer's class",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_4_table2.jpg"
@@ -1899,18 +1883,18 @@
                     "format": "html",
                     "text": [
                       "<ul><li>How can you describe what is happening with each account? (Chang: They start with $144 and they take out $12 every week. Mamer: They start with $500 and they take out $10 every week.)</li><li>How can we write this as a symbolic expression to represent the pattern in the data for each class? (See below.) How do we know that these expressions are all correct? (At this time, student will use various informal answers using number sense.)</li></ul>",
-                      "<p>                                                                Chang: 144 – 12x      or       144 + -12x    or     -12x + 144</p>",
-                      "<p>                                                              Mamer: 500 – 10x      or       500 + -10x    or    -10x + 500</p>",
+                      "<p>          Chang: 144 – 12x      or       144 + -12x    or     -12x + 144</p>",
+                      "<p>          Mamer: 500 – 10x      or       500 + -10x    or    -10x + 500</p>",
                       "<p>Note that some students may write: 100 – 50x for every 5 weeks</p>",
                       "<ul><li>What is an equation to represent that data from each class?</li></ul>",
-                      "<p>                                                      Chang: A = 144 – 12x     or     A = 144 + -12x     or    A = -12x + 144</p>",
-                      "<p>                                                     Mamer: A = 500 – 10x    or      A = 500 + -10x    or    A = -10x + 500</p>",
+                      "<p>          Chang: A = 144 – 12x     or     A = 144 + -12x     or    A = -12x + 144</p>",
+                      "<p>          Mamer: A = 500 – 10x    or      A = 500 + -10x    or    A = -10x + 500</p>",
                       "<ul><li>How do we see the rate of change in the equation? (The rate of change is the number multiplied by the independent variable or the coefficient of x.)</li></ul>",
-                      "<p>                                                      Chang: A = 144 – 12x     or     A = 144 + -12x     or    A = -12x + 144</p>",
-                      "<p>                                                     Mamer: A = 500 – 10x    or      A = 500 + -10x    or    A = -10x + 500</p>",
+                      "<p>          Chang: A = 144 – 12x     or     A = 144 + -12x     or    A = -12x + 144</p>",
+                      "<p>          Mamer: A = 500 – 10x    or      A = 500 + -10x    or    A = -10x + 500</p>",
                       "<ul><li>How do we see the y-intercept in the equation? (It is the amount that they started with. That amount is added into the equation.)</li></ul>",
-                      "<p>                                                      Chang: A = 144 – 12x     or     A = 144 + -12x     or    A = -12x + 144</p>",
-                      "<p>                                                     Mamer: A = 500 – 10x    or      A = 500 + -10x    or    A = -10x + 500</p>",
+                      "<p>          Chang: A = 144 – 12x     or     A = 144 + -12x     or    A = -12x + 144</p>",
+                      "<p>          Mamer: A = 500 – 10x    or      A = 500 + -10x    or    A = -10x + 500</p>",
                       "<ul><li>Are either of these relationships proportional? (No. Table: We cannot scale values or make proportions. Graph: The line does not go through (0, 0). Equation: There is a non-zero amount added.)</li></ul>"
                     ]
                   }
@@ -1923,7 +1907,6 @@
                     "text": [
                       "<p>Now What Do Students Know</p>",
                       "<p>Ask students to reflect on the discussion and answer the Now What Do You Know question.</p>",
-                      "<p><em>How can you tell from an equation, table, or graph if the linear pattern of change is decreasing?  If a relationship is linear, explain how you can tell if it is proportional?</em></p>",
                       "<p>See answers to the Problem for more information about the strategies and embedded mathematics.</p>"
                     ]
                   }
@@ -1943,11 +1926,9 @@
                   }
                 }
                 ]
-              },
-              "supports": []
+              }
             }
-          ],
-          "supports": []
+          ]
         }
       ]
     },
@@ -1972,6 +1953,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
+                      "<h3>Problem Overview</h3>",
                       "<p>Students look at the context of a young boy challenging his older brother toa race. Students explore the question, “How long should the race be so thatthe younger brother wins in a close race?” This Problem introduces the idea of students finding the point of intersection of two linear relationships using a graph, a table, or numeric reasoning. The Problem also assesses what students have learned about linear relationships and their representations from Investigation 1. </p>",
                       "<p><strong>Implementation Note:</strong> You might have a short summary after the Initial Challenge. This will give students a chance to share their strategies and how they made sense of the race question before going on to answer more detailed questions. You may want to use the What If...? questions to push the conversation during the Summarize. Ask the questions and pause for students to think about and record their answers, then engage the class in a discussion of ideas.</p>"
                     ]
@@ -1983,7 +1965,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>AoL:  Explore/Analysis &amp; Analysis</p>",
+                      "<p>AoL: Linear Relationships: Explore/Analysis & Algebraic Expressions and Equations: Analysis</p>",
                       "<p>CCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2c, 7.EE.A.1, 7.EE.A.2, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b</p>"
                     ]
                   }
@@ -2037,8 +2019,7 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "launch",
@@ -2050,9 +2031,8 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><strong><u>Launch (Getting Started)</u></strong><u>         </u></p>",
-                      "<p><u>Connecting to Prior Knowledge</u></p>",
-                      "<p></p>",
+                      "<p><strong>Launch (Getting Started)</strong></p>",
+                      "<p>Connecting to Prior Knowledge</p>",
                       "<p>If you did not pose the following questions at the end of the Summarize for Problem 1.4, ask them now. Begin by having students list several equations from Investigation 1 that represent linear relationships. </p>"
                     ]
                   }
@@ -2064,7 +2044,7 @@
                     "format": "html",
                     "text": [
                       "<p><strong>Suggested Questions </strong></p>",
-                      "<ul><li>Which relationship has the greatest rate of change? (Answers will vary. Look for students to choose the relationship that when written in the form y = b + ax has the greatest value of a. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of a.) </li><li>Which relationship(s) has a graph that crosses the y-axis at a point witha positive y-coordinate? With a y-coordinate of zero? With a negative y-coordinate? (Answers will vary. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of b. Positive y-coordinate: Look for students to choose the relationship(s) that when written in the form y = b + axhas a positive value of b. Sample: The line that represents Alana’s pledge plan. Zero y-coordinate: Look for students to choose a proportional relationship. Sample: Gilberto’s pledge plan can be modeled by a line that passes through the origin. Negative y-coordinate: Look for students to choose the relationship(s) that when written in the form y = b + mx has a negative value of b. Sample: The line that represents Gilberto’s pledge plan after purchasing a T-shirt for each sponsor.) You can tell students that they will continue to look at linear relationships in this Problem. </li></ul>"
+                      "<ul><li>Which relationship has the greatest rate of change? (Answers will vary. Look for students to choose the relationship that when written in the form y = b + ax has the greatest value of a. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of a.) </li><li>Which relationship(s) has a graph that crosses the y-axis at a point witha positive y-coordinate? With a y-coordinate of zero? With a negative y-coordinate? (Answers will vary. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of b. Positive y-coordinate: Look for students to choose the relationship(s) that when written in the form y = b + ax has a positive value of b. Sample: The line that represents Alana’s pledge plan. Zero y-coordinate: Look for students to choose a proportional relationship. Sample: Gilberto’s pledge plan can be modeled by a line that passes through the origin. Negative y-coordinate: Look for students to choose the relationship(s) that when written in the form y = b + mx has a negative value of b. Sample: The line that represents Gilberto’s pledge plan after purchasing a T-shirt for each sponsor.) You can tell students that they will continue to look at linear relationships in this Problem. </li></ul>"
                     ]
                   }
                 },
@@ -2093,19 +2073,15 @@
                     "format": "html",
                     "text": [
                       "<p><strong>Suggested Questions</strong></p>",
-                      "<p></p>",
                       "<ul><li>What do we know about the race at the beginning? (Possible answer: The younger brother, Henri, has a head start. The brothers are not starting in the same spot.)</li><li>If you were watching this race, what would you see happening with the brothers? (Possible answer: The two brothers would start walking at the same time. The older brother, Emile, would be walking faster and would be catching up with each step. Some students may want to model what would happen with some physical movement.)</li></ul>",
-                      "<p></p>",
                       "<p>Encourage students to think about how the race can be represented mathematically. Do not look for answers to these questions at this time. During the Explore and Summarize, listen and watch to see how students make sense of the situation.</p>",
-                      "<p></p>",
                       "<ul><li>What data would you collect to document what happens in the race?</li><li>What are the variables that you would keep track of?</li><li>How could you represent the data to show what happens as they race?</li></ul>",
                       "<p>Have students work in groups of 4 as they investigate the brother’s walking race.</p>"
                     ]
                   }
                 }
                 ]
-              },
-              "supports": [ ]
+              }
             },
             {
               "type": "explore",
@@ -2142,8 +2118,6 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>For the What If...?</p>",
-                      "<p></p>",
                       "<p>If students did not make tables or graphs in the Initial Challenge, then have some students make tables and graphs for each or have them ready for display. Or you can hand out <strong>Teaching Aid 2.1A: Emile and Henri’s Race</strong> with the example tables, graphs, and equations.</p>",
                       "<p></p>",
                       "<p>For Situation B: Using Equations, the claims are available on<strong> Teaching Aid 2.1B:  Amit’s Claims</strong>. You might want to print and cut apart the Teaching Aid. After formatively assessing students during the Initial Challenge, you can decide which claims to assign to groups, pairs, or individual students.</p>",
@@ -2163,20 +2137,20 @@
                   }
                 },
                 {
-                  "id": "D5Mk1ojBe8RgoJKY",
+                  "id": "L4LLESt3Hovv3Qld",
+                  "title": "Text 14",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><em>Now What Do You Know?</em></p>",
-                      "<p><em>Describe some strategies for solving problems that involve linear relationships. How can a table, graph, and an equation that represents a linear relationship be used to answer questions about the linear relationship? What other strategies could you use?</em></p>"
+                      "<p><em><strong>Now What Do You Know?</strong></em></p>",
+                      "<p><em><strong>Describe some strategies for solving problems that involve linear relationships. </strong></em></p>",
+                      "<p><em>(Select student work that will show how to use a table, graph, or numeric reasoning to find how long the race will be.  Use this student work to show the connections between the representations.)</em></p>"
                     ]
                   }
                 }
-                ]
-              },
-              "supports": [
               ]
+            }
             },
             {
               "type": "summarize",
@@ -2189,8 +2163,8 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><u><strong>Summarize (Orchestrating the Discussion)   </strong></u></p>",
-                      "<p><u>Solutions and Strategies</u> </p>",
+                      "<p><strong>Summarize (Orchestrating the Discussion)</strong></p>",
+                      "<p>Solutions and Strategies</p>",
                       "<p><em>Initial Challenge</em></p>",
                       "<p>Have students share their ways of answering the question about the length of the race. Students may use some of the following strategies.</p>"
                     ]
@@ -2203,7 +2177,7 @@
                     "format": "html",
                     "text": [
                       "<p><strong>Suggested Questions</strong></p>",
-                      "<ul><li>How did your group interpret the Initial Challenge? What strategy did you use? (Student answers and strategies for answering the question will vary. Possible strategies follow. Some students will answer with a distance. The brothers tie at 75 meters, so the race should be close to that distance. Some students will answer with a number of seconds for the lengths of the </li></ul>"
+                      "<ul><li>How did your group interpret the Initial Challenge? What strategy did you use? (Student answers and strategies for answering the question will vary. Possible strategies follow. Some students will answer with a distance. The brothers tie at 75 meters, so the race should be close to that distance. Some students will answer with a number of seconds for the lengths of the race.</li></ul>"
                     ]
                   }
                 },
@@ -2228,54 +2202,32 @@
                   }
                 },
                 {
-                  "id": "Og7n9HxD7YGalL3E",
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "<p>Guess and Check</p>"
-                    ]
-                  }
-                },
-                {
                   "id": "509wo9XoQ2kUMENh",
+                  "title": "Guess and Check solution",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/moving-straight-ahead/images/TG_MSA_2_1_GuessandCheck.jpg"
                   }
                 },
                 {
-                  "id": "P_4-LHg9xl8nR4WD",
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "<p>Double Number Lines</p>"
-                    ]
-                  }
-                },
-                {
                   "id": "Mhg8PZkYGPikJNbN",
+                  "title": "Double Number Lines",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/moving-straight-ahead/images/MSA_2_1_DoubleNumberLines.jpg"
                   }
                 },
                 {
-                  "id": "351Efz8-FvQnJxE1",
+                  "id": "sMnFHEfNDodzElqm",
+                  "title": "Table 1",
                   "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "<p>Table: Meters and Brothers’ Distances</p>"
+                    "type": "Table",
+                    "name": "Table: Meters and Brothers’ Distances",
+                    "columns": [
+                      {"name":"Meters","width":80,"values":["0","10","20","30","40","50"]},
+                      {"name":"Henri","width":80,"values":["45","55","65","75","85",""]},
+                      {"name":"Emile","width":80,"values":["0","25","50","75","100",""]}
                     ]
-                  }
-                },
-                {
-                  "id": "jHIjRbywcZ-BP4dz",
-                  "content": {
-                    "type": "Image",
-                    "url": "curriculum/moving-straight-ahead/images/MSA_2_1_DistanceTable.jpg"
                   }
                 },
                 {
@@ -2289,24 +2241,39 @@
                   }
                 },
                 {
-                  "id": "WlCQ_QbLV9eCV9se",
+                  "id": "fal1HAXsVJZRsfD-",
+                  "title": "Graph: Meters and Brothers’ Distances",
                   "content": {
-                    "type": "Image",
-                    "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_GraphDistances.jpg"
-                  }
-                },
-                {
-                  "id": "W-b6uwt5FZwHwaSX",
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "<p>Graph and Table: Distance Apart for Every Meter the Brothers Walk</p>"
+                    "type": "Geometry",
+                    "board": {
+                      "properties": {
+                        "axisMin": [-4.805, -9.043],
+                        "axisRange": [45.661, 128.696],
+                        "axisNames": ["x", "y"],
+                        "axisLabels": ["(seconds)", "(meters)"]
+                      }
+                    },
+                    "objects": [
+                      { "type": "point", "parents": [0, 0], "properties": {"id":"Tj5M_375TSE9jyiY","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [10, 25], "properties": {"id":"LvM96IZNQpl1vNxs","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [20, 50], "properties": {"id":"kPd5_Iq5YLxLGdG3","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [30, 75], "properties": {"id":"xO5VPpnx1sFR_37E","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [40, 100], "properties": {"id":"8m0reCMriJxoY0JX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "polygon", "parents": ["Tj5M_375TSE9jyiY", "LvM96IZNQpl1vNxs", "kPd5_Iq5YLxLGdG3", "xO5VPpnx1sFR_37E", "8m0reCMriJxoY0JX"],"properties": {"id":"24rUmfbK1RkIAzTm"} },
+                      { "type": "comment", "parents": [-1, -20.588697350543484], "properties": {"id":"3sCwbJ0wSc2_sPsv","text":"Emile","anchor":"xO5VPpnx1sFR_37E"} },
+                      { "type": "point", "parents": [0, 45], "properties": {"id":"Sogq-g9xZoSve_yx","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [10, 55], "properties": {"id":"UoSpIgO_gUu9q4gI","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [20, 65], "properties": {"id":"c5dy7mc9LfnFwvWe","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [30, 75], "properties": {"id":"hReT3XWVjXT44LVs","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "point", "parents": [40, 85], "properties": {"id":"xdULmTshYfRC9S_k","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+                      { "type": "polygon", "parents": ["Sogq-g9xZoSve_yx", "UoSpIgO_gUu9q4gI", "c5dy7mc9LfnFwvWe", "hReT3XWVjXT44LVs", "xdULmTshYfRC9S_k"],"properties": {"id":"1V1rSGMqCjNux2Sa"} },
+                      { "type": "comment", "parents": [-5.729580553944315, 11.165760869565219], "properties": {"id":"b782Q9-ECjA9vf_n","text":"Henri","anchor":"c5dy7mc9LfnFwvWe"} }
                     ]
                   }
                 },
                 {
                   "id": "bnLBlvZONEWl3DZ1",
+                  "title":"Graph and Table: Distance Apart for Every Meter the Brothers Walk",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_GraphTable.jpg"
@@ -2368,8 +2335,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><u>Making the Mathematics Explicit </u></p>",
-                      "<p></p>",
+                      "<p>Making the Mathematics Explicit</p>",
                       "<p>During the discussion of your students’ strategies, you may have already answered some of the What If…? questions. You may want to use some or all of the What If...? questions to push the Summary conversation.</p>"
                     ]
                   }
@@ -2380,8 +2346,6 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><em>For Situation A</em></p>",
-                      "<p></p>",
                       "<p>If students did not make tables or graphs in the Initial Challenge, you could have students make tables and graphs now. Or you can hand out Teaching Aid 2.1A: Emile and Henri’s Race  with the example tables, graphs, and equations.</p>",
                       "<p>Use the representation(s) to help students make sense of the questions and answers. </p>"
                     ]
@@ -2431,14 +2395,15 @@
                   }
                 },
                 {
-                  "id": "kTZUBSAcZifwtMGx",
+                  "id": "yDl0HLOz9GQmo4VO",
+                  "title": "Table 2",
                   "content": {
                     "type": "Table",
                     "name": "Distance From Starting Line 1",
                     "columns": [
-                      {"name":"Time (seconds)","values":["0","10","20","30","40"]},
-                      {"name":"Henri's Distance (m)","values":["45","55","65","75","85"]},
-                      {"name":"Emile's Distance (m)","values":["0","25","50","75","100"]}
+                      {"name":"Time (seconds)","width":105,"values":["0","10","20","30","40"]},
+                      {"name":"Henri's Distance (m)","width":130,"values":["45","55","65","75","85"]},
+                      {"name":"Emile's Distance (m)","width":130,"values":["0","25","50","75","100"]}
                     ]
                   }
                 },
@@ -2468,22 +2433,13 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<ul><li>How does the starting point of each brother in the race show up in the graph? (It is the y-intercept. 45 for Henri and 0 for Emile.)</li><li>How does the starting point of each brother in the race show up in the graph? (It is the y-intercept. 45 for Henri and 0 for Emile.)</li><li>What expression represents Emile’s race? Henri’s? (Students may need to use words first, then move to symbols. For Emile: He walks 2.5 meters every second. 2.5 x t, 2.5t, or 2.5t + 0. For Henri: He gets a 45-meter head start and walks 1 meter every second. 45 + 1t, 1t + 45, or 45 + t.)</li><li>What does the vertical (up and down) difference between the two lines on the graph tell you? (The vertical difference tells you how far apart the brothers are at that moment in time. It shows that the difference is 45 meters at t = 0 and that the distance between them gets smaller as Emile catches up to Henri. At 20 seconds, they are 15 meters apart.) </li></ul>"
-                    ]
-                  }
-                },
-                {
-                  "id": "DrPHHqgJsRkPnjZg",
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "<ul><li>How can I find if a specific point, like (26, 70), is in the table or graph of one of the brothers? (Answers will vary. Students may discuss estimating values on the graph or searching for values on the table. Students might also informally or formally determine the values using equations. Emile: 2.5 (26) = ? Henri: 1(26) + 45 = ?)</li><li>How can I look at the table or graph and know which brother is ahead in the race? (Answers will vary. Graph: Henri is ahead when the graph is “higher” or further up on y-values than Emile’s. Table: Henri is ahead when the dependent variable values are larger than Emile’s. This happens up to 30 seconds and 75 meters. After than point, it switches to Emile being ahead.)</li></ul>"
+                      "<ul><li>How does the starting point of each brother in the race show up in the graph? (It is the y-intercept. 45 for Henri and 0 for Emile.)</li><li>What expression represents Emile’s race? Henri’s? (Students may need to use words first, then move to symbols. For Emile: He walks 2.5 meters every second. 2.5 x t, 2.5t, or 2.5t + 0. For Henri: He gets a 45-meter head start and walks 1 meter every second. 45 + 1t, 1t + 45, or 45 + t.)</li><li>What does the vertical (up and down) difference between the two lines on the graph tell you? (The vertical difference tells you how far apart the brothers are at that moment in time. It shows that the difference is 45 meters at t = 0 and that the distance between them gets smaller as Emile catches up to Henri. At 20 seconds, they are 15 meters apart.) </li><<li>How can I find if a specific point, like (26, 70), is in the table or graph of one of the brothers? (Answers will vary. Students may discuss estimating values on the graph or searching for values on the table. Students might also informally or formally determine the values using equations. Emile: 2.5 (26) = ? Henri: 1(26) + 45 = ?)</li><li>How can I look at the table or graph and know which brother is ahead in the race? (Answers will vary. Graph: Henri is ahead when the graph is “higher” or further up on y-values than Emile’s. Table: Henri is ahead when the dependent variable values are larger than Emile’s. This happens up to 30 seconds and 75 meters. After than point, it switches to Emile being ahead.)</li></ul>"
                     ]
                   }
                 },
                 {
                   "id": "msQRrNQWWZsjSSMo",
+                  "title":"Henri and Emile's Race",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_HenriEmileRace.jpg"
@@ -2501,6 +2457,7 @@
                 },
                 {
                   "id": "klcK_dlUyF7DruVB",
+                  "title":"Numberline Inequality Solution",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_Numberline30.jpg"
@@ -2518,6 +2475,7 @@
                 },
                 {
                   "id": "msQRrNQWWZsjSSMo",
+                  "title":"Graph Inequality Solution",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_HenriEmileRace.jpg"
@@ -2536,6 +2494,7 @@
                 },
                 {
                   "id": "msQRrNQWWZsjSSMo",
+                  "title":"Graph with inequality highlighting",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_HenriEmileRace.jpg"
@@ -2543,6 +2502,7 @@
                 },
                 {
                   "id": "dSFdp4600RGC4GWL",
+                  "title":"Negative Numberline",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_1_negNumberline.jpg"
@@ -2550,6 +2510,7 @@
                 },
                 {
                   "id": "0Uy0QJwdT6Ak--1U",
+                  "title":"Graph and numberline combined",
                   "content": {
                     "type": "Image",
                     "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_GraphNumberline.jpg"
@@ -2561,9 +2522,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><em>For Situation B</em></p>",
-                      "<p><em></em></p>",
-                      "<p>The claims are available on Teaching Aid 2.1B:  Amit’s Claims. You might want to print and cut apart the Teaching Aid. After formatively assessing students during the Initial Challenge and What If...? Situation A, you can decide which claims to assign to groups, pairs, or individual students.</p>"
+                      "<p>The claims are available on <strong>Teaching Aid 2.1B:  Amit’s Claims</strong>. You might want to print and cut apart the Teaching Aid. After formatively assessing students during the Initial Challenge and What If...? Situation A, you can decide which claims to assign to groups, pairs, or individual students.</p>"
                     ]
                   }
                 },
@@ -2573,8 +2532,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><strong>Suggested Questions</strong></p>",
-                      "<ul><li>In Situation B, we see that Amit wrote equations to represent the relationships between time and distance. How do these equations represent the situation for each brother? (To find the distance that they travel, we multiply the time by the walking rate and add any head start.)</li></ul>"
+                      "In What If Situation B, we see that Amit wrote equations to represent the relationships between time and distance. How do these equations represent the situation for each brother? (To find the distance that they travel, we multiply the time by the walking rate and add any head start.)</li></ul>"
                     ]
                   }
                 },
@@ -2660,7 +2618,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Claim #2: The walking rate will determine how fast a brother walks. The faster the walking rate, the steeper the line will be.</p>"
+                      "<p>Claim 2: The walking rate will determine how fast a brother walks. The faster the walking rate, the steeper the line will be.</p>"
                     ]
                   }
                 },
@@ -2670,8 +2628,28 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p></p>",
                       "<p>Some students may think that Henri has the steeper line because it is “higher” than Emile’s in the beginning. It is important to reflect back on the pattern of change between the two variables that students first learned about in Grade 6 <em>Variables and Patterns</em>. Students discuss how the distance changes as the time changes. </p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "md2s7LzOTFsEFqC1",
+                  "title": "Henri and Emile's Race",
+                  "content": {
+                    "type": "Geometry",
+                    "board": {
+                      "properties": {
+                        "axisMin": [-7.122, -12.394],
+                        "axisRange": [72.264, 118.31],
+                        "axisNames": ["x", "y"],
+                        "axisLabels": ["", ""]
+                      }
+                    },
+                    "objects": [
+                      { "type": "movableLine", "parents": [{ "type": "point", "parents": [0, 0] }, { "type": "point", "parents": [30.364330751215995, 76.5714230739629] }],"properties": {"id":"xb5js70pbFcYdfQV","pt1":{"type":"point","id":"xb5js70pbFcYdfQV-point1"},"pt2":{"type":"point","id":"xb5js70pbFcYdfQV-point2"}} },
+                      { "type": "comment", "parents": [null, null], "properties": {"id":"LriPrpc-Q7w3R9WV","text":"Emile","anchor":"xb5js70pbFcYdfQV"} },
+                      { "type": "movableLine", "parents": [{ "type": "point", "parents": [-0.04615384615384607, 44.91197183098591] }, { "type": "point", "parents": [30.364835164835164, 75.96830985915493] }],"properties": {"id":"ulZoZXvT3vr6oxsW","pt1":{"type":"point","id":"ulZoZXvT3vr6oxsW-point1"},"pt2":{"type":"point","id":"ulZoZXvT3vr6oxsW-point2"}} },
+                      { "type": "comment", "parents": [-2.559340659340659, 10.091549295774655], "properties": {"id":"yJRkyQyvIvEXGMCX","text":"Henri","anchor":"ulZoZXvT3vr6oxsW"} }
                     ]
                   }
                 },
@@ -2681,8 +2659,7 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Claim #3: Only one of the linear equations is proportional. Emile’s is proportional. </p>",
-                      "<p></p>",
+                      "<p>Claim 3: Only one of the linear equations is proportional. Emile’s is proportional. </p>",
                       "<p>This might be an introduction to how to determine a proportional linear equation for many students. They will need to verify the proportionality using the table, coordinate pairs, and the position of the line on the graph. Some students may remember Comparing and Scaling Problem 2.2 where the cost for Howdy’s pizza was not proportional because there was a delivery charge (non-zero y-intercept). And the cost for Royal’s pizza was proportional because there was no delivery charge (y-intercept of zero).</p>"
                     ]
                   }
@@ -2711,19 +2688,10 @@
                     }
                   }
                 ],
-                {
-                  "id": "9sDdRY_h7jOx8z_Y",
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "<p>Graph</p>"
-                    ]
-                  }
-                },
                 [
                   {
                     "id": "msQRrNQWWZsjSSMo",
+                    "title": "Graph",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_TG_HenriEmileRace.jpg"
@@ -2747,6 +2715,19 @@
                     "format": "html",
                     "text": [
                       "<p>Table</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "weAWwBWjFRuTOmxS",
+                  "title": "Table 3",
+                  "content": {
+                    "type": "Table",
+                    "name": "Table showing race comparison",
+                    "columns": [
+                      {"name":"Time (seconds)","width":96.26953125,"values":["0","10","20","30","40"]},
+                      {"name":"Henri's Distance (meters)","width":124.87109375,"values":["45","55","65","75","85"]},
+                      {"name":"Emile's Distance (meters)","width":125.35546875,"values":["0","25","50","75","100"]}
                     ]
                   }
                 },
@@ -2835,13 +2816,15 @@
                   }
                 ],
                 {
+                  "id": "NOwktZnIJ5BxVy5x",
+                  "title": "Table 4",
                   "content": {
                     "type": "Table",
                     "name": "Distance From Starting Line",
                     "columns": [
-                      {"name":"Time (sec)","values":["0","10","20","30","40"]},
-                      {"name":"Henri's Dist (m)","values":["45","55","65","75","85"]},
-                      {"name":"Emile's Dist (m)","values":["0","25","50","75","100"]}
+                      {"name":"Time (sec)","width":80,"values":["0","10","20","30","40"]},
+                      {"name":"Henri's Dist (m)","width":116.00390625,"values":["45","55","65","75","85"]},
+                      {"name":"Emile's Dist (m)","width":113.87890625,"values":["0","25","50","75","100"]}
                     ]
                   }
                 },
@@ -2851,8 +2834,8 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Claim #4: If we put the time when the brothers tie into each expression (2.5t or 2.5 x 30 or 75) and (45 + t or 45 + 30 or 75), we see that the equation is true/correct when the time is 30.</p>",
-                      "<p>Claim #5: We know that they start 45 meters apart. Then for every second, Emile “catches-up” 1.5 meters. We can see the “catch-up amount” by finding the difference in their walking rates. </p>",
+                      "<p>Claim 4: If we put the time when the brothers tie into each expression (2.5t or 2.5 x 30 or 75) and (45 + t or 45 + 30 or 75), we see that the equation is true/correct when the time is 30.</p>",
+                      "<p>Claim 5: We know that they start 45 meters apart. Then for every second, Emile “catches-up” 1.5 meters. We can see the “catch-up amount” by finding the difference in their walking rates. </p>",
                       "<p>  Emile’s rate – Henri’s rate or </p>",
                       "<p>                         2.5<em>t </em>– 1<em>t</em> or 1.5<em>t</em>.</p>"
                     ]
@@ -2871,27 +2854,6 @@
                   }
                 },
                 {
-                  "id": "xnhohOOq-7F_aSv8",
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "<p><strong>Suggested Question</strong></p>",
-                      "<ul><li>Would it help to look at examples where you used a table, graph, or equation to answer a question?</li></ul>"
-                    ]
-                  }
-                },
-                {
-                  "id": "-3FM41LDn5ZZBNiH",
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": [
-                      "<p>See answers to the Problem for more information about the strategies and embedded mathematics. </p>"
-                    ]
-                  }
-                },
-                {
                   "id": "Wtd1tRKWGmxEp3By",
                   "content": {
                     "type": "Text",
@@ -2906,11 +2868,9 @@
                   }
                 }
                 ]
-              },
-              "supports": []
+              }
             }
-          ],
-          "supports": []
+          ]
         },
         {
           "description": "Problem 2.2",
@@ -2926,14 +2886,20 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Students explore constant rate and y-intercept in a new context. They find solutions to equations. Students solve problems and make decisions about linear relationships and inequalities using information given in tables, graphs, and equations. This Problem formally introduces the words coefficient and solutions of an equation. The constant rate of change is emphasized as the coefficient of the independent variable. Students learn to recognize a linear relationship within a contextual situation, from an equation, table, or graph. "]
+                      "text": [
+                        "<h3>Problem Overview</h3>",
+                        "Students explore constant rate and y-intercept in a new context. They find solutions to equations. Students solve problems and make decisions about linear relationships and inequalities using information given in tables, graphs, and equations. This Problem formally introduces the words coefficient and solutions of an equation. The constant rate of change is emphasized as the coefficient of the independent variable. Students learn to recognize a linear relationship within a contextual situation, from an equation, table, or graph. "
+                      ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["AoL: Analysis & Analysis\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.EE.A.1, 7.EE.A.2, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b"]
+                      "text": [
+                        "<p>AoL: Linear Relationships: Analysis & Algebraic Expressions and Equations:  Analysis</p>",
+                        "CCSSM: 7.RP.A.2, 7.RP.A.2a, 7.EE.A.1, 7.EE.A.2, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b"
+                      ]
                     }
                   },
                   {
@@ -2948,7 +2914,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text":["<strong>Emerging Mathematical Ideas</strong>\nContinue examining ways tables, graphs, equations, and inequalities can be used to find solutions, using a new problem context presented in the form of two contrasting linear equations.\n\nLook for patterns that can be used to find solutions to linear relationships including:<ul><li>using a completed table, look for the value of the dependent variable (<em>y</em>) that corresponds to the needed value of the independent variable (<em>x</em>),</li><li>using a table that is incomplete, substitute the value for the independent value (<em>n</em>) into the given equation and perform the indicated operations to find the corresponding value for the dependent variable (C<sub>M</sub>) (solution) (e.g., for C<sub>M</sub> = 49 + n, to find n = 100, the solution, C<sub>M</sub>, is equal to 49 + 100 = 149),</li><li>in a graph, the coordinates of the points (<em>a,b</em>) on the line represent all of the solutions to the equation of the line; to find the solution for a given value of the independent variable (first coordinate a), find the point on the line with the first coordinate and read the corresponding <em>b<em> value in the ordered pair, and</li><li>in an equation or inequality, the value of the dependent variable (<em>y</em>) can be found for any value of the independent variable (<em>x</em>) by substituting the needed value of <em>x</em> into the equation and performing the indicated operations in the equation to find the solution (<em>y</em>).</li></ul>Identify and represent proportional relationships as tables, graphs, and equations and distinguish from non-proportional linear relationships."]
+                      "text":["<strong>Emerging Mathematical Ideas</strong>\nContinue examining ways tables, graphs, equations, and inequalities can be used to find solutions, using a new problem context presented in the form of two contrasting linear equations.\n\nLook for patterns that can be used to find solutions to linear relationships including:<ul><li>using a completed table, look for the value of the dependent variable (<em>y</em>) that corresponds to the needed value of the independent variable (<em>x</em>),</li><li>using a table that is incomplete, substitute the value for the independent value (<em>n</em>) into the given equation and perform the indicated operations to find the corresponding value for the dependent variable (C<sub>M</sub>) (solution) (e.g., for C<sub>M</sub> = 49 + n, to find n = 100, the solution, C<sub>M</sub>, is equal to 49 + 100 = 149),</li><li>in a graph, the coordinates of the points (<em>a,b</em>) on the line represent all of the solutions to the equation of the line; to find the solution for a given value of the independent variable (first coordinate a), find the point on the line with the first coordinate and read the corresponding <em>b</em> value in the ordered pair, and</li><li>in an equation or inequality, the value of the dependent variable (<em>y</em>) can be found for any value of the independent variable (<em>x</em>) by substituting the needed value of <em>x</em> into the equation and performing the indicated operations in the equation to find the solution (<em>y</em>).</li></ul>Identify and represent proportional relationships as tables, graphs, and equations and distinguish from non-proportional linear relationships."]
                     }
                   },
                                     {
@@ -2972,25 +2938,49 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "launch",
               "content": {
                 "tiles": [
                   {
+                    "id": "4CNPDUfNbGB2PmWM",
+                    "title": "Text 6",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Launch (Getting Started)\nConnecting to Prior Knowledge</strong>\nUse the introduction information to formalize and portray (PROTRAYAL) the types of equations for linear relationships that students have been using to answer questions. If you did not introduce the vocabulary word “coefficient” in the Summary of the previous Problem, introduce the word now. Discuss with students that they have been finding solutions of an equation when they were given one variable and found another or that a coordinate pair of a point on a graph will substitute into the equation. Using tables, graphs, and numerical relationships, they have found many solutions to an equation to answer questions in this and in previous Units.\n\nYou can show the equations, graphs, and tables from Problem 2.1 to connect the ideas. (LANGUAGE) This might be a good time to create an anchor chart. <strong>Teaching Aid 2.2A</strong> provides a possible example.\n\n\u0009\u0009<em>d</em><sub>Henri</sub> = 45 + <em>t</em> and <em>d</em><sub>Emile</sub> = 2.5<em>t</em>"]
+                      "text": [
+                        "<p><strong>Launch (Getting Started) </strong></p>",
+                        "<p><strong>Connecting to Prior Knowledge</strong> </p>",
+                        "<p>Students will have been introduced to  the vocabulary word “coefficient” in the 6th grade unit Variables and Patterns.  Briefly review coefficient and y-intercept using the previous problem. </p>",
+                        "<p><strong>Suggested questions</strong> </p>",
+                        "<ul><li>What were the coefficients for the Henri and Emile equations?  (1 and 2.5)   </li><li>What did the coefficients tell you about the situation? (each brother’s walking rate) </li><li>How do you see the coefficient in the equation? (the number multiplied by x) Table? (the amount the y-values increase as the x-values increase by 1) Graph? (how much the graph goes up, or how “slanty” it is.  It isn’t necessary at this point to push for slope understanding just a general sense of the slant of the line.) </li><li>What were the y- intercepts for the Henri and Emile problem? ( (0,0) and (0, 45)) </li><li>What did the y-intercepts tell you about the situation? (the starting point for each brother in the race) </li><li>How do you see the y-intercepts in the equation?  (the number added on) Table? (the y-value when the x-value is zero) Graph? (where the line crosses the y-axis) </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "v5jbTkAxB6Xrr2EF",
+                    "title": "Text 7",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Discuss with students that they have been finding <strong>solutions of an equation</strong> when they were given one variable and found another or that a coordinate pair of a point on a graph will substitute into the equation. Using tables, graphs, and numerical relationships, they have found many solutions to an equation to answer questions in this and in previous Units.  </p>",
+                        "<p> </p>",
+                        "<p>You can show the equations, graphs, and tables from Problem 2.1 to connect the ideas. (LANGUAGE) This might be a good time to create an anchor chart. <strong>Teaching Aid 2.2A:  Introduction</strong>  provides a possible example.  </p>",
+                        "<p>  </p>",
+                        "<p>dHenri = 45 + t and dEmile = 2.5t </p>"
+                      ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Suggested Questions</strong>\n<ul><li>What information do the variables and numbers represent in each equation? (The variable <em>t</em> represents time, and the variable <em>d</em> represents each brother’s distance from the starting line. The number 45 represents Henri’s head start, and the number 2.5 represents how many meters Emile walks per second. Henri’s rate of 1 m/s is the assumed coefficient of <em>t</em>.)</li></ul>\nDisplay a graph and a table for each of the two questions.\n<ul><li>Where do the lines cross the y-axis? (The line for Henri crosses the y-axis at the point (0, 45), and the line for Emile crosses the y-axis at the point (0, 0).)</li><li>Why is the name <strong>y-intercept</strong> a good name for these points? (This is the point where each line intersects, or intercepts, the <em>y</em>-axis.)</li><ul>\nGo over the definition of <strong>coefficient</strong> with students. Then ask:<ul><li>How does the walking rate show up in the equations? (The walking rate of each brother is the coefficient of t in the equation for each relationship. In Henri’s equation, the coefficient is 1, which is not written, but assumed.)</li></ul>"]
+                      "text": [
+                        "<strong>Suggested Questions</strong>\n<ul><li>What information do the variables and numbers represent in each equation? (The variable <em>t</em> represents time, and the variable <em>d</em> represents each brother’s distance from the starting line. The number 45 represents Henri’s head start, and the number 2.5 represents how many meters Emile walks per second. Henri’s rate of 1 m/s is the assumed coefficient of <em>t</em>.)</li></ul>\nDisplay a graph and a table for each of the two questions.\n<ul><li>Where do the lines cross the y-axis? (The line for Henri crosses the y-axis at the point (0, 45), and the line for Emile crosses the y-axis at the point (0, 0).)</li><li>Why is the name <strong>y-intercept</strong> a good name for these points? (This is the point where each line intersects, or intercepts, the <em>y</em>-axis.)</li><ul>",
+                        "Go over the definition of <strong>coefficient</strong> with students. Then ask:<ul><li>How does the walking rate show up in the equations? (The walking rate of each brother is the coefficient of t in the equation for each relationship. In Henri’s equation, the coefficient is 1, which is not written, but assumed.)</li></ul>"]
                     }
                   },
                   {
@@ -3008,8 +2998,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [  ]
+              }
             },
             {
               "type": "explore",
@@ -3030,27 +3019,31 @@
                     }
                   },
                   {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["Look for interesting strategies. Call on these students in the Summary to share their strategies. Be sure to have a representative sample of the strategies presented. Students may choose to use numerical reasoning, tables, graphs, or equations. Be sure to look at what methods students are using to find when the two cost plans are equal.\n\nFor the What If...?, to maximize class time, you may use <strong>Teaching Aid 2.2B</strong> for students to see the equation, table, and graph for each T-shirt company. Make sure students explain how they found their answers.<ul><li>How do the solutions to the questions show up in the graph? In the table? In the equation?  (The ordered pairs are the coordinates of a point on each graph and are also entries in the table of data for each equation.)</li></ul>"]
+                    "id": "eFnVnxaiXtQw8K9Z",
+                    "title": "Text 14",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>For the What If Situations, to maximize class time, you may use <strong>Teaching Aid 2.2B</strong> for students to see the equation, table, and graph for each T-shirt company. Make sure students explain how they found their answers.</p>",
+                        "<ul><li>How do the solutions to the questions show up in the graph? In the table? In the equation?  (The ordered pairs are the coordinates of a point on each graph and are also entries in the table of data for each equation.)</li></ul>"
+                      ]
                     }
                   },
                   {
-                  "content": {
-                    "type": "Text",
-                    "format": "html",
-                    "text": ["Planning for the Summary\n\nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know questions? What will you do if you do not have evidence?\n\n<strong>Now What Do You Know?\nHow do you know if the ordered pair of numbers for a point on a graph is a solution to an equation? How can you use a table or graph to find a solution for an equation?</strong>"]
+                    "id": "HA6Vph6B5SWtR4MM",
+                    "title": "Text 15",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Planning for the Summary<br/><br/>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know questions? What will you do if you do not have evidence?<br/><br/><strong>Now What Do You Know?<br/></strong><em><strong>How do you know if the ordered pair of numbers for a point on a graph or table is a solution to an equation? How can you use a table or graph to find a solution for an equation?</strong></em></p>",
+                        "<p>Look for interesting strategies. Call on these students in the Summary to share their strategies. Be sure to have a representative sample of the strategies presented. Students may choose to use numerical reasoning, tables, graphs, or equations.)</p>"
+                      ]
                     }
                   }
                 ]
-              },
-              "supports": [
-                { "text": "What do the number 0 and 34 mean in the table of T-shirt costs for The Big Tee?" },
-                { "text": "How can you compare which company is a better deal when they all have different ways of charging for the shirts?" },
-                { "text": "What does it mean for relationships to be proportional?"},
-                { "text": "How can you tell if relationships are linear?"}
-              ]
+              }
             },
             {
               "type": "summarize",
@@ -3064,41 +3057,75 @@
                     }
                   },
                   {
+                    "id": "TFJWLaRQa_ZjnyAz",
+                    "title": "Text 17",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Call on students to share their strategies. Be sure to have a representative sample of the strategies presented. Students may choose to use numerical reasoning, tables, graphs, or equations. Question students to explain their methods used to find when the two cost plans are equal. You may want to orchestrate the Summary so that at least one student presents Situation B #1 and #2 with table, another student with graph, and a third student with equation to reinforce how to use each representation.\n\nYou can use student reasoning, the representations, and the What If...? questions to clarify points that students do not discuss.\n\n<strong>Suggested Questions</strong><ul><li>What is the cost per T-shirt under each plan? (The cost per T-shirt is $1 for Mighty Tee and $4.50 for No-Shrink Tee.)</li><li>How would this rate show up in a table? In a graph? (As the value in the column for the number of T-shirts increases by 1, the value for cost increases by $1 for Mighty Tee and $4.50 for No-Shrink Tee. The graph of the line for No-Shrink Tee is much steeper than the graph of the line for Mighty Tee.)</li><li>What information does the y-intercept represent in each equation? (The y-intercept represents the cost of 0 T-shirts. It is the starting cost for each company.)</li><li>For what number of T‐shirts are the two costs equal? How did you find that number? (14 T‐shirts; students may have made a table and found the row for which the two costs are equal, constructed a graph and identified the intersection point, or used a method involving guess and check.)</li><li>Why is it important to know when the costs are equal? (You can tell when the companies charge the same amount for the same number of t-shirts. Before or beyond that point, the one company is cheaper than the other.)</li><li>In Situation C, what do the numbers 0 and 34 mean in the table? (That must be a set-up fee or shipping cost or some other fee just to order from them. It is the y-intercept.)</li><li>Is the relationship in Situation C linear? (Yes.) What is the coefficient in the equation? (The rate of change for the shirts is as you add 3 shirts is costs $7.50 more or as you add 2 shirts is costs $5.00 more. This would mean that the cost for 1 each new t-shirt is $2.50. So, the coefficient is 2.5.)</li><li>How could we write the equation for The Big Tee company? (Cost = y-intercept + coefficient times n or CBig Tee = 34 + 2.5n.)</li></ul>"]
+                      "text": [
+                        "<p>Call on students to share their strategies. Be sure to have a representative sample of the strategies presented. Students may choose to use numerical reasoning, tables, graphs, or equations. Question students to explain their methods used to find when the two cost plans are equal. You may want to orchestrate the Summary so that at least one student presents Situation B #1 and #2 with table, another student with graph, and a third student with equation to reinforce how to use each representation.<br/><br/>You can use student reasoning, the representations, and the What If...? questions to clarify points that students do not discuss.</p>",
+                        "<ul><li>What is the cost per T-shirt under each plan? (The cost per T-shirt is $1 for Mighty Tee and $4.50 for No-Shrink Tee.)</li><li>How would this rate show up in a table? In a graph? (As the value in the column for the number of T-shirts increases by 1, the value for cost increases by $1 for Mighty Tee and $4.50 for No-Shrink Tee. The graph of the line for No-Shrink Tee is much steeper than the graph of the line for Mighty Tee.)</li><li>What information does the y-intercept represent in each equation? (The y-intercept represents the cost of 0 T-shirts. It is the starting cost for each company.)</li><li>For what number of T‐shirts are the two costs equal? How did you find that number? (14 T‐shirts; students may have made a table and found the row for which the two costs are equal, constructed a graph and identified the intersection point, or used a method involving guess and check.)</li><li>Why is it important to know when the costs are equal? (You can tell when the companies charge the same amount for the same number of t-shirts. Before or beyond that point, the one company is cheaper than the other.)</li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "yRv1xPvbx3mSwJGw",
+                    "title": "Text 18",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Note</strong>:  When looking at What If Situation B they are solving linear situations.  To solve a problem involving a linear relationship you can use a table, graph or equation.  Discuss this with students so they will become fluid with all representations for solving. Help students connect the ordered pair to points on a table, point on a graph and the x and y variables in the equation.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "cGxH71_0ipGOkHjV",
+                    "title": "Text 19",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<ul><li>In Situation C, what do the numbers 0 and 34 mean in the table? (That must be a set-up fee or shipping cost or some other fee just to order from them. It is the y-intercept.)</li><li>Is the relationship in What If Situation C linear? (Yes.) What is the coefficient in the equation? (The rate of change for the shirts is as you add 3 shirts is costs $7.50 more or as you add 2 shirts is costs $5.00 more. This would mean that the cost for 1 each new t-shirt is $2.50. So, the coefficient is 2.5.)</li><li>How could we write the equation for The Big Tee company? (Cost = y-intercept + coefficient times n or CBig Tee = 34 + 2.5n.)</li></ul>"
+                      ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Making the Mathematics Explicit\n\n<strong>Suggested Questions</strong>\n<ul><li>How did The Big Tee company in Situation C compare to Mighty and No-Shrink? (Various answers. Students might say that that cost is not linear which makes it more difficult to compare.)</li><li>Which representation seems most convenient for solving this Problem? (Answers will vary. Students may give reasons for each representation. At this stage in their development, they might say that equations are most convenient because the row you need to answer a question might not be in the table, or the point on the line you need might not be shown on a graph. They may also explain that graphs can be easily traced to find the missing value of an ordered pair. Finally, they may point out that tables usually require no calculations to find pairs of values.)</li><li>How can you compare which company is a better deal when they all have different ways of charging for the shirts? (Consider different the cost for different numbers of shirts. It is important to know when the costs are the same for either company. This tells you the point where one company will begin to cost more than the other.)</li><li>In Situation B #4, what question do you think someone was trying to answer by writing the inequality C<sub>Mighty</sub> < C<sub>No-Shrink</sub>? (How many t-shirts can I buy and pay less with the Mighty Tee company.) Note that students will solve inequalities symbolically later in the unit.</li><li>If I know how much money I have to spend, how can I find how many t-shirts I can buy from the different companies?</li><li>In a linear situation, describe how you can find a value of a variable if the value of the other variable is known. (Answers will vary. Sample answer: For an equation, if the independent variable is known, you can substitute its value into the equation and then evaluate the resulting expression. If the dependent variable is known, you can substitute its value into the equation and then solve the equation to find the corresponding value of the independent variable. With a graph, follow the vertical line on the grid if the independent variable is known, or the horizontal line if the dependent variable is known, until it hits the line. Then, follow the other direction to find the other quantity.)</li><li>What does it mean for relationships to be proportional? The equation is of the form <em>y = mx</em>, like the cost at No-Shrink. The relationship is proportional to the number of T-shirts. So, if you double the number of T-shirts, you also double the cost. You cannot do this with Mighty, because is it not proportional.)</li><li>How can you tell if relationships are linear? (Various answers. Table representation: as the x variable increases by a consistent amount, the y variable also increases by a consistent amount. Graph: A straight line is formed. Equation: The equation fits the form of <em>y = ax</em>, <em>y = ax + b</em>, or <em>y = b + ax</em>.)</li></ul>"]
+                      "text": [
+                        "Making the Mathematics Explicit",
+                        "<p>Suggested questions</p>",
+                        "<ul><li>How did The Big Tee company in Situation C compare to Mighty and No-Shrink? (Various answers. Students might say that that cost is not linear which makes it more difficult to compare.)</li><li>Which representation seems most convenient for solving this Problem? (Answers will vary. Students may give reasons for each representation. At this stage in their development, they might say that equations are most convenient because the row you need to answer a question might not be in the table, or the point on the line you need might not be shown on a graph. They may also explain that graphs can be easily traced to find the missing value of an ordered pair. Finally, they may point out that tables usually require no calculations to find pairs of values.)</li><li>How can you compare which company is a better deal when they all have different ways of charging for the shirts? (Consider different the cost for different numbers of shirts. It is important to know when the costs are the same for either company. This tells you the point where one company will begin to cost more than the other.)</li><li>In Situation B #4, what question do you think someone was trying to answer by writing the inequality C<sub>Mighty</sub> < C<sub>No-Shrink</sub>? (How many t-shirts can I buy and pay less with the Mighty Tee company.) Note that students will solve inequalities symbolically later in the unit.</li><li>If I know how much money I have to spend, how can I find how many t-shirts I can buy from the different companies?</li><li>In a linear situation, describe how you can find a value of a variable if the value of the other variable is known. (Answers will vary. Sample answer: For an equation, if the independent variable is known, you can substitute its value into the equation and then evaluate the resulting expression. If the dependent variable is known, you can substitute its value into the equation and then solve the equation to find the corresponding value of the independent variable. With a graph, follow the vertical line on the grid if the independent variable is known, or the horizontal line if the dependent variable is known, until it hits the line. Then, follow the other direction to find the other quantity.)</li><li>What does it mean for relationships to be proportional? The equation is of the form <em>y = mx</em>, like the cost at No-Shrink. The relationship is proportional to the number of T-shirts. So, if you double the number of T-shirts, you also double the cost. You cannot do this with Mighty, because is it not proportional.)</li><li>How can you tell if relationships are linear? (Various answers. Table representation: as the x variable increases by a consistent amount, the y variable also increases by a consistent amount. Graph: A straight line is formed. Equation: The equation fits the form of <em>y = ax</em>, <em>y = ax + b</em>, or <em>y = b + ax</em>.)</li></ul>"]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Now What Do Students Know\n\nAsk students to reflect on the discussion and answer the Now What Do You Know questions.\n\n<strong>How do you know if the ordered pair of numbers for a point on a graph is a solution to an equation? How can you use a table or graph to find a solution for an equation?</strong>\n\nSee answers to the problem for more information about the strategies and embedded mathematics."]
+                      "text": [
+                        "Now What Do Students Know",
+                        "Ask students to reflect on the discussion and answer the Now What Do You Know questions.",
+                        "See answers to the problem for more information about the strategies and embedded mathematics."]
                     }
                   },
                   {
+                    "id": "MQaGAOlY8iUhbdnL",
+                    "title": "Text 22",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Reflecting on Student Learning</strong>\n\nUse the following questions to assess student understanding at the end of the lesson.<ul><li>What evidence do I have that students understand the Now What Do You Know Question?<li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></li><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li><ul>"]
+                      "text": [
+                        "<p><strong>Reflecting on Student Learning</strong><br/><br/>Use the following questions to assess student understanding at the end of the lesson.</p>",
+                        "<ul><li>What evidence do I have that students understand the Now What Do You Know Question?</li><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+                      ]
                     }
                   }
                 ]
-              },
-              "supports": [
-                { "text": "Would it help to look at examples where you used a table, graph, or equation to answer a question?" }
-              ]
+              }
             }
-          ],
-          "supports": []
+          ]
         },
         {
           "description": "Problem 2.3",
@@ -3114,14 +3141,20 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Students investigate various pledge plans from sponsors of the walkathon. The plans are represented by equations. In this Problem, students identify the constant rate of change from various representations. They decide whether the graph of a linear relationship is decreasing, increasing, or staying the same from different representations of the relationship. They decide if the relationships are proportional. They also begin to make the connections among the points on a line, the pairs of data in a row of a table, and a solution of an equation of the form <em>y = b + ax</em>. This latter goal provides a transition to solving equations using algebraic methods. "]
+                      "text": [
+                        "<h3>Problem Overview</h3>",
+                        "Students investigate various pledge plans from sponsors of the walkathon. The plans are represented by equations. In this Problem, students identify the constant rate of change from various representations. They decide whether the graph of a linear relationship is decreasing, increasing, or staying the same from different representations of the relationship. They decide if the relationships are proportional. They also begin to make the connections among the points on a line, the pairs of data in a row of a table, and a solution of an equation of the form <em>y = b + ax</em>. This latter goal provides a transition to solving equations using algebraic methods. "
+                      ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["AoL: Analysis & Analysis\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.EE.A.1, 7.EE.A.2, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b</strong>"]
+                      "text": [
+                        "AoL: Linear Relationships: Analysis & Algebraic Expressions and Equations: Analysis",
+                        "CCSSM: 7.RP.A.2, 7.RP.A.2a, 7.EE.A.1, 7.EE.A.2, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b</strong>"
+                      ]
                     }
                   },
                   {
@@ -3160,29 +3193,37 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "launch",
               "content": {
                 "tiles": [
                   {
+                    "id": "WcQ1BeqXtYCOQ6eW",
+                    "title": "Text 6",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Launch (Getting Started) </strong>",
-                        "Connecting Prior Knowledge",
-                        "Remind students about the three students and their pledge plans from Investigation 1. Display Teaching Aid 2.3A: Alana’s Pledge Plan</strong>.",
-                        "<strong>Suggested Questions</strong><ul><li>Write a question that could be answered using the point (14, 12). (Sample answers: How far did Alana walk if a sponsor donates 12 dollars? How much money would Alana raise from each sponsor if she walked 14 kilometers?)</li><li>How can you use the equation for Alana’s plan to check the answer to the question you wrote? (The equation for Alana’s plan is <em>A</em> = 5 + 0.5<em>d</em>. For the first question, if you substitute 12 for A in the equation and solve for d, you will find the number of kilometers. For the second question, if you substitute 14 for <em>d</em> in the equation and solve for <em>A</em>, you will find how much each sponsor pledges.)</li><li>How can you use a graph to find the number of kilometers that Alana walked if each sponsor donated $17? (You can find 17 on the <em>y</em>-axis and move horizontally until you reach a point on the line. Then, you move vertically down until you hit the <em>x</em>-axis. The value on the <em>x</em>-axis is the number of kilometers walked.)</li></ul>\nAsk the class to show how the questions relate to solving the equation A = 5 + 0.5d when the value of one variable is known. Students are substituting one value into the equation and solving for the other.\n\n\u0009<em>A</em> = 5 + 0.5(14) to solve for A if <em>d</em> = 14\n\u000912 = 5 + 0.5<em>d</em> to solve for <em>d</em> if <em>A</em> = 12.\n\nDiscuss how a graph or a table could be used to find solutions of these two equations.\n\nPick two or three other points on the line and repeat the preceding questions. Students should begin to see that there are an infinite number of coordinate pairs that are solutions of A = 5 + 0.5d. When they are solving a linear equation in one “unknown,” they are looking for the missing coordinate of an ordered pair that is a solution of the linear equation."]
+                        "<p><strong>Launch (Getting Started) </strong><br/>Connecting Prior Knowledge<br/>Remind students about the three students and their pledge plans from Investigation 1. Display <strong>Teaching Aid 2.3A: Alana’s Pledge Plan</strong>.</p>",
+                        "<p><br/><strong>Suggested questions</strong></p>",
+                        "<ul><li>Write a question that could be answered using the point (14, 12). (Sample answers: How far did Alana walk if a sponsor donates 12 dollars? How much money would Alana raise from each sponsor if she walked 14 kilometers?)</li><li>How can you use the equation for Alana’s plan to check the answer to the question you wrote? (The equation for Alana’s plan is <em>A</em> = 5 + 0.5<em>d</em>. For the first question, if you substitute 12 for A in the equation and solve for d, you will find the number of kilometers. For the second question, if you substitute 14 for <em>d</em> in the equation and solve for <em>A</em>, you will find how much each sponsor pledges.)</li><li>How can you use a graph to find the number of kilometers that Alana walked if each sponsor donated $17? (You can find 17 on the <em>y</em>-axis and move horizontally until you reach a point on the line. Then, you move vertically down until you hit the <em>x</em>-axis. The value on the <em>x</em>-axis is the number of kilometers walked.)</li></ul>",
+                        "<p>Ask the class to show how the questions relate to solving the equation A = 5 + 0.5d when the value of one variable is known. Students are substituting one value into the equation and solving for the other.</p>",
+                        "<p>     <em>A</em> = 5 + 0.5(14) to solve for A if <em>d</em> = 14</p>",
+                        "<p>    12 = 5 + 0.5<em>d</em> to solve for <em>d</em> if <em>A</em> = 12.</p>",
+                        "<p>Discuss how a graph or a table could be used to find solutions of these two equations.<br/><br/>Pick two or three other points on the line and repeat the preceding questions. Students should begin to see that there are an infinite number of coordinate pairs that are solutions of A = 5 + 0.5d. When they are solving a linear equation in one 'unknown,' they are looking for the missing coordinate of an ordered pair that is a solution of the linear equation.</p>"
+                      ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["Presenting the Challenge\n\nNow pose the challenge in the Problem. Tell students they need to decide whether an equation represents a reasonable pledge plan for the walkathon if the idea is to raise money for charity. They will decide which points are solutions of the equation and whether the <em>y</em>-values increase, decrease, or stay the same as the <em>x</em>-values increase.\n\nYou might have students use a graphing calculator or <strong>Coordinate Grapher</strong> or <strong>Teaching Aid 2.3B: New Pledge Plans</strong>.",
+                      "text": [
+                        "<p>Presenting the Challenge</p>",
+                        "<p>Now pose the challenge in the Problem. Tell students they need to decide whether an equation represents a reasonable pledge plan for the walkathon if the idea is to raise money for charity. They will decide which points are solutions of the equation and whether the <em>y</em>-values increase, decrease, or stay the same as the <em>x</em>-values increase.</p>",
+                        "<p>You might have students use a graphing calculator or a CLUE graph or <strong>Teaching Aid 2.3B: New Pledge Plans</strong>.</p>",
                         "Ask questions to help students start thinking about the plans. Do not look for students to answer the questions yet. Let them explore the questions and return to them in the Summarize.\n\n<strong>Suggested Questions</strong><ul><li>What do you notice and what do you wonder about the three plans?</li><li>Consider how much you would raise if you walked one kilometer. Two kilometers? Three kilometers?</li></ul>",
                         "<em>Optional Launch</em>",
                         "Use <strong>Teaching Aid 2.3B: New Pledge Plans</strong>, mix up the representations, and have students match the tables and graphs to the plans.",
@@ -3191,8 +3232,7 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "explore",
@@ -3204,24 +3244,30 @@
                     "format": "html",
                     "text": [
                       "<strong>Explore (Digging In)</strong>\nProviding for Individual Needs",
-                      "As you move from group to group, listen as students discuss strategies. Look for interesting explanations of what information each equation represents and discuss these in the Summarize.\n\nStudents may need help with the negative coefficient in the equation for Plan 2. You can ask students to explain why the line slants down or why the relationship is decreasing.\n<ul><li>Does the table help you decide whether the graph of the relationship is increasing or decreasing? (Yes. You can use the table to see how the dependent variable changes as the independent variable increases. If the dependent variable decreases, then the line will slant down. If the dependent variable increases, then the relationship is increasing and the line will slant up.)</li><li>Pick a point on this line. Can you find this point in the table? Explain. (Answers will vary. Sample answers: Yes, the point (2, 4) is also an entry in the table where the value of <em>x</em> is 2 and the value of <em>y</em> is 4. No, the point (6, 0) is not a row in the table that I made, but if I extended the table, it would be there.)</li><li>How do you know the ordered pair you picked is a solution to the equation? (It makes the equation <em>y</em> = -<em>x</em> + 6 true, because, for the point (2, 4), 4 = -2 + 6.)</li></ul>",
-                      "For Situation A, choosing the plan that could use 8 = 5x-3, some students may discard Plan 3 because the equation does not have a solution with a y-value of 8. Students may mistakenly reject Plan 2 for the same reason if they are only looking in the first quadrant. If they look in the second quadrant, they will find that the equation has a solution with a y-value of 8: (-2, 8). Although the equation for Plan 2 has the solution (-2, 8), remind students that the solution corresponds to walking -2 kilometers, which may not make sense in this real-world situation. Some students might find some interesting ways to interpret y = -x + 6 in this context. However, this equation can represent many situations, and (-2, 8) might well make sense for a different situation. It is a solution for this equation, but does not make sense within the context."
+                      "<p>As you move from group to group, listen as students discuss strategies. Look for interesting explanations of what information each equation represents and discuss these in the Summarize.\n\nStudents may need help with the negative coefficient in the equation for Plan 2. You can ask students to explain why the line slants down or why the relationship is decreasing.</p>",
+                      "<strong>Suggested questions</strong>",
+                      "<ul><li>Does the table help you decide whether the graph of the relationship is increasing or decreasing? (Yes. You can use the table to see how the dependent variable changes as the independent variable increases. If the dependent variable decreases, then the line will slant down. If the dependent variable increases, then the relationship is increasing and the line will slant up.)</li><li>Pick a point on this line. Can you find this point in the table? Explain. (Answers will vary. Sample answers: Yes, the point (2, 4) is also an entry in the table where the value of <em>x</em> is 2 and the value of <em>y</em> is 4. No, the point (6, 0) is not a row in the table that I made, but if I extended the table, it would be there.)</li><li>How do you know the ordered pair you picked is a solution to the equation? (It makes the equation <em>y</em> = -<em>x</em> + 6 true, because, for the point (2, 4), 4 = -2 + 6.)</li></ul>",
+                      "For What If Situation A, choosing the plan that could use 8 = 5x-3, some students may discard Plan 3 because the equation does not have a solution with a y-value of 8. Students may mistakenly reject Plan 2 for the same reason if they are only looking in the first quadrant. If they look in the second quadrant, they will find that the equation has a solution with a y-value of 8: (-2, 8). Although the equation for Plan 2 has the solution (-2, 8), remind students that the solution corresponds to walking -2 kilometers, which may not make sense in this real-world situation. Some students might find some interesting ways to interpret y = -x + 6 in this context. However, this equation can represent many situations, and (-2, 8) might well make sense for a different situation. It is a solution for this equation, but does not make sense within the context."
                     ]
                   }
                 },
                 {
+                  "id": "dSlHmfjt9jdPqPkQ",
+                  "title": "Text 9",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p>Planning for the Summary\n\nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>",
-                      "<strong>Now What Do You Know?</strong>\nDescribe the advantages and disadvantages of using tables, graphs, and symbolic methods to solve equations."
+                      "<p>Planning for the Summary</p>",
+                      "What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>",
+                      "<p><strong>Now What Do You Know?</strong></p>",
+                      "<p><em><strong>Describe the advantages and disadvantages of using tables, graphs, and symbolic methods to solve equations.</strong></em></p>",
+                      "<p>(As you are circulating during the Explore, listen to how students are making decisions on which representations to use to solve problems.  Select students to share how they used tables, graphs or symbolic methods in the summary.  Use this work to lead conversations on the connections between the representations and the advantages and disadvantages of each.)</p>"
                     ]
                   }
                 }
               ]
-              },
-              "supports": [{"text": "Can you explain the meaning of (2, 4) in terms of dollars and distance?"}]
+              }
             },
             {
               "type": "summarize",
@@ -3231,7 +3277,10 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["<strong>Summarize (Orchestrating the Discussion)</strong>\nSolutions and Strategies\n\nRevisit constant rate of change in the context of equations and connect the rate to tables and graphs of linear relationships."
+                      "text": [
+                        "<strong>Summarize (Orchestrating the Discussion)</strong>",
+                        "Solutions and Strategies",
+                        "Revisit constant rate of change in the context of equations and connect the rate to tables and graphs of linear relationships."
                       ]
                     }
                   },
@@ -3249,7 +3298,10 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "Let students share their ideas with the main focus on the rate, intercepts of the graphs, and solutions of the equations. Most students will say that the negative rate does not make sense. It means you give money back. However, students are very creative and may suggest something plausible. Another suggestion could be that the walker for Plan 2 collects $6 and promises to walk 15 kilometers. If she does not walk the 15 km, then she will pay back $1 for each kilometer she does not walk. In this case, it is necessary to change what the variable <em>x</em> represents to the number of kilometers <em>not</em> walked.\n\nPlan 2 is linear, decreasing, and not proportional. Can a linear relationship be decreasing and still be proportional? (Yes. It would not make sense for a pledge plan because we would lose money the more we walked. An example graph could contain the points: (0,0), (1,-2), (2,-4), (3,-6), (4, -8), etc.)"
+                      "text":[ 
+                        "Let students share their ideas with the main focus on the rate, intercepts of the graphs, and solutions of the equations. Most students will say that the negative rate does not make sense. It means you give money back. However, students are very creative and may suggest something plausible. Another suggestion could be that the walker for Plan 2 collects $6 and promises to walk 15 kilometers. If she does not walk the 15 km, then she will pay back $1 for each kilometer she does not walk. In this case, it is necessary to change what the variable <em>x</em> represents to the number of kilometers <em>not</em> walked.",
+                        "Plan 2 is linear, decreasing, and not proportional. Can a linear relationship be decreasing and still be proportional? (Yes. It would not make sense for a pledge plan because we would lose money the more we walked. An example graph could contain the points: (0,0), (1,-2), (2,-4), (3,-6), (4, -8), etc.)"
+                      ]
                     }
                   },
                   {
@@ -3257,7 +3309,9 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "Making the Mathematics Explicit\n\nBe sure to go over the answers to Situations A, B, and C. Check to make sure students understand the relationship between the points on a line, values in a table, and the solutions of the equation for that line. Have students share their solutions and their strategies for each part of the Problem. Ask for explanations."
+                      "text":[ 
+                        "Making the Mathematics Explicit",
+                        "Be sure to go over the answers to Situations A, B, and C. Check to make sure students understand the relationship between the points on a line, values in a table, and the solutions of the equation for that line. Have students share their solutions and their strategies for each part of the Problem. Ask for explanations."]
                     }
                   },
                   {
@@ -3266,20 +3320,16 @@
                       "format": "html",
                       "text": [
                         "<p>Students should be making the connection between a specific solution of an equation and the more general relationship between two variables for the related equation. They should see the relationship between equations, such as y = 5x - 3 and the following equations: 12 = 5x - 3, -8 = 5x - 3, and 27 = 5x - 3.  </p>",
+                        "<p><strong>Suggested questions</strong></p>",
                         "<ul><li>How are the equations 12 = 5x - 3, -8 = 5x - 3, and 27 = 5x - 3 related to y = 5x - 3? (In each equation, you are given the value of y and are looking for the corresponding value of x for that solution.)  </li><li>How can you find the missing value of x? (You can use a table or a graph to find the y-value of that row of the table or the y-coordinate of that point on the line.)  </li></ul>",
                         "<p>If needed, you can repeat some of the questions from the Explore that help students sort out the solutions of an equation.  </p>",
-                        "<p>You may want to draw the line and then label several points with their coordinates. Make a table of values. Display Teaching Aid 2.3C: Graph of y = 5x -3. Put the corresponding equation next to the coordinates to show that it is a true statement for these particular values of x and y. This will help students see the connection between finding solutions using a graph, table, and equation. </p>"
+                        "<p>You may want to draw the line and then label several points with their coordinates. Make a table of values. Display <strong>Teaching Aid 2.3C: Graph of y = 5x -3</strong>. Put the corresponding equation next to the coordinates to show that it is a true statement for these particular values of x and y. This will help students see the connection between finding solutions using a graph, table, and equation. </p>"
                       ]
                     }
                   },
                   {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "You may want to draw the line and then label several points with their coordinates. Make a table of values. Display <strong>Teaching Aid 2.3C</strong>. Put the corresponding equation next to the coordinates to show that it is a true statement for these particular values of x and y. (LANGUAGE) This will help students see the connection between finding solutions using a graph, table, and equation."
-                    }
-                  },
-                  {
+                    "id": "Hdw5oPwioyyIu-82",
+                    "title": "Graph of y = 5x - 3",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_3_graph_to_table_comp.png"
@@ -3289,21 +3339,29 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "Using another example from Situation A #3:\n<ul><li>For which equation is (2, 4) a solution? Explain your answer. (Plan 2. If you substitute 2 for <em>x</em> and 4 for <em>y</em> in the equation for Plan 2, it makes the equation true.)</li><li>How is the solution (2, 4) related to a table and a graph of Plan 3? (The values <em>x</em> = 2 and <em>y</em> = 4 are a solution of the equation. The ordered pair (2, 4) represents the coordinates of a point on the graph of the equation and an entry in the table.)</li></ul>"
+                      "text": [
+                        "Using another example from Situation A #3:",
+                        "<ul><li>For which equation is (2, 4) a solution? Explain your answer. (Plan 2. If you substitute 2 for <em>x</em> and 4 for <em>y</em> in the equation for Plan 2, it makes the equation true.)</li><li>How is the solution (2, 4) related to a table and a graph of Plan 3? (The values <em>x</em> = 2 and <em>y</em> = 4 are a solution of the equation. The ordered pair (2, 4) represents the coordinates of a point on the graph of the equation and an entry in the table.)</li></ul>"
+                      ]
                     }
                   },
                   {
+                    "id": "OKAJttNEgnYpKPe1",
+                    "title": "Text 16",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Check for Understanding</strong></p>",
                         "<p>Display Teaching Aid 2.3D: Troy’s Calculator. Troy is working with the equation y = 100 - 3x. He is trying to find a value of x that corresponds to y = 22. He writes the following question: “What is x if 100 - 3x = 22?” </p>",
+                        "<p><strong>Suggested question</strong></p>",
                         "<ul><li>Explain how Troy can use the following table or graph to answer this question.  </li></ul>"
                       ]
                     }
                   },
                   {
+                    "id": "UCPwqB1suuXqe8I4",
+                    "title": "Troy's Calculator",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_TG_2_3_graphing_calc.png"
@@ -3323,8 +3381,7 @@
                       "format": "html",
                       "text": [
                         "<strong>Now What do Students Know</strong>",
-                        "Ask students to reflect on the discussion and answer the Now What Do You Know.",
-                        "<p>Describe the advantages and disadvantages of using tables, graphs, and symbolic methods to solve equations.</p>",
+                        "<p>Ask students to reflect on the discussion and answer the Now What Do You Know.</p>",
                         "See answers to the Problem for more information about the strategies and embedded mathematics."
                       ]
                     }
@@ -3343,11 +3400,9 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             }
-          ],
-          "supports": []
+          ]
         }
       ]
     },
@@ -3371,7 +3426,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "This Problem introduces students to symbolic ways of solving linear equations with one unknown. Equations are represented pictorially as coins (constant term) and pouches that hold an unknown number of coins (variables). Students explore the properties of equality pictorially as they find the number of coins in a pouch. This provides a transition into solving equations symbolically.\n\nStudents use the fact that the number of coins on both sides of the equation is equal to find the number of coins in a pouch. In the process, they find that there is more than one way to represent the number of coins on one side of the equation. This provides an opportunity to use equivalent expressions as part of a strategy for solving equations."
+                        "<h3>Problem Overview</h3>",
+                        "<p>This Problem introduces students to symbolic ways of solving linear equations with one unknown. Equations are represented pictorially as coins (constant term) and pouches that hold an unknown number of coins (variables). Students explore the properties of equality pictorially as they find the number of coins in a pouch. This provides a transition into solving equations symbolically.</p>",
+                        "Students use the fact that the number of coins on both sides of the equation is equal to find the number of coins in a pouch. In the process, they find that there is more than one way to represent the number of coins on one side of the equation. This provides an opportunity to use equivalent expressions as part of a strategy for solving equations."
                       ]
                     }
                   },
@@ -3379,7 +3436,9 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": ["AoL:  Explore & Explore\nCCSSM: 7.NS.A.2c, 7.EE.A, 7.EE.A.1, 7.EE.A.2, 7.EE.B, 7.EE.B.4, 7.EE.B.4a</strong>"]
+                      "text": [
+                        "AoL:  Linear Relationships: Explore & Algebraic Expressions and Equations: Explore",
+                        "CCSSM: 7.NS.A.2c, 7.EE.A, 7.EE.A.1, 7.EE.A.2, 7.EE.B, 7.EE.B.4, 7.EE.B.4a</strong>"]
                     }
                   },
                   {
@@ -3426,22 +3485,24 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "launch",
               "content": {
                 "tiles": [
                   {
+                    "id": "91vRj_sL2o5_Z67S",
+                    "title": "Text 6",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                          "<p><strong>Launch (Getting Started)</strong></p>",
-                          "Connecting to Prior Knowledge",
-                          "<p>Display <strong>Teaching Aid 3.1</strong>. Tell students that the graphand table are for Alana’s pledge plan, which is represented by the equation<em>A</em> = 5 + 0.5<em>d</em>, where <em>A</em> is the amount of money Alana collects from each sponsor for walking <em>d</em> kilometers</p>"
-                        ]
+                        "<p><strong>Launch (Getting Started)</strong></p>",
+                        "<p>Connecting to Prior Knowledge</p>",
+                        "<p>Review the strategies students have used for solving equations in this unit:  using a table; using a graph; and using numeric reasoning.  </p>",
+                        "<p>Display <strong>Teaching Aid 3.1</strong>. Tell students that the graph and table are for Alana’s pledge plan, which is represented by the equation <em>A</em> = 5 + 0.5<em>d</em>, where <em>A</em> is the amount of money Alana collects from each sponsor for walking <em>d</em> kilometers</p>"
+                      ]
                     }
                   },
                   [
@@ -3523,9 +3584,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-              ]
+              }
             },
             {
               "type": "explore",
@@ -3541,8 +3600,7 @@
                         "<p>Encourage students to record their strategies.</p>",
                         "<p><strong>Suggested Questions</strong></p>",
                         "<ul><li>What does equality mean? What does the equal sign tell us? (It means that two quantities are equal.)</li><li> How can we maintain equality? (A few students may be able to say that equality can be maintained by adding, subtracting, multiplying, or dividing each side of an equation by the same number (for multiplication and division, the number must be nonzero), but most will not be able to answer this question fully yet. At this time, you might look for students to describe adding or removing one coin from each of the equal quantities or dividing the coins and pouches on each side into two equal groups.)</li><li>How do you know if your answer is correct? (You can substitute the value of the unknown into the equation and check that the resulting values on each side are equal.)</li></ul>",
-                        "<p>This is an opportunity to see how students handle parentheses. See the answers for some suggestions. </p>",
-                        "<p>Look for interesting strategies to share during the Summarize.</p>"
+                        "<p>This is an opportunity to see how students handle parentheses. See the answers for some suggestions. </p>"
                       ]
                     }
                   },
@@ -3559,37 +3617,37 @@
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "eZPlkXs37IX0gp9t",
+                    "title": "Text 11",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Now What Do You Know?</strong></p>",
-                        "<p>Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?</p>"
+                        "<p><em><strong>Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?</strong></em></p>",
+                        "<p>(As you are circulating during the Explore, look for strategies that students are using to find the number of coins in a pouch for each code.  Look for students that are “getting rid of” common coins or “getting rid of” common pouches first.  Look for how students are sharing or dividing the coins into the pouches.  Listen for the informal language students are using that can be used in the next problem to develop a procedure for solving equations symbolically.)</p>"
                       ]
                     }
                   }
                 ]
-              },
-              "supports": [
-                {"text": "What information do we have? "},
-                {"text": "What are we trying to find? "}
-              ]
+              }
             },
             {
               "type": "summarize",
               "content": {
                 "tiles": [
                   {
+                    "id": "ALxb4SlwiDTb5Shd",
+                    "title": "Text 12",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Summarize (Orchestrating the Discussion)</strong></p>",
                         "<p><strong>Solutions and Strategies </strong></p>",
-                        "<p>Initial Challenge</p>",
-                        "<p>If your students recorded their work on poster paper, display the posters and give the class time to examine the various strategies. The following are examples of how two groups of students solved Code 1. </p>",
-                        "<ul><li>First, we noted that there are 10 coins on the left and there are 4 coins and 3 bags on the right. So the 3 bags must have a total of 6 coins in order to make the total number of coins on the right equal to 10. So each bag must have 2 coins.</li><li>We started by removing 4 coins from each side. Then we had 6 coins on the left and 3 pouches on the right. So each pouch must have 2 coins. To check our answer, we found the total number of coins in the pouches, which is 6, and added it to the 4 coins to get a total of 10 coins on the right. This is equal to the 10 coins on the left.</li></ul>"
+                        "<p>If your students recorded their work on poster paper, display the posters and give the class time to examine the various strategies using a Gallery Walk. The following are examples of how two groups of students solved Code 1. </p>",
+                        "<p><em>Group 1:</em> First, we noted that there are 10 coins on the left and there are 4 coins and 3 bags on the right. So the 3 bags must have a total of 6 coins in order to make the total number of coins on the right equal to 10. So each bag must have 2 coins.</p>",
+                        "<p><em>Group 2:</em> We started by removing 4 coins from each side. Then we had 6 coins on the left and 3 pouches on the right. So each pouch must have 2 coins. To check our answer, we found the total number of coins in the pouches, which is 6, and added it to the 4 coins to get a total of 10 coins on the right. This is equal to the 10 coins on the left.</p>"
                       ]
                     }
                   },
@@ -3599,31 +3657,55 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Have students share all of the correct strategies they used (and some incorrect strategies if discussing them would be helpful in deepening students’ understanding of equality). The strategies above are just two of the many informative ways that students might solve these problems. See the answers for more possible strategies.</p>",
-                        "<p> After discussing each of the equations in the Initial Challenge, ask if there were other strategies that students used. If there were, they are likely to already be on posters. However, during the discussion, some students may have thought of additional ways to solve each equation. Some students may have used the Distributive Property before the What If...?.</p>"
+                        "<p>Have students share all of the correct strategies they used (and some incorrect strategies if discussing them would be helpful in deepening students’ understanding of equality). The strategies above are just two of the many informative ways that students might solve these problems. See the answers for more possible strategies.</p>"
                       ]
                     }
                   },
                   {
-                    "content":
-                    {
+                    "id": "HZXw83N7q3R4eVom",
+                    "title": "Text 14",
+                    "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>What If...?</p>",
-                        "<p>After students have had a few minutes to try the What If...? questions, display <strong>Teaching Aid 3.1B: Nichole’s Strategy</strong> and make sure students understand how the Distributive Property is being used.</p>",
-                        "<p><strong>Suggested Questions</strong></p>",
-                        "<ul><li>Can you use the Distributive Property on any of the other equations? (Yes. In Code 4 and Situation B. In Code 4, you can write the left side of the equation as 3 times 1 pouch and 1 coin and the right side of the equation as 3 sets of 10 coins. So 1 pouch and 1 coin will equal 10 coins. By removing 1 coin from each side, you can see that 1 pouch equals 9 coins. In Situation B, you can write the left side of the equation as 5 times 1 pouch and 2 coins and the right side of the equation as 3 sets of 7 coins. By removing 2 coins from each side, you can see that 1 pouch equals 5 coins.)</li><li>Could you use the Distributive Property for Aman’s Code in Situation B? (Yes. Some students may have used the Distributive Property when working with Aman’s Code. Other students may not have used the Distributive Property.)</li></ul>",
+                        "<p>Display <strong>Teaching Aid 3.1B: Nichole’s Strategy</strong> and make sure students understand how the Distributive Property is being used.</p>",
+                        "<p><strong>Suggested questions</strong></p>",
+                        "<ul><li>Can you use the Distributive Property on any of the other equations? (Yes. In Code 4 and Situation B. In Code 4, you can write the left side of the equation as 3 times 1 pouch and 1 coin and the right side of the equation as 3 sets of 10 coins. So 1 pouch and 1 coin will equal 10 coins. By removing 1 coin from each side, you can see that 1 pouch equals 9 coins.) In Situation B, you can write the left side of the equation as 5 times 1 pouch and 2 coins and the right side of the equation as 3 sets of 7 coins. By removing 2 coins from each side, you can see that 1 pouch equals 5 coins.)</li><li>Could you use the Distributive Property for Aman’s Code in Situation B? (Yes. Some students may have used the Distributive Property when working with Aman’s Code. Other students may not have used the Distributive Property.)</li></ul>",
                         "<p>Using the Distributive Property, students may see the 5 pouches and 10 coins = 35 dollars as 5 groups of 1 pouch and 2 coins = 5 groups of coins.</p>"
                       ]
                     }
                   },
-                  {
-                    "content":
-                      {
-                        "type": "Image",
-                        "url": "curriculum/moving-straight-ahead/images/TG_3_1_bagsandcoins.jpg"
+                  [
+                    {
+                      "id": "nBMhY_URcVQ31Nwj",
+                      "title": "Text 15",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>5 pouches + 10 coins = 35 coins</p>"
+                        ]
                       }
+                    },
+                    {
+                      "id": "NT1n2QNvBIeHlZlM",
+                      "title": "Text 16",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>5(1 pouch + 2 coins) = 5(7)</p>"
+                        ]
+                      }
+                    }
+                  ],
+                  {
+                    "id": "rHQNM32wiLM5qxVD",
+                    "title": "Distributive Property Diagram",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/TG_3_1_bagsandcoins.jpg"
+                    }
                   },
                   {
                     "content":{
@@ -3633,11 +3715,12 @@
                     }
                   },
                   {
-                    "content":
-                      {
-                        "type": "Image",
-                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_1_pouch_coin.png"
-                      }
+                    "id": "bN0sHmshZ8SD32Ec",
+                    "title": "5 pouches + 10 coins = 35 coins",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_1_pouch_coin.png"
+                    }
                   },
                   {
                     "content":
@@ -3660,36 +3743,17 @@
                           "<ul><li>Did everyone use the same first step in each equation? (There is often more than one way to make the first step in solving an equation, so it is likely that different groups took different steps.)</li><li>What are some common strategies that we can use to maintain equality? (As a student describes a strategy, ask him or her to refer to a step in the solution to an equation that illustrates the strategy.)</li><li>How is designing a code, like you did in Situation C, different from figuring out a code, like you did in the other questions? (Students will have various answers. Some students may think about maintaining equality. Other students may use a guess and check approach.)</li></ul>",
                           "<p>The conditions under which the equality relation is maintained are called the properties of equality. Note that this is not essential vocabulary, and that it is not introduced in the Student Edition until Problem 3.3. However, it might help in the discussion as students begin transitioning to symbolic methods of solving equations. You could display properties of equality on poster paper at this time.</p>",
                           "Situation C makes the transition from pictures to variables. After discussing the situation, revisit some of the Codes in the Initial Challenge.",
-                          "Use Code 4 to make the transition from pouches to variables."
+                          "If there is time begin to make the transition from pouches to variables using Code 4. If not this can be used to Launch Problem 3.2."
                         ]
                       }
                   },
-                  [
-                    {
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>5 pouches + 10 coins =   35 coins </p>"
-                        ]
-                      }
-                    },
-                    {
-                      "content": {
-                        "type": "Text",
-                        "format": "html",
-                        "text": [
-                          "<p>5(1pouch + 2 coins) =      5(7)</p>"
-                        ]
-                      }
-                    }
-                  ],
                   {
-                    "content":
-                      {
-                        "type": "Image",
-                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_1_pouch_coin_equality.png"
-                      }
+                    "id": "q76S9NGRxLLUR6yg",
+                    "title": "3 P + 3 C = 30 C",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_1_pouch_coin_equality.png"
+                    }
                   },
                   {
                     "content":
@@ -3702,11 +3766,27 @@
                     }
                   },
                   {
-                    "content":
-                      {
-                        "type": "Image",
-                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_3_1_how_many_coins.png"
-                      }
+                    "id": "SCmu1EPVCOqSs1cO",
+                    "title": "3P + 3C = 2P + 4C",
+                    "content": {
+                      "type": "Drawing",
+                      "objects": [
+                        {"type": "image", "id": "UnA7AC3jiwzDa6rq", "x": 134.5, "y": 46.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "W5CxuM3Wvew8Ev01", "x": 18, "y": 73.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "jupDXKUO34Wl-mN4", "x": 18, "y": 73.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "LwgSOsjlmvVCUyQo", "x": 55, "y": 72.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "fVDXuNX_QbCK3sUi", "x": 96, "y": 71.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "uZB8JMvwtuh01RjF", "x": 244, "y": 69.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "vwFyb32mGGqwBN7L", "x": 283, "y": 69.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+                        {"type": "image", "id": "P5IsR1OErfKtlzjz", "x": 135.5, "y": 84.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "dFRa0xafrZRjOcYK", "x": 173.5, "y": 85.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "lVKOGEZXL_u7UJ7n", "x": 318.5, "y": 42.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "WAnirRP-ZpJoxND0", "x": 359.5, "y": 42.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "GvVFcs_q5iJQv2Ep", "x": 321.5, "y": 80.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "ljsqHvMx3i7kSBfI", "x": 363.5, "y": 80.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+                        {"type": "image", "id": "Ukz6CKObbvq7e6zx", "x": 209.5, "y": 71.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25}
+                      ]
+                    }
                   },
                   {
                     "content":
@@ -3719,11 +3799,12 @@
                     }
                   },
                   {
-                    "content":
-                      {
-                        "type": "Image",
-                        "url": "curriculum/moving-straight-ahead/images/TG_3_1_solutiongrid.jpg"
-                      }
+                    "id": "d5Am16mCC1bpSWlC",
+                    "title": "Pouch and coin problem representations",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/TG_3_1_solutiongrid.jpg"
+                    }
                   },
                   {
                     "content":
@@ -3745,7 +3826,6 @@
                       "text": [
                         "<p>Now What Do Students Know</p>",
                         "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions.</p>",
-                        "<p><strong>Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?</strong></p>",
                         "<p>See answers to the problem for more information about the strategies and embedded mathematics.</p>"
                       ]
                     }
@@ -3764,11 +3844,9 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             }
-          ],
-          "supports": []
+          ]
         },
         {
           "description": "Problem 3.2",
@@ -3835,8 +3913,7 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "launch",
@@ -3882,8 +3959,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [{"text": "How can you express the number of coins in one pouch? In two pouches? In three pouches?"}]
+              }
             },
             {
               "type": "explore",
@@ -3932,11 +4008,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-                {"text": "Would a diagram help?"},
-                {"text": "What does 'x' mean in the equations?"}
-              ]
+              }
             },
             {
               "type": "summarize",
@@ -3977,8 +4049,13 @@
                       "<p>Making the Mathematics Explicit</p>",
                       "<p>To move from pouches and coins to solving equations symbolically, discuss the What If...? Situations.</p>",
                       "<ul><li>In Situation A, what equation can we write to represent the pouches and coins code? (Various answers. The most common might be: 6x + 27 = 105.)</li><li>Using the thinking that you were using with the visual equations, how do we find the value of x. (The first step is to take away 27 coins from each side. That leaves 6 pouches on theleft side and 78 coins on the right side. The second step is to divide the  coins and pouches into 6 equal groups. So, the number of coins in each pouch is 13.)</li><li>Next to your work, write down a similar method using the equation that represents this situation. (LANGUAGE)</li></ul>",
-                      "Step 1: Subtract 27 from each side of the equation:\n                                   6<em>x</em> + 27 -27 = 205 -27\n                                                       6<em>x</em> = 78",
-                      "Step 2: Divide by 6 on each side:\n                                                   6<em>x</em> = 78\n                                                      6    6\n                                                      <em>x</em> = 13",
+                      "Step 1: Subtract 27 from each side of the equation:",
+                      "                                   6<em>x</em> + 27 -27 = 205 -2",
+                      "                                                       6<em>x</em> = 78",
+                      "Step 2: Divide by 6 on each side:",
+                      "                                                   6<em>x</em> = 78",
+                      "                                                      6    6",
+                      "                                                      <em>x</em> = 13",
                       "<p>As students move away from the pouches and toward symbolic statements, they may find that their experience with pouches and coins is useful for recalling strategies.</p>"
                     ]
                   }
@@ -4306,11 +4383,9 @@
                   }
                 }
               ]
-              },
-              "supports": []
+              }
             }
-          ],
-          "supports": []
+          ]
         },
         {
           "description": "Problem 3.3",
@@ -4386,8 +4461,7 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "launch",
@@ -4423,8 +4497,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [{"text": "Would drawing a diagram help?"}]
+              }
             },
             {
               "type": "explore",
@@ -4472,9 +4545,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-              ]
+              }
             },
             {
               "type": "summarize",
@@ -4586,11 +4657,9 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             }
-          ],
-          "supports": []
+          ]
         },
         {
           "description": "Problem 3.4",
@@ -4674,8 +4743,7 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "launch",
@@ -4725,12 +4793,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-                {"text": "Can you explain the meaning of the equation in your own words?  "},
-                {"text": "How much will it cost Fabian to make 1 cake? 2 cakes?  "},
-                {"text": "What does it mean by “making a profit”? "}
-              ]
+              }
             },
             {
               "type": "explore",
@@ -4784,9 +4847,8 @@
                       ]
                     }
                   }
-              ]
-              },
-              "supports": []
+                ]
+              }
             },
             {
               "type": "summarize",
@@ -4956,11 +5018,9 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             }
-          ],
-          "supports": []
+          ]
         }
       ]
     },
@@ -5047,8 +5107,7 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "launch",
@@ -5093,10 +5152,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-                {"text": "How can you use rise and run to explain the steepness of stairs?"}
-              ]
+              }
             },
             {
               "type": "explore",
@@ -5140,8 +5196,7 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "summarize",
@@ -5206,11 +5261,9 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             }
-          ],
-          "supports": []
+          ]
         },
         {
           "description": "Problem 4.2",
@@ -5293,8 +5346,7 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "launch",
@@ -5349,8 +5401,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [ ]
+              }
             },
             {
               "type": "explore",
@@ -5414,9 +5465,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-              ]
+              }
             },
             {
               "type": "summarize",
@@ -5564,11 +5613,9 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             }
-          ],
-          "supports": []
+          ]
         },
         {
           "description": "Problem 4.3",
@@ -5645,8 +5692,7 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             },
             {
               "type": "launch",
@@ -5685,11 +5731,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-                {"text": "How much does the operating expense cost if 10 students watch the movie? "},
-                {"text": "How much does the school pay for the movie if 10 students watch the movie?"}
-              ]
+              }
             },
             {
               "type": "explore",
@@ -5723,9 +5765,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-              ]
+              }
             },
             {
               "type": "summarize",
@@ -5829,11 +5869,9 @@
                     }
                   }
                 ]
-              },
-              "supports": []
+              }
             }
-          ],
-          "supports": []
+          ]
         }
       ]
     },
@@ -5889,8 +5927,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [ ]
+              }
             },
             {
               "type": "MathReflection2",
@@ -5938,8 +5975,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [ ]
+              }
             },
             {
               "type": "MathReflection3",
@@ -6028,8 +6064,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [ ]
+              }
             },
             {
               "type": "MathReflection4",
@@ -6071,15 +6106,11 @@
                     }
                   }                 
                 ]
-              },
-              "supports": [ ]
+              }
             }
           ]
         }
-      ],
-      "supports": [
       ]
     }
-  ],
-  "supports": []
+  ]
 }
