@@ -24,7 +24,7 @@ export const SharedVariables = SharedModel.named("SharedVariables")
 .actions(self => ({
   addAndInsertVariable(
     variable: VariableType,
-    insertVariable: (variable: VariableType, x?: number, y?: number) => void,
+    insertVariable: (variable: VariableType) => void,
     noUndo?: boolean
   ) {
     if (noUndo) withoutUndo();
