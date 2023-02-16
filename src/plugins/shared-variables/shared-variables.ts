@@ -1,6 +1,7 @@
 import { destroy, Instance, types } from "mobx-state-tree";
 import { Variable, VariableType } from "@concord-consortium/diagram-view";
 import { SharedModel } from "../../models/shared/shared-model";
+import { withoutUndo } from "../../models/history/without-undo";
 
 export const kSharedVariablesID = "SharedVariables";
 
@@ -21,7 +22,12 @@ export const SharedVariables = SharedModel.named("SharedVariables")
   }
 }))
 .actions(self => ({
-  addAndInsertVariable(variable: VariableType, insertVariable: (variable: VariableType) => void) {
+  addAndInsertVariable(
+    variable: VariableType,
+    insertVariable: (variable: VariableType, x?: number, y?: number) => void,
+    noUndo?: boolean
+  ) {
+    if (noUndo) withoutUndo();
     self.addVariable(variable);
     const addedVariable = self.variables.find(v => v === variable);
     if (addedVariable) {
