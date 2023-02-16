@@ -72,9 +72,9 @@
         {
           "description": "Problem 1.1",
           "ordinal": 1,
-          "title": "MSA 1.1 Walking Marathons",
+          "title": "MSA 1.1 Walkathons",
           "subtitle": "Using Rates",
-          "disabled": ["GeometryMovableLineEquation"],
+          "disabled": [],
           "sections": [
             {
               "type": "overview",
@@ -86,7 +86,7 @@
                       "format": "html",
                       "text": [
                         "<h2>Problem Overview</h2>",
-                        "This Problem introduces patterns of change between two variables in the context of a walkathon. Students determine their walking rates in meters per second as a ratio of distance to time. This Problem connects back to the rate work done in Comparing and Scaling while laying the foundation for using rate to look at patterns of change. Students answer questions about time and distance using their constant walking rates and write an equation that models the distance walked over time at their constant walking rates."
+                        "<p>This Problem introduces patterns of change between two variables in the context of a walkathon. Students determine their walking rates in meters per second as a ratio of distance to time. This Problem connects back to the rate work done in Comparing and Scaling while laying the foundation for using rate to look at patterns of change. Students answer questions about time and distance using their constant walking rates and write an equation that models the distance walked over time at their constant walking rates.</p>"
                       ]
                     }
                   },
@@ -96,14 +96,19 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>NWDYK</strong>\nAssume you continue to walk at the rate determined in the Initial Challenge. Describe in words the distance you could walk in a given number of seconds. Then write an equation to represent this information. "
+                        "<strong>NWDYK</strong>",
+                        "<p>Describe how the distance you walk at a constant rate of time is represented in an equation and graph.</p>"
                       ]
                     }
                   },
                   {
                     "content": {
                       "type": "Text",
-                      "text": "AoL:  Introduce & Introduce/Explore\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.EE.B.4"
+                      "format": "html",
+                      "text": [
+                        "<p>AoL:  Linear Relationships: Introduce, Algebraic Expressions and Equations: Introduce/Explore</p>",
+                        "CCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.EE.B.4"
+                      ]
                     }
                   },
                   {
@@ -146,7 +151,9 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>Launch (Getting Started)</strong> \nConnecting to Prior Knowledge\n\nThe introduction to the Investigation revisits Adrian’s Bike Rental from Grade 6 Variables and Patterns. In that Unit, students used contextual situations, tables, graphs, and equations to represent patterns relating variables such as cost, income, and profit. They looked at both consistent relationships (such as linear patterns) and non-consistent relationships to explain the pattern of change between two variables.\n\nThe four questions in the introduction to the Investigation offer overarching questions that the students should explore throughout the unit. You may want to display these questions in the classroom in some way to help keep students focused on the big ideas in the Unit.<ul><li> How can you determine whether a relationship is linear by examining a table of data? A graph? An equation? A verbal context?</li><li> If the relationship is linear, how can you determine if it is a proportional relationship?</li><li> How do changes in one variable affect changes in a related variable? How are these changes represented in a table, graph, or equation?</li><li> If I know the value of one variable, how can I find the value of the other variable? </li></ul>After setting the scene for the Unit with the four questions, begin to introduce students to the context of the Problem.",
+                        "<strong>Launch (Getting Started)</strong> \nConnecting to Prior Knowledge\n\nThe introduction to the Investigation revisits Adrian’s Bike Rental from Grade 6 Variables and Patterns. In that Unit, students used contextual situations, tables, graphs, and equations to represent patterns relating variables such as cost, income, and profit. They looked at both consistent relationships (such as linear patterns) and non-consistent relationships to explain the pattern of change between two variables.\n\nThe four questions in the introduction to the Investigation offer overarching questions that the students should explore throughout the unit. You may want to display these questions in the classroom in some way to help keep students focused on the big ideas in the Unit.",
+                        "<ul><li> What are the variable in the problem?</li><li>Do the variables in the problem have a linear relationship to each other?</li><li>What patterns in the problem suggest that the relationship is linear? Proportional?</li><li> How can the linear relationship be represented with a verbal description, a table, a graph, or an equation?</li><li>How do changes in one variable affect changes in a related variable? How are these changes captured in a table, a graph, or an equation?</li><li>How can tables, graphs, equations, inequalities of linear relationships be used to solve problems?</li></ul>",
+                        "After setting the scene for the Unit with the four questions, begin to introduce students to the context of the Problem.",
                         "Ask students to describe if they are fast or slow walkers and to describe their evidence."]
                     }
                   },
@@ -235,7 +242,12 @@
                       "content": {
                         "type": "Text",
                         "format": "html",
-                        "text": "Unit Rate #1:\n 10 meters in 4 seconds\n ÷ 10 \u2939               \u2938 ÷ 10 \n 1 meter in 0.4 seconds."
+                        "text": [
+                          "<p>Unit Rate #1:</p>",
+                          "<p>10 meters in 4 seconds</p>",
+                          "<p> ÷ 10 \u2939               \u2938 ÷ 10 </p>",
+                          "<p>1 meter in 0.4 seconds.</p>"
+                          ]
                         }
                     },
                     {
@@ -251,14 +263,24 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "Students may not know which one to use. While both are accurate unit rates, a specific rate is asked for in the Initial Challenge. You can use the “for every” language from Grade 6 <em>Comparing Quantities</em> to help students analyze which rate to use for this problem.\n\n<strong>Suggested Questions</strong><ul><li> Your walking rate was 10 meters for every 4 seconds. (Using the values from the student’s walking.) There are two unit rates. Do we need to find how many seconds for every 1 meter? Or how many meters for every 1 second?</li><li> Have the student or group look back at the question in the Initial Challenge to see that it asks for meters per second. Does meters per second mean for every 1 meter or for every 1 second? (“per second” means for every 1 second)</li></ul>Discuss these ideas in the Summarize. "
+                      "text": [
+                        "Students may not know which one to use. While both are accurate unit rates, a specific rate is asked for in the Initial Challenge. You can use the “for every” language from Grade 6 <em>Comparing Quantities</em> to help students analyze which rate to use for this problem.",
+                        "<ul><li> Your walking rate was 10 meters for every 4 seconds. (Using the values from the student’s walking.) There are two unit rates. Do we need to find how many seconds for every 1 meter? Or how many meters for every 1 second?</li><li> Have the student or group look back at the question in the Initial Challenge to see that it asks for meters per second. Does meters per second mean for every 1 meter or for every 1 second? (“per second” means for every 1 second)</li></ul>",
+                        "Discuss these ideas in the Summary. "
+                      ]
                     }
                   },
                   {
+                    "id": "ofmfwXH9qAAak2eo",
+                    "title": "Text 17",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "While students are answering the questions in the What If...?, note their strategies for finding answers to the questions. Are students scaling the ratios? Are students using a table? Are students using a graph? These various strategies can be discussed in the Summarize.\n\nAs students complete the experiment and record their data, have them continue on to the What If…? questions.\n\nThe way that students answer the What If...? Situation questions can provide a formative assessment of the strategies that students have for answering the questions in the Unit. This will help you assess the types of questions that you will need to ask as you continue in the Unit. "
+                      "text": [
+                        "<p>While students are answering the questions in the What If Situations, note their strategies for finding answers to the questions. </p>",
+                        "<ul><li>Are students scaling the ratios? </li><li>Are students using a table? </li><li>Are students using a graph? </li></ul>",
+                        "<p>These various strategies can be discussed in the Summarize.<br/><br/>As students complete the experiment and record their data, have them continue on to the What If Situation questions.<br/><br/>The way that students answer the What If...? Situation questions can provide a formative assessment of the strategies that students have for answering the questions in the unit. This will help you assess the types of questions that you will need to ask as you continue in the unit. </p>"
+                      ]
                     }
                   },
                   {
@@ -270,12 +292,15 @@
                     }
                   },
                   {
+                    "id": "VPf1sbt6zm1ZRurM",
+                    "title": "Text 19",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><em>Now What Do You Know? </em></p>",
-                        "<p>fAssume you continue to walk at the rate determined in the Initial Challenge. Describe in words the distance you could walk in a given number of seconds. Then write an equation to represent this information. </p>"
+                        "<p>Describe how the distance you walk at a constant rate of time is represented in an equation and graph. </p>",
+                        "<p>(As you are circulating during the Explore, listen to the way students are using their walking rate- are they using “for every” language; are they looking at scaling them up or down to fit the situation; are they seeing this constant rate in the graph; are they using a unit rate in an equation?  Find examples from student work to use in the summary.)</p>"
                       ]
                     }
                   }
@@ -311,25 +336,20 @@
                     }
                   },
                   {
+                    "id": "HbBJeLGVIlTRanLF",
+                    "title": "Text 23",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><em>What If Situation A</em></p>",
-                        "<p><strong>Suggested Questions</strong></p>",
+                        "<p><strong>Suggested questions</strong></p>",
                         "<ul><li>How do you find how long it takes to walk a given distance, in particular, asking about 500 meters in situation A? (Note that this is informally solving for T when D is given. Students will have informal ways to find the value, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li>How do you find how far you can walk in a given time?  Use the examples from What If Situation A for students to demonstrate their thinking.  (Note that this is informally solving for D when T is given. Students will have informal ways to find the values, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li>How does the equation show the relationship between the two variables? (The equation shows that the distance is the product of the walkingrate and the time, or d = rt. The walking rate is the coefficient of the independent variable.) </li><li>Explain what information the numbers and variables in your equation represent. (Take this opportunity to see how students interpret the expression 2t. They should say something like “If my walking rate is 2 meters per second, this is the distance that I walked after t seconds.” Emphasize that 2t means 2 times the value of t.) </li><li>Which variable in your equation is the independent variable, and which is the dependent variable? (Time is the independent variable, and distance is the dependent variable.) </li></ul>",
                         "<p>If some students made graphs during the Explore, display them for the class. </p>",
                         "<ul><li>How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.) </li></ul>",
                         "<p>Pick a typical equation from the class and ask students to use this equation to make a table. </p>",
-                        "<ul><li>How does the walking rate show up in the table? (In the table, as the time increases by 1 second, the distance increases by a constant amount equal to the walking rate.) </li></ul>"
+                        "<ul><li>How does the walking rate show up in the table? (In the table, as the time increases by 1 second, the distance increases by a constant amount equal to the walking rate.) </li><li>Could we represent Liz’s claim with a rate table? (Yes.) What would it look like? </li></ul>",
+                        "<p>Possible answer:</p>"
                       ]
-                    }
-                  },
-                  {
-                    "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": "<strong>Situation B Suggested Questions</strong> \nWe have found different ways that we can represent proportional relationships. We have used rate tables, comparison statements (like “for every” statements), and proportions.\n\n\u0089• Could we represent Liz’s claim with a rate table? (Yes.) What would it look like? \nPossible answer:"
                     }
                   },
                   {
@@ -339,11 +359,13 @@
                       "columns": [
                         { "name": "Distance (meters)",
                           "type": "number",
-                          "values": [1.5, 7.5, 15, 500]
+                          "values": [1.5, 7.5, 15, 500],
+                          "width": 80
                         },
                         { "name": "Time (seconds)",
                           "type": "string",
-                          "values": ["1", "5", "10", "about 333"]
+                          "values": ["1", "5", "10", "about 333"],
+                          "width": 80
                         }
                       ]
                     }
@@ -451,10 +473,8 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<strong>General Summary Questions</strong>",
-                        "<p></p>",
                         "<ul><li>Have students compare their equations. How do the equations compare? (Students should see that the equations are the same except for the walking rates.)</li><li>What information does the walking rate provide? (It gives the unit rate, or how far you can walk for every 1 second.)</li><li>What does it mean to walk at a constant rate? (It means that you always walk the same distance for a set amount of time.) </li><li>Suppose you do not walk at a constant rate for the walkathon. Which of the questions in Problem 1.1 can you still answer? Why? (It would be difficult to answer any of the questions since they all assume a constant walking rate. For Question A, you can find the total time it took to walk 10 meters and then compute the average rate.) If some students made graphs during the Explore, display them for the class. </li><li>How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.) Pick a typical equation from the class and ask students to use this equation to make a table. </li></ul>",
-                        "<p>The above questions on graphs and tables can be used to launch the next Problem. </p>",
+                        "<p>Some of the above questions on graphs and tables can be used to launch the next Problem. </p>",
                         "<p></p>"
                       ]
                     }
@@ -464,7 +484,11 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Now What Do Students Know</strong>\nAsk students to reflect on the discussion and answer the Now What Do You Know.\n\nAssume you continue to walk at the rate determined in the Initial Challenge. Describe in words the distance you could walk in a given number of seconds. Then write an equation to represent this information. \n\nSee answers to the problem for more information about the strategies and embedded mathematics. "
+                      "text": [
+                        "<strong>Now What Do Students Know</strong>",
+                        "Ask students to reflect on the discussion and answer the Now What Do You Know.",
+                        "See answers to the problem for more information about the strategies and embedded mathematics. "
+                      ]
                     }
                   },
                   {
@@ -512,7 +536,9 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "AoL: Introduce & Explore\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d, 7.EE.B.4"
+                      "text": [
+                        "AoL: Linear Relationships; Introduce & Algebraic Expressions and Equations; Explore",
+                        "CCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d, 7.EE.B.4"]
                     }
                   },
                   {
@@ -576,7 +602,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "Note that the rate of change describes the change in a linear relationship. If the linear relationship is proportional, the rate of change is the same as the unit rate or constant of proportionality. This conversation started for students in Comparing and Scaling and will continue throughout this Unit. <ul><li> What equation can we use to represent the pattern in this data? (Distance is equal to 1.5 times the number of seconds walked, or d = 1.5t.)</li><li> The equation is made up of two expressions. The equal sign shows that the expressions are equivalent. What are the two expressions? (d and 1.5t)</li></ul>"
+                      "text": "<strong>Note:</strong> The rate of change describes the change in a linear relationship. If the linear relationship is proportional, the rate of change is the same as the unit rate or constant of proportionality. This conversation started for students in Comparing and Scaling and will continue throughout this Unit. <ul><li> What equation can we use to represent the pattern in this data? (Distance is equal to 1.5 times the number of seconds walked, or d = 1.5t.)</li><li> The equation is made up of two expressions. The equal sign shows that the expressions are equivalent. What are the two expressions? (d and 1.5t)</li></ul>"
                     }
                   },
                   {
@@ -632,8 +658,8 @@
                       "type": "Table",
                       "name": "Table 1",
                       "columns": [
-                        {"name":"Time (seconds)"},
-                        {"name":"Alana's Distance (meters)"}
+                        {"name":"Time (seconds)", "width":100},
+                        {"name":"Alana's Distance (meters)", "width":100}
                       ]
                     }
                   },
@@ -642,8 +668,8 @@
                       "type": "Table",
                       "name": "Table 2",
                       "columns": [
-                        {"name":"Time (seconds)"},
-                        {"name":"Gilberto's Distance (meters)"}
+                        {"name":"Time (seconds)", "width":100},
+                        {"name":"Gilberto's Distance (meters)", "width":100}
                       ]
                     }
                   },
@@ -652,8 +678,8 @@
                       "type": "Table",
                       "name": "Table 3",
                       "columns": [
-                        {"name":"Time (seconds)"},
-                        {"name":"Leanne's Distance (meters)"}
+                        {"name":"Time (seconds)", "width":100},
+                        {"name":"Leanne's Distance (meters)", "width":100}
                       ]
                     }
                   },
@@ -688,12 +714,15 @@
                     }
                   },
                   {
+                    "id": "vipkt4JVMuMwqP7i",
+                    "title": "Text 16",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>Now What Do You Know?</strong></p>",
-                        "<p>How can you recognize a linear pattern of change in a verbal context, table, graph, expression, or equation? </p>"
+                        "<p><strong><em>How can you recognize a linear pattern of change in a verbal context, table, graph, expression, or equation? </em></strong></p>",
+                        "<p>(Select student work to use in the summary.  Select tables that show the rate of change for each student (if there is a student that didn’t have the time increase by one use that also).  Select graphs that may have different scales to show how this changes the look of the graph but not the rate of change. Select equations from students to emphasize the rate of change and how it appears in the equation.)</p>"
                       ]
                     }
                   }
@@ -710,7 +739,7 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Summarize (Orchestrating the Discussion)</strong> \nSolutions and Strategies \n\n<strong>Suggested Questions </strong><ul><li> Who walks the fastest? (Leanne) Who walks the slowest? (Alana) How can you tell? (Graph: Leanne’s line is the highest or steepest or has the largest angle from the x-axis. Alana’s line is the lowest or least steep or has the smallest angle from the x-axis. Table: For any number of seconds, other than zero seconds, Leanne has traveled the greatest distance and Alana has traveled the least distance. For example, at 5 seconds Leanne has walked 12.5 meters when Alana has only walked 5 seconds. Equation: The number multiplied by the time is the larger for Leanne who is faster and smaller for Alana who walks slower.)</li><li> If my walking rate was 2.3 meters per second, where would the line of my data be on the graph? (Between Leanne’s and Gilberto’s, because for every one second that you walk, you would travel 2.3 meters, 2 seconds would be 4.6 meters, etc.)</li><li> What is the equation for Alana? (d = 1t) Gilberto? (d = 2t) Leanne? (d = 2.5t) How did you find it? (Various answers. For example, to find the distance we multiply by the walking rate.)</li><li> If you increased your walking rate, what effect would that have on your table or graph? (If you increase the rate at which you walk, you can cover more distance in a given time. The distance in each row of the table would increase, and the graph would be steeper. Similarly, if you walk faster, it takes less time to cover a certain distance.)</li><li> As you change your walking rate to a faster rate, what effect does this have on the original equation? (The number multiplying [the coefficient] by the time t will increase.)</li></ul>"
+                      "text": "<strong>Summarize (Orchestrating the Discussion)</strong> \nSolutions and Strategies \n\n<strong>Suggested Questions </strong><ul><li> Who walks the fastest? (Leanne) Who walks the slowest? (Alana) How can you tell? (Graph: Leanne’s line is the highest or steepest or has the largest angle from the x-axis. Alana’s line is the lowest or least steep or has the smallest angle from the x-axis. Table: For any number of seconds, other than zero seconds, Leanne has traveled the greatest distance and Alana has traveled the least distance. For example, at 5 seconds Leanne has walked 12.5 meters when Alana has only walked 5 seconds. Equation: The number multiplied by the time is the larger for Leanne who is faster and smaller for Alana who walks slower.)</li><li> If my walking rate was 2.3 meters per second, where would the line of my data be on the graph? (Between Leanne’s and Gilberto’s, because for every one second that you walk, you would travel 2.3 meters, 2 seconds would be 4.6 meters, etc.)</li><li> What is the equation for Alana? (d = 1t) Gilberto? (d = 2t) Leanne? (d = 2.5t) How did you find it? (Various answers. For example, to find the distance we multiply by the walking rate.)</li><li> If you increased your walking rate, what effect would that have on your table or graph? (If you increase the rate at which you walk, you can cover more distance in a given time. The distance in each row of the table would increase, and the graph would be steeper. Similarly, if you walk faster, it takes less time to cover a certain distance.)</li><li> As you change your walking rate to a faster rate, what effect does this have on the original equation? (The number multiplying [the coefficient] by the time t will increase.)</li><li>Which representation can I use to determine the distance I walk in 15 seconds? The time it takes to walk 20 meters?  (Answers will vary.)</li></ul>"
                     }
                   },
                   {
@@ -740,12 +769,16 @@
                   },
                   [
                     {
+                      "id": "A-PMV-5JqKIraYlS",
+                      "title": "Distance Table showing progression",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_2_Anchor.png"
                       }
                     },
                     {
+                      "id": "mJgtPlvHnKQKrPeM",
+                      "title": "Walking Rates comparison graph",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_2_Anchor2.png"
@@ -774,10 +807,10 @@
                       "type": "Table",
                       "name": "Walking Rates - Distance (meters)",
                       "columns": [
-                        {"name":"Time (s)","values":["0","1","2","3"]},
-                        {"name":"Alana","values":["0","1","2","3"]},
-                        {"name":"Gilberto","values":["0","2","4","6"]},
-                        {"name":"Leanne","values":["0","2.5","5","7.5"]}
+                        {"name":"Time (s)","width": 90,"values":["0","1","2","3"]},
+                        {"name":"Alana","width": 90,"values":["0","1","2","3"]},
+                        {"name":"Gilberto","width": 90,"values":["0","2","4","6"]},
+                        {"name":"Leanne","width": 90,"values":["0","2.5","5","7.5"]}
                       ]
                     }
                   },
@@ -787,9 +820,9 @@
                       "format": "html",
                       "text": [
                         "<p>To find the rate of change, students may instead use proportional reasoning to determine that, if the time triples, then the distance should also triple. </p>",
-                        "  (1 sec / 2 m) x 3 = 3 sec / 6 m",
-                        "Similarly, if the distance value is twice the time value after 1 second, the distance should continue to be twice the time value. There is a multiplicative 2 to 1 relationship between distance and time. ",
-                        "  2 m / 1 sec = 10 m / 5 sec",
+                        "<p>  (1 sec / 2 m) x 3 = 3 sec / 6 m</p>",
+                        "<p>Similarly, if the distance value is twice the time value after 1 second, the distance should continue to be twice the time value. There is a multiplicative 2 to 1 relationship between distance and time. </p>",
+                        "<p>  2 m / 1 sec = 10 m / 5 sec</p>",
                         "In this Problem, the relationship between the variables is both linear and proportional. So, the latter thinking using proportions works. However, students will be confronted with a non-proportional relationship in Problem 1.3. There, students will need to rely on finding the rate of change by looking at the change in the dependent variable as the independent variable increases by 1. ",
                         "<strong>Note:</strong> Students tend to set up their tables using an interval of 1 second because that is what makes most sense to them. This means that they need to produce many pairs of data to get a sense of what is happening over a reasonable span of time. You may want to discuss the advantages and disadvantages of using other intervals, such as 2 seconds or 5 seconds. What If Situation B with Omar’s Walking Rate Graph and What If Situation C with Elizabeth’s Walkathon Table provide this opportunity."]
                     }
@@ -843,13 +876,13 @@
                     }
                   },
                   {
-                    "layout": {
-                      "height": 180
-                    },
-                      "content": {
-                        "type": "Image",
-                        "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_2_CountingSquares.png"
-                      }
+                    "id": "FEmFqc0xsMXTzaVE",
+                    "title": "Dividing by 3 on a Graph",
+                    "layout": { "height": 180 },
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_2_CountingSquares.png"
+                    }
                   },
                   {
                     "content": {
@@ -859,10 +892,19 @@
                     }
                   },
                   {
+                    "id": "HEgzALw5hRRy8OJ5",
+                    "title": "Text 26",
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>Situation C</strong>\nPick one or two of the representations and ask: <ul><li> What are the variables? (The variables for George, Elizabeth, and Billie are time and distance. The variables for Evo are not labeled. The variables for Bob are time t in seconds and walking rate r in meters per second.) </li><li> Describe the patterns of change between the two variables. How did you find the pattern? (For Elizabeth, for every increase of 2 seconds, the distance increases by 3 meters. Each row of the table increases by the same number of seconds. For Billie, for every 1 second, the distance increases by 2.25 meters. The equation is in the form d = rt, so the walking rate is the same as the value of r. For George, distance increases with time, but there does not seem to be a pattern. For Bob, as rate increases, time decreases.) </li><li> Describe what is happening in each situation. (According to the table, George is not walking at a constant rate. Elizabeth is walking at a constant rate and is using an interval of 2 seconds. If Evo’s represents time and distance, she walked at a consistent rate, stopped for some time, then walked again at a consistent rate. Billie is also walking at a constant rate because the equation is similar to those for Alana, Gilberto, and Leanne. Bob is walking 100 meters, but the rate and time are not known. His walking rate may or may not be constant because the variables are time and rate, not time and distance.) </li><li> After 5 seconds, who is ahead? (According to the table, George walks 25 meters in 5 seconds. In that time, Elizabeth walks 7.5 meters, and Billie walks 11.25 meters. (Note: Using the equation for Bob, a time of 5 seconds results in a rate of 20 m/s, which is not a realistic walking rate.) </li></ul>The table of Elizabeth’s time and distance represents a linear relationship, but students need to note that time is not increasing by an interval of 1 second. Go back to the idea of writing the rate as a unit rate, as discussed earlier in this section. <ul><li> For those that are linear, compare the walking rates to those of the original three students. Who is the fastest? Who is the slowest? (Elizabeth walks 3 meters for every 2 seconds, or 1.5 meters per second. This is faster than Alana but slower than Gilberto. Billie walks 2.25 meters per second, which is faster than Alana and Gilberto but slower than Leanne. Since Leanne is still the fastest, her graph is the steepest.)</li></ul> Conclude by discussing the ideas of being linear and proportional.<ul><li> Was every relationship in this problem linear? Explain. (No. The data for George, Bob, and Evo were not linear.)</li><li> Were the linear relationships in this problem proportional? (Yes. If we used values from the table or points from the graph, we could write proportions.)</li><li> How can you tell if a graph does not represent a linear relationship? (A graph represents a linear relationship if it is one straight line. Therefore, if the graph is not a straight line, the relationship it models is not linear.) </li><li> How can you tell if a table does not represent a linear relationship? (A table does not represent a linear relationship if for each unit change in the independent variable, there is not a constant change in the dependent variable.) </li><li> How can you tell if an equation represents a linear relationship? (Various answers. At this time, students’ experiences are limited. Students may identify that there is a number multiplied by one variable to get values for the other variable.) </li></ul>"
+                      "text": [
+                        "<p>For What If Situation C pick one or two of the representations and ask: </p>",
+                        "<ul><li> What are the variables? (The variables for George, Elizabeth, and Billie are time and distance. The variables for Evo are not labeled. The variables for Bob are time t in seconds and walking rate r in meters per second.) </li><li> Describe the patterns of change between the two variables. How did you find the pattern? (For Elizabeth, for every increase of 2 seconds, the distance increases by 3 meters. Each row of the table increases by the same number of seconds. For Billie, for every 1 second, the distance increases by 2.25 meters. The equation is in the form d = rt, so the walking rate is the same as the value of r. For George, distance increases with time, but there does not seem to be a pattern. For Bob, as rate increases, time decreases.) </li><li> Describe what is happening in each situation. (According to the table, George is not walking at a constant rate. Elizabeth is walking at a constant rate and is using an interval of 2 seconds. If Evo’s represents time and distance, she walked at a consistent rate, stopped for some time, then walked again at a consistent rate. Billie is also walking at a constant rate because the equation is similar to those for Alana, Gilberto, and Leanne. Bob is walking 100 meters, but the rate and time are not known. His walking rate may or may not be constant because the variables are time and rate, not time and distance.) </li><li> After 5 seconds, who is ahead? (According to the table, George walks 25 meters in 5 seconds. In that time, Elizabeth walks 7.5 meters, and Billie walks 11.25 meters. (<strong>Note</strong>: Using the equation for Bob, a time of 5 seconds results in a rate of 20 m/s, which is not a realistic walking rate.) </li></ul>",
+                        "<p>The table of Elizabeth’s time and distance represents a linear relationship, but students need to note that time is not increasing by an interval of 1 second. Go back to the idea of writing the rate as a unit rate, as discussed earlier in this section. </p>",
+                        "<ul><li> For those that are linear, compare the walking rates to those of the original three students. Who is the fastest? Who is the slowest? (Elizabeth walks 3 meters for every 2 seconds, or 1.5 meters per second. This is faster than Alana but slower than Gilberto. Billie walks 2.25 meters per second, which is faster than Alana and Gilberto but slower than Leanne. Since Leanne is still the fastest, her graph is the steepest.)</li></ul>",
+                        "<p> You may want to extend the conversation and conclude by discussing the ideas of being linear and proportional.</p>",
+                        "<ul><li> Was every relationship in this problem linear? Explain. (No. The data for George, Bob, and Evo were not linear.)</li><li> Were the linear relationships in this problem proportional? (Yes. If we used values from the table or points from the graph, we could write proportions.)</li><li> How can you tell if a graph does not represent a linear relationship? (A graph represents a linear relationship if it is one straight line. Therefore, if the graph is not a straight line, the relationship it models is not linear.) </li><li> How can you tell if a table does not represent a linear relationship? (A table does not represent a linear relationship if for each unit change in the independent variable, there is not a constant change in the dependent variable.) </li><li> How can you tell if an equation represents a linear relationship? (Various answers. At this time, students’ experiences are limited. Students may identify that there is a number multiplied by one variable to get values for the other variable.) </li></ul>"
+                      ]
                     }
                   },
                   {
@@ -887,12 +929,9 @@
                     }
                   }
                 ]
-              },
-              "supports": [
-             ]
+              }
             }
-          ],
-          "supports": []
+          ]
         },
         {
           "description": "Problem 1.3",
@@ -917,7 +956,10 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>1.3 Raising Money: Using Linear Relationships to Solve Equations\nAoL: Explore & Analysis\nCCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d, 7.EE.B.4.</strong>"
+                      "text": [
+                        "1.3 Raising Money: Using Linear Relationships to Solve Equations",
+                        "AoL: Linear Relationships; Explore & Algebraic Expressions and Equations: Analysis",
+                        "CCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d, 7.EE.B.4.</strong>"]
                     }
                   },
                   {
@@ -925,7 +967,9 @@
                     "content": {
                       "type": "Text",
                       "format": "html",
-                      "text": "<strong>NWDYK</strong>\nHow can you determine if a relationship is linear from a context, table, graph, or equation?\nIf a relationship is linear, explain how you can tell if it is proportional?"
+                      "text": [
+                        "<strong>NWDYK</strong>",
+                        "<p>How can you predict where the graph of a linear relationship intersects the y-axis from a context, table, or equation that represent the relationship?</p>"]
                     }
                   },
                   {
@@ -1055,7 +1099,6 @@
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><strong>Suggested Questions</strong></p>",
                       "<ul><li>How does Gilberto’s plan work? (A sponsor will donate $2 for each kilometer Gilberto walks.)</li><li>What are the variables and what letter name can we give them? (Amount of money, A, and number of kilometers he walks, d.)</li><li>Which is the independent variable? (Number of kilometers he walks.)</li><li>What happens with the independent variable in Gilberto’s plan? What happens for every kilometer that he walks? (He will make $2.)</li><li>How could we write that as an expression? ($2 times every kilometer walked or 2 * d.)</li><li>How can we write this an equation? (The amount a sponsor donates is found by finding $2 times every kilometer walked or A = 2 • d)</li></ul>"
                     ]
                   }
@@ -1081,19 +1124,20 @@
                   }
                 },
                 {
+                  "id": "SP3hXu74mCfcXHUn",
+                  "title": "Text 16",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
                       "<p><em>Now What Do You Know?</em></p>",
-                      "<p>How can you predict where the graph of a linear relationship intersects the y-axis from a context, table, or equation that represent the relationship?</p>",
-                      "<p>Describe how you can use a table, graph, or equation to solve a problem? </p>"
+                      "<p><em><strong>How can you predict where the graph of a linear relationship intersects the y-axis from a context, table, or equation that represent the relationship?</strong></em></p>",
+                      "<p>(As you are circulating during the Explore, select examples of student work where students are indicating the y-intercept:  on a table where they have indicated the y-value when the x-value is zero; in the equation it is what is “added on” or the b in y = ax +b; in the context it is the “starting amount”.)</p>"
                     ]
                   }
                 }
-                ]
-              },
-              "supports": []
+              ]
+            }
             },
             {
               "type": "summarize",
@@ -1113,6 +1157,8 @@
                     }
                   },
                   {
+                    "id": "xJeTBabKjG6hXnC3",
+                    "title": "Anchor charts for Money earned table and graph",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_Anchor.png"
@@ -1125,7 +1171,6 @@
                       "format": "html",
                       "text": [
                         "<p>Discuss the Initial Challenge. If you did not ask students to identify the dependent and independent variables in the Launch, ask them now. </p>",
-                        "<p></p>",
                         "<p>Look at the points of intersection and raise questions about what those points tell us about who will raise the most money.</p>"
                       ]
                     }
@@ -1137,13 +1182,13 @@
                       "format": "html",
                       "text": [
                         "<p><strong>Suggested Questions </strong></p>",
-                        "<p></p>",
                         "<ul><li>Who makes the most money at the beginning of the walking? (Leanne. She is getting $10 for any distance. So, she makes $10 for 0, 1, 2, etc. kilometers. Gilberto and Alana get less than that for the first few kilometers.)</li><li>Point to the intersection of Leanne’s and Gilberto’s lines. What point is this? (5, 10) </li></ul>"
                       ]
                     }
                   },
                   {
-                    "id": "_bikHymSD4_M1Y-y",
+                    "id": "Bl4d_33MkblH3GwO",
+                    "title": "Point of intersection",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_Intersection.png"
@@ -1164,7 +1209,8 @@
                     }
                   },
                   {
-                    "id": "yA0iXyWCYr9EqYuy",
+                    "id": "W_lEoZMapRzTTJG1",
+                    "title": "Further graph analysis",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_Height.png"
@@ -1199,8 +1245,6 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Suggested Questions </strong></p>",
-                        "<p></p>",
                         "<ul><li>How are the tables, graphs, and equations for the pledge plans different from the walking rate representations? (Various answers. Students will probably mention the y-intercepts without knowing the term. They will discuss the “starting point” on the graph, the “beginning of the table or the (0,y)”, and the “amount added on in the equation.” It is typical for students to say that Leanne’s is a straight line and the others are not. Students need a way to express the horizontal line.)</li><li>Are the relationships between the distance walked and the money earned in pledges all linear? (Yes.) How do you know? (At this time, students are likely to say that the graphs are straight lines or that the data is consistent.)</li></ul>"
                       ]
                     }
@@ -1221,8 +1265,6 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>Suggested Questions </strong></p>",
-                        "<p></p>",
                         "<ul><li>How is the rate of change represented in a context? (At this time, students are likely to say it is the amount of money for every meter walked or the “per” or “per kilometer” amount.)</li></ul>"
                       ]
                     }
@@ -1233,8 +1275,8 @@
                       "type": "Table",
                       "name": "Table 1",
                       "columns": [
-                        {"name":"Name","values":["Leanne","Gilberto","Alana"]},
-                        {"name":"Pledge Plan                                                     ","values":["$10 regardless of how far she walks","$2 per kilometer (km)","$5 donation plus $0.50 per kilometer"]}
+                        {"name":"Name","width":100,"values":["Leanne","Gilberto","Alana"]},
+                        {"name":"Pledge Plan  ","width":160,"values":["$10 regardless of how far she walks","$2 per kilometer (km)","$5 donation plus $0.50 per kilometer"]}
                       ]
                     }
                   },
@@ -1248,12 +1290,14 @@
                         "<p></p>",
                         "<p>The multiplicative and additive ideas and vocabulary were introduced in Grade 6.</p>",
                         "<p></p>",
-                        "<ul><li>How is the rate of change represented in a Table? (How much the dependent variable changes for every increase of 1 in the independent variable. For Leanne the rate of change is 0; for every increase of 1 kilometer she will collect no more dollars. For Gilberto the rate of changes is 2, and for Alana the rate of is 0.50.)</li></ul>"
+                        "<ul><li>How is the rate of change represented in a Table? (How much the dependent variable changes for every increase of 1 in the independent variable. For Leanne the rate of change is 0; for every increase of 1 kilometer she will collect no more dollars. For Gilberto the rate of changes is 2, and for Alana the rate of is 0.50.)</li></ul>",
+                        "<p>This is how it is shown in the tables.</p>"
                       ]
                     }
                   },
                   {
                     "id": "LfpXP6eIrIhkg-3A",
+                    "title":"Rate of change in tables",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_TableCompare1.png"
@@ -1274,6 +1318,7 @@
                   },
                   {
                     "id": "7AXFTR6WBAXo-ol8",
+                    "title":"Proportions in tables",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_TableCompare2.png"
@@ -1327,6 +1372,7 @@
                   },
                   {
                       "id": "Z8iAr5AHCmYcpU3i",
+                      "title":"Rate of change in graphs",
                       "content": {
                         "type": "Image",
                         "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_TableCompare3.png"
@@ -1351,6 +1397,7 @@
                   },
                   {
                     "id": "42Uir_Pkfklpy90M",
+                    "title":"y-intercept on graphs",
                     "content": {
                       "type": "Image",
                       "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_3_GraphConstant.png"
@@ -1472,7 +1519,7 @@
                       "format": "html",
                       "text": [
                         "<ul><li>Why does “adding an amount” make the relationship non-proportional? (To be proportional, you have to have the two quantities change in a multiplicative way, keeping the factors and multiples of the quantities. When an amount is added, it gets spread over the dependent variable in a non-constant way. For example, with Leanne’s money amount, she will collect $10 for walking no kilometers, $10 for 1 kilometer, $5 for each of 2 kilometers, $3.33 for each of 3 kilometers, etc. The amount for every kilometer is not consistent.)</li></ul>",
-                        "<p>At the end of this Problem, students will have had experiences with y-intercepts.  The term y-intercept is introduced in the next Problem. It would be appropriate to name the y-intercepts while summarizing this Problem.</p>"
+                        "<p>At the end of this Problem, students will have had experiences with y-intercepts.  The term <em>y-intercept</em> is introduced in the next Problem. It would be appropriate to name the y-intercepts while summarizing this Problem.</p>"
                       ]
                     }
                   },
@@ -1484,8 +1531,6 @@
                       "text": [
                         "<p>Now What Do Students Know</p>",
                         "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions.</p>",
-                        "<p><em>How can you predict where the graph of a linear relationship intersects the y-axis from a context, table, or equation that represent the relationship?</em></p>",
-                        "<p><em>Describe how you can use a table, graph, or equation to solve a problem?</em></p>",
                         "<p>See answers to the Problem for more information about the strategies and embedded mathematics. </p>"
                       ]
                     }
