@@ -937,6 +937,13 @@ export const DocumentContentModel = types
 
       return sharedModelEntry;
     },
+    addSharedModelFromImport(id: string, pckg: any){ //TODO type
+      if (self.sharedModelMap){
+        // ISSUE - this throws an exception because entry exists with this id
+        // May need another approach, or to replace map item rather than "set"
+        self.sharedModelMap.set(id, pckg)
+      }
+    }
 
   }));
 

@@ -68,6 +68,16 @@ export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
       migrateTile(docContent, tileOrRow);
     }
   });
-  // do something with shared models
+
+  if (sharedModels){
+    // WIP, match or define type "sharedModel: sharedMdoel(?)", "tiles": string[]
+    sharedModels.forEach((modelAndArray:any) => {
+      const pack = {sharedModel: modelAndArray.sharedModel, tiles: modelAndArray.tiles}
+      const id = modelAndArray.sharedModel.id
+      docContent.addSharedModelFromImport(id, pack)
+    })
+  }
+
+
   return getSnapshot(docContent);
 }
