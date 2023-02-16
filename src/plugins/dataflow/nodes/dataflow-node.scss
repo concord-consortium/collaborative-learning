@@ -16,6 +16,7 @@ $node-inner-width: 140px;
     font-size: 11px;
     box-sizing: border-box;
     color: $gray-text;
+    background-color: blue;
 
     &.sensor {
       background-color: $sensor-blue;

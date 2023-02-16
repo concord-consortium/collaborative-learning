@@ -30,6 +30,7 @@ export class DataflowNode extends Node {
 
     return (
       <div className={`node ${node.name.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`}>
+        {console.log(`node ${node.name.toLowerCase().replace(/ /g, "-")} ${dynamicClasses}`)}
         <div className="top-bar">
           <div className="node-title">
             {displayName}

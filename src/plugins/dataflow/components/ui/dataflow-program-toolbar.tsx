@@ -1,5 +1,6 @@
 import React from "react";
 import { NodeTypes } from "../../model/utilities/node";
+import { DragEndEvent, DragOverlay, useDndMonitor, useDraggable, useDroppable } from "@dnd-kit/core";
 
 import "./dataflow-program-toolbar.sass";
 
@@ -17,6 +18,8 @@ export class DataflowProgramToolbar extends React.Component<IProps> {
 
   public render() {
     const { isTesting } = this.props;
+    console.log("DataflowProgramToolbar > render, \n NodeTypes: ", NodeTypes);
+
     return (
       <div className="program-toolbar" data-test="program-toolbar">
         { NodeTypes.map((nt: any, i: any) => (
@@ -60,15 +63,22 @@ export class DataflowProgramToolbar extends React.Component<IProps> {
         {nodeIcons}
       </div>
     );
+
+    //drop node
+    // const droppableInfo = useDroppable({ id: droppableId }); //useDroppable cannot be called in a class component
+    // const setDroppableNodeRef = droppableInfo.setNodeRef;
+
     return (
-      <button
-        disabled={this.props.disabled}
-        key={i} title={`Add ${nodeType} Block`}
-        onClick={handleAddNodeButtonClick}
-      >
-        {nodeIcon}
-        <div className="label">{nodeType}</div>
-      </button>
+      // <div ref={setDroppableNodeRef}>
+        <button
+          disabled={this.props.disabled}
+          key={i} title={`Add ${nodeType} Block`}
+          onClick={handleAddNodeButtonClick}
+        >
+          {nodeIcon}
+          <div className="label">{nodeType}</div>
+        </button>
+      // </div>
     );
   }
 

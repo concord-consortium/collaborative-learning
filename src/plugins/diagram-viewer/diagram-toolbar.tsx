@@ -67,6 +67,7 @@ interface INewVariableButton {
   tileId: string;
 }
 const NewVaribleButton = ({ handleClick, tileId }: INewVariableButton) => {
+  console.log("NewVariableButton with \n handleClick:", handleClick, "tileId:", tileId);
   const ui = useUIStore();
   const draggableId = `${kNewVariableButtonDraggableId}-${tileId}`;
   const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });
@@ -74,10 +75,13 @@ const NewVaribleButton = ({ handleClick, tileId }: INewVariableButton) => {
   // Because the button is draggable, it can no longer be clicked.
   // Instead, we check to see if it's dropped on itself, and if it is we "click" it.
   const droppableId = `${kNewVariableButtonDroppableId}-${tileId}`;
-  const droppableInfo = useDroppable({ id: droppableId });
+  console.log("draggableId", draggableId);
+
+  const droppableInfo = useDroppable({ id: droppableId }); //called in a functional component
   const setDroppableNodeRef = droppableInfo.setNodeRef;
   useDndMonitor({
     onDragEnd: (event: DragEndEvent) => {
+      console.log("diagram-toolbar.tsx > onDragEnd");
       if (event.over?.id === droppableId && event.active.id === draggableId) {
         handleClick();
       }
