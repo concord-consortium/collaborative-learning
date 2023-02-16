@@ -1,6 +1,5 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
-import { EPanelId } from "../../../components/app-header";
 import { BaseComponent, IBaseProps } from "../../../components/base";
 import { DocumentViewMode } from "../../../components/document/document";
 import { FourUpComponent } from "../../../components/four-up";
