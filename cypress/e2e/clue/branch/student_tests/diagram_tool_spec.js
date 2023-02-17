@@ -7,9 +7,8 @@ let clueCanvas = new ClueCanvas,
   diagramTile = new DiagramToolTile,
   drawTile = new DrawToolTile,
   textTile = new TextToolTile;
-  
-const isMac = navigator.platform.indexOf("Mac") === 0;
-const cmdKey = isMac ? "cmd" : "ctrl";
+
+const cmdKey = Cypress.platform === "darwin" ? "cmd" : "ctrl";
 const undoKeystroke = `{${cmdKey}}z`;
 const redoKeystroke = `{${cmdKey}}{shift}z`;
 
