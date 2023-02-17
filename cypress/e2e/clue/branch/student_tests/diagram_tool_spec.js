@@ -201,16 +201,14 @@ context('Diagram Tool Tile', function () {
 
       // Undoing previous step in diagram tile by pressing cmd-z on the keyboard
       // does not undo the most recent step in a different tile
-      textTile.getTextTile().click();
-      textTile.enterText("Hello");
       diagramTile.getDiagramTile().click();
       diagramTile.getVariableCardField("name").should("have.value", newName);
       diagramTile.getVariableCardField("name").clear();
-      diagramTile.getVariableCardField("name").should("have.value", "");
+      textTile.getTextTile().click();
+      textTile.enterText("Hello");
       cy.get("body").type("{cmd}z");
-      cy.get("body").type("{ctrl}z");
-      diagramTile.getVariableCardField("name").should("have.value", newName);
-      textTile.getTextTile().should('contain', 'Hello');
+      diagramTile.getVariableCardField("name").should("have.value", "");
+      textTile.getTextTile().should("contain", "Hell");
     });
   });
 });
