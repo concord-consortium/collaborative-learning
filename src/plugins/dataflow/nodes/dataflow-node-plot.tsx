@@ -21,9 +21,16 @@ export const defaultMinigraphOptions: MinigraphOptions = {
 };
 
 let stepY = 5;
+let yMax = 0;
 
 export const DataflowNodePlot = (props: NodePlotProps) => {
   if (!props.display) return null;
+  // console.log("<DataflowNodePlot>");
+  // console.log("\n with props:", props);
+  // console.log("props.position ", props.data.position); //this is where the node is placed on the canvas
+  //start here
+  // console.log("< Line: ", "\n lineData(props.data):", lineData(props.data), "\n options:", lineOptions());
+  //ticks are set at lineOptions().scales.yAxes[0].ticks.stepSize:260
 
   return (
     <div className="node-graph">
@@ -39,9 +46,13 @@ export const DataflowNodePlot = (props: NodePlotProps) => {
 function lineData(node: any) {
   const chartDataSets: ChartDataSets[] = [];
 
+  // console.log("function lineData() with arg: \nnode:", node);
+
   let dsMax = 0;
   let dsMin = 0;
+
   Object.keys(node.data.watchedValues).forEach((valueKey: string) => {
+    // console.log("map function where valueKey:", valueKey);
     const recentValues: any = node.data.recentValues?.[valueKey];
     if (recentValues !== undefined) {
       const customOptions = node.data.watchedValues?.[valueKey] || {};
@@ -56,23 +67,37 @@ function lineData(node: any) {
       };
 
       const chData: any[] = [];
+
       recentValues.forEach((val: any) => {
         if (isFinite(val)) {
           chData.push(val);
-          dsMax = Math.max(dsMax, val);
-          dsMin = Math.min(dsMin, val);
+          // dsMax = Math.max(dsMax, val); //original
+          dsMax = Math.max(...recentValues);
+          yMax = (dsMax > yMax) ? dsMax : yMax; //yMax stores the global max so far
+          dsMax = yMax;
+          // dsMax = Math.max(recentValues); //added- prob no
+          dsMin = Math.min(dsMin, val); //original - prob yes?
         }
       });
+
       dataset.data = chData;
       chartDataSets.push(dataset);
     }
   });
+
+  // console.log("function lineData() > dsMax:", dsMax);
+  // console.log("function lineData() > dsMin:", dsMin);
+
   stepY = (dsMax - dsMin) / 2;
 
   const chartData: ChartData = {
     labels: new Array(MAX_NODE_VALUES).fill(undefined).map((val,idx) => idx),
     datasets: chartDataSets
   };
+  console.log("lineData() returns chartData:", chartData);
+  console.log("function lineData() > dsMax:", dsMax);
+  console.log("function lineData() > dsMin:", dsMin);
+  console.log("--------------------");
 
   return chartData;
 }
