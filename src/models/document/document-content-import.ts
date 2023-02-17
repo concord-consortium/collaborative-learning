@@ -72,10 +72,10 @@ export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
   if (sharedModels){
     // WIP, match or define type "sharedModel: sharedMdoel(?)", "tiles": string[]
     sharedModels.forEach((modelAndArray:any) => {
-      const pack = {sharedModel: modelAndArray.sharedModel, tiles: modelAndArray.tiles}
-      const id = modelAndArray.sharedModel.id
-      docContent.addSharedModelFromImport(id, pack)
-    })
+      const pack = {sharedModel: modelAndArray.sharedModel, tiles: modelAndArray.tiles};
+      const id = modelAndArray.sharedModel.id;
+      docContent.addSharedModelFromImport(id, pack);
+    });
   }
 
 

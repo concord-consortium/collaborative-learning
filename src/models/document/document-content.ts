@@ -941,7 +941,7 @@ export const DocumentContentModel = types
       if (self.sharedModelMap){
         // ISSUE - this throws an exception because entry exists with this id
         // May need another approach, or to replace map item rather than "set"
-        self.sharedModelMap.set(id, pckg)
+        self.sharedModelMap.set(id, pckg);
       }
     }
 
