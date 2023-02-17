@@ -107,10 +107,12 @@ context('Diagram Tool Tile', function () {
 
       // Can undo previous step by pressing cmd-z on the keyboard
       cy.get("body").type("{cmd}z");
+      cy.get("body").type("{ctrl}z");
       diagramTile.getVariableCard().should("not.exist");
 
       // Can redo previous step by pressing cmd-shift-z on the keyboard
       cy.get("body").type("{cmd}{shift}z");
+      cy.get("body").type("{ctrl}{shift}z");
       diagramTile.getVariableCard().should("exist");
     });
 
@@ -206,6 +208,7 @@ context('Diagram Tool Tile', function () {
       diagramTile.getVariableCardField("name").clear();
       diagramTile.getVariableCardField("name").should("have.value", "");
       cy.get("body").type("{cmd}z");
+      cy.get("body").type("{ctrl}z");
       diagramTile.getVariableCardField("name").should("have.value", newName);
       textTile.getTextTile().should('contain', 'Hello');
     });
