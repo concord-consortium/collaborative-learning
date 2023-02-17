@@ -96,16 +96,12 @@ context('Diagram Tool Tile', function () {
       diagramTile.getDiagramDialogCloseButton().click();
 
       // Can drag new variable button to create a new variable card
-      // TODO Couldn't figure out how to test dragging
-      const skipDragTest = true;
-      if (!skipDragTest) {
-        const dataTransfer = new DataTransfer;
-        const draggable = () => diagramTile.getDiagramToolbar(undefined, true).find("div").first();
-        draggable().trigger("dragstart", { dataTransfer });
-        diagramTile.getDiagramTile().trigger("drop", { force: true, dataTransfer });
-        draggable().trigger("dragend");
-        diagramTile.getVariableCard().should("exist");
-      }
+      const dataTransfer = new DataTransfer;
+      const draggable = () => diagramTile.getDiagramToolbar(undefined, true).find("div[role=button]").first();
+      draggable().focus().trigger("dragstart", { dataTransfer });
+      diagramTile.getDiagramTile().trigger("drop", { dataTransfer });
+      draggable().trigger("dragend");
+      diagramTile.getVariableCard().should("exist");
     });
 
     it("Drawing tile, toolbar, dialogs, and interactions between tiles", () => {
