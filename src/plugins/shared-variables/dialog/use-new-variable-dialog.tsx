@@ -1,22 +1,30 @@
 import { useState, useCallback } from "react";
-import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { EditVariableDialogContent, Variable, VariableType } from "@concord-consortium/diagram-view";
 
-import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
-import './variable-dialog.scss';
+import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { SharedVariablesType } from "../shared-variables";
+import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
+
+import './variable-dialog.scss';
 
 interface IUseNewVariableDialog {
   addVariable: (variable: VariableType ) => void;
   sharedModel?: SharedVariablesType;
-  namePrefill? : string;
+  namePrefill?: string;
+  noUndo?: boolean;
   onClose?: () => void;
 }
-export const useNewVariableDialog = ({ addVariable, sharedModel, namePrefill, onClose }: IUseNewVariableDialog) => {
+export const useNewVariableDialog = ({
+  addVariable, sharedModel, namePrefill, noUndo = false, onClose
+}: IUseNewVariableDialog) => {
   const [newVariable, setNewVariable] = useState(Variable.create({name: namePrefill || undefined}));
 
   const handleClick = () => {
-    sharedModel?.addAndInsertVariable(newVariable, (variable: VariableType) => addVariable(variable));
+    sharedModel?.addAndInsertVariable(
+      newVariable,
+      (variable: VariableType) => addVariable(variable),
+      noUndo
+    );
     setNewVariable(Variable.create({name: namePrefill || undefined}));
   };
 
