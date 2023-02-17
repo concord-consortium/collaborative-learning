@@ -187,11 +187,6 @@
         "isTileTool": true
       },
       {
-        "id": "Geometry",
-        "title": "Geometry",
-        "isTileTool": true
-      },
-      {
         "id": "undo",
         "title": "Undo",
         "iconId": "icon-undo-tool",
@@ -201,12 +196,6 @@
         "id": "redo",
         "title": "Redo",
         "iconId": "icon-redo-tool",
-        "isTileTool": false
-      },
-      {
-        "id": "delete",
-        "title": "Delete",
-        "iconId": "icon-delete-tool",
         "isTileTool": false
       }
     ]
@@ -1071,7 +1060,7 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "document_Text_20",
+                  "id": "DefaultInstructions02172023",
                   "title":"ExampleVarInstructions",
                   "content": {
                     "type": "Text",
@@ -1081,7 +1070,8 @@
                       "<p><em>Here is a space for you to take notes. Create variables using the variable tool on text tiles or in the diagram tile.</em></p>",
                       "<p>Some sample variables could be:</p>",
                       "<ul><li>[initial number of cats]</li><li>[height of the building]</li><li>[area of town]</li><li>[etc.]</li></ul>",
-                      "<p></p>"
+                      "<p>A diagram for specifying variable relationships, and a drawing tile for sketches are already made for you.</p>",
+                      "<p>Drag the questions from this Activity on the left into this workspace. Edit the text to write your answers below the questions.</p>"
                     ]
                   }
                 },
@@ -1091,6 +1081,11 @@
                   "content": {
                     "type": "Diagram",
                     "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                },
+                {
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Drawing 1",
+                  "content": {"type": "Drawing", "objects": []}
                 }
               ]
             }
@@ -1159,21 +1154,32 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "document_Text_20",
+                  "id": "DefaultInstructions02172023",
                   "title":"ExampleVarInstructions",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><strong>Interpreting Food Waste</strong></p>",
+                      "<p><strong>My notes</strong></p>",
+                      "<p><em>Here is a space for you to take notes. Create variables using the variable tool on text tiles or in the diagram tile.</em></p>",
+                      "<p>Some sample variables could be:</p>",
+                      "<ul><li>[initial number of cats]</li><li>[height of the building]</li><li>[area of town]</li><li>[etc.]</li></ul>",
+                      "<p>A diagram for specifying variable relationships, and a drawing tile for sketches are already made for you.</p>",
                       "<p>Drag the questions from the Activity on the left into this workspace. Edit the text to write your answers below the questions.</p>"
                     ]
                   }
                 },
                 {
-                  "id": "zF0UeiltfldnJBiG",
-                  "title": "Diagram 3",
-                  "content": {"nodes":{"5xiON-eVj61Thqk-":{"id":"5xiON-eVj61Thqk-","variable":"qWTPWgGnn3JmJgZw","x":40.70001220703125,"y":135.40000915527344},"EVhglJXUwAj2AP6T":{"id":"EVhglJXUwAj2AP6T","variable":"CatGIY3IXkxG8IIW","x":38.70001220703125,"y":21.400009155273438},"eNu7fEwW_wzqLWs9":{"id":"eNu7fEwW_wzqLWs9","variable":"r6YXD9ZqhxVR9a_Q","x":37.70001220703125,"y":248.40000915527344},"_QmQpjeNRVg4k8RA":{"id":"_QmQpjeNRVg4k8RA","variable":"_68LHo5ANji_jQO0","x":489.70001220703125,"y":109.40000915527344}},"flowTransform":{"x":-3.8300114724792422,"y":24.410632403239788,"zoom":0.7092597804672108}}
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Diagram 1",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                },
+                {
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Drawing 1",
+                  "content": {"type": "Drawing", "objects": []}
                 }
               ]
             }
@@ -1264,21 +1270,429 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "document_Text_20",
+                  "id": "DefaultInstructions02172023",
                   "title":"ExampleVarInstructions",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><strong>Interpreting Food Waste</strong></p>",
+                      "<p><strong>My notes</strong></p>",
+                      "<p><em>Here is a space for you to take notes. Create variables using the variable tool on text tiles or in the diagram tile.</em></p>",
+                      "<p>Some sample variables could be:</p>",
+                      "<ul><li>[initial number of cats]</li><li>[height of the building]</li><li>[area of town]</li><li>[etc.]</li></ul>",
+                      "<p>A diagram for specifying variable relationships, and a drawing tile for sketches are already made for you.</p>",
                       "<p>Drag the questions from the Activity on the left into this workspace. Edit the text to write your answers below the questions.</p>"
                     ]
                   }
                 },
                 {
-                  "id": "ZYHPrIKSxNf6zlv_",
-                  "title": "Diagram 3",
-                  "content": {"nodes":{"5xiON-eVj61Thqk-":{"id":"5xiON-eVj61Thqk-","variable":"qWTPWgGnn3JmJgZw","x":23.70001220703125,"y":128.40000915527344},"EVhglJXUwAj2AP6T":{"id":"EVhglJXUwAj2AP6T","variable":"CatGIY3IXkxG8IIW","x":24.70001220703125,"y":239.40000915527344},"eNu7fEwW_wzqLWs9":{"id":"eNu7fEwW_wzqLWs9","variable":"r6YXD9ZqhxVR9a_Q","x":25.70001220703125,"y":2.4000091552734375},"_QmQpjeNRVg4k8RA":{"id":"_QmQpjeNRVg4k8RA","variable":"_68LHo5ANji_jQO0","x":427.70001220703125,"y":42.40000915527344},"TQW68nxb7MRrfi5k":{"id":"TQW68nxb7MRrfi5k","variable":"Rp1xVLuqqbAJl75P","x":29.70001220703125,"y":468.90000915527344},"wvIQZ9zjfDVtQr79":{"id":"wvIQZ9zjfDVtQr79","variable":"c2wtFJTDbAvfyXtc","x":25.70001220703125,"y":352.90000915527344},"NFv53q11Bv0ew-xN":{"id":"NFv53q11Bv0ew-xN","variable":"dvsT-NOpjK6dd99Q","x":429.70001220703125,"y":372.90000915527344},"Vao0rYGyrtm_0I2l":{"id":"Vao0rYGyrtm_0I2l","variable":"Mx3atFUSDhX64C-P","x":752.7000122070312,"y":45.899993896484375},"iE9tzwUg3QRorsN5":{"id":"iE9tzwUg3QRorsN5","variable":"wk6SCPHac_LKQhTj","x":750.7000122070312,"y":372.8999938964844},"ex-PbXm8VQjLD-F9":{"id":"ex-PbXm8VQjLD-F9","variable":"tk4Eb6Egi_gguGAh","x":478.70001220703125,"y":234.89999389648438}},"flowTransform":{"x":23.635598704176743,"y":132.93551080697864,"zoom":0.5}}
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Diagram 1",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                },
+                {
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Drawing 1",
+                  "content": {"type": "Drawing", "objects": []}
+                }
+              ]
+            }
+          }
+        },
+        {
+          "description": "M2S Problem 3.4",
+          "ordinal": 4,
+          "title": "Introduction to Math Modeling",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Introduction to Math Modeling in CLUE</h2>",
+                        "<p>CLUE has three important tools to let you do modeling. They are already present in your workspace. Here are guides to the buttons on each tool tile.</p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "njCI4Wmr6eYNc5go",
+                    "title": "CLUE Toolbar",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/CLUEToolbar.png",
+                      "filename": "curriculum/m2studio/images/CLUEToolbar.png"
+                    }
+                  },
+                  {
+                    "id": "cP2E6t6w3HOYTCUi",
+                    "title": "Toolbar buttons for the text tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Text.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Text.png"
+                    }
+                  },
+                  {
+                    "id": "ePTfYCm7Q-oWGR2R",
+                    "title": "Toolbar buttons for the drawing tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Drawing.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Drawing.png"
+                    }
+                  },
+                  {
+                    "id": "r8R3q6_aIIroLzYl",
+                    "title": "Toolbar buttons for the diagram tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Diagram.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Diagram.png"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "DefaultInstructions02172023",
+                  "title":"ExampleVarInstructions",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>My notes</strong></p>",
+                      "<p><em>Here is a space for you to take notes. Create variables using the variable tool on text tiles or in the diagram tile.</em></p>",
+                      "<p>Some sample variables could be:</p>",
+                      "<ul><li>[initial number of cats]</li><li>[height of the building]</li><li>[area of town]</li><li>[etc.]</li></ul>",
+                      "<p>A diagram for specifying variable relationships, and a drawing tile for sketches are already made for you.</p>",
+                      "<p>Drag the questions from this Activity on the left into this workspace. Edit the text to write your answers below the questions.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Diagram 1",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                },
+                {
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Drawing 1",
+                  "content": {"type": "Drawing", "objects": []}
+                }
+              ]
+            }
+          }
+        },
+        {
+          "description": "M2S Problem 3.5",
+          "ordinal": 5,
+          "title": "Mathematizing Part 1",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Introduction to Math Modeling in CLUE</h2>",
+                        "<p>CLUE has three important tools to let you do modeling. They are already present in your workspace. Here are guides to the buttons on each tool tile.</p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "njCI4Wmr6eYNc5go",
+                    "title": "CLUE Toolbar",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/CLUEToolbar.png",
+                      "filename": "curriculum/m2studio/images/CLUEToolbar.png"
+                    }
+                  },
+                  {
+                    "id": "cP2E6t6w3HOYTCUi",
+                    "title": "Toolbar buttons for the text tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Text.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Text.png"
+                    }
+                  },
+                  {
+                    "id": "ePTfYCm7Q-oWGR2R",
+                    "title": "Toolbar buttons for the drawing tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Drawing.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Drawing.png"
+                    }
+                  },
+                  {
+                    "id": "r8R3q6_aIIroLzYl",
+                    "title": "Toolbar buttons for the diagram tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Diagram.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Diagram.png"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "DefaultInstructions02172023",
+                  "title":"ExampleVarInstructions",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>My notes</strong></p>",
+                      "<p><em>Here is a space for you to take notes. Create variables using the variable tool on text tiles or in the diagram tile.</em></p>",
+                      "<p>Some sample variables could be:</p>",
+                      "<ul><li>[initial number of cats]</li><li>[height of the building]</li><li>[area of town]</li><li>[etc.]</li></ul>",
+                      "<p>A diagram for specifying variable relationships, and a drawing tile for sketches are already made for you.</p>",
+                      "<p>Drag the questions from this Activity on the left into this workspace. Edit the text to write your answers below the questions.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Diagram 1",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                },
+                {
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Drawing 1",
+                  "content": {"type": "Drawing", "objects": []}
+                }
+              ]
+            }
+          }
+        },
+        {
+          "description": "M2S Problem 3.6",
+          "ordinal": 6,
+          "title": "Mathematizing Part 2",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Introduction to Math Modeling in CLUE</h2>",
+                        "<p>CLUE has three important tools to let you do modeling. They are already present in your workspace. Here are guides to the buttons on each tool tile.</p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "njCI4Wmr6eYNc5go",
+                    "title": "CLUE Toolbar",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/CLUEToolbar.png",
+                      "filename": "curriculum/m2studio/images/CLUEToolbar.png"
+                    }
+                  },
+                  {
+                    "id": "cP2E6t6w3HOYTCUi",
+                    "title": "Toolbar buttons for the text tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Text.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Text.png"
+                    }
+                  },
+                  {
+                    "id": "ePTfYCm7Q-oWGR2R",
+                    "title": "Toolbar buttons for the drawing tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Drawing.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Drawing.png"
+                    }
+                  },
+                  {
+                    "id": "r8R3q6_aIIroLzYl",
+                    "title": "Toolbar buttons for the diagram tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Diagram.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Diagram.png"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "DefaultInstructions02172023",
+                  "title":"ExampleVarInstructions",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>My notes</strong></p>",
+                      "<p><em>Here is a space for you to take notes. Create variables using the variable tool on text tiles or in the diagram tile.</em></p>",
+                      "<p>Some sample variables could be:</p>",
+                      "<ul><li>[initial number of cats]</li><li>[height of the building]</li><li>[area of town]</li><li>[etc.]</li></ul>",
+                      "<p>A diagram for specifying variable relationships, and a drawing tile for sketches are already made for you.</p>",
+                      "<p>Drag the questions from this Activity on the left into this workspace. Edit the text to write your answers below the questions.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Diagram 1",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                },
+                {
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Drawing 1",
+                  "content": {"type": "Drawing", "objects": []}
+                }
+              ]
+            }
+          }
+        },
+        {
+          "description": "M2S Problem 3.7",
+          "ordinal": 7,
+          "title": "Math Modeling Final Project",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>ADA Guidelines</h2>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "d4oRjHedLKVUFAFv",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>According to the American Disabilities Act (ADA), a ramp should be no steeper than 1:12, or it should have an angle of elevation that is less than 5 degrees. Ramps that are very long, also require landings (flat sections) at regular intervals so that users do not pick up too much speed or get too tired. </p><p></p><p>By the end of this activity, your goal is to create a model or formula that will determine the total length of a ramp and the number of landings for a ramp of any total height. </p><p></p><p>To help you, we have split this process into smaller parts. Are you ready? Let&#x27;s go!</p><p></p><p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "njCI4Wmr6eYNc5go",
+                    "title": "CLUE Toolbar",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/CLUEToolbar.png",
+                      "filename": "curriculum/m2studio/images/CLUEToolbar.png"
+                    }
+                  },
+                  {
+                    "id": "cP2E6t6w3HOYTCUi",
+                    "title": "Toolbar buttons for the text tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Text.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Text.png"
+                    }
+                  },
+                  {
+                    "id": "ePTfYCm7Q-oWGR2R",
+                    "title": "Toolbar buttons for the drawing tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Drawing.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Drawing.png"
+                    }
+                  },
+                  {
+                    "id": "r8R3q6_aIIroLzYl",
+                    "title": "Toolbar buttons for the diagram tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Diagram.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Diagram.png"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "DefaultInstructions02172023",
+                  "title":"ExampleVarInstructions",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>My notes</strong></p>",
+                      "<p><em>Here is a space for you to take notes. Create variables using the variable tool on text tiles or in the diagram tile.</em></p>",
+                      "<p>Some sample variables could be:</p>",
+                      "<ul><li>[initial number of cats]</li><li>[height of the building]</li><li>[area of town]</li><li>[etc.]</li></ul>",
+                      "<p>A diagram for specifying variable relationships, and a drawing tile for sketches are already made for you.</p>",
+                      "<p>Drag the questions from this Activity on the left into this workspace. Edit the text to write your answers below the questions.</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Diagram 1",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                },
+                {
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Drawing 1",
+                  "content": {"type": "Drawing", "objects": []}
                 }
               ]
             }
