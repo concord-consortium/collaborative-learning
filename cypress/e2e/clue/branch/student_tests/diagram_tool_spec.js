@@ -7,6 +7,11 @@ let clueCanvas = new ClueCanvas,
   diagramTile = new DiagramToolTile,
   drawTile = new DrawToolTile,
   textTile = new TextToolTile;
+  
+const isMac = navigator.platform.indexOf("Mac") === 0;
+const cmdKey = isMac ? "cmd" : "ctrl";
+const undoKeystroke = `{${cmdKey}}z`;
+const redoKeystroke = `{${cmdKey}}{shift}z`;
 
 context('Diagram Tool Tile', function () {
   const dialogField = (field) => cy.get(`#evd-${field}`);
@@ -106,11 +111,11 @@ context('Diagram Tool Tile', function () {
       diagramTile.getVariableCard().should("exist");
 
       // Can undo previous step by pressing cmd-z on the keyboard
-      cy.get("body").type("{cmd}z");
+      cy.get("body").type(undoKeystroke);
       diagramTile.getVariableCard().should("not.exist");
 
       // Can redo previous step by pressing cmd-shift-z on the keyboard
-      cy.get("body").type("{cmd}{shift}z");
+      cy.get("body").type(redoKeystroke);
       diagramTile.getVariableCard().should("exist");
     });
 
@@ -204,7 +209,7 @@ context('Diagram Tool Tile', function () {
       diagramTile.getVariableCardField("name").clear();
       textTile.getTextTile().click();
       textTile.enterText("Hello");
-      cy.get("body").type("{cmd}z");
+      cy.get("body").type(undoKeystroke);
       diagramTile.getVariableCardField("name").should("have.value", "");
       textTile.getTextTile().should("contain", "Hell");
     });
