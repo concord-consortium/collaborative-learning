@@ -109,11 +109,11 @@ context('Diagram Tool Tile', function () {
       draggable().trigger("dragend");
       diagramTile.getVariableCard().should("exist");
 
-      // Can undo previous step by pressing cmd-z on the keyboard
+      // Can undo previous step by pressing control+z or command+z on the keyboard
       cy.get("body").type(undoKeystroke);
       diagramTile.getVariableCard().should("not.exist");
 
-      // Can redo previous step by pressing cmd-shift-z on the keyboard
+      // Can redo previous step by pressing control+shift+z or command+shift+z on the keyboard
       cy.get("body").type(redoKeystroke);
       diagramTile.getVariableCard().should("exist");
     });
@@ -201,8 +201,8 @@ context('Diagram Tool Tile', function () {
       drawTile.getVariableChip().click();
       drawTile.getDrawToolDelete().click();
 
-      // Undoing previous step in diagram tile by pressing cmd-z on the keyboard
-      // does not undo the most recent step in a different tile
+      // Undoing previous step in diagram tile by pressing control+z or command+z on
+      // the keyboard does not undo the most recent step in a different tile
       diagramTile.getDiagramTile().click();
       diagramTile.getVariableCardField("name").should("have.value", newName);
       diagramTile.getVariableCardField("name").clear();
