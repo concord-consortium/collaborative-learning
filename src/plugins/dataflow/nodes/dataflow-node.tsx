@@ -10,7 +10,6 @@ export class DataflowNode extends Node {
   public render() {
     const { node, bindSocket, bindControl } = this.props;
     const { outputs, controls, inputs } = this.state;
-
     const settingsControls = controls.filter(isSettingControl);
     const outputControls = controls.filter(isOutputControl);
     const deleteControls = controls.filter(isDeleteControl);
