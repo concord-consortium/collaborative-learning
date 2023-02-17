@@ -166,14 +166,14 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     json && navigator.clipboard.writeText(json);
   };
 
-  private handleDocumentUndo = (e: React.KeyboardEvent) => {
-    e.preventDefault();
+  private handleDocumentUndo = () => {
     this.props.document?.undoLastAction();
+    return true;
   };
 
-  private handleDocumentRedo = (e: React.KeyboardEvent) => {
-    e.preventDefault();
+  private handleDocumentRedo = () => {
     this.props.document?.redoLastAction();
+    return true;
   };
 
   private handleTogglePlaybackControlComponent = () => {
