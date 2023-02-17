@@ -98,11 +98,12 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
         const clientX = pointerEvent.clientX + event.delta.x;
         const clientY = pointerEvent.clientY + event.delta.y;
         const position = diagramHelper?.convertClientToDiagramPosition({x: clientX, y: clientY});
+        const { x, y } = position;
 
         const variable = Variable.create({});
         content.sharedModel?.addAndInsertVariable(
           variable,
-          (v: VariableType, x?: number, y?: number) => insertVariable(variable, position.x, position.y)
+          (v: VariableType) => insertVariable(variable, x, y)
         );
       }
     }

@@ -24,7 +24,7 @@ export const SharedVariables = SharedModel.named("SharedVariables")
 .actions(self => ({
   addAndInsertVariable(
     variable: VariableType,
-    insertVariable: (variable: VariableType, x?: number, y?: number) => void,
+    insertVariable: (variable: VariableType) => void,
     noUndo?: boolean
   ) {
     // In some cases, adding and inserting a new variable can add two undo steps to the undo stack,
