@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataSets } from "chart.js";
 import { MAX_NODE_VALUES } from "../components/dataflow-program";
 import { NodePlotColor } from "../model/utilities/node";
 import "./dataflow-node.scss";
 
-interface NodePlotProps {
+interface INodePlotProps {
   display: boolean;
   data: any;
 }
@@ -22,19 +22,31 @@ export const defaultMinigraphOptions: MinigraphOptions = {
 
 let stepY = 5;
 
+// const GraphTrials: React.FC<IGraphTrialsProps>
 
-export const DataflowNodePlot = (props: NodePlotProps) => {
+
+
+export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
+  const [scalar, setScalar] = useState(1);
+  const handleClickScalar = (newScalar: number) => {
+    setScalar((oldVal) => oldVal * newScalar);
+  };
+
   if (!props.display) return null;
-  console.log("dataFlowNodePlot:", props.data.name);
-  // console.log("lineOptions()", lineOptions());
 
   return (
-    <div className="node-graph">
-      <Line
-        data={lineData(props.data)}
-        options={lineOptions(props.data)}
-        redraw={true}
-      />
+    <div className="node-bottom-section">
+      <div className="node-bottom-buttons">
+        <button className="scale-buttons" onClick={() => handleClickScalar(1.25)}> + </button>
+        <button className="scale-buttons" onClick={() => handleClickScalar(0.8)}> - </button>
+      </div>
+      <div className="node-graph">
+        <Line
+          data={lineData(props.data)}
+          options={lineOptions(props.data, scalar)}
+          redraw={true}
+        />
+      </div>
     </div>
   );
 };
@@ -65,9 +77,9 @@ function lineData(node: any) {
         }
       });
       const localMax = Math.max(...chData);
-      node.data.dsMax = (node.data.dsMax) ? Math.max(localMax, node.data.dsMax) : localMax;
+      node.data.dsMax = ((node.data.dsMax) ? Math.max(localMax, node.data.dsMax) : localMax);
       const localMin = Math.min(...chData);
-      node.data.dsMin = (node.data.dsMin) ? Math.min(localMin, node.data.dsMin) : localMin;
+      node.data.dsMin = ((node.data.dsMin) ? Math.min(localMin, node.data.dsMin) : localMin);
       console.log("max:", node.data.dsMax);
       console.log("min:", node.data.dsMin);
       dataset.data = chData;
@@ -81,13 +93,14 @@ function lineData(node: any) {
     labels: new Array(MAX_NODE_VALUES).fill(undefined).map((val,idx) => idx),
     datasets: chartDataSets
   };
-  console.log("--------------------");
 
   return chartData;
 }
 
 
-function lineOptions(node: any) {
+function lineOptions(node: any, scalar: number) {
+  console.log("--------------------");
+  console.log("lineOptions invoked with scalar:", scalar);
   const options: ChartOptions = {
     animation: {
       duration: 0
@@ -105,8 +118,8 @@ function lineOptions(node: any) {
           fontSize: 9,
           display: true,
           stepSize: stepY,
-          max: node.data.dsMax,
-          min: node.data.dsMin,
+          max: node.data.dsMax * scalar,
+          min: node.data.dsMin * scalar,
           maxTicksLimit: 3,
           minRotation: 0,
           maxRotation: 0,
@@ -126,5 +139,11 @@ function lineOptions(node: any) {
       }]
     },
   };
+
+  // if (options.scales?.yAxes[0]) {
+  //   console.log("maxY:", options.scales?.yAxes[0])
+  // }
+  console.log("lineOptions returns:", options);
+  console.log("--------------------");
   return options;
 }
