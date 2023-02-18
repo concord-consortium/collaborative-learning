@@ -1,10 +1,16 @@
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import DiagramToolTile from '../../../../support/elements/clue/DiagramToolTile';
 import DrawToolTile from '../../../../support/elements/clue/DrawToolTile';
+import TextToolTile from '../../../../support/elements/clue/TextToolTile';
 
 let clueCanvas = new ClueCanvas,
   diagramTile = new DiagramToolTile,
-  drawTile = new DrawToolTile;
+  drawTile = new DrawToolTile,
+  textTile = new TextToolTile;
+
+const cmdKey = Cypress.platform === "darwin" ? "cmd" : "ctrl";
+const undoKeystroke = `{${cmdKey}}z`;
+const redoKeystroke = `{${cmdKey}}{shift}z`;
 
 context('Diagram Tool Tile', function () {
   const dialogField = (field) => cy.get(`#evd-${field}`);
@@ -102,11 +108,20 @@ context('Diagram Tool Tile', function () {
       diagramTile.getDiagramTile().trigger("drop", { dataTransfer });
       draggable().trigger("dragend");
       diagramTile.getVariableCard().should("exist");
+
+      // Can undo previous step by pressing control+z or command+z on the keyboard
+      cy.get("body").type(undoKeystroke);
+      diagramTile.getVariableCard().should("not.exist");
+
+      // Can redo previous step by pressing control+shift+z or command+shift+z on the keyboard
+      cy.get("body").type(redoKeystroke);
+      diagramTile.getVariableCard().should("exist");
     });
 
-    it("Drawing tile, toolbar, dialogs, and interactions between tiles", () => {
+    it("Drawing tile, text tile, toolbar, dialogs, and interactions between tiles", () => {
       clueCanvas.addTile("diagram");
       clueCanvas.addTile("drawing");
+      clueCanvas.addTile("text");
 
       // Draw tile and toolbar buttons render
       drawTile.getDrawTile().should("exist");
@@ -114,10 +129,15 @@ context('Diagram Tool Tile', function () {
       drawTile.getDrawToolEditVariable().should("exist").should("be.disabled");
       drawTile.getDrawToolInsertVariable().should("exist").should("be.disabled");
 
+      // Text tile and editor render
+      textTile.getTextTile().should("exist");
+      textTile.getTextEditor().should("exist");
+
       // New variable dialog works
       const vName = "variable-name";
       const vValue = "1.2";
       const vUnit = "meter";
+      drawTile.getDrawTile().click();
       drawTile.getDrawToolNewVariable().click();
       cy.get(".custom-modal").should("exist");
       dialogField("name").type(vName);
@@ -180,6 +200,17 @@ context('Diagram Tool Tile', function () {
       drawTile.getVariableChip().should("exist");
       drawTile.getVariableChip().click();
       drawTile.getDrawToolDelete().click();
+
+      // Undoing previous step in diagram tile by pressing control+z or command+z on
+      // the keyboard does not undo the most recent step in a different tile
+      diagramTile.getDiagramTile().click();
+      diagramTile.getVariableCardField("name").should("have.value", newName);
+      diagramTile.getVariableCardField("name").clear();
+      textTile.getTextTile().click();
+      textTile.enterText("Hello");
+      cy.get("body").type(undoKeystroke);
+      diagramTile.getVariableCardField("name").should("have.value", "");
+      textTile.getTextTile().should("contain", "Hell");
     });
   });
 });
