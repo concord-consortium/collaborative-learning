@@ -290,7 +290,7 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
     }
   };
 
-  const isValidId = (id: string) => objectInfoMap[id] && !objectInfoMap[id].isDeleted;
+  const isValidId = (id: string) => !objectInfoMap[id]?.isDeleted;
 
   const isExportable = (id: string) => {
     if (!isValidId(id)) return false;
@@ -302,21 +302,21 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
     if (objInfo.noExport) return false;
 
     // must have valid/sufficient dependencies
-    if (["comment", "movableLine", "polygon", "vertexAngle"].includes(objInfo.type)) {
-      const minParentsMap: { [K in JXGObjectType]?: number } =
-              { comment: 1, movableLine: 2, polygon: 2, vertexAngle: 3 };
-      const minParents = minParentsMap[objInfo.type];
-      const parents = validParentIds(id);
-      if (minParents && (parents.length < minParents)) return false;
-      // all dependencies must be exportable (except movable line control points)
-      if ((objInfo.type !== "movableLine") && !objInfo.dependencies.every(_id => !objectInfoMap[_id]?.noExport)) {
-        return false;
-      }
-      // all dependencies must be valid (except for a subset of polygon vertices)
-      if ((objInfo.type !== "polygon") && !objInfo.dependencies.every(isValidId)) {
-        return false;
-      }
-    }
+    // if (["comment", "movableLine", "polygon", "vertexAngle"].includes(objInfo.type)) {
+    //   const minParentsMap: { [K in JXGObjectType]?: number } =
+    //           { comment: 1, movableLine: 2, polygon: 2, vertexAngle: 3 };
+    //   const minParents = minParentsMap[objInfo.type];
+    //   const parents = validParentIds(id);
+    //   if (minParents && (parents.length < minParents)) return false;
+         // all dependencies must be exportable (except movable line control points)
+    //   if ((objInfo.type !== "movableLine") && !objInfo.dependencies.every(_id => !objectInfoMap[_id]?.noExport)) {
+    //     return false;
+    //   }
+         // all dependencies must be valid (except for a subset of polygon vertices)
+    //   if ((objInfo.type !== "polygon") && !objInfo.dependencies.every(isValidId)) {
+    //     return false;
+    //   }
+    // }
     return true;
   };
 
