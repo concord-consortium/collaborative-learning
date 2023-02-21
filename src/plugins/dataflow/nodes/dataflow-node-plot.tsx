@@ -23,7 +23,6 @@ export const defaultMinigraphOptions: MinigraphOptions = {
 let stepY = 5;
 
 export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
-  console.log("<DataflowNodePlot> with props", props);
   const [scalar, setScalar] = useState(1);
   if (!props.display) return null;
 
@@ -84,8 +83,6 @@ function lineData(node: any) {
       node.data.dsMax = ((node.data.dsMax) ? Math.max(localMax, node.data.dsMax) : localMax);
       const localMin = Math.min(...chData);
       node.data.dsMin = ((node.data.dsMin) ? Math.min(localMin, node.data.dsMin) : localMin);
-      console.log("max:", node.data.dsMax);
-      console.log("min:", node.data.dsMin);
       dataset.data = chData;
       chartDataSets.push(dataset);
     }
@@ -103,8 +100,6 @@ function lineData(node: any) {
 
 
 function lineOptions(node: any, scalar: number) {
-  console.log("--------------------");
-  console.log("lineOptions invoked with scalar:", scalar);
   const options: ChartOptions = {
     animation: {
       duration: 0
@@ -144,10 +139,5 @@ function lineOptions(node: any, scalar: number) {
     },
   };
 
-  // if (options.scales?.yAxes[0]) {
-  //   console.log("maxY:", options.scales?.yAxes[0])
-  // }
-  console.log("lineOptions returns:", options);
-  console.log("--------------------");
   return options;
 }
