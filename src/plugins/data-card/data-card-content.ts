@@ -1,3 +1,4 @@
+import stringify from "json-stringify-pretty-compact";
 import { reaction } from "mobx";
 import { addDisposer, getType, Instance, types } from "mobx-state-tree";
 import { kDataCardTileType, kDefaultLabel, kDefaultLabelPrefix } from "./data-card-types";
@@ -116,10 +117,9 @@ export const DataCardContentModel = TileContentModel
       return attributesWithValues === 0;
     },
     exportJson(options?: ITileExportOptions){
-      this.allAttributesJsonString();
       return [
         `{`,
-        `  "type": "DataCard",`,
+        `  "type": "DataCard"`,
         `}`
       ].join("\n");
     }
