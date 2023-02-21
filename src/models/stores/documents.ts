@@ -1,5 +1,5 @@
 import { forEach } from "lodash";
-import { getEnv, types } from "mobx-state-tree";
+import { getEnv, getSnapshot, types } from "mobx-state-tree";
 import { observable } from "mobx";
 import { AppConfigModelType } from "./app-config-model";
 import { DocumentModelType } from "../document/document";

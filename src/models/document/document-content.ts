@@ -905,7 +905,7 @@ export const DocumentContentModel = types
       });
       self.moveTiles(tiles, rowInfo);
     },
-    userCopyTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+    userCopyTiles(tiles: IDragTileItem[], sharedModels: any[] | undefined, rowInfo: IDropRowInfo) {
       const dropRow = (rowInfo.rowDropIndex != null) ? self.getRowByIndex(rowInfo.rowDropIndex) : undefined;
       const results = dropRow?.acceptTileDrop(rowInfo)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
@@ -917,6 +917,21 @@ export const DocumentContentModel = types
           logTileCopyEvent(LogEventName.COPY_TILE, { tile: newTile, originalTileId });
         }
       });
+
+      // Proof of concept
+      // TODO iterate over results and sharedModels arrays + handle cases of multiple sharedModels
+      // TODO check against existing sharedModelMap before updating, perhaps with dedicated model action
+      const newTileId = results[0]?.tileId;
+      const sharedMod = sharedModels as any;
+      const thisSharedModel = sharedMod[0];
+
+      if (newTileId){
+        const pckg = {
+          sharedModel: thisSharedModel,
+          tiles: [newTileId]
+        };
+        self.sharedModelMap.set(newTileId, pckg);
+      }
       return results;
     }
   }))

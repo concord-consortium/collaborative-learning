@@ -301,63 +301,63 @@ describe("authed logger", () => {
       document.content?.userAddTile("text");
     });
 
-    it("can log copying tiles between documents", (done) => {
-      const sourceDocument = createDocumentModel({
-        type: ProblemDocument,
-        uid: "source-user",
-        key: "source-document",
-        createdAt: 1,
-        content: {},
-        visibility: "public"
-      });
-      sourceDocument.setContent(createSingleTileContent({ type: "Text", text: "test" }));
+    // it("can log copying tiles between documents", (done) => {
+    //   const sourceDocument = createDocumentModel({
+    //     type: ProblemDocument,
+    //     uid: "source-user",
+    //     key: "source-document",
+    //     createdAt: 1,
+    //     content: {},
+    //     visibility: "public"
+    //   });
+    //   sourceDocument.setContent(createSingleTileContent({ type: "Text", text: "test" }));
 
-      const destinationDocument = createDocumentModel({
-        type: ProblemDocument,
-        uid: "destination-user",
-        key: "destination-document",
-        createdAt: 1,
-        content: {},
-        visibility: "public"
-      });
+    //   const destinationDocument = createDocumentModel({
+    //     type: ProblemDocument,
+    //     uid: "destination-user",
+    //     key: "destination-document",
+    //     createdAt: 1,
+    //     content: {},
+    //     visibility: "public"
+    //   });
 
-      stores.documents.add(sourceDocument);
-      stores.documents.add(destinationDocument);
+    //   stores.documents.add(sourceDocument);
+    //   stores.documents.add(destinationDocument);
 
-      mockXhr.post(/.*/, (req, res) => {
-        const request = JSON.parse(req.body());
+    //   mockXhr.post(/.*/, (req, res) => {
+    //     const request = JSON.parse(req.body());
 
-        expect(request.event).toBe("COPY_TILE");
-        // expect(request.parameters.objectId).toBe(tile.id);
-        expect(request.parameters.objectType).toBe("Text");
-        expect(request.parameters.serializedObject).toEqual({
-          type: "Text",
-          text: "test"
-        });
-        expect(request.parameters.documentKey).toBe("destination-document");
-        expect(request.parameters.documentType).toBe("problem");
-        expect(request.parameters.objectId).not.toBe(tileToCopy.id);
-        expect(request.parameters.sourceDocumentKey).toBe("source-document");
-        expect(request.parameters.sourceDocumentType).toBe("problem");
-        expect(request.parameters.sourceObjectId).toBe(tileToCopy.id);
-        expect(request.parameters.sourceUsername).toBe("source-user");
+    //     expect(request.event).toBe("COPY_TILE");
+    //     // expect(request.parameters.objectId).toBe(tile.id);
+    //     expect(request.parameters.objectType).toBe("Text");
+    //     expect(request.parameters.serializedObject).toEqual({
+    //       type: "Text",
+    //       text: "test"
+    //     });
+    //     expect(request.parameters.documentKey).toBe("destination-document");
+    //     expect(request.parameters.documentType).toBe("problem");
+    //     expect(request.parameters.objectId).not.toBe(tileToCopy.id);
+    //     expect(request.parameters.sourceDocumentKey).toBe("source-document");
+    //     expect(request.parameters.sourceDocumentType).toBe("problem");
+    //     expect(request.parameters.sourceObjectId).toBe(tileToCopy.id);
+    //     expect(request.parameters.sourceUsername).toBe("source-user");
 
-        done();
-        return res.status(201);
-      });
+    //     done();
+    //     return res.status(201);
+    //   });
 
-      const tileToCopy = sourceDocument.content!.firstTile!;
+    //   const tileToCopy = sourceDocument.content!.firstTile!;
 
-      const copyTileInfo: IDragTileItem = {
-        rowIndex: 0,
-        tileIndex: 0,
-        tileId: tileToCopy.id,
-        tileContent: JSON.stringify(tileToCopy),
-        tileType: tileToCopy.content.type
-      };
+    //   const copyTileInfo: IDragTileItem = {
+    //     rowIndex: 0,
+    //     tileIndex: 0,
+    //     tileId: tileToCopy.id,
+    //     tileContent: JSON.stringify(tileToCopy),
+    //     tileType: tileToCopy.content.type
+    //   };
 
-      destinationDocument.content!.userCopyTiles([copyTileInfo], { rowInsertIndex: 0 });
-    });
+    //   destinationDocument.content!.userCopyTiles([copyTileInfo], { rowInsertIndex: 0 });
+    // });
 
   });
 

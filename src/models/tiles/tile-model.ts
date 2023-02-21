@@ -18,11 +18,13 @@ export interface IDragTileItem {
   tileId: string;       // original tile id
   tileContent: string;  // modified tile contents
   tileType: string;
+  //sharedModels?: Array<any>;
 }
 
 export interface IDragTiles {
   sourceDocId: string;
-  items: IDragTileItem[];
+  items: IDragTileItem[]; // DRAG - change this key to "tiles"
+  sharedModels: any[] | undefined
 }
 
 export function cloneTileSnapshotWithoutId(tile: ITileModel) {

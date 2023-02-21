@@ -374,6 +374,9 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     }
     // set the drag data
     const { model, docId } = this.props;
+    const sharedManager = model.content.tileEnv?.sharedModelManager;
+    const tileSharedModels = sharedManager?.getTileSharedModels(model.content);
+
     const Component = getTileComponentInfo(model.content.type)?.Component;
     // can't drag placeholder tiles
     if (Component === PlaceholderTileComponent) {
@@ -394,7 +397,8 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
     const dragTiles: IDragTiles = {
       sourceDocId: docId,
-      items: this.getDragTileItems(dragSrcContentId, ui.selectedTileIds)
+      items: this.getDragTileItems(dragSrcContentId, ui.selectedTileIds),
+      sharedModels: tileSharedModels
     };
 
     // create a sorted array of selected tiles
@@ -435,6 +439,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     tileIds.forEach(tileId => idMap[tileId] = uniqueId());
 
     const content = getDocumentContentFromNode(model);
+
     tileIds.forEach(tileId => {
       const srcTile = content?.getTile(tileId) || (tileId === model.id ? model : undefined);
       if (srcTile) {
