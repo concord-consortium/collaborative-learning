@@ -118,7 +118,7 @@ function lineOptions(node: any, scalar: number) {
           display: true,
           stepSize: stepY * scalar,
           max: node.data.dsMax * scalar,
-          min: node.data.dsMin * scalar,
+          min: node.data.dsMin,
           maxTicksLimit: 3,
           minRotation: 0,
           maxRotation: 0,
