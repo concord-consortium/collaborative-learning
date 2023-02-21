@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { Line } from "react-chartjs-2";
 import { ChartOptions, ChartData, ChartDataSets } from "chart.js";
 import { MAX_NODE_VALUES } from "../components/dataflow-program";
@@ -22,23 +22,29 @@ export const defaultMinigraphOptions: MinigraphOptions = {
 
 let stepY = 5;
 
-// const GraphTrials: React.FC<IGraphTrialsProps>
-
-
-
 export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
+  console.log("<DataflowNodePlot> with props", props);
   const [scalar, setScalar] = useState(1);
+  if (!props.display) return null;
+
   const handleClickScalar = (newScalar: number) => {
     setScalar((oldVal) => oldVal * newScalar);
   };
+  const scaleBtnColorClass= props.data.name.charAt(0).toLowerCase() + props.data.name.slice(1);
 
-  if (!props.display) return null;
+
 
   return (
     <div className="node-bottom-section">
       <div className="node-bottom-buttons">
-        <button className="scale-buttons" onClick={() => handleClickScalar(1.25)}> + </button>
-        <button className="scale-buttons" onClick={() => handleClickScalar(0.8)}> - </button>
+        <button
+          className={`scale-buttons ${scaleBtnColorClass} plus`} onClick={() => handleClickScalar(1.25)}>
+          +
+        </button>
+        <button
+          className={`scale-buttons ${scaleBtnColorClass} minus`} onClick={() => handleClickScalar(0.8)}>
+          -
+        </button>
       </div>
       <div className="node-graph">
         <Line
@@ -50,8 +56,6 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
     </div>
   );
 };
-
-
 
 
 function lineData(node: any) {
@@ -117,7 +121,7 @@ function lineOptions(node: any, scalar: number) {
         ticks: {
           fontSize: 9,
           display: true,
-          stepSize: stepY,
+          stepSize: stepY * scalar,
           max: node.data.dsMax * scalar,
           min: node.data.dsMin * scalar,
           maxTicksLimit: 3,
