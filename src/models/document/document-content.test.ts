@@ -91,7 +91,7 @@ describe("DocumentContentModel", () => {
     expect(documentContent.rowCount).toBe(0);
     expect(documentContent.indexOfLastVisibleRow).toBe(-1);
     expect(documentContent.defaultInsertRow).toBe(0);
-    expect(parsedContentExport()).toEqual({ tiles: [] });
+    expect(parsedContentExport()).toEqual({ sharedModels: [], tiles: [] });
     expect(documentContent.getTilesInDocumentOrder()).toEqual([]);
   });
 
@@ -108,6 +108,7 @@ describe("DocumentContentModel", () => {
     documentContent.addTile("drawing");
     expect(documentContent.tileMap.size).toBe(5);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
@@ -167,6 +168,7 @@ describe("DocumentContentModel", () => {
     expect(rowIndex2).toBe(3);
 
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         { title: "Image 1", content: { type: "Image", url: placeholderImage } },
@@ -206,6 +208,7 @@ describe("DocumentContentModel", () => {
     expect(textTile2RowIndex1).toBe(1);
 
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
@@ -248,6 +251,7 @@ describe("DocumentContentModel", () => {
 
     expect(textTile2RowIndex1).toBe(2);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
@@ -291,6 +295,7 @@ describe("DocumentContentModel", () => {
 
     expect(textTile2RowIndex1).toBe(1);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
@@ -369,7 +374,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.isPlaceholderRow(content.getRowByIndex(3)!)).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(1);
-    expect(parsedContentExport()).toEqual({ tiles: [] });
+    expect(parsedContentExport()).toEqual({ sharedModels: [], tiles: [] });
   });
 
   it("will remove placeholder tiles when adding a new tile in the last section", () => {
@@ -381,6 +386,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -396,6 +402,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 2", content: { type: "Text", format: "html", text: ["<p>foo</p>"] } },
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
@@ -413,6 +420,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -428,7 +436,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(1);
-    expect(parsedContentExport()).toEqual({ tiles: [] });
+    expect(parsedContentExport()).toEqual({ sharedModels: [], tiles: [] });
   });
 
   it("will add/remove placeholder rows when moving entire rows (3 => 1)", () => {
@@ -444,6 +452,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(2);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -459,6 +468,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -475,6 +485,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(2);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -491,6 +502,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -507,6 +519,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(2);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -522,6 +535,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -536,7 +550,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.rowCount).toBe(4);
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
-    expect(parsedContentExport()).toEqual({ tiles: [] });
+    expect(parsedContentExport()).toEqual({ sharedModels: [], tiles: [] });
   });
 
   it("addTile() will add/remove placeholder rows", () => {
@@ -547,6 +561,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -562,6 +577,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -573,6 +589,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -584,6 +601,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -595,6 +613,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -606,6 +625,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A", 2)).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         [
           { title: "Graph 1", content: { type: "Geometry", objects: [] } },
@@ -622,6 +642,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A")).toBe(true);
     expect(isContentSection("B", 2)).toBe(true);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
@@ -637,6 +658,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A", 2)).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         [
           { title: "Graph 1", content: { type: "Geometry", objects: [] } },
@@ -656,6 +678,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A", 2)).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         [
           { content: { type: "Text", format: "html", text: ["<p></p>"] } },
@@ -675,6 +698,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
+      sharedModels: [],
       tiles: [
         { title: "Graph 1", content: { type: "Geometry", objects: [] } },
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
@@ -718,6 +742,7 @@ describe("DocumentContentModel", () => {
     const tileContent = tile!.content;
     expect(tileContent.type).toBe("Text");
     expect(parsedExport(content)).toEqual({
+      sharedModels: [],
       tiles: [
         { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } },
         [
