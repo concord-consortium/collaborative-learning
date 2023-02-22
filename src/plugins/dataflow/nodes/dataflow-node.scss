@@ -443,9 +443,10 @@ $node-inner-width: 140px;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        width: 15px;
 
         .scale-buttons{
-          width: 14px;
+          width: 100%;
           height: 20px;
           display: flex;
           align-items: center;
@@ -466,6 +467,9 @@ $node-inner-width: 140px;
             font-size: 20px;
             padding-bottom: 3px;
             border-bottom-left-radius: 5px;
+            &:active {
+              color: white;
+            }
           }
 
           &.sensor {
@@ -589,10 +593,10 @@ $node-inner-width: 140px;
 
       .node-graph {
         padding: 5px 5px 0 0;
-        margin: 10px 0;
+        margin: 10px;
         width: $node-inner-width;
         background-color: white;
-        margin-left: 0px;
+        margin-left: 0.5px;
         border-left: 1.5px solid #c6d6f6;
         border-top: 1.5px solid #c6d6f6;
       }
