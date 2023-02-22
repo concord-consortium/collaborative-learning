@@ -45,7 +45,7 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
       </div>
       <div className="node-graph">
         <Line
-          data={lineData(props.data)}
+          data={lineData(props.data, scalar)}
           options={lineOptions(props.data, scalar)}
           redraw={true}
         />
@@ -55,7 +55,7 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
 };
 
 
-function lineData(node: any) {
+function lineData(node: any, scalar: number) {
   const chartDataSets: ChartDataSets[] = [];
   Object.keys(node.data.watchedValues).forEach((valueKey: string) => {
     const recentValues: any = node.data.recentValues?.[valueKey];
@@ -85,8 +85,7 @@ function lineData(node: any) {
       chartDataSets.push(dataset);
     }
   });
-
-  stepY = (node.data.dsMax - node.data.dsMin) / 2;
+  stepY = ((node.data.dsMax * scalar) - node.data.dsMin) / 2;
 
   const chartData: ChartData = {
     labels: new Array(MAX_NODE_VALUES).fill(undefined).map((val,idx) => idx),
@@ -114,7 +113,7 @@ function lineOptions(node: any, scalar: number) {
         ticks: {
           fontSize: 9,
           display: true,
-          stepSize: stepY * scalar,
+          stepSize: stepY,
           max: node.data.dsMax * scalar,
           min: node.data.dsMin,
           maxTicksLimit: 3,
@@ -122,7 +121,7 @@ function lineOptions(node: any, scalar: number) {
           maxRotation: 0,
         },
         gridLines: {
-          display: false
+          display: false,
         }
       }],
       xAxes: [{
@@ -136,6 +135,7 @@ function lineOptions(node: any, scalar: number) {
       }]
     },
   };
+
 
   return options;
 }
