@@ -1,4 +1,3 @@
-import stringify from "json-stringify-pretty-compact";
 import { reaction } from "mobx";
 import { addDisposer, getType, Instance, types } from "mobx-state-tree";
 import { kDataCardTileType, kDefaultLabel, kDefaultLabelPrefix } from "./data-card-types";
