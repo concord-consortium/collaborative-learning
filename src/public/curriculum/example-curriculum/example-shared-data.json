@@ -1,0 +1,285 @@
+{
+  "code": "example-shared-data",
+  "abbrevTitle": "EXSD",
+  "title": "Unit importable shared data",
+  "subtitle": "",
+  "config": {
+    "autoAssignStudentsToIndividualGroups": false,
+    "autoSectionProblemDocuments": false,
+    "placeholderText": "Enter notes here",
+    "defaultDocumentType": "problem",
+    "defaultDocumentTitle": "Untitled",
+    "defaultDocumentTemplate": {
+      "sharedModels":[
+        {
+          "sharedModel": {
+            "type": "SharedDataSet",
+            "id": "fa-wtBZBPtFPEk5e",
+            "providerId": "ocE9IDDQyJInnvVH",
+            "dataSet": {
+              "id": "V8lj4GO-FCZ9NJrM",
+              "name": "Table 1",
+              "attributes": [
+                {
+                  "id": "feRuv9gR6L9PoUYg",
+                  "clientKey": "",
+                  "name": "x",
+                  "hidden": false,
+                  "units": "",
+                  "formula": {},
+                  "values": ["0", "15", "0"]
+                },
+                {
+                  "id": "yGRYwwl0l_VBAvBB",
+                  "clientKey": "",
+                  "name": "y",
+                  "hidden": false,
+                  "units": "",
+                  "formula": {},
+                  "values": ["0", "0", "15"]
+                }
+              ],
+              "cases": [
+                {"__id__": "HR3at2-RqvnRaT9z"},
+                {"__id__": "O3SmGUb4iRPw29HU"},
+                {"__id__": "76WRbhQpTu2Wqy1c"}
+              ]
+            }
+          },
+          "tiles": ["ocE9IDDQyJInnvVH", "7PaV91x-dBRFVZsc"]
+        }
+      ],
+      "tiles": [
+        {
+          "content": {
+            "type": "Text",
+            "text": "My plain text on the right 2"
+          }
+        },
+        {
+          "id": "ocE9IDDQyJInnvVH",
+          "title": "Table 1",
+          "content": {
+            "type": "Table",
+            "name": "Table 1"
+          }
+        }
+        ,
+        {
+          "id": "7PaV91x-dBRFVZsc",
+          "title": "Graph 1",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [-4.049, -2.232],
+                "axisRange": [36.592, 19.71]
+              }
+            },
+            "objects": [
+              { "type": "polygon", "parents": ["HR3at2-RqvnRaT9z:yGRYwwl0l_VBAvBB", "O3SmGUb4iRPw29HU:yGRYwwl0l_VBAvBB", "76WRbhQpTu2Wqy1c:yGRYwwl0l_VBAvBB"],"properties": {"id":"cWoEx64CKz1q6gdJ"} }
+            ]
+          }
+        }
+      ]
+    },
+    "documentLabels": {
+      "personal": {
+        "labels": {
+          "1": "Document",
+          "n": "Documents"
+        }
+      },
+      "problem": {
+        "labels": {
+          "1": "Document",
+          "n": "Documents"
+        }
+      }
+    },
+    "settings": {
+      "table": {
+        "numFormat": ".3~f"
+      }
+    },
+    "navTabs": {
+      "showNavPanel": true,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "tab": "problems",
+          "label": "Activities",
+          "sections": [
+            {
+              "initials": "A",
+              "title": "Task A",
+              "type": "problem-documents"
+            }
+          ]
+        },
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Documents",
+              "type": "problem-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["problem", "planning"],
+              "properties": ["!isDeleted"],
+              "addDocument": true
+            },
+            {
+              "title": "Documents",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["personal"],
+              "properties": ["!isDeleted"],
+              "addDocument": true
+            }
+          ]
+        },
+        {
+          "tab": "class-work",
+          "label": "Class Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "published-problem-documents",
+              "dataTestHeader": "class-work-section-published",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["publication"],
+              "showStars": ["teacher"],
+              "properties": ["!isTeacherDocument"]
+            },
+            {
+              "title": "Workspaces",
+              "type": "published-personal-documents",
+              "dataTestHeader": "class-work-section-personal",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["personalPublication"],
+              "properties": ["!isTeacherDocument"]
+            },
+            {
+              "className": "section teacher published-documents",
+              "title": "Workspaces",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["publication", "personalPublication"],
+              "properties": ["isTeacherDocument", "!isDeleted"]
+            },
+            {
+              "title": "Workspaces",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["supportPublication"],
+              "properties": ["teacherSupport", "!isDeleted"]
+            }
+          ]
+        }
+      ]
+    },
+    "toolbar": [
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "Geometry",
+        "title": "Geometry",
+        "isTileTool": true
+      },
+      {
+        "id": "DataCard",
+        "title": "DataCard",
+        "isTileTool": true
+      },
+      {
+        "id": "Table",
+        "title": "Table",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
+    ]
+  },
+  "sections": {
+    "taska": {
+      "initials": "A",
+      "title": "Task A",
+      "placeholder": "Work on Task A here"
+    }
+  },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "plan": {
+        "initials": "PL",
+        "title": "Plan",
+        "placeholder": "teacher planning document plan text placeholder"
+      },
+      "show": {
+        "initials": "SH",
+        "title": "Show",
+        "placeholder": "Show the work"
+      }
+    },
+    "sections": [
+      { "type": "plan" },
+      { "type": "show" }
+    ]
+  },
+  "investigations": [
+    {
+      "description": "Investigation Description",
+      "ordinal": 1,
+      "title": "Investigation Title",
+      "problems": [
+        {
+          "description": "Problem Description",
+          "ordinal": 1,
+          "title": "Problem Title",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "taska",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>Text tile on the left one</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>text tile on the left two</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
