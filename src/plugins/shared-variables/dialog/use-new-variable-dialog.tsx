@@ -10,14 +10,14 @@ import './variable-dialog.scss';
 interface IUseNewVariableDialog {
   addVariable: (variable: VariableType ) => void;
   sharedModel?: SharedVariablesType;
-  namePrefill?: string;
+  descriptionPrefill?: string;
   noUndo?: boolean;
   onClose?: () => void;
 }
 export const useNewVariableDialog = ({
-  addVariable, sharedModel, namePrefill, noUndo = false, onClose
+  addVariable, sharedModel, descriptionPrefill, noUndo = false, onClose
 }: IUseNewVariableDialog) => {
-  const [newVariable, setNewVariable] = useState(Variable.create({name: namePrefill || undefined}));
+  const [newVariable, setNewVariable] = useState(Variable.create({description: descriptionPrefill || undefined}));
 
   const handleClick = () => {
     sharedModel?.addAndInsertVariable(
@@ -25,7 +25,7 @@ export const useNewVariableDialog = ({
       (variable: VariableType) => addVariable(variable),
       noUndo
     );
-    setNewVariable(Variable.create({name: namePrefill || undefined}));
+    setNewVariable(Variable.create({description: descriptionPrefill || undefined}));
   };
 
   const [show, hideModal] = useCustomModal({
@@ -44,13 +44,13 @@ export const useNewVariableDialog = ({
     onClose
   }, [addVariable, newVariable]);
 
-  // Wrap useCustomModal's show so we can prefill with variable name
+  // Wrap useCustomModal's show so we can prefill with variable description
   const showModal = useCallback(() => {
-    if (namePrefill) {
-      newVariable.setName(namePrefill);
+    if (descriptionPrefill) {
+      newVariable.setDescription(descriptionPrefill);
     }
     show();
-  }, [namePrefill, newVariable, show]);
+  }, [descriptionPrefill, newVariable, show]);
 
   return [showModal, hideModal];
 };

@@ -24,9 +24,41 @@ export function insertTextVariable(variable: VariableType, editor?: Editor) {
     console.warn("inserting variable but there is no editor");
     return;
   }
+
+  // To calculate where to place the cursor before inserting the variable chip, we need
+  // to know the length (i.e., character count) of any selected text. Note that the number
+  // corresponding to the start of a selection can be higher than the number corresponding
+  // to the end of a selection if the user selects the text from right to left.
+  const selectionStart = editor.selection?.anchor.offset || 0;
+  const selectionEnd = editor.selection?.focus.offset || 0;
+  const selectionLength = Math.abs(selectionEnd - selectionStart);
+  Transforms.move(editor, { distance: selectionLength, unit: "character", edge: "start" });
+
+  const newNodes = [];
+
+  // If the insertion point is preceded by a character that's not a space, add a space.
+  const range = editor.selection || [0,0];
+  const beforeInsertPoint = Editor.before(editor, range, { unit: "character" });
+  const charBefore = editor.selection && beforeInsertPoint &&
+                       Editor.string(editor, {anchor: editor.selection.anchor, focus: beforeInsertPoint });
+  if (charBefore && charBefore !== " ") {
+    newNodes.push({text: " "});
+  }
+
+  // Add the variable chip.
   const reference = variable.id;
   const varElt: VariableElement = { type: kVariableFormat, reference, children: [{text: "" }]};
-  Transforms.insertNodes(editor, varElt);
+  newNodes.push(varElt);
+
+  // If insertion point is followed by a character that's not a space or punctuation, add a space.
+  const afterInsertPoint = Editor.after(editor, range, { unit: "character" });
+  const charAfter = editor.selection && afterInsertPoint &&
+                      Editor.string(editor, {anchor: editor.selection.anchor, focus: afterInsertPoint });
+  if (charAfter && !(/^[.,;:!? ]/.test(charAfter))) {
+    newNodes.push({text: " "});
+  }
+
+  Transforms.insertNodes(editor, newNodes);
 }
 
 export function insertTextVariables(variables: VariableType[], editor?: Editor) {
@@ -73,7 +105,6 @@ function handleClose(editor: Editor) {
   // focus the editor after closing the dialog, which is what the user expects and
   // also required for certain slate selection synchronization mechanisms to work.
   // focusing twice shouldn't be necessary, but sometimes seems to help ¯\_(ツ)_/¯
-  Transforms.move(editor, { distance: 1, unit: "word" });
   ReactEditor.focus(editor);
   setTimeout(() => {
     ReactEditor.focus(editor);
@@ -91,12 +122,12 @@ export const NewVariableTextButton = observer(function NewVariableTextButton(
   const enabled = !!sharedModel;
 
   const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
-  const namePrefill = highlightedText;
+  const descriptionPrefill = highlightedText;
   const [showDialog] = useNewVariableDialog({
     addVariable(variable) {
       insertTextVariable(variable, editor);
     },
-    sharedModel, namePrefill,
+    sharedModel, descriptionPrefill,
     noUndo: true,
     onClose: () => handleClose(editor)
   });
@@ -137,7 +168,7 @@ export const InsertVariableTextButton = observer(function InsertVariableTextButt
   };
   return (
     <TextToolbarButton iconName={kInsertVariableButtonName} Icon={InsertVariableChipIcon}
-      tooltip={"Insert Variable"}  enabled={enabled} isSelected={isSelected}
+      tooltip={"Insert Variable"} enabled={enabled} isSelected={isSelected}
       onClick={handleClick} />
   );
 });
