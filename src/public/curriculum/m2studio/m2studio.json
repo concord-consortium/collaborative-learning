@@ -76,6 +76,21 @@
               "initials": "D",
               "title": "Task D",
               "type": "problem-documents"
+            },
+            {
+              "initials": "TXT",
+              "title": "Text",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "DRAW",
+              "title": "Drawing",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "DIA",
+              "title": "Diagram",
+              "type": "problem-documents"
             }
           ]
         },
@@ -187,11 +202,6 @@
         "isTileTool": true
       },
       {
-        "id": "Geometry",
-        "title": "Geometry",
-        "isTileTool": true
-      },
-      {
         "id": "undo",
         "title": "Undo",
         "iconId": "icon-undo-tool",
@@ -201,12 +211,6 @@
         "id": "redo",
         "title": "Redo",
         "iconId": "icon-redo-tool",
-        "isTileTool": false
-      },
-      {
-        "id": "delete",
-        "title": "Delete",
-        "iconId": "icon-delete-tool",
         "isTileTool": false
       }
     ]
@@ -240,6 +244,21 @@
     "taskd": {
       "initials": "D",
       "title": "Task D",
+      "placeholder": "Work on the task here"
+    },
+    "text": {
+      "initials": "TXT",
+      "title": "Text",
+      "placeholder": "Work on the task here"
+    },
+    "drawing": {
+      "initials": "DRAW",
+      "title": "Drawing",
+      "placeholder": "Work on the task here"
+    },
+    "diagram": {
+      "initials": "DIA",
+      "title": "Diagram",
       "placeholder": "Work on the task here"
     }
   },
@@ -1071,7 +1090,7 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "document_Text_20",
+                  "id": "DefaultInstructions02172023",
                   "title":"ExampleVarInstructions",
                   "content": {
                     "type": "Text",
@@ -1081,7 +1100,8 @@
                       "<p><em>Here is a space for you to take notes. Create variables using the variable tool on text tiles or in the diagram tile.</em></p>",
                       "<p>Some sample variables could be:</p>",
                       "<ul><li>[initial number of cats]</li><li>[height of the building]</li><li>[area of town]</li><li>[etc.]</li></ul>",
-                      "<p></p>"
+                      "<p>A diagram for specifying variable relationships, and a drawing tile for sketches are already made for you.</p>",
+                      "<p>Drag the questions from this Activity on the left into this workspace. Edit the text to write your answers below the questions.</p>"
                     ]
                   }
                 },
@@ -1091,13 +1111,18 @@
                   "content": {
                     "type": "Diagram",
                     "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                },
+                {
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Drawing 1",
+                  "content": {"type": "Drawing", "objects": []}
                 }
               ]
             }
           }
         },
         {
-          "description": "Interpreting - Food Waste",
+          "description": "M2S Problem 3.2 Interpreting - Food Waste",
           "ordinal": 2,
           "title": "Interpreting - Food Waste",
           "subtitle": "",
@@ -1119,19 +1144,28 @@
                     }
                   },
                   {
-                    "id": "0B10hck18-CDeN2u",
-                    "title": "Text 6",
+                    "id": "Pa4vmyE4hbAsOri_",
+                    "title": "Interpreting Food Waste Variable Diagram",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/FoodWasteInterpret.png",
+                      "filename": "curriculum/m2studio/images/FoodWasteInterpret.png"
+                    }
+                  },
+                  {
+                    "id": "RUeVrDKwUcmyjjiM",
+                    "title": "Text 9",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>References</strong></p><p>[1] Alexander, K. C.; Atlantic Geoscience Corp.; Connecticut. Dept. of Environmental Protection.; Draper/Lennon, Inc.; &quot;Identifying, quantifying, and mapping food residuals from Connecticut businesses and institutions an organics recycling planning tool using GIS ; final report&quot; Recycling Program (Conn.), 2001.</p><p>[2] NYS Department of Environmental Education, &quot;Food Donation and Food Scraps Recycling Law&quot;, accessed online 12/31/22, https://www.dec.ny.gov/docs/materials_minerals_pdf/foodscrapsleg.pdf</p>"
+                        "<p>Recreate the model shown here in a diagram tile, then drag these questions into your worksheet and edit them to add your responses.</p>"
                       ]
                     }
                   },
                   {
                     "id": "X1DZKnOboeLBni0L",
-                    "title": "Q1FoodWaste_ModelRepresent",
+                    "title": "InterpretFoodWaste_ModelRepresent",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -1142,12 +1176,34 @@
                   },
                   {
                     "id": "bIwjvrQnqogKZUll",
-                    "title": "Q2FoodWaste_Results",
+                    "title": "InterpretFoodWaste_Results",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>What do results from the Residential Institutions model mean?</strong></p><p>Use this space to write your responses to questions in the <strong>Residential Institutions Food Waste Model Results</strong> section. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "6Fbs8pdmRg53itfG",
+                    "title": "Text 7",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Usability of the Residential Institutions Food Waste Model</strong></p><p>Use this space to share your response to the final questions associated with this activity</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "0B10hck18-CDeN2u",
+                    "title": "Text 6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>References</strong></p><p>[1] Alexander, K. C.; Atlantic Geoscience Corp.; Connecticut. Dept. of Environmental Protection.; Draper/Lennon, Inc.; &quot;Identifying, quantifying, and mapping food residuals from Connecticut businesses and institutions an organics recycling planning tool using GIS ; final report&quot; Recycling Program (Conn.), 2001.</p><p>[2] NYS Department of Environmental Education, &quot;Food Donation and Food Scraps Recycling Law&quot;, accessed online 12/31/22, https://www.dec.ny.gov/docs/materials_minerals_pdf/foodscrapsleg.pdf</p>"
                       ]
                     }
                   }
@@ -1159,30 +1215,37 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "document_Text_20",
+                  "id": "DefaultInstructions02172023",
                   "title":"ExampleVarInstructions",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><strong>Interpreting Food Waste</strong></p>",
-                      "<p>Drag the questions from the Activity on the left into this workspace. Edit the text to write your answers below the questions.</p>"
+                      "<p><strong>My notes</strong></p>",
+                      "<p><em>Here is a space for you to take notes. Create variables using the variable tool on text tiles or drawing tiles, and develop your model in the diagram tile.</em></p>"
                     ]
                   }
                 },
                 {
-                  "id": "zF0UeiltfldnJBiG",
-                  "title": "Diagram 3",
-                  "content": {"nodes":{"5xiON-eVj61Thqk-":{"id":"5xiON-eVj61Thqk-","variable":"qWTPWgGnn3JmJgZw","x":40.70001220703125,"y":135.40000915527344},"EVhglJXUwAj2AP6T":{"id":"EVhglJXUwAj2AP6T","variable":"CatGIY3IXkxG8IIW","x":38.70001220703125,"y":21.400009155273438},"eNu7fEwW_wzqLWs9":{"id":"eNu7fEwW_wzqLWs9","variable":"r6YXD9ZqhxVR9a_Q","x":37.70001220703125,"y":248.40000915527344},"_QmQpjeNRVg4k8RA":{"id":"_QmQpjeNRVg4k8RA","variable":"_68LHo5ANji_jQO0","x":489.70001220703125,"y":109.40000915527344}},"flowTransform":{"x":-3.8300114724792422,"y":24.410632403239788,"zoom":0.7092597804672108}}
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Drawing 1",
+                  "content": {"type": "Drawing", "objects": []}
+                },
+                {
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Diagram 1",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
                 }
               ]
             }
           }
         },
         {
-          "description": "Interpreting - Food Waste",
+          "description": "M2S Problem 3.3 Validating - Food Waste",
           "ordinal": 3,
-          "title": "Interpreting - Food Waste",
+          "title": "Validating - Food Waste",
           "subtitle": "",
           "disabled": [],
           "sections": [
@@ -1224,19 +1287,28 @@
                     }
                   },
                   {
-                    "id": "jHWN3eLr-eKHUPiO",
-                    "title": "Text 6",
+                    "id": "OdSkEm-ZkZ4uG_4x",
+                    "title": "Food Waste Validation Model",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/FoodWasteValidate.png",
+                      "filename": "curriculum/m2studio/images/FoodWasteValidate.png"
+                    }
+                  },
+                  {
+                    "id": "RUeVrDKwUcmyjjiM",
+                    "title": "Text 9",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p><strong>References</strong></p><p>[1] Alexander, K. C.; Atlantic Geoscience Corp.; Connecticut. Dept. of Environmental Protection.; Draper/Lennon, Inc.; &quot;Identifying, quantifying, and mapping food residuals from Connecticut businesses and institutions an organics recycling planning tool using GIS ; final report&quot; Recycling Program (Conn.), 2001.</p><p>[2] NYS Department of Environmental Education, &quot;Food Donation and Food Scraps Recycling Law&quot;, accessed online 12/31/22, https://www.dec.ny.gov/docs/materials_minerals_pdf/foodscrapsleg.pdf</p>"
+                        "<p>Recreate the model shown here in a diagram tile, then drag these questions into your worksheet and edit them to add your responses.</p>"
                       ]
                     }
                   },
                   {
                     "id": "VN_25iI3RPwFoPni",
-                    "title": "Q1FoodWaste_ModelSense",
+                    "title": "FoodWasteValid_ModelSense",
                     "content": {
                       "type": "Text",
                       "format": "html",
@@ -1247,12 +1319,23 @@
                   },
                   {
                     "id": "Z035-QbbZr6MNr4s",
-                    "title": "Q2FoodWaste_Practice",
+                    "title": "FoodWasteValid_Practice",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
                         "<p><strong>How does the Food Waste Model work in practice?</strong></p><p>Use this space to write your responses to questions in the <strong>Test the model</strong> section. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "jHWN3eLr-eKHUPiO",
+                    "title": "Text 6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>References</strong></p><p>[1] Alexander, K. C.; Atlantic Geoscience Corp.; Connecticut. Dept. of Environmental Protection.; Draper/Lennon, Inc.; &quot;Identifying, quantifying, and mapping food residuals from Connecticut businesses and institutions an organics recycling planning tool using GIS ; final report&quot; Recycling Program (Conn.), 2001.</p><p>[2] NYS Department of Environmental Education, &quot;Food Donation and Food Scraps Recycling Law&quot;, accessed online 12/31/22, https://www.dec.ny.gov/docs/materials_minerals_pdf/foodscrapsleg.pdf</p>"
                       ]
                     }
                   }
@@ -1264,21 +1347,505 @@
             "defaultDocumentTemplate": {
               "tiles": [
                 {
-                  "id": "document_Text_20",
+                  "id": "DefaultInstructions02172023",
                   "title":"ExampleVarInstructions",
                   "content": {
                     "type": "Text",
                     "format": "html",
                     "text": [
-                      "<p><strong>Interpreting Food Waste</strong></p>",
-                      "<p>Drag the questions from the Activity on the left into this workspace. Edit the text to write your answers below the questions.</p>"
+                      "<p><strong>My notes</strong></p>",
+                      "<p><em>Here is a space for you to take notes. Create variables using the variable tool on text tiles or drawing tiles, and develop your model in the diagram tile.</em></p>"
                     ]
                   }
                 },
                 {
-                  "id": "ZYHPrIKSxNf6zlv_",
-                  "title": "Diagram 3",
-                  "content": {"nodes":{"5xiON-eVj61Thqk-":{"id":"5xiON-eVj61Thqk-","variable":"qWTPWgGnn3JmJgZw","x":23.70001220703125,"y":128.40000915527344},"EVhglJXUwAj2AP6T":{"id":"EVhglJXUwAj2AP6T","variable":"CatGIY3IXkxG8IIW","x":24.70001220703125,"y":239.40000915527344},"eNu7fEwW_wzqLWs9":{"id":"eNu7fEwW_wzqLWs9","variable":"r6YXD9ZqhxVR9a_Q","x":25.70001220703125,"y":2.4000091552734375},"_QmQpjeNRVg4k8RA":{"id":"_QmQpjeNRVg4k8RA","variable":"_68LHo5ANji_jQO0","x":427.70001220703125,"y":42.40000915527344},"TQW68nxb7MRrfi5k":{"id":"TQW68nxb7MRrfi5k","variable":"Rp1xVLuqqbAJl75P","x":29.70001220703125,"y":468.90000915527344},"wvIQZ9zjfDVtQr79":{"id":"wvIQZ9zjfDVtQr79","variable":"c2wtFJTDbAvfyXtc","x":25.70001220703125,"y":352.90000915527344},"NFv53q11Bv0ew-xN":{"id":"NFv53q11Bv0ew-xN","variable":"dvsT-NOpjK6dd99Q","x":429.70001220703125,"y":372.90000915527344},"Vao0rYGyrtm_0I2l":{"id":"Vao0rYGyrtm_0I2l","variable":"Mx3atFUSDhX64C-P","x":752.7000122070312,"y":45.899993896484375},"iE9tzwUg3QRorsN5":{"id":"iE9tzwUg3QRorsN5","variable":"wk6SCPHac_LKQhTj","x":750.7000122070312,"y":372.8999938964844},"ex-PbXm8VQjLD-F9":{"id":"ex-PbXm8VQjLD-F9","variable":"tk4Eb6Egi_gguGAh","x":478.70001220703125,"y":234.89999389648438}},"flowTransform":{"x":23.635598704176743,"y":132.93551080697864,"zoom":0.5}}
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Diagram 1",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                },
+                {
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Drawing 1",
+                  "content": {"type": "Drawing", "objects": []}
+                }
+              ]
+            }
+          }
+        },
+        {
+          "description": "M2S Problem 3.4",
+          "ordinal": 4,
+          "title": "Introduction to Math Modeling",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "text",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "zx1KHi-_yxNAfSfd",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Organize your thoughts about the task using the text tile.</em></p><p>(   ) Take notes:</p><ul><li>Interpret the question</li><li>Record key ideas</li><li>Keep track of your sources</li></ul><p>(   ) Format your notes (bullets, underline, italics, bold, paragraphs)</p><p>(   ) If you have already created variables elsewhere in your workspace, insert them into your work using the [v=&lt;--] button and add commentary.</p><p>(   ) Create variables to enhance your notes using the [v=] button. Variables can have any combination of:</p><ul><li>Short name (No spaces, case sensitive, should be short but informative)</li><li>Description (Space to take a few notes to jog your memory. Long ideas should be in the text tile itself)</li><li>Units (Do you already have an idea of what the units should be?)</li><li>Value (This is what you are temporarily setting this value to, if you have an idea. Be sure to keep good notes to explain how you chose this number!)</li></ul><p>(   ) After you have a chip in place, click on it and the Edit Variable button to see how you can make changes.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "njCI4Wmr6eYNc5go",
+                    "title": "CLUE Toolbar",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/CLUEToolbar.png",
+                      "filename": "curriculum/m2studio/images/CLUEToolbar.png"
+                    }
+                  },
+                  {
+                    "id": "cP2E6t6w3HOYTCUi",
+                    "title": "Toolbar buttons for the text tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Text.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Text.png"
+                    }
+                  },
+                  {
+                    "id": "7QvQa97zBd4PZLP6",
+                    "title": "Text 10",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>You can store reference data in tables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "FDAYvugP7pz6d3Oh",
+                    "title": "Table 1",
+                    "content": {
+                      "type": "Table",
+                      "name": "World Population by Age Range",
+                      "columns": [
+                        {"name":"Age Group","width":116.73828125,"values":["<20 years","20-39 years","40-59 years","60-79 years","80-99 years","100+ years"]},
+                        {"name":"Number of People","width":232.125,"values":["2.6 billion","2.3 billion","1.8 billion","918 million","147 million","0.6 million"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "UBEgM8aG2Fh2ONiD",
+                    "title": "Table 2",
+                    "content": {
+                      "type": "Table",
+                      "name": "Cell Phone Use",
+                      "columns": [
+                        {"name":"Country","width":103.54296875,"values":["China","India","Indonesia","United States","Brazil","Russia","Nigeria","Bangladesh","Pakistan","Japan"]},
+                        {"name":"Number of Cell Phone Users","width":158.92578125,"values":["1.6 billion","1.28 billion","386 million","327 million","284 million","256 million","167 million","166 million","165 million","147 million"]}
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "drawing",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "Vt5Fa54oRfOIx9Y1",
+                    "title": "Text 4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Create a labeled sketch of the situation using the drawing tile. </em></p><p>(   ) Sketch out the situation</p><ul><li>Use the drawing tools to design sketches. Test out the different options.</li><li>Upload images from your computer and then annotate them using the drawing tools </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ePTfYCm7Q-oWGR2R",
+                    "title": "Toolbar buttons for the drawing tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Drawing.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Drawing.png"
+                    }
+                  },
+                  {
+                    "id": "TZAbGjYLLuBenwJB",
+                    "title": "Text 9",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>(   ) Create chips to label your drawing using the <strong>Create Variable</strong> button. <a href='https://project-resources.concord.org/M2Studio/Curriculum/Tutorials/CreatingVariablesInDrawingTile.mp4'>Video Tutorial</a> </p><p>Your variables can include any combination of:  </p><ul><li>Short name (No spaces, case sensitive, should be short but informative)</li><li>Description (Space to take a few notes to jog your memory. Long ideas should be in the text tile instead)</li><li>Units (Do you already have an idea of what the units should be?)</li><li>Value (This is what you are temporarily setting this value to, if you have an idea. Be sure to keep good notes to explain how you chose this number!)</li></ul><p>(   ) If you have already created variables elsewhere, insert them here using the <strong>Insert Variable(s) </strong>button to either annotate your existing sketch or to help you decide what else you need to do to improve your sketch of the situation. </p><p>(   ) Use the Edit Variable button to make any necessary changes to your existing variables.</p>",
+                        "<p>Here are some images you might want to use. These can be dragged into your workspace on the right. They can be dragged into drawing tiles.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "9FHA9Xi-5FaLICMC",
+                    "title": "2021 Global Smartphone Shipments (in millions)",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/GloablSmartphones.png",
+                      "filename": "curriculum/m2studio/images/GloablSmartphones.png"
+                    }
+                  },
+                  {
+                    "id": "q8i-DMRdWVGQMVBc",
+                    "title": "World Clock",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/WorldClock.png",
+                      "filename": "curriculum/m2studio/images/WorldClock.png"
+                    }
+                  },
+                  {
+                    "id": "kdgkHdGz7X0tiWju",
+                    "title": "Distribution of Global Population 2021 by continent",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/GlobalDist.png",
+                      "filename": "curriculum/m2studio/images/GlobalDist.png"
+                    }
+                  },
+                  {
+                    "id": "LwLreJIOQt4jGY6N",
+                    "title": "Population by age bracket around the world, 2022",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/PopAges.png",
+                      "filename": "curriculum/m2studio/images/PopAges.png"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "diagram",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "n1VqWVhmPdh7Yla0",
+                    "title": "Text 6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><em>Model meaningful relationships between and among the variables important to your problem context using the diagram tile.</em></p><p>(   ) Create variable cards by clicking on the <strong>Create Variable</strong> button. Then you should see a pop up that asks you to provide this information about the variable:</p><ul><li>Short name (No spaces, case sensitive, should be short but informative)</li><li>Description (Space to take a few notes to jog your memory. Long ideas should be in the text tile instead)</li><li>Units (Do you already have an idea of what the units should be? If this is an output variable, you can leave this blank)</li><li>Value (This is what you are temporarily setting this value to, if you have an idea. Be sure to keep good notes to explain how you chose this number! If this is an output variable, you can leave this blank)</li></ul><p>(   ) Create a variable card by dragging a blank variable from the toolbar <strong>Create Variable </strong>button and then edit the name, unit, and value directly on the card. </p><p>(   ) If you have already created variable chip in other tiles, you can insert them now using the <strong>Insert Variable(s)</strong> button.</p><p>(   ) You can use the <strong>Edit Variable</strong> button to see the pop-up screen and make changes to the notes about your variables. </p><p>(   ) If you believe that a variable has an impact on another variable, draw an arrow to connect them (click on the circle to the right of the card and then drag from there to another card).</p><p>(   ) Once cards are connected, the cards at the arrow end of the arrow will have a new field where you can enter an expression. Use your variable names, numbers, and operators to mathematically create your expression. If you write a valid expression, it will automatically calculate the values for you and create an output unit. Check both the value and unit to verify that everything makes sense. </p><p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "r8R3q6_aIIroLzYl",
+                    "title": "Toolbar buttons for the diagram tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Diagram.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Diagram.png"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "F6sAm5paq34JKYpQ",
+                  "title": "CellPhoneUse",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>How many people in the world are talking on their cell phones as you read this question?</strong></p><p><strong></strong></p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Cell Phone Use Drawing",
+                  "content": {"type": "Drawing", "objects": []}
+                },
+                {
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Cell Phone Use Model",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                }
+              ]
+            }
+          }
+        },
+        {
+          "description": "M2S Problem 3.5",
+          "ordinal": 5,
+          "title": "Mathematizing Part 1",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Introduction to Math Modeling in CLUE</h2>",
+                        "<p>CLUE has three important tools to let you do modeling. They are already present in your workspace. Here are guides to the buttons on each tool tile.</p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "cP2E6t6w3HOYTCUi",
+                    "title": "Toolbar buttons for the text tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Text.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Text.png"
+                    }
+                  },
+                  {
+                    "id": "ePTfYCm7Q-oWGR2R",
+                    "title": "Toolbar buttons for the drawing tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Drawing.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Drawing.png"
+                    }
+                  },
+                  {
+                    "id": "r8R3q6_aIIroLzYl",
+                    "title": "Toolbar buttons for the diagram tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Diagram.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Diagram.png"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "DefaultInstructions02172023",
+                  "title":"ExampleVarInstructions",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>My notes</strong></p>",
+                      "<p><em>Here is a space for you to take notes. Create variables using the variable tool on text tiles or drawing tiles, and develop your model in the diagram tile.</em></p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Mathematizing Drawing 1",
+                  "content": {"type": "Drawing", "objects": []}
+                },
+                {
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Mathematizing Diagram 1",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                }
+              ]
+            }
+          }
+        },
+        {
+          "description": "M2S Problem 3.6",
+          "ordinal": 6,
+          "title": "Mathematizing Part 2",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<h2>Introduction to Math Modeling in CLUE</h2>",
+                        "<p>CLUE has three important tools to let you do modeling. They are already present in your workspace. Here are guides to the buttons on each tool tile.</p>",
+                        "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "njCI4Wmr6eYNc5go",
+                    "title": "CLUE Toolbar",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/CLUEToolbar.png",
+                      "filename": "curriculum/m2studio/images/CLUEToolbar.png"
+                    }
+                  },
+                  {
+                    "id": "cP2E6t6w3HOYTCUi",
+                    "title": "Toolbar buttons for the text tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Text.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Text.png"
+                    }
+                  },
+                  {
+                    "id": "ePTfYCm7Q-oWGR2R",
+                    "title": "Toolbar buttons for the drawing tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Drawing.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Drawing.png"
+                    }
+                  },
+                  {
+                    "id": "r8R3q6_aIIroLzYl",
+                    "title": "Toolbar buttons for the diagram tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Diagram.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Diagram.png"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "DefaultInstructions02172023",
+                  "title":"ExampleVarInstructions",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>My notes</strong></p>",
+                      "<p><em>Here is a space for you to take notes. Create variables using the variable tool on text tiles or drawing tiles, and develop your model in the diagram tile.</em></p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Mathematizing Drawing 2",
+                  "content": {"type": "Drawing", "objects": []}
+                },
+                {
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Mathematizing Diagram 2",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                }
+              ]
+            }
+          }
+        },
+        {
+          "description": "M2S Problem 3.7",
+          "ordinal": 7,
+          "title": "Math Modeling Final Project",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "Ttl0eb3ZgxnuTIaD",
+                    "title": "TestModel_FinalProject",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Test your model</strong></p><p>It is time to test your model. Complete at least <u>three</u> tests. Then drag this tile into your workspace and answer the following questions:</p><p></p><p><u>Test 1</u></p><p>How are you testing your model? {Write your answer here}</p><p>What are your test results? {Write your answer here}</p><p>What do these results mean in the problem context? {Write your answer here}</p><p></p><p><u>Test 2</u></p><p>How are you testing your model? {Write your answer here}</p><p>What are your test results? {Write your answer here}</p><p>What do these results mean in the problem context? {Write your answer here}</p><p></p><p><u>Test 3</u></p><p>How are you testing your model? {Write your answer here}</p><p>What are your test results? {Write your answer here}</p><p>What do these results mean in the problem context? {Write your answer here}</p><p></p><p>Feel free to add more tests.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "nbTrPHfoC-NSGgBg",
+                    "title": "CompareModel_FinalProject",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Compare your model with the initial model</strong></p><p>Explain how your model compares with the initial model. </p><p>{Write your answer here}</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "m5g_CqB8YPf-WF_V",
+                    "title": "GeneralizeModel_FinalProject",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Generalize your model</strong></p><p>Explain how your model can be used to solve similar problems. Describe an example.</p><p>{Write your answer here}</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "nOJeRQ3yJUqSvVrg",
+                  "title": "AnalyzeModel_FinalProject",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Analyze the initial model</strong></p><ul><li>What concerns do you have about the initial model?</li><li>Bold the concerns that you will try to fix in your revision.</li></ul><p>{Write your answer here}</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "R-rvC2XAZcNLC1-N",
+                  "title": "Assumptions_FinalProject",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Assumptions and variables</strong></p><p>What assumptions AND variables are you using in your model?</p><p>{Write your answer here}</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Final Project Drawing",
+                  "content": {"type": "Drawing", "objects": []}
+                },
+                {
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Final Project Diagram",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
                 }
               ]
             }

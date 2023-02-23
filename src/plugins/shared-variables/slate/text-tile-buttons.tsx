@@ -97,6 +97,7 @@ export const NewVariableTextButton = observer(function NewVariableTextButton(
       insertTextVariable(variable, editor);
     },
     sharedModel, namePrefill,
+    noUndo: true,
     onClose: () => handleClose(editor)
   });
   const handleClick = (event: React.MouseEvent) => {
