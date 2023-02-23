@@ -826,7 +826,7 @@
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>Your research question: (What do you want know?)</p>",
+                        "<p>Your research question: (What do you want to know?)</p>",
                         "<p></p>"
                       ]
                     }
