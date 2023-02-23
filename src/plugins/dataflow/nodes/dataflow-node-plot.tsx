@@ -29,17 +29,18 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
   const handleClickScalar = (newScalar: number) => {
     setScalar((oldVal) => oldVal * newScalar);
   };
+
   const scaleBtnColorClass= props.data.name.charAt(0).toLowerCase() + props.data.name.slice(1);
 
   return (
     <div className="node-bottom-section">
       <div className="node-bottom-buttons">
         <button
-          className={`scale-buttons ${scaleBtnColorClass} plus`} onClick={() => handleClickScalar(1.25)}>
+          className={`scale-buttons ${scaleBtnColorClass} plus`} onClick={() => handleClickScalar(0.9)}>
           +
         </button>
         <button
-          className={`scale-buttons ${scaleBtnColorClass} minus`} onClick={() => handleClickScalar(0.8)}>
+          className={`scale-buttons ${scaleBtnColorClass} minus`} onClick={() => handleClickScalar(1.1)}>
           -
         </button>
       </div>
@@ -115,7 +116,7 @@ function lineOptions(node: any, scalar: number) {
           display: true,
           stepSize: stepY,
           max: node.data.dsMax * scalar,
-          min: node.data.dsMin,
+          min: node.data.dsMin * scalar,
           maxTicksLimit: 3,
           minRotation: 0,
           maxRotation: 0,
