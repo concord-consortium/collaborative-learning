@@ -15,6 +15,11 @@ export interface MinigraphOptions {
   borderColor?: string;
 }
 
+enum Zoom {
+  In,
+  Out
+}
+
 export const defaultMinigraphOptions: MinigraphOptions = {
   backgroundColor: NodePlotColor,
   borderColor: NodePlotColor
@@ -23,40 +28,82 @@ export const defaultMinigraphOptions: MinigraphOptions = {
 let stepY = 5;
 
 export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
-  const [scalar, setScalar] = useState(1);
+  // const [offset, setOffset] = useState(0);
   if (!props.display) return null;
 
-  const handleClickScalar = (newScalar: number) => {
-    setScalar((oldVal) => oldVal * newScalar);
+  const handleClickOffset = (zoomDir: Zoom) => {
+    // console.log("-------CLICK START----------");
+    // console.log("handleClickOffset > props.dta.data.tickMax:", props.data.data.tickMax);
+    // console.log("handleClickOffset > props.dta.data.dsMax:", props.data.data.dsMax);
+    const max = props.data.data.tickMax || props.data.data.dsMax;
+    // console.log("handleClickOffset > max:", max);
+    const min = props.data.data.tickMin || props.data.data.dsMin;
+    // console.log("handleClickOffset > min:", min);
+    const difference = Math.abs(max - min);
+    console.log("handleClickOffset > difference:", difference);
+    const offset = 0.1 * difference;
+
+    if (zoomDir === Zoom.In ){
+      console.log("zoomIn > offset in tickMax", offset);
+
+      props.data.data.tickMax = props.data.data.tickMax ?
+                                props.data.data.tickMax - offset :
+                                props.data.data.dsMax - offset;
+
+      // if (min < 0) {
+      //   console.log("zoomIn, our minimum tick is negative");
+      //   offset = offset * -1;
+      // }
+      console.log("zoomIn > offset in tickMin", offset);
+
+      props.data.data.tickMin = props.data.data.tickMin ?
+                                props.data.data.tickMin + offset :
+                                props.data.data.dsMin + offset;
+    }
+    if (zoomDir === Zoom.Out){
+      props.data.data.tickMax = props.data.data.tickMax ?
+                                props.data.data.tickMax + offset :
+                                props.data.data.dsMax + offset;
+      props.data.data.tickMin = props.data.data.tickMin ?
+                                props.data.data.tickMin - offset :
+                                props.data.data.dsMin - offset;
+    }
   };
 
   const scaleBtnColorClass= props.data.name.charAt(0).toLowerCase() + props.data.name.slice(1);
+
+
 
   return (
     <div className="node-bottom-section">
       <div className="node-bottom-buttons">
         <button
-          className={`scale-buttons ${scaleBtnColorClass} plus`} onClick={() => handleClickScalar(0.9)}>
+          className={`scale-buttons ${scaleBtnColorClass} plus`} onClick={() => handleClickOffset(Zoom.In)}>
           +
         </button>
         <button
-          className={`scale-buttons ${scaleBtnColorClass} minus`} onClick={() => handleClickScalar(1.1)}>
+          className={`scale-buttons ${scaleBtnColorClass} minus`} onClick={() => handleClickOffset(Zoom.Out)}>
           -
         </button>
       </div>
       <div className="node-graph">
+        {/* {console.log("------render start----------")} */}
+        {/* {console.log("props:", props)} */}
+
         <Line
-          data={lineData(props.data, scalar)}
-          options={lineOptions(props.data, scalar)}
+          data={lineData(props.data)}
+          options={lineOptions(props.data)}
           redraw={true}
         />
+        {/* {console.log("------render end----------")} */}
+
       </div>
     </div>
   );
 };
 
 
-function lineData(node: any, scalar: number) {
+function lineData(node: any) {
   const chartDataSets: ChartDataSets[] = [];
   Object.keys(node.data.watchedValues).forEach((valueKey: string) => {
     const recentValues: any = node.data.recentValues?.[valueKey];
@@ -86,18 +133,22 @@ function lineData(node: any, scalar: number) {
       chartDataSets.push(dataset);
     }
   });
-  stepY = ((node.data.dsMax * scalar) - node.data.dsMin) / 2;
+
+  stepY = (node.data.dsMax  - node.data.dsMin) / 2;
+  if (node.name === "Sensor"){
+    console.log("Sensor stepY:", stepY);
+
+  }
 
   const chartData: ChartData = {
     labels: new Array(MAX_NODE_VALUES).fill(undefined).map((val,idx) => idx),
     datasets: chartDataSets
   };
-
   return chartData;
 }
 
 
-function lineOptions(node: any, scalar: number) {
+function lineOptions(node: any) {
   const options: ChartOptions = {
     animation: {
       duration: 0
@@ -115,8 +166,8 @@ function lineOptions(node: any, scalar: number) {
           fontSize: 9,
           display: true,
           stepSize: stepY,
-          max: node.data.dsMax * scalar,
-          min: node.data.dsMin * scalar,
+          max: node.data.tickMax || node.data.dsMax,
+          min: node.data.tickMin || node.data.dsMin,
           maxTicksLimit: 3,
           minRotation: 0,
           maxRotation: 0,
@@ -136,6 +187,16 @@ function lineOptions(node: any, scalar: number) {
       }]
     },
   };
+
+  if (options.scales?.yAxes){
+    const obj = options.scales?.yAxes[0];
+    if (obj.ticks){
+      // console.log("in lineOptions > max:", obj.ticks.max);
+      // console.log("in lineOptions > min:", obj.ticks.min);
+
+    }
+  }
+
 
 
   return options;
