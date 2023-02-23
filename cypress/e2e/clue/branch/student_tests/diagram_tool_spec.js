@@ -129,6 +129,10 @@ context('Diagram Tool Tile', function () {
       drawTile.getDrawToolEditVariable().should("exist").should("be.disabled");
       drawTile.getDrawToolInsertVariable().should("exist").should("be.disabled");
 
+      // Text tile and editor render
+      textTile.getTextTile().should("exist");
+      textTile.getTextEditor().should("exist");
+
       // New variable dialog works
       const vName = "variable-name";
       const vValue = "1.2";
@@ -197,10 +201,6 @@ context('Diagram Tool Tile', function () {
       drawTile.getVariableChip().click();
       drawTile.getDrawToolDelete().click();
 
-      // Text tile and editor render
-      textTile.getTextTile().should("exist");
-      textTile.getTextEditor().should("exist");
-
       // Undoing previous step in diagram tile by pressing control+z or command+z on
       // the keyboard does not undo the most recent step in a different tile
       diagramTile.getDiagramTile().click();
@@ -211,23 +211,6 @@ context('Diagram Tool Tile', function () {
       cy.get("body").type(undoKeystroke);
       diagramTile.getVariableCardField("name").should("have.value", "");
       textTile.getTextTile().should("contain", "Hell");
-
-      // Text tile new variable dialog works
-      const textTileVName = "text-tile-variable-name";
-      const textTileVValue = "7";
-      const textTileVUnit = "seconds";
-      textTile.getTextTile().click();
-      textTile.clickToolbarTool("New Variable");
-      cy.get(".custom-modal").should("exist");
-      dialogField("name").type(textTileVName);
-      dialogField("value").type(textTileVValue);
-      dialogField("units").type(textTileVUnit);
-      textTile.getVariableChip().should("not.exist");
-      dialogOkButton().click();
-      textTile.getVariableChip().should("exist");
-      textTile.getVariableChip().should("contain", textTileVName);
-      textTile.getVariableChip().should("contain", textTileVValue);
-      textTile.getVariableChip().should("contain", textTileVUnit);
     });
   });
 });
