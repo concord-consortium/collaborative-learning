@@ -39,9 +39,9 @@ context('Text tool tile functionalities', function(){
         textToolTile.getTextTile().last().should('not.contain', 'delete');
     });
     // FIXME: For some reason that only seems present in these tests, we have to add seemingly
-    // superfluous line breaks before applying each text format. If we don't, the descendents
-    // we're checking for either don't get added, or get added in a somewhat meaningless way
-    // (e.g., `<em></em> This should be italic`). This issue doesn't exist in the browser.
+    // superfluous spaces and line breaks before applying each text format. If we don't, the
+    // elements we're checking for either don't get added, or get added in a somewhat meaningless
+    // way (e.g., `<em></em> This should be italic`). This issue doesn't exist in the browser.
     it('has a toolbar that can be used', function(){
         textToolTile.clickToolbarTool("Bold");
         textToolTile.enterText('{end} {enter}');

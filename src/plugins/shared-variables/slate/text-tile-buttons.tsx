@@ -26,12 +26,12 @@ export function insertTextVariable(variable: VariableType, editor?: Editor) {
   }
 
   // To calculate where to place the cursor before inserting the variable chip, we need
-  // to know the length (i.e., character count) of any selected text. Note that the number
-  // corresponding to the start of a selection can be higher than the number corresponding
-  // to the end of a selection if the user selects the text from right to left.
+  // to know the length of any selected text. Note that the number corresponding to the
+  // start of a selection can be higher than the number corresponding to the end if the
+  // user selects the text from right to left.
   const selectionStart = editor.selection?.anchor.offset || 0;
   const selectionEnd = editor.selection?.focus.offset || 0;
-  const selectionLength = Math.abs(selectionEnd - selectionStart);
+  const selectionLength = Math.abs(selectionEnd - selectionStart); // ensure it's a positive number
   Transforms.move(editor, { distance: selectionLength, unit: "character", edge: "start" });
 
   const newNodes = [];
