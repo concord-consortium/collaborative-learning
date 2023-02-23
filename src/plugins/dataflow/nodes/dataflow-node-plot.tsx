@@ -50,10 +50,6 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
                                 props.data.data.tickMax - offset :
                                 props.data.data.dsMax - offset;
 
-      // if (min < 0) {
-      //   console.log("zoomIn, our minimum tick is negative");
-      //   offset = offset * -1;
-      // }
       console.log("zoomIn > offset in tickMin", offset);
 
       props.data.data.tickMin = props.data.data.tickMin ?
@@ -126,9 +122,9 @@ function lineData(node: any) {
         }
       });
       const localMax = Math.max(...chData);
-      node.data.dsMax = ((node.data.dsMax) ? Math.max(localMax, node.data.dsMax) : localMax);
+      node.data.dsMax = ((node.data.dsMax !== undefined) ? Math.max(localMax, node.data.dsMax) : localMax);
       const localMin = Math.min(...chData);
-      node.data.dsMin = ((node.data.dsMin) ? Math.min(localMin, node.data.dsMin) : localMin);
+      node.data.dsMin = ((node.data.dsMin !== undefined) ? Math.min(localMin, node.data.dsMin) : localMin);
       dataset.data = chData;
       chartDataSets.push(dataset);
     }
@@ -137,7 +133,7 @@ function lineData(node: any) {
   stepY = (node.data.dsMax  - node.data.dsMin) / 2;
   if (node.name === "Sensor"){
     console.log("Sensor stepY:", stepY);
-
+    console.log("node.data.dsMin: ", node.data.dsMin);
   }
 
   const chartData: ChartData = {
@@ -149,6 +145,9 @@ function lineData(node: any) {
 
 
 function lineOptions(node: any) {
+  const max = node.data.tickMax || node.data.dsMax;
+  const min = node.data.tickMin || node.data.dsMin;
+
   const options: ChartOptions = {
     animation: {
       duration: 0
@@ -166,8 +165,8 @@ function lineOptions(node: any) {
           fontSize: 9,
           display: true,
           stepSize: stepY,
-          max: node.data.tickMax || node.data.dsMax,
-          min: node.data.tickMin || node.data.dsMin,
+          max: (max === min) ? max + 1 : max,
+          min: (max === min) ? min - 1 : min,
           maxTicksLimit: 3,
           minRotation: 0,
           maxRotation: 0,
