@@ -25,7 +25,6 @@ export abstract class DataflowReteNodeFactory extends Rete.Component {
     // The key is the id of the control
     // The value is options related to the value, currently just for the minigraph
     node.data.watchedValues = {"nodeValue": defaultMinigraphOptions};
-    console.log("<DataflowReteNodeFactory > defaultBuilder > return ");
     return node;
   }
 }

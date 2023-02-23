@@ -75,14 +75,14 @@ const NewVaribleButton = ({ handleClick, tileId }: INewVariableButton) => {
   // Because the button is draggable, it can no longer be clicked.
   // Instead, we check to see if it's dropped on itself, and if it is we "click" it.
   const droppableId = `${kNewVariableButtonDroppableId}-${tileId}`;
-  console.log("draggableId", draggableId);
-
+  // console.log("draggableId", draggableId);
   const droppableInfo = useDroppable({ id: droppableId }); //called in a functional component
   const setDroppableNodeRef = droppableInfo.setNodeRef;
   useDndMonitor({
     onDragEnd: (event: DragEndEvent) => {
       console.log("diagram-toolbar.tsx > onDragEnd");
       if (event.over?.id === droppableId && event.active.id === draggableId) {
+        console.log("diagram-toolbar.tsx > onDragEnd > inside If");
         handleClick();
       }
     }
@@ -91,8 +91,12 @@ const NewVaribleButton = ({ handleClick, tileId }: INewVariableButton) => {
   return (
     <div ref={setDroppableNodeRef}>
       <div ref={setNodeRef} {...attributes} {...listeners} >
-        <SvgToolbarButton SvgIcon={AddVariableCardIcon} buttonClass="button-add-variable" title="New Variable"
-          onClick={handleClick} />
+        <SvgToolbarButton
+          SvgIcon={AddVariableCardIcon}
+          buttonClass="button-add-variable"
+          title="New Variable"
+          onClick={handleClick}
+        />
       </div>
       <DragOverlay>
         { ui.dragId === draggableId.toString()
@@ -202,6 +206,8 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
   handleInsertVariableClick, hideNavigator, handleNewVariableClick, interactionLocked, onIsEnabled, tileId,
   toggleInteractionLocked, toggleNavigator,  ...others
 }) => {
+
+  console.log("<DiagramToolBar> with tileId", tileId);
   const root = content?.root;
   const selectedVariable = root?.selectedNode?.variable;
 
