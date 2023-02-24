@@ -215,23 +215,18 @@ export class SensorSelectControl extends Rete.Control {
         this.emitter.trigger("process");
       },
       onSensorDropdownClick: (v: any) => {
-        console.log("onSensorDropDownClick");
         this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showSensorList = !this.props.showSensorList;
         this.props.showTypeList = false;
         (this as any).update();
       },
       onTypeDropdownClick: (v: any) => {
-        console.log("onTypeDropDownClick");
-
         this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showTypeList = !this.props.showTypeList;
         this.props.showSensorList = false;
         (this as any).update();
       },
       onTypeOptionClick: (v: any) => () => {
-        console.log("onTypeOptionClick");
-
         this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showTypeList = !this.props.showTypeList;
         this.props.showSensorList = false;
@@ -244,8 +239,6 @@ export class SensorSelectControl extends Rete.Control {
         dataflowLogEvent("selectsensortype", changeObj, tileId);
       },
       onSensorOptionClick: (v: any) => () => {
-        console.log("onSensorOptionClick");
-
         this.emitter.trigger("selectnode", { node: this.getNode() });
         this.props.showSensorList = !this.props.showSensorList;
         this.props.showTypeList = false;
@@ -270,7 +263,6 @@ export class SensorSelectControl extends Rete.Control {
   };
 
   public setSensorType = (val: any) => {
-    console.log("setSensorType");
     this.setSensor("none");
     this.props.type = val;
     this.putData("type", val);
