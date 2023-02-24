@@ -27,7 +27,7 @@ function processCommentEventParams(params: ILogComment, context: IContext) {
     const [_unit, facet, _investigation, _problem, section] = parseSectionPath(documentId) || [];
     const curriculumStore = facet === "guide" ?  context.teacherGuide : context.problem;
     const tileType = tileId && curriculumStore?.getSectionById(section)?.content?.getTileType(tileId);
-    const tileTitle = tileId && curriculumStore?.getSectionById(section)?.content?.getTileTitle(tileId) || "<no title>";
+    const tileTitle = tileId && curriculumStore?.getSectionById(section)?.content?.getTileTitle(tileId);
     return { curriculum: documentId, tileId, tileTitle, tileType, ...others };
   }
 
