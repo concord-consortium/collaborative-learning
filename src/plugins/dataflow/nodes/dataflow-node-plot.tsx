@@ -28,34 +28,23 @@ export const defaultMinigraphOptions: MinigraphOptions = {
 let stepY = 5;
 
 export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
-  // const [offset, setOffset] = useState(0);
   if (!props.display) return null;
 
   const handleClickOffset = (zoomDir: Zoom) => {
-    // console.log("-------CLICK START----------");
-    // console.log("handleClickOffset > props.dta.data.tickMax:", props.data.data.tickMax);
-    // console.log("handleClickOffset > props.dta.data.dsMax:", props.data.data.dsMax);
     const max = props.data.data.tickMax || props.data.data.dsMax;
-    // console.log("handleClickOffset > max:", max);
     const min = props.data.data.tickMin || props.data.data.dsMin;
-    // console.log("handleClickOffset > min:", min);
     const difference = Math.abs(max - min);
-    console.log("handleClickOffset > difference:", difference);
     const offset = 0.1 * difference;
 
     if (zoomDir === Zoom.In ){
-      console.log("zoomIn > offset in tickMax", offset);
-
       props.data.data.tickMax = props.data.data.tickMax ?
                                 props.data.data.tickMax - offset :
                                 props.data.data.dsMax - offset;
-
-      console.log("zoomIn > offset in tickMin", offset);
-
       props.data.data.tickMin = props.data.data.tickMin ?
                                 props.data.data.tickMin + offset :
                                 props.data.data.dsMin + offset;
     }
+
     if (zoomDir === Zoom.Out){
       props.data.data.tickMax = props.data.data.tickMax ?
                                 props.data.data.tickMax + offset :
@@ -83,16 +72,11 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
         </button>
       </div>
       <div className="node-graph">
-        {/* {console.log("------render start----------")} */}
-        {/* {console.log("props:", props)} */}
-
         <Line
           data={lineData(props.data)}
           options={lineOptions(props.data)}
           redraw={true}
         />
-        {/* {console.log("------render end----------")} */}
-
       </div>
     </div>
   );
@@ -131,15 +115,12 @@ function lineData(node: any) {
   });
 
   stepY = (node.data.dsMax  - node.data.dsMin) / 2;
-  if (node.name === "Sensor"){
-    console.log("Sensor stepY:", stepY);
-    console.log("node.data.dsMin: ", node.data.dsMin);
-  }
 
   const chartData: ChartData = {
     labels: new Array(MAX_NODE_VALUES).fill(undefined).map((val,idx) => idx),
     datasets: chartDataSets
   };
+
   return chartData;
 }
 
@@ -186,17 +167,6 @@ function lineOptions(node: any) {
       }]
     },
   };
-
-  if (options.scales?.yAxes){
-    const obj = options.scales?.yAxes[0];
-    if (obj.ticks){
-      // console.log("in lineOptions > max:", obj.ticks.max);
-      // console.log("in lineOptions > min:", obj.ticks.min);
-
-    }
-  }
-
-
 
   return options;
 }
