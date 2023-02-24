@@ -9,9 +9,6 @@ function getTileModel(tileContentModel: IAnyStateTreeNode) {
   if (!hasParentOfType(tileContentModel, TileModel)) {
     // we aren't attached in the right place yet
     return undefined;
-
-
-
   }
   return getParentOfType(tileContentModel, TileModel);
 }

@@ -439,7 +439,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     tileIds.forEach(tileId => idMap[tileId] = uniqueId());
 
     const content = getDocumentContentFromNode(model);
-
     tileIds.forEach(tileId => {
       const srcTile = content?.getTile(tileId) || (tileId === model.id ? model : undefined);
       if (srcTile) {
