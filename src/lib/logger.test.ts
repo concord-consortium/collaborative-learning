@@ -357,7 +357,7 @@ describe("authed logger", () => {
         tileType: tileToCopy.content.type
       };
 
-      const emptySharedModels: SharedModelType[] = []
+      const emptySharedModels: SharedModelType[] = [];
 
       destinationDocument.content!.userCopyTiles([copyTileInfo], { rowInsertIndex: 0 }, emptySharedModels);
     });
