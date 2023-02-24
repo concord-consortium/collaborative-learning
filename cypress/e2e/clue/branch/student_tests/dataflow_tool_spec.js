@@ -35,6 +35,18 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getNumberField().type("3{enter}");
         dataflowToolTile.getNumberField().should("have.value", "3");
       });
+
+      //TO DO: write a test that can check min and max (should be 0 and 3)
+      // could be in class .chartjs-size-monitor
+
+      it("can click zoom in positive button", () => {
+        dataflowToolTile.getShowGraphButton(nodeType).click(); //open minigraph
+        dataflowToolTile.getShowZoomInButton(nodeType).click();
+      });
+      it("can click zoom out negative button", () => {
+        dataflowToolTile.getShowZoomOutButton(nodeType).click();
+        dataflowToolTile.getShowGraphButton(nodeType).click(); //close minigraph
+      });
       it("can delete number node", () => {
         dataflowToolTile.getDeleteNodeButton(nodeType).click();
         dataflowToolTile.getNode(nodeType).should("not.exist");
