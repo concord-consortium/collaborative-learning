@@ -46,9 +46,7 @@ export const useNewVariableDialog = ({
 
   // Wrap useCustomModal's show so we can prefill with variable description
   const showModal = useCallback(() => {
-    if (descriptionPrefill) {
-      newVariable.setDescription(descriptionPrefill);
-    }
+    newVariable.setDescription(descriptionPrefill ?? "");
     show();
   }, [descriptionPrefill, newVariable, show]);
 
