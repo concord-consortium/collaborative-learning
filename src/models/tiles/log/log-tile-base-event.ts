@@ -1,5 +1,6 @@
 import { Logger } from "../../../lib/logger";
 import { LogEventName } from "../../../lib/logger-types";
+import { getTileTitleForLogging } from "../../../lib/logger-utils";
 import { DocumentModelType } from "../../document/document";
 import { isDocumentLogEvent, logDocumentEvent } from "../../document/log-document-event";
 
@@ -15,7 +16,7 @@ export function isTileBaseEvent(params: Record<string, any>): params is ITileBas
 function processTileBaseEventParams(params: ITileBaseLogEvent) {
   const { document, tileId, ...others } = params;
   const sectionId = document?.content?.getSectionIdForTile(tileId);
-  const tileTitle = document?.content?.getTileTitle(tileId);
+  const tileTitle = getTileTitleForLogging(tileId, document);
   return { document, tileId, sectionId, tileTitle, ...others };
 }
 

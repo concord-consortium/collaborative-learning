@@ -1,5 +1,6 @@
 import { Logger } from "../../../lib/logger";
 import { LogEventName } from "../../../lib/logger-types";
+import { getTileTitleForLogging } from "../../../lib/logger-utils";
 import { DocumentsModelType } from "../../stores/documents";
 import { ITileModel } from "../tile-model";
 import { logTileDocumentEvent } from "./log-tile-document-event";
@@ -18,7 +19,7 @@ function processTileCopyEventParams(params: ITileCopyLogEvent, context: IContext
   const { originalTileId, ...others } = params;
   const srcDocument = context.documents.findDocumentOfTile(originalTileId) ||
                       context.networkDocuments.findDocumentOfTile(originalTileId);
-  const originalTileTitle = srcDocument?.content?.getTileTitle(originalTileId);
+  const originalTileTitle = getTileTitleForLogging(originalTileId, srcDocument);
   const srcProps = srcDocument
                     ? {
                       sourceUsername: srcDocument.uid,
