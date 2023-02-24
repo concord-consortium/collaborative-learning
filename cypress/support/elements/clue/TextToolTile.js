@@ -25,5 +25,9 @@ class TextToolTile {
         // sometimes Ctrl-
         cy.get(`.primary-workspace .text-toolbar [data-original-title^="${titlePrefix}"]`).click();
     }
+
+    getVariableChip() {
+      return cy.get('.primary-workspace [data-testid=ccrte-editor] .slate-variable-chip .variable-chip');
+    }
 }
 export default TextToolTile;
