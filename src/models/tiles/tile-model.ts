@@ -7,6 +7,7 @@ import { ITileContentModel } from "./tile-content";
 import { DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 import { StringBuilder } from "../../utilities/string-builder";
+import { SharedModelType } from "../shared/shared-model";
 
 // generally negotiated with app, e.g. single column width for table
 export const kDefaultMinWidth = 60;
@@ -18,13 +19,12 @@ export interface IDragTileItem {
   tileId: string;       // original tile id
   tileContent: string;  // modified tile contents
   tileType: string;
-  //sharedModels?: Array<any>;
 }
 
-export interface IDragTiles {
+export interface IDragTilesData {
   sourceDocId: string;
-  items: IDragTileItem[]; // DRAG - change this key to "tiles"
-  sharedModels: any[] | undefined
+  tiles: IDragTileItem[];
+  sharedModels: SharedModelType[]
 }
 
 export function cloneTileSnapshotWithoutId(tile: ITileModel) {

@@ -8,7 +8,7 @@ import { transformCurriculumImageUrl } from "../../models/tiles/image/image-impo
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import {
-  cloneTileSnapshotWithNewId, IDragTileItem, IDragTiles, ITileModel
+  cloneTileSnapshotWithNewId, IDragTileItem, IDragTilesData, ITileModel
 } from "../../models/tiles/tile-model";
 import { BaseComponent } from "../base";
 import PlaceholderTileComponent from "./placeholder/placeholder-tile";
@@ -395,14 +395,14 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     // dragging a tile selects it first
     ui.setSelectedTile(model, { append: hasSelectionModifier(e) });
 
-    const dragTiles: IDragTiles = {
+    const dragTiles: IDragTilesData = {
       sourceDocId: docId,
-      items: this.getDragTileItems(dragSrcContentId, ui.selectedTileIds),
-      sharedModels: tileSharedModels
+      tiles: this.getDragTileItems(dragSrcContentId, ui.selectedTileIds),
+      sharedModels: tileSharedModels || []
     };
 
     // create a sorted array of selected tiles
-    dragTiles.items.sort((a, b) => {
+    dragTiles.tiles.sort((a, b) => {
       if (a.rowIndex < b.rowIndex) return -1;
       if (a.rowIndex > b.rowIndex) return 1;
       if (a.tileIndex < b.tileIndex) return -1;
@@ -416,8 +416,8 @@ export class TileComponent extends BaseComponent<IProps, IState> {
 
     // to support existing geometry and drawing layer drop logic set the single tile drag fields
     // if only 1 tile is selected
-    if (dragTiles.items.length === 1) {
-      const dragTile = dragTiles.items[0];
+    if (dragTiles.tiles.length === 1) {
+      const dragTile = dragTiles.tiles[0];
       e.dataTransfer.setData(kDragTileId, dragTile.tileId);
       e.dataTransfer.setData(kDragTileContent, dragTile.tileContent);
       e.dataTransfer.setData(dragTileType(model.content.type), dragTile.tileType);

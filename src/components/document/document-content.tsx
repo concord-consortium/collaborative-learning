@@ -12,7 +12,7 @@ import { DocumentContentModelType, IDragToolCreateInfo } from "../../models/docu
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
 import { IDropRowInfo } from "../../models/document/tile-row";
-import { IDragTiles } from "../../models/tiles/tile-model";
+import { IDragTilesData } from "../../models/tiles/tile-model";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tiles/tile-component";
 import { safeJsonParse } from "../../utilities/js-utils";
@@ -395,12 +395,12 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     }
   };
 
-  private handleMoveTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTiles) => {
-    this.props.content?.userMoveTiles(dragTiles.items, this.getDropRowInfo(e));
+  private handleMoveTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTilesData: IDragTilesData) => {
+    this.props.content?.userMoveTiles(dragTilesData.tiles, this.getDropRowInfo(e));
   };
 
-  private handleCopyTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTiles) => {
-    this.props.content?.userCopyTiles(dragTiles.items, dragTiles.sharedModels, this.getDropRowInfo(e));
+  private handleCopyTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTilesData) => {
+    this.props.content?.userCopyTiles(dragTiles.tiles, this.getDropRowInfo(e), dragTiles.sharedModels);
   };
 
   private handleInsertNewTile = (e: React.DragEvent<HTMLDivElement>) => {
@@ -439,7 +439,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
     const dragTilesJson = e.dataTransfer.getData(kDragTiles);
     if (dragTilesJson) {
       try {
-        const dragTiles: IDragTiles = JSON.parse(dragTilesJson);
+        const dragTiles: IDragTilesData = JSON.parse(dragTilesJson);
         if ((dragTiles.sourceDocId === content.contentId) && !e.altKey) {
           this.handleMoveTilesDrop(e, dragTiles);
         }

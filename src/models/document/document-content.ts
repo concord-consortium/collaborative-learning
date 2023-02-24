@@ -905,7 +905,7 @@ export const DocumentContentModel = types
       });
       self.moveTiles(tiles, rowInfo);
     },
-    userCopyTiles(tiles: IDragTileItem[], sharedModels: any[] | undefined, rowInfo: IDropRowInfo) {
+    userCopyTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo, sharedModels ? : SharedModelType[] | undefined) {
       const dropRow = (rowInfo.rowDropIndex != null) ? self.getRowByIndex(rowInfo.rowDropIndex) : undefined;
       const results = dropRow?.acceptTileDrop(rowInfo)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
@@ -921,16 +921,16 @@ export const DocumentContentModel = types
       // Proof of concept
       // TODO iterate over results and sharedModels arrays + handle cases of multiple sharedModels
       // TODO check against existing sharedModelMap before updating, perhaps with dedicated model action
+      // TODO pckg should be named something else and has a type somewhere
       const newTileId = results[0]?.tileId;
-      const sharedMod = sharedModels as any;
-      const thisSharedModel = sharedMod[0];
 
-      if (newTileId){
+      if (newTileId && sharedModels){
         const pckg = {
-          sharedModel: thisSharedModel,
+          sharedModel: sharedModels[0],
           tiles: [newTileId]
         };
         self.sharedModelMap.set(newTileId, pckg);
+
       }
       return results;
     }
