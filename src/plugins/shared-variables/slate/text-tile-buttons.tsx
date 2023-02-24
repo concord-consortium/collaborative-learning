@@ -25,6 +25,7 @@ export function insertTextVariable(variable: VariableType, editor?: Editor) {
     return;
   }
 
+  // If any text is selected, move the insertion point to immediately after the selection.
   const selectionLength = editor.selection ? Editor.string(editor, editor.selection).length : 0;
   Transforms.move(editor, { distance: selectionLength, unit: "character", edge: "start" });
 
