@@ -133,6 +133,9 @@ export const DocumentContentModel = types
       getTileType(tileId: string) {
         return self.tileMap.get(tileId)?.content.type;
       },
+      getTileTitle(tileId: string) {
+        return self.tileMap.get(tileId)?.title ?? "<no title>";
+      },
       get rowCount() {
         return self.rowOrder.length;
       },

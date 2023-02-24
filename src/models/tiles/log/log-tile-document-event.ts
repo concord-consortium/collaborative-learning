@@ -21,8 +21,7 @@ function processTileDocumentEventParams(params: ITileDocumentLogEvent, context: 
   const document = context.documents.findDocumentOfTile(tileId) ||
                     context.networkDocuments.findDocumentOfTile(tileId);
   const legacyTileProps = { objectId: tileId, objectType: tileType, serializedObject: getSnapshot(content) };
-  const tile = document?.content?.getTile(tileId);
-  const tileTitle = tile?.title ?? "<no title>";
+  const tileTitle = document?.content?.getTileTitle(tileId) ?? "<no title>";
   return { document, tileId, tileType, ...legacyTileProps, tileTitle, ...others };
 }
 
