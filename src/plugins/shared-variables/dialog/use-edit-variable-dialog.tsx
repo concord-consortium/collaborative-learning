@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { getSnapshot } from "mobx-state-tree";
 import { EditVariableDialogContent, updateVariable, Variable, VariableType } from "@concord-consortium/diagram-view";
 
@@ -12,7 +12,17 @@ interface IProps {
   onClose?: () => void;
 }
 export const useEditVariableDialog = ({ variable, onClose }: IProps) => {
-  const variableClone = useMemo(() => Variable.create(variable ? getSnapshot(variable) : {}), [variable]);
+  // We use a clone of the variable for the edit dialog so the user can modify its properties, but those
+  // changes won't be saved unless the Save button is pushed. We also cache variableClone with useMemo to
+  // minimize the number of times it's recreated. These two things cause two side effects:
+  // 1. If changes made in the dialog are not saved, variableClone will no longer match variable.
+  // 2. Changes made to a variable's properties in a variable card will not cause useMemo to recreate
+  // variableClone because useMemo only does a shallow comparison of objects in its dependency array.
+  // To address both issues, every time the dialog is opened, we increment a counter that is used as a
+  // dependency in the useMemo call.
+  const [count, setCount] = useState(1);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const variableClone = useMemo(() => Variable.create(variable ? getSnapshot(variable) : {}), [variable, count]);
 
   const handleClick = () => {
     if (variable) {
@@ -37,7 +47,12 @@ export const useEditVariableDialog = ({ variable, onClose }: IProps) => {
       }
     ],
     onClose
-  }, [variable]);
+  }, [variable, variableClone, count]);
 
-  return [showModal, hideModal];
+  const _showModal = () => {
+    setCount(c => c + 1);
+    showModal?.();
+  };
+
+  return [_showModal, hideModal];
 };
