@@ -15,7 +15,7 @@ export function isTileBaseEvent(params: Record<string, any>): params is ITileBas
 function processTileBaseEventParams(params: ITileBaseLogEvent) {
   const { document, tileId, ...others } = params;
   const sectionId = document?.content?.getSectionIdForTile(tileId);
-  const tileTitle = document?.content?.getTileTitle(tileId) ?? "<no title>";
+  const tileTitle = document?.content?.getTileTitle(tileId);
   return { document, tileId, sectionId, tileTitle, ...others };
 }
 

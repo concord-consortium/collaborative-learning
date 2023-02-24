@@ -20,7 +20,7 @@ function processTileChangeEvent(params: ITileChangeLogEvent, context: IContext) 
   const document = context.documents.findDocumentOfTile(tileId) ||
                     context.networkDocuments.findDocumentOfTile(tileId);
   const legacyChangeProps = { toolId: tileId, operation, ...change };
-  const tileTitle = document?.content?.getTileTitle(tileId) ?? "<no title>";
+  const tileTitle = document?.content?.getTileTitle(tileId);
   return { document, tileId, ...legacyChangeProps, tileTitle, ...others };
 }
 

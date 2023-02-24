@@ -34,7 +34,7 @@ function processCommentEventParams(params: ILogComment, context: IContext) {
   const document = documents.getDocument(documentId) || networkDocuments.getDocument(documentId);
   if (document) {
     const tileType = tileId ? document.content?.getTileType(tileId) : undefined;
-    const tileTitle = document?.content?.getTileTitle(tileId) ?? "<no title>";
+    const tileTitle = document?.content?.getTileTitle(tileId);
     return { document, tileId, tileTitle, tileType, ...others };
   }
 

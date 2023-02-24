@@ -18,7 +18,7 @@ function processTileCopyEventParams(params: ITileCopyLogEvent, context: IContext
   const { originalTileId, ...others } = params;
   const srcDocument = context.documents.findDocumentOfTile(originalTileId) ||
                       context.networkDocuments.findDocumentOfTile(originalTileId);
-  const originalTileTitle = srcDocument?.content?.getTileTitle(originalTileId) ?? "<no title>";
+  const originalTileTitle = srcDocument?.content?.getTileTitle(originalTileId);
   const srcProps = srcDocument
                     ? {
                       sourceUsername: srcDocument.uid,
