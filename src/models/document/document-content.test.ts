@@ -114,8 +114,12 @@ describe("DocumentContentModel", () => {
           { title: "Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
-        { title: "Table 1", content: { type: "Table",
-          columns: [{ name: "x", width: kDefaultColumnWidth }, { name: "y", width: kDefaultColumnWidth }] } },
+        { title: "Table 1",
+          content: {
+            type: "Table",
+            /* columns: [{ name: "x", width: kDefaultColumnWidth }, { name: "y", width: kDefaultColumnWidth }] */
+          }
+        },
         { title: "Drawing 1", content: { type: "Drawing", objects: [] } }
       ]
     });
@@ -1056,10 +1060,10 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
           {
             content: {
               type: "Table",
-              columns: [
-                { name: "x", width: kDefaultColumnWidth, values: [1, 2, 3] },
-                { name: "y", width: kDefaultColumnWidth, values: [2, 4, 6] }
-              ]
+              // columns: [
+              //   { name: "x", width: kDefaultColumnWidth, values: [1, 2, 3] },
+              //   { name: "y", width: kDefaultColumnWidth, values: [2, 4, 6] }
+              // ]
             }
           },
           { content: { type: "Image", url: "image/url" } }
