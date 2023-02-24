@@ -197,6 +197,11 @@
         "isTileTool": true
       },
       {
+        "id": "Geometry",
+        "title": "Geometry",
+        "isTileTool": true
+      },
+      {
         "id": "Table",
         "title": "Table",
         "isTileTool": true
