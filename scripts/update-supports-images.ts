@@ -12,7 +12,7 @@ interface IFirestoreMultiClassSupport {
   uid: string;
   classPath?: string; // frequently missing in supports published before 2.1.3 ¯\_(ツ)_/¯
   classes: string[];
-  network: string;
+  network?: string; // many multi class support docs do not have a network
   content: string;
   originDoc: string;
   properties: Record<string, string>;
@@ -46,7 +46,7 @@ interface IFirestoreMultiClassImage {
   url: string;  // old-style without class hash
   classes: string[];
   classPath: string;
-  network: string;
+  network?: string; // if the support doesn't have a network the mcimage won't either
   supportKey: string;
   // LTI fields
   platform_id: string;
@@ -108,11 +108,15 @@ function shouldLogIndividualSupports(supportIndex: number, classHash?: TClassHas
 const kImageTileRegex = /"type":"(Drawing|Geometry|Image)"/g;
 
 // regular expression for identifying firebase image urls in document content
-// capture group 1: "url" (Drawing, Image) or "parents" (Geometry)
-//                       |-------------------------|
-// capture group 2: image url                            |---------------------------------------|
-// capture group 3: image key (includes class hash for modern image urls)                 |-----|
-const kImageUrlRegex = /(\\"url\\":|\\"parents\\":\[)\\"(ccimg:\/\/fbrtdb\.concord\.org\/([^\\"]+))\\"/g;
+// In some tile states the image URLS are inside of a double escaped JSON. This means
+// they will be in a string like \"url\" because the quotes have to be escaped.
+// This is why in the regex below the URL is terminated either by \\" or "
+//
+// capture group 1: image url
+//                        |---------------------------------------|
+// capture group 2: image key (includes class hash for modern image urls)
+//                                                         |-----|
+const kImageUrlRegex = /"(ccimg:\/\/fbrtdb\.concord\.org\/([^\\"]+))\\?"/g;
 
 function parseImageUrl(url: string) {
   const match = /ccimg:\/\/fbrtdb\.concord\.org\/([^/]+)(\/([^/]+))?/.exec(url);
@@ -149,6 +153,15 @@ function buildFirebaseImagePath(classPath: string, imageKey: string) {
 
 console.log(`***** Base Path: ${kFirestoreBasePath} *****`);
 
+// TODO: There is another type of document which might reference images which
+// need to be processed. If a teacher in one class publishes a document to "This
+// class" or "All Classes" and then the same or a different teacher uses an
+// image in one of these documents and publishes this document to a different
+// class using the "This Class" option. This document will not be sent to the
+// publishSupport firebase function. This means the doc won't be added to the
+// mcsupports collection in firestore. Also documents won't be added to the
+// mcimages collection giving the students in that second class access to the
+// image.
 admin.firestore()
   .collection(kFirestoreMCSupportsPath)
   .listDocuments()
@@ -191,7 +204,7 @@ admin.firestore()
           // find all the firebase image urls in the support content
           const imageMatches = [...(content?.matchAll(kImageUrlRegex) || [])]
                                 .map(match => {
-                                  const [ , , url, path] = match;
+                                  const [ , url, path] = match;
                                   const { imageKey: key = path, legacyUrl } = parseImageUrl(url);
                                   const { index: start = 0 } = match;
                                   const tileIndex = getTileIndex(start);
@@ -333,6 +346,11 @@ admin.firestore()
         appMode, platform_id = "", uid, context_id: classHash,
         classPath: docClassPath, network, content, originDoc, properties = {}
       } = docData || {};
+
+      // Firestore doesn't like properties with undefined values so we add
+      // the network using this approach
+      const imageNetworkObj = network ? {network} : {};
+
       // identify image-supporting tiles in this support document
       const imageTileMatches = [...(content?.matchAll(kImageTileRegex) || [])];
       if (imageTileMatches.length) {
@@ -375,7 +393,7 @@ admin.firestore()
             const { classes = [], resource_link_id = "", resource_url = "" } = docData || {};
             const { classPath, context_id } = firestoreImages[key];
             return {
-              url: legacyUrl, classes, classPath, network, supportKey,
+              url: legacyUrl, classes, classPath, ...imageNetworkObj, supportKey,
               platform_id, context_id, resource_link_id, resource_url
             };
           });

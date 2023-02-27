@@ -1,33 +1,41 @@
 import { useState, useCallback } from "react";
-import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { EditVariableDialogContent, Variable, VariableType } from "@concord-consortium/diagram-view";
 
-import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
-import './variable-dialog.scss';
+import { useCustomModal } from "../../../hooks/use-custom-modal";
 import { SharedVariablesType } from "../shared-variables";
+import AddVariableChipIcon from "../assets/add-variable-chip-icon.svg";
+
+import './variable-dialog.scss';
 
 interface IUseNewVariableDialog {
   addVariable: (variable: VariableType ) => void;
   sharedModel?: SharedVariablesType;
-  namePrefill? : string;
+  descriptionPrefill?: string;
+  noUndo?: boolean;
   onClose?: () => void;
 }
-export const useNewVariableDialog = ({ addVariable, sharedModel, namePrefill, onClose }: IUseNewVariableDialog) => {
-  const [newVariable, setNewVariable] = useState(Variable.create({name: namePrefill || undefined}));
+export const useNewVariableDialog = ({
+  addVariable, sharedModel, descriptionPrefill, noUndo = false, onClose
+}: IUseNewVariableDialog) => {
+  const [newVariable, setNewVariable] = useState(Variable.create({description: descriptionPrefill || undefined}));
 
   const handleClick = () => {
-    sharedModel?.addAndInsertVariable(newVariable, (variable: VariableType) => addVariable(variable));
-    setNewVariable(Variable.create({name: namePrefill || undefined}));
+    sharedModel?.addAndInsertVariable(
+      newVariable,
+      (variable: VariableType) => addVariable(variable),
+      noUndo
+    );
+    setNewVariable(Variable.create({description: descriptionPrefill || undefined}));
   };
 
   const [show, hideModal] = useCustomModal({
     Icon: AddVariableChipIcon,
     title: "New Variable",
     Content: EditVariableDialogContent,
-    contentProps: { variable: newVariable },
+    contentProps: { variableClone: newVariable },
     buttons: [
       { label: "Cancel" },
-      { label: "OK",
+      { label: "Save",
         isDefault: true,
         isDisabled: false,
         onClick: handleClick
@@ -36,13 +44,11 @@ export const useNewVariableDialog = ({ addVariable, sharedModel, namePrefill, on
     onClose
   }, [addVariable, newVariable]);
 
-  // Wrap useCustomModal's show so we can prefill with variable name
+  // Wrap useCustomModal's show so we can prefill with variable description
   const showModal = useCallback(() => {
-    if (namePrefill) {
-      newVariable.setName(namePrefill);
-    }
+    newVariable.setDescription(descriptionPrefill ?? "");
     show();
-  }, [namePrefill, newVariable, show]);
+  }, [descriptionPrefill, newVariable, show]);
 
   return [showModal, hideModal];
 };

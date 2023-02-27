@@ -94,6 +94,7 @@ $modal-footer-height: 45px;
     padding: $modal-padding;
 
     .modal-button {
+      cursor: pointer;
       height: $modal-control-height;
       min-width: $modal-button-min-width;
       margin-left: $modal-button-spacing;
