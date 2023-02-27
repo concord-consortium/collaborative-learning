@@ -37,21 +37,13 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
     const offset = 0.1 * difference;
 
     if (zoomDir === Zoom.In ){
-      props.data.data.tickMax = props.data.data.tickMax ?
-                                props.data.data.tickMax - offset :
-                                props.data.data.dsMax - offset;
-      props.data.data.tickMin = props.data.data.tickMin ?
-                                props.data.data.tickMin + offset :
-                                props.data.data.dsMin + offset;
+      props.data.data.tickMax = max - offset;
+      props.data.data.tickMin = min + offset;
     }
 
     if (zoomDir === Zoom.Out){
-      props.data.data.tickMax = props.data.data.tickMax ?
-                                props.data.data.tickMax + offset :
-                                props.data.data.dsMax + offset;
-      props.data.data.tickMin = props.data.data.tickMin ?
-                                props.data.data.tickMin - offset :
-                                props.data.data.dsMin - offset;
+      props.data.data.tickMax = max + offset;
+      props.data.data.tickMin = min - offset;
     }
   };
 
