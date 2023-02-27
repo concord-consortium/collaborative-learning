@@ -1,4 +1,5 @@
 import { Logger } from "../../../lib/logger";
+import { getTileTitleForLogging } from "../../../lib/logger-utils";
 import { LogEventMethod, LogEventName } from "../../../lib/logger-types";
 import { DocumentsModelType } from "../../stores/documents";
 import { isTileBaseEvent, logTileBaseEvent } from "./log-tile-base-event";
@@ -20,7 +21,8 @@ function processTileChangeEvent(params: ITileChangeLogEvent, context: IContext) 
   const document = context.documents.findDocumentOfTile(tileId) ||
                     context.networkDocuments.findDocumentOfTile(tileId);
   const legacyChangeProps = { toolId: tileId, operation, ...change };
-  return { document, tileId, ...legacyChangeProps, ...others };
+  const tileTitle = getTileTitleForLogging(tileId, document);
+  return { document, tileId, ...legacyChangeProps, tileTitle, ...others };
 }
 
 export function logTileChangeEvent(event: LogEventName, _params: ITileChangeLogEvent) {
