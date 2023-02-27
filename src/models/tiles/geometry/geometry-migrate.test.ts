@@ -511,51 +511,53 @@ describe("Geometry migration", () => {
     });
   });
 
-  // it("should not export linked points or polygons of linked points", () => {
-  //   const changes: JXGChange[] = [
-  //     {
-  //       operation: "create",
-  //       target: "board",
-  //       properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
-  //     },
-  //     { operation: "create", target: "tableLink", properties: { ids: ["lp1", "lp2", "lp3"] } },
-  //     { operation: "create", target: "polygon", parents: ["lp1", "lp2", "lp3"], properties: { id: "lpoly"} }
-  //   ];
-  //   expect(convertChangesToJson(changes)).toEqual({
-  //     type: "Geometry",
-  //     board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
-  //     objects: [
-  //     ]
-  //   });
-  //   const [received, expected] = testRoundTrip(changes);
-  //   expect(received).toEqual(expected);
+  it("should not export linked points", () => {
+    const changes: JXGChange[] = [
+      {
+        operation: "create",
+        target: "board",
+        properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
+      },
+      { operation: "create", target: "tableLink", properties: { ids: ["lp1", "lp2", "lp3"] } },
+    ];
+    expect(convertChangesToJson(changes)).toEqual({
+      type: "Geometry",
+      board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
+      objects: [
+      ]
+    });
+    const [received, expected] = testRoundTrip(changes);
+    expect(received).toEqual(expected);
 
-  //   expect(convertChangesToModelSnapshot(changes)).toEqual(kDefaultModelProps);
-  // });
+    expect(convertChangesToModelSnapshot(changes)).toEqual(kDefaultModelProps);
+  });
 
-  // it("should not export linked points or polygons of linked points", () => {
-  //   const changes: JXGChange[] = [
-  //     {
-  //       operation: "create",
-  //       target: "board",
-  //       properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
-  //     },
-  //     { operation: "create", target: "linkedPoint", parents: [0, 0], properties: { id: "lp1" } },
-  //     { operation: "create", target: "linkedPoint", parents: [5, 5], properties: { id: "lp2" } },
-  //     { operation: "create", target: "linkedPoint", parents: [5, 0], properties: { id: "lp3" } },
-  //     { operation: "create", target: "polygon", parents: ["lp1", "lp2", "lp3"], properties: { id: "lpoly"} }
-  //   ];
-  //   expect(convertChangesToJson(changes)).toEqual({
-  //     type: "Geometry",
-  //     board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
-  //     objects: [
-  //     ]
-  //   });
-  //   const [received, expected] = testRoundTrip(changes);
-  //   expect(received).toEqual(expected);
+  it("should migrate polygons of linked points", () => {
+    const changes: JXGChange[] = [
+      {
+        operation: "create",
+        target: "board",
+        properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
+      },
+      { operation: "create", target: "tableLink", properties: { ids: ["lp1", "lp2", "lp3"] }},
+      { operation: "create", target: "polygon", parents: ["lp1", "lp2", "lp3"], properties: { id: "p1" } },
+    ];
+    expect(convertChangesToJson(changes)).toEqual({
+      type: "Geometry",
+      board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
+      objects: [
+        { type: "polygon", parents: ["lp1", "lp2", "lp3"], properties: { id: "p1" } },
+      ]
+    });
+    const [received, expected] = testRoundTrip(changes);
+    expect(received).toEqual(expected);
 
-  //   expect(convertChangesToModelSnapshot(changes)).toEqual(kDefaultModelProps);
-  // });
+    expect(convertChangesToModelSnapshot(changes)).toEqual({
+      ...kDefaultModelProps, objects: {
+        p1: { type: "polygon", id: "p1", points: ["lp1", "lp2", "lp3"]},
+      }
+    });
+  });
 
   it("should establish links from legacy saves", () => {
     const linkChanges1: JXGChange[] = [

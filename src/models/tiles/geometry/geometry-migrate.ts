@@ -301,6 +301,9 @@ export const exportGeometry = (changes: string[], options?: ITileExportOptions) 
     // don't export non-exportable types
     if (objInfo.noExport) return false;
 
+    if ((objInfo.type !== "movableLine") && !objInfo.dependencies.every(_id => !objectInfoMap[_id]?.noExport)) {
+        return false;
+    }
     // must have valid/sufficient dependencies
     // if (["comment", "movableLine", "polygon", "vertexAngle"].includes(objInfo.type)) {
     //   const minParentsMap: { [K in JXGObjectType]?: number } =
