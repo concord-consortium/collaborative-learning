@@ -15,11 +15,6 @@ export interface MinigraphOptions {
   borderColor?: string;
 }
 
-enum Zoom {
-  In,
-  Out
-}
-
 export const defaultMinigraphOptions: MinigraphOptions = {
   backgroundColor: NodePlotColor,
   borderColor: NodePlotColor
@@ -27,12 +22,17 @@ export const defaultMinigraphOptions: MinigraphOptions = {
 
 let stepY = 5;
 
+
+enum Zoom {
+  In,
+  Out
+}
 export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
   if (!props.display) return null;
 
   const handleClickOffset = (zoomDir: Zoom) => {
-    const max = props.data.data.tickMax || props.data.data.dsMax;
-    const min = props.data.data.tickMin || props.data.data.dsMin;
+    const max = returnMinOrMax(MinOrMax.Max, props.data);
+    const min = returnMinOrMax(MinOrMax.Min, props.data);
     const difference = Math.abs(max - min);
     const offset = 0.1 * difference;
 
@@ -117,9 +117,10 @@ function lineData(node: any) {
 }
 
 
+
 function lineOptions(node: any) {
-  const max = node.data.tickMax || node.data.dsMax;
-  const min = node.data.tickMin || node.data.dsMin;
+  const max = returnMinOrMax(MinOrMax.Max, node);
+  const min = returnMinOrMax(MinOrMax.Min, node);
 
   const options: ChartOptions = {
     animation: {
@@ -161,4 +162,19 @@ function lineOptions(node: any) {
   };
 
   return options;
+}
+
+
+enum MinOrMax {
+  Max,
+  Min
+}
+
+function returnMinOrMax (option: MinOrMax, node: any){
+  if (option === MinOrMax.Max){
+    return node.data.tickMax ?? node.data.dsMax;
+  }
+  if (option === MinOrMax.Min){
+    return  node.data.tickMin ?? node.data.dsMin;
+  }
 }
