@@ -36,7 +36,11 @@ class GraphToolTile{
     }
 
     getGraphTitle(workspaceClass){
-      return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-tool .geometry-title`);
+      return cy.get(`${workspaceClass || ".primary-workspace"} .canvas-area .geometry-tool .editable-tile-title-text`);
+    }
+
+    getGraphTileTitle(workspaceClass){
+        return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
     }
 
     getGraphAxisLabelId(axis){

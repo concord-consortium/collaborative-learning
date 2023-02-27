@@ -201,6 +201,9 @@ class TeacherDashboard {
     selectGroup(group) {
         this.getGroupName().contains(group).click();
     }
+    getPlaybackToolBar() {
+        return cy.get('[data-testid="playback-component"]');
+    }
 
 }
 export default TeacherDashboard;

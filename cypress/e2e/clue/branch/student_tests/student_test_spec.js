@@ -30,6 +30,16 @@ describe('Check header area for correctness', function(){
     it('will verify student name is correct', function(){
         header.getUserName().should('contain','Student '+student);
     });
+    it('will verify student network status', function(){
+        header.getNetworkStatus().should('contain','Online');
+    });
+    it('will verify teacher options are not displayed', function(){
+        header.getDashboardWorkspaceToggleButtons().should("not.exist");
+        cy.get('.top-tab.tab-teacher-guide').should("not.exist");
+        cy.get('.top-tab.tab-student-work').should("not.exist");
+        cy.get('[data-test="solutions-button"]').should("not.exist");
+        cy.get('.chat-panel-toggle').should("not.exist");
+    });
 
 });
 

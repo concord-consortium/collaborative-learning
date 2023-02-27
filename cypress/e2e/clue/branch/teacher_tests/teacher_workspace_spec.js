@@ -35,6 +35,9 @@ context('Teacher Workspace', () => {
       // cy.get('.collapsed-resources-tab').click();
       cy.wait(500);
       cy.get('.top-tab.tab-problems').should('exist').click();
+      cy.get('.prob-tab').contains('Initial Challenge').click();
+      cy.get('[data-test=solutions-button]').should('have.class', "toggled");
+      cy.get('.has-teacher-tiles').should("exist");
       cy.get('.prob-tab').contains('What If...?').click();
       cy.get('[data-test=solutions-button]').should('have.class', "toggled");
       cy.get('.has-teacher-tiles').should("exist");
@@ -86,12 +89,13 @@ context('Teacher Workspace', () => {
     });
   });
 
-  describe.skip('Student Workspace', () => { //flaky -- could be because it is trying to connect to firebase?
+  describe('Student Workspace', () => { //flaky -- could be because it is trying to connect to firebase?
     it('verify student workspace tab', () => {
       cy.visit("/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:7&unit=msa");
       cy.waitForLoad();
       dashboard.switchView("Workspace & Resources");
-      primaryWorkSpace.getResizeRightPanelHandle().click();
+      primaryWorkSpace.getResizePanelDivider().click();
+      // primaryWorkSpace.getResizeRightPanelHandle().click();
       cy.wait(2000);
       cy.get('@clueData').then((clueData) => {
         const groups = clueData.classes[0].problems[0].groups;

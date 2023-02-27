@@ -231,3 +231,6 @@ Cypress.Commands.add('unlinkTableToGraph', (table, graph) => {
     cy.get('button').contains('Unlink').click();
   });
 });
+Cypress.Commands.add("deleteDocumentThumbnail", (tab, section,title) => { 
+  cy.get('.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer .icon-delete-document').eq(1).click({force:true});
+});
