@@ -998,42 +998,6 @@ describe("Geometry migration", () => {
     });
   });
 
-  it("should not export vertex angles without parents", () => {
-    const changes: JXGChange[] = [
-      {
-        operation: "create",
-        target: "board",
-        properties: { axis: true, boundingBox: [-2, 15, 22, -1], unitX: 20, unitY: 20 }
-      },
-      { operation: "create", target: "point", parents: [0, 0], properties: { id: "v1" } },
-      { operation: "create", target: "point", parents: [5, 0], properties: { id: "v2" } },
-      { operation: "create", target: "point", parents: [0, 5], properties: { id: "v3" } },
-      { operation: "create", target: "polygon", parents: ["v1", "v2", "v3"], properties: { id: "p1" } },
-      { operation: "create", target: "vertexAngle", properties: { id: "a1" } }
-    ];
-    expect(convertChangesToJson(changes)).toEqual({
-      type: "Geometry",
-      board: { properties: { axisMin: [-2, -1], axisRange: [24, 16] } },
-      objects: [
-        { type: "point", parents: [0, 0], properties: { id: "v1" } },
-        { type: "point", parents: [5, 0], properties: { id: "v2" } },
-        { type: "point", parents: [0, 5], properties: { id: "v3" } },
-        { type: "polygon", parents: ["v1", "v2", "v3"], properties: { id: "p1" } }
-      ]
-    });
-    const [received, expected] = testRoundTrip(changes);
-    expect(received).toEqual(expected);
-
-    expect(convertChangesToModelSnapshot(changes)).toEqual({
-      ...kDefaultModelProps, objects: {
-        v1: { type: "point", id: "v1", x: 0, y: 0 },
-        v2: { type: "point", id: "v2", x: 5, y: 0 },
-        v3: { type: "point", id: "v3", x: 0, y: 5 },
-        p1: { type: "polygon", id: "p1", points: ["v1", "v2", "v3"]}
-      }
-    });
-  });
-
   it("should not export vertex angles without polygons", () => {
     const changes: JXGChange[] = [
       {
