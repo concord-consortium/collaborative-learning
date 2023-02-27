@@ -906,6 +906,7 @@ export const DocumentContentModel = types
       self.moveTiles(tiles, rowInfo);
     },
     userCopyTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo, sharedModels ? : SharedModelType[] | undefined) {
+      console.log("DROP 1: userCopyTiles: \n", {tiles}, "\n", {sharedModels}, "\n" )
       const dropRow = (rowInfo.rowDropIndex != null) ? self.getRowByIndex(rowInfo.rowDropIndex) : undefined;
       const results = dropRow?.acceptTileDrop(rowInfo)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)

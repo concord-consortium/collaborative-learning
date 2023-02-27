@@ -14,6 +14,7 @@ import { DEBUG_DOCUMENT } from "../../lib/debug";
 import { IUserContext } from "../../../functions/src/shared";
 import { Firestore } from "../../lib/firestore";
 import { TreeManagerType } from "../history/tree-manager";
+import { getSnapshot } from "mobx-state-tree";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
   const latestPublications: DocumentModelType[] = [];
@@ -180,14 +181,24 @@ export const DocumentsModel = types
   }))
   .actions((self) => {
     const add = (document: DocumentModelType) => {
-      if (DEBUG_DOCUMENT) {
+      if (true && document.type === "problem") {
+
+        const fullSnap = getSnapshot(document).content
+        const sharedModelSnap = getSnapshot(document).content?.sharedModelMap
+        const fullSnapString = JSON.stringify(fullSnap)
+
         // eslint-disable-next-line no-console
+
         console.log("adding document to DocumentsModel", {
           key: document.key,
           title: document.title,
           uid: document.uid,
-          type: document.type
+          type: document.type,
+          sharedModelSnap: sharedModelSnap,
+          fullSnap: fullSnap,
+          fullView: fullSnapString
         });
+
       }
       if (!self.getDocument(document.key)) {
         self.all.push(document);
