@@ -7,7 +7,6 @@ import { SectionModel, SectionModelType } from "../curriculum/section";
 import { cloneTileSnapshotWithoutId, IDragTileItem } from "../tiles/tile-model";
 import { TextContentModel } from "../tiles/text/text-content";
 import { IDocumentExportOptions } from "../tiles/tile-content-info";
-import { kDefaultColumnWidth } from "../../components/tiles/table/table-types";
 import { safeJsonParse } from "../../utilities/js-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
 
@@ -171,7 +170,6 @@ describe("DocumentContentModel", () => {
     expect(rowIndex2).toBe(3);
 
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         { title: "Image 1", content: { type: "Image", url: placeholderImage } },
@@ -211,7 +209,6 @@ describe("DocumentContentModel", () => {
     expect(textTile2RowIndex1).toBe(1);
 
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
@@ -254,7 +251,6 @@ describe("DocumentContentModel", () => {
 
     expect(textTile2RowIndex1).toBe(2);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
@@ -298,7 +294,6 @@ describe("DocumentContentModel", () => {
 
     expect(textTile2RowIndex1).toBe(1);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } },
         [
@@ -389,7 +384,6 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -405,7 +399,6 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 2", content: { type: "Text", format: "html", text: ["<p>foo</p>"] } },
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
@@ -423,7 +416,6 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(4);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -439,7 +431,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(1);
-    expect(parsedContentExport()).toEqual({  tiles: [] });
+    expect(parsedContentExport()).toEqual({ tiles: [] });
   });
 
   it("will add/remove placeholder rows when moving entire rows (3 => 1)", () => {
@@ -455,7 +447,6 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(2);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -488,7 +479,6 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(2);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -522,7 +512,6 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("B")).toBe(true);
     expect(content.defaultInsertRow).toBe(2);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -538,7 +527,6 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -553,7 +541,7 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(content.rowCount).toBe(4);
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
-    expect(parsedContentExport()).toEqual({  tiles: [] });
+    expect(parsedContentExport()).toEqual({ tiles: [] });
   });
 
   it("addTile() will add/remove placeholder rows", () => {
@@ -580,7 +568,6 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -592,7 +579,6 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -604,7 +590,6 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A")).toBe(true);
     expect(isPlaceholderSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -616,7 +601,6 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isPlaceholderSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
@@ -628,7 +612,6 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A", 2)).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         [
           { title: "Graph 1", content: { type: "Geometry", objects: [] } },
@@ -661,7 +644,6 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A", 2)).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         [
           { title: "Graph 1", content: { type: "Geometry", objects: [] } },
@@ -701,14 +683,12 @@ describe("DocumentContentModel -- sectioned documents --", () => {
     expect(isContentSection("A")).toBe(true);
     expect(isContentSection("B")).toBe(true);
     expect(parsedContentExport()).toEqual({
-
       tiles: [
         { title: "Graph 1", content: { type: "Geometry", objects: [] } },
         { title: "Text 1", content: { type: "Text", format: "html", text: ["<p></p>"] } }
       ]
     });
   });
-
 });
 
 describe("DocumentContentModel", () => {
@@ -745,7 +725,6 @@ describe("DocumentContentModel", () => {
     const tileContent = tile!.content;
     expect(tileContent.type).toBe("Text");
     expect(parsedExport(content)).toEqual({
-
       tiles: [
         { content: { type: "Text", format: "html", text: ["<p>foo</p>"] } },
         [

@@ -1,7 +1,9 @@
 import { cloneDeep } from "lodash";
 import { getSnapshot } from "mobx-state-tree";
 import { ITileModelSnapshotIn } from "../tiles/tile-model";
-import { DocumentContentModel, DocumentContentModelType, INewTileOptions } from "./document-content";
+import {
+  DocumentContentModel, DocumentContentModelType, INewTileOptions, SharedModelEntryType
+} from "./document-content";
 import {
   IDocumentImportSnapshot, isOriginalAuthoredTileModel, isOriginalSectionHeaderContent,
   OriginalAuthoredTileModel, OriginalTileModel
@@ -70,14 +72,11 @@ export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
   });
 
   if (sharedModels){
-    // WIP, match or define type "sharedModel: sharedMdoel(?)", "tiles": string[]
-    sharedModels.forEach((modelAndArray:any) => {
-      const pack = {sharedModel: modelAndArray.sharedModel, tiles: modelAndArray.tiles};
-      const id = modelAndArray.sharedModel.id;
-      docContent.addSharedModelFromImport(id, pack);
+    sharedModels.forEach((entry:SharedModelEntryType) => {
+      const id = entry.sharedModel.id;
+      docContent.addSharedModelFromImport(id, entry);
     });
   }
-
 
   return getSnapshot(docContent);
 }
