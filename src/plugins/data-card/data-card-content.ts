@@ -116,10 +116,9 @@ export const DataCardContentModel = TileContentModel
       return attributesWithValues === 0;
     },
     exportJson(options?: ITileExportOptions){
-      this.allAttributesJsonString();
       return [
         `{`,
-        `  "type": "DataCard",`,
+        `  "type": "DataCard"`,
         `}`
       ].join("\n");
     }
