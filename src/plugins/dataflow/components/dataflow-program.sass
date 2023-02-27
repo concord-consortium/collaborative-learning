@@ -35,13 +35,18 @@ $dataflow-toolbar-height: 364px
     flex: 1
     overflow: hidden
     min-height: $dataflow-toolbar-height
+    background-color: #333 !important
 
     .editor
       flex: 0 0 auto
+      background-color: #333
+
       &.half
         width: 50%
       &.some
         width: calc(20% - #{calc($dataflow-toolbar-width / 5)})
+
+
 
     .open-program.program-editor
       position: absolute

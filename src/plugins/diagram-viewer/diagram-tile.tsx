@@ -42,7 +42,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   const [showEditVariableDialog] = useEditVariableDialog({
     variable: content.root.selectedNode?.variable
   });
-  
+
   const insertVariables = (variablesToInsert: VariableType[], startX?: number, startY?: number) => {
     // Start at an arbitrary point...
     let x = 250;

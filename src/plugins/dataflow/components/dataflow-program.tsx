@@ -113,6 +113,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const showRateUI = ["qa", "test", "dev"].indexOf(this.stores.appMode) >= 0;
     const showZoomControl = !documentProperties?.dfHasData;
     const showProgramToolbar = showZoomControl && !readOnly;
+
+    const droppableId = `dataflow-droppable-${this.props.tileId}`;
+
+    console.log("dataflow: droppableId", droppableId);
+
     return (
       <div className="dataflow-program-container">
         <DataflowProgramTopbar
@@ -132,29 +137,33 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             isTesting={isTesting}
             disabled={!!readOnly}
           /> }
-          <div
-            className="editor-graph-container"
-            style={this.getEditorStyle()}
-            onDragOver={event => {
-              event.preventDefault();
-              event.dataTransfer.dropEffect = "copy";
-            }}
-          >
+
+          {console.log("this is our draggable area")}
+          {/* <div className="drop-target" ref={setNodeRef} style={dropTargetStyle}> */}
             <div
-              className={editorClass}
-              ref={(elt) => this.editorDomElement = elt}
+              className="editor-graph-container"
+              style={this.getEditorStyle()}
+              onDragOver={event => {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "copy";
+              }}
             >
-              <div className="flow-tool" ref={elt => this.toolDiv = elt}/>
-              { this.shouldShowProgramCover() &&
-                <DataflowProgramCover editorClass={editorClassForDisplayState} /> }
-              {showZoomControl &&
-                <DataflowProgramZoom
-                  onZoomInClick={this.zoomIn}
-                  onZoomOutClick={this.zoomOut}
-                  disabled={false}
-                /> }
+              <div
+                className={editorClass}
+                ref={(elt) => this.editorDomElement = elt}
+              >
+                <div className="flow-tool" ref={elt => this.toolDiv = elt}/>
+                { this.shouldShowProgramCover() &&
+                  <DataflowProgramCover editorClass={editorClassForDisplayState} /> }
+                {showZoomControl &&
+                  <DataflowProgramZoom
+                    onZoomInClick={this.zoomIn}
+                    onZoomOutClick={this.zoomOut}
+                    disabled={false}
+                  /> }
+              </div>
             </div>
-          </div>
+          {/* </div> */}
         </div>
       </div>
     );
@@ -746,5 +755,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const { transform } = this.programEditor.view.area;
     this.props.onZoomChange(transform.x, transform.y, transform.k);
   };
+
+}
+
+
+export const DataflowProgramToolbar: React.FC<IDFProgramToolBarProps> = (props) => {
 
 }

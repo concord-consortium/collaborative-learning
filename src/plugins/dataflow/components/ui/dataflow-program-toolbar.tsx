@@ -17,7 +17,7 @@ interface IDFProgramToolBarProps {
 
 export const DataflowProgramToolbar: React.FC<IDFProgramToolBarProps> = (props) => {
   const { onNodeCreateClick, onClearClick, isTesting, disabled } = props;
-  console.log("<DataflowProgramToolbar> with props", props);
+  // console.log("<DataflowProgramToolbar> with props", props);
 
 
   //tileId in <NewVariableButton> is a unique hash for each diagram tool dragged into canvas
@@ -44,9 +44,11 @@ export const DataflowProgramToolbar: React.FC<IDFProgramToolBarProps> = (props) 
   return (
     <div className="program-toolbar" data-test="program-toolbar">
       <div ref={setDroppableNodeRef}>
-        <div ref={setNodeRef} {...attributes} {...listeners}>
+        {/* <div ref={setNodeRef} {...attributes} {...listeners}> */}
         {
             NodeTypes.map((nt: any, i: any) => {
+              // above line 47 ref={setNodeRef} causes error where u cant even click on sensor or number
+
               // const draggableIdLocal = `new-node-draggable-${i}`;
               // const { attributes, listeners, setNodeRef } = useDraggable({id:draggableIdLocal});
               //  ^^^^ cant be used inside of a call back ^^^
@@ -62,7 +64,7 @@ export const DataflowProgramToolbar: React.FC<IDFProgramToolBarProps> = (props) 
             })
           }
           { isTesting && <button className={"qa"} onClick={onClearClick}>Clear</button> }
-        </div>
+        {/* </div> */}
       </div>
     </div>
   );
