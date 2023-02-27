@@ -31,7 +31,6 @@ export const exportTableContentAsJson = (
   builder.pushLine("{");
   builder.pushLine(`"type": "Table"`, 2);
   dataSet.name && builder.pushLine(`"name": "${dataSet.name}"`, 2);
-  /* TODO tile-level table import/export as this discontines legacy table import on left  */
   // builder.pushLine(`"columns": [`, 2);
   // builder.pushLines(columns, 4);
   // builder.pushLine("]", 2);
