@@ -56,7 +56,7 @@ export function isOriginalAuthoredTileModel(tile: OriginalTileModel): tile is Or
 export type OriginalTilesSnapshot = Array<OriginalTileModel | OriginalTileModel[]>;
 
 export interface IDocumentImportSnapshot {
-  sharedModels: SharedModelEntryType[];
+  sharedModels?: SharedModelEntryType[];
   tiles: OriginalTilesSnapshot;
 }
 

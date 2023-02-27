@@ -71,12 +71,10 @@ export function migrateSnapshot(snapshot: IDocumentImportSnapshot): any {
     }
   });
 
-  if (sharedModels){
-    sharedModels.forEach((entry:SharedModelEntryType) => {
-      const id = entry.sharedModel.id;
-      docContent.addSharedModelFromImport(id, entry);
-    });
-  }
+  sharedModels?.forEach((entry:SharedModelEntryType) => {
+    const id = entry.sharedModel.id;
+    docContent.addSharedModelFromImport(id, entry);
+  });
 
   return getSnapshot(docContent);
 }

@@ -31,9 +31,6 @@ export const exportTableContentAsJson = (
   builder.pushLine("{");
   builder.pushLine(`"type": "Table"`, 2);
   dataSet.name && builder.pushLine(`"name": "${dataSet.name}"`, 2);
-  // builder.pushLine(`"columns": [`, 2);
-  // builder.pushLines(columns, 4);
-  // builder.pushLine("]", 2);
   builder.pushLine("}");
   return builder.build();
 };
