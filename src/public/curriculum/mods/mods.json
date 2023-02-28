@@ -1,0 +1,182 @@
+{
+  "code": "mods",
+  "abbrevTitle": "MODS",
+  "title": "MODS",
+  "subtitle": "Design Strategies",
+  "config": {
+    "enableHistoryRoles": ["teacher"],
+    "placeholderText": "Enter notes here",
+
+    "stamps": [
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/plus.png",
+        "width": 25,
+        "height": 25
+      },
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/equals.png",
+        "width": 25,
+        "height": 25
+      },
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/lparen.png",
+        "width": 25,
+        "height": 25
+      },
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/rparen.png",
+        "width": 25,
+        "height": 25
+      }
+    ],
+    "defaultDocumentType": "problem",
+    "settings": {
+      "table": {
+        "numFormat": ".2~f"
+      }
+    },
+    "toolbar": [
+      {
+        "id": "select",
+        "title": "Select",
+        "iconId": "icon-select-tool",
+        "isTileTool": false,
+        "isDefault": true
+      },
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "Image",
+        "title": "Image",
+        "isTileTool": true
+      },
+      {
+        "id": "DataCard",
+        "title": "Concept Cards",
+        "isTileTool": true
+      },
+      {
+        "id": "Drawing",
+        "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "Table",
+        "title": "Table",
+        "isTileTool": true
+      },
+      {
+        "id": "Geometry",
+        "title": "Graph",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
+    ]
+  },
+  "sections": {
+    "introduction": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    },
+    "initialChallenge": {
+      "initials": "IC",
+      "title": "Initial Challenge",
+      "placeholder": "Work area for\nInitial Challenge section"
+    },
+    "whatIf": {
+      "initials": "CM",
+      "title": "Concept Map",
+      "placeholder": "Work area for\nConcept section"
+    }
+  },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "overview": {
+        "initials": "OV",
+        "title": "Overview",
+        "placeholder": "Work area for\nOverview section"
+      },
+      "launch": {
+        "initials": "LC",
+        "title": "Launch",
+        "placeholder": "Work area for\nLaunch section"
+      },
+      "explore": {
+        "initials": "EX",
+        "title": "Explore",
+        "placeholder": "Work area for\nExplore section"
+      },
+      "summarize": {
+        "initials": "SM",
+        "title": "Summarize",
+        "placeholder": "Work area for\nSummarize section"
+      }
+    },
+    "sections": [
+      { "type": "overview" },
+      { "type": "launch" },
+      { "type": "explore" },
+      { "type": "summarize" }
+    ]
+  },
+  "investigations": [
+    {
+      "description": "Problem 1",
+      "ordinal": 1,
+      "title": "MODS Water Challenge",
+      "problems": [
+        {
+          "description": "Activity 1.1",
+          "ordinal": 1,
+          "title": "Activity 1.1",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [ 
+
+                ]
+              }
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [  ]
+              }
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            } 
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
