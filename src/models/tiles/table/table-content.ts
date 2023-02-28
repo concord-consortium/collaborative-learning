@@ -9,6 +9,7 @@ import {
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileModelHooks } from "../tile-model-hooks";
+import { setTileTitleFromContent } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
 import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
@@ -333,7 +334,7 @@ export const TableContentModel = TileContentModel
     },
     setTableName(name: string) {
       self.dataSet.setName(name);
-
+      setTileTitleFromContent(self, name);
       self.logChange({ action: "update", target: "table", props: { name } });
     },
     setColumnWidth(attrId: string, width: number) {

@@ -1,3 +1,4 @@
+import stringify from "json-stringify-pretty-compact";
 import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn, getType, getEnv } from "mobx-state-tree";
 import {
@@ -13,6 +14,7 @@ import {
   IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
 } from "../document/tile-row";
 import { migrateSnapshot } from "./document-content-import";
+import { isImportDocument } from "./document-content-import-types";
 import { IDocumentEnvironment } from "./document-environment";
 import { logTileCopyEvent } from "../tiles/log/log-tile-copy-event";
 import { logTileDocumentEvent } from "../tiles/log/log-tile-document-event";
@@ -88,9 +90,7 @@ export const DocumentContentModel = types
     sharedModelMap: types.map(SharedModelEntry),
   })
   .preProcessSnapshot(snapshot => {
-    return snapshot && (snapshot as any).tiles
-            ? migrateSnapshot(snapshot)
-            : snapshot;
+    return isImportDocument(snapshot) ? migrateSnapshot(snapshot) : snapshot;
   })
   .volatile(self => ({
     visibleRows: [] as string[],
@@ -362,6 +362,12 @@ export const DocumentContentModel = types
     exportAsJson(options?: IDocumentExportOptions) {
       const builder = new StringBuilder();
       builder.pushLine("{");
+
+      const sharedModelsArray = Array.from(self.sharedModelMap.values());
+      if (sharedModelsArray.length > 0){
+        builder.pushLine(`"sharedModels":${stringify(sharedModelsArray)},`, 2);
+      }
+
       builder.pushLine(`"tiles": [`, 2);
 
       // identify rows with exportable tiles
@@ -949,6 +955,11 @@ export const DocumentContentModel = types
 
       return sharedModelEntry;
     },
+    addSharedModelFromImport(id: string, sharedModelEntry: SharedModelEntryType){
+      if (self.sharedModelMap){
+        self.sharedModelMap.set(id, sharedModelEntry);
+      }
+    }
 
   }));
 

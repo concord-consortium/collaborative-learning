@@ -39,103 +39,108 @@ context('Shared Variables', function () {
 
   const addLastCard = () => addCard(true);
 
-  // FIXME: these are likely broken because the toolbar buttons changed in the text tile.
-  // describe("Text tile", () => {
-  //   it('can add a variable chip to the text tool', function() {
-  //     clueCanvas.addTile('text');
-  //     clueCanvas.addTile('diagram');
+  describe("Text tile", () => {
+    const dialogField = (field) => cy.get(`#evd-${field}`);
+    const dialogOkButton = () => cy.get(".modal-button").last();
+    const textTileVName1 = "varA";
+    const textTileVValue1 = "7";
+    const textTileVUnit1 = "seconds";
+    const textTileVName2 = "varB";
+    const textTileVValue2 = "1.234";
 
-  //     textToolTile.enterText('Hello World');
-  //     textToolTile.getTextTile().last().should('contain', 'Hello World');
-  //     textToolTile.clickToolbarTool("Variables");
-  //     cy.get(".ReactModalPortal").within(() => {
-  //       cy.findByLabelText(/Name/).type("Var A");
-  //       cy.findByRole("button", {name: "OK"}).click();
-  //     });
-  //     // Make sure the text tile now has a chip with Var A.
-  //     textToolTile.getTextTile().last().should('contain', 'Var A');
-  //     // Make sure the diagram tile now has a card with Var A.
-  //     addLastCard();
-  //     cy.get('.primary-workspace .canvas-area .diagram-tool [data-testid="quantity-node"]')
-  //       .findByDisplayValue('Var A')
-  //       .should('exist');
-  //   });
+    it('can add a variable chip to the text tool with appropriate spacing', function() {
+      clueCanvas.addTile('text');
+      clueCanvas.addTile('diagram');
 
-  //   it('can add a duplicate variable chip to the text tool', function() {
-  //     // Note that when the chip is focused you can't type so we have to use
-  //     // rightArrow to move off of the chip
-  //     // We aren't using textToolTile.enterText because that calls focus() which seems
-  //     // to mess up the cursor position in Electron
-  //     textToolTile.getTextEditor().last().type('Second Chip:');
-  //     textToolTile.getTextTile().last().should('contain', 'Second Chip');
-  //     textToolTile.clickToolbarTool("Variables");
-  //     cy.get(".ReactModalPortal").within(() => {
-  //       cy.findByRole("combobox").type("Var{enter}");
-  //       cy.findByRole("button", {name: "OK"}).click();
-  //     });
-  //     // Make sure the text tile now has 2 chips with Var A.
-  //     textToolTile.getTextTile().last().find('.variable-chip:contains("Var A")').should('have.length', 2);
-  //   });
+      textToolTile.enterText('Hello World!');
+      textToolTile.getTextTile().last().should('contain', 'Hello World!');
+      textToolTile.getTextTile().last().should('not.contain', ' Hello World!');
+      textToolTile.enterText("{moveToStart}");
+      textToolTile.clickToolbarTool("New Variable");
+      cy.get(".custom-modal").should("exist");
+      dialogField("name").type(textTileVName1);
+      dialogField("value").type(textTileVValue1);
+      dialogField("units").type(textTileVUnit1);
+      textToolTile.getVariableChip().should("not.exist");
+      dialogOkButton().click();
+      textToolTile.getVariableChip().should("exist");
+      textToolTile.getVariableChip().should("contain", textTileVName1);
+      textToolTile.getVariableChip().should("contain", textTileVValue1);
+      textToolTile.getVariableChip().should("contain", textTileVUnit1);
+      textToolTile.getTextTile().last().should('contain', ' Hello World!');
+      // Make sure the diagram tile now has a card with variable name.
+      addLastCard();
+      cy.get('.primary-workspace .canvas-area .diagram-tool [data-testid="quantity-node"]')
+        .findByDisplayValue(textTileVName1)
+        .should('exist');
+    });
 
-  //   it('can pre populate the name field based on the selected text', function() {
-  //     // textToolTile.enterText uses `focus` which messes up the cursor position in Electron.
-  //     // So instead we click on the text tile, to do position the cursor and cause the focus event.
-  //     textToolTile.getTextTile().last().find('.variable-chip:contains("Var A")').last().click();
+    it('can add a duplicate variable chip to the text tool', function() {
+      textToolTile.enterText('Second Chip:');
+      textToolTile.getTextTile().last().should('contain', 'Second Chip:');
+      textToolTile.getTextTile().last().should('not.contain', 'Second Chip: ');
+      textToolTile.clickToolbarTool("Insert Variable");
+      cy.get(".custom-modal").should("exist");
+      cy.get(".variable-chip-list .variable-chip").click();
+      dialogOkButton().click();
+      textToolTile.getTextTile().last().should('contain', 'Second Chip: ');
+      // Make sure the text tile now has 2 chips with the same name.
+      textToolTile.getTextTile().last().find(`.variable-chip:contains("${textTileVName1}")`).should('have.length', 2);
+    });
 
-  //     // Note that when the chip is focused you can't type so we have to use
-  //     // rightArrow to move off of the chip
-  //     textToolTile.getTextEditor().last().type('{rightArrow} VarC{shift}{leftArrow}{leftArrow}{leftArrow}{leftArrow}');
+    // FIXME: The method for highlighting text using shift+leftarrow that was being used here
+    // doesn't seem to work. It was possibly broken by the Slate upgrade, but it also doesn't
+    // seem like Cypress supports selecting text like that.
+    // it('can pre populate the notes field based on the selected text', function() {
+    //   textToolTile.getTextEditor().last().click().type(' 0 time for this{shift}{leftarrow}{leftarrow}{leftarrow}{leftarrow}');
+    //   textToolTile.clickToolbarTool("New Variable");
+    //   dialogField("name").type("new");
+    //   dialogField("value").type("1");
+    //   dialogField("units").type("hour");
+    //   cy.pause();
+    //   dialogField("notes").should("have.value", "this");
+    //   dialogOkButton().click();
+    // });
 
-  //     textToolTile.clickToolbarTool("Variables");
-  //     cy.get(".ReactModalPortal").within(() => {
-  //       cy.findByDisplayValue('VarC').should('exist');
-  //       cy.findByRole("button", {name: "OK"}).click();
-  //     });
-  //     // Make sure the text tile now has a chips with VarC
-  //     textToolTile.getTextTile().last().find('.variable-chip:contains("VarC")').should('exist');
-  //     textToolTile.getTextEditor().last().type('{rightArrow} After chip');
-  //   });
+    it('can edit a variable name', function() {
+      textToolTile.getTextTile().last().find('.variable-name').first().click();
+      textToolTile.clickToolbarTool("Edit Variable");
+      cy.get(".custom-modal").should("exist");
+      dialogField("name").clear().type(textTileVName2);
+      dialogOkButton().click();
+      // Make sure the text tile now has 2 chips with the new variable name.
+      textToolTile.getTextTile().last().find(`.variable-chip:contains("${textTileVName2}")`).should('have.length', 2);
+      // Make sure the diagram tile now has a card with the new variable name.
+      cy.get('.primary-workspace .canvas-area .diagram-tool [data-testid="quantity-node"]')
+        .findByDisplayValue(textTileVName2)
+        .should('exist');
+    });
+    it('can change the value of a variable', function() {
+      textToolTile.getTextTile().last().find('.variable-chip').first().click();
+      textToolTile.clickToolbarTool("Edit Variable");
+      cy.get(".custom-modal").should("exist");
+      dialogField("value").clear().type(textTileVValue2);
+      dialogOkButton().click();
+      // Make sure the text tile now has 2 chips with the new variable value.
+      textToolTile.getTextTile().last().find(`.variable-chip:contains("${textTileVName2}=${textTileVValue2}")`).should('have.length', 2);
+    });
 
-  //   it('can edit a variable by double clicking', function() {
-  //     textToolTile.getTextTile().last().find('.variable-name').first().dblclick();
-  //     cy.get(".ReactModalPortal").within(() => {
-  //       cy.findByLabelText(/Name/).clear().type("Var B");
-  //       cy.findByRole("button", {name: "OK"}).click();
-  //     });
-  //     // Make sure the text tile now has 2 chips with Var B.
-  //     textToolTile.getTextTile().last().find('.variable-chip:contains("Var B")').should('have.length',  2);
-  //     // Make sure the diagram tile now has a card with Var B.
-  //     cy.get('.primary-workspace .canvas-area .diagram-tool [data-testid="quantity-node"]')
-  //       .findByDisplayValue('Var B')
-  //       .should('exist');
-  //   });
+    it('verifies restore of variable chip content',()=>{
+      canvas.createNewExtraDocumentFromFileMenuWithoutTabs('text tool test','my-work');
+      cy.wait(2000);
+      textToolTile.getTextTile().should('not.exist');
+      //re-open investigation
+      canvas.openDocumentWithTitleWithoutTabs(title);
+      // Make sure the text tile still has 2 chips with Var B.
+      textToolTile.getTextTile().last().find(`.variable-chip:contains("${textTileVName2}=${textTileVValue2}")`).should('have.length', 2);
+      // Make sure the diagram tile still has a card with Var B.
+      cy.get('.primary-workspace .canvas-area .diagram-tool [data-testid="quantity-node"]')
+        .findByDisplayValue(textTileVName2)
+        .should('exist');
+    });
+  });
 
-  //   it('can set the value of a variable', function() {
-  //     textToolTile.getTextTile().last().find('.variable-chip').first().dblclick();
-  //     cy.get(".ReactModalPortal").within(() => {
-  //       cy.findByLabelText(/Value/).clear().type("1.234");
-  //       cy.findByRole("button", {name: "OK"}).click();
-  //     });
-  //     // Make sure the text tile now has 2 chips with Var B.
-  //     textToolTile.getTextTile().last().find('.variable-chip:contains("Var B=1.234")').should('have.length', 2);
-  //   });
-
-  //   it('verifies restore of variable chip content',()=>{
-  //     canvas.createNewExtraDocumentFromFileMenuWithoutTabs('text tool test','my-work');
-  //     cy.wait(2000);
-  //     textToolTile.getTextTile().should('not.exist');
-  //     //re-open investigation
-  //     canvas.openDocumentWithTitleWithoutTabs(title);
-  //     // Make sure the text tile still has 2 chips with Var B.
-  //     textToolTile.getTextTile().last().find('.variable-chip:contains("Var B=1.234")').should('have.length', 2);
-  //     // Make sure the diagram tile still has a card with Var B.
-  //     cy.get('.primary-workspace .canvas-area .diagram-tool [data-testid="quantity-node"]')
-  //       .findByDisplayValue('Var B')
-  //       .should('exist');
-  //   });
-  // });
-
-  // FIXME: these are broken from slate upgrade. I *think* because they depend on the tests above which are turned off.
+  // FIXME: these are broken from slate upgrade.
   describe("Drawing tile", () => {
     it('dummy test', function () {
       expect(true).to.equal(true);
