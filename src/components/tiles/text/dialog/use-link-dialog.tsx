@@ -14,7 +14,7 @@ interface IContentProps {
 export const LinkDialogContent = ({ setUrl, text, url }: IContentProps) => {
   return (
     <div className="link-dialog-content">
-      <p>{text}</p>
+      <p>Link text: {text}</p>
       <input
         placeholder="Url"
         onChange={e => setUrl(e.target.value)}
