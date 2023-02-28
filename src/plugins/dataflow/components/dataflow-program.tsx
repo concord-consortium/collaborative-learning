@@ -113,10 +113,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const showRateUI = ["qa", "test", "dev"].indexOf(this.stores.appMode) >= 0;
     const showZoomControl = !documentProperties?.dfHasData;
     const showProgramToolbar = showZoomControl && !readOnly;
-
     const droppableId = `dataflow-droppable-${this.props.tileId}`;
 
-    console.log("dataflow: droppableId", droppableId);
 
     return (
       <div className="dataflow-program-container">
@@ -131,13 +129,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           serialDevice={this.stores.serialDevice}
         />
         <div className={toolbarEditorContainerClass}>
-          { showProgramToolbar && <DataflowProgramToolbar
-            onNodeCreateClick={this.addNode}
-            onClearClick={this.clearProgram}
-            isTesting={isTesting}
-            disabled={!!readOnly}
-          /> }
-
+          {
+            showProgramToolbar &&
+            <DataflowProgramToolbar
+              onNodeCreateClick={this.addNode}
+              onClearClick={this.clearProgram}
+              isTesting={isTesting}
+              disabled={!!readOnly}
+              droppableId={droppableId}
+            />
+          }
           {console.log("this is our draggable area")}
           {/* <div className="drop-target" ref={setNodeRef} style={dropTargetStyle}> */}
             <div
@@ -758,7 +759,3 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
 }
 
-
-export const DataflowProgramToolbar: React.FC<IDFProgramToolBarProps> = (props) => {
-
-}

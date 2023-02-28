@@ -12,25 +12,24 @@ interface IDFProgramToolBarProps {
   onClearClick: () => void;
   isTesting: boolean;
   disabled: boolean;
+  droppableId: string;
 }
 
 
 export const DataflowProgramToolbar: React.FC<IDFProgramToolBarProps> = (props) => {
-  const { onNodeCreateClick, onClearClick, isTesting, disabled } = props;
+  const { onNodeCreateClick, onClearClick, isTesting, disabled, droppableId } = props;
   // console.log("<DataflowProgramToolbar> with props", props);
-
 
   //tileId in <NewVariableButton> is a unique hash for each diagram tool dragged into canvas
   // in diagram-toolbar.tsx (file that holds <NewVariableButton>), each button has a different component, and
   //only  <NewVariableButton> has a draggable on it.
 
-
-  //review how you did ... footprints draggable
-
   const ui = useUIStore();
   const draggableId = `new-node-draggable`;
   const { attributes, listeners, setNodeRef } = useDraggable({ id:draggableId });
-  const droppableId = `new-node-droppable`;
+  // const droppableId = `new-node-droppable`;
+    console.log("<DataFlowProgramToolBar> with droppableId", droppableId);
+
   const droppableInfo = useDroppable({ id: droppableId});
   const setDroppableNodeRef = droppableInfo.setNodeRef;
 
