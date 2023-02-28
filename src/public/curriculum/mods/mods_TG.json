@@ -1,0 +1,115 @@
+{
+  "code": "msa",
+  "abbrevTitle": "MSA",
+  "title": "Moving Straight Ahead",
+  "subtitle": "Linear Expressions, Equations, and Relationships",
+  "placeholderText": "Enter notes here",
+  "settings": {
+    "table": {
+      "numFormat": ".2~f"
+    }
+  },
+  "sections": {
+    "overview": {
+      "initials": "OV",
+      "title": "Overview",
+      "placeholder": "Work area for\nOverview section"
+    },
+    "launch": {
+      "initials": "LC",
+      "title": "Launch",
+      "placeholder": "Work area for\nLaunch section"
+    },
+    "explore": {
+      "initials": "EX",
+      "title": "Explore",
+      "placeholder": "Work area for\nExplore section"
+    },
+    "summarize": {
+      "initials": "SM",
+      "title": "Summarize",
+      "placeholder": "Work area for\nSummarize section"
+    }
+  },
+  "defaultStamps": [
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/plus.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/equals.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/lparen.png",
+      "width": 25,
+      "height": 25
+    },
+    {
+      "url": "curriculum/moving-straight-ahead/stamps/rparen.png",
+      "width": 25,
+      "height": 25
+    }
+  ],
+  "investigations": [
+    {
+      "description": "Problem 1: Water Resources",
+      "ordinal": 1,
+      "title": "Problem 1: Water Resources",
+      "problems": [
+        {
+          "description": "Activity 1.1",
+          "ordinal": 1,
+          "title": "Water: Activity 1.1",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "overview",
+              "content": {
+                "tiles": [
+                 
+                  {
+                    "id": "837CIC0YBLn_nOrY",
+                    "title": "Text 4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p>This is text to a <a href='http://learn.concord.org'>link</a>. Here is a link to the<a href='https://docs.google.com/document/d/18KE3Ofgj7XmA4LXnPgD85JfjeBp_sClI5hNWYga8FRU/edit'> CLUE User&#x27;s Guide</a>.</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "launch",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            },
+            {
+              "type": "explore",
+              "content": {
+                "tiles": [  ]
+              }
+            },
+            {
+              "type": "summarize",
+              "content": {
+                "tiles": [ 
+
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
