@@ -78,7 +78,8 @@ export const TextContentModel = TileContentModel
     exportJson(options?: ITileExportOptions) {
       const value = self.asSlate();
       const html = value ? slateToHtml(value) : "";
-      const exportHtml = html.split("\n").map((line, i, arr) => `    "${line}"${i < arr.length - 1 ? "," : ""}`);
+      const exportHtml = html.split("\n")
+        .map((line, i, arr) => `    "${line.replaceAll(`"`, `\\"`)}"${i < arr.length - 1 ? "," : ""}`);
       return [
         `{`,
         `  "type": "Text",`,
