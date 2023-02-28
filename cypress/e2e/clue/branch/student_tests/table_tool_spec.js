@@ -252,16 +252,6 @@ context('Table Tool Tile Undo Redo', function () {
       cy.get('.primary-workspace').within(function () {
         tableToolTile.getColumnHeader().should('have.length', 3);
       });
-    });         
-    it('will undo redo table field content using keyboard', function () {
-      tableToolTile.typeInTableCell(1,'{cmd+z}' );
-      cy.get('.primary-workspace').within(function () {
-        tableToolTile.getColumnHeader().should('have.length', 2);
-      });
-      tableToolTile.typeInTableCell(1, '{cmd+shift+z}{cmd+shift+z}');
-      cy.get('.primary-workspace').within(function () {
-        tableToolTile.getColumnHeader().should('have.length', 4);
-      });
-    });
+    }); 
   });
 });

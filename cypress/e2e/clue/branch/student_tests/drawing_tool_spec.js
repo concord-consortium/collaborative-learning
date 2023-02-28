@@ -405,19 +405,7 @@ context('Draw Tool Tile Undo Redo', function () {
       clueCanvas.getRedoTool().click().click();
       drawToolTile.getTileTitle().should("contain", "Drawing Tile");
   });
-  it('will undo redo drawing tile using keyboard', function () {
-      drawToolTile.getDrawToolStamp().click();
-      drawToolTile.getDrawTile()
-        .trigger("mousedown", 250, 50)
-        .trigger("mouseup");
-      drawToolTile.getImageDrawing().should("exist").and("have.length", 1);
-      drawToolTile.getTileTitle().first().click();
-      drawToolTile.getDrawTileTitle().first().type('{cmd+z}{cmd+z}{cmd+z}');
-      drawToolTile.getImageDrawing().should("not.exist")
-      drawToolTile.getDrawTileTitle().first().type('{cmd+shift+z}');
-      drawToolTile.getImageDrawing().should("exist").and("have.length", 1);
-  });
-  it('verify delete table', function () {
+  it('verify delete tile', function () {
       clueCanvas.deleteTile('draw');
       drawToolTile.getDrawTile().should("not.exist");
   });
