@@ -140,19 +140,19 @@ context('Text Tool Tile selection', function () {
         //Bold
         textToolTile.clickToolbarTool("Bold");
         textToolTile.getTextEditor().last().should('have.descendants', 'strong');
-        textToolTile.getTextEditor().type('{cmd+b}');
+        textToolTile.clickToolbarTool("Bold");
         textToolTile.getTextEditor().last().should('not.have.descendants', 'strong');
 
         //Italic
         textToolTile.clickToolbarTool("Italic");
         textToolTile.getTextEditor().last().should('have.descendants', 'em');
-        textToolTile.getTextEditor().type('{cmd+i}');
+        textToolTile.clickToolbarTool("Italic");
         textToolTile.getTextEditor().last().should('not.have.descendants', 'em');
 
         //Underline
         textToolTile.clickToolbarTool("Underline");
         textToolTile.getTextEditor().last().should('have.descendants', 'u');
-        textToolTile.getTextEditor().type('{cmd+u}');
+        textToolTile.clickToolbarTool("Underline");
         textToolTile.getTextEditor().last().should('not.have.descendants', 'u');
 
         //Subscript
