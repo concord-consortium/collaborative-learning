@@ -1,0 +1,24 @@
+{
+  "tiles": [
+    {
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "title": "Section 1 Tile",
+        "text": [
+          "<p>Section 1 Tile</p>"
+        ]
+      }
+    },
+    {
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "title": "Section 2 Tile",
+        "text": [
+          "<p>Section 2 Tile</p>"
+        ]
+      }
+    }
+  ]
+}

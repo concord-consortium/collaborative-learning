@@ -1,5 +1,6 @@
 import { IReactionDisposer, reaction } from "mobx";
 import { getParent, Instance, SnapshotIn, types } from "mobx-state-tree";
+
 import { buildProblemPath, buildSectionPath } from "../../../functions/src/shared";
 import { DocumentContentModel } from "../document/document-content";
 import { InvestigationModel, InvestigationModelType } from "./investigation";
@@ -153,31 +154,64 @@ function getUnitSpec(unitId: string | undefined, appConfig: AppConfigModelType) 
   return requestedUnit || (appConfig.defaultUnit ? appConfig.getUnit(appConfig.defaultUnit) : undefined);
 }
 
+const populateProblemSections = async (content: Record<string, any>, unitUrl: string) => {
+  for (const investigation of content.investigations) {
+    for (const problem of investigation.problems) {
+      for (let i = 0; i < problem.sections.length; i++) {
+        // Currently, curriculum files can either contain their problem section data inline
+        // or in external JSON files. In the latter case, the problem sections arrays will
+        // be made up of strings that are paths to the external files. We fetch the data from
+        // those files and populate the section with it. Otherwise, we leave the section as
+        // is. Eventually, all curriculum files will be updated so their problem section data
+        // is in external files.
+        const section = problem.sections[i];
+        if (typeof section === "string") {
+          const sectionDataFile = section;
+          try {
+            const sectionDataUrl = new URL(sectionDataFile, unitUrl).href;
+            problem.sections[i] = await fetch(sectionDataUrl).then(res => res.json());
+          } catch (e) {
+            problem.sections[i] = { type: "unknown" };
+            console.log(`Unable to fetch section problem data. Error: ${e}`);
+          }
+        }
+      }
+    }
+  }
+  return content;
+};
+
 export function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType) {
   const unitSpec = getUnitSpec(unitId, appConfig);
-  const unitUrl = unitSpec?.content;
-  return fetch(getAssetUrl(unitUrl!))
-          .then(response => {
-            if (response.ok) {
-              return response.json();
-            }
-            else {
-              throw Error(`Request rejected with status ${response.status}`);
-            }
-          })
-          .catch(error => {
-            throw Error(`Request rejected with exception`);
-          });
+  const unitPath = unitSpec?.content;
+  const unitUrl = getAssetUrl(unitPath!);
+  return fetch(unitUrl!)
+           .then(async response => {
+             if (response.ok) {
+               const unitContent = await response.json();
+               const finalUnitContent = unitContent && populateProblemSections(unitContent, unitUrl);
+               return finalUnitContent;
+             }
+             else {
+               throw Error(`Request rejected with status ${response.status}`);
+             }
+           })
+           .catch(error => {
+             throw Error(`Request rejected with exception ${error}`);
+           });
 }
 
 export function getGuideJson(unitId: string | undefined, appConfig: AppConfigModelType) {
   const unitSpec = getUnitSpec(unitId, appConfig);
-  const guideUrl = unitSpec?.guide;
-  if (!guideUrl) return;
-  return fetch(getAssetUrl(guideUrl))
-          .then(response => {
+  const guidePath = unitSpec?.guide;
+  if (!guidePath) return;
+  const guideUrl = getAssetUrl(guidePath!);
+  return fetch(guideUrl)
+          .then(async response => {
             if (response.ok) {
-              return response.json();
+              const guideContent = await response.json();
+              const finalGuideContent = guideContent && populateProblemSections(guideContent, guideUrl);
+              return finalGuideContent;
             }
             else {
               throw Error(`Request rejected with status ${response.status}`);

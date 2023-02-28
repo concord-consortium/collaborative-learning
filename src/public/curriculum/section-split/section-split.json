@@ -1,0 +1,140 @@
+{
+  "code": "section-split",
+  "title": "Section Split",
+  "subtitle": "A fake curriculum for testing the section split",
+  "lookingAhead": {
+    "tiles": []
+  },
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "Investigation 1",
+      "problems": [
+        {
+          "description": "Problem 1",
+          "ordinal": 1,
+          "title": "Problem 1",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "help",
+              "content": {
+                "externalTiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "title": "Section 1 Tile",
+                      "text": [
+                        "<p>Section 1 Tile</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "title": "Section 2 Tile",
+                      "text": [
+                        "<p>Section 2 Tile</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "title": "IC Section 1 Tile",
+                      "text": [
+                        "<p>IC Section 1 Tile</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "title": "IC Section 2 Tile",
+                      "text": [
+                        "<p>IC Section 2 Tile</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "title": "WF Section 1 Tile",
+                      "text": [
+                        "<p>WF Section 1 Tile</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "title": "WF Section 2 Tile",
+                      "text": [
+                        "<p>WF Section 2 Tile</p>"
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "title": "NWDYK Section 1 Tile",
+                      "text": [
+                        "<p>NWDYK Section 1 Tile</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "title": "NWDYK Section 2 Tile",
+                      "text": [
+                        "<p>NWDYK Section 2 Tile</p>"
+                      ]
+                    }
+                  }
+                ],
+                "supports": []
+              }
+            }
+          ],
+          "supports": []
+        }
+      ],
+      "supports": []
+    }
+  ],
+  "supports": []
+}
