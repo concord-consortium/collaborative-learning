@@ -1,0 +1,85 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "If two figures are similar, how can you use information about the figures to find unknown lengths, perimeters, areas, or angle measures?"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>For lengths and perimeters, you can use the scale factor and/or the ratio of adjacent side lengths. When two figures are similar, the ratios of corresponding adjacent side lengths will be equal. Also, when two figures are similar, the ratio of corresponding side lengths across two figures will be equal.</p>",
+            "<p>For areas, you can use the scale factor. When the scale factor from figure A to figure B is , the area of the figure B will be a times a, or a2 times the area of the figure A.</p>",
+            "<p>For angle measures, you can use the fact that the corresponding angles measures in two similar figures are equal. You can find missing angle measures by looking at corresponding angle measures in the similar figure.</p>"
+          ]
+        }
+      },
+      {
+        "id": "pqI-0jaYj8H-z3f5",
+        "title": "Text 8",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Did You Know?</strong> </p>",
+            "<p>Special cameras on satellites, airplanes, and ships take images of large areas on earth. They use the images to calculate lengths and areas of shapes. This process is called remote sensing. Some use of remote sensing is tracking forest fires, erupting volcanoes, ocean floor, growth of cities or forests, </p>",
+            "<p>https://www.usgs.gov/faqs/what-does-georeferenced-mean?qt-news_science_products=0#qt-news_science_products</p>"
+          ]
+        }
+      },
+      {
+        "id": "75CjbzNx65gXDxBN",
+        "title": "Satellite Photography",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/satellitePhotography.png",
+          "filename": "curriculum/stretching-and-shrinking/images/satellitePhotography.png"
+        }
+      },
+      [
+        {
+          "id": "e8nNwJ9kewksRjzF",
+          "title": "Text 9",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Georeferencing means that the internal coordinate system of a digital map or aerial photo can be related to a ground system of geographic coordinates. </p>",
+              "<p>A georeferenced digital map or image has been tied to a known Earth coordinate system, so users can determine where every point on the map or aerial photo is located on the Earth&#x27;s surface.  </p>",
+              "<p>https://www.usgs.gov/faqs/what-does-georeferenced-mean?qt-news_science_products=0#qt-news_science_products </p>"
+            ]
+          }
+        },
+        {
+          "id": "uiQTIoGN0awEH10M",
+          "title": "Georeferencing",
+          "content": {
+            "type": "Image",
+            "url": "curriculum/stretching-and-shrinking/images/survey.png",
+            "filename": "curriculum/stretching-and-shrinking/images/survey.png"
+          }
+        }
+      ],
+      {
+        "id": "4ARO2ZR2ty2IzBl-",
+        "title": "Text 10",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The relevant coordinate transforms are typically stored within the image file (GeoPDF and GeoTIFF are examples of georeferenced file formats), though there are many possible mechanisms for implementing georeferencing.  Georeferencing in the digital file allows basic map analysis to be done, such as pointing and clicking on the map to determine the coordinates of a point, to calculate distances and areas, and to determine other information.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

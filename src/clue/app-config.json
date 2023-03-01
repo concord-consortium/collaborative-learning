@@ -324,9 +324,6 @@
       "content": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
       "guide": "curriculum/stretching-and-shrinking/sas-teacher-guide.json"
     },
-    "section-split": {
-      "content": "curriculum/section-split/section-split.json"
-    },
     "sws": {
       "content": "curriculum/say-it-with-symbols/say-it-with-symbols.json"
     },

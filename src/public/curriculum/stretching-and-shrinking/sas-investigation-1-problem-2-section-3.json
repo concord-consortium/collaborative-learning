@@ -1,0 +1,285 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Situation A. Making Comparisons</strong></p>",
+            "Ms. Marvel’s class made several comparison statements about the original figure and the image.",
+            "Merve’s Comparison: The lengths of the sides of the image are twice the lengths of the original.",
+            "Ashley’s Comparison: The distance from a point on the original figure to anchor point P is equal to the distance from the image of the point to P.  ",
+            "Eli’s Comparison: The measure of an angle in the original figure has the same measure as the image of the angle.",
+            "Soro’s Comparison: The area of the hat of the original figure is about ¼ the area of the hat of image.",
+            "<ul><li>Which of these statements are true? Explain your reasoning.</li><li> Which of these statements represent ratios? Write these as ratio statements.</li><li> Use your rubber band stretcher to enlarge another figure, such as a circle or square. Which of the comparisons are true for the original figure and its image?</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>Any of these are ratios, see examples below:</li><li> The same comparisons would be true for the original figure and its image.</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Merve’s Comparison is true. We can place copies of the original lengths on the image to see this relationship. The ratio of original to image would be x to 2x. For every measurement in the original, the image is twice the size.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "20AUG20220936",
+        "title": "Sample diagram for Merve’s comparison",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_A_1.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Any of the comparisons could be re-written as ratios. Examples include:</p>",
+            "<p>Merve’s Comparison: The comparison of the lengths on the image to the original is 2 to 1</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Ashley’s Comparison is not true. The distance from the P to a point on the image is twice as long as the distance from the P to a point on the original. The distance between points on the image and original is equal to the distance between P to the original. A comparison statement that would be true might be: For every unit of measure going from P to the original, the image will have twice that distance.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "20AUG20220937",
+        "title": "Sample diagram for Ashley’s comparison",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_A_2.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Ashley’s Comparison: (Re-written to be true.) The distance from the point P to a point on the image is twice the distance from a point on the original. Or, the distance from the point P to the original compares to the distance from the point P the image by a ratio of 1 to 2.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+        "type": "Text",
+        "format": "html",
+        "text": [
+          "<p>Eli's Comparison is true. We can place copies of the original angles on the image to see this relationship. The angle ratios from the original to the image will always be 1 to 1.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "20AUG20220938",
+        "title": "Sample diagram for Eli’s comparison",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_A_3.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Eli's Comparison: The measure of the angles have a 1 to 1 relationship. For every 90˚ on the original, there will be 90˚ on the corresponding angle of the image.</p>",
+            "<p>Comparison 4 is true.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "20AUG20220940",
+        "title": "Sample diagram for Soro’s comparison",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_A_4.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "About 4 of the original hats fit inside the image hat. So, the original hat is about 1/4 the area of the image.",
+            "Soro's Comparison: The area of the hat of the original figure to the area of the hat of image is 1 to 4.  "
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Situation B. Changing the Anchor Point and Number of Bands</strong></p>",
+            "Several students had questions about the anchor point and the number of rubber bands. What is your response to each question?",
+            "<p>DaShawn’s Question: What if we change the position of the anchor point? How does this affect the image?</p>",
+            "<p>Sunyoung’s Question: What if we use three rubber bands? We would still trace the figure using the knot closest to the anchor point. How will this affect the image?  </p>",
+            "<p>Amy’s Question: The rubber bands seem to be acting like multipliers. Since there is a multiplying effect, we can use ratios. How can I use ratio language to describe what happens to corresponding side lengths?</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>If the location of P is changed, the location of the image will also change. However, the location of P does not affect the size or shape of the image.</p>",
+            "<p>For example, the darker blue triangle below is the original. Moving the location of P moves the image (lighter blue triangle). It does not change the shape or size. The length of the distances away from P remain proportional. If we look at corresponding right angles, on the image the right angle is always twice the distance from P while the right angle on the original is always one distance away from P.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "20AUG202209399",
+        "title": "Results of moving the anchor point for a rubber band stretcher",
+        "content":
+        {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/1-2_What_if_Situation_B.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content":
+        {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Note that there are two possible interpretations of Sunyoung’s question. Most students will use the knot closer to the anchor point to trace the original figure. Some students may use the knot closer to the pencil.</p>",
+            "<p>Answers for the knots closer to the anchor point:</p>",
+            "<ul><li>The shapes are similar to each other.</li><li>The lengths in the image figure are about 3 times as long as the lengths in the original figure.</li></ul>"
+          ]
+        }
+      },
+
+      {
+        "display": "teacher",
+        "id": "20AUG202209349",
+        "title": "Side lengths for similar figures from a three rubber band stretcher (knot closer to anchor point)",
+        "content":
+        {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_B_Sunyoungs_Question_1.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content":
+         {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>The areas in the image figure are about 9 times as big as the areas in the original figure.</li><li>Each point on the image is about 3 times as far from P as its corresponding point on the original figure.</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "20AUG20220941",
+        "title": "Areas for similar figures from a three rubber band stretcher (knot closer to anchor point)",
+        "content":
+        {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_B_Sunyoungs_Question_2.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content":
+         {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>Answers for the knots closer to the pencil:</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "20AUG20220942",
+        "title": "Side lengths for similar figures from a three rubber band stretcher (knot closer to pencil)",
+        "content":
+        {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_B_Sunyoungs_Question_3.png"
+        }
+      },
+       {
+        "display": "teacher",
+        "content":
+         {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>The shapes are similar to each other.</li><li>The lengths in the image figure are about 1.5 times as long as the lengths in the original figure.</ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "20AUG20220942",
+        "title": "Areas of similar figures from a three rubber band stretcher (knot closer to pencil)",
+        "content":
+        {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/1-2_What_If_Situation_B_Sunyoungs_Question_4.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content":
+         {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<ul><li>The areas in the image figure are about 2.25 times as big as the areas in the original figure. Students may estimate and say that the areas in the image are a little more than twice those in the original.</li><li>Each point on the image is about 1.5 times as far from P as its corresponding point on the original figure.</li></ul>"
+            ]
+          }
+      },
+      {
+        "display": "teacher",
+        "content":
+        {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In Amy's Question, if the distances of each figure from the anchor point P have a 2 to 1 ratio, like the 2 rubber band stretcher, then the side length of the image figure is 2 times the side length of the original figure.</p>",
+            "<p>Using three rubber bands the ratio of the side length in figure 1 to the side length of corresponding side length in the image is 1 to 3 or 1 : 3.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "1TnPmtlYwgluY0vy",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Explore (Digging In)</strong></u></p>",
+            "<p><u>Providing for Individual Needs</u></p>",
+            "<p></p>",
+            "<p>Pay attention to how well your students are measuring. This is the first Problem in this Unit where more precision really makes sense, yet the comparisons are still relatively simple. Use this time to have students practice this important skill. Depending on how comfortable your students are with measuring, they may use rulers or transparent grid paper to measure side lengths; they may use angle rulers or protractors to measure angles.</p>",
+            "<p></p>",
+            "<p>If needed, this is also an opportunity to review operations with percents.</p>"
+          ]
+        }
+      },
+      {
+        "id": "dvhV0DF9EO2fmD9V",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What is the measurement of the base of the triangle in the smaller figure? (If the original figure’s base is 1.5 in., the smaller figure’s base ought to be 75% of this ( 1 1/8in.). Most students will get this first by measuring. Encourage some of this computation as well for review and practice.)</li><li>How could you use a rubber band stretcher to achieve 150% increase?  (Answers will vary.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "GggahfoxogiOzIfC",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Look for strategies that students use to compare features such as length and area.  Some students will see immediately that the percents given are the right comparison.  Some students will feel more comfortable comparing with fractions (the lengths on the smaller figure are about 3/4 of the original; some students might write ratios, saying that Copy 1 = 4 to 3 or 1 to  3/4  or 100% to 75%.  (Portrayal)</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Planning for the Summary</u></p>",
+            "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>",
+            "<p><em>Now What Do You Know?</em></p>",
+            "<p><em>For similar figures, what features (attributes) and measures stay the same? What features (attributes) and measures change? How does a multiplier play a role in these changes?</em></p>"
+          ]
+        }
+      },
+      {
+        "id": "Wf4etRiJhtvBhfKj",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>As you are circulating, listen for how students are answering the questions in the What If part? How are they describing the changes in the side lengths, area, and perimeter? Listen for their use of  “for every” statements that you can expand on in the Summary. (Language) </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "What are strategies for identifying if shapes have been scaled (similar figures) or if the shapes are imposters?"
+          ]
+        }
+      },
+      {
+        "id": "21AUG20220503PM",
+        "title": "Did You Know?: Non-rectangular buildings",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_4_3_NWDYK.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary.  There are many possible solutions. Some possible answers:</p>",
+            "<ul><li>There is a scale factor for corresponding sides.</li><li>Equivalent ratios of adjacent side lengths in one shape and the corresponding ratio of adjacent side lengths of the other shape are equivalent.</li><li>One shape is a rep-tile of the other.</li><li>Corresponding angles are equal. This is not enough to determine similar figures. There must also be a relationship among corresponding lengths. This is mentioned above.</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

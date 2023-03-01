@@ -1,0 +1,104 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles":
+    [
+
+      {
+        "id": "xk71E--6FPtSHfyX",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
+            "<p><u><em>Solutions and Strategies</em></u> </p>",
+            "<p>Discuss the answers. Ask for explanations. For rectangles J and L, students may talk about the width growing by 2 and the length growing by 2. The perimeters also grow by a factor of 2. This gives you an opportunity to help students describe the growth in a different way. We say that the widths, lengths, and perimeters grow by a scale factor of 2. Note that Rectangle L is Mug’s mouth and Triangle O is Mug’s nose.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Making the Mathematics Explicit </u></p>",
+            "<p>Suggested Questions</p>",
+            "<ul><li>How can you decide if two figures are similar? (They are similar when their corresponding angles have the same measure and their corresponding sides grow by the same scale factor.)</li><li>Do you agree with Zack that you can use ratios (proportional reasoning) to show that the scale factor is the same for corresponding side lengths? Why or Why not? (Yes, proportional reasoning is the ability to make comparisons between objects using multiplicative thinking instead of additive thinking and when you are using a scale factor all the side lengths are multiplied or “grow” by that amount.)</li><li>I want to grow a new Wump from Wump 1 (Mug). The scale factor is 9. What are the dimensions and perimeter of the new Wump’s mouth? (36 × 9, p = 90)</li><li>If the scale factor is 75, what are the measurements of the new mouth? (300 by 75)</li><li>Why are the dimensions 300 by 75? What rule would produce this figure? (The scale factor tells what to multiply the old sides by to get the new sides. Since Mug’s mouth is 4 by 1, the new mouth is 4 × 75 by 1 × 75 or 300 by 75. The rule is (75x, 75y).)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "qwgymmkAQKTzz6jG",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Note:</strong> These questions connect back to Variables and Patterns in 6th grade. Students are looking for an algebraic rule to relate Mug’s mouth to other Wump family mouths.</p>",
+            "<ul><li>Why does the perimeter grow the same way as the lengths of the sides of a rectangle? (Students should be able to explain that the perimeter is really a length, so it behaves like the width and length. Some might say that the perimeter = 2(ℓ+ w), and if the scale factor is 2, then the new perimeter = 2(2ℓ + 2w) and this is just double the original perimeter. A few students might recognize that 2(2ℓ + 2w) = 2 × 2(ℓ + w) or that in the expression 2(2ℓ + 2w), the factor 2 ℓ + 2w is the perimeter of the original rectangle.)</li><li>Let’s go in the reverse direction. How can you find the scale factor from the original to the image if all you have are the dimensions of the two similar figures? (We need to divide the length of a side of the image by the length of the corresponding side of the original figure.)</li><li>For similar rectangles, the perimeter of the image is the scale factor times the perimeter of the original rectangle. Do you think this is true for similar triangles? (Yes. For example, if the scale factor is 3, each side of the triangle will grow by a factor of 3. When you add all three side lengths of the image, the sum of the lengths is the original perimeter times 3.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "ANZ79rU_QNPwJe1g",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>You might try this on one of the triangles in the Problem. Students should be able to measure the sides of the triangle with enough accuracy to verify the reasoning.</p>",
+            "<p>Once you feel students have some ideas about similarity and scale factor, probe students’ understanding of similarity by asking the reverse of some of the above questions:</p>",
+            "<ul><li>If the perimeter of the mouth of a new Wump family member is 150, what are the length, width, and area of its mouth? What scale factor was used to grow this new Wump from Mug 1? (If the perimeter is 150, then I must find a number that when the original perimeter (10) is multiplied by this number, the product is 150, that is, 10 ×   . So, I divide 150 by 10 to get 15, which is the scale factor. Therefore, the length is 60, the width is 15, and the area is 900.)</li><li>What scale factor is needed to produce a new mouth (rectangle) whose perimeter is 5? (This requires students to shrink the original rectangle by a scale factor of ½.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "KVr12DYAKUFgPcFs",
+        "title": "Scaling Mug’s mouth by ½",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SASTG_2-3_making_mathematics_explicit_1.png"
+        }
+      },
+      {
+        "id": "44JsOoJMEPc4IWMr",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Repeat some of the questions above for triangles. It is best if you use the original nose (Triangle O) as the reference.</p>",
+            "<ul><li>Which mouth belongs to Mug? (L) Zug? (J)  Bug? (N)  Glug? (K)  Lug? (M)  How do you know? (Answers will vary.  Focus the conversation on scale factor and/or rules to create the figures.)</li><li>Which nose belongs to Mug? (O) Zug? (R)  Bug? (S)  Glug? (P) Lug? (Q)  How do you know? (Answers will vary.  Focus the conversation on scale factor and/or rules to create the figures.)</li></ul>",
+            "<p>As part of the Summarize or as an extension, you could extend the idea of similar rectangles to similar quadrilaterals. On grid paper, draw a quadrilateral (or a parallelogram) that is not a rectangle. Make a similar quadrilateral using a scale factor of 2. (To do this, students need to keep corresponding angles congruent. Limiting it to nonrectangular parallelograms would be a bit easier.) Compare the corresponding lengths of the two figures. Compare the measures of the corresponding angles.</p>",
+            "<p></p>",
+            "<p>All the triangles and rectangles are in the correct orientation to make it easier to reason about similarity when comparing corresponding sides. Rotate Rectangle J (or draw a new rectangle that looks like J rotated) and ask students whether this rectangle is similar to Rectangle L. Some students may say it is not similar because comparing the bases and the heights results in different ratios. However, similarity of shapes does not change under a rotation (or a flip).</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Now What Do Students Know</u></p>",
+            "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions.</p>"
+          ]
+        }
+      },
+      {
+        "id": "3nbWcd8_0Z4_Q9Ly",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p></p>",
+            "<p><strong>Reflecting on Student Learning</strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+            "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+            "<ul><li> How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

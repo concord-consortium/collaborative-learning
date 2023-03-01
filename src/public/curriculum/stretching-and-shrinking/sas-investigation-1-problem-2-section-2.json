@@ -1,0 +1,106 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+       {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Michelle, Daphne, and Mukesh are officers of the Mystery Club. Mukesh designs a flier to attract new members.",
+            "Daphne is making a large poster to publicize the next meeting. She wants to redraw the club’s logo, “Super Sleuth,” in a larger size. Michelle shows her a clever way to enlarge the figure by using rubber bands."
+          ]
+        }
+      },
+      {
+        "id": "20AUG20220935",
+        "title": "Mystery club flier",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_1_2_In_08_flyer_350w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Equipment</strong>",
+            "<ul><li> Rubber bands – identical size, bands about 3 inches long work well</li><li> Learning Aid – with a shape to enlarge and anchor point</li><li> Blank paper</li><li> Tape </li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Instructions for Stretching a Figure",
+            "<ul><li> Make a “two-band stretcher” by tying the ends of the rubber bands together.</li><li> Tape the Learning Aid to your desk. Next to it, tape a blank sheet of paper. </li><li> If you are right-handed, put the blank paper on the right.</li><li> If you are left-handed, put the blank paper on the left.</li></ul> "
+          ]
+        }
+      },
+      {
+        "id": "20AUG20220935123",
+        "title": "Left-handed and right-handed setup for using a rubber band stretcher",
+        "content": {
+        "type": "Image",
+        "url": "curriculum/stretching-and-shrinking/images/SS_1_2_rubberbands.jpg"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Instructions for Stretching a Figure",
+            "<ul><li> With your finger, hold down one end of the rubber-band stretcher on point P. Point P is called the anchor point.</li><li> Put a pencil in the other hand of the stretcher. Stretch the rubber bands with the pencil until the knot is on the outline of the shape.</li><li>  Keep the rubber bands taut (stretched). Move your pencil to guide the knot around the picture. Your pencil will draw a copy of the shape. The new picture is called the image of the original. It is also a scale drawing of the original.</li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li> Use the rubber-band method to enlarge the figure on the Mystery Club flier. Draw the figure as carefully as you can, so you can compare the size and shape of the image to the size and shape of the original figure.</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "V_gWTG15Nz1BmRtV",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Note: Students will experience different levels of success using the rubber band to enlarge the shape. Have fun with it. The messy shapes motivate the need for more precise stretching and shrinking strategies that students will experience in the next few problems.  </p>",
+            "<p>Technique Notes: It is important to keep the rubber band as close to the paper as possible. And, watch the knot, not your pencil.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li> How are the original figure and its image alike? Different? What is your evidence?</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Students may compare the general shapes of two figures, the lengths of line segments in the hats and bodies, the areas or the perimeters of the hats and bodies, the angles in the hats and bodies, or the distance of corresponding points on each figure from the anchor point P. Because the tool does provide exact replicas, the answers will be estimates at this time.</p>",
+            "<ul><li>The general shapes of the two figures are the same.</li><li>The angles in the image are the same as the corresponding angles in the original.</li><li>The lengths of the corresponding line segments are different. The lengths in the image seem to be twice as long as the corresponding lengths in the original.</li><li>The perimeters of the body and the hat in the image seem to be twice as long as those in the original. Students may reason that since each line segment doubles, the perimeter, which is the sum of these doubled line segments, will also double. (Doubling each side individually then finding the perimeter is the same as finding the perimeter and then doubling it. This is intuitively the Distributive Property: 2L + 2L + 2w + 2w = 2(L + L + w + w).)</li><li>The areas of the body and hat in the image seem to be 4 times as large as those in the original. Students may see that approximately 4 of the original rectangles (hats) can fit into the enlarged rectangle (hat). If students say the areas are three or four times as large, this is fine at this stage. The important idea is that the area is more than twice as large.</li><li>The distances of each figure from the anchor point P also have a 2 to 1 ratio. That is, each point on the image is twice the distance from P as the original corresponding point is from P.</li></ul>",
+            "<p>Note that the answers above are true in the ideal case. In practice, the 2 to 1 ratio of the lengths (and the 4 to 1 ratio of the areas) will not always be observed. This is because of the imperfection of the bands and some differences in the application of the method. More precise methods will be explored in next Problems.</p>",
+            "<p>The rubber band stretcher results are more accurate if the end of the rubber band on point P is fixed by holding a pin instead of holding by hand directly; if the image end of the band is held as close to the page as possible using the pencil; if the pencil chosen is as thin as possible since its thickness might cause the band in the image end to be shorter than it is supposed to be; if the bands are not stretched too much.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}
