@@ -18,7 +18,6 @@ import { createSingleTileContent } from "../utilities/test-utils";
 
 // This is needed so MST can deserialize snapshots referring to tiles
 import { registerTileTypes } from "../register-tile-types";
-import { SharedModelType } from "../models/shared/shared-model";
 registerTileTypes(["Geometry", "Text"]);
 
 const investigation = InvestigationModel.create({
@@ -357,9 +356,7 @@ describe("authed logger", () => {
         tileType: tileToCopy.content.type
       };
 
-      const emptySharedModels: SharedModelType[] = [];
-
-      destinationDocument.content!.userCopyTiles([copyTileInfo], { rowInsertIndex: 0 }, emptySharedModels);
+      destinationDocument.content!.userCopyTiles([copyTileInfo], { rowInsertIndex: 0 });
     });
 
   });

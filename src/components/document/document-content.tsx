@@ -400,7 +400,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleCopyTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTilesData) => {
-    this.props.content?.userCopyTiles(dragTiles.tiles, this.getDropRowInfo(e), dragTiles.sharedModels);
+    this.props.content?.handleDragTiles(dragTiles.tiles, this.getDropRowInfo(e), dragTiles.sharedModels);
   };
 
   private handleInsertNewTile = (e: React.DragEvent<HTMLDivElement>) => {
