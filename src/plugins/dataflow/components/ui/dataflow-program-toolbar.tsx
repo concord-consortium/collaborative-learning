@@ -45,7 +45,6 @@ export const DataflowProgramToolbar: React.FC<IDFProgramToolBarProps> = observer
 
   const [diagramHelper, setDiagramHelper] = useState<DiagramHelper | undefined>();
 
-
   const ui = useUIStore();
   const draggableId = `new-node-draggable`;
   const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });
@@ -103,6 +102,9 @@ export const DataflowProgramToolbar: React.FC<IDFProgramToolBarProps> = observer
       //   // console.log("check to see if its dropped on itself > click");
       //   // console.log("event:", event);
       //   // onNodeCreateClick();
+
+      /* ==[ Where you left off ] == */
+      //we need to create the nodes onto the canvas
         const pointerEvent = event.activatorEvent as PointerEvent;
         const clientX = pointerEvent.clientX + event.delta.x;
         const clientY = pointerEvent.clientY + event.delta.y;
