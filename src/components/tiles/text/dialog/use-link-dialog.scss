@@ -1,0 +1,11 @@
+.link-dialog-content {
+  margin: 10px 0;
+
+  input {
+    width: 100%;
+
+    &:invalid {
+      outline-color: red;
+    }
+  }
+}

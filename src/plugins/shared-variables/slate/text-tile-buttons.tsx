@@ -3,7 +3,7 @@ import { VariableType } from "@concord-consortium/diagram-view";
 import { Editor, ReactEditor, Transforms, useSlate } from "@concord-consortium/slate-editor";
 import { observer } from "mobx-react";
 import { IButtonDefProps, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
-import { TextToolbarButton } from "../../../components/tiles/text/text-toolbar-button";
+import { TextToolbarButton } from "../../../components/tiles/text/toolbar/text-toolbar-button";
 import { TextContentModelContext } from "../../../components/tiles/text/text-content-context";
 import { useNewVariableDialog } from "../dialog/use-new-variable-dialog";
 import { variableBuckets } from "../shared-variables-utils";

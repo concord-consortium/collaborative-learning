@@ -10,7 +10,7 @@ import { debouncedSelectTile } from "../../../models/stores/ui";
 import { logTileChangeEvent } from "../../../models/tiles/log/log-tile-change-event";
 import { TextContentModelType } from "../../../models/tiles/text/text-content";
 import { hasSelectionModifier } from "../../../utilities/event-utils";
-import { TextToolbarComponent } from "./text-toolbar";
+import { TextToolbarComponent } from "./toolbar/text-toolbar";
 import { ITileApi, TileResizeEntry } from "../tile-api";
 import { ITileProps } from "../tile-component";
 import { createTextPluginInstances, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";

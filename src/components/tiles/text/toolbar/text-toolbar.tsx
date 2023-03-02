@@ -2,22 +2,22 @@ import React, { useContext } from "react";
 import ReactDOM from "react-dom";
 import { Editor, EFormat, useSlate } from "@concord-consortium/slate-editor";
 
-import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
-import { useSettingFromStores } from "../../../hooks/use-stores";
-import { IRegisterTileApiProps } from "../tile-component";
-import { ButtonDefComponent, getAllTextPluginInfos } from "../../../models/tiles/text/text-plugin-info";
-import { isMac } from "../../../utilities/browser";
 import { TextToolbarButton } from "./text-toolbar-button";
-import { TextPluginsContext } from "./text-plugins-context";
+import { LinkButton } from "./link-button";
+import { TextPluginsContext } from "../text-plugins-context";
+import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../../hooks/use-floating-toolbar-location";
+import { IRegisterTileApiProps } from "../../tile-component";
+import { useSettingFromStores } from "../../../../hooks/use-stores";
+import { ButtonDefComponent, getAllTextPluginInfos } from "../../../../models/tiles/text/text-plugin-info";
+import { isMac } from "../../../../utilities/browser";
 
-import BoldToolIcon from "../../../assets/icons/text/bold-text-icon.svg";
-import ItalicToolIcon from "../../../assets/icons/text/italic-text-icon.svg";
-import UnderlineToolIcon from "../../../assets/icons/text/underline-text-icon.svg";
-import SuperscriptToolIcon from "../../../assets/icons/text/superscript-text-icon.svg";
-import SubscriptToolIcon from "../../../assets/icons/text/subscript-text-icon.svg";
-import NumberedListToolIcon from "../../../assets/icons/text/numbered-list-text-icon.svg";
-import BulletedListToolIcon from "../../../assets/icons/text/bulleted-list-text-icon.svg";
-
+import BoldToolIcon from "../../../../assets/icons/text/bold-text-icon.svg";
+import ItalicToolIcon from "../../../../assets/icons/text/italic-text-icon.svg";
+import UnderlineToolIcon from "../../../../assets/icons/text/underline-text-icon.svg";
+import SuperscriptToolIcon from "../../../../assets/icons/text/superscript-text-icon.svg";
+import SubscriptToolIcon from "../../../../assets/icons/text/subscript-text-icon.svg";
+import NumberedListToolIcon from "../../../../assets/icons/text/numbered-list-text-icon.svg";
+import BulletedListToolIcon from "../../../../assets/icons/text/bulleted-list-text-icon.svg";
 
 import "./text-toolbar.sass";
 
@@ -72,6 +72,11 @@ btn("subscript",   SubscriptToolIcon,    EFormat.subscript,    toggleSupSub,  `S
 btn("superscript", SuperscriptToolIcon,  EFormat.superscript,  toggleSupSub,  `Superscript`);
 btn("list-ol",     NumberedListToolIcon, EFormat.numberedList, toggleElement, `Numbered List`);
 btn("list-ul",     BulletedListToolIcon, EFormat.bulletedList, toggleElement, `Bulleted List`);
+
+buttonDefs.set("link", {
+  pluginName: "built-in",
+  ButtonComponent: LinkButton
+});
 
 const handleMouseDown = (event: React.MouseEvent) => {
   event.preventDefault();

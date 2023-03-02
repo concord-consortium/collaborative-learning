@@ -1,7 +1,7 @@
 import React from "react";
 import classNames from "classnames";
 import { Tooltip } from "react-tippy";
-import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
+import { useTooltipOptions } from "../../../../hooks/use-tooltip-options";
 
 interface IProps {
   iconName: string;
