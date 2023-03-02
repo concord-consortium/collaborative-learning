@@ -79,7 +79,110 @@
         "iconId": "icon-delete-tool",
         "isTileTool": false
       }
-    ]
+    ],
+    "navTabs": {
+      "showNavPanel": true,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "tab": "problems",
+          "label": "Lessons",
+          "sections": [
+            {
+              "initials": "IN",
+              "title": "Introduction",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "ACT",
+              "title": "Activity",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "RF",
+              "title": "Reflection",
+              "type": "problem-documents"
+            }
+          ]
+        },
+        {
+          "tab": "my-work",
+          "label": "My Notebook",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "problem-documents",
+              "dataTestHeader": "my-work-section-investigations",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["problem", "planning"],
+              "order": "original",
+              "showStars": []
+            },
+            {
+              "title": "Workspaces",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["personal"],
+              "properties": ["!isDeleted"],
+              "showStars": [],
+              "addDocument": true
+            },
+            {
+              "title": "Learning Journal",
+              "type": "learning-logs",
+              "dataTestHeader": "learning-log-section",
+              "documentTypes": ["learningLog"],
+              "properties": ["!isDeleted"],
+              "addDocument": true
+            }
+          ]
+        },
+        {
+          "tab": "class-work",
+          "label": "Shared Ideas",
+          "sections": [
+            {
+              "title": "Class Notebooks",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["publication", "personalPublication"],
+              "properties": ["isTeacherDocument", "!isDeleted"]
+            },
+            {
+              "title": "Custom Lessons",
+              "type": "published-problem-documents",
+              "dataTestHeader": "class-work-section-published",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["publication"],
+              "showStars": ["teacher"],
+              "properties": ["!isTeacherDocument"]
+            },
+            {
+              "title": "Presentations",
+              "type": "published-personal-documents",
+              "dataTestHeader": "class-work-section-personal",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["personalPublication"],
+              "properties": ["!isTeacherDocument"]
+            }
+          ]
+        },
+        {
+          "tab": "teacher-guide",
+          "label": "Teacher Guide",
+          "teacherOnly": true,
+          "sections": []
+        },
+        {
+          "tab": "student-work",
+          "label": "Student Workspaces",
+          "teacherOnly": true,
+          "sections": []
+        }
+      ]
+    }
   },
   "sections": {
     "introduction": {
@@ -87,47 +190,35 @@
       "title": "Introduction",
       "placeholder": "Work area for\nIntroduction section"
     },
-    "initialChallenge": {
-      "initials": "IC",
-      "title": "Initial Challenge",
-      "placeholder": "Work area for\nInitial Challenge section"
+    "activity": {
+      "initials": "ACT",
+      "title": "Activity",
+      "placeholder": "Work area for\nActivity section"
     },
-    "whatIf": {
-      "initials": "CM",
-      "title": "Concept Map",
-      "placeholder": "Work area for\nConcept section"
+    "reflection": {
+      "initials": "REF",
+      "title": "Reflection",
+      "placeholder": "Work area for\nReflection section"
     }
   },
   "planningDocument": {
     "enable": "teacher",
     "default": true,
     "sectionInfo": {
-      "overview": {
+      "objectives": {
         "initials": "OV",
-        "title": "Overview",
-        "placeholder": "Work area for\nOverview section"
-      },
-      "launch": {
-        "initials": "LC",
-        "title": "Launch",
-        "placeholder": "Work area for\nLaunch section"
-      },
-      "explore": {
-        "initials": "EX",
-        "title": "Explore",
-        "placeholder": "Work area for\nExplore section"
+        "title": "Objectives",
+        "placeholder": "Class Planning notes for\nObjectives section"
       },
       "summarize": {
         "initials": "SM",
-        "title": "Summarize",
-        "placeholder": "Work area for\nSummarize section"
+        "title": "Sequence",
+        "placeholder": "Class Planning notes for\nSequence section"
       }
     },
     "sections": [
-      { "type": "overview" },
-      { "type": "launch" },
-      { "type": "explore" },
-      { "type": "summarize" }
+      { "type": "objectives" },
+      { "type": "sequence" }
     ]
   },
   "investigations": [
@@ -152,13 +243,13 @@
               }
             },
             {
-              "type": "initialChallenge",
+              "type": "activity",
               "content": {
                 "tiles": [  ]
               }
             },
             {
-              "type": "whatIf",
+              "type": "reflection",
               "content": {
                 "tiles": [
 
@@ -192,13 +283,13 @@
               }
             },
             {
-              "type": "initialChallenge",
+              "type": "activity",
               "content": {
                 "tiles": [  ]
               }
             },
             {
-              "type": "whatIf",
+              "type": "reflection",
               "content": {
                 "tiles": [
 
@@ -232,13 +323,13 @@
               }
             },
             {
-              "type": "initialChallenge",
+              "type": "activity",
               "content": {
                 "tiles": [  ]
               }
             },
             {
-              "type": "whatIf",
+              "type": "reflection",
               "content": {
                 "tiles": [
 
@@ -272,13 +363,13 @@
               }
             },
             {
-              "type": "initialChallenge",
+              "type": "activity",
               "content": {
                 "tiles": [  ]
               }
             },
             {
-              "type": "whatIf",
+              "type": "reflection",
               "content": {
                 "tiles": [
 
@@ -312,13 +403,13 @@
               }
             },
             {
-              "type": "initialChallenge",
+              "type": "activity",
               "content": {
                 "tiles": [  ]
               }
             },
             {
-              "type": "whatIf",
+              "type": "reflection",
               "content": {
                 "tiles": [
 
@@ -352,13 +443,13 @@
               }
             },
             {
-              "type": "initialChallenge",
+              "type": "activity",
               "content": {
                 "tiles": [  ]
               }
             },
             {
-              "type": "whatIf",
+              "type": "reflection",
               "content": {
                 "tiles": [
 
@@ -392,13 +483,13 @@
               }
             },
             {
-              "type": "initialChallenge",
+              "type": "activity",
               "content": {
                 "tiles": [  ]
               }
             },
             {
-              "type": "whatIf",
+              "type": "reflection",
               "content": {
                 "tiles": [
 

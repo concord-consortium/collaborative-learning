@@ -1,8 +1,8 @@
 {
-  "code": "msa",
-  "abbrevTitle": "MSA",
-  "title": "Moving Straight Ahead",
-  "subtitle": "Linear Expressions, Equations, and Relationships",
+  "code": "mods",
+  "abbrevTitle": "MODS",
+  "title": "MODS Teacher Guide",
+  "subtitle": "Engineering Design",
   "placeholderText": "Enter notes here",
   "settings": {
     "table": {
@@ -10,25 +10,15 @@
     }
   },
   "sections": {
-    "overview": {
+    "objectives": {
       "initials": "OV",
-      "title": "Overview",
+      "title": "objectives",
       "placeholder": "Work area for\nOverview section"
     },
-    "launch": {
-      "initials": "LC",
-      "title": "Launch",
-      "placeholder": "Work area for\nLaunch section"
-    },
-    "explore": {
-      "initials": "EX",
-      "title": "Explore",
-      "placeholder": "Work area for\nExplore section"
-    },
-    "summarize": {
-      "initials": "SM",
-      "title": "Summarize",
-      "placeholder": "Work area for\nSummarize section"
+    "sequence": {
+      "initials": "IS",
+      "title": "Sequence",
+      "placeholder": "Work area for\nInstructional Sequence section"
     }
   },
   "defaultStamps": [
@@ -62,23 +52,44 @@
         {
           "description": "Activity 1.1",
           "ordinal": 1,
-          "title": "Water: Activity 1.1",
-          "subtitle": "",
+          "title": "Activity 1.1",
+          "subtitle": "Importance of Water Conservation",
           "disabled": [],
           "sections": [
             {
-              "type": "overview",
+              "type": "objectives",
               "content": {
                 "tiles": [
-                 
                   {
-                    "id": "837CIC0YBLn_nOrY",
-                    "title": "Text 4",
+                    "id": "Mf2vKLFaBOM_YjWL",
+                    "title": "Text 1",
                     "content": {
                       "type": "Text",
                       "format": "html",
                       "text": [
-                        "<p>This is text to a <a href='http://learn.concord.org'>link</a>. Here is a link to the<a href='https://docs.google.com/document/d/18KE3Ofgj7XmA4LXnPgD85JfjeBp_sClI5hNWYga8FRU/edit'> CLUE User&#x27;s Guide</a>.</p>"
+                        "<p><strong>Importance of Water Conservation</strong></p><p>Students will be able to explain at least one reason why water conservation is important in their lives and/or communities.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Q_3vZLK0L3wviFh6",
+                    "title": "Text 2",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Main Activities</strong></p><ul><li>Reading about water conservation</li><li>Small group and whole class discussion</li><li>Introducing a problem statement </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "6D36i4u2k7QpdJr-",
+                    "title": "Text 3",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Deliverables </strong></p><ul><li>Engineer notebook: &#x27;Why water conservation is important to me and my community?&#x27;</li></ul>"
                       ]
                     }
                   }
@@ -86,23 +97,186 @@
               }
             },
             {
-              "type": "launch",
+              "type": "sequence",
               "content": {
                 "tiles": [
 
                 ]
               }
-            },
+            }
+          ]
+        },
+        {
+          "description": "Activity 1.2",
+          "ordinal": 2,
+          "title": "Activity 1.2",
+          "subtitle": "Stakeholder Mapping",
+          "disabled": [],
+          "sections": [
             {
-              "type": "explore",
+              "type": "objectives",
               "content": {
-                "tiles": [  ]
+                "tiles": [
+                  {
+                    "id": "3783LgotcLR5O2Kq",
+                    "title": "Text 4",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Stakeholder Mapping </strong></p><ul><li>Students will be able to identify at least five stakeholders.</li><li>Students will be able to identify commonalities among groups of stakeholders. </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "5VdEm5HM4QkP0alr",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Main Activities</strong></p><ul><li>Creating a stakeholder map</li><li>Reframing the problem statement </li></ul>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "B1o4sFmbbOGq6p9U",
+                    "title": "Text 6",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Deliverables </strong></p><ul><li>Stakeholder map</li><li>Notes in engineer notebook</li></ul>"
+                      ]
+                    }
+                  }
+                ]
               }
             },
             {
-              "type": "summarize",
+              "type": "sequence",
               "content": {
-                "tiles": [ 
+                "tiles": [
+
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Activity 1.3",
+          "ordinal": 3,
+          "title": "Activity 1.3",
+          "subtitle": "Scoping",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "objectives",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "sequence",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Activity 1.4",
+          "ordinal": 4,
+          "title": "Activity 1.4",
+          "subtitle": "Stakeholder Interviews",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "objectives",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "sequence",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Activity 1.5",
+          "ordinal": 5,
+          "title": "Activity 1.5",
+          "subtitle": "Research",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "objectives",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "sequence",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Activity 1.6",
+          "ordinal": 6,
+          "title": "Activity 1.6",
+          "subtitle": "Concept Generation, Drawing Ideas",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "objectives",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "sequence",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "description": "Activity 1.7",
+          "ordinal": 7,
+          "title": "Activity 1.7",
+          "subtitle": "Presentation & Reflection",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "objectives",
+              "content": {
+                "tiles": [
+                ]
+              }
+            },
+            {
+              "type": "sequence",
+              "content": {
+                "tiles": [
 
                 ]
               }
