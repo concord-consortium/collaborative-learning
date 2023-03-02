@@ -79,6 +79,8 @@ export const TextContentModel = TileContentModel
     exportJson(options?: ITileExportOptions) {
       const value = self.asSlate();
       const html = value ? slateToHtml(value) : "";
+      // slateToHtml changes double quotes (") into `&quot;`. If this changes, we'll need to explicitly
+      // escape double quotes here, because unescaped double quotes will break the curriculum json.
       const exportHtml = html.split("\n")
         .map((line, i, arr) => `    "${escapeBackslashes(line)}"${i < arr.length - 1 ? "," : ""}`);
       return [
