@@ -19,6 +19,12 @@ class DataflowToolTile {
   getMinigraph(nodeType) {
     return cy.get(`${getNodeText(nodeType)} .node-graph`);
   }
+  getShowZoomInButton(nodeType){
+    return cy.get(`${getNodeText(nodeType)} .plus`);
+  }
+  getShowZoomOutButton(nodeType){
+    return cy.get(`${getNodeText(nodeType)} .minus`);
+  }
   getDeleteNodeButton(nodeType) {
     return cy.get(`${getNodeText(nodeType)} .close-node-button`);
   }

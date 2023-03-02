@@ -5,7 +5,7 @@ import { MAX_NODE_VALUES } from "../components/dataflow-program";
 import { NodePlotColor } from "../model/utilities/node";
 import "./dataflow-node.scss";
 
-interface NodePlotProps {
+interface INodePlotProps {
   display: boolean;
   data: any;
 }
@@ -22,25 +22,63 @@ export const defaultMinigraphOptions: MinigraphOptions = {
 
 let stepY = 5;
 
-export const DataflowNodePlot = (props: NodePlotProps) => {
+const maxY = (node: any) => node.data.tickMax ?? node.data.dsMax;
+const minY = (node: any) => node.data.tickMin ?? node.data.dsMin;
+
+enum Zoom {
+  In,
+  Out
+}
+
+export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
   if (!props.display) return null;
 
+  const handleClickOffset = (zoomDir: Zoom) => {
+    const max = maxY(props.data);
+    const min = minY(props.data);
+    const difference = Math.abs(max - min);
+    const offset = 0.1 * difference;
+
+    if (zoomDir === Zoom.In ){
+      props.data.data.tickMax = max - offset;
+      props.data.data.tickMin = min + offset;
+    }
+
+    if (zoomDir === Zoom.Out){
+      props.data.data.tickMax = max + offset;
+      props.data.data.tickMin = min - offset;
+    }
+  };
+
+  const scaleBtnColorClass= props.data.name.charAt(0).toLowerCase() + props.data.name.slice(1);
+
+
+
   return (
-    <div className="node-graph">
-      <Line
-        data={lineData(props.data)}
-        options={lineOptions()}
-        redraw={true}
-      />
+    <div className="node-bottom-section">
+      <div className="node-bottom-buttons">
+        <button
+          className={`scale-buttons ${scaleBtnColorClass} plus`} onClick={() => handleClickOffset(Zoom.In)}>
+          +
+        </button>
+        <button
+          className={`scale-buttons ${scaleBtnColorClass} minus`} onClick={() => handleClickOffset(Zoom.Out)}>
+          -
+        </button>
+      </div>
+      <div className="node-graph">
+        <Line
+          data={lineData(props.data)}
+          options={lineOptions(props.data)}
+          redraw={true}
+        />
+      </div>
     </div>
   );
 };
 
 function lineData(node: any) {
   const chartDataSets: ChartDataSets[] = [];
-
-  let dsMax = 0;
-  let dsMin = 0;
   Object.keys(node.data.watchedValues).forEach((valueKey: string) => {
     const recentValues: any = node.data.recentValues?.[valueKey];
     if (recentValues !== undefined) {
@@ -59,15 +97,18 @@ function lineData(node: any) {
       recentValues.forEach((val: any) => {
         if (isFinite(val)) {
           chData.push(val);
-          dsMax = Math.max(dsMax, val);
-          dsMin = Math.min(dsMin, val);
         }
       });
+      const localMax = Math.max(...chData);
+      node.data.dsMax = ((node.data.dsMax !== undefined) ? Math.max(localMax, node.data.dsMax) : localMax);
+      const localMin = Math.min(...chData);
+      node.data.dsMin = ((node.data.dsMin !== undefined) ? Math.min(localMin, node.data.dsMin) : localMin);
       dataset.data = chData;
       chartDataSets.push(dataset);
     }
   });
-  stepY = (dsMax - dsMin) / 2;
+
+  stepY = (maxY(node) - minY(node)) / 2;
 
   const chartData: ChartData = {
     labels: new Array(MAX_NODE_VALUES).fill(undefined).map((val,idx) => idx),
@@ -77,7 +118,10 @@ function lineData(node: any) {
   return chartData;
 }
 
-function lineOptions() {
+function lineOptions(node: any) {
+  const max = maxY(node);
+  const min = minY(node);
+
   const options: ChartOptions = {
     animation: {
       duration: 0
@@ -95,12 +139,14 @@ function lineOptions() {
           fontSize: 9,
           display: true,
           stepSize: stepY,
+          max: (max === min) ? max + 1 : max,
+          min: (max === min) ? min - 1 : min,
           maxTicksLimit: 3,
           minRotation: 0,
           maxRotation: 0,
         },
         gridLines: {
-          display: false
+          display: false,
         }
       }],
       xAxes: [{
@@ -114,5 +160,6 @@ function lineOptions() {
       }]
     },
   };
+
   return options;
 }
