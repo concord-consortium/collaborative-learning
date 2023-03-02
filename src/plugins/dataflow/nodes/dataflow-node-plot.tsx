@@ -22,17 +22,20 @@ export const defaultMinigraphOptions: MinigraphOptions = {
 
 let stepY = 5;
 
+const maxY = (node: any) => node.data.tickMax ?? node.data.dsMax;
+const minY = (node: any) => node.data.tickMin ?? node.data.dsMin;
 
 enum Zoom {
   In,
   Out
 }
+
 export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
   if (!props.display) return null;
 
   const handleClickOffset = (zoomDir: Zoom) => {
-    const max = returnMinOrMax(MinOrMax.Max, props.data);
-    const min = returnMinOrMax(MinOrMax.Min, props.data);
+    const max = maxY(props.data);
+    const min = minY(props.data);
     const difference = Math.abs(max - min);
     const offset = 0.1 * difference;
 
@@ -73,7 +76,6 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
     </div>
   );
 };
-
 
 function lineData(node: any) {
   const chartDataSets: ChartDataSets[] = [];
@@ -116,11 +118,9 @@ function lineData(node: any) {
   return chartData;
 }
 
-
-
 function lineOptions(node: any) {
-  const max = returnMinOrMax(MinOrMax.Max, node);
-  const min = returnMinOrMax(MinOrMax.Min, node);
+  const max = maxY(node);
+  const min = minY(node);
 
   const options: ChartOptions = {
     animation: {
@@ -162,19 +162,4 @@ function lineOptions(node: any) {
   };
 
   return options;
-}
-
-
-enum MinOrMax {
-  Max,
-  Min
-}
-
-function returnMinOrMax (option: MinOrMax, node: any){
-  if (option === MinOrMax.Max){
-    return node.data.tickMax ?? node.data.dsMax;
-  }
-  if (option === MinOrMax.Min){
-    return  node.data.tickMin ?? node.data.dsMin;
-  }
 }
