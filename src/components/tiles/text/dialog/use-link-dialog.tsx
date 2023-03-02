@@ -16,9 +16,10 @@ export const LinkDialogContent = ({ setUrl, text, url }: IContentProps) => {
     <div className="link-dialog-content">
       <p>Link text: {text}</p>
       <input
-        placeholder="Url"
+        placeholder="URL"
         onChange={e => setUrl(e.target.value)}
-        type="text"
+        spellCheck={false}
+        type="url"
         value={url}
       />
     </div>

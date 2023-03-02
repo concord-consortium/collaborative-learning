@@ -3,5 +3,9 @@
 
   input {
     width: 100%;
+
+    &:invalid {
+      outline-color: red;
+    }
   }
 }
