@@ -170,9 +170,8 @@ const populateProblemSections = async (content: Record<string, any>, unitUrl: st
           try {
             const sectionDataUrl = new URL(sectionDataFile, unitUrl).href;
             problem.sections[i] = await fetch(sectionDataUrl).then(res => res.json());
-          } catch (e) {
-            problem.sections[i] = { type: "unknown" };
-            console.log(`Unable to fetch section problem data. Error: ${e}`);
+          } catch (error) {
+            throw Error(`Unable to fetch section problem data. Error: ${error}`);
           }
         }
       }
@@ -189,8 +188,8 @@ export function getUnitJson(unitId: string | undefined, appConfig: AppConfigMode
            .then(async response => {
              if (response.ok) {
                const unitContent = await response.json();
-               const finalUnitContent = unitContent && populateProblemSections(unitContent, unitUrl);
-               return finalUnitContent;
+               const fullUnitContent = unitContent && populateProblemSections(unitContent, unitUrl);
+               return fullUnitContent;
              }
              else {
                throw Error(`Request rejected with status ${response.status}`);
@@ -210,8 +209,8 @@ export function getGuideJson(unitId: string | undefined, appConfig: AppConfigMod
           .then(async response => {
             if (response.ok) {
               const guideContent = await response.json();
-              const finalGuideContent = guideContent && populateProblemSections(guideContent, guideUrl);
-              return finalGuideContent;
+              const fullGuideContent = guideContent && populateProblemSections(guideContent, guideUrl);
+              return fullGuideContent;
             }
             else {
               throw Error(`Request rejected with status ${response.status}`);
