@@ -66,8 +66,8 @@ interface INewVariableButton {
   handleClick: () => void;
   tileId: string;
 }
-const NewVaribleButton = ({ handleClick, tileId }: INewVariableButton) => {
-  console.log("NewVariableButton with \n handleClick:", handleClick, "tileId:", tileId);
+const NewVariableButton = ({ handleClick, tileId }: INewVariableButton) => {
+  // console.log("NewVariableButton with \n handleClick:", handleClick, "tileId:", tileId);
   const ui = useUIStore();
   const draggableId = `${kNewVariableButtonDraggableId}-${tileId}`;
   const { attributes, listeners, setNodeRef } = useDraggable({ id: draggableId });
@@ -77,12 +77,14 @@ const NewVaribleButton = ({ handleClick, tileId }: INewVariableButton) => {
   const droppableId = `${kNewVariableButtonDroppableId}-${tileId}`;
   // console.log("draggableId", draggableId);
   const droppableInfo = useDroppable({ id: droppableId }); //called in a functional component
-  const setDroppableNodeRef = droppableInfo.setNodeRef;
+  const setDroppableNodeRef = droppableInfo.setNodeRef; //seems like a function
+  // console.log("diagram tool bar > setDroppableNodeRef:", setDroppableNodeRef);
+
   useDndMonitor({
     onDragEnd: (event: DragEndEvent) => {
-      console.log("diagram-toolbar.tsx > onDragEnd");
+      // console.log("diagram-toolbar.tsx > onDragEnd");
       if (event.over?.id === droppableId && event.active.id === draggableId) {
-        console.log("diagram-toolbar.tsx > onDragEnd > inside If");
+        // console.log("diagram-toolbar.tsx > onDragEnd > inside If");
         handleClick();
       }
     }
@@ -207,7 +209,7 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
   toggleInteractionLocked, toggleNavigator,  ...others
 }) => {
 
-  console.log("<DiagramToolBar> with tileId", tileId);
+  // console.log("<DiagramToolBar> with tileId", tileId);
   const root = content?.root;
   const selectedVariable = root?.selectedNode?.variable;
 
@@ -223,7 +225,7 @@ export const DiagramToolbar: React.FC<IProps> = observer(({
     ? ReactDOM.createPortal(
       <div className={`diagram-toolbar ${enabled && location ? "enabled" : "disabled"}`}
           style={location} onMouseDown={e => e.stopPropagation()}>
-        <NewVaribleButton handleClick={handleNewVariableClick} tileId={tileId} />
+        <NewVariableButton handleClick={handleNewVariableClick} tileId={tileId} />
         <InsertVariableButton disabled={disableInsertVariableButton} handleClick={handleInsertVariableClick} />
         <EditVariableButton handleClick={handleEditVariableClick} selectedVariable={selectedVariable} />
         <ButtonDivider />

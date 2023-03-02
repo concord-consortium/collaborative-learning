@@ -93,7 +93,12 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   };
   useDndMonitor({
     onDragEnd: (event: DragEndEvent) => {
+      if (event.over?.id) {
+        console.log("0️⃣ Diagram > onDragEnd: with event.over?.id:", event.over?.id);
+      }
+
       if (event.over?.id === droppableId && event.active.id.toString().includes(kNewVariableButtonDraggableId)) {
+        console.log("diagram-title > onDragEnd > this is creating the node?");
         const pointerEvent = event.activatorEvent as PointerEvent;
         const clientX = pointerEvent.clientX + event.delta.x;
         const clientY = pointerEvent.clientY + event.delta.y;
@@ -129,6 +134,9 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
         scale={scale}
         { ...toolbarProps }
       />
+      {/* {console.log("diagram-tile ref: setNodeRef:", setNodeRef)} */}
+      {/* {console.log("diagram-tile ref: style:", dropTargetStyle)} */}
+
       <div className="drop-target" ref={setNodeRef} style={dropTargetStyle}>
         <Diagram
           dqRoot={content.root}

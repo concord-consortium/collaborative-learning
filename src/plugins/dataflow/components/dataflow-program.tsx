@@ -24,7 +24,7 @@ import { LiveOutputReteNodeFactory } from "../nodes/factories/live-output-rete-n
 import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node-factory";
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
 import { NumControl } from "../nodes/controls/num-control";
-import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
+import DataflowProgramToolbar from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
@@ -34,6 +34,8 @@ import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { SerialDevice } from "../../../models/stores/serial";
 import { dataflowLogEvent } from "../dataflow-logger";
+import { DragEndEvent, useDndMonitor, useDroppable } from "@dnd-kit/core";
+
 
 import "./dataflow-program.sass";
 
@@ -78,6 +80,9 @@ export const MAX_NODE_VALUES = 16;
 const MAX_ZOOM = 2;
 const MIN_ZOOM = .1;
 
+//reassigned in DataflowFC functional componenti
+let isOverLocal: boolean, setNodeRefLocal: React.LegacyRef<HTMLDivElement> | undefined;
+
 @inject("stores")
 @observer
 export class DataflowProgram extends BaseComponent<IProps, IState> {
@@ -113,8 +118,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const showRateUI = ["qa", "test", "dev"].indexOf(this.stores.appMode) >= 0;
     const showZoomControl = !documentProperties?.dfHasData;
     const showProgramToolbar = showZoomControl && !readOnly;
-    const droppableId = `dataflow-droppable-${this.props.tileId}`;
 
+    const droppableId = `dataflow-droppable-${this.props.tileId}`;
+    // const { isOver, setNodeRef } = useDroppable({ id: droppableId }); //"useDroppable" cannot called in class comp
+    const dropTargetStyle = {
+      backgroundColor: isOverLocal ? "#eef8ff" : undefined
+    };
 
     return (
       <div className="dataflow-program-container">
@@ -139,8 +148,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               droppableId={droppableId}
             />
           }
-          {console.log("this is our draggable area")}
-          {/* <div className="drop-target" ref={setNodeRef} style={dropTargetStyle}> */}
+          {/* {console.log("this is our draggable area")} */}
+          <DataflowFC droppableId={droppableId} />
+          {/* {console.log("Dataflow-tile: ref:", setNodeRefLocal, "style:", dropTargetStyle)} */}
+          {isOverLocal ? "T": "F"}
+          <div className="drop-target" ref={setNodeRefLocal} style={dropTargetStyle}>
             <div
               className="editor-graph-container"
               style={this.getEditorStyle()}
@@ -164,7 +176,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
                   /> }
               </div>
             </div>
-          {/* </div> */}
+          </div>
         </div>
       </div>
     );
@@ -460,6 +472,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private addNode = async (nodeType: string) => {
+    console.log("<DataflowProgram> - addNode with nodeType:", nodeType);
     const nodeFactory = this.programEditor.components.get(nodeType) as DataflowReteNodeFactory;
     const n1 = await nodeFactory!.createNode();
     n1.position = this.getNewNodePosition();
@@ -759,3 +772,39 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
 }
 
+
+interface IDataflowFCProps{
+  droppableId: string;
+}
+
+const DataflowFC: React.FC<IDataflowFCProps> = ({droppableId}) => {
+  const { isOver, setNodeRef } = useDroppable({ id: droppableId }); //"useDroppable" cannot called in class comp
+
+  isOverLocal = isOver;
+  setNodeRefLocal = setNodeRef;
+
+  useDndMonitor({
+    onDragEnd: (event: DragEndEvent) => {
+      console.log("1️⃣ <DataflowFC> \n onDragEnd > event: ", event);
+      if (event.over?.id) {
+        console.log("1️⃣ DataflowFC > onDragEnd: with event.over?.id:", event.over?.id);
+      }
+
+      // if (event.over?.id === droppableId && event.active.id.toString().includes(kNewVariableButtonDraggableId)) {
+      //   const pointerEvent = event.activatorEvent as PointerEvent;
+      //   const clientX = pointerEvent.clientX + event.delta.x;
+      //   const clientY = pointerEvent.clientY + event.delta.y;
+      //   const position = diagramHelper?.convertClientToDiagramPosition({x: clientX, y: clientY});
+      //   const { x, y } = position;
+
+      //   const variable = Variable.create({});
+      //   content.sharedModel?.addAndInsertVariable(
+      //     variable,
+      //     (v: VariableType) => insertVariable(variable, x, y)
+      //   );
+      // }
+    }
+  });
+
+  return <> </>;
+};

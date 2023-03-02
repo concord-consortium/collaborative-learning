@@ -29,29 +29,30 @@ $dataflow-toolbar-height: 364px
     &.complete
       height: 100%
 
-  .editor-graph-container
-    position: relative
-    display: flex
-    flex: 1
-    overflow: hidden
-    min-height: $dataflow-toolbar-height
-    background-color: #333 !important
+    .drop-target
+      height: 100%
+      width: 100%
 
-    .editor
-      flex: 0 0 auto
-      background-color: #333
+      .editor-graph-container
+        position: relative
+        display: flex
+        flex: 1
+        overflow: hidden
+        min-height: $dataflow-toolbar-height
 
-      &.half
-        width: 50%
-      &.some
-        width: calc(20% - #{calc($dataflow-toolbar-width / 5)})
+        .editor
+          flex: 0 0 auto
+          background-color: #333
 
+          &.half
+            width: 50%
+          &.some
+            width: calc(20% - #{calc($dataflow-toolbar-width / 5)})
 
-
-    .open-program.program-editor
-      position: absolute
-      left: 20px
-      bottom: 10px
+        .open-program.program-editor
+          position: absolute
+          left: 20px
+          bottom: 10px
 
   .half
     width: 50%
