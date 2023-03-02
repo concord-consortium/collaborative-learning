@@ -139,19 +139,11 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const duplicateCard = () => {
     const originalCaseIndex = content.caseIndex;
     const copyableCase = content.caseByIndex(originalCaseIndex);
-    addNewCase(); // increments caseIndex
-    const newCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
-
-    if (newCaseId && content.isEmptyCase(newCaseId)){
-      for (const attrId in copyableCase){
-        const foundValue = copyableCase[attrId] || "";
-        const copyableValue: string = foundValue as string;
-        content.setAttValue(newCaseId, attrId, copyableValue);
-
-        //TODO - implement below function to get the case "next to" the one it's copied off of
-        const foundIndexWithinDataSet = 0;
-        content.moveCaseToDataSetIndex(newCaseId, foundIndexWithinDataSet);
-      }
+    const desiredIndex = originalCaseIndex + 1;
+    const beforeId = content.dataSet.caseIDFromIndex(desiredIndex);
+    if (copyableCase){
+      content.dataSet.addCanonicalCasesWithIDs([copyableCase], beforeId);
+      content.setCaseIndex(desiredIndex);
     }
   };
 
