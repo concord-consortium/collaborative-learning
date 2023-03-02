@@ -6,6 +6,7 @@ import { ITileExportOptions } from "../tile-content-info";
 import { TileContentModel } from "../tile-content";
 import { SharedModelType } from "../../shared/shared-model";
 import { getAllTextPluginInfos } from "./text-plugin-info";
+import { escapeBackslashes } from "../../../utilities/string-utils";
 
 export const kTextTileType = "Text";
 
@@ -79,7 +80,7 @@ export const TextContentModel = TileContentModel
       const value = self.asSlate();
       const html = value ? slateToHtml(value) : "";
       const exportHtml = html.split("\n")
-        .map((line, i, arr) => `    "${line.replaceAll(`"`, `\\"`)}"${i < arr.length - 1 ? "," : ""}`);
+        .map((line, i, arr) => `    "${escapeBackslashes(line)}"${i < arr.length - 1 ? "," : ""}`);
       return [
         `{`,
         `  "type": "Text",`,
