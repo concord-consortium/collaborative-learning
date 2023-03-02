@@ -9,7 +9,7 @@ import {
 import { DataCardContentModelType } from "./data-card-content";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { ImageUploadButton } from "../../components/tiles/image/image-toolbar";
-import { DeleteAttrIconButton } from "./components/add-remove-icons";
+import { DeleteAttrIconButton, DuplicateCardIconButton } from "./components/data-card-icons";
 import { EditFacet } from "./data-card-types";
 
 import "./data-card-toolbar.scss";
@@ -20,11 +20,12 @@ interface IProps extends IFloatingToolbarProps {
   currEditFacet: EditFacet;
   setImageUrlToAdd: (url: string) => void;
   handleDeleteValue: () => void;
+  handleDuplicateCard: () => void;
 }
 
 export const DataCardToolbar: React.FC<IProps> = observer(({
   model, documentContent, tileElt, currEditAttrId, currEditFacet,
-  onIsEnabled, setImageUrlToAdd, handleDeleteValue, ...others
+  onIsEnabled, setImageUrlToAdd, handleDeleteValue, handleDuplicateCard, ...others
   }: IProps) => {
 
     const content = model.content as DataCardContentModelType;
@@ -65,6 +66,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
     ? ReactDOM.createPortal(
       <div className={toolbarClasses} style={location}>
         <div className={toolbarButtonsClasses}>
+          <DuplicateCardIconButton onClick={handleDuplicateCard} className="duplicate-card-icon" />
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
           <DeleteAttrIconButton onClick={handleDeleteValue} />
         </div>

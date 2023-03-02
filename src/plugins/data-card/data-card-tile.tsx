@@ -7,7 +7,7 @@ import { DataCardContentModelType } from "./data-card-content";
 import { DataCardRows } from "./components/data-card-rows";
 import { DataCardToolbar } from "./data-card-toolbar";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
-import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
+import { AddIconButton, RemoveIconButton } from "./components/data-card-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
 import { EditFacet } from "./data-card-types";
 
@@ -136,6 +136,25 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     }
   };
 
+  const duplicateCard = () => {
+    const originalCaseIndex = content.caseIndex;
+    const copyableCase = content.caseByIndex(originalCaseIndex);
+    addNewCase(); // increments caseIndex
+    const newCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
+
+    if (newCaseId && content.isEmptyCase(newCaseId)){
+      for (const attrId in copyableCase){
+        const foundValue = copyableCase[attrId] || "";
+        const copyableValue: string = foundValue as string;
+        content.setAttValue(newCaseId, attrId, copyableValue);
+
+        //TODO - implement below function to get the case "next to" the one it's copied off of
+        const foundIndexWithinDataSet = 0;
+        content.moveCaseToDataSetIndex(newCaseId, foundIndexWithinDataSet);
+      }
+    }
+  };
+
   const previousButtonClasses = classNames(
     "card-nav", "previous",
     content.caseIndex > 0 ? "active" : "disabled",
@@ -173,6 +192,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
         currEditFacet={currEditFacet}
         setImageUrlToAdd={setImageUrlToAdd} {...toolbarProps}
         handleDeleteValue={deleteSelectedValue}
+        handleDuplicateCard={duplicateCard}
       />
       <div className="data-card-content" onClick={handleBackgroundClick}>
         <div className="data-card-header-row">

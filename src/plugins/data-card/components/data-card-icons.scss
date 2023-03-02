@@ -43,4 +43,15 @@
   &.remove-card {
     margin-right: -35px;
   }
+
+  &.duplicate-card-icon {
+    opacity: 80%;
+    transform: translate(-13px, -5px);
+    width:24px;
+    svg {
+      border: 0px transparent;
+      stroke: transparent;
+
+    }
+  }
 }

@@ -220,6 +220,12 @@ export const DataCardContentModel = TileContentModel
           });
         }
       });
+    },
+    moveCaseToDataSetIndex(caseId: string, index: number){
+      // TODO - implement this, see data-set.ts for composables?
+      // Also, remember there is the model's notion of currentIndex - a single integer we are focused on
+      // That is separate from the index the case is at, which I think is stored in data-set model?
+      console.log(`move ${caseId} to index: ${index}`);
     }
   }));
 
