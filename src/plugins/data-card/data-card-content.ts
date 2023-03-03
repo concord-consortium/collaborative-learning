@@ -197,9 +197,13 @@ export const DataCardContentModel = TileContentModel
         { __id__: caseId, [attrId]: val }
       ]);
     },
-    addNewCaseFromAttrKeys(atts: string[]){
+    addNewCaseFromAttrKeys(atts: string[], beforeId?: string ){
       const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
-      addCanonicalCasesToDataSet(self.dataSet, [obj]);
+      if (beforeId){
+        addCanonicalCasesToDataSet(self.dataSet, [obj], beforeId);
+      } else {
+        addCanonicalCasesToDataSet(self.dataSet, [obj]);
+      }
     },
     addNewAttr(){
       self.dataSet.addAttributeWithID({

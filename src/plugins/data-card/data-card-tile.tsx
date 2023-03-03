@@ -141,10 +141,18 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     const copyableCase = content.caseByIndex(originalCaseIndex);
     const desiredIndex = originalCaseIndex + 1;
     const beforeId = content.dataSet.caseIDFromIndex(desiredIndex);
-    if (copyableCase){
-      content.dataSet.addCanonicalCasesWithIDs([copyableCase], beforeId);
-      content.setCaseIndex(desiredIndex);
+
+    content.addNewCaseFromAttrKeys(content.existingAttributes(), beforeId);
+    const newCaseId = content.dataSet.caseIDFromIndex(desiredIndex);
+
+    if (newCaseId && content.isEmptyCase(newCaseId)){
+      for (const attrId in copyableCase){
+        const foundValue = copyableCase[attrId] || "";
+        const copyableValue: string = foundValue as string;
+        content.setAttValue(newCaseId, attrId, copyableValue);
+      }
     }
+    content.setCaseIndex(desiredIndex);
   };
 
   const previousButtonClasses = classNames(
