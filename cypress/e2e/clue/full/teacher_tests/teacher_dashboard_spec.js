@@ -15,8 +15,6 @@ let dashboard = new TeacherDashboard();
  *    all of the students in the dashboard's current view
  */
 
-// This test launches from portal and tests the master branch rather than the branch under development.
-// Only tests that test the branch under development should run as part of Travis branch tests.
 context("Teacher Space", () => {
 
     const clueTeacher = {
@@ -95,7 +93,7 @@ context("Teacher Space", () => {
                     dashboard.getProblemDropdown().click({ force: true }).then(() => {
                         dashboard.getProblemList().should('have.class','show');
                         dashboard.getProblemList().find('.list-item').contains(problems[tempProblemIndex].problemTitle).click({ force: true });
-                        // cy.wait(1000)
+                        // cy.wait(1000);
                         cy.waitForLoad();
                         tempProblemIndex += 1;
                     });
