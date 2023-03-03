@@ -71,14 +71,21 @@
     }
   }
 
-  .duplicate-card-button {
-    opacity: 1;
-    transform: translate(-12px, 0px);
-    svg {
-      stroke: transparent;
+  .card-actions-buttons {
+    .duplicate-card-button {
+      opacity: 1;
+      transform: translate(-12px, 0px);
+      svg {
+        stroke: transparent;
+      }
+      &:hover svg {
+        background-color:$workspace-teal-light-6;
+      }
     }
-    &:hover svg {
-      background-color:$workspace-teal-light-6;
+    &.card-actions-disabled {
+      opacity: 0.35;
+      pointer-events: none;
     }
   }
+
 }

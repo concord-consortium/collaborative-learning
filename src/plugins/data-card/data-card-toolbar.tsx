@@ -62,10 +62,17 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
     { "value-actions-disabled": !valueActionsEnabled }
   );
 
+  const cardActionsButtonsClasses = classNames(
+    "card-actions-buttons",
+    { "card-actions-disabled": content.attributes.length < 1 }
+  );
+
   return documentContent
     ? ReactDOM.createPortal(
       <div className={toolbarClasses} style={location}>
-        <DuplicateCardIconButton onClick={handleDuplicateCard} className="duplicate-card-button" />
+        <div className={cardActionsButtonsClasses}>
+          <DuplicateCardIconButton onClick={handleDuplicateCard} />
+        </div>
         <div className={valueActionsButtonsClasses}>
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
           <DeleteAttrIconButton onClick={handleDeleteValue} />

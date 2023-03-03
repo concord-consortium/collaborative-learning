@@ -38,7 +38,7 @@ export const DuplicateCardIconButton = (props: IconButtonProps) => {
 
   return (
     <Tooltip title="Duplicate card" {...tooltipOptions}>
-      <IconButtonBack {...props}>
+      <IconButtonBack className="duplicate-card-button" {...props}>
         <DuplicateCardIcon />
       </IconButtonBack>
     </Tooltip>
