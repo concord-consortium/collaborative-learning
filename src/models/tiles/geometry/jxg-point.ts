@@ -28,8 +28,8 @@ export function syncClientColors(props: any) {
   const { selectedFillColor, selectedStrokeColor, ...p } = props || {} as any;
   const colorMapEntry = getColorMapEntry(p.linkedTableId);
 
-  if (colorMapEntry) {
-    const { colorSet: { fill, stroke, selectedFill, selectedStroke } } = colorMapEntry;
+  if (colorMapEntry?.colorSet) {
+    const { fill, stroke, selectedFill, selectedStroke } = colorMapEntry.colorSet;
     p.fillColor = p.clientFillColor = fill;
     p.strokeColor = p.clientStrokeColor = stroke;
     p.clientSelectedFillColor = selectedFill;
