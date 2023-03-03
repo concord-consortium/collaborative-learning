@@ -28,7 +28,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   public static tileHandlesSelection = true;
 
   public render() {
-
+    // console.log("class <DataflowToolComponent> with props", this.props);
     const { readOnly, height, model } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
@@ -52,6 +52,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
                   size={size}
                   tileHeight={height}
                   tileId={model.id}
+                  onRecordDataChange={this.handleRecordDataChange}
                 />
               );
             }}
@@ -120,12 +121,18 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   };
 
   private handleProgramDataRateChange = (program: any) => {
+    console.log("handleProgramDataRateChange with program:", program);
     this.getContent().setProgramDataRate(program);
   };
 
   private handleProgramZoomChange = (dx: number, dy: number, scale: number) => {
+    console.log("handleProgramZoomChange with dx:", dx, "dy:", dy, "scale:", scale);
     this.getContent().setProgramZoom(dx, dy, scale);
   };
+  private handleRecordDataChange = (program: any) => {
+    console.log("handleRecordDataChange: with program:", program);
+  };
+
 
   private getContent() {
     return this.props.model.content as DataflowContentModelType;

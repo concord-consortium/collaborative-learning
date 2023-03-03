@@ -1,45 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import classNames from "classnames";
 import { ProgramDataRate } from "../../model/utilities/node";
 import { IconButton } from "../../../../components/utilities/icon-button";
 import { SerialDevice } from "../../../../models/stores/serial";
 
 import "./dataflow-program-topbar.scss";
-
-interface RateSelectorProps {
-  rateOptions: ProgramDataRate[];
-  dataRate: number;
-  onRateSelectClick: (rate: number) => void;
-  readOnly: boolean;
-}
-
-const RateSelectorComponent = (props: RateSelectorProps) => {
-  const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    props.onRateSelectClick(Number(event.target.value));
-  };
-  return (
-    <div className="datarate" title="Set Program Sampling Rate">
-      <div className="label-back">
-        <label className="label" htmlFor="rate-select">Sampling Rate</label>
-      </div>
-      <div className="datarate-options-back">
-        <div className="datarate-options">
-          <select onChange={handleSelectChange}
-            disabled={props.readOnly}
-            value={props.dataRate.toString()}
-            id="rate-select" // TODO: The id needs to be unique to the particular DF tile
-          >
-            { props.rateOptions.map((rate: ProgramDataRate) => (
-              <option key={rate.text} value={rate.val} disabled={rate.disabled}>
-                {rate.text}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 interface TopbarProps {
   programDataRates: ProgramDataRate[];
@@ -50,10 +15,12 @@ interface TopbarProps {
   showRateUI: boolean;
   lastIntervalDuration: number;
   serialDevice: SerialDevice;
+  onRecordDataChange: (program: any) => void; //change this to have modes?
 }
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
-  const { serialDevice } = props;
+  const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates,
+    dataRate, onRateSelectClick, onRecordDataChange } = props;
   // Of the boards tested, only authentic Arduinos (usbProductId === 67) raise the browser `connect` event
   // Which we use to track physical connection independently of port state
   // So we only warn of a lack of physical connection when using an known board
@@ -90,9 +57,9 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         {<IconButton
           icon="serial"
           key="serial"
-          onClickButton={props.onSerialRefreshDevices}
+          onClickButton={onSerialRefreshDevices}
           title="Refresh Serial Connection"
-          disabled={props.readOnly}
+          disabled={readOnly}
           className={classes}
         />}
         <div className="serial-message">
@@ -101,10 +68,13 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       </div>
       <div className="topbar-center">
         <RateSelectorComponent
-          rateOptions={props.programDataRates}
-          dataRate={props.dataRate}
-          onRateSelectClick={props.onRateSelectClick}
-          readOnly={props.readOnly}
+          rateOptions={programDataRates}
+          dataRate={dataRate}
+          onRateSelectClick={onRateSelectClick}
+          readOnly={readOnly}
+        />
+        <RecordDataButton
+          onRecordDataChange={onRecordDataChange}
         />
       </div>
       <div className="topbar-right">
@@ -112,5 +82,68 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
       </div>
     </div>
   );
+};
 
+interface IRateSelectorProps {
+  rateOptions: ProgramDataRate[];
+  dataRate: number;
+  onRateSelectClick: (rate: number) => void;
+  readOnly: boolean;
+}
+
+const RateSelectorComponent = (props: IRateSelectorProps) => {
+  const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    props.onRateSelectClick(Number(event.target.value));
+  };
+  return (
+    <div className="datarate" title="Set Program Sampling Rate">
+      <div className="label-back">
+        <label className="label" htmlFor="rate-select">Sampling Rate</label>
+      </div>
+      <div className="datarate-options-back">
+        <div className="datarate-options">
+          <select onChange={handleSelectChange}
+            disabled={props.readOnly}
+            value={props.dataRate.toString()}
+            id="rate-select" // TODO: The id needs to be unique to the particular DF tile
+          >
+            { props.rateOptions.map((rate: ProgramDataRate) => (
+              <option key={rate.text} value={rate.val} disabled={rate.disabled}>
+                {rate.text}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+enum Mode {
+  "Record Data",
+  "Stop",
+  "Clear Data"
+}
+
+interface IRecordDataProps {
+  onRecordDataChange: (program: any) => void; //change this to have modes?
+}
+
+
+const RecordDataButton = (props: IRecordDataProps) => {
+  const { onRecordDataChange } = props;
+
+  const [mode, setMode] = useState(0);
+
+  return (
+    <div className="record-data-button">
+      <button
+        onClick={() => onRecordDataChange(mode)}
+      >
+      {Mode[mode]}
+      </button>
+
+    </div>
+  );
 };

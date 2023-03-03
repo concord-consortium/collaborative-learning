@@ -17,6 +17,7 @@ $duration-label-back: $gray-mid;
   .topbar-left {
     width: 20%;
     display: flex;
+    background-color: orange;
 
     .icon-refresh {
       display: flex;
@@ -132,8 +133,9 @@ $duration-label-back: $gray-mid;
   .topbar-center {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: left;
     width: 60%;
+    background-color: red;
 
     .datarate {
       position: relative;
@@ -204,6 +206,10 @@ $duration-label-back: $gray-mid;
           }
         }
       }
+    }
+
+    .record-data-btn{
+
     }
   }
 
