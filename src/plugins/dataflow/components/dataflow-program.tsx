@@ -66,6 +66,7 @@ interface IProps extends SizeMeProps {
   tileHeight?: number;
   tileId: string;
   onRecordDataChange: (program: any) => void; //change this
+  programRecordState: number;
 }
 
 interface IState {
@@ -126,6 +127,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
           onRecordDataChange={this.props.onRecordDataChange}
+          programRecordState={this.props.programRecordState}
         />
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar

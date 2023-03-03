@@ -16,11 +16,12 @@ interface TopbarProps {
   lastIntervalDuration: number;
   serialDevice: SerialDevice;
   onRecordDataChange: (program: any) => void; //change this to have modes?
+  programRecordState: number;
 }
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates,
-    dataRate, onRateSelectClick, onRecordDataChange } = props;
+    dataRate, onRateSelectClick, onRecordDataChange, programRecordState } = props;
   // Of the boards tested, only authentic Arduinos (usbProductId === 67) raise the browser `connect` event
   // Which we use to track physical connection independently of port state
   // So we only warn of a lack of physical connection when using an known board
@@ -72,8 +73,10 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
           dataRate={dataRate}
           onRateSelectClick={onRateSelectClick}
           readOnly={readOnly}
+
         />
         <RecordDataButton
+          programRecordState={programRecordState}
           onRecordDataChange={onRecordDataChange}
         />
       </div>
@@ -128,20 +131,22 @@ enum Mode {
 
 interface IRecordDataProps {
   onRecordDataChange: (program: any) => void; //change this to have modes?
+  programRecordState: number;
+
 }
 
-
 const RecordDataButton = (props: IRecordDataProps) => {
-  const { onRecordDataChange } = props;
+  const { onRecordDataChange, programRecordState } = props;
 
-  const [mode, setMode] = useState(0);
 
   return (
-    <div className="record-data-button">
+    <div className="record-data-btn-container">
       <button
-        onClick={() => onRecordDataChange(mode)}
+        className="record-data-btn"
+        onClick={onRecordDataChange}
       >
-      {Mode[mode]}
+
+      {Mode[programRecordState]}
       </button>
 
     </div>

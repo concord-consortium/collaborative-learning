@@ -208,8 +208,13 @@ $duration-label-back: $gray-mid;
       }
     }
 
-    .record-data-btn{
-
+    .record-data-btn-container{
+      background-color: lightblue;
+      .record-data-btn{
+        width: 120px;
+        height: 25px;
+        display: flex;
+      }
     }
   }
 
