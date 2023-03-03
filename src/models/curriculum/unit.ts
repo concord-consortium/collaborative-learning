@@ -4,7 +4,7 @@ import { buildProblemPath, buildSectionPath } from "../../../functions/src/share
 import { DocumentContentModel } from "../document/document-content";
 import { InvestigationModel, InvestigationModelType } from "./investigation";
 import {
-  ISectionInfoMap, SectionModel, SectionModelType, 
+  ISectionInfoMap, SectionModel, SectionModelType,
   registerSectionInfo, suspendSectionContentParsing, resumeSectionContentParsing
 } from "./section";
 import { ProblemModelType } from "./problem";
@@ -209,11 +209,18 @@ export function isDifferentUnitAndProblem(stores: IBaseStores, unitId?: string |
 }
 
 export function getSectionPath(section: SectionModelType) {
+  // The sections we work with at runtime are not MST children of their problem
+  // In order to avoid circular dependencies the problem is stored in a generic
+  // realParent volatile property of the section model
+  const problem = section.realParent as ProblemModelType | undefined;
+  if (!problem) {
+    // If there is a coding error, realParent might undefined
+    throw new Error("section was not initialized right");
+  }
   // getParent is called twice because the direct parent is an array
-  const problem = getParent(getParent(section)) as ProblemModelType;
   const investigation = getParent(getParent(problem)) as InvestigationModelType;
   const unit = getParent(getParent(investigation)) as UnitModelType;
   const problemPath = buildProblemPath(unit.code, `${investigation.ordinal}`, `${problem.ordinal}`);
 
-  return buildSectionPath(problemPath, section.type, unit.facet) || '';  
+  return buildSectionPath(problemPath, section.type, unit.facet) || '';
 }

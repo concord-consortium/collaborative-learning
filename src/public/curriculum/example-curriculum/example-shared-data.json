@@ -253,22 +253,73 @@
             {
               "type": "taska",
               "content": {
+                "sharedModels":[
+                  {
+                    "sharedModel": {
+                      "type": "SharedDataSet",
+                      "id": "fa-wtBZBPtFPEk5e",
+                      "providerId": "ocE9IDDQyJInnvVH",
+                      "dataSet": {
+                        "id": "V8lj4GO-FCZ9NJrM",
+                        "name": "Table 1",
+                        "attributes": [
+                          {
+                            "id": "feRuv9gR6L9PoUYg",
+                            "clientKey": "",
+                            "name": "x",
+                            "hidden": false,
+                            "units": "",
+                            "formula": {},
+                            "values": ["0", "15", "0"]
+                          },
+                          {
+                            "id": "yGRYwwl0l_VBAvBB",
+                            "clientKey": "",
+                            "name": "y",
+                            "hidden": false,
+                            "units": "",
+                            "formula": {},
+                            "values": ["0", "0", "15"]
+                          }
+                        ],
+                        "cases": [
+                          {"__id__": "HR3at2-RqvnRaT9z"},
+                          {"__id__": "O3SmGUb4iRPw29HU"},
+                          {"__id__": "76WRbhQpTu2Wqy1c"}
+                        ]
+                      }
+                    },
+                    "tiles": ["ocE9IDDQyJInnvVH", "7PaV91x-dBRFVZsc"]
+                  }
+                ],
                 "tiles": [
                   {
                     "content": {
                       "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>Text tile on the left 1</p>"
-                      ]
+                      "text": "My plain text on the right 2"
                     }
                   },
                   {
+                    "id": "ocE9IDDQyJInnvVH",
+                    "title": "Table 1",
                     "content": {
-                      "type": "Text",
-                      "format": "html",
-                      "text": [
-                        "<p>text tile on the left 2</p>"
+                      "type": "Table",
+                      "name": "Table 1"
+                    }
+                  },
+                  {
+                    "id": "7PaV91x-dBRFVZsc",
+                    "title": "Graph 1",
+                    "content": {
+                      "type": "Geometry",
+                      "board": {
+                        "properties": {
+                          "axisMin": [-4.049, -2.232],
+                          "axisRange": [36.592, 19.71]
+                        }
+                      },
+                      "objects": [
+                        { "type": "polygon", "parents": ["HR3at2-RqvnRaT9z:yGRYwwl0l_VBAvBB", "O3SmGUb4iRPw29HU:yGRYwwl0l_VBAvBB", "76WRbhQpTu2Wqy1c:yGRYwwl0l_VBAvBB"],"properties": {"id":"cWoEx64CKz1q6gdJ"} }
                       ]
                     }
                   }
