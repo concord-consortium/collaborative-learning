@@ -26,9 +26,9 @@ const defaultProps = {
 // colors for linked points are derived from the link color map
 export function syncClientColors(props: any) {
   const { selectedFillColor, selectedStrokeColor, ...p } = props || {} as any;
-  const colorMapEntry = p.linkedTableId && getColorMapEntry(p.linkedTableId);
+  const colorMapEntry = getColorMapEntry(p.linkedTableId);
 
-  if (colorMapEntry.colorSet) {
+  if (colorMapEntry?.colorSet) {
     const { fill, stroke, selectedFill, selectedStroke } = colorMapEntry.colorSet;
     p.fillColor = p.clientFillColor = fill;
     p.strokeColor = p.clientStrokeColor = stroke;
