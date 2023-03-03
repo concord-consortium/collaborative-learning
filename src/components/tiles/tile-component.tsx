@@ -374,7 +374,6 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     // set the drag data
     const { model, docId } = this.props;
     const sharedManager = model.content.tileEnv?.sharedModelManager;
-    const tileSharedModels = sharedManager?.getTileSharedModels(model.content);
 
     const Component = getTileComponentInfo(model.content.type)?.Component;
     // can't drag placeholder tiles
@@ -397,8 +396,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     const dragTiles: IDragTilesData = {
       sourceDocId: docId,
       tiles: this.getDragTileItems(dragSrcContentId, ui.selectedTileIds),
-      // TODO: include entry information, i.e. which tiles are associated with which shared models
-      sharedModels: tileSharedModels || []
+      sharedModels: sharedManager?.getSharedModelDragDataForTiles(ui.selectedTileIds) ?? []
     };
 
     // create a sorted array of selected tiles

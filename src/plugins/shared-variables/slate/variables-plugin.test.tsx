@@ -45,6 +45,9 @@ const makeSharedModelManager = (variables?: SharedVariablesType): ISharedModelMa
     getTileSharedModels(tileContentModel) {
       return variables ? [variables] : [];
     },
+    getSharedModelDragDataForTiles(tileIds: string[]) {
+      return [];
+    },
     getSharedModelTiles(sharedModel) {
       return [];
     },

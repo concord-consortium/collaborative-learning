@@ -8,7 +8,7 @@ import { kTextTileType } from "../tiles/text/text-content";
 import { getTileContentInfo, IDocumentExportOptions } from "../tiles/tile-content-info";
 import { ITileContentModel } from "../tiles/tile-content";
 import {
-  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut
+  IDragTileItem, TileModel, ITileModel, ITileModelSnapshotIn, ITileModelSnapshotOut, IDropTileItem
 } from "../tiles/tile-model";
 import {
   IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
@@ -22,7 +22,10 @@ import { LogEventName } from "../../lib/logger-types";
 import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
-import { SharedModelUnion } from "../shared/shared-model-manager";
+import {
+  IDragSharedModelItem, sharedModelFactory, SharedModelUnion, UnknownSharedModel
+} from "../shared/shared-model-manager";
+
 export interface IDocumentAddTileOptions {
   title?: string;
   addSidecarNotes?: boolean;
@@ -34,6 +37,7 @@ export interface INewTileOptions {
   rowHeight?: number;
   rowId?: string; // The id of the row to add the tile to
   rowIndex?: number; // The position to add a new row
+  tileId?: string;
   title?: string;
 }
 
@@ -83,8 +87,7 @@ export interface SharedModelEntryType extends Instance<typeof SharedModelEntry> 
 export interface IDragTilesData {
   sourceDocId: string;
   tiles: IDragTileItem[];
-  // TODO: should really be something like SharedModelEntry snapshots
-  sharedModels: SharedModelType[];
+  sharedModels: IDragSharedModelItem[];
 }
 
 export const DocumentContentModel = types
@@ -574,12 +577,12 @@ export const DocumentContentModel = types
       const content = PlaceholderContentModel.create({ sectionId });
       return self.addTileContentInNewRow(content, { rowIndex: self.rowCount });
     },
-    copyTilesIntoExistingRow(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+    copyTilesIntoExistingRow(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
         tiles.forEach(tile => {
           let result: INewRowTile | undefined;
-          const parsedContent = safeJsonParse(tile.tileContent);
+          const parsedContent = safeJsonParse<ITileModelSnapshotIn>(tile.tileContent);
           if (parsedContent?.content) {
             const rowOptions: INewTileOptions = {
               rowIndex: rowInfo.rowDropIndex,
@@ -588,14 +591,14 @@ export const DocumentContentModel = types
             if (tile.rowHeight) {
               rowOptions.rowHeight = tile.rowHeight;
             }
-            result = self.addTileSnapshotInExistingRow(parsedContent, rowOptions);
+            result = self.addTileSnapshotInExistingRow({ ...parsedContent, id: tile.newTileId }, rowOptions);
           }
           results.push(result);
         });
       }
       return results;
     },
-    copyTilesIntoNewRows(tiles: IDragTileItem[], rowIndex: number) {
+    copyTilesIntoNewRows(tiles: IDropTileItem[], rowIndex: number) {
       const results: NewRowTileArray = [];
       if (tiles.length > 0) {
         let rowDelta = -1;
@@ -603,8 +606,8 @@ export const DocumentContentModel = types
         let lastRowId = "";
         tiles.forEach(tile => {
           let result: INewRowTile | undefined;
-          const parsedTile = safeJsonParse(tile.tileContent);
-          const content = parsedTile.content;
+          const parsedTile = safeJsonParse<ITileModelSnapshotIn>(tile.tileContent);
+          const content = parsedTile?.content;
           if (content) {
             if (tile.rowIndex !== lastRowIndex) {
               rowDelta++;
@@ -612,18 +615,21 @@ export const DocumentContentModel = types
             const tileOptions: INewTileOptions = {
               rowId: lastRowId,
               rowIndex: rowIndex + rowDelta,
+              tileId: tile.newTileId,
               title: parsedTile.title
             };
             if (tile.rowHeight) {
               tileOptions.rowHeight = tile.rowHeight;
             }
             if (tile.rowIndex !== lastRowIndex) {
-              result = self.addTileContentInNewRow(content, tileOptions);
+              // TODO: figure out the appropriate type/conversion here
+              result = self.addTileContentInNewRow(content as any, tileOptions);
               lastRowIndex = tile.rowIndex;
               lastRowId = result.rowId;
             }
             else {
-              result = self.addTileSnapshotInExistingRow({ content, title: parsedTile.title }, tileOptions);
+              const tileSnapshot: ITileModelSnapshotIn = { id: tile.newTileId, title: parsedTile.title, content };
+              result = self.addTileSnapshotInExistingRow(tileSnapshot, tileOptions);
             }
           }
           results.push(result);
@@ -895,6 +901,25 @@ export const DocumentContentModel = types
     }
   }))
   .actions(self => ({
+    addSharedModel(sharedModel: SharedModelType) {
+      // we make sure there isn't an entry already otherwise adding a shared
+      // model twice would clobber the existing entry.
+      let sharedModelEntry = self.sharedModelMap.get(sharedModel.id);
+
+      if (!sharedModelEntry) {
+        sharedModelEntry = SharedModelEntry.create({sharedModel});
+        self.sharedModelMap.set(sharedModel.id, sharedModelEntry);
+      }
+
+      return sharedModelEntry;
+    },
+    addSharedModelFromImport(id: string, sharedModelEntry: SharedModelEntryType){
+      if (self.sharedModelMap){
+        self.sharedModelMap.set(id, sharedModelEntry);
+      }
+    }
+  }))
+  .actions(self => ({
     userAddTile(toolId: string, options?: IDocumentContentAddTileOptions) {
       const result = self.addTile(toolId, options);
       const newTile = result?.tileId && self.getTile(result.tileId);
@@ -917,7 +942,7 @@ export const DocumentContentModel = types
       });
       self.moveTiles(tiles, rowInfo);
     },
-    userCopyTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo) {
+    userCopyTiles(tiles: IDropTileItem[], rowInfo: IDropRowInfo) {
       const dropRow = (rowInfo.rowDropIndex != null) ? self.getRowByIndex(rowInfo.rowDropIndex) : undefined;
       const results = dropRow?.acceptTileDrop(rowInfo)
                       ? self.copyTilesIntoExistingRow(tiles, rowInfo)
@@ -931,68 +956,53 @@ export const DocumentContentModel = types
       });
       return results;
     },
-    userCopySingleTileWithSharedModel(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
-      const { tiles, sharedModels } = dragTiles;
-      const results = this.userCopyTiles(tiles, rowInfo);
-      results.forEach((result, i) => {
-        const newSharedModelId = sharedModels[0].id;
-        // TODO: fix types -- should be SharedModelEntry
-        const pckg = {
-          sharedModel: sharedModels[0],
-          tiles: [result?.tileId]
-        };
-        self.sharedModelMap.set(newSharedModelId, pckg as any);
-        // "copy" is already logged above
-      });
-    },
     handleDragCopyTiles(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
       const { tiles, sharedModels } = dragTiles;
-      // if this is not dragging any sharedData, proceed as usual
-      if (!sharedModels.length) {
-        this.userCopyTiles(tiles, rowInfo);
-      }
 
-      // For now only handle shared data if tile is new to destination, and is paired 1:1 with a sharedModel
-      else if (sharedModels.length === 1) {
-        const existingProviderIds = self.getSharedModelsByType("SharedDataSet").map((sm) => {
-          return (sm as any).providerId;
-        });
-        const incomingProviderId = (sharedModels[0] as any).providerId;
-        const tileAlreadyCopied = existingProviderIds.includes(incomingProviderId);
+      // We need to copy the contents of the tiles and the shared models to the destination.
+      // The ids of the tiles will be remapped as part of the copy process, however, so we
+      // need to make sure that the tile references in the shared models are remapped as well.
+      // To accomplish this, we first generate new ids for the tiles, then we update the
+      // shared models to make use of the new ids, then we copy the shared models into the
+      // document, then we copy the tiles, having modified the tile copying code to make
+      // use of the ids we generated at the beginning of the process.
 
-        if (tileAlreadyCopied) return console.warn("not handling new drags of same tile");
-        if (tiles.length > 1) return console.warn("not handling multiple tiles in a drag of shared data");
+      // generate new tile ids for the dropped/copied tiles
+      const tileIdMap: Record<string, string> = {};
+      const dropTiles = tiles.map(tile => {
+        const newTileId = uniqueId();
+        tileIdMap[tile.tileId] = newTileId;
+        return { ...tile, newTileId };
+      });
 
-        // this is a drag with a sharedModel we can currently handle
-        if (!tileAlreadyCopied && tiles.length === 1) {
-          this.userCopySingleTileWithSharedModel(dragTiles, rowInfo);
+      // map tile ids within shared models and add them to the document
+      sharedModels?.forEach(sharedItem => {
+        // for now, if we already have this shared model, don't copy it again
+        // later, we can support other options (asking the user, auto-merging, etc.)
+        if (self.sharedModelMap.get(sharedItem.modelId)) return;
+
+        const providerId = sharedItem.providerId ? tileIdMap[sharedItem.providerId] : undefined;
+        const tileIds = sharedItem.tileIds.map(tileId => tileIdMap[tileId]);
+        try {
+          const content = JSON.parse(sharedItem.content, (key, value) => {
+            // some shared models, notably SharedDataSet, have an internal providerId that must be mapped
+            return key === "providerId" ? tileIdMap[value] : value;
+          });
+          const Model = sharedModelFactory(content);
+          const sharedModel = Model !== UnknownSharedModel ? Model.create(content) : undefined;
+          if (sharedModel) {
+            const entry = SharedModelEntry.create({ sharedModel, provider: providerId, tiles: tileIds });
+            self.addSharedModelFromImport(sharedItem.modelId, entry);
+          }
         }
-      }
+        catch(e) {
+          // ignore shared models with errors
+        }
+      });
 
-      else {
-        return console.warn("not handling multiple incoming sharedModels in drag");
-      }
+      // copy the tiles, making use of the new ids generated above
+      return this.userCopyTiles(dropTiles, rowInfo);
     }
-  }))
-  .actions(self => ({
-    addSharedModel(sharedModel: SharedModelType) {
-      // we make sure there isn't an entry already otherwise adding a shared
-      // model twice would clobber the existing entry.
-      let sharedModelEntry = self.sharedModelMap.get(sharedModel.id);
-
-      if (!sharedModelEntry) {
-        sharedModelEntry = SharedModelEntry.create({sharedModel});
-        self.sharedModelMap.set(sharedModel.id, sharedModelEntry);
-      }
-
-      return sharedModelEntry;
-    },
-    addSharedModelFromImport(id: string, sharedModelEntry: SharedModelEntryType){
-      if (self.sharedModelMap){
-        self.sharedModelMap.set(id, sharedModelEntry);
-      }
-    }
-
   }));
 
 export type DocumentContentModelType = Instance<typeof DocumentContentModel>;
