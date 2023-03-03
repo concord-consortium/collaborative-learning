@@ -212,6 +212,12 @@
         "title": "Redo",
         "iconId": "icon-redo-tool",
         "isTileTool": false
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
       }
     ]
   },
