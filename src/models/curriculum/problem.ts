@@ -1,4 +1,4 @@
-import { clone, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { clone, getSnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
 import { SectionModel, SectionModelType } from "./section";
 import { SettingsMstType } from "../stores/settings";
 import { SupportModel } from "./support";
@@ -41,7 +41,11 @@ const ModernProblemModel = types
         const environment: ITileEnvironment = {
           sharedModelManager
         };
-        const sectionCopy = clone(section, environment);
+        const sectionSnapshot = getSnapshot(section);
+        // We have to make a copy of the sectionSnapshot because child models modify
+        // their snapshots in place during preProcessor calls. The objects from
+        // getSnapshot are readonly
+        const sectionCopy = SectionModel.create(JSON.parse(JSON.stringify(sectionSnapshot)), environment);
         sectionCopy.setRealParent(self);
         if (sectionCopy.content) {
           sharedModelManager.setDocument(sectionCopy.content);
