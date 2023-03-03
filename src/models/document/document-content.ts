@@ -78,7 +78,14 @@ export const SharedModelEntry = types.model("SharedModelEntry", {
     self.tiles.remove(tile);
   }
 }));
-export type SharedModelEntryType = Instance<typeof SharedModelEntry>;
+export interface SharedModelEntryType extends Instance<typeof SharedModelEntry> {}
+
+export interface IDragTilesData {
+  sourceDocId: string;
+  tiles: IDragTileItem[];
+  // TODO: should really be something like SharedModelEntry snapshots
+  sharedModels: SharedModelType[];
+}
 
 export const DocumentContentModel = types
   .model("DocumentContent", {
@@ -924,10 +931,12 @@ export const DocumentContentModel = types
       });
       return results;
     },
-    userCopySingleTileWithSharedModel(tiles: IDragTileItem[], rowInfo: IDropRowInfo, sharedModels: SharedModelType[]){
+    userCopySingleTileWithSharedModel(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
+      const { tiles, sharedModels } = dragTiles;
       const results = this.userCopyTiles(tiles, rowInfo);
       results.forEach((result, i) => {
         const newSharedModelId = sharedModels[0].id;
+        // TODO: fix types -- should be SharedModelEntry
         const pckg = {
           sharedModel: sharedModels[0],
           tiles: [result?.tileId]
@@ -936,14 +945,15 @@ export const DocumentContentModel = types
         // "copy" is already logged above
       });
     },
-    handleDragTiles(tiles: IDragTileItem[], rowInfo: IDropRowInfo, sharedModels ? : SharedModelType[] | undefined){
+    handleDragCopyTiles(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
+      const { tiles, sharedModels } = dragTiles;
       // if this is not dragging any sharedData, proceed as usual
-      if (!sharedModels || sharedModels.length < 1){
+      if (!sharedModels.length) {
         this.userCopyTiles(tiles, rowInfo);
       }
 
       // For now only handle shared data if tile is new to destination, and is paired 1:1 with a sharedModel
-      if (sharedModels && sharedModels.length === 1 ){
+      else if (sharedModels.length === 1) {
         const existingProviderIds = self.getSharedModelsByType("SharedDataSet").map((sm) => {
           return (sm as any).providerId;
         });
@@ -954,12 +964,12 @@ export const DocumentContentModel = types
         if (tiles.length > 1) return console.warn("not handling multiple tiles in a drag of shared data");
 
         // this is a drag with a sharedModel we can currently handle
-        if (!tileAlreadyCopied && tiles.length === 1){
-          this.userCopySingleTileWithSharedModel(tiles, rowInfo, sharedModels);
+        if (!tileAlreadyCopied && tiles.length === 1) {
+          this.userCopySingleTileWithSharedModel(dragTiles, rowInfo);
         }
       }
 
-      else if (sharedModels && sharedModels.length > 1){
+      else {
         return console.warn("not handling multiple incoming sharedModels in drag");
       }
     }

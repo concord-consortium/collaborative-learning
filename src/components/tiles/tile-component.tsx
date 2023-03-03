@@ -4,12 +4,11 @@ import { observer, inject } from "mobx-react";
 import { isAlive } from "mobx-state-tree";
 import React from "react";
 import ResizeObserver from "resize-observer-polyfill";
+import { IDragTilesData } from "../../models/document/document-content";
 import { transformCurriculumImageUrl } from "../../models/tiles/image/image-import-export";
 import { getTileComponentInfo } from "../../models/tiles/tile-component-info";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
-import {
-  cloneTileSnapshotWithNewId, IDragTileItem, IDragTilesData, ITileModel
-} from "../../models/tiles/tile-model";
+import { cloneTileSnapshotWithNewId, IDragTileItem, ITileModel } from "../../models/tiles/tile-model";
 import { BaseComponent } from "../base";
 import PlaceholderTileComponent from "./placeholder/placeholder-tile";
 import { ITileApi, TileResizeEntry, TileApiInterfaceContext} from "./tile-api";
@@ -385,7 +384,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     }
     if (!e.dataTransfer) return;
 
-    // TODO: should this be moved to document-content.tsx since it is more than just the current tile?
+    // TODO: move this to document-content.tsx since it is more than just the current tile
     //       and also the drop handler is there
 
     const { ui } = this.stores;
@@ -398,6 +397,7 @@ export class TileComponent extends BaseComponent<IProps, IState> {
     const dragTiles: IDragTilesData = {
       sourceDocId: docId,
       tiles: this.getDragTileItems(dragSrcContentId, ui.selectedTileIds),
+      // TODO: include entry information, i.e. which tiles are associated with which shared models
       sharedModels: tileSharedModels || []
     };
 

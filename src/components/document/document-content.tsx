@@ -8,11 +8,10 @@ import classNames from "classnames";
 import { BaseComponent, IBaseProps } from "../base";
 import { TileRowComponent, kDragResizeRowId, extractDragResizeRowId, extractDragResizeY,
         extractDragResizeModelHeight, extractDragResizeDomHeight } from "../document/tile-row";
-import { DocumentContentModelType, IDragToolCreateInfo } from "../../models/document/document-content";
+import { DocumentContentModelType, IDragTilesData, IDragToolCreateInfo } from "../../models/document/document-content";
 import { getTileContentInfo } from "../../models/tiles/tile-content-info";
 import { getDocumentIdentifier } from "../../models/document/document-utils";
 import { IDropRowInfo } from "../../models/document/tile-row";
-import { IDragTilesData } from "../../models/tiles/tile-model";
 import { TileApiInterfaceContext } from "../tiles/tile-api";
 import { dragTileSrcDocId, kDragTileCreate, kDragTiles } from "../tiles/tile-component";
 import { safeJsonParse } from "../../utilities/js-utils";
@@ -400,7 +399,7 @@ export class DocumentContentComponent extends BaseComponent<IProps, IState> {
   };
 
   private handleCopyTilesDrop = (e: React.DragEvent<HTMLDivElement>, dragTiles: IDragTilesData) => {
-    this.props.content?.handleDragTiles(dragTiles.tiles, this.getDropRowInfo(e), dragTiles.sharedModels);
+    this.props.content?.handleDragCopyTiles(dragTiles, this.getDropRowInfo(e));
   };
 
   private handleInsertNewTile = (e: React.DragEvent<HTMLDivElement>) => {
