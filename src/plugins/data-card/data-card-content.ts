@@ -220,7 +220,7 @@ export const DataCardContentModel = TileContentModel
           });
         }
       });
-    },
+    }
   }));
 
 export interface DataCardContentModelType extends Instance<typeof DataCardContentModel> {}

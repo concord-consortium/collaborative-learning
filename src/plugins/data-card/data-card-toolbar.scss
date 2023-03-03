@@ -55,16 +55,22 @@
       }
     }
 
-    .delete-value-button {
-      svg path {
-        fill: $charcoal-dark-1;
-      }
+    .delete-value-button,
+    .duplicate-card-icon {
       opacity: 1;
-      transform: translate(-12px, -5px);
+      transform: translate(-13px, -5px);
+      width: 24px;
+      &:hover svg {
+        background-color:$workspace-teal-light-6;
+      }
     }
 
-    .delete-value-button:hover svg {
-      background-color:$workspace-teal-light-6;
+    .delete-value-button svg path {
+      fill: $charcoal-dark-1;
+    }
+
+    .duplicate-card-icon svg {
+      stroke: transparent;
     }
   }
 }
