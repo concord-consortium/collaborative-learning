@@ -12,7 +12,7 @@
     display: none;
   }
 
-  .toolbar-buttons {
+  .value-actions-buttons {
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -20,7 +20,7 @@
     height: $toolbar-button-height;
     background-color: $workspace-teal-light-9;
 
-    .toolbar-button { // in effect, this is just the image upload button
+    .image-upload {
       position: relative;
       width: $toolbar-button-width;
       height: $toolbar-button-height;
@@ -49,7 +49,7 @@
         width: $toolbar-button-width;
         height: $toolbar-button-height;
       }
-    }al
+    }
 
     .delete-value-button {
       opacity: 1;
@@ -70,7 +70,9 @@
       pointer-events: none;
     }
   }
+
   .duplicate-card-button {
+    opacity: 1;
     transform: translate(-12px, 0px);
     svg {
       stroke: transparent;
