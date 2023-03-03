@@ -7,7 +7,7 @@ import DeleteSelectionIcon from "../assets/delete-selection-icon.svg";
 import DuplicateCardIcon from "../assets/duplicate-card-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 
-import "./data-card-icons.scss";
+import "./add-remove-icons.scss";
 
 interface IconButtonProps {
   className?: string;

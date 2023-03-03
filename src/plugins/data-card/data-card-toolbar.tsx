@@ -9,7 +9,7 @@ import {
 import { DataCardContentModelType } from "./data-card-content";
 import { ITileModel } from "../../models/tiles/tile-model";
 import { ImageUploadButton } from "../../components/tiles/image/image-toolbar";
-import { DeleteAttrIconButton, DuplicateCardIconButton } from "./components/data-card-icons";
+import { DeleteAttrIconButton, DuplicateCardIconButton } from "./components/add-remove-icons";
 import { EditFacet } from "./data-card-types";
 
 import "./data-card-toolbar.scss";

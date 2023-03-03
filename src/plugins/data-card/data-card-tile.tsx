@@ -7,7 +7,7 @@ import { DataCardContentModelType } from "./data-card-content";
 import { DataCardRows } from "./components/data-card-rows";
 import { DataCardToolbar } from "./data-card-toolbar";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
-import { AddIconButton, RemoveIconButton } from "./components/data-card-icons";
+import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
 import { EditFacet } from "./data-card-types";
 
