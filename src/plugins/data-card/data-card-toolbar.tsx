@@ -30,7 +30,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
 
     const content = model.content as DataCardContentModelType;
     const currentCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
-    const enabled = onIsEnabled();
+    const enabled = onIsEnabled(); //"enabled" is the visibility of the toolbar at lower left
     const location = useFloatingToolbarLocation({
       documentContent,
       tileElt,
@@ -41,7 +41,7 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
   });
 
   const isEditingValue = !!currEditAttrId && currEditFacet === "value";
-  const buttonsEnabled = enabled && isEditingValue;
+  const valueActionsEnabled = enabled && isEditingValue;
 
   const uploadImage = (file: File) => {
     gImageMap.addFileImage(file)
@@ -59,14 +59,14 @@ export const DataCardToolbar: React.FC<IProps> = observer(({
 
   const toolbarButtonsClasses = classNames(
     "toolbar-buttons",
-    { disabled: !buttonsEnabled }
+    { "value-actions-disabled": !valueActionsEnabled }
   );
 
   return documentContent
     ? ReactDOM.createPortal(
       <div className={toolbarClasses} style={location}>
+        <DuplicateCardIconButton onClick={handleDuplicateCard} className="duplicate-card-button" />
         <div className={toolbarButtonsClasses}>
-          <DuplicateCardIconButton onClick={handleDuplicateCard} className="duplicate-card-icon" />
           <ImageUploadButton onUploadImageFile={file => uploadImage(file)} />
           <DeleteAttrIconButton onClick={handleDeleteValue} />
         </div>

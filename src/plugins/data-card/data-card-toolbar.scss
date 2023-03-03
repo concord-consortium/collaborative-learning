@@ -2,6 +2,7 @@
 
 .data-card-toolbar {
   position: absolute;
+  display:flex;
   border: $toolbar-border;
   border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
   z-index: $toolbar-z-index;
@@ -19,12 +20,7 @@
     height: $toolbar-button-height;
     background-color: $workspace-teal-light-9;
 
-    &.disabled {
-      opacity: 0.35;
-      pointer-events: none;
-    }
-
-    .toolbar-button {
+    .toolbar-button { // in effect, this is just the image upload button
       position: relative;
       width: $toolbar-button-width;
       height: $toolbar-button-height;
@@ -53,10 +49,9 @@
         width: $toolbar-button-width;
         height: $toolbar-button-height;
       }
-    }
+    }al
 
-    .delete-value-button,
-    .duplicate-card-icon {
+    .delete-value-button {
       opacity: 1;
       width: 24px;
       &:hover svg {
@@ -70,12 +65,18 @@
         fill: $charcoal-dark-1;
       }
     }
-
-    .duplicate-card-icon {
-      transform: translate(-11px, -5px);
-      svg {
-        stroke: transparent;
-      }
+    &.value-actions-disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+  }
+  .duplicate-card-button {
+    transform: translate(-12px, 0px);
+    svg {
+      stroke: transparent;
+    }
+    &:hover svg {
+      background-color:$workspace-teal-light-6;
     }
   }
 }
