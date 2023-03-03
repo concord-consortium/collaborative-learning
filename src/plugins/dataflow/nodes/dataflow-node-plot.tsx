@@ -36,18 +36,9 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
   const handleClickOffset = (zoomDir: Zoom) => {
     const max = maxY(props.data);
     const min = minY(props.data);
-    const difference = Math.abs(max - min);
-    const offset = 0.1 * difference;
-
-    if (zoomDir === Zoom.In ){
-      props.data.data.tickMax = max - offset;
-      props.data.data.tickMin = min + offset;
-    }
-
-    if (zoomDir === Zoom.Out){
-      props.data.data.tickMax = max + offset;
-      props.data.data.tickMin = min - offset;
-    }
+    const scalar = (zoomDir === Zoom.In) ? 1.25 : 0.8;
+    props.data.data.tickMax = scalar * max;
+    props.data.data.tickMin = scalar * min;
   };
 
   const scaleBtnColorClass= props.data.name.charAt(0).toLowerCase() + props.data.name.slice(1);
