@@ -3,6 +3,7 @@ import { observer } from "mobx-react";
 import React, { useEffect, useState } from "react";
 import { ITileProps } from "../../components/tiles/tile-component";
 import { useUIStore } from "../../hooks/use-stores";
+import { addCanonicalCasesToDataSet } from "../../models/data/data-set";
 import { DataCardContentModelType } from "./data-card-content";
 import { DataCardRows } from "./components/data-card-rows";
 import { DataCardToolbar } from "./data-card-toolbar";
@@ -139,20 +140,14 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const duplicateCard = () => {
     const originalCaseIndex = content.caseIndex;
     const copyableCase = content.caseByIndex(originalCaseIndex);
-    const desiredIndex = originalCaseIndex + 1;
-    const beforeId = content.dataSet.caseIDFromIndex(desiredIndex);
-
-    content.addNewCaseFromAttrKeys(content.existingAttributes(), beforeId);
-    const newCaseId = content.dataSet.caseIDFromIndex(desiredIndex);
-
-    if (newCaseId && content.isEmptyCase(newCaseId)){
-      for (const attrId in copyableCase){
-        const foundValue = copyableCase[attrId] || "";
-        const copyableValue: string = foundValue as string;
-        content.setAttValue(newCaseId, attrId, copyableValue);
-      }
+    if (copyableCase) {
+      // strip __id__ so a new id will be generated on insertion
+      const { __id__, ...canonicalCase } = copyableCase;
+      const desiredIndex = originalCaseIndex + 1;
+      const beforeId = content.dataSet.caseIDFromIndex(desiredIndex);
+      addCanonicalCasesToDataSet(content.dataSet, [canonicalCase], beforeId);
+      content.setCaseIndex(desiredIndex);
     }
-    content.setCaseIndex(desiredIndex);
   };
 
   const previousButtonClasses = classNames(
