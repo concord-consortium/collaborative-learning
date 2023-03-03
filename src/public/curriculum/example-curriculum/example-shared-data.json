@@ -257,11 +257,11 @@
                   {
                     "sharedModel": {
                       "type": "SharedDataSet",
-                      "id": "fa-wtBZBPtFPEk5e",
-                      "providerId": "ocE9IDDQyJInnvVH",
+                      "id": "shared-data-1",
+                      "providerId": "table-1",
                       "dataSet": {
                         "id": "V8lj4GO-FCZ9NJrM",
-                        "name": "Table 1",
+                        "name": "Table In Section",
                         "attributes": [
                           {
                             "id": "feRuv9gR6L9PoUYg",
@@ -289,7 +289,7 @@
                         ]
                       }
                     },
-                    "tiles": ["ocE9IDDQyJInnvVH", "7PaV91x-dBRFVZsc"]
+                    "tiles": ["table-1", "graph-1"]
                   }
                 ],
                 "tiles": [
@@ -300,16 +300,16 @@
                     }
                   },
                   {
-                    "id": "ocE9IDDQyJInnvVH",
-                    "title": "Table 1",
+                    "id": "table-1",
+                    "title": "Table in Section",
                     "content": {
                       "type": "Table",
-                      "name": "Table 1"
+                      "name": "Table in Section"
                     }
                   },
                   {
-                    "id": "7PaV91x-dBRFVZsc",
-                    "title": "Graph 1",
+                    "id": "graph-1",
+                    "title": "Graph in Section",
                     "content": {
                       "type": "Geometry",
                       "board": {
