@@ -1,4 +1,5 @@
-import { clone, getSnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { getSnapshot, Instance, SnapshotIn, types } from "mobx-state-tree";
+import { cloneDeep } from "lodash";
 import { SectionModel, SectionModelType } from "./section";
 import { SettingsMstType } from "../stores/settings";
 import { SupportModel } from "./support";
@@ -22,6 +23,7 @@ const ModernProblemModel = types
     ordinal: types.integer,
     title: types.string,
     subtitle: "",
+    // loadedSections are part of the tree, but clients should use the sections view instead
     loadedSections: types.array(SectionModel),
     supports: types.array(SupportModel),
     config: types.maybe(types.frozen<Partial<ProblemConfiguration>>())
@@ -45,7 +47,7 @@ const ModernProblemModel = types
         // We have to make a copy of the sectionSnapshot because child models modify
         // their snapshots in place during preProcessor calls. The objects from
         // getSnapshot are readonly
-        const sectionCopy = SectionModel.create(JSON.parse(JSON.stringify(sectionSnapshot)), environment);
+        const sectionCopy = SectionModel.create(cloneDeep(sectionSnapshot), environment);
         sectionCopy.setRealParent(self);
         if (sectionCopy.content) {
           sharedModelManager.setDocument(sectionCopy.content);
