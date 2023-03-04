@@ -45,8 +45,8 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
     const distanceFromMidpoint = difference / 2;
     const scalar = (zoomDir === Zoom.In) ? 0.8 : 1.25;
     const newDistanceFromMidpoint = scalar * distanceFromMidpoint;
-    props.data.data.tickMax = ((midpoint + newDistanceFromMidpoint) * 1e2) / 1e2; //round to nearest hundredths
-    props.data.data.tickMin = ((midpoint - newDistanceFromMidpoint) * 1e2) / 1e2;
+    props.data.data.tickMax = (midpoint + newDistanceFromMidpoint);
+    props.data.data.tickMin = (midpoint - newDistanceFromMidpoint);
   };
 
   const scaleBtnColorClass= props.data.name.charAt(0).toLowerCase() + props.data.name.slice(1);
