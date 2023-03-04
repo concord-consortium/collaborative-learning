@@ -30,20 +30,26 @@ enum Zoom {
   Out
 }
 
+//This will not behave as expected for tickMin > 0 (or if both values are negative, but that probably won't happen).
+// Not sure what should happen in that case. Part of what @tealefristoe was recommending was an algorithm that worked
+//independent of the values involved.
+
 export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
   if (!props.display) return null;
 
   const handleClickOffset = (zoomDir: Zoom) => {
     const max = maxY(props.data);
     const min = minY(props.data);
-    const scalar = (zoomDir === Zoom.In) ? 1.25 : 0.8;
-    props.data.data.tickMax = scalar * max;
-    props.data.data.tickMin = scalar * min;
+    const difference = Math.abs(max - min);
+    const midpoint = (max + min)/2;
+    const distanceFromMidpoint = difference / 2;
+    const scalar = (zoomDir === Zoom.In) ? 0.8 : 1.25;
+    const newDistanceFromMidpoint = scalar * distanceFromMidpoint;
+    props.data.data.tickMax = (midpoint + newDistanceFromMidpoint).toFixed(2);
+    props.data.data.tickMin = (midpoint - newDistanceFromMidpoint).toFixed(2);
   };
 
   const scaleBtnColorClass= props.data.name.charAt(0).toLowerCase() + props.data.name.slice(1);
-
-
 
   return (
     <div className="node-bottom-section">
