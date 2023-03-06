@@ -37,22 +37,15 @@ export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
     const max = maxY(props.data);
     const min = minY(props.data);
     const difference = Math.abs(max - min);
-    const offset = 0.1 * difference;
-
-    if (zoomDir === Zoom.In ){
-      props.data.data.tickMax = max - offset;
-      props.data.data.tickMin = min + offset;
-    }
-
-    if (zoomDir === Zoom.Out){
-      props.data.data.tickMax = max + offset;
-      props.data.data.tickMin = min - offset;
-    }
+    const midpoint = (max + min)/2;
+    const distanceFromMidpoint = difference / 2;
+    const scalar = (zoomDir === Zoom.In) ? 0.8 : 1.25;
+    const newDistanceFromMidpoint = scalar * distanceFromMidpoint;
+    props.data.data.tickMax = (midpoint + newDistanceFromMidpoint);
+    props.data.data.tickMin = (midpoint - newDistanceFromMidpoint);
   };
 
   const scaleBtnColorClass= props.data.name.charAt(0).toLowerCase() + props.data.name.slice(1);
-
-
 
   return (
     <div className="node-bottom-section">
@@ -107,7 +100,7 @@ function lineData(node: any) {
       chartDataSets.push(dataset);
     }
   });
-
+  
   stepY = (maxY(node) - minY(node)) / 2;
 
   const chartData: ChartData = {
