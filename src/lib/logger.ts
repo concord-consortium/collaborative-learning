@@ -154,9 +154,11 @@ export class Logger {
 }
 
 function sendToLoggingService(data: LogMessage, user: UserModelType) {
+  const isProduction = user.portal === productionPortal || data.parameters?.portal === productionPortal;
+  const url = logManagerUrl[isProduction ? "production" : "dev"];
   if (DEBUG_LOGGER) {
     // eslint-disable-next-line no-console
-    console.log("Logger#sendToLoggingService sending", data, "to", logManagerUrl);
+    console.log("Logger#sendToLoggingService sending", data, "to", url);
   }
   if (!Logger.isLoggingEnabled) return;
 
@@ -166,7 +168,6 @@ function sendToLoggingService(data: LogMessage, user: UserModelType) {
   request.upload.addEventListener("error", () => user.setIsLoggingConnected(false));
   request.upload.addEventListener("abort", () => user.setIsLoggingConnected(false));
 
-  const url = logManagerUrl[user.portal === productionPortal ? "production" : "dev"];
   request.open("POST", url, true);
   request.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
   request.send(JSON.stringify(data));

@@ -20,11 +20,6 @@ export interface IDragTileItem {
   tileType: string;
 }
 
-export interface IDragTiles {
-  sourceDocId: string;
-  items: IDragTileItem[];
-}
-
 export function cloneTileSnapshotWithoutId(tile: ITileModel) {
   const { id, display, ...copy } = cloneDeep(getSnapshot(tile));
   return copy;

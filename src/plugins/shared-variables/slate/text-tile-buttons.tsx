@@ -3,7 +3,7 @@ import { VariableType } from "@concord-consortium/diagram-view";
 import { Editor, ReactEditor, Transforms, useSlate } from "@concord-consortium/slate-editor";
 import { observer } from "mobx-react";
 import { IButtonDefProps, ITextPlugin } from "../../../models/tiles/text/text-plugin-info";
-import { TextToolbarButton } from "../../../components/tiles/text/text-toolbar-button";
+import { TextToolbarButton } from "../../../components/tiles/text/toolbar/text-toolbar-button";
 import { TextContentModelContext } from "../../../components/tiles/text/text-content-context";
 import { useNewVariableDialog } from "../dialog/use-new-variable-dialog";
 import { variableBuckets } from "../shared-variables-utils";
@@ -24,9 +24,36 @@ export function insertTextVariable(variable: VariableType, editor?: Editor) {
     console.warn("inserting variable but there is no editor");
     return;
   }
+
+  // If any text is selected, move the insertion point to immediately after the selection.
+  const selectionLength = editor.selection ? Editor.string(editor, editor.selection).length : 0;
+  Transforms.move(editor, { distance: selectionLength, unit: "character", edge: "start" });
+
+  const newNodes = [];
+
+  // If the insertion point is preceded by a character that's not a space, add a space.
+  const range = editor.selection || [0,0];
+  const beforeInsertPoint = Editor.before(editor, range, { unit: "character" });
+  const charBefore = editor.selection && beforeInsertPoint &&
+                       Editor.string(editor, {anchor: editor.selection.anchor, focus: beforeInsertPoint });
+  if (charBefore && charBefore !== " ") {
+    newNodes.push({text: " "});
+  }
+
+  // Add the variable chip.
   const reference = variable.id;
   const varElt: VariableElement = { type: kVariableFormat, reference, children: [{text: "" }]};
-  Transforms.insertNodes(editor, varElt);
+  newNodes.push(varElt);
+
+  // If insertion point is followed by a character that's not a space or punctuation, add a space.
+  const afterInsertPoint = Editor.after(editor, range, { unit: "character" });
+  const charAfter = editor.selection && afterInsertPoint &&
+                      Editor.string(editor, {anchor: editor.selection.anchor, focus: afterInsertPoint });
+  if (charAfter && !(/^[.,;:!? ]/.test(charAfter))) {
+    newNodes.push({text: " "});
+  }
+
+  Transforms.insertNodes(editor, newNodes);
 }
 
 export function insertTextVariables(variables: VariableType[], editor?: Editor) {
@@ -73,7 +100,6 @@ function handleClose(editor: Editor) {
   // focus the editor after closing the dialog, which is what the user expects and
   // also required for certain slate selection synchronization mechanisms to work.
   // focusing twice shouldn't be necessary, but sometimes seems to help ¯\_(ツ)_/¯
-  Transforms.move(editor, { distance: 1, unit: "word" });
   ReactEditor.focus(editor);
   setTimeout(() => {
     ReactEditor.focus(editor);
@@ -91,12 +117,12 @@ export const NewVariableTextButton = observer(function NewVariableTextButton(
   const enabled = !!sharedModel;
 
   const highlightedText = (editor && editor.selection) ? Editor.string(editor, editor.selection) : "";
-  const namePrefill = highlightedText;
+  const descriptionPrefill = highlightedText;
   const [showDialog] = useNewVariableDialog({
     addVariable(variable) {
       insertTextVariable(variable, editor);
     },
-    sharedModel, namePrefill,
+    sharedModel, descriptionPrefill,
     noUndo: true,
     onClose: () => handleClose(editor)
   });
@@ -137,7 +163,7 @@ export const InsertVariableTextButton = observer(function InsertVariableTextButt
   };
   return (
     <TextToolbarButton iconName={kInsertVariableButtonName} Icon={InsertVariableChipIcon}
-      tooltip={"Insert Variable"}  enabled={enabled} isSelected={isSelected}
+      tooltip={"Insert Variable"} enabled={enabled} isSelected={isSelected}
       onClick={handleClick} />
   );
 });

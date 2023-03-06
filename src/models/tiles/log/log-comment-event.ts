@@ -1,6 +1,7 @@
 import { isSectionPath, parseSectionPath } from "../../../../functions/src/shared";
 import { ProblemModelType } from "../../curriculum/problem";
 import { Logger } from "../../../lib/logger";
+import { getTileTitleForLogging } from "../../../lib/logger-utils";
 import { LogEventName } from "../../../lib/logger-types";
 import { isDocumentLogEvent, logDocumentEvent } from "../../document/log-document-event";
 import { isCurriculumLogEvent, logCurriculumEvent } from "../../curriculum/log-curriculum-event";
@@ -27,13 +28,15 @@ function processCommentEventParams(params: ILogComment, context: IContext) {
     const [_unit, facet, _investigation, _problem, section] = parseSectionPath(documentId) || [];
     const curriculumStore = facet === "guide" ?  context.teacherGuide : context.problem;
     const tileType = tileId && curriculumStore?.getSectionById(section)?.content?.getTileType(tileId);
-    return { curriculum: documentId, tileId, tileType, ...others };
+    const tileTitle = tileId && getTileTitleForLogging(tileId, curriculumStore?.getSectionById(section));
+    return { curriculum: documentId, tileId, tileTitle, tileType, ...others };
   }
 
   const document = documents.getDocument(documentId) || networkDocuments.getDocument(documentId);
   if (document) {
     const tileType = tileId ? document.content?.getTileType(tileId) : undefined;
-    return { document, tileId, tileType, ...others };
+    const tileTitle = tileId && getTileTitleForLogging(tileId, document);
+    return { document, tileId, tileTitle, tileType, ...others };
   }
 
   console.warn("Warning: couldn't transform log comment event params for document:", documentId);

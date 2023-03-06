@@ -100,8 +100,8 @@ function lineData(node: any) {
       chartDataSets.push(dataset);
     }
   });
-
-  stepY = (maxY(node)  - minY(node)) / 2;
+  
+  stepY = (maxY(node) - minY(node)) / 2;
 
   const chartData: ChartData = {
     labels: new Array(MAX_NODE_VALUES).fill(undefined).map((val,idx) => idx),
