@@ -312,7 +312,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const geometryContent = content as GeometryContentModelType;
       if (size && size.width && size.height && (!prevProps.size ||
           ((size.width !== prevProps.size.width) || (size.height !== prevProps.size.height)))) {
-        geometryContent.resizeBoard(this.state.board, size.width, size.height, scale);
+        // console.log(`resizing`, this.props.model.id);
+        geometryContent.resizeBoard(this.state.board, size.width, size.height, scale, this.props.model.id);
       }
 
       // Handle new scale

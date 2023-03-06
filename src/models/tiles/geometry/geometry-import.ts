@@ -243,6 +243,11 @@ export function preprocessImportFormat(snapshot: any): GeometryExtrasContentSnap
       yAxis: { ...yAxisBase, name: axisNames?.[1], label: axisLabels?.[1] },
       ...others
     });
+    if (xAxisBase.range && xAxisBase.range < 26 && xAxisBase.range > 25) {
+      console.log(`axisRange`, axisRange);
+      console.log(`xAxisBase`, xAxisBase);
+      console.log(`board`, board);
+    }
   }
 
   addBoard(boardSpecs);

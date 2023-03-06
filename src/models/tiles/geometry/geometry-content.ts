@@ -17,7 +17,7 @@ import {
   isPointModel, isPolygonModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel
 } from "./geometry-model";
 import {
-  getObjectById, guessUserDesiredBoundingBox, kAxisBuffer, kXAxisMinBuffer, kXAxisTotalBuffer, kYAxisTotalBuffer,
+  getBoardUnitsAndBuffers, getObjectById, guessUserDesiredBoundingBox, kXAxisTotalBuffer, kYAxisTotalBuffer,
   resumeBoardUpdates, suspendBoardUpdates
 } from "./jxg-board";
 import {
@@ -420,20 +420,17 @@ export const GeometryContentModel = GeometryBaseContentModel
       board && JXG.JSXGraph.freeBoard(board);
     }
 
-    function resizeBoard(board: JXG.Board, width: number, height: number, scale?: number) {
+    function resizeBoard(board: JXG.Board, width: number, height: number, scale?: number, id?: string) {
+      if (id === "1-rchbtK5TpKQlL-") debugger;
       // JSX Graph canvasWidth and canvasHeight are truncated to integers,
       // so we need to do the same to get the new canvasWidth and canvasHeight values
       const scaledWidth = Math.trunc(width) / (scale || 1);
       const scaledHeight = Math.trunc(height) / (scale || 1);
       const widthMultiplier = (scaledWidth - kXAxisTotalBuffer) / (board.canvasWidth - kXAxisTotalBuffer);
       const heightMultiplier = (scaledHeight - kYAxisTotalBuffer) / (board.canvasHeight - kYAxisTotalBuffer);
-      const unitX = board.unitX || kGeometryDefaultPixelsPerUnit;
-      const unitY = board.unitY || kGeometryDefaultPixelsPerUnit;
       // Remove the buffers to correct the graph proportions
       const [xMin, yMax, xMax, yMin] = guessUserDesiredBoundingBox(board);
-      const xMinBufferRange = kXAxisMinBuffer / unitX;
-      const xMaxBufferRange = kAxisBuffer / unitX;
-      const yBufferRange = kAxisBuffer / unitY;
+      const { xMinBufferRange, xMaxBufferRange, yBufferRange } = getBoardUnitsAndBuffers(board);
       // Add the buffers back post-scaling
       const newBoundingBox: JXG.BoundingBox = [
         xMin * widthMultiplier - xMinBufferRange,

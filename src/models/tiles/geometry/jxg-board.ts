@@ -182,13 +182,19 @@ function scaleBoundingBoxToElement(domElementID: string, changeProps: any) {
   return [xMin, yMax, xMax, yMin] as JXG.BoundingBox;
 }
 
-export function guessUserDesiredBoundingBox(board: JXG.Board) {
-  const [xMin, yMax, xMax, yMin] = board.getBoundingBox();
-  const unitX = board.unitX;
-  const unitY = board.unitY;
+export function getBoardUnitsAndBuffers(board: JXG.Board) {
+  const unitX = board.unitX || kGeometryDefaultPixelsPerUnit;
+  const unitY = board.unitY || kGeometryDefaultPixelsPerUnit;
   const xMinBufferRange = kXAxisMinBuffer / unitX;
   const xMaxBufferRange = kAxisBuffer / unitX;
   const yBufferRange = kAxisBuffer / unitY;
+
+  return { unitX, unitY, xMinBufferRange, xMaxBufferRange, yBufferRange };
+}
+
+export function guessUserDesiredBoundingBox(board: JXG.Board) {
+  const [xMin, yMax, xMax, yMin] = board.getBoundingBox();
+  const { xMinBufferRange, xMaxBufferRange, yBufferRange } = getBoardUnitsAndBuffers(board);
 
   return [xMin + xMinBufferRange, yMax - yBufferRange, xMax - xMaxBufferRange, yMin + yBufferRange];
 }
