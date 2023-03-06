@@ -30,10 +30,6 @@ enum Zoom {
   Out
 }
 
-//This will not behave as expected for tickMin > 0 (or if both values are negative, but that probably won't happen).
-// Not sure what should happen in that case. Part of what @tealefristoe was recommending was an algorithm that worked
-//independent of the values involved.
-
 export const DataflowNodePlot: React.FC<INodePlotProps> = (props) => {
   if (!props.display) return null;
 
@@ -105,7 +101,7 @@ function lineData(node: any) {
     }
   });
 
-  stepY = (node.data.dsMax  - node.data.dsMin) / 2;
+  stepY = (maxY(node)  - minY(node)) / 2;
 
   const chartData: ChartData = {
     labels: new Array(MAX_NODE_VALUES).fill(undefined).map((val,idx) => idx),
