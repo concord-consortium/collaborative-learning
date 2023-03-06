@@ -348,35 +348,35 @@ context('Test Canvas', function () {
         clueCanvas.deleteTile('image');
       });
       // FIXME: enable below test when dragging multiple shared-model-backed tiles works
-      // it('will maintain positioning when copying multiple tiles', () => {
-      //   resourcesPanel.openBottomTab("Initial Challenge");
-      //   const leftTile = type => cy.get(`.nav-tab-panel .problem-panel .${type}-tool-tile`);
+      it.skip('will maintain positioning when copying multiple tiles', () => {
+        resourcesPanel.openBottomTab("Initial Challenge");
+        const leftTile = type => cy.get(`.nav-tab-panel .problem-panel .${type}-tool-tile`);
 
-      //   // Select three table tiles on the left
-      //   leftTile('table').first().click({ shiftKey: true });
-      //   leftTile('table').eq(1).click({ shiftKey: true });
-      //   leftTile('table').eq(2).click({ shiftKey: true });
+        // Select three table tiles on the left
+        leftTile('table').first().click({ shiftKey: true });
+        leftTile('table').eq(1).click({ shiftKey: true });
+        leftTile('table').eq(2).click({ shiftKey: true });
 
-      //   // Drag the selected copies to the workspace on the right
-      //   leftTile('table').eq(2).trigger('dragstart', { dataTransfer });
-      //   cy.get('.single-workspace .canvas .document-content').first()
-      //     .trigger('drop', { force: true, dataTransfer });
+        // Drag the selected copies to the workspace on the right
+        leftTile('table').eq(2).trigger('dragstart', { dataTransfer });
+        cy.get('.single-workspace .canvas .document-content').first()
+          .trigger('drop', { force: true, dataTransfer });
 
-      //   // Make sure the tiles were copied in the correct order
-      //   tableToolTile.getTableTile().first().find('.editable-header-cell').contains('Mug Wump');
-      //   tableToolTile.getTableTile().eq(1).find('.editable-header-cell').contains('Mug Wump Part 2');
-      //   tableToolTile.getTableTile().eq(2).find('.editable-header-cell').contains('Mug Wump Part 3');
+        // Make sure the tiles were copied in the correct order
+        tableToolTile.getTableTile().first().find('.editable-header-cell').contains('Mug Wump');
+        tableToolTile.getTableTile().eq(1).find('.editable-header-cell').contains('Mug Wump Part 2');
+        tableToolTile.getTableTile().eq(2).find('.editable-header-cell').contains('Mug Wump Part 3');
 
-      //   // Clean up
-      //   clueCanvas.deleteTile('table');
-      //   clueCanvas.deleteTile('table');
-      //   clueCanvas.deleteTile('table');
-      // });
+        // Clean up
+        clueCanvas.deleteTile('table');
+        clueCanvas.deleteTile('table');
+        clueCanvas.deleteTile('table');
+      });
       it('will copy a single table tile from resources to canvas', () => {
         resourcesPanel.openBottomTab("Initial Challenge");
         const leftTile = type => cy.get(`.nav-tab-panel .problem-panel .${type}-tool-tile`);
 
-        // Select one table tiles on the left
+        // Select one table tile on the left
         leftTile('table').first().click();
 
         // Drag the selected copies to the workspace on the right
