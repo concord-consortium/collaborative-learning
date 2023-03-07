@@ -1,4 +1,80 @@
 # Changelog
+## Version 3.7.0 - Mar 6, 2023
+
+Version 3.7.0 has bug fixes related to m2studio variable cards, updating to the latest slate editor, restricting to one diagram tile per document, shared models in curriculum sections among other features.
+
+### Features/Improvements
+- Restrict to One Diagram Tile [#184008021](https://www.pivotaltracker.com/story/show/184008021)
+- Insert Variable on Text Toolbar [#183806331](https://www.pivotaltracker.com/story/show/183806331)
+- New/Edit Variable from Text Toolbar [#183534556](https://www.pivotaltracker.com/story/show/183534556)
+- Update slate-editor library to latest slate version [#181890362](https://www.pivotaltracker.com/story/show/181890362)
+- Geometry Tile should preserve connected shapes [#183053771](https://www.pivotaltracker.com/story/show/183053771)
+- Link Table/Geometry Axis Domain Synchronization [#184187800](https://www.pivotaltracker.com/story/show/184187800)
+- Warning on mismatched units [#184365058](https://www.pivotaltracker.com/story/show/184365058)
+- Restyle warnings [#184316798](https://www.pivotaltracker.com/story/show/184316798)
+- Warning on unknown variables [#184272677](https://www.pivotaltracker.com/story/show/184272677)
+- Edit Variable dialog  displays read only expressions when used [#183974159](https://www.pivotaltracker.com/story/show/183974159)
+- Warning on missing operands [#184258400](https://www.pivotaltracker.com/story/show/184258400)
+- Selected text should NOT be replaced by variable chip. Instead, selected text should stay in the text tile and populate the Notes field of the variable.  [#184395017](https://www.pivotaltracker.com/story/show/184395017)
+- Hyperlinks operation in write mode (**text tile**) [#182820037](https://www.pivotaltracker.com/story/show/182820037)
+- <H> Log Tile Titles [#184428587](https://www.pivotaltracker.com/story/show/184428587)
+- SPIKE: Unexpected auto unit conversion [#183249829](https://www.pivotaltracker.com/story/show/183249829)
+- Geometry/Table: Whole Document Export of linked tiles [#178324844](https://www.pivotaltracker.com/story/show/178324844)
+- DF Graph Y Axis Limits [#184259328](https://www.pivotaltracker.com/story/show/184259328)
+- Tables should export/import/copy using shared model [#184558660](https://www.pivotaltracker.com/story/show/184558660)
+- Import Unit Display of linked tiles [#184228633](https://www.pivotaltracker.com/story/show/184228633)
+- Shared Models in curriculum sections [#184583797](https://www.pivotaltracker.com/story/show/184583797)
+
+### Bug Fixes
+- <H> Variables placed above a certain line in the diagram tile disappear [#184395185](https://www.pivotaltracker.com/story/show/184395185)
+- Undo Inserting a variable chip in the text tile crashes CLUE [#184370351](https://www.pivotaltracker.com/story/show/184370351)
+- <H>Text Tile New Variable Dialog creates two undoable actions [#184406182](https://www.pivotaltracker.com/story/show/184406182)
+- Log message for the initial loading from the Portal for CLUE Production is logged using qa log ingester URL [#184068699](https://www.pivotaltracker.com/story/show/184068699)
+- CLUE crash with "$" unit and singular variables [#184564582](https://www.pivotaltracker.com/story/show/184564582)
+- <H> Typing in the expression field or text tile freezes CLUE for a few seconds [#184559217](https://www.pivotaltracker.com/story/show/184559217)
+- Table and Graph do not syncronize in 4-up view [#184609260](https://www.pivotaltracker.com/story/show/184609260)
+
+### Asset Sizes
+| File                                                                                  | Size | % Change from Previous Release |
+| ------------------------------------------------------------------------------------- | ---- | ------------------------------ |
+| File                                                                                  | Size | % Change from Previous Release |
+| ------------------------------------------------------------------------------------- | ---- | ------------------------------ |
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.09bbc7d4.js | 51K  |                             0% |
+| common-DataCard-Geometry-SharedDataSet-Table.311a8987.js                              | 9.5K |                           100% |
+| common-DataCard-Geometry-SharedDataSet-Table.c297120d.js                              | 25K  |                           100% |
+| common-Dataflow-Geometry.776cddf3.js                                                  | 26K  |                             0% |
+| common-Diagram-SharedVariables-Drawing.53ab0f8b.js                                    | 26K  |                             0% |
+| common-Diagram-SharedVariables.607647d5.js                                            | 929K |                         48.17% |
+| common-Diagram-SharedVariables.84bfe38c.js                                            | 15K  |                            25% |
+| common-Geometry-Table.92564685.js                                                     | 19K  |                           100% |
+| DataCard.cc685421.js                                                                  | 20K  |                         11.11% |
+| Dataflow.166c697d.js                                                                  | 751K |                          2.04% |
+| Diagram.38b16bed.js                                                                   | 23K  |                             0% |
+| Drawing.81438ecd.js                                                                   | 33K  |                             0% |
+| Geometry.b65cee69.js                                                                  | 882K |                         -1.47% |
+| Image.90b1778f.js                                                                     | 16K  |                             0% |
+| index.e1625c71e53547951926.js                                                         | 389K |                         -4.89% |
+| SharedDataSet.a14fff08.js                                                             | 253B |                             0% |
+| SharedVariables.97f87cb8.js                                                           | 3.7K |                        -42.19% |
+| Starter.f2715137.js                                                                   | 1.2K |                             0% |
+| Table.c713d414.js                                                                     | 80K  |                        -46.95% |
+| Text.3ae18473.js                                                                      | 17K  |                          6.25% |
+| vendor-main.97cecfca.js                                                               | 1.8M |                        -18.18% |
+
+| File                         | Size | % Change from Previous Release |
+| ---------------------------- | ---- | ------------------------------ |
+| DataCard.2f0a7f09.css        | 8.9K |                          5.95% |
+| Dataflow.60cc0a91.css        | 36K  |                          12.5% |
+| Diagram.a5fd8226.css         | 25K  |                            25% |
+| Drawing.e50785ef.css         | 5.2K |                             0% |
+| Geometry.f0acf6a0.css        | 10K  |                             0% |
+| Image.58c11029.css           | 6.3K |                             0% |
+| main.76596688.css            | 162K |                         -1.82% |
+| SharedVariables.f0164025.css | 433B |                             0% |
+| Starter.d87da933.css         | 207B |                             0% |
+| Table.6dda5fd0.css           | 10K  |                             0% |
+| Text.26bb2387.css            | 1.3K |                        -71.11% |
+
 ## Version 3.6.1 - Jan 24, 2023
 
 Version 3.6.1 has a few bug fixes related to 4-up views, pressure sensors and document loading problems.
