@@ -420,7 +420,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       board && JXG.JSXGraph.freeBoard(board);
     }
 
-    function resizeBoard(board: JXG.Board, width: number, height: number, scale?: number, id?: string) {
+    function resizeBoard(board: JXG.Board, width: number, height: number, scale?: number) {
       // JSX Graph canvasWidth and canvasHeight are truncated to integers,
       // so we need to do the same to get the new canvasWidth and canvasHeight values
       const scaledWidth = Math.trunc(width) / (scale || 1);
