@@ -258,7 +258,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       return board.objectsList.filter(obj => self.isSelected(obj.id));
     },
     exportJson(options?: ITileExportOptions) {
-      const changes = convertModelToChanges(self);
+      const changes = convertModelToChanges(self, false);
       const jsonChanges = changes.map(change => JSON.stringify(change));
       return exportGeometryJson(jsonChanges, options);
     }
@@ -395,7 +395,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     // actions
     function initializeBoard(domElementID: string, onCreate?: onCreateCallback): JXG.Board | undefined {
       let board: JXG.Board | undefined;
-      const changes = convertModelToChanges(self);
+      const changes = convertModelToChanges(self, true);
       applyChanges(domElementID, changes, getDispatcherContext())
         .filter(result => result != null)
         .forEach(changeResult => {
@@ -421,7 +421,6 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     function resizeBoard(board: JXG.Board, width: number, height: number, scale?: number, id?: string) {
-      if (id === "1-rchbtK5TpKQlL-") debugger;
       // JSX Graph canvasWidth and canvasHeight are truncated to integers,
       // so we need to do the same to get the new canvasWidth and canvasHeight values
       const scaledWidth = Math.trunc(width) / (scale || 1);

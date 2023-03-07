@@ -3525,8 +3525,8 @@
                         "type": "Geometry",
                         "board": {
                           "properties": {
-                            "axisMin": [-12.096, -15],
-                            "axisRange": [25.153, 16],
+                            "axisMin": [-9.9, -14],
+                            "axisRange": [11.9, 16],
                             "axisNames": ["x", "y"],
                             "axisLabels": ["x", "y"]
                           }

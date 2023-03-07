@@ -76,7 +76,7 @@ export function syncLinkedPoints(board: JXG.Board, links: ITableLinkProperties) 
 export const kAxisBuffer = 20;
 // twice as much buffer for left side of X axis for Y axis labels
 export const kXAxisMinBuffer = 2 * kAxisBuffer;
-export const kXAxisTotalBuffer = 3 * kAxisBuffer;
+export const kXAxisTotalBuffer = kXAxisMinBuffer + kAxisBuffer;
 export const kYAxisTotalBuffer = 2 * kAxisBuffer;
 
 export const getAxisType = (v: any) => {
@@ -307,7 +307,7 @@ export const boardChangeAgent: JXGChangeAgent = {
                           ...toObj("xAnnotation", xAnnotation), ...toObj("yAnnotation", yAnnotation)
                         });
     return [board, ...axes];
-},
+  },
 
   update: (board: JXG.Board, change: JXGChange) => {
     if (!change.properties) { return; }
