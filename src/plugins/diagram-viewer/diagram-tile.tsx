@@ -22,6 +22,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   { documentContent, model, onRegisterTileApi, onUnregisterTileApi, readOnly, scale, tileElt }
 ) => {
   const content = model.content as DiagramContentModelType;
+  const [dialogPresent, setDialogPresent] = useState(false); 
 
   const [diagramHelper, setDiagramHelper] = useState<DiagramHelper | undefined>();
   const [interactionLocked, setInteractionLocked] = useState(false);
@@ -40,7 +41,8 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   };
 
   const [showEditVariableDialog] = useEditVariableDialog({
-    variable: content.root.selectedNode?.variable
+    variable: content.root.selectedNode?.variable,
+    setDialogPresent
   });
   
   const insertVariables = (variablesToInsert: VariableType[], startX?: number, startY?: number) => {
@@ -69,8 +71,11 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   };
   const insertVariable = (variable: VariableType, x?: number, y?: number) => insertVariables([variable], x, y);
 
-  const [showNewVariableDialog] =
-    useNewVariableDialog({ addVariable: insertVariable, sharedModel: content.sharedModel as SharedVariablesType });
+  const [showNewVariableDialog] = useNewVariableDialog({
+    addVariable: insertVariable,
+    sharedModel: content.sharedModel as SharedVariablesType,
+    setDialogPresent
+  });
 
   const { selfVariables, otherVariables, unusedVariables } = variableBuckets(content, content.sharedModel);
   const [showInsertVariableDialog] = useInsertVariableDialog({
@@ -131,6 +136,7 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
       />
       <div className="drop-target" ref={setNodeRef} style={dropTargetStyle}>
         <Diagram
+          dialogPresent={dialogPresent}
           dqRoot={content.root}
           hideControls={true}
           hideNavigator={!!content.hideNavigator}
