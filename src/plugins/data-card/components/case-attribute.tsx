@@ -105,9 +105,25 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const handleCompleteName = () => {
     if (labelCandidate !== getLabel()) {
-      caseId && content.setAttName(attrKey, labelCandidate);
+      const names = content.existingAttributesWithNames().map(a => a.attrName);
+      if (!names.includes(labelCandidate)){
+        caseId && content.setAttName(attrKey, labelCandidate);
+      } else {
+        showUniqueAttributeAlert();
+      }
     }
   };
+
+  const UniqueAttributeAlertContent = () => {
+    return <p> Attribute names must be unique.</p>;
+  };
+
+  const [showUniqueAttributeAlert] = useCautionAlert({
+    title: "Delete Attribute",
+    content: UniqueAttributeAlertContent,
+    confirmLabel: "OK",
+    onConfirm: () => deleteAttribute()
+  });
 
   const handleCompleteValue = () => {
     if (valueCandidate !== getValue()) {
@@ -121,7 +137,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   }
 
-  const AlertContent = () => {
+  const DeleteAttributeAlertContent = () => {
     return (
       <p>
         Are you sure you want to remove the <em style={{ fontWeight: "bold"}}>{ getLabel() }</em>&nbsp;
@@ -131,15 +147,15 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     );
   };
 
-  const [showAlert] = useCautionAlert({
+  const [showDeleteAttributeAlert] = useCautionAlert({
     title: "Delete Attribute",
-    content: AlertContent,
+    content: DeleteAttributeAlertContent,
     confirmLabel: "Delete Attribute",
     onConfirm: () => deleteAttribute()
   });
 
   const handleDeleteAttribute = () => {
-    showAlert();
+    showDeleteAttributeAlert();
   };
 
   const valueIsImage = () => {
