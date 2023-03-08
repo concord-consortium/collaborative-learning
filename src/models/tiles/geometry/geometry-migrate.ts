@@ -31,14 +31,14 @@ export const convertChangesToModel = (changes: JXGChange[]) => {
   return exportGeometryModel(changesJson);
 };
 
-export const convertModelToChanges = (model: GeometryBaseContentModelType): JXGChange[] => {
+export const convertModelToChanges = (model: GeometryBaseContentModelType, addBuffers?: boolean): JXGChange[] => {
   const { board, bgImage, objects } = model;
   const changes: JXGChange[] = [];
   // convert the board
   const { xAxis, yAxis } = board || BoardModel.create(kDefaultBoardModelOutputProps);
   const { name: xName, label: xAnnotation } = xAxis;
   const { name: yName, label: yAnnotation } = yAxis;
-  changes.push(defaultGeometryBoardChange(xAxis, yAxis, { xName, yName, xAnnotation, yAnnotation } ));
+  changes.push(defaultGeometryBoardChange(xAxis, yAxis, { xName, yName, xAnnotation, yAnnotation }, addBuffers ));
   // convert the background image (if any)
   if (bgImage) {
     changes.push(...convertModelObjectToChanges(bgImage));
