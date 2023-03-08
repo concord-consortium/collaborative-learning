@@ -1,0 +1,126 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles":
+    [
+      {
+        "id": "YzNRQl2Hia39CLez",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
+            "<p><u>Solutions and Strategies</u><em> </em></p>",
+            "<p>As students present their solutions, be sure they explain their reasoning and methods.</p>",
+            "<p>To find the missing lengths in the What If, students might find the scale factor by dividing two of the known, corresponding lengths of the similar figures. They can then multiply the scale factor by a known length to find the corresponding, unknown length. Be sure that students are using the correct scale factor. That is, they need to find the scale factor from the figure with the known length to the figure with the unknown length.</p>"
+          ]
+        }
+      },
+      {
+        "id": "vBkP33LI548EfYu4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Implementation Note:</strong> As an optional enrichment activity, you can hand out copies of <strong>Learning Aid 3.2B: Polygon Sets</strong> for students to extend their understanding of similarity to other polygons. As a further extension, you can assign side lengths to the polygons on this Learning Aid and ask students to find missing side measures. Note: Students will have an activity like this in Problem 4.3.</p>"
+          ]
+        }
+      },
+      {
+        "id": "lxafII51NK87uc-H",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong> </p>",
+            "<p>As the students work with <strong>Learning Aid 3.2B: Polygon Sets</strong>:</p>",
+            "<ul><li>In each set, which polygons are similar? Explain how you know. (Rectangles A and C are similar, Parallelograms B and C are similar, Decagons A and B are similar, and Stars A and C are similar. For the rectangles, we need to check only the side lengths. The corresponding side lengths from one figure to the other must grow by the same scale factor. For the others, we need to check the angle measurements as well. For a pair of similar figures, angle measures are congruent.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Making the Mathematics Explicit </u></p>",
+            "Suggested questions<ul><li>What does a whole number scale factor do to change a shape? (It makes a larger similar figure)</li><li>What does a fractional scale factor do to change a shape? (It makes a smaller similar figure.)</li><li>How did you draw _____?  (Answers will vary depending on the criteria and shape.)</li><li>How did scale factor help you to draw _____? (Answers will vary depending on the criteria and shape.)</li><li>What is the relationship between scale factor and area?  (scale factor squared will give you the area change)</li><li>How did you find the missing side lengths in the What If Situations?  (Answers will vary.  Focus the conversation on their use of scale factor.)</li></ul> ",
+            "<p>Students should be solidifying the use of scale factor and how it effects length, perimeter and area of similar figures. Having conversations on how they created the similar rectangle or triangle for the constraints will make this understanding visible. This is an example of a conversation that took place in one classroom about creating Rectangle R:</p>",
+            "<p></p>",
+            "<p>Teacher:    How did you draw Rectangle R?</p>",
+            "<p>Alvin:        In our group we first drew a rectangle with side lengths that were ¼ the size of the side lengths on Rectangle A, but that was incorrect.</p>",
+            "<p>Janice:       Are you sure it is incorrect? That is what we did and we think it is correct.</p>",
+            "<p>Alvin:          It is incorrect because the scale factor of ¼ made the sides get ¼ the size but the area became (1)/16 the size.  The area of Rectangle A is 32 square units because it is an 8 by 4 rectangle. When we incorrectly used a scale factor of ¼, we got a rectangle with dimensions of 2 by 1. This gave Rectangle 2 an area of 2.  The direction that our new rectangle should have an area of ¼ of Rectangle A or 8 square units. Our rectangle is 2 square units or 1/16 the area of Rectangle A.  </p>",
+            "<p>Janice:       Ok.  I see. So, if the scale factor is ¼ then the area of the new rectangle will be 1/16  of  original area. How do we get a rectangle that is ¼ the area of the original?</p>",
+            "<p>Teacher:    What did we find from Problem 3.1 about the relationship between scale factor and area?</p>",
+            "<p>Shannon:    That the scale factor times itself will give you the change in the area.  </p>",
+            "<p>Teacher:    We need a change in area of ¼ the size.</p>",
+            "<p>Antoine:    So, we are looking for a number of times itself that will be ¼. </p>",
+            "<p>Alvin:       Right, so the scale factor must be ½ because ½ x ½ = ¼. That means the new rectangle would be a 4 by 2. This has an area of 8 square units which is ¼ the original area of 32 square units.  </p>",
+            "<p>Shannon:  We got the same rectangle but did it differently. We knew that Rectangle A had an area of 32 square units and the new rectangle had to be ¼ of that or 8 square units. We tried a 1 by 8 rectangle but a scale factor didn’t exist between that one and Rectangle A. Then we tried a 4 by 2 rectangle and that worked with a scale factor of ½.  </p>",
+            "<p></p>",
+            "<p></p>",
+            "<p>By the end of this Investigation, students should have a firm understanding of the two criteria for identifying similar figures – 1) consistent scale factors for corresponding sides and congruent corresponding angles and 2) the relationship between scale factor and comparisons of lengths, perimeters, and areas of two similar figures. (Time)</p>"
+          ]
+        }
+      },
+      {
+        "id": "Bm71I-OJnXtNgASB",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Check for Understanding</strong></p>",
+            "<p></p>",
+            "<p> Display the rectangle below.</p>"
+          ]
+        }
+      },
+      {
+        "id": "0VqM0_xYDymLs8-4",
+        "title": "New rectangle",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SASTG_3-2_check_for_understanding_1.png"
+        }
+      },
+      {
+        "id": "c5sSaLGb_DBNTx16",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>If this rectangle is enlarged by a scale factor of 3, what is the perimeter of the enlargement? What is the area of the enlargement? (perimeter: 63 units; area: 202.5 square units)</li></ul>",
+            "<p>Discuss how the students found the missing side lengths and angle measures for the two situations in the What If. (Students should be able to use the scale factor to find the measures of the corresponding side lengths and use their understanding that corresponding angles will have the same measurement.)</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Now What Do Students Know</u></p>",
+            "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions.</p>"        ]
+        }
+      },
+      {
+        "id": "UXVm31FgfHAKPGTa",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p></p>",
+            "<p><strong>Reflecting on Student Learning</strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+            "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

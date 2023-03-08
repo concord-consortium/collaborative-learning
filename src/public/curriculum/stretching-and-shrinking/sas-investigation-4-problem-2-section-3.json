@@ -1,0 +1,126 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "id": "UXvvLts7ffIoB0AE",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Situation A: The Experiments</strong> </p>",
+            "<p>1. Use the mirror method to find the height of a tall object in your school. </p>",
+            "<p><strong>The Mirror Experiment </strong></p>",
+            "<p><strong> </strong></p>",
+            "<p>Equipment</p>",
+            "<ul><li>Mirror</li><li>Measuring tool such as a meter stick, yard stick, or measuring tape </li><li>Something tall or high on a wall to measure, such as a flagpole, top of a building, or something near the ceiling of a tall room</li><li>Pencil and Paper</li></ul>",
+            "<p><strong>Instructions for the Experiment</strong></p>",
+            "<ul><li>Set the mirror on the floor. Backup until you can see the object you want to measure in the mirror.</li><li> Make the three necessary measurements:You will need to know: </li></ul>",
+            "<ol><li>how far the mirror is away from the object, </li><li>how far the mirror is from the person looking into the mirror, and </li><li>the height from the floor to the person’s eyes. </li></ol>",
+            "<p> Note that you will need to form two right triangles.</p>",
+            "<ul><li>Sketch a diagram and record your measurements on the sketch.</li><li> Use the similar triangles and your sketch to find the height of the object. </li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "ybsRKE9HeohDcL1P",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>2.  Use the shadow method to find the height of a tall object near your school. </p>",
+            "<p><strong>The Shadow Experiment </strong> </p>",
+            "<p>Equipment </p>",
+            "<ul><li>Meter stick or yard stick  </li><li>Measuring tool such as additional meter sticks, yard sticks, or measuring tape </li><li>Something tall to measure, such as a flagpole or building</li><li>Pencil and Paper </li><li>Sunshine to create a shadow  </li></ul>",
+            "<p> <strong>Instructions for the Experiment</strong></p>",
+            "<ul><li>Stand the meter/yard stick at a 90˚ angle to the ground.</li><li> Make the three necessary measurements. You will need to know</li></ul>",
+            "<ol><li>the height of your stick, </li><li>the length of the shadow of your stick, and</li><li>the length of the shadow of your object.</li></ol>",
+            "<p>Note that you will need to form two right triangles.</p>",
+            "<ul><li>Sketch a diagram and record your measurements on the sketch. </li><li>Use the similar triangles and your sketch to find the height of the object. </li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "kV2bn0sdFzuvmonl",
+        "title": "Text 7",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Student results will vary. The strategies give approximate measurements. </p>",
+            "<p>Learning to limit the variables that impact the measures takes some time and experience. Students will get “messy” data. When looking at results of groups who measured the same item, variables that impact the differences can be discussed.</p>",
+            "<p>The applications allow students to see a use of similarity. </p>",
+            "<p>Note: These strategies are used to get “indirect” measures by people working in various fields such as outside design and construction.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation B. Using A Camera to Find Distance</h3>Cameras on satellites or planes are used to find distances on earth.  The following figure shows a tree and its image in a camera. The two triangles created are similar.</p><p>If the height of the image is 14 mm, the focal length is 35 mm, and the distance from the object is 10 m. What is the height of the tree?</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG2022M20218pm",
+        "title": "Labeled diagram of similar triangles created by camera lenses",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_4_2_WhatIf_B_Ans.jpg"
+        }
+      },
+      {
+        "id": "21AUG2022M20219pm",
+        "title": "Diagram of similar triangles created by camera lenses",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Camera.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Using ratio of adjacent sides reasoning:</p>"
+          ]
+        }
+      },
+      {
+        "id": "21AUG2022M20220pm",
+        "title": "Sample reasoning using ratio of adjacent sides",
+        "display": "teacher",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-2_What_If_Situation_B_2.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Using scale factor reasoning:</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG2022M20221pm",
+        "title": "Sample reasoning using scale factor",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-2_What_If_Situation_B_3.png"
+        }
+      }
+    ]
+  }
+}

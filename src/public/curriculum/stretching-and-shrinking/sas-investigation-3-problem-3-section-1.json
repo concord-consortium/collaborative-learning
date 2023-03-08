@@ -1,0 +1,17 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "In this problem we will use similar triangles to find the distance across a river from Stake 1 to Tree 1."
+          ]
+        }
+      }
+    ]
+  },
+  "supports": [ ]
+}

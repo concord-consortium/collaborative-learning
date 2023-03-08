@@ -1,0 +1,376 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+       {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "The diagram shows a collection of mouths (rectangles) and noses (triangles). Some are from the Wump family. Others are from impostors."
+          ]
+        }
+      },
+      {
+        "id": "21AUG20220512PM",
+        "title": "Wump Mouths and Noses",
+        "layout": {
+          "height": 420
+        },
+        "content": {
+          "type":"Geometry",
+          "objects": [
+            {
+              "type": "image",
+              "parents": {
+                "url": "curriculum/stretching-and-shrinking/images/SS_2_3_IC_19_shapes_350w.png",
+                "coords": [0, 0],
+                "size": [350, 368]
+              }
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [1, 19],
+                  "properties": {
+                    "name": "J₁"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [9, 19],
+                  "properties": {
+                    "name": "J₂"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [9, 17],
+                  "properties": {
+                    "name": "J₃"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [1, 17],
+                  "properties": {
+                    "name": "J₄"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [12, 19],
+                  "properties": {
+                    "name": "K₁"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [16, 19],
+                  "properties": {
+                    "name": "K₂"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [16, 16],
+                  "properties": {
+                    "name": "K₃"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [12, 16],
+                  "properties": {
+                    "name": "K₄"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [2, 16],
+                  "properties": {
+                    "name": "L₁"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [6, 16],
+                  "properties": {
+                    "name": "L₂"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [6, 15],
+                  "properties": {
+                    "name": "L₃"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [2, 15],
+                  "properties": {
+                    "name": "L₄"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [5, 14],
+                  "properties": {
+                    "name": "M₁"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [17, 14],
+                  "properties": {
+                    "name": "M₂"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [17, 13],
+                  "properties": {
+                    "name": "M₃"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [5, 13],
+                  "properties": {
+                    "name": "M₄"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [1, 12],
+                  "properties": {
+                    "name": "N₁"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [13, 12],
+                  "properties": {
+                    "name": "N₂"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [13, 9],
+                  "properties": {
+                    "name": "N₃"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [1, 9],
+                  "properties": {
+                    "name": "N₄"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [2, 6],
+                  "properties": {
+                    "name": "O₁"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [1, 5],
+                  "properties": {
+                    "name": "O₂"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [3, 5],
+                  "properties": {
+                    "name": "O₃"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [8, 7],
+                  "properties": {
+                    "name": "P₁"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [7, 4],
+                  "properties": {
+                    "name": "P₂"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [9, 4],
+                  "properties": {
+                    "name": "P₃"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [15, 7],
+                  "properties": {
+                    "name": "Q₁"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [12, 6],
+                  "properties": {
+                    "name": "Q₂"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [18, 6],
+                  "properties": {
+                    "name": "Q₃"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [4, 4],
+                  "properties": {
+                    "name": "R₁"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [2, 2],
+                  "properties": {
+                    "name": "R₂"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [6, 2],
+                  "properties": {
+                    "name": "R₃"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [13, 4],
+                  "properties": {
+                    "name": "S₁"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [10, 1],
+                  "properties": {
+                    "name": "S₂"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [16, 1],
+                  "properties": {
+                    "name": "S₃"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li> Identify pairs of similar shapes. Provide evidence that your shapes are similar. What is the scale factor? </li><ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Rectangles</p>",
+            "<p>Rectangles (mouths) J, L, and N are similar to each other. Students should point out that since these are all rectangles, the angles are all right angles and hence congruent, or the same size. For rectangles, it is then only necessary to check side lengths.</p>",
+            "<p>L to J is 2; L to N is 3; J to N is 3/2</p>",
+            "<p>J to L is 1/2 (reciprocal of 2); N to L is 1/3  (reciprocal of 3); N to J is   2/3 (reciprocal of 3/2 ).</p>",
+            "<p>Triangles</p>",
+            "<p>Triangles (noses) O, R, and S are similar to each other.</p>",
+            "<p>O to R is 2; O to S is 3; and R to S is 3/2 .</p>",
+            "<p>R to O is 1/2 (reciprocal of 2); S to O is 1/3  (reciprocal of 3); S to R is 2/3  (reciprocal of 3/2 ).</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "• In what ways could scale factor be useful when determining similar figures?"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The scale factor tells us how much the new figure has been stretched or shrunk in both vertical and horizontal directions. If the scale factor is larger than 1, then the new figure will be bigger than the original figure. The new side lengths and perimeters will be the scale factor times as large. If the scale factor is less than 1, then the new figure will be smaller than the original figure. The new side lengths and perimeters will be the scale factor times as small.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

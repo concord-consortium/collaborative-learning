@@ -1,0 +1,74 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles":
+    [
+      {
+        "id": "XNVKPC9e6JV4ux2z",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Overview</strong></p>",
+            "<p>In this Problem, students will use their definition of similar figures to decide which shape in a group is not similar and then create their own group of similar figures with an imposter. </p>"
+          ]
+        }
+      },
+      {
+        "id": "2IDRaf-MrUb9jNsT",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'>Revision Comments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>CMP STEM Problem Format</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>Unit Descriptions</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'>Goals of the Units</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'>Unit Alignments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'>General Arc of Learning </a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'>Unit Arc of Learning</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'>Mathematical Overview</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'>Learning Aids</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'>Teaching Aids</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'>Family Letters </a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'>Assessments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'>ACE Homework</a></strong></p>"
+                        ]
+        }
+      },
+      {
+        "id": "JQ1QisWuPpZi1WDU",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>AoL:</strong> Synthesis, Synthesis</p>",
+            "<p><strong>CCSSM: </strong>7.G.A.1, 7.RP.A.1, 7.RP.A.2, 7.RP.A.2.A, 7.RP.A.2.B, 7.RP.A.3 , 7.EE.B.3</p>"
+          ]
+        }
+      },
+      {
+        "id": "KVYVxv8YAqHSvP92",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Continue using proportional relationships to determine scaled figures.Compare and measure geometric figures that are both similar and non-similar figures.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>NWDYK</strong></p>",
+            "<p>What are strategies for identifying if shapes have been scaled (similar figures) or if the shapes are imposters?</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

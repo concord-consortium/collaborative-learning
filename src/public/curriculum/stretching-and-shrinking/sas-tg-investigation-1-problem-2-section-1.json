@@ -1,0 +1,71 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Overview</strong></p>",
+            "<p>The Problem begins with the Mystery Club enlarging a flier into a poster to attract new members. In this context, students create a similar figure using rubber bands. They make a stretcher by tying two rubber bands together and use it to enlarge two different figures. They compare how the general shape, line lengths, areas, perimeters, and angles are affected. This focuses students’ attention on the preservation of shape in similar figures</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>AoL:</strong> Introduction, Exploration, Analysis</p>",
+            "<p><strong>CCSSM: </strong>7.G.A.1, 7.RP.A.2, 7.RP.A.2.B</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Informally explore enlarging a geometric figure and begin to notice which attributes change and which stay the same:</p>",
+            "<ul><li>angles of the two figures appear to be the same</li><li>side lengths of the enlarged figure are longer</li><li>area of the enlarged figure is bigger</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>NWDYK</strong></p>",
+            "<p>The original figure and its image are similar figures. The image is also called the scale drawing of the original figure. For two similar figures, what characteristics and measures are the same? Different? Explain how you know. </p>"
+          ]
+        }
+      },
+      {
+        "id": "bHNQ1o0GhX06AZZY",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'>Revision Comments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>CMP STEM Problem Format</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>Unit Descriptions</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'>Goals of the Units</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'>Unit Alignments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'>General Arc of Learning </a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'>Unit Arc of Learning</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'>Mathematical Overview</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'>Learning Aids</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'>Teaching Aids</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'>Family Letters </a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'>Assessments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'>ACE Homework</a></strong></p>"
+                        ]
+        }
+      }
+    ]
+  }
+}

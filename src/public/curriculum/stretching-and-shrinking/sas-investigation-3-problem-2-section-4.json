@@ -1,0 +1,29 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "How can you use scale factors to draw similar figures(scale drawings)? \n\nHow can you use scale factors to find missing information about angles measures? Side lengths? Area? Perimeter? "
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>With lengths of similar figures, you can multiply each length of the original figure by the scale factor to get the corresponding length on the image. Keeping all the angle measures the same as the original, you can draw the similar figures.</p> ",
+            "To find missing information about angles, you do not need to use scale factors because the corresponding angle measures of similar figures stay the same as the original. ",
+            "<p>To find missing information about area, you can use scale factors. When the scale factor from the original to the similar figure is *x*, the area of the similar figure will be *x* times *x* or *x^2* times the area of the original.</p>",
+            "Perimeter is the sum of lengths. So, every relationship for length and scale factor is the same for perimeter and scale factor. To find missing information about perimeter, you can use scale factors. When the scale factor from the original to the similar figure is *x*, the perimeter of the similar figure will be *x* times the perimeter of the original perimeter. "
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,134 @@
+{
+  "type": "MathReflection4",
+  "content": {
+    "tiles":
+    [
+      {
+          "id": "50awySsCZ1k3qJaH",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>AoL:</strong> Synthesis, Synthesis</p>",
+              "<p><strong>CCSSM</strong>: <em>Responses to the reflection are informed by the work in the Investigation and thus also reflect</em>: 7.G.A, 7.G.A.1, 7.RP.A, 7.RP.A.2, 7.RP.A.2.a, 7.RB.A.2.b , 7.RB.A.3 , 7.EE.B.3, 7.EE.B.4</p>"
+            ]
+          }
+        },
+        {
+          "id": "v4c6ydoU7eXy6HMZ",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>Mathematical Reflection</strong></p>",
+              "<p>What do you now know about similar figures? What do you know about proportional reasoning?</p>"
+            ]
+          }
+        },
+        {
+          "id": "JlczytuuxT2aQBTq",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>Emerging Mathematical Ideas</strong></p>",
+              "<p>Continue exploration of proportional relationships between corresponding side length and perimeter of similar figures.</p>",
+              "<p>With similar figures, understand and be able to articulate which attributes change and which stay the same: </p>",
+              "<ul><li>corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.</li><li>corresponding side lengths and perimeter of the similar figure increase or decrease by the scale factor (multiplier).</li><li>area of similar figures increases or decreases by the scale factor squared (multiplier squared).</li><li>ratios of corresponding adjacent side lengths within two similar figures are equal. </li></ul>"
+            ]
+          }
+        },
+        {
+          "id": "9NkxCfPI8nBZkYbs",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>The Mathematical Reflection provides an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over time (TIME). </p>",
+              "<p>After the class discussion, students can record their responses to the Mathematical Reflection to create a record of their current understandings of the big ideas of the Unit. </p>",
+              "<p>A teacher can gain an understanding of student thinking during a discussion of the reflection questions. Then assess individual understanding based on each student’s written work.</p>",
+              "<p>Students have been working with factors and multiples and the multiplicative structure of numbers. Students will reflect upon what they know about the multiplicative structure of numbers</p>"
+            ]
+          }
+        },
+        {
+          "id": "4YhfsW_LW-e5phRM",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Having students pull out their notes from the Now What Do You Know from each problem in the Investigation can help them to synthesize all their ideas around Similarity. </p>",
+              "<p><em>What do you know about similar figures? What do you know about proportional reasoning? </em></p>"
+            ]
+          }
+        },
+        {
+          "id": "4dUcS9fANQ85BcSL",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>(Student answers should include discussions of the changes between originals and images in relation to the general shape, side lengths, angle measures, and area. Students should be using the words scale factors and ratios in their explanations.)</p>",
+              "<p><strong>Reflecting on Student Learning</strong></p>",
+              "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+              "<ul><li>What evidence in students’ work shows an understanding the ideas in this Unit?</li><li>What mathematical ideas will still need emphasis?</li><li>What opportunities exist in the rest of the Unit, or in future Units, to extend and connect the students’ learning?</li></ul>"
+            ]
+          }
+        },
+        {
+          "id": "NAGrB8uSWatTdJKy",
+          "title": "Text 1",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>These are two examples of student responses to the Mathematical Reflection after Investigation 4:  </p>",
+              "<p><strong>Student 1</strong></p>",
+              "<p>When it comes to similar figures and proportional reasoning I feel like I have learned quite a lot about the two. With similar figures, they must have the same angle measures and the same type of shape. </p>"
+            ]
+          }
+        },
+        {
+          "id": "gEwsBfUvj481JnUO",
+          "title": "Variety of similar triangles",
+          "content": {
+            "type": "Image",
+            "url": "curriculum/stretching-and-shrinking/images/manyTrianglesMR.png",
+            "filename": "curriculum/stretching-and-shrinking/images/manyTrianglesMR.png"
+          }
+        },
+        {
+          "id": "NWOBUPmMmMCCKjBD",
+          "title": "Text 2",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>These triangles are similar, they have the same angle measures and type of shape. But, not all of these triangles are similar. The triangle furthest to the right is not similar to the rest of the triangles in the picture. The three triangles on the left are all right triangles. But, the triangle on the right is not a right triangle. So, this means that the triangle on the right is not similar to the rest of the triangles in the picture. </p>",
+              "<p>When it comes to proportional reasoning, I have learned that on copiers, you can choose a percentage that decides the size of what you’re copying. We went over how to prove what percentage a person chose when copying a shape. For example, the original copy would be 100%. If you wanted a shape half that size, you would have to choose the 50% option. But, if you wanted a shape 2 times that size, you would choose the 200% option. To prove what percentage a person used, you would have to measure the sides and compare that to the original photo. When a person uses the 50% option on a copier, they will notice the side lengths are half of what the original side lengths are. When you are using the 200% option on a copier, you will notice that the side lengths are double what the original side lengths were on the original.</p>",
+              "<p>We used the Wumps to find out about stretching, shrinking, and moving images on a coordinate plane. When stretching and shrinking a shape on the coordinate plane you can use a set of rules to change the shape. For example, (3x,2y) This is multiplying the original coordinates. But, the coefficients are not equal, so this shape would not be similar to the original shape. But, if the rule was (5x,5y), the original shape would grow 5 times larger and still be a similar shape. To shrink a shape your coefficients, have to be less than one. For example, (.5x,.5y) or, (.3x,.7y), these would both shrink the shape. But, (.3x,.7y ) would not create a similar figure because the coefficients are not equal.</p>",
+              "<p>To move a shape on the coordinate plane you would need to use addition and subtraction in your rules. If you are adding to x, the shape would be moving that many units to the right, if you were subtracting from x, your shape would be moving that many units to the left. But, if you wanted to move your shape up, you would add to y. If you wanted to move your shape down, you would need to subtract from y.  For example, (7+x,y-4), or, (5+x,5+y). ( 7+x, y-4 ) would move the shape 4 units down and 7 units to the right. (5+x,5+y)would move your shape 5 units to the right and 5 units up.  </p>",
+              "<p>To find a missing side on a similar figure, you first must verify that the shapes are in fact similar. You can start by measuring the angles, unless the shape is a rectangle, in which case, all the angles will be 90 degrees. If the corresponding angles are congruent, and the corresponding side lengths are related, you have a similar figure. To find the missing side length, you first want to determine which of the shapes provides the most information(shape 1). Then, you must find the scale factor from that shape, to the shape that has that missing side you’re trying to find. To do this, you should divide one of the sides on the larger shape by the corresponding side on the smaller shape. Once you have an answer, you can check it by multiplying one of the lengths by the quotient of your division problem. Once you’re verified correct, multiply the side on shape 1 that corresponds to the missing side on shape 2, and you will get the missing length.</p>",
+              "<p>I have learned quite a bit in Unit 3. From proportional reasoning, to similar figures, I feel quite confident in what I have learned. </p>"
+            ]
+          }
+        },
+        {
+          "id": "-_hOM4CaEWO_MbAk",
+          "title": "Text 3",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>Student 2</strong></p>",
+              "<p>Mathematical Reflection U3 </p>",
+              "<p>In Unit 3, we learned all about similar figures, area, perimeter, proportional reasoning, and scale factors. We did activities such as rubber band stretchers to make a scaled-up version of pictures.  Similar figures are not always congruent but they share some of the same qualities. They have the same angles but can have different side lengths. They are also different in size but not shape. There is always a scale factor for similar figures. For example, a 4 by 4 square and a 16 by 16 square are similar, and they have a scale factor of 4 because square #1 times 4 is square #2. Proportional reasoning is when you compare objects/shapes using clues like quantity, value, shape, size, etc. Area is the space inside of a shape, to find the area of a rectangle, you do length × width. But for triangles you do (length × width) times 1/2. Perimeter is the distance around a shape. In order to find perimeter, you add up all the side lengths of your shape. Ex: The perimeter of a 3 by 3 square would be 3 + 3 + 3 + 3 = 12. When a scale factor is applied to a shape, the perimeter will be sized up by how much the scale factor is. Ex: if the perimeter of a rectangle is 12 and the scale factor is 3, the new rectangle’s area will be 36. Area on the other hand works a bit differently. If the scale factor for a triangle is 4, the new copy’s area will actually be 16x greater than the original triangle. Cool, right?   </p>",
+              "<p>During this unit, we spent a lot of time talking about the Wump Family. The Wumps are a group of creatures that are of different sizes and shapes. Our job was to discover whether one wump was similar to another. I did this by measuring angles, perimeter, area, and side lengths. I needed all the information I could get to figure out whether the Wumps were really family. The difficult part about this investigation was plotting out every creature. Graphs are another thing we talked about in this unit. I learned that when you add to x your figure will move to the right, and if you subtract from x it moves to the left! For y, on the other hand, when you subtract from it your figure moves down and when you add to y it will move up. After graphing all the Wumps, I first started off by measuring their side lengths, then I found the angle measurements, then the area and perimeter. I compared all this information to see if the angles were the same and if a scale factor could be applied to one Wump to make another. Ex: If one Wump had a mouth 3 units long and another had a mouth 9 units long, I would know the scale factor between those two is 3. After the investigation was over, we had finally sorted out the Wump family tree. This experiment showed me how area and perimeter act differently when a scale factor is applied. </p>",
+              "<p>Finally, in this unit, we talked about ratios, specifically internal ratios.  We made ratios out of shapes (for example, if a triangle has a base of 4cm and one side is 8cm then we know the ratio would be 4:8) and then compare them. Say there&#x27;s another triangle with a base of 8cm and one side length that&#x27;s 16cm (8:16) if we compared 4:8 and 8:16 we would see that the second triangle is 2x bigger than the first. This is another method of figuring out whether two shapes are similar or not. Always remember that ratios compare two parts, not part to whole, careful not to get them confused with fractions. I hope this report helped you understand our 3rd unit a bit better. :)  </p>",
+              "<p></p>"
+            ]
+          }
+        }
+    ]
+  }
+}

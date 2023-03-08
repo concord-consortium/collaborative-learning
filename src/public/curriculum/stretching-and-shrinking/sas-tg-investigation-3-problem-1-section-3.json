@@ -1,0 +1,112 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles":
+    [
+      {
+        "id": "NWc-iOu978pqA6Uf",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Explore (Digging In)</strong></u></p>",
+            "<p><u>Providing for Individual Needs</u></p>",
+            "<p>Some students’ spatial skills enable them to find rep‑tiles more quickly than others. To scaffold for students who need some suggestions to move forward you can suggest students can systematically explore the possibilities. Point out that it is reasonable to assume that edges with the same length must be placed together. Keep in mind that there are usually two ways to place two matching edges together, as one of the shapes can be flipped.</p>"
+          ]
+        }
+      },
+      {
+        "id": "_Vs89RdradVhHR7E",
+        "title": "Example of flipped parallelograms",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SASTG_2-1_providing_for_individual_needs_1.png"
+        }
+      },
+      {
+        "id": "P9NwfxNOk2Ck4C9s",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Implementation Note</strong>: Some teachers have students make a poster with each rep‑tile the group finds. They display these posters as a handy reference for future discussions about the relationship between area and scale factor. (Time and Portrayal) Students can also use <strong>Learning Aid 3.1C Rep-tile Recording Sheet</strong> to keep track of their work. </p>"
+          ]
+        }
+      },
+      {
+        "id": "vxd0jwXKtEAJTOzW",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>As you circulate, make sure that the students have arranged the copies of the rectangles or triangles in such a way that the larger figure is similar to the smaller figure. Make sure that students have a way to compare the side lengths of the smaller figures to the side lengths of the larger figures.</p>",
+            "<p></p>",
+            "<p>You might ask students if they have checked angle measures. Some may use a transparent piece of paper to copy and compare. Others may use angle rulers or protractors. Students should notice that corresponding angles are congruent. They need to make sure that the angles they are comparing are corresponding.</p>"
+          ]
+        }
+      },
+      {
+        "id": "A12JMCx4bkGf6Hiu",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>How do you know that your original triangle and your new, larger triangle are similar? (Possible answer: The two triangles have the same angle measures. Also, each set of corresponding side lengths has the same scale factor.)</li><li>How can you determine which angles or which side lengths correspond in the similar figures? (Possible answer: I can see the larger triangles is a rotated version of the smaller triangle. I find the longest side for the original triangle and the longest side for the new triangle. This helps me to determine how the triangle was rotated.  </li><li>How many rectangles will it take to make a larger, similar figure formed by the rectangles? (4)  </li><li>How many rectangles will it take to make the next larger, similar figure formed by the rectangles? (9) </li><li>We will call these similar figures rep‑tile figures. How many rectangles will it take to make the 10th rep‑tile figure? (Students may not yet understand the link between area and scale factor. At this point, students should see the relationship between areas of similar figures and small scale factors such as 2, 3, or 4. Some students may already know that 100 rectangles would form the 10th rep‑tile figure.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "swr4ubfloWQiFQpq",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The four parallelograms below form a larger parallelogram, but it is not similar to the original. You might ask students to decide for themselves whether or not this is true and explain why.</p>"
+          ]
+        }
+      },
+      {
+        "id": "iWBy06QHYNEakMFl",
+        "title": "Non-similar parallelogram made by tiling",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SASTG_3-1_providing_for_individual_needs_2.png"
+        }
+      },
+      {
+        "id": "TXotseagByd3yKnQ",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>For students who need an extra challenge ask them if a trapezoid will rep-tile and to provide evidence of what they find.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Planning for the Summary</u><em></em></p>",
+            "<p><em></em>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>",
+            "<p><em>Now What Do You Know?</em></p>",
+            "<p><em>How do rep-tiles show the relationship between the scale factor and the area of similar shape?</em></p>"
+          ]
+        }
+      },
+      {
+        "id": "jrQw-j19oP9f71jJ",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Listen to students as they are discussing the shapes that would rep-tile in the Initial Challenge.  Find student work examples to highlight the scale factor and area change relationship to use in the Summary.  Listen to how students reason through the student claims in the What If Situations. Use their responses to frame your summary.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

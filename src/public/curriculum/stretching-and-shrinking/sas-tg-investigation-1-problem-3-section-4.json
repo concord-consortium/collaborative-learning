@@ -1,0 +1,148 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles":
+    [
+      {
+        "id": "9UAPAKmvrJ4mVt0L",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
+            "<p><u>Solutions and Strategies </u></p>",
+            "<p>Discuss the questions. Ask students to explain their reasoning. This will give you insight into their understanding of percent. Be sure to discuss angle measures, side lengths, and area.</p>",
+            "<p></p>",
+            "<p>Students may use addition strategies rather than multiplying by a scale factor. For example, they may divide the side lengths of the original figure by four equal segments and then subtract one of the segments to get the side length of the figure that has been reduced to 75%.</p>",
+            "<p></p>",
+            "<p>To get the side length of the figure that is increased to 150% students may divide the side lengths of the original figure into two equal segments and then add one of the segments to the original.</p>"
+          ]
+        }
+      },
+      {
+        "id": "rmPCYy8V3cYHFIrV",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions:</strong></p>",
+            "<ul><li>How could you use a rubber band stretcher to achieve 150% increase? (Answers will vary.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Making the Mathematics Explicit </u></p>",
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>How did you describe the comparison between the corresponding side lengths? (Answers will vary. Students will often use additive descriptions first such as, ”For 150% you just take the original and added on half as much.”  Guide them to refine their thinking and use multiplicative structures to see that the side lengths are 1.5 times longer.)</li><li>To help students think about these ideas with a multiplicative structure versus additive you could ask them if there is a way to use a “for every” statement to express their idea.  (“For every length on the original the corresponding length on the image is 1.5 times as long”.)</li><li>If I want to enlarge a figure by 25% will the image be larger or smaller than the original? What number do I enter in the photocopier? (To increase a figure by 25% you multiply the figure by a factor of 1.25. So, you enter 125% into the photocopier.)  Explain why this is true.</li> <li>If we want to make a copy of the original drawing that does NOT change the size, what percent would we use?(100%)</li><li>How do the corresponding angles of the Super Sleuth’s characters compare?  (Corresponding angles are all the same angle measure) </li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "1Vcqwv0Vq6irEwbh",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>This is a good time to review the Distributive Property. For example, to increase a figure by 25% means you multiply the original number by 25% and then add it to the original number. This is the same as multiplying the original number by 125% because x + 0.25x = 1x + 0.25x = (1 + 0.25)x = 1.25x.</p>",
+            "<p></p>",
+            "<p>Draw a square on a transparent grid on the overhead to show what happens with an increase of 25% To make the enlargement, first enlarge two adjacent sides of the original square, and then complete the square. Compare the two squares. (If the original side length is 1, then the new side length is 1.25. So, the lengths grew by a factor of 1.25. That is, each side length was multiplied by 1.25.)</p>"
+          ]
+        }
+      },
+      {
+        "title": "Similar figures showing an increase of 25%",
+        "id": "m0aG_wNWHybXqdg2",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SASTG_1-3_making_mathematics_explicit_1.png"
+        }
+      },
+      {
+        "id": "F-Tp100R52yW8we2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Repeat this demonstration on a unit square with a decrease of 25%. In this case the scale factor is 0.75</p>"
+          ]
+        }
+      },
+      {
+        "id": "y8UrLmBSdgLHGATV",
+        "title": "Enlarging a shape",
+        "content": {
+          "type": "Geometry",
+          "board": {
+            "properties": {
+              "axisMin": [-4.372, -2.186],
+              "axisRange": [26.23, 17.486]
+            }
+          },
+          "objects": [
+            { "type": "point", "parents": [5, 1], "properties": {"id":"zxnw1S3P_6RRxSJ9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [1, 1], "properties": {"id":"jm-9QT1wWia976W_","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [1, 5], "properties": {"id":"3fqjb2eArXfmU2WX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [5, 5], "properties": {"id":"qv9KBFiipADCs3tZ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "polygon", "parents": ["zxnw1S3P_6RRxSJ9", "jm-9QT1wWia976W_", "3fqjb2eArXfmU2WX", "qv9KBFiipADCs3tZ"],"properties": {"id":"XrAtOscgQutMyDnx"} },
+            { "type": "point", "parents": [6.1000000000000005, 7.000000000000001], "properties": {"id":"V_CLC7VUpqVQNaxx","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [1, 7.000000000000001], "properties": {"id":"RPlssU7812RDrI3i","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [1, 12], "properties": {"id":"KnuZnKztH3bj5OgH","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [6.1000000000000005, 12], "properties": {"id":"K4IpL6Wqs7weDEdt","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "polygon", "parents": ["V_CLC7VUpqVQNaxx", "RPlssU7812RDrI3i", "KnuZnKztH3bj5OgH", "K4IpL6Wqs7weDEdt"],"properties": {"id":"tE4SBJpvY9LAPTAs"} },
+            { "type": "comment", "parents": [5.320825633067438, -0.31061568583503885], "properties": {"id":"y0EYZP0gMnaqBU-5","text":"x 1.25 of the original box","anchor":"tE4SBJpvY9LAPTAs"} }
+          ]
+        }
+      },
+      {
+        "title": "Similar figures showing an decrease of 25%",
+        "id": "jzlo4jLJau1YBtvV",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SASTG_1-3_making_mathematics_explicit_2.png"
+        }
+      },
+      {
+        "id": "-H4qLGCNGl72h9bz",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p></p>",
+            "<ul><li>How is the photocopy similar to the rubber band method of creating similar figures? (Students will likely say that they are alike in that they each produce similar figures, but that they have only used rubber bands to enlarge figures.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Now What Do Students Know</u></p>",
+            "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions. Push students towards describing the changes in the side lengths using multiplication versus additive descriptions.</p>"
+          ]
+        }
+      },
+      {
+        "id": "Q3X1EGYEq6lx1H4B",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong> </p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+            "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
+          ]
+        }
+      }
+
+    ]
+  }
+}

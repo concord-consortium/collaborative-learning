@@ -1,0 +1,26 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "How can you use similar triangles to find a distance that is difficult to measure?"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "To find a distance that you cannot measure directly, you can use similar figures. Draw a diagram that includes a pair of similar nested triangles. One of the sides of the similar triangles should be the distance that you are having trouble measuring. You can multiply (or divide) one side length in a triangle by the scale factor to find the corresponding side length (the missing length) in a similar triangle."
+          ]
+        }
+      }
+    ]
+  }
+}

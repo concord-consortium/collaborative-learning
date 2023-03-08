@@ -1,0 +1,76 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles":
+    [
+      {
+        "id": "JpPwTZ5JRZEoCxH-",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Explore (Digging In)</strong></u></p>",
+            "<p><u>Providing for Individual Needs</u></p>",
+            "<p>Be sure the groups have identified the similar triangles and the corresponding sides and angles they need to measure.  (Portrayal)</p>"
+          ]
+        }
+      },
+      {
+        "id": "oyko8EGkfsycZawn",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>How many triangles do you see in the river diagram? (Students may point out that they see two triangles and a trapezoid, or just one triangle and a trapezoid. It is important that students focus on the two triangles. The corresponding side lengths will link the sides of the small triangle to sides of the large triangle, not the trapezoid.)</li><li>Are the triangles in the river diagram similar?  How do you know? (The triangle formed by Stakes 1, 2, and 3 is similar to the triangle formed by Stake 3 and Trees 1 and 2.  These triangles have angles that are congruent.  The angle at Tree 1 is 90° and corresponds to the angle at Stake 1 which is also 90°. The triangles share the angle formed at Stake 3. The angle formed at Tree 2 has the same measure as the angle formed at Stake 2. This is because the line segment from Tree 1 to Tree 2 is parallel to the line segment from Stake 1 to Stake 2 and the angle at Stake 2 corresponds to the angle at Tree 2.  The important features of this figure are that Tree 1, Stake 1 and Stake 3 are on the same line; Tree 2, Stake 2, and Stake 3 are on the same line; and the segments connecting Stakes 1 and 2 and Trees 1 and 2 are parallel. These conditions allow students to use their knowledge of transversals.) </li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "KG21cb2-a0Ajxujn",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Learning Aid 3.3: River Diagrams</strong> shows both the diagram and the modified diagram described in the What If Situation B.</p>",
+            "<p>Since the distance across the river is a portion of a side length of the larger triangle, some students may have difficulty isolating just the distance across the river. Be sure that students can use details to explain their processes.</p>"
+          ]
+        }
+      },
+      {
+        "id": "vFbuy9Vy1tREYlFe",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Can you sketch the two similar triangles? (Answers will vary)</li><li>What do you know about the angles of the two triangles? (The corresponding angles are equivalent.)</li><li>Which sides correspond on the two triangles? (Answers will vary)</li><li>What is the scale factor between the smaller triangle and the larger triangle in the Initial Challenge? (1.75)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Planning for the Summary</u></p>",
+            "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>",
+            "<p><em>Now What Do You Know?</em></p>",
+            "<p><em>How can you use similar triangles to find a distance that is difficult to measure directly?</em></p>"
+          ]
+        }
+      },
+      {
+        "id": "R8NtmtWE3BF3cCM3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Look for examples of students using scale factor to find missing sides lengths.  </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

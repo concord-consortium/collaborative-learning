@@ -1,0 +1,320 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "-6zAUG20220128pm",
+        "title": "Rectangle A and Triangle B",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_3_2_In_23_A_B_350w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "The Art Club created several design challenges using Rectangle A and Triangle B.<ul><li>Use the design criteria as a guide to draw a new similar rectangle.</li><li>Describe the lengths, perimeters, and areas for each figure.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "6SAD92cDHNbTcMAA",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Criteria for Rectangles</strong></p>",
+            "<ul><li><p><strong>Rectangle P</strong> The scale factor from Rectangle A to Rectangle P is 2.5.</ul></li>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>To make the new Rectangle P that is similar to A, multiply the scale factor, 2.5, by each side length of rectangle A. The size of rectangle A is 4 x 8. So, you can get 4 x 2.5 = 10, 8 x 2.5 =20, which becomes a 10 x 20 rectangle. The lengths are 2.5 times larger. The perimeter increases from 24 units to 60 units. This is an increase of 2.5 times. 24 • 2.5 = 60. The area increases from 32 square units to 200 square units. This is an increase of 6.25 times. 32 • 6.25 = 200. Using the Commutative Property, we can see that the area of P is (2.5 • 4) • (2.5 • 8) = 2.5 • 2.5 • 4 • 8 = 6.25 • 32.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "-6zAUG20220129pm",
+        "title": "Comparing Rectangle A and Rectangle P",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_1.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li> <strong>Rectangle Q</strong> The perimeter of Rectangle Q is three times the perimeter of Rectangle A.</li>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "If the perimeter of the new rectangle 3 is three times the perimeter of A, each side length of Rectangle Q will be three times the corresponding side length of A. We will have 4 x 3 = 12, 8 x 3 = 24, which becomes a 12 x 24 rectangle."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "-6zAUG20220130pm",
+        "title": "Comparing Rectangle A and Rectangle Q",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_2.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "The lengths are 3 times larger. The perimeter increases from 24 units to72 units. This is an increase of 3 times. 24 • 3 = 72. The area increases from 32 square units to 288 square units. This is an increase of 9 times. 32 • 9 = 288. Using the Commutative Property, we can see that the area of P is (3 • 4) • (3 • 8) = 3 • 3 • 4 • 8 = 9 • 32. "
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li> <strong>Rectangle R</strong> The area of Rectangle R is 1/4 the area of Rectangle A.</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "If the new Rectangle R is ¼ the area of the rectangle A, there are four congruent Rectangle Rs in the rectangle A. To divide the rectangle A into four of them, you should divide each side length of the rectangle A into two. So, the side lengths of the rectangle R are 2 and 4.  "
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "-6zAUG20220131pm",
+        "title": "Comparing Rectangle A and Rectangle R",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_3.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "The lengths are ½ the size of the original. The perimeter decreases from 24 units to 12 units. This is decrease of 0.5 times. 24 • 0.5 = 12. The area decreases from 32 square units to 8 square units. The new area is ¼ of the original. 32 • ¼  = 8. Using the Commutative Property, we can see that the area of P is (½ • 4) • (½ • 8) = ½ • ½ • 4 • 8 = ¼ • 32.  "
+          ]
+        }
+      },
+      {
+        "id": "21AUG20220506PM",
+        "title": "Rectangle and Triangle Figures",
+        "layout": {
+          "height": 260
+        },
+        "content": {
+          "type":"Geometry",
+          "objects": [
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [1, 4],
+                  "properties": {
+                    "name": "A"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [1, 0],
+                  "properties": {
+                    "name": "B"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [9, 0],
+                  "properties": {
+                    "name": "C"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [9, 4],
+                  "properties": {
+                    "name": "D"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [12, 0],
+                  "properties": {
+                    "name": "E"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [19, 0],
+                  "properties": {
+                    "name": "F"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [15, 4],
+                  "properties": {
+                    "name": "G"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Criteria for Triangles</strong></p>",
+            "For each part, draw a triangle similar to Triangle B that fits the given description. Explain your reasoning.",
+            "**Triangle X** The area of the Triangle X is 16 times the area of Triangle B."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "If the new Rectangle R is ¼ the area of the rectangle A, there are four congruent Rectangle Rs in the rectangle A. To divide the rectangle A into four of them, you should divide each side length of the rectangle A into two. So, the side lengths of the rectangle R are 2 and 4. "
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "adsfd-6zAUG20220132pm",
+        "title": "Comparing Triangle B and Triangle X",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_4.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Triangle Y</strong> The scale factor from Triangle B to Triangle X is 1/2."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "For the triangle B, the base length is 7 and the height is 4. Using the scale factor ½ to make a similar triangle X, the base length of the Triangle Y will be 3.5 and the height will be 2.  "
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "-6zAUG2022adte5y0133pm",
+        "title": "Comparing Triangle B and Triangle Y",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_5.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Triangle Z</strong> The ratio of corresponding side lengths of Triangle B to Triangle Z is 2:3."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "When the ratio of corresponding side lengths from Triangle B to Triangle Z is 2:3, the scale factor will be 3/2. For every length of 2 on Triangle B, we would have a length of 3 on Triangle Z. This means that the side increase 1.5 times. The base length of the Triangle Z will be 7 x 1.5 = 10.5 and the height of the Triangle 3 will be 4 x 1.5 = 6.  "
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "-6zAUG20220133pm",
+        "title": "Comparing Triangle B and Triangle Z",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-2_Initial_Challenge_6.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "-6wzAUG20220134PM",
+        "title": "Comparing Triangles using Graphs",
+        "content": {
+          "type": "Geometry",
+          "board": {
+            "properties": {
+              "axisMin": [-2.186, -1.093],
+              "axisRange": [26.23, 17.486]
+            }
+          },
+          "objects": [
+            { "type": "point", "parents": [0, 1], "properties": {"id":"QoOAajSwGtewNljd","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [7, 1], "properties": {"id":"E00UkT6YShwP1x7q","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [3, 5], "properties": {"id":"6QU_u1IHGMOYAv2M","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "polygon", "parents": ["QoOAajSwGtewNljd", "E00UkT6YShwP1x7q", "6QU_u1IHGMOYAv2M"],"properties": {"id":"ICTe18smsApCkgdg","labelOption":"length"} },
+            { "type": "point", "parents": [3, 5], "properties": {"id":"F3X8bOdjJf4Rvvvj","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [3, 1], "properties": {"id":"Ru3MItvlhpMzOH1p","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "polygon", "parents": ["F3X8bOdjJf4Rvvvj", "Ru3MItvlhpMzOH1p"],"properties": {"id":"5DcUuvDmqMhSTEIb","labelOption":"length"} },
+            { "type": "point", "parents": [10, 1], "properties": {"id":"MS_KgxqRz4vcVZ9h","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [20.5, 1], "properties": {"id":"DzrA2plNu4bFwCHX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [14, 7], "properties": {"id":"eIK-HXiWEtyYezVT","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "polygon", "parents": ["MS_KgxqRz4vcVZ9h", "DzrA2plNu4bFwCHX", "eIK-HXiWEtyYezVT"],"properties": {"id":"_rY6pH8VyuAe2Q28","labelOption":"length"} },
+            { "type": "point", "parents": [14, 7], "properties": {"id":"BGBYM4-gz88cDBDt","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [14, 1], "properties": {"id":"jhGA1rxEmVpKmK9j","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "polygon", "parents": ["BGBYM4-gz88cDBDt", "jhGA1rxEmVpKmK9j"],"properties": {"id":"n67iYfC51QOWzPHx","labelOption":"length"} },
+            { "type": "comment", "parents": [2.383879781420765, 2.021857923497268], "properties": {"id":"KKFBBLX33FiutNQW","anchor":"_rY6pH8VyuAe2Q28","text":"Z"} },
+            { "type": "comment", "parents": [2.1338797814207653, 1.196721311475411], "properties": {"id":"hcv6VkwAgO53mFDN","anchor":"ICTe18smsApCkgdg","text":"B"} }
+          ]
+        }
+      }
+    ]
+  }
+}

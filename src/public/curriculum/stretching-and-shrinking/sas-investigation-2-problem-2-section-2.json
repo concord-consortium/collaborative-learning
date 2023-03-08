@@ -1,0 +1,238 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Situation A. Writing New Hat Rules</strong></p>",
+            "Several members of the computer club wrote different design criteria that would produce hats similar to the original Mug hat. ",
+            "<p>What rule would you write for each design?</p>",
+            "<strong>Syrah’s Design:</strong> The side lengths are one third as long as Mug’s hat?"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "(1/3 x, 1/3 y)"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Joe’s Design:</strong> The side lengths are 1.5 times as long as Mug’s hat?"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "(1.5 x, 1.5 y)"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Viola’s Design:</strong> The hat is the same size as Mug’s hat but has moved right 1 unit and up 5 units?"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "(x + 1, y - 5)"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Kathy's Design:</strong> The image is in another quadrant of the graph?"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary.</p>",
+            "<p>To move the image to the second quadrant, you should move it left more than 9 units and up more than 0: possible answers are (x-9, y), (x-10, y+1), (x-12, y+3).</p>",
+            "<p>To move the image to the third quadrant, you should move it left more than 9 units and down more than 3 units: possible answers are (x-9, y-3), (x-9, y-4), (x-11, y-4).</p>",
+            "<p>To move the image to the fourth quadrant, you should move it down more than 3 units and right more than 0 units: possible answers are (x, y-3), (x, y-5), (x+2, y-5).</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Situation B. Raymond's Claim about Negative Numbers and Rules</strong>",
+            "Raymond's Claim",
+            "If you multiply each coordinate by a negative number the image is similar but smaller. Is he correct? Explain."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>If you multiply each coordinate (x, y) by -1 so you get (-x, -y), then the image has the same size of the original, but it rotates 180 deg as if x-axis and y-axis are used as mirrors. Students may multiply -1 to each coordinate of Mug’s and draw it as an example to see how the image looks like. This new Negative Hat will be in quadrant 3.</p>"
+          ]
+        }
+      },
+      [
+        {
+          "display": "teacher",
+          "content": {
+            "type": "Table",
+            "name": "Mug's Hat",
+            "columns": [
+              {"name":"Point","values":["A","B","C","D","E","F","G"]},
+              {"name":"(x, y)","values":["(1, 1)","(9, 1)","(6, 2)","(6, 3)","(4, 3)","(4, 2)","(1, 1)"]}
+            ]
+          }
+        },
+        {
+          "display": "teacher",
+          "id": "-WTuxMU6a-_Aonv7",
+          "title": "Mug's Hat",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [-1, -1],
+                "axisRange": [26.23, 17.486],
+                "axisNames": ["x", "y"],
+                "axisLabels": ["x", "y"]
+              }
+            },
+            "objects": [
+              { "type": "point", "parents": [1.007560381566389, 1.016734972677595], "properties": {"id":"D4U8qe_5HrzNU41J","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [9, 1], "properties": {"id":"TuaMquaQVvVeowpV","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [6.014553467054895, 2.0086663251366113], "properties": {"id":"qz4DbQ5dskvYAxV-","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [6, 3], "properties": {"id":"2l728kCiExnl7Aho","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [4, 3], "properties": {"id":"yQt0c6binEZqz4_h","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [4.000000000000001, 2], "properties": {"id":"VMJXVG2nLV6XIlWC","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "polygon", "parents": ["D4U8qe_5HrzNU41J", "TuaMquaQVvVeowpV", "qz4DbQ5dskvYAxV-", "2l728kCiExnl7Aho", "yQt0c6binEZqz4_h", "VMJXVG2nLV6XIlWC"],"properties": {"id":"KE8pozQFMjQ9apBB"} }
+            ]
+          }
+        }
+      ],
+      [
+        {
+          "display": "teacher",
+          "content": {
+            "type": "Table",
+            "name": "Negative Hat",
+            "columns": [
+              {"name":"x","values":["-1","-9","-6","-6","-4","-4","-1"]},
+              {"name":"y","values":["-1","-1","-2","-3","-3","-2","-1"]}
+            ]
+          }
+        },
+        {
+          "display": "teacher",
+          "id": "1-rchbtK5TpKQlL-",
+          "title": "Negative Hat",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [-9.9, -14],
+                "axisRange": [11.9, 16],
+                "axisNames": ["x", "y"],
+                "axisLabels": ["x", "y"]
+              }
+            },
+            "objects": [
+              { "type": "point", "parents": [-2.005253820960698, -0.9898925781249996], "properties": {"id":"8DvYJi-FdJ5RsMW9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [-9, -1], "properties": {"id":"5hamWrwS1_qwAZ-0","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [-6, -2], "properties": {"id":"x5lDReicjeo10ELn","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [-6, -3.0000000000000004], "properties": {"id":"B_BKinRldfS8yvZ-","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [-4.009211244541484, -3.0192871093749996], "properties": {"id":"5wqPZkpmEmhj397m","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [-4.000000000000001, -2], "properties": {"id":"uZMJD9pfPj8CPLwK","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "polygon", "parents": ["8DvYJi-FdJ5RsMW9", "5hamWrwS1_qwAZ-0", "x5lDReicjeo10ELn", "B_BKinRldfS8yvZ-", "5wqPZkpmEmhj397m", "uZMJD9pfPj8CPLwK"],"properties": {"id":"lTBYaAfEqGgXWeMb"} }
+            ]
+          }
+        }
+      ],
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Situation C. Isaiah’s Challenge: Putting the Hat on Mug</strong>",
+            "Isaiah's Challenge",
+            "I think it is possible to write a rule that will put Mug’s hat on Mug. My group will work on finding the correct rule."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>It is possible. Because you can move the hat upwards on the coordinate plane by adding numbers to the y-coordinate, you can put the hat on Mug. One possible rule for a hat that student can come up with is (x-1, y+6). Students might struggle with making a rule for the move at first. Students can first draw the hat on Mug and make a table for the coordinates of moved hat. Then they can compare the coordinates of the original (points A, B, …, G) with the new coordinates. For the corresponding coordinates, students may count units that moves from the original position to the new position.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "-6wzAUG20221115AM",
+        "title": "Mug Hat on Mug",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_2_2_MughatOnMug.jpg"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Table",
+          "name": "Mug's Hat",
+          "columns": [
+            {"name":"x","values":["1","9","6","6","4","4","1"]},
+            {"name":"y","values":["1","1","2","3","3","2","1"]}
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Table",
+          "name": "Mug's Hat on Mug",
+          "columns": [
+            {"name":"x","values":["0","8","5","5","3","3","0"]},
+            {"name":"y","values":["7","7","8","9","9","8","7"]}
+          ]
+        }
+      }
+    ]
+  }
+}
