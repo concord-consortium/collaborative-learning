@@ -276,6 +276,9 @@
     "example-variables": {
       "content": "curriculum/example-curriculum/example-variables.json"
     },
+    "example-shared-data": {
+      "content": "curriculum/example-curriculum/example-shared-data.json"
+    },
     "faw": {
       "content": "curriculum/filling-and-wrapping/filling-and-wrapping.json"
     },

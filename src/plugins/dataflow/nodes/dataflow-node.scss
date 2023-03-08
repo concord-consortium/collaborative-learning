@@ -435,14 +435,174 @@ $node-inner-width: 140px;
     .decorated-inputs {
       width: $node-width;
     }
+    .node-bottom-section{
+      width: 100%;
+      display: flex;
 
-    .node-graph {
-      padding: 5px 5px 0 0;
-      margin: 10px 0;
-      width: $node-inner-width;
-      background-color: white;
+      .node-bottom-buttons{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 15px;
+
+        .scale-buttons{
+          width: 100%;
+          height: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 1px;
+          margin-left: -2px;
+
+          &.plus {
+            border-bottom: 1px solid;
+            font-size: 14px;
+            border-top-left-radius: 3px;
+            &:active {
+              color: white;
+            }
+          }
+          &.minus {
+            border-top: 0px;
+            font-size: 20px;
+            padding-bottom: 3px;
+            border-bottom-left-radius: 5px;
+            &:active {
+              color: white;
+            }
+          }
+
+          &.sensor {
+            border-color: $sensor-blue;
+            color: $sensor-blue;
+            &:hover {
+              background-color: $sensor-blue-outline;
+            }
+            &:active {
+              background-color: $sensor-blue-control;
+            }
+          }
+
+          &.number {
+            border-color: $number-blue;
+            color: $number-blue;
+            &:hover {
+              background-color: $number-blue-outline;
+            }
+            &:active {
+              background-color: $number-blue-control;
+            }
+          }
+
+          &.generator {
+            border-color: $generator-blue;
+            color: $generator-blue;
+
+            &:hover {
+              background-color: $generator-blue-outline;
+            }
+            &:active {
+              background-color: $generator-blue-control;
+            }
+          }
+
+          &.timer {
+            border-color: $timer-blue;
+            color: $timer-blue;
+
+            &:hover {
+              background-color: $timer-blue-outline;
+            }
+            &:active {
+              background-color: $timer-blue-control;
+            }
+          }
+
+          &.math {
+            border-color: $math-green;
+            color: $math-green;
+
+            &:hover {
+              background-color: $math-green-outline;
+            }
+            &:active {
+              background-color: $math-green-control;
+            }
+          }
+
+          &.logic {
+            border-color: $logic-green;
+            color: $logic-green;
+
+            &:hover {
+              background-color: $logic-green-outline;
+            }
+            &:active {
+              background-color: $logic-green-control;
+            }
+          }
+
+          &.transform {
+            border-color: $transform-green;
+            color: $transform-green;
+
+            &:hover {
+              background-color: $transform-green-outline;
+            }
+            &:active {
+              background-color: $transform-green-control;
+            }
+          }
+
+          &.control {
+            border-color: $control-green;
+            color: $control-green;
+
+            &:hover {
+              background-color: $control-green-outline;
+            }
+            &:active {
+              background-color: $control-green-control;
+            }
+          }
+
+          &.demo-output {
+            background-color: $demo-output-orange;
+            color: $demo-output-orange;
+            &:hover {
+              background-color: $demo-output-orange-outline;
+            }
+            &:active {
+              background-color: $demo-output-orange-control;
+            }
+          }
+
+          &.live-output {
+            background-color: $live-output-orange;
+            color: $live-output-orange;
+            &:hover {
+              background-color: $live-output-orange-outline;
+            }
+            &:active {
+              background-color: $live-output-orange-control;
+            }
+          }
+
+        }
+      }
+
+      .node-graph {
+        padding: 5px 5px 0 0;
+        margin: 10px;
+        width: $node-inner-width;
+        background-color: white;
+        margin-left: 0.5px;
+        border-left: 1.5px solid #c6d6f6;
+        border-top: 1.5px solid #c6d6f6;
+      }
     }
   }
+
 
   svg {
     path.main-path {

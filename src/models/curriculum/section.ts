@@ -1,4 +1,4 @@
-import { types } from "mobx-state-tree";
+import { IAnyStateTreeNode, types } from "mobx-state-tree";
 import { parseSectionPath } from "../../../functions/src/shared";
 import { DocumentContentModel } from "../document/document-content";
 import { IAuthoredTileContent } from "../document/document-content-import-types";
@@ -87,6 +87,9 @@ export const SectionModel = types
     content: types.maybe(DocumentContentModel),
     supports: types.array(SupportModel),
   })
+  .volatile(self => ({
+    realParent: undefined as IAnyStateTreeNode | undefined
+  }))
   .preProcessSnapshot(snap => {
     return gSuspendSectionContentParsing
             ? { ...snap, content: undefined }
@@ -104,7 +107,12 @@ export const SectionModel = types
         return getSectionPlaceholder(self.type);
       }
     };
-  });
+  })
+  .actions(self => ({
+    setRealParent(parent: IAnyStateTreeNode) {
+      self.realParent = parent;
+    }
+  }));
 export type SectionModelType = typeof SectionModel.Type;
 
 export function findSectionIndex(sections: SectionModelType[], fullPath: string | undefined){

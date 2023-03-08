@@ -7,6 +7,7 @@ import { NodeSensorTypes, NodeChannelInfo,
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import { dataflowLogEvent } from "../../dataflow-logger";
+import { resetGraph } from "../../utilities/graph-utils";
 
 import "./sensor-select-control.sass";
 import "./value-control.sass";
@@ -269,6 +270,8 @@ export class SensorSelectControl extends Rete.Control {
   };
 
   public setSensor = (val: any) => {
+    resetGraph(this.node);
+
     const nch: NodeChannelInfo = this.props.channels.find((ch: any) => ch.channelId === val);
     this.setSensorValue(nch ? nch.value : NaN);
     this.setSensorVirtualState(!!nch?.virtual);

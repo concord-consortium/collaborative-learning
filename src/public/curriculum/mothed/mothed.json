@@ -685,6 +685,58 @@
             {
               "type": "pinning",
               "content": {
+                "sharedModels":[
+                  {
+                    "sharedModel": {
+                      "type": "SharedDataSet",
+                      "id": "2RLUYg5P96NDMIfI",
+                      "providerId": "Mf8F2TQ576QtCIkq",
+                      "dataSet": {
+                        "id": "pmBp0E-weI04bgsG",
+                        "attributes": [
+                          {
+                            "id": "lgQ-aHc3ENGlh4CC",
+                            "clientKey": "",
+                            "name": "Moth",
+                            "hidden": false,
+                            "units": "",
+                            "formula": {},
+                            "values": ["large"]
+                          },
+                          {
+                            "id": "nb9o6hyCZqVPYp9R",
+                            "clientKey": "",
+                            "name": "Date",
+                            "hidden": false,
+                            "units": "",
+                            "formula": {},
+                            "values": [""]
+                          },
+                          {
+                            "id": "jzCeWK-wTPkHjaui",
+                            "clientKey": "",
+                            "name": "image",
+                            "hidden": false,
+                            "units": "",
+                            "formula": {},
+                            "values": [""]
+                          },
+                          {
+                            "id": "mxFnkDHe2Xbceey_",
+                            "clientKey": "",
+                            "name": "Another Label ",
+                            "hidden": false,
+                            "units": "",
+                            "formula": {},
+                            "values": [""]
+                          }
+                        ],
+                        "cases": [{"__id__": "01GB97G7F4QR5TBZ4D1CB50G9K"}]
+                      }
+                    },
+                    "tiles": ["Mf8F2TQ576QtCIkq"]
+                  }
+                ],
                 "tiles": [
                   {
                     "id": "XejN-F7hDWsdjxpt",
@@ -724,12 +776,10 @@
                     }
                   },
                   {
-                    "id": "MJR4ZpqhE9UX0GH4",
-                    "title": "Data Cards - press the fourth toolbar button",
+                    "id": "Mf8F2TQ576QtCIkq",
+                    "title": "My Moths",
                     "content": {
-                      "type": "Image",
-                      "url": "curriculum/mothed/images/dataCard.png",
-                      "filename": "curriculum/mothed/images/dataCard.png"
+                      "type": "DataCard"
                     }
                   },
                   {

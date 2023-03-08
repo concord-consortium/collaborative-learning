@@ -7,7 +7,6 @@ import { SectionModel, SectionModelType } from "../curriculum/section";
 import { cloneTileSnapshotWithoutId, IDragTileItem } from "../tiles/tile-model";
 import { TextContentModel } from "../tiles/text/text-content";
 import { IDocumentExportOptions } from "../tiles/tile-content-info";
-import { kDefaultColumnWidth } from "../../components/tiles/table/table-types";
 import { safeJsonParse } from "../../utilities/js-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
 
@@ -114,8 +113,7 @@ describe("DocumentContentModel", () => {
           { title: "Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
-        { title: "Table 1", content: { type: "Table",
-          columns: [{ name: "x", width: kDefaultColumnWidth }, { name: "y", width: kDefaultColumnWidth }] } },
+        { title: "Table 1", content: { type: "Table" } },
         { title: "Drawing 1", content: { type: "Drawing", objects: [] } }
       ]
     });
@@ -681,7 +679,6 @@ describe("DocumentContentModel -- sectioned documents --", () => {
       ]
     });
   });
-
 });
 
 describe("DocumentContentModel", () => {
@@ -1032,10 +1029,6 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
           {
             content: {
               type: "Table",
-              columns: [
-                { name: "x", width: kDefaultColumnWidth, values: [1, 2, 3] },
-                { name: "y", width: kDefaultColumnWidth, values: [2, 4, 6] }
-              ]
             }
           },
           { content: { type: "Image", url: "image/url" } }
