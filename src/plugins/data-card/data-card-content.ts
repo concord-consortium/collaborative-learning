@@ -34,7 +34,7 @@ export const DataCardContentModel = TileContentModel
   .props({
     type: types.optional(types.literal(kDataCardTileType), kDataCardTileType),
     caseIndex: 0,
-    sortByAttributeName: 'none'
+    selectedSortAttributeName: 'none'
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
@@ -190,9 +190,9 @@ export const DataCardContentModel = TileContentModel
       withoutUndo();
       self.caseIndex = caseIndex;
     },
-    setsortByAttributeName(attrName: string){
+    setselectedSortAttributeName(attrName: string){
       withoutUndo();
-      self.sortByAttributeName = attrName;
+      self.selectedSortAttributeName = attrName;
     },
     setAttName(attrId: string, name: string){
      self.dataSet.setAttributeName(attrId, name);

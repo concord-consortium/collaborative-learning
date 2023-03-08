@@ -11,7 +11,7 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
 
   return (
     <div className="sort-grid">
-      <pre>cards sorted by { content.sortByAttributeName }</pre>
+      <pre>cards sorted by { content.selectedSortAttributeName }</pre>
     </div>
   );
 };

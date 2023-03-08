@@ -20,7 +20,7 @@ export const SortSelect: React.FC<IProps> = ({ model, onSortAttrChange }) => {
         <select
           name="selectedSortAttribute"
           onChange={onSortAttrChange}
-          value={content.sortByAttributeName}
+          value={content.selectedSortAttributeName}
         >
           <option value="none">None</option>
           { alphaAttrs.map((a) => {

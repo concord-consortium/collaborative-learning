@@ -29,7 +29,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const [imageUrlToAdd, setImageUrlToAdd] = useState<string>("");
   const shouldShowAddCase = !readOnly && isTileSelected;
   const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
-  const displayAs = content.sortByAttributeName === "none" ? "single" : "sorted";
+  const displayAs = content.selectedSortAttributeName === "none" ? "single" : "sorted";
   const shouldShowAddField = !readOnly && isTileSelected && displayAs === "single";
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   };
 
   function setSort(event: React.ChangeEvent<HTMLSelectElement>){
-    content.setsortByAttributeName(event.target.value);
+    content.setselectedSortAttributeName(event.target.value);
   }
 
   function addNewCase(){
