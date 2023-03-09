@@ -122,7 +122,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     title: "Delete Attribute",
     content: RequireUniqueAlert,
     confirmLabel: "OK",
-    onConfirm: () => deleteAttribute()
+    onConfirm: () => {}
   });
 
   const handleCompleteValue = () => {
