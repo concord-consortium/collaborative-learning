@@ -1,0 +1,64 @@
+{
+  "type": "labWork",
+  "content": {
+    "tiles": [
+      {
+        "id": "TZ5hC-GJDRC3-B1Y",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Anatomy of the nervous system</strong></p>",
+            "<p>The nervous system guides almost everything you do. It controls complex functions, such as movement, thought, and memory, as well as vital functions, such as breathing. The nervous system is made of billions of specialized cells called neurons. Neurons use electrical signals to communicate with one another. Different kinds of neurons send different signals. Motor neurons make your muscles move, whereas sensory neurons pick up information from the environment (sight, sound, touch etc.) and send signals to your brain. </p>",
+            "<p>The nervous system has two main parts</p>",
+            "<p><strong>Central nervous system</strong>: Consists of the brain and spinal cord. </p>",
+            "<p><strong>Peripheral nervous system</strong>: Consists of nerves that branch out from the brain and spinal cord all over your body. </p>",
+            "<p>Annotate the parts of the nervous system in the following image by adding a text tile to your workspace and indicating what part of the nervous system is marked by each number.  Then, think about how each part of the nervous system might be involved in controlling limb movement. Note: you can also drag images into drawing tiles so you can write on top of them.</p>"
+          ]
+        }
+      },
+      {"id": "_ePQ8mK9tiyAhfsq", "title": "The Nervous System [Credit: Encyclopedia Britannica]", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/lesson3labeledNervousSystem.jpeg", "filename": "curriculum/neural-engineering/images/lesson3labeledNervousSystem.jpeg"}},
+      {
+        "id": "lJ3td0Z3BqgQsVYS",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>How does nerve injury affect movement? </strong></p>",
+            "<p>In the next activity, you will investigate how injury to different parts of the nervous system might impact limb movement. Your team may choose or  be assigned to explore one of the following injuries:</p>",
+            "<ul><li><a href='https://theconversation.com/how-our-brain-controls-movement-and-makes-new-connections-when-parts-are-damaged-63520#:~:text=The%20brain%27s%20motor%20system%20is,and%20movement%20of%20specific%20muscles'>Brain Injury</a></li><li><a href='https://uihc.org/health-topics/how-does-spinal-cord-work'>Spinal Cord Injury</a></li><li><a href='https://orthoinfo.aaos.org/en/diseases--conditions/nerve-injuries/'>Peripheral Nerve Injury</a></li></ul>",
+            "<p>In your workspace, summarize in your own words how the injury that you read about could impact limb movement.</p>",
+            "<p><strong>Reflection</strong></p>",
+            "<p>Please record your current thinking and learning in your Learning Journal (see Reflection tab). </p>"
+          ]
+        }
+      },
+      {
+        "id": "M5HPUPP5DioC-I3q",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Modeling movement</strong></p>",
+            "<p>We can use a simple computer program to model how the brain controls limb movement. In the following program, the limb is represented by a robotic grabber that can open or close. Drag this program into your workspace and try to get the grabber to close.</p>",
+            "<p><u>Hint</u>: You will need to add a &quot;brain&quot; to the program and connect it to the grabber. </p>"
+          ]
+        }
+      },
+      {
+        "id": "jm9bx6l797gF47ZA",
+        "title": "Dataflow 1",
+        "content": {
+          "type": "Dataflow",
+          "programDataRate": 1000,
+          "programZoom": {"dx": 0, "dy": 0, "scale": 1},
+          "program": {
+            "values": {"6": {"currentValues": {"nodeValue": 0}}},
+            "id": "dataflow@0.1.0",
+            "nodes": {"6": {"id": 6, "name": "Demo Output", "x": 590.078125, "y": 51.61328125, "inputs": {"nodeValue": {"connections": {}}, "tilt": {"connections": {}}}, "outputs": {}, "data": {"outputType": "Grabber", "demoOutput": 0, "inputKeys": []}}}
+          }
+        }
+      }
+    ]
+  }
+}

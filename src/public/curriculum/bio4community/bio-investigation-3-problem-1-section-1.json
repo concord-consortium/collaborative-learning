@@ -1,0 +1,145 @@
+{
+  "type": "chapter1",
+  "content": {
+    "tiles": [
+      {"id": "cI1Xo-lIDz_ad-T5", "title": "Text 2", "content": {"type": "Text", "format": "html", "text": ["<h2>STRESS AND FEELING SICK:</h2>", "<h2>Felix’s Story</h2>"]}},
+      {"id": "29Fnhm8vVNnC48JK", "title": "Text 3", "content": {"type": "Text", "format": "html", "text": ["<h3>CHAPTER 1:  A NEW PHASE IN LIFE</h3>"]}},
+      {
+        "id": "YhvzIQ-7KHADpQH4",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Being a law student is hard work, especially for Felix who just started his final year of law school. He loved the independence that came with life in his mid 20s. He got to choose his own classes, meet new people, and finally got to live with his boyfriend, Josué. Moving out of his parents’ home and into an apartment with Josué was so exciting, it was a dream come true even though all they could afford was a tiny basement apartment that was old and pretty run down. At the same time, law school life also meant that he had to pay for his college fees, course textbooks, and of course, rent and groceries! Moving away from home, living with his boyfriend, and starting this new phase in his life meant he had new responsibilities and more expenses. </p>",
+            "<p>To pay his living expenses, Felix worked at the grocery store close to his apartment. He would plan his shifts around his classes and try to get as many as he could. Some days he would have a full day of classes and then pick up two shifts right after, then go home and stay up all night reading for his classes the next day. Josué always worried about how hard Felix worked. One night, when Felix had just worked for six hours straight and was starting on his homework, Josué decided to say something about it. </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "OJDA6H9HwbtVFNGr",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Josué</strong>: Mi amor (my love), it’s 1:00 am. You need to sleep or else you’re gonna collapse during class.</p>",
+            "<p><strong>Felix</strong>: Yo sé pero, (I know but) I have to finish this assignment. I’ll go to bed soon.</p>",
+            "<p><strong>Josué</strong>: You say that every night. </p>",
+            "<p><strong>Felix</strong>: Ya vengo (I’ll come). I promise. </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "AboIT1VwI0DrcmLf",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Felix didn’t want to admit it, but he knew Josué was right. But what was he supposed to do? How was he supposed to pay for rent if he didn’t work? After reading for another 30 minutes, Felix decided to listen to Josué and go to bed. </p>",
+            "<p>The next morning Felix woke up with a stuffy nose and a slight cough. He thought about maybe not going to his classes and resting. But then he remembered that he had to give a presentation that he couldn’t miss. And then he had another double shift at work. He wished the grocery store gave part-time employees sick days too. He was getting sick more often and it was really starting to make life harder. Felix and Josué couldn’t afford health insurance which meant they never saw the doctor even if they needed to. He decided to call his mom in hopes she would be able to provide him some tips and home remedies to help him get better. </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "m6Of6vMpB-E8HhQc",
+        "title": "Text 7",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Felix</strong>: Hola Mamá. Está bien? (Are you well?)</p>",
+            "<p><strong>Mamá</strong>: Sí Felix. Qué te pasa? (Whats wrong?)</p>",
+            "<p><strong>Felix</strong>: I’m just feeling a little under the weather lately. What do I eat to stop coughing again?</p>",
+            "<p><strong>Mamá</strong>: I don’t think I can help you. You know what you have to change to stop being sick.</p>",
+            "<p><strong>Felix</strong>: W-what do you mean?</p>",
+            "<p><strong>Mamá</strong>: Well, you choose to live that lifestyle. Of course you’re going to get sick and stressed. Leaving your family and living with another man, what did you think was going to happen?</p>",
+            "<p><strong>Felix</strong>: You think I’m getting sick because I’m gay? I didn’t CHOOSE any lifestyle. I can’t help who I love. </p>",
+            "<p><strong>Mamá</strong>: Did you call me to argue?</p>",
+            "<p><strong>Felix</strong>: I called you looking for some help and comfort while I was sick, like I did when I was little. Clearly that was a mistake. </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "TBeFkqs4cBtcHJtH",
+        "title": "Text 8",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Felix hangs up the phone without hearing his mom’s response. He doesn’t know why he tries when he knows how his family is. Ever since he came out to them, they have been the opposite of supportive. If Felix’s head didn’t already hurt before, it for sure hurt after that phone call. It left him with a bitter taste in his mouth and a heavy feeling in his chest. Felix shook his head. He had other things to worry about aside from his mom’s homophobia. Lying in bed, Felix realized there was no way he could take the day off to recover. Instead, he just popped cough drops in his mouth and tried to deal with it. Felix walked into the kitchen to find Josué had already made coffee for them, and was just starting to pack their lunches.</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "95oH407GwPIBL3g_",
+        "title": "Text 9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Felix</strong>: Good morning mi amor… (Felix coughs) </p>",
+            "<p><strong>Josué</strong>: Don’t tell me. You’re sick. Again?? Mi amor, c’mon now you know this isn’t right. I’m telling you, you’re stressing yourself to the point where you’re getting sick. </p>",
+            "<p><strong>Felix</strong>: Ugh please don’t. Not so early in the morning. I’m fine. And don’t be ridiculous, stress doesn’t make you sick.</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {"id": "12SEP20220348PMKaweg8tl", "title": "Felix has a cold", "content": {"type": "Image", "url": "curriculum/bio4community/images/Felix_S1.jpg"}},
+      {"id": "wfUh5FxrjMEwuyjb", "title": "Text 10", "content": {"type": "Text", "format": "html", "text": ["<p>Josué knew he was right, but didn’t know how to make Felix hear him. As usual, Felix was just being so stubborn, and now Josué needed to find a way to get through to him. </p>"]}},
+      {"id": "96dATNGUsa5twZMM", "title": "Text 11", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Do you think Josué is right?</strong></p>", "<p><strong>Discuss with your group--What do you think is the connection between stress and getting sick often?</strong></p>"]}},
+      {"id": "kVx8VOXJ2yrn-j2J", "title": "Text 12", "content": {"type": "Text", "format": "html", "text": ["<p><em>Continue reading to find out what happened next:</em></p>", "<p>When he finished packing their lunches, Josué looked up and noticed Felix seemed upset. </p>", "<p></p>"]}},
+      {
+        "id": "n7ptZVjfSXb4SjSu",
+        "title": "Text 13",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Josué</strong>: You seem down. What’s wrong?</p>",
+            "<p><strong>Felix</strong>: Oh nothing. I just called my mom asking her for some advice on treating this annoying cough. </p>",
+            "<p><strong>Josué</strong>: Oh no… what did she say this time? Did she give you any actual advice?</p>",
+            "<p><strong>Felix</strong>: Nope. She essentially said I’m sick because I’m gay. </p>",
+            "<p><strong>Josué</strong>: Well… what did you expect? I’m sorry love…</p>",
+            "<p><strong>Felix</strong>: I know. I just wanted some comfort from my mom, ya know? Jeez it’s the 21st Century and being gay isn’t illegal.. I don’t know why my mom and our community have these ridiculous expectations that everyone has to be straight. And now I feel like I&#x27;m never gonna get that love and comfort from my family again. </p>",
+            "<p><strong>Josué</strong>: You need to give them time, my love. In time, they’ll see what they’re missing out on and maybe you can have an actual conversation with them. But until then, you have my parents, no? And they love you so much! </p>",
+            "<p><strong>Felix</strong>: Thanks Josué.</p>",
+            "<p><strong>Josué</strong>: In fact, you know what. I think you should call my mom right now. She’s a doctor and a mom so she knows a lot about people getting sick. </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "QdyiJujAJli-FGMn",
+        "title": "Text 14",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Felix reluctantly agreed and figured a chat with Josué’s mom wasn’t that hard to do.  Josué, realizing he had a golden opportunity, pulled out his phone right away and rang his mother. Josué’s mother picked up the phone and Josué loudly told her that Felix was sick again! Unfortunately, Josué’s mom was in the middle of seeing a patient and couldn’t talk. She told them that she would send them a link to a slide show that explains how and why you get sick. Later that day, Felix was in class when he saw a text from Josué’s mother with a link to the slide show. He couldn’t wait so he clicked on the link: “<em>How Do You Get Sick</em>?”</p>"
+          ]
+        }
+      },
+      {
+        "id": "6VviThDk4BJ6RHXP",
+        "title": "Text 15",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li><strong>Watch the slide show- </strong><em><strong>EVIDENCE 1-How Do You Get Sick? </strong></em><strong>- in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Discuss the animation in your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li><p><strong></strong></p></ul>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

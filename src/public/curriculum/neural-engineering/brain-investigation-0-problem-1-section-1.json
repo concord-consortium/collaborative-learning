@@ -1,0 +1,27 @@
+{
+  "type": "intro",
+  "content": {
+    "tiles": [
+      {
+        "id": "ab4qD_VhNxbQSPDI",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Overview:</strong></p>",
+            "<p>In this activity, you will be introduced to CLUE, a collaborative learning platform that we will use throughout the neural engineering unit. </p>",
+            "<p>You will also be introduced to Dataflow, a visual computer programming interface that is part of the CLUE platform. </p>",
+            "<p><strong>Learning Objectives:</strong></p>",
+            "<p>After completing this activity, you will be able to add and share content on CLUE and make simple computer programs using Dataflow. </p>",
+            "<p><strong>Welcome to CLUE!</strong></p>",
+            "<p>In CLUE, everyone works in a group with up to four people. When you start an activity, CLUE drops you into a group randomly. <strong>You can change groups by clicking on the group number in the upper right corner.</strong> Then, you can either join an existing group that has fewer than four students, or start a new group. Your teacher may ask you to join a specific group. When you change groups, your work moves with you.</p>",
+            "<p><strong>Groups are important in CLUE.</strong> You can learn from classmates in your group and they can learn from you. Many features of CLUE are designed to help you share information and learn from others in your group and in your class.</p>",
+            "<p>Each lesson in CLUE has three parts. The tabs above display each part:</p>",
+            "<ul><li>Introduction</li><li>Activities</li><li>Reflection</li></ul>"
+          ]
+        }
+      },
+      {"id": "Prn74UZEK92lKVjs", "content": {"type": "Text", "format": "html", "text": ["<p>Please click on the &quot;Activities&quot; tab to continue. </p>"]}}
+    ]
+  }
+}

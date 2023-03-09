@@ -1,0 +1,15 @@
+{
+  "type": "MathReflection2",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["In this unit, we are exploring equivalent expressions to represent a quantity in a relationship.  At the end of this Investigation,<em>What do you know about equivalent expressions or equivalent equations? How is this information useful in solving problems?</em>"]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

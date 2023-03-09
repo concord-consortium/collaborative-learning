@@ -1,0 +1,57 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "gGM-ZzHwsFx6UXIK",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Launch (Getting Started)</strong>        </p>",
+            "<p>Connecting to Prior Knowledge</p>",
+            "<p>If you did not introduce the vocabulary term “y-intercept” in the Summary of Problem 1.3, the introduction of this Problem offers the opportunity.</p>",
+            "<p>Tell students that they have been looking at linear relationships and determining whether the relationships are proportional.</p>"
+          ]
+        }
+      },
+      {
+        "id": "KNgFTr5Hgl0uH6sU",
+        "title": "Text 7",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested questions </strong></p>",
+            "<ul><li>How can you tell whether a relationship is linear? (Answers will vary and may not be polished at this point. Look for students to mention a rate of change and describe how to recognize a constant rate from different representations, including a table, graph, equation, or verbal description.)</li><li>Are all linear relationships proportional? (No. All have a rate of change. Some have a rate of change that is also the constant of proportionality/unit rate.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "gAS0TX4EdvzS2aH4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Presenting the Challenge</p>",
+            "<p>In this Problem, students will continue to work with linear relationships that are modeled by tables and graphs. Tell the first story of how one class is going to use the money they raised from the walkathon. Display Teaching Aid 1.4A: Ms. Chang’s Class Account.</p>"
+          ]
+        }
+      },
+      {
+        "id": "x1gsp6j7Gi2wncGn",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What do you notice and what do you wonder? (Various answer to set the scene for the rest of the Problem.)</li><li>Do you have any “What If…” questions? (Various answer to set the scene for the rest of the Problem.)</li><li>Would the graph of these data look like the pledge plan data? (Sample answer: No. The graph would look different from other graphs in this Investigation, because the dependent variable is decreasing.) </li></ul>",
+            "<p>Use the above questions to help students visualize that as x is increasing, y is decreasing. Some students may already be good at recognizing this trend, but most students need a chance to think about the question before they begin to answer questions. Eventually, the goal is for students to have a rough idea of what a graph of a linear relationship will look like without actually graphing it.</p>",
+            "<ul><li>Is this a linear relationship? (Answers may vary. Collect some conjectures and come back to them in the Summarize.)</li></ul>",
+            "<p>Have students begin this problem independently and then work with a partner.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

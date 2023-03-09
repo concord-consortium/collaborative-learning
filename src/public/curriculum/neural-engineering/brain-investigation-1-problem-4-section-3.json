@@ -1,0 +1,19 @@
+{
+  "type": "reflection",
+  "content": {
+    "tiles": [
+      {
+        "id": "bhBVksJOfx92fQrF",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Please load your Learning Journal (&quot;My Work&quot; &gt;&gt; &quot;Learning Journal&quot;). </p>", "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>"]}
+      },
+      {
+        "id": "guld1K-WcL-GOupl",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Lesson 1.4 Journal Entry</strong></p>", "<p>1. Today&#x27;s date:</p>", "<p>2. Today&#x27;s topic:</p>", "<p>3. What connections do you see between today's activity and Tilly's bionic arms?</p>", "<p>4. What questions do you have about EMG?</p>"]
+        }
+      }
+    ]
+  }
+}

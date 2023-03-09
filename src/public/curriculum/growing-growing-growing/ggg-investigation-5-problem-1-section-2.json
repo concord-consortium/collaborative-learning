@@ -1,0 +1,9 @@
+{
+  "type": "MathReflection2",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["In this unit, we are exploring an important non-linear function, exponential functions. At the end of this Investigation, <em>What do you know about exponential functions? What do you know about expressions with exponents?</em>"]}}
+    ]
+  },
+  "supports": []
+}

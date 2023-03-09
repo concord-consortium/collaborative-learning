@@ -1,0 +1,36 @@
+{
+  "type": "chapter3",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["<h3>CHAPTER 3: WHAT'S IN YOUR BLOOD</h3>"]}},
+      {
+        "id": "0D31sWU-FOLtBslN",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Rakesh read the blog and realized he really did need to start paying more attention to the family group text. Meera was amazing at explaining stuff and her blog was really interesting! Based on her post he believed that his diet was mostly fine. Every dinner the family ate was homecooked, and had food even his chithi would approve of. There was almost always a piece of fruit or a vegetable curry in his lunch. </p>",
+            "<p>Yet, he was still nervous about those blockages. If even babies have cholesterol, then was there was a chance that despite his healthy life habits he could still have too much cholesterol in his blood? The fear of his arteries getting clogged up was still not leaving him. He just couldn’t stop worrying about it no matter how hard he tried. </p>",
+            "<p>So he decided to just get his blood checked and confirm whether he had high cholesterol or not. He called the doctor’s office and they ordered some tests and told him to go to the blood lab. The next day he went to the lab right after work, did the blood test. Two days later he received an email from the lab, the results were attached. He clicked on the attachment: “<em>Rakesh Sharma Blood Test Report</em>”</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "7lxgx3babDl10UWa",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li><strong>Review the test results- </strong><em><strong>EVIDENCE 3-Rakesh Sharma Blood Test Report</strong></em><strong> - in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Discuss the results with your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li><p><strong></strong></p></ul>"
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

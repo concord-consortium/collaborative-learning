@@ -1,0 +1,38 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Explore (Digging In)</strong></p>",
+            "<p>Providing for Individual Needs</p>",
+            "<p>Encourage students to record their strategies.</p>",
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What does equality mean? What does the equal sign tell us? (It means that two quantities are equal.)</li><li> How can we maintain equality? (A few students may be able to say that equality can be maintained by adding, subtracting, multiplying, or dividing each side of an equation by the same number (for multiplication and division, the number must be nonzero), but most will not be able to answer this question fully yet. At this time, you might look for students to describe adding or removing one coin from each of the equal quantities or dividing the coins and pouches on each side into two equal groups.)</li><li>How do you know if your answer is correct? (You can substitute the value of the unknown into the equation and check that the resulting values on each side are equal.)</li></ul>",
+            "<p>This is an opportunity to see how students handle parentheses. See the answers for some suggestions. </p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Planning for the Summary</strong></p>", "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence? </p>"]}
+      },
+      {
+        "id": "eZPlkXs37IX0gp9t",
+        "title": "Text 11",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Now What Do You Know?</strong></p>",
+            "<p><em><strong>Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?</strong></em></p>",
+            "<p>(As you are circulating during the Explore, look for strategies that students are using to find the number of coins in a pouch for each code.  Look for students that are “getting rid of” common coins or “getting rid of” common pouches first.  Look for how students are sharing or dividing the coins into the pouches.  Listen for the informal language students are using that can be used in the next problem to develop a procedure for solving equations symbolically.)</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

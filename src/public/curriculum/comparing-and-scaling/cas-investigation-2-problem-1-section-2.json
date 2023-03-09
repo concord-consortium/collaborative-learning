@@ -1,0 +1,60 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "Gu-ZtmTmKynTAE_j",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The dining room at a camp has two sizes of tables. A large table seats ten people, and a small table seats eight people. When the campers come for dinner one night, there are four pizzas on each large table and three pizzas on each small table. The campers at each table share the pizzas equally.</p>"
+          ]
+        }
+      },
+      [
+        {"id": "08OCt202204012q34PM", "title": "Large Table for 10 people", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_2-1_LargeTable.png"}},
+        {"id": "08OCt20220400PM", "title": "Small Table for 8 people", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_2-1_SmallTable.png"}}
+      ],
+      {"id": "SOM-WGtBsbO4SQRE", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Does a person sitting at a small table get the same amount of pizza as a person sitting at a large table? Explain your reasoning and conclusion.</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["No. Possible strategies include scaling up or down."]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Possible explanation scaling up to 40 people:</p>",
+            "<p>Large Table</p>",
+            "<p>4 pizzas for every 10 people (4 : 10) is equivalent to</p>",
+            "<p>16 pizzas for every 40 people (16 : 40)</p>",
+            "<p>Small Table</p>",
+            "<p>3 pizzas for every 8 people (3 : 8) is equivalent to</p>",
+            "<p>15 pizzas for every 40 people (15 : 40).</p>",
+            "<p>Therefore, a person sitting at the large table gets more pizza since 16 pizzas for 40 people is greater than 15 pizzas for 40 people.</p>"
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Possible explanation scaling up to 12 pizzas:</p>", "<p>Students might make equivalent ratios with the same number of pizzas, for example,</p>"]}},
+      [
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Large</p>", "<p>4 pizzas for every 10 people</p>", "<p>12 pizzas : 30 people</p>"]}},
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Small</p>", "<p>3 pizzas for every 8 people</p>", "<p>12 pizzas : 32 people</p>"]}}
+      ],
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>If more people share the same number of pizzas, each person gets a smaller share.</p>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Possible explanation scaling down to one person (unit rate of amount of pizza per person):</p>"]}},
+      [
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Large</p>", "<p>4 pizzas for every 10 people</p>", "<p>Each gets 4/10 or 0.4 of a pizza per person</p>"]}},
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Small</p>", "<p>3 pizzas for every 8 people</p>", "<p>Each gets 3/8 or 0.375 of a pizza per person</p>"]}}
+      ],
+      {
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Therefore, each person at a large table will get more pizza than each person at a small table.</p>", "<p></p>", "<p>Possible explanation scaling down to one people per pizza ( unit rate of amount people per pizza):</p>"]}
+      },
+      [
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Large</p>", "<p>4 pizzas for every 10 people</p>", "<p>21/2 people per pizza</p>"]}},
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Small</p>", "<p>3 pizzas for every 8 people</p>", "<p>22/3 people per pizza</p>"]}}
+      ],
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Therefore, each person at a large table will get more pizza than each person at a small table.</p>"]}}
+    ]
+  }
+}

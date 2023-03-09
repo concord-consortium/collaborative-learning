@@ -1,0 +1,21 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "ndbN07ileQuFzfYR",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Did You Know?</p>",
+            "<p>The average household&#x27;s leaks can account for nearly 10,000 gallons of water wasted every year and ten percent of homes have leaks that waste 90 gallons or more per day. Common types of leaks found in the home are worn toilet flappers, dripping faucets, and other leaking valves.</p>",
+            "<p>https://www.epa.gov/watersense/fix-leak-week</p>"
+          ]
+        }
+      },
+      {"id": "aSedHJ_NN2MhZAhM", "title": "Annual Household Water Waste = 1 Trillion Gallons", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_3.4_AnnualHouseholdLeaksWaste.png"}}
+    ]
+  },
+  "supports": []
+}

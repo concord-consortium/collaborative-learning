@@ -1,0 +1,45 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Explore (Digging In)</strong></p>",
+            "<p>Providing for Individual Needs</p>",
+            "<p>As you move around, make a note of how students are solving the problems. Some may use tables, some may use graphs, and some may use symbolic methods. Make sure that each of these strategies comes out in the Summarize.</p>",
+            "<p>You can encourage students to make a table, a graph, or an explanation of a symbolic method. These can be used during the Summarize to make connections among the representations—verbal description, table, graph, and equation.</p>",
+            "<p>Encourage students to write both equations and inequalities.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In the What If…? Situation A, when students determine whether there is a profit for making and selling 100 cakes, they can just compute the expenses and income and then subtract the expenses from the income. Be sure students see the connection between this numerical strategy and how it is represented on the graph. The profit is the vertical distance between the two points (100, I) and (100, E) on the graphs. Point out that, in this case, the expenses are greater than the income, so the vertical distance actually represents a loss.</p>",
+            "Encourage students to check their answers as they continue to answer questions."
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Planning for the Summary</p>", "<p>What evidence will you use in the Summary to clarify and deepen the understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"]}},
+      {
+        "id": "TFj2IEZeCbKwv2SF",
+        "title": "Text 12",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Now What Do You Know?</strong></p>",
+            "<p><strong>Describe how you can solve an equation of the form ax + b = y? </strong></p>",
+            "<p><strong>Describe how you can solve an inequality of the form ax + b &lt; c or ax + b &gt; c?</strong></p>",
+            "<p>(As you circulate, make a note of how students are solving the problems. Some may use tables, some may use graphs, and some may use symbolic methods. Make sure that each of these strategies comes out in the Summary.) </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

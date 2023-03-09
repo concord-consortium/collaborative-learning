@@ -1,0 +1,51 @@
+{
+  "type": "help",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Welcome to your work space! In here, you will find information and questions. You will work both individually and in groups, so be sure to listen to your teacher about what to do when. </strong></p>",
+            "<p><strong></strong></p>",
+            "<p><strong>Some tips for this workspace:</strong></p>",
+            "<p>To the right, you can see 9 buttons. These will add tiles to your workspace:</p>",
+            "<ul>",
+            "<li>The top button will create a space for you to create a diagram</li>",
+            "<li>The next button (with the A) will create a space for you to write down your thoughts</li>",
+            "<li>The button with the pencil will create a space where you can draw</li>",
+            "<li>The button with the mountain allows you to import images</li>",
+            "<li>The button with the table lets you build a table</li>",
+            "<li>The button with the graph lets you plot points</li>",
+            "<li>The button with the counter-clockwise arrow will undo</li>",
+            "<li>The button with the clockwise arrow will redo</li>",
+            "<li>The X will delete a tile (this cannot be undone!)</li>",
+            "</ul>",
+            "<p>You can rearrange your spaces by clicking on the top right-hand corner of the tile (where you will see 6 dots). This will allow you drag and move the tiles. </p>",
+            "<p>You can click on the bottom right corner of any tile and then drag it up or down to make it smaller or bigger. </p>",
+            "<p>You can share your work with your group-mates by using the Share slider on the top right corner, or publish your work to the whole class by clicking the button with the up-arrow next to the File menu.</p>",
+            "<p>You can also look at the work of your group-mates by clicking the Group View icon on the top bar (it looks like a window). </p>",
+            "<p></p>",
+            "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Welcome to teacher solutions</strong></p>",
+            "<p><strong>Some tips for this workspace:</strong></p>",
+            "<p>If your students are having trouble, consider putting some tips in a document of your own and publishing it with the uparrow button near the File menu. This will appear in Class Work and students can see the examples you post. They can publish too and the class can share ideas.</p>",
+            "<p>All content from the left hand panels can be dragged into working documents on the right. Some curriculum pieces are intended to be dragged in as starting places for student work.</p>",
+            "<p></p>",
+            "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["In recent years, the populations of many small towns have declined as residents move to large cities for jobs. The town of Roseville has a plan to attract new residents."]}},
+      {"content": {"type": "Text", "format": "html", "text": ["Roseville offers free land to “homesteaders” who are willing to build houses. Each lot is rectangular and has an area of 24,000 square feet. The lengths and widths of the lots vary."]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "The town planners want a quick way to check lot sizes or possible rectangular shapes for the new homesteaders. They decide to experiment with a rectangle that has a fixed area of 24 square feet. Then look for patterns in the data to make predictions about the rectangles with an area of 24,000 square feet."
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["Look at all the rectangles that have whole number dimensions and an area of 24 square feet."]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "- Create a table and graph for the length and width of rectangles that have an area of 24 square feet.",
+            "- What patterns appear in tables and graphs of the data? Is it linear? Explain.",
+            "- What equation represents the relationship between the length *l* and width *w* of rectangles with area 24 square feet? Is this a function? Explain."
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

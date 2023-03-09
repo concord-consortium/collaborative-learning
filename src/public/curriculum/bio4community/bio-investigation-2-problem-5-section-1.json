@@ -1,0 +1,36 @@
+{
+  "type": "chapter3",
+  "content": {
+    "tiles": [
+      {"id": "QfJCBdIEUtTl4WDN", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<h3>CHAPTER 5: SLEEP AND MOTIVATION </h3>"]}},
+      {
+        "id": "lh4lmsNpk2697B0v",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The project and research helped Estrella understand that the stress hormones caused her brain to think differently, with her fear networks having stronger connections than the neuron networks that help her pay attention and focus. While interesting to learn, Estrella was trying to figure out how to deal with these stress hormones so that she could build stronger attention networks. As she thought about all this, Estrella had a realization. </p>",
+            "<p>Her lack of focus seemed to happen only at school! She had no trouble focusing when she was helping her siblings with their homework or playing video games with her friends! Why would the stress hormones only affect her at school and then stop affecting her when she got home? Estrella decided these questions were worth one more trip to Ms. Guerra after school. She needed to solve this puzzle once and for all! Ms. Guerra thought Estrella’s question was a really good one. She herself did not have an answer so they decided to email Dr. Mackey again and ask. </p>"
+          ]
+        }
+      },
+      {
+        "id": "Kkw05peNhLaPahA3",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li><strong>Explore - </strong><em><strong>EVIDENCE 4a-Focus Model Simulator </strong></em><strong>- in the Resource Library. Change the options in the simulator and notice the effects.</strong></li></ul>",
+            "<ul><li><strong>Read the email </strong><em><strong>EVIDENCE 4b- Dr. Mackey Email </strong></em><strong>- in the Resource Library.</strong></li></ul>",
+            "<ul><li><strong>Then watch the video- </strong><em><strong>EVIDENCE 4c- Dr. Mackey Email Attachment</strong></em><strong> - in the Resource Library.  </strong></li></ul>",
+            "<ul><li><strong>Discuss these materials with your group and together, answer the questions about the evidence in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Write what you learned from this evidence in your table.</strong></li></ul>"
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

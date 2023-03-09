@@ -1,0 +1,41 @@
+{
+  "type": "trapBuilding",
+  "content": {
+    "tiles": [
+      {
+        "id": "JljmJWi28FebN5P4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Step 2:  Moth Traps  (Investigation)</strong></p>",
+            "<p>*What do you think a moth trap should look like?  </p>",
+            "<p>*Attributes of a good trap</p>",
+            "<p>*Draw and label your own idea</p>",
+            "<p><strong>*Think-Pair-Share</strong></p>",
+            "<p>*Look closely at your teacher&#x27;s trap</p>",
+            "<p><strong>*Compare/Contrast  – </strong>How does yours look like your teacher&#x27;s?  </p>"
+          ]
+        }
+      },
+      {
+        "id": "cBegs1yRXvBgiQ9B",
+        "display": "teacher",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Safety with scientific tools</p>",
+            "<p>*Share materials</p>",
+            "<p>*Build traps</p>",
+            "<p>*Have activities going on like moth games, or watching a <a href='https://www.ecosystemforkids.com/moth-life-cycle-and-moth-diet.html'>moth life cycle video</a> while the other groups are waiting to build with their teacher</p>",
+            "<p>https://www.ecosystemforkids.com/moth-life-cycle-and-moth-diet.html</p>",
+            "<p>*Discuss trap locations and journal</p>",
+            "<p>*Set traps and bring in what they collected</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

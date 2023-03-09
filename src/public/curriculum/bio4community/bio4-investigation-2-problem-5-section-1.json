@@ -1,0 +1,151 @@
+{
+  "type": "sources",
+  "content": {
+    "tiles": [
+      {"id": "thSqYvnLiCvOGHYW", "title": "Text 11", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 5 RESOURCES</h2>"]}},
+      [
+        {
+          "id": "j9gS4nbEPIXwMCuv",
+          "title": "Text 16",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong></strong></p>",
+              "<p><strong>EVIDENCE 4a- </strong><em><strong><a href='https://bio4community.concord.org/branch/main/?mode=simulation&organ=brain'>Focus Model Simulator</a></strong></em></p>",
+              "<p><strong>EVIDENCE 4b- </strong><em><strong><a href='https://docs.google.com/presentation/d/1TUxjpsx_w-9zYzDRSbeK7BHeryxULlK5OK6RO_eFuxk/edit?usp=sharing'>Dr. Mackey Email</a></strong></em></p>",
+              "<p><strong>EVIDENCE 4c- </strong><em><strong><a href='https://youtu.be/4AXj5pkHK44'>Dr. Mackey Email Attachment</a> (video)</strong></em></p>",
+              "<p></p>",
+              "<p></p>"
+            ]
+          }
+        },
+        {"id": "CdQTzyCWgciLk1WO", "title": "Evidence 4a- Focus Model Simulator", "content": {"type": "Image", "url": "curriculum/bio4community/images/focusmodelStill.png", "filename": "curriculum/bio4community/images/focusmodelStill.png"}}
+      ],
+      [
+        {"id": "Z3_PtzMsK1dz4VDW", "title": "Evidence 4b- Dr. Mackey Email", "content": {"type": "Image", "url": "curriculum/bio4community/images/mackeyEmail.png", "filename": "curriculum/bio4community/images/mackeyEmail.png"}},
+        {"id": "KkhSdneKnzktyruz", "title": "Evidence 4c - Dr. Mackey’s Email Attachment", "content": {"type": "Image", "url": "curriculum/bio4community/images/mackeyVideoStill.png", "filename": "curriculum/bio4community/images/mackeyVideoStill.png"}}
+      ],
+      {
+        "id": "2d3gIQPynRBbBKwg",
+        "title": "Text 18",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Questions About Evidence 4a- </strong><em><strong>Focus Model Simulator</strong></em></p>",
+            "<p><strong></strong></p>",
+            "<p>1. When Stress Level is high, there is more signaling in Simulated Amygdala at 40 years the the signaling at 20 years. </p>",
+            "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+            "<p></p>",
+            "<p>2. Which brain area has a network of neurons that directly impacts focus?</p>",
+            "<ul><li><strong>A.  Amygdala  </strong></li><li><strong>B. Prefrontal cortex</strong></li></ul>",
+            "<p>(underline your choice)   </p>",
+            "<p></p>",
+            "<p>3. More signaling between neurons results in formation of more connections.</p>",
+            "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "V5B8uzGZFovHMg5V",
+        "title": "Text 17",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Questions About Evidence 4b- </strong><em><strong>Dr. Mackey Email</strong></em></p>",
+            "<p><strong></strong></p>",
+            "<p>1. Stress affects a person’s motivation to learn.  </p>",
+            "<p><strong>True</strong>   OR  <strong>False</strong> ?   (underline your choice)</p>",
+            "<p></p>",
+            "<p>2. What are three suggestions Dr. Mackey had for Estrella?  </p>",
+            "<p>Type here…</p>",
+            "<p>1.</p>",
+            "<p>2.</p>",
+            "<p>3.</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {"id": "fI79ibptj1FWPBWf", "title": "Text 10", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 4 RESOURCES</h2>"]}},
+      [
+        {
+          "id": "Cayv-lAXQDs5b70z",
+          "title": "Text 13",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong></strong></p>",
+              "<p><strong>EVIDENCE 3a- </strong><em><strong><a href='https://docs.google.com/presentation/d/16wjcimzgRdeSgCh1ybWm0U0Kr5Q9H8hiDVvr6dK0JoQ/edit?usp=sharing'>Dr. Mackey’s Report</a></strong></em></p>",
+              "<p><strong>EVIDENCE 3b- </strong><em><strong><a href='https://youtu.be/bdQOoJvBhKo'>Dr. Mackey’s Video</a></strong></em></p>",
+              "<p><strong>EVIDENCE 3c- </strong><em><strong><a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=brain'>Focus Animation</a></strong></em><strong> </strong></p>"
+            ]
+          }
+        },
+        {"id": "ArJGHPtq5yrYq8ue", "title": "Evidence 3a - Dr. Mackey's Report", "content": {"type": "Image", "url": "curriculum/bio4community/images/mackeyReport.png"}}
+      ],
+      [
+        {"id": "GBKogo-zM8eW7oHA", "title": "Evidence 3b - Dr. Mackey's Video", "content": {"type": "Image", "url": "curriculum/bio4community/images/mackeyVideoStill.png"}},
+        {"id": "ugVduL4e8KjI2TJb", "title": "Evidence 3c - Focus Animation", "content": {"type": "Image", "url": "curriculum/bio4community/images/brainanimationStill.png", "filename": "curriculum/bio4community/images/brainanimationStill.png"}}
+      ],
+      {
+        "id": "l4SYhvHCJZLc4u-_",
+        "title": "Text 14",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Questions About Evidence 3a-</strong><em><strong>Dr. Mackey’s Report </strong></em><strong> and Evidence 3b- </strong><em><strong>Dr. Mackey’s Video</strong></em></p>",
+            "<p>1. A circuit network is made up of several connected neurons that send a signal from one part of the brain to another.  </p>",
+            "<ul><li><strong>True</strong>   OR  <strong>False</strong> ?  (underline your choice)</li></ul>",
+            "<p></p>",
+            "<p>2. For chronically stressed people, neurons in the prefrontal cortex are:</p>",
+            "<ul><li><strong>Bigger</strong>    OR    <strong>Smaller    </strong>(underline your choice)</li></ul>",
+            "<p></p>",
+            "<p>3. For chronically stressed people, neurons in the amygdala are:</p>",
+            "<ul><li><strong>Bigger</strong>    OR    <strong>Smaller    </strong>(underline your choice)</li></ul>",
+            "<p></p>",
+            "<p>4. For chronically stressed people attention circuit networks are stronger.  </p>",
+            "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? <strong>   </strong>(underline your choice)</li></ul>",
+            "<p></p>"
+          ]
+        }
+      },
+      {"id": "qiuIEi9tSa5dC4HK", "title": "Text 9", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 3 RESOURCES</h2>"]}},
+      [
+        {
+          "id": "WU4gJoyMjTKhvD9c",
+          "title": "Text 8",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<p><em><strong></strong></em></p>", "<p><em><strong></strong></em></p>", "<p><em><strong><a href='https://docs.google.com/document/d/1jDkvOLbvn7w83BcXa8JKZOgEx_evoiZ7gDRJS3hM2D4/edit?usp=sharing'>EVIDENCE 2- Stress and the Brain (blog post) </a></strong></em></p>"]
+          }
+        },
+        {"id": "S6W68aSeYJx2dyET", "title": "Stress and the Brain blog", "content": {"type": "Image", "url": "curriculum/bio4community/images/BrainBlog.png", "filename": "curriculum/bio4community/images/BrainBlog.png"}}
+      ],
+      {"id": "VUvucAdUofi1X4MC", "title": "Text 2", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 2 RESOURCES</h2>"]}},
+      [
+        {
+          "id": "vlginxKM1T6sUA32",
+          "title": "Text 7",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><em><strong>Evidence 1: How Our Brains Think (video)</strong></em></p>",
+              "<p>Please choose Version 1 <strong>OR </strong>Version 2.</p>",
+              "<ul><li><strong><a href='https://youtu.be/3mYCDCbOx2o'>Version 1</a>. Trigger warning.</strong> This version has a picture of a real human brain. In the picture you can see  brain tissue, some blood, and blood vessels.</li></ul>",
+              "<ul><li><strong><a href='https://youtu.be/7POpNoeKkes'>Version 2</a>. </strong>This version does <strong>NOT</strong> have a picture of a real human brain. Other than that, it is exactly the same as Version 1.</li></ul>"
+            ]
+          }
+        },
+        {"id": "o2zQNWVjCeeT3mcy", "title": "Video: How Our Brains Think", "content": {"type": "Image", "url": "curriculum/bio4community/images/brainNeurons.png"}}
+      ],
+      {"id": "sYyNCiyVmvM9GYSI", "title": "Text 20", "content": {"type": "Text", "format": "html", "text": ["<p><strong></strong></p>", "<p><strong>CHAPTER 1 - No resources. Resources for Estrella&#x27;s story start with Chapter 2.</strong></p>", "<p><strong></strong></p>"]}}
+    ]
+  }
+}

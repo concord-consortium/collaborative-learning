@@ -1,0 +1,65 @@
+{
+  "type": "chapter3",
+  "content": {
+    "tiles": [
+      {"id": "_1xLSGqoTw61MpD1", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<h3>CHAPTER 3: MAKING CONNECTIONS</h3>"]}},
+      {
+        "id": "rDcxrdrPP2l4dAEg",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>After watching the video, Estrella now understood that in order to focus better, the signaling between neurons needed to get stronger. Her neurons simply needed to make more connections! It seemed that maybe stress had nothing to do with her inability to focus, after all. </p>",
+            "<p>The next week in school, Estrella tried to practice focusing harder. Every time she was in class and caught herself feeling distracted she just thought about her neurons and concentrated as hard as she could to encourage them to make new connections. But despite her best efforts, it didn’t seem to work. She still could not focus. That evening while having dinner her mother asked her:</p>"
+          ]
+        }
+      },
+      {
+        "id": "kv8NdJYpHN9qJEY1",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Mamá</strong>: Mija, como estan sus hermanos? Ellos comieron? (Daughter, how are your brothers? Did they eat?)</p>",
+            "<p><strong>Estrella</strong>: Si, nosotros comimos. (Yes, we ate)</p>",
+            "<p><strong>Mamá</strong>: Bien, ayudarles con sus tareas, ok? (Good, help them with their homework, ok?)</p>",
+            "<p><strong>Estrella</strong>: Ok, Mama.</p>",
+            "<p><strong>Papá</strong>: Paco y Tito tienen una conferencia con las maestras en una semana, verdad? (Paco  and Tito have a conference with the teachers in a week, right?)</p>",
+            "<p><strong>Estrella</strong>: Sï (Yes)</p>",
+            "<p><strong>Mamá</strong>: Tú necesitas venir con nosotros para hablar con las maestras en inglés. (You need to come with us to talk to the teacher in English)</p>",
+            "<p><strong>Estrella</strong>: Pero, yo tengo una examen y necesito estudiar. (But, I have an exam and I need to study)</p>",
+            "<p><strong>Papá</strong>: Estrella, tú sabes que no hay conferencias de maestras en español. No entenderemos sin tu ayuda. Esto es muy importante para Tito y Paco, piensa en ellos también. (Estrella, you know that there are no conferences for teachers in Spanish. We won’t understand without your help. This is very important for Tito and Paco, think of them)</p>",
+            "<p><strong>Estrella</strong>: Okay…</p>"
+          ]
+        }
+      },
+      {
+        "id": "qHF-THwY16bcCVF1",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Estrella felt like she had so many things piling up on her plate, her shoulders felt heavier and heavier with each task. All this made focusing even harder. Feeling frustrated, Estrella decided to look up “brain, stress, and neuron signaling” on Google. A few links down from the top, she came across a blog post: “<em>Stress and the Brain</em>”.</p>"
+          ]
+        }
+      },
+      {
+        "id": "p378BRXMfkMlfKkx",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li><strong>Read the blog- </strong><em><strong>EVIDENCE 2-Stress and the Brain</strong></em><strong>  - in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Discuss the blog with your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library.</strong></li></ul>",
+            "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li></ul>"
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

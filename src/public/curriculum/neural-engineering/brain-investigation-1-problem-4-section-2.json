@@ -1,0 +1,101 @@
+{
+  "type": "labWork",
+  "content": {
+    "tiles": [
+      {
+        "id": "-lGkEOMNjsqf-LZx",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Visualize and Record Muscle Activity</strong></p>",
+            "<p>Let’s measure your muscle activity! In order to make muscle activity usable as data to drive Bionics, we need to be able to measure it. For this, we will use EMG sensors, which <a href='https://imotions.com/blog/electromyography-101/'>measure the electrical activity</a> that occurs when you contract or expand your muscles.</p>",
+            "<p>For this activity you will need the following materials:</p>"
+          ]
+        }
+      },
+      [
+        {"id": "PodHYZ4go3HA1HYi", "title": "SpikerShield", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/1.jpg", "filename": "curriculum/neural-engineering/images/1.jpg"}},
+        {
+          "id": "2gcDnEdA3OTheS9w",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Muscle SpikerShield (yellow board) coupled with an Arduino board (blue). The Muscle SpikerShield allows you to record your muscle&#x27;s electrical activity (known as Electromyography or EMG). The yellow board has a small switch that reads 'EMG' on one side and 'Control' on the other. The switch should be on the 'EMG' position.</p>"
+            ]
+          }
+        }
+      ],
+      [
+        {"id": "4pWC3KJXXdYoa5vv", "title": "Alligator clips", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/2.jpg", "filename": "curriculum/neural-engineering/images/2.jpg"}},
+        {"id": "h7P3h8mhehe_Cuzr", "content": {"type": "Text", "format": "html", "text": ["<p>Orange Muscle Electrode Cable with 3 alligator clips (two reds, one black). </p>"]}}
+      ],
+      [
+        {"id": "vn4aa8kjXblKIQSA", "title": "USB Cable connects Arduino to Computer", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/Lesson1_4img2.jpeg", "filename": "curriculum/neural-engineering/images/Lesson1_4img2.jpeg"}},
+        {"id": "3TxP81BNLdqAWksC", "content": {"type": "Text", "format": "html", "text": ["<p>A USB data cable that connects the Arduino board to a computer. </p>"]}}
+      ],
+      [
+        {"id": "I_o28skM9_9QVzEu", "title": "Sticker Electrodes", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/4.jpg", "filename": "curriculum/neural-engineering/images/4.jpg"}},
+        {"id": "Kh590E5YLoZa_HR-", "content": {"type": "Text", "format": "html", "text": ["<p>Sticker electrodes - used to pick up electrical signals from your muscles. </p>"]}}
+      ],
+      [
+        {"id": "Twbv6PU3nxhlG4qd", "title": "SpikeRecorder App", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/5.jpg", "filename": "curriculum/neural-engineering/images/5.jpg"}},
+        {"id": "XPhporOEXVAjaiKE", "content": {"type": "Text", "format": "html", "text": ["<p>A computer desktop with the Backyard Brains Spike Recorder app.</p>"]}}
+      ],
+      [
+        {"id": "hB0y5oGIJC8z8tgZ", "title": "gripper", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/6.png", "filename": "curriculum/neural-engineering/images/Lesson1_4img6.png"}},
+        {"id": "1tEg4VyVBMnyWl_o", "content": {"type": "Text", "format": "html", "text": ["<p>One hand grip (optional)</p>"]}}
+      ],
+      {"id": "hRL2PzfJH5u7ohJD", "content": {"type": "Text", "format": "html", "text": ["<h3>Proceedure</h3>", "<p>1. Connect the Arduino board to your computer using the blue USB cable.</p>"]}},
+      {
+        "id": "AIaXlh5Jt6mO1ko4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>2. Decide who is going to be the study participant (you can take turns). Place two electrode stickers on the participant’s forearm close to each other and another one on the participant’s elbow (this is the reference electrode)</p>"]
+        }
+      },
+      {"id": "2hcaL4NZmS-uOSsY", "title": "Place electrodes", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/9.jpg", "filename": "curriculum/neural-engineering/images/9.jpg"}},
+      {"id": "Xf1VSQp7lP4Hckuo", "content": {"type": "Text", "format": "html", "text": ["<p>3. Connect the orange muscle electrode cable (the one with the three alligators) to the Muscle SpikerShield orange connector:</p>"]}},
+      {"id": "hGLe_2Xa-uVW069o", "title": "Connect Electrodes to shield", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/10.jpg", "filename": "curriculum/neural-engineering/images/10.jpg"}},
+      {"id": "ubWseUhinUcs1rwC", "content": {"type": "Text", "format": "html", "text": ["<p>4. Connect the two red alligators to the electrodes on your arm. The black cable should be connected to the reference electrode:</p>"]}},
+      {"id": "2r6t0lkN0WkyPi2i", "title": "Connect Electrodes to arm", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/11.jpg", "filename": "curriculum/neural-engineering/images/11.jpg"}},
+      {
+        "id": "Mo17A3If3LtSFuUG",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>5. Open the Backyard Brains Spike Recorder App on your computer. Click on the gear icon at the top left corner of the screen. Click on the 'Connect' button just below 'Select Port' (you may need to make the app window larger to view this option).</p>"]
+        }
+      },
+      {"id": "gy5LjOQMM03K1ezq", "title": "Setting up the SpikeRecoder App", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/filter.png", "filename": "curriculum/neural-engineering/images/filter.png"}},
+      {
+        "id": "BfEcsBHvG1mVwV4H",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The signals that you see on the screen reflect your muscle electrical activity.  Change the time scale of your signal to ~1 second by scrolling up/down. You can also use the “+” and “-­” buttons you to change the vertical scale.</p>",
+            "<p>Hold the hand grip and squeeze it (or just make a fist) - how does the display change?&quot;</p>"
+          ]
+        }
+      },
+      {"id": "nHcjmx6S8pJ4HydI", "title": "Backyard Brains App", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/12.png", "filename": "curriculum/neural-engineering/images/12.png"}},
+      {
+        "id": "7NWg1JOva6MjHeUC",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>EMG Experiment</h3>",
+            "<p>Now it is time to explore your EMG muscle activity. With your group, select 3 of the following research questions and answer them in your workspace. Make sure to include screenshots from the Spike Recorder App as evidence and describe what is shown in each image. (Screenshots can be copied and pasted into image or drawing tiles in your workspace.)</p>",
+            "<ul><li>How does muscle activity vary between one’s dominant vs. non-dominant hand? </li><li>How does muscle activity vary between different muscles (e.g., forearm vs. forehead muscles)?</li><li>How does muscle activity vary between <a href='https://www.google.com/url?q=https://www.bbc.co.uk/bitesize/guides/zct2hv4/revision/2%23:~:text%3DIn%2520an%2520antagonistic%2520muscle%2520pair,lengthening%2520is%2520called%2520the%2520antagonist.&amp;sa=D&amp;source=docs&amp;ust=1656487065696941&amp;usg=AOvVaw3V0NsK35zz-BzcJKzU5B1m'>agonist and antagonist muscles</a>? </li><li>What happens when we activate our hand muscles for an extended period of time using a <a href='https://backyardbrains.com/experiments/rateoffatigue'>hand gripper</a>?</li><li>Can you predict who’s going to win an arm-wrestling contest based on the contestants’ muscle activity?</li></ul>",
+            "<p>Please document your observations in your Workspace."
+          ]
+        }
+      },
+      {"id": "FXdgLMJooVFMO_Lq", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Reflection</strong></p>", "<p>Please record your current thinking and learning in your Learning Journal (see Reflection tab). </p>"]}}
+    ]
+  }
+}

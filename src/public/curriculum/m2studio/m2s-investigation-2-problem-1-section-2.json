@@ -1,0 +1,40 @@
+{
+  "type": "task",
+  "content": {
+    "tiles": [
+      {
+        "id": "blahblah2022",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Instructions and Tips: </strong></p>",
+            "<p>* Use the workspace at right to answer your question about cats. </p>",
+            "<p>* You can use any of the tile types (diagram, text, drawing, image, table, graph) to help you with your assignment.  </p>",
+            "<p>* Make sure you label your drawings. </p>",
+            "<p>* Variables can be created in the drawing, text, and diagram tiles. Once a variable has been created, you can reuse it in any of your other tiles.</p>",
+            "<p>* Double click on an existing variable chip to edit it.</p>",
+            "<p>* When you create a new variable, it will also appear in your diagram tile. The variables might stack, so move them around to see what is behind them.</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {"id": "psjUt4noZJyaf7C9", "title": "Cats and kittens", "content": {"type": "Image", "url": "curriculum/m2studio/images/cats_420kgraphic2.png"}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Welcome to teacher solutions</strong></p>",
+            "<p><strong>Some tips for this workspace:</strong></p>",
+            "<p>If your students are having trouble, consider putting some tips in a document of your own and publishing it with the uparrow button near the File menu. This will appear in Class Work and students can see the examples you post. They can publish too and the class can share ideas.</p>",
+            "<p>All content from the left hand panels can be dragged into working documents on the right. Some curriculum pieces are intended to be dragged in as starting places for student work.</p>",
+            "<p></p>",
+            "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

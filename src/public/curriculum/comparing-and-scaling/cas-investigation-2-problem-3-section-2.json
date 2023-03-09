@@ -1,0 +1,74 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"id": "CW7Qv9YGBf7UpukZ", "content": {"type": "Text", "format": "html", "text": ["<p>Foodfresh has oranges on sale at 10 for $2. Mia represents the sale with a table, proportions, equations, and graphs.</p>"]}},
+      {"id": "AWlXAxQ9YoN4Eqfv", "content": {"type": "Table", "name": "Mia's Table", "columns": [{"name": "Number of Oranges, N", "width": 150, "values": ["10", "5", "1", "2", "3"]}, {"name": "Total Cost in Dollars, C", "width": 150, "values": ["2", "1", "0.20", "0.4", "0.6"]}]}},
+      [{"id": "nr6jQM1_fxkZM7Ey", "content": {"type": "Text", "format": "html", "text": ["10/$2 = 5/$1"]}}, {"id": "aZCAuB5YB4_u6f78", "content": {"type": "Text", "format": "html", "text": ["10/$2 = 1/$0.20"]}}],
+      [{"id": "EHwI5HWX0JRuK7vE", "content": {"type": "Text", "format": "html", "text": ["N = 5C"]}}, {"id": "Faofgx6PzHDnG_UP", "content": {"type": "Text", "format": "html", "text": ["C = 0.20N"]}}],
+      [
+        {
+          "id": "ICU9ok0vViqCLRGq",
+          "content": {
+            "type": "Geometry",
+            "title": "Mia's Graph 1",
+            "board": {"properties": {"axisMin": [-2.186, -1.093], "axisRange": [29.409, 20.021]}},
+            "objects": [
+              {"type": "point", "parents": [1, 0.19999999999999996], "properties": {"id": "-AcHcoWyclD2qnyd", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [2, 0.4], "properties": {"id": "UglMrORVuaOHbAv5", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [3, 0.6000000000000001], "properties": {"id": "h96yZCoIYEZBA4fI", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [5, 1], "properties": {"id": "VDW9cUQVNtNKWuyJ", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "polygon", "parents": ["-AcHcoWyclD2qnyd", "UglMrORVuaOHbAv5", "h96yZCoIYEZBA4fI", "VDW9cUQVNtNKWuyJ"], "properties": {"id": "V7Dx__MeGCQ_YZ9f"}},
+              {"type": "point", "parents": [10.001655903295246, 2.035321137245585], "properties": {"id": "IWQ-OjbKWHUZHKqZ", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}}
+            ]
+          }
+        },
+        {
+          "id": "FsbAd_dVFJLACSWJ",
+          "content": {
+            "type": "Geometry",
+            "title": "Mia's Graph 2",
+            "board": {"properties": {"axisMin": [-3.411, -2.344], "axisRange": [32.974, 22.922]}},
+            "objects": [
+              {"type": "point", "parents": [0.2, 1], "properties": {"id": "qgBfU-zoRh9RvZV2", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [0.4, 2], "properties": {"id": "G3yeFOCF0NI3J3R0", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [0.6000000000000001, 3], "properties": {"id": "vuashVnxJgfvre3r", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [1, 5], "properties": {"id": "UjEq195QXrdAFTF3", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [1.9686948973089071, 10.043263285598034], "properties": {"id": "WdCUIH5tEsYfCB0x", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "polygon", "parents": ["qgBfU-zoRh9RvZV2", "G3yeFOCF0NI3J3R0", "vuashVnxJgfvre3r", "UjEq195QXrdAFTF3", "WdCUIH5tEsYfCB0x"], "properties": {"id": "Yk5buYiqIGZ1gpIq"}}
+            ]
+          }
+        }
+      ],
+      {"id": "RbDSMo9NZdH9ZqwD", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Is each representation correct? Explain.</li></ul>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Yes. Each one accurately represents the cost for buying different amounts of oranges. The proportion, equation, and graph on the left show how many oranges you get for different increments of 20¢. The proportion, equation, and graph on the right show the cost for different numbers of oranges.</p>",
+            "<p>There is only one table, because both unit rates can be shown on the table.</p>"
+          ]
+        }
+      },
+      {"id": "4AQmPHFUTShHnnrD", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What does each representation tell you about the rate?</li></ul>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>On the table, we see the unit rate when one of the quantities is 1.</p>",
+            "<p>In the proportions, we can scale the rate, so one of the quantities is 1.</p>",
+            "<p>In the equations, the multiplier (coefficient) is the unit rate.</p>",
+            "<p>In the graph, we can find the unit rate by finding the point where x = 1, y = unit rate. Or we can look at how much the graph increases for every increment of 1.</p>"
+          ]
+        }
+      },
+      {"id": "QGGxvzF6QRS2aiae", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How is the constant of proportionality represented in each representation</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>The same way the rate is represented. In a proportional situation, the unit rate and constant of proportionality are the same thing.</p>"]}}
+    ]
+  },
+  "supports": []
+}

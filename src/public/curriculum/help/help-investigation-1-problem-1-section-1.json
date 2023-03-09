@@ -1,0 +1,36 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "CLUE is an educational environment that allows you to create and share live content with your peers so you can solve problems together. When you launch an activity, you'll see a work area on the right. This is where you can create text, graphs, images, drawings and other STEM content. There are also content tabs on the left that hold curriculum, help and documentation, and reusable content from your own library or your class or your instructor. \n\nThere are also subsections in many tabs. For example, in this help section you will see subsections for :<ul><li>Introduction</li><li>Tools</li><li>Sharing</li><li>Instructors</li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "You will find text, graphs, images and other kinds of content in the Problems. These can be dragged into your workspace. Try to drag this text into your workspace now. You can drag any kind of content, from Problems, your Teacher or your peers, into your own workspace to reuse it. When you share with your fellow students, they will be able to reuse your work."
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/help/images/fileAndContent.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Images are handy for recording work you do on paper that you want to save as part of the digital document. You can make an image either by choosing the image tool and choosing a file from your computer, or you can drag an image from your file list or desktop on to the browser window. Try this now."
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

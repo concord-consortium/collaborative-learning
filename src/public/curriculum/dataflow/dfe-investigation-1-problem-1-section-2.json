@@ -1,0 +1,17 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["One of the ways scientists measure erosion is by comparing changes in coastline from year to year."]}},
+      {"content": {"type": "Table", "name": "Erosion", "columns": [{"name": "Year", "values": ["1995", "1996", "1998", "1999", "2000", "2004", "2005"]}, {"name": "inches of coastline", "values": [".1", ".1", ".2", ".7", ".4", "1.2", "2.9"]}]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<ol><li>Now that you’ve learned different ways to consider this issue, is there anything you’d like to add or change in your answers? You can use any ideas that you want: Native Hawaiian/Alaskan ideas, Western science ideas, and/or your own ideas.</li></ol>"]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

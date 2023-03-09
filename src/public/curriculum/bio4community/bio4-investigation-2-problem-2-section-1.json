@@ -1,0 +1,49 @@
+{
+  "type": "sources",
+  "content": {
+    "tiles": [
+      {"id": "VUvucAdUofi1X4MC", "title": "Text 2", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 2 RESOURCES</h2>"]}},
+      [
+        {
+          "id": "vlginxKM1T6sUA32",
+          "title": "Text 7",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><em><strong>Evidence 1: How Our Brains Think (video)</strong></em></p>",
+              "<p>Please choose Version 1 <strong>OR </strong>Version 2.</p>",
+              "<ul><li><strong><a href='https://youtu.be/3mYCDCbOx2o'>Version 1</a>. Trigger warning.</strong> This version has a picture of a real human brain. In the picture you can see  brain tissue, some blood, and blood vessels.</li></ul>",
+              "<ul><li><strong><a href='https://youtu.be/7POpNoeKkes'>Version 2</a>. </strong>This version does <strong>NOT</strong> have a picture of a real human brain. Other than that, it is exactly the same as Version 1.</li></ul>"
+            ]
+          }
+        },
+        {"id": "o2zQNWVjCeeT3mcy", "title": "Video: How Our Brains Think", "content": {"type": "Image", "url": "curriculum/bio4community/images/brainNeurons.png"}}
+      ],
+      {
+        "id": "NXzH_yVyd-FNm2ya",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Questions about Evidence 1: </strong><em><strong>How Our Brains Think (video)</strong></em></p>",
+            "<p>1. Neuron signaling results in:</p>",
+            "<ul><li><strong>Less connections</strong>    OR    <strong>More connections</strong></li></ul>",
+            "<p>(underline your choice)</p>",
+            "<p></p>",
+            "<p>2. Neurons can connect to each other and send signals to one another.  </p>",
+            "<ul><li><strong>True  OR  False ?</strong></li></ul>",
+            "<p>(underline your choice)</p>",
+            "<p></p>",
+            "<p>3. Connections that are not used:</p>",
+            "<ul><li><strong>A. Get stronger    </strong></li><li><strong>B. Fade away    </strong></li><li><strong>C. Do not change</strong></li></ul>",
+            "<p>(underline  your choice)</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {"id": "sYyNCiyVmvM9GYSI", "title": "Text 20", "content": {"type": "Text", "format": "html", "text": ["<p><strong></strong></p>", "<p><strong>CHAPTER 1 - No resources. Resources for Estrella&#x27;s story start with Chapter 2.</strong></p>", "<p><strong></strong></p>"]}}
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "type": "teach",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["<h2>Welcome to the Bio4Community CLUE Teacher Guide!<h2>"]}},
+      {
+        "id": "YUvmY2iB3OJSUt1O",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
+            "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories, about Rakesh, Estrella, or Felix.  The stories are accessed through the <strong>Concord Portal</strong> at <strong>https://learn.concord.org</strong>. </p>",
+            "<p>To get started, <strong>register as a teacher and log into the Concord Portal </strong>Then, follow these steps:</p>",
+            "<ol><li>Create a <strong>class</strong> for each <strong>small group</strong> in the Concord portal.</li><li>Create a <strong>unique access code</strong> for each group of students, called the &quot;class word&quot;</li><li>Give each group their class word and have them register for student accounts.  </li><li>Contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  </li><li>You will then be able to release each Chapter to each group when you are ready for them to have access.. </li></ol>"
+          ]
+        }
+      },
+      {
+        "id": "m654b9zgDW5cPX31",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>The Student Resource Library</strong></p>",
+            "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the Resource Library list so the students can see it and access the Resources.</p>",
+            "<p>To publish the Resource Library List for each Chapter: </p>",
+            "<ul><li>Drag all the tiles from your Evidence tab (left side of screen, under Curriculum) to your Workspace (right-hand side of screen) </li></ul>",
+            "<p><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></p>",
+            "<ul><li>Edit the list, if you wish</li><li>Click the blue Publish button (rectangle with up arrow) at the upper left of the <em>Workspace</em> </li><li>Note: everything in your Workspace will be published to the students&#x27; Resource Library tab when you click the button. Make sure to delete any tiles that are not part of the Resource List</li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Chapter 1 of Each Story:</p>",
+            "<p>Tell the students that we are trying something a bit different. Instead of just giving them evidence in a packet like we did for short term stress, we are giving them a story, and different groups have different stories. The stories follow a main character as they try to figure out a health issue that is making them concerned.  The characters encounter evidence along the way and use it to figure out the issue.</p>",
+            "<p>They should work as a team and assign the cast. The narrator has  a lot to read. Other roles have much less.</p>",
+            "<p>They should answer the questions and fill in the table in their Workspace.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

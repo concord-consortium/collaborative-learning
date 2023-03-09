@@ -1,0 +1,55 @@
+{
+  "type": "chapter2",
+  "content": {
+    "tiles": [
+      {"id": "A9cRhaWig1A3zzuh", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<h3>CHAPTER 2: LEARNING FROM MS. GUERRA</h3>"]}},
+      {"id": "T5ukoQhmHQij-9Rk", "title": "Text 2", "content": {"type": "Text", "format": "html", "text": ["<p>The next day after science class, Estrella stayed behind and spoke with her science teacher, Ms. Guerra. </p>"]}},
+      {
+        "id": "D3yZVVkoskfDjZ8t",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Estrella</strong>: Hi Ms. Guerra, can I talk to you for a moment? </p>",
+            "<p><strong>Ms. Guerra</strong>: Of course, Estrella. What do you need? </p>",
+            "<p><strong>Estrella</strong>: I’ve been having a lot of issues with focusing lately and it&#x27;s been hurting my grades. </p>",
+            "<p><strong>Ms. Guerra</strong>: Oh Estrella! It is ok. High school can be a really tough time. I know you’re involved in a lot of activities and you’re so helpful at home too. </p>",
+            "<p><strong>Estrella</strong>: Yeah… I was wondering if you could explain to me some science about attention and stress? </p>",
+            "<p><strong>Ms. Guerra</strong>: Oh of course. Your brain is a really complicated organ and spends your whole life processing so much information. When we feel stressed it can get harder for us to focus on things. </p>",
+            "<p><strong>Estrella</strong>: That makes sense…. </p>",
+            "<p><strong>Ms. Guerra</strong>: Remember earlier in the year we talked about neurons. </p>",
+            "<p><strong>Estrella</strong>: I think so. Aren&#x27;t neurons the cells in your brain that send signals to each other? </p>",
+            "<p><strong>Ms. Guerra</strong>: Yes!  If your issue is being able to focus, you need to work on growing more connections between the neurons in your brain! </p>"
+          ]
+        }
+      },
+      {"id": "FveUSbKnR7roxoCm", "title": "Estrella Talks to Ms. Guerra", "content": {"type": "Image", "url": "curriculum/bio4community/images/Estrella_S2.jpg", "filename": "curriculum/bio4community/images/Estrella_S2.jpg"}},
+      {
+        "id": "Nu5Ew43MyYQpDCMj",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Estrella didn’t really understand what that meant and Ms. Guerra could sense her confusion. Figuring Estrella needed more of an explanation, Ms. Guerra pulled out a video that she had used when she taught college courses a few years ago. Huddled around the computer, the two of them clicked on the link: “<em>How our Brains Think</em>” </p>"
+          ]
+        }
+      },
+      {
+        "id": "ZsBwzUxkZWug5ZwL",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li><strong>Watch the slide show- </strong><em><strong>EVIDENCE 1-How our Brains Think</strong></em><strong> - in the Resource Library.</strong></li></ul>",
+            "<ul><li><strong>Discuss the animation in your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li></ul>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

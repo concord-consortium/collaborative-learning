@@ -1,0 +1,52 @@
+{
+  "type": "taskb",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>The student council at your school has decided to create a template to help students and parents figure out if a student has enough time to take on an after-school job. The student council wants your help! Your first assignment is to figure out what percentage of the day students spend at school. </strong></p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answer the questions below using the tiles in your workspace. Be sure to label each answer with the question number you are answering! You can also create additional tiles.</p>",
+            "<p></p>",
+            "<p><strong>1. Describe your first task in your own words.</strong></p>",
+            "<p><strong></strong></p>",
+            "<p><strong>2. What do you need to know about the school in order to complete your first task? </strong></p>",
+            "<p>a. List as many factors (key quantities and variables) as you can:</p>",
+            "<p>b. Next to each factor, write where you can find out the information or what you would need to do to figure it out. <br/>Examples:</p>",
+            "<p>- I need to know how many pets the students have. --&gt; I will conduct a survey to collect this information. </p>",
+            "<p>- I wonder how many books are at the library. --&gt; Ask the librarian if they have this on record. </p>",
+            "<p>c. Turn your factors into “variable chips” by clicking on the [v=] button in your text tile.</p>",
+            "<p></p>",
+            "<p><strong>3. What assumptions can you make about the context or factors to help you complete this task?</strong></p>",
+            "<p><em>Hint: Use the [v=] and  go to &quot;Reference existing variable&quot; to select the chips you created in Q2. If you come up with a new variable now, you can also turn it into a chip here.</em></p>",
+            "<p>Example: By saying &#x27;typical day&#x27;, the school board likely means to consider only days that school is in session. </p>",
+            "<p>Example: We probably only care about the [pets] owned by the students on the soccer team. </p>",
+            "<p></p>",
+            "<p><strong>4. Share your variables/factors and assumptions with your group. Together, sort them to indicate how important you think they are to completing the task. </strong></p>",
+            "<p>Note: Your teacher may ask you to sort them in class, or ask you to arrange the orange boxes in your workspace. </p>",
+            "<p><strong></strong></p>",
+            "<p><strong>5. Select 2 of the factors and explain how/why they are important for helping you to complete the task. </strong></p>",
+            "<p><em>Hint: You can use the [v=] button to get a list and then select from &#x27;Reference existing variable&#x27; to get you started!</em></p>",
+            "<p>Example: We need to know the number of [pets] so that we buy enough [pet food].</p>",
+            "<p></p>",
+            "<p><strong>6. Describe in words how some of these factors are related.</strong></p>",
+            "<p>Example: The more [pets] we have, the more [pet food] we need.</p>",
+            "<p></p>",
+            "<p><strong>7. Use mathematical language or symbols to describe the relationship between those variables. </strong></p>",
+            "<p><em>Note: If you want to sketch the relationship, click on the pencil icon to create a drawing tile!</em></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

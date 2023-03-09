@@ -1,0 +1,172 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {"id": "gZgxPJBgPhWNcMOV", "content": {"type": "Text", "format": "html", "text": ["<h2>Situation A. Ratios, Ratios, and More Ratios!</h2>", "<p>Examine each ratio application and answer the questions for each.</p>"]}},
+      [
+        {
+          "id": "NqhOGv9ivwicA9Wc",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<strong>Free Throws</strong>",
+              "<p>Two basketball teams recently competed in free throw attempts. Team A made 108 out of 126 attempts. Team B made 195 out of 257 attempts. It is difficult to tell which team was better by looking at the raw numbers. Sid thought it would help to express the raw numbers as percents.</p>",
+              "<ol><li>Describe how Sid could use percents to decide which team has the best free throw average.</li><li>Describe another strategy for deciding which team has the best free throw average.</li></ol>"
+            ]
+          }
+        },
+        {
+          "id": "BxN0xGnkgpy1MoIP",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<strong>2020 Census Population Data</strong>",
+              "<p>The 2020 Census data shows that the population of people in the USA under the age of 18 was 73.1 million in 2020. That is a decline of 1.4% from the 2010 Census.</p>",
+              "<ol><li>What was the population of people under the age of 18 in 2010?</li><li>If the decline of people under the age of 18 continued at this rate, what will be the population in 2030? 2040?</li></ol>"
+            ]
+          }
+        }
+      ],
+      [
+        {
+          "display": "teacher",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>1.                        Team A</p>",
+              "<p>                     108/126≈ 86%</p>",
+              "<p>                          Team B</p>",
+              "<p>              195/257 ≈ 76%</p>",
+              "<p>2.   Students could find a unit rate or make one</p>",
+              "<p>        quantity common to both ratios.</p>",
+              "<p>Unit Rates:</p>",
+              "<p>Team A-</p>",
+              "<p>108/126  ≈ 0.86/1 or 108/126≈1/1.17</p>",
+              "<p>Team B-</p>",
+              "<p>195/257 ≈ 0.76/1 or 195/257≈ 1/1.32</p>",
+              "<p>One possible common quantity is the number of attempts made: 108</p>",
+              "<p>Team A-</p>",
+              "<p>108/126</p>",
+              "<p>Team B-</p>",
+              "<p>195/257 ≈ 108/143</p>",
+              "<p>One possible common quantity is the number of total free throws:126</p>",
+              "<p>Team A-</p>",
+              "<p>108/126</p>",
+              "<p>Team B-</p>",
+              "<p>195/257 ≈ 96/126</p>"
+            ]
+          }
+        },
+        {
+          "display": "teacher",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>1. (73.1 million)/(98.6 %)≈  (0.74138 m)/(1 %)=  (74.14 million)/(100%)</p>",
+              "<p>2. 2030</p>",
+              "<p>(0.74138 m)/(1 %)≈  (72.06 million)/(97.2%)</p>",
+              "<p>2040</p>",
+              "<p>(0.74138 m)/(1 %)≈  (71.02 million)/(95.8%)</p>",
+              "<p>You can also think of this as</p>",
+              "<p> 73.1 million (the 2020 Census data) x 98.6% = 72.08 million in 2030.</p>"
+            ]
+          }
+        }
+      ],
+      [
+        {
+          "id": "ltpiVDQzBrj71fIQ",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Rising Ocean Levels and Erosion</p>",
+              "<p></p>",
+              "<p>It is reported that approximately 20 square miles of dry land and wetland were converted to water along the Atlantic Coast between 1996 and 2011.</p>",
+              "<ol><li>At this rate how much land will be lost between 2011 and 2022?</li><li>A small unpopulated island in the Atlantic Ocean is 2000 ft wide by 9,380 feet long. At this rate, how long before the island is submerged?</li></ol>",
+              "<p>       (Photo credit: https://www.nps.gov/)</p>"
+            ]
+          }
+        },
+        {
+          "id": "dEZbe_rY-sonkgCs",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Puffins in Alaska</p>",
+              "<p>Puffins are a black and white seabird with a flat brightly colored bill. A biologist studies puffins on a remote island off Alaska.</p>",
+              "<p>Last summer she trapped 20 puffins, tagged them, and then released them.</p>",
+              "<p>This summer she trapped 50 puffins and found that 2 of them were tagged.</p>",
+              "<ol><li>What percent of the puffins caught this summer were tagged?</li><li>Use the biologist’s information to estimate the number of puffins on the island.</li></ol>",
+              "<p>(Photo credit: https://www.istockphoto.com/search/2/image?phrase=puffin)</p>"
+            ]
+          }
+        }
+      ],
+      [
+        {"id": "_DorjUf6UgmNC6yO", "title": "Beach on the Atlantic Ocean", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_3-4_RisingOceanLevelsandErosion.jpg"}},
+        {"id": "6xoUFL_ernZEQBPM", "title": "Two Puffins", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_3-4_PuffinsinAlaska.png"}}
+      ],
+      [
+        {
+          "display": "teacher",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>2011 – 1996 = 15 years</p>",
+              "<ol><li>2022 – 2011 = 11 years</li></ol>",
+              "<p>(15 years)/(20 sq.miles)≈  (11 years)/(14.6666… sq.miles)</p>",
+              "<p>Students might wright this with sq. miles in the denominator or square miles per year.</p>",
+              "<p>2.  2,000 ft • 9,380 ft needs to be changed to miles</p>",
+              "<p>0.3787878 miles • 1.7765 miles ≈ 0.67 sq mi</p>",
+              "<p>(15 years)/(20 sq.miles)≈  (0.5 years)/(0.67 sq.miles)</p>"
+            ]
+          }
+        },
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>1. 4%</p>", "<p>(2 tagged)/(50 total)≈  (4 tagged)/(100 total)</p>", "<p>2. About 500 puffins</p>", "<p>(4% tagged)/(20 puffins)≈  (100% tagged)/(500 puffins)</p>"]}}
+      ],
+      {"id": "F_sIBA9zela_gQrU", "content": {"type": "Text", "format": "html", "text": ["<strong>Situation B. What is the Question?</strong>", "<p>Make up a situation and question that could be solved with each of the following representations.</p>"]}},
+      {"id": "F_s9zela_gQrU", "content": {"type": "Text", "format": "html", "text": ["<p>Proportion: 16/120 = x/40</p>"]}},
+      {
+        "id": "VFqJlDMpISePftmA",
+        "content": {
+          "type": "Geometry",
+          "title": "Graph representation",
+          "board": {"properties": {"axisMin": [-2.186, -1.093], "axisRange": [26.23, 17.486]}},
+          "objects": [
+            {"type": "point", "parents": [0, 0], "properties": {"id": "66o_jvI9coXzx2dS", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [15.027322404371585, 9.94535519125683]}, {"type": "point", "parents": [30, 19.89071038251366]}], "properties": {"id": "aRUePMFm7YT6ucUG"}}
+          ]
+        },
+        "layout": {"height": 250}
+      },
+      {"id": "F_s9zela_gQrU", "content": {"type": "Text", "format": "html", "text": ["<p>Equation: Y = 0.60x</p>"]}},
+      {"id": "Uklotw3WymGXRtW3", "content": {"type": "Table", "name": "Table representation", "columns": [{"name": "x", "values": ["1", "5", "10", "15"]}, {"name": "y", "values": ["12", "60", "120", "180"]}]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary.</p>",
+            "<p>For the proportion the situation and question should reflect that the original ratio is 16 to 120 and that the 120 is being scaled down to 40 so they are finding the x that would scale down the 16 the same way.</p>",
+            "<p>  One example: The recipe for a trail mix is 16 cups of cranberries and 120 cups of   granola. If I only have 40 cups of granola how many cups of cranberries do I  need?</p>",
+            "<p>For the graph their situation and question should relate the ratios 15/10 and 30/20.</p>",
+            "<p>  One example: If I know that I paid $15 for 10 candy bars and $30 for 20 candy   bars, how can I figure out how much it would be for any number of candy bars?</p>",
+            "<p>For the table the situation and question should relate at least two of the ratios in the table.</p>",
+            "<p>  One example: This table represents the number of hours that I worked (top row)  and how much money (bottom row) I was paid at my job at the zoo. If I work 28   hours next week how much will I be paid?</p>",
+            "<p>For the equation the situation and question should involve a unit rate of .6.</p>",
+            "<p>  One example: This equation represents how much it costs to buy apples at the  local food market. The x is the number of apples, and the y is the total cost. How much would it cost for 20 apples?</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

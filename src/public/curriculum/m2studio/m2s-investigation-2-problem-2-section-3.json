@@ -1,0 +1,51 @@
+{
+  "type": "taskb",
+  "content": {
+    "tiles": [
+      {
+        "id": "23AUG20220547pm",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Your client:</strong> The Student Council</p>",
+            "<p><strong>Their goal: </strong>Create a template to help students and their families figure out if a student has enough time to also have an after-school job and still be successful at their other obligations and activities.</p>",
+            "<p><strong>Your first task: </strong> Help the student council by determining how much time students typically spend <em>at school</em>.</p>"
+          ]
+        }
+      },
+      {"id": "23AUG20220548pm", "title": "School Building", "content": {"type": "Image", "url": "curriculum/m2studio/images/MS2_SchoolBuilding.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answer the questions below using tiles in your workspace. Be sure to label each answer with the number of the question you are answering. </p>",
+            "<p><strong>1. Create a text tile.  In it, describe how you interpret your client&#x27;s goal.</strong></p>",
+            "<p><strong></strong></p>",
+            "<p><strong>2. Create another text tile, take notes on what might be important to consider as you complete your first task.</strong></p>",
+            "<p>Example from how someone might approach a modeling problem:</p>",
+            "<p>…The public library is wondering if they should allow dogs in the building. Because dogs need lots of space to run around, they first might want to know how much space there is for dogs to run around in the library. Dogs might also chew on the books, so they might also want to know how many books each dog might chew up…</p>",
+            "<p></p>",
+            "<p><strong>3. Decide what in your notes counts as &quot;assumptions&quot; and what are variables. </strong></p>",
+            "<p>Option 1: Copy and paste your text into a fresh tile where you italicize the assumptions and convert the variables into variable chips.</p>",
+            "<p>Example of how they could convert their text into assumptions and variables:</p>",
+            "<p>…The public library is wondering if they should allow dogs in the building. Because <em>dogs need lots of space to run around,</em> they first might want to know [amount of open space in the library]  for dogs to run around in the library. <em>Dogs might also chew on the books</em>, so they might also want to know [number of books dogs destroy each day]…</p>",
+            "<p></p>",
+            "<p>Option 2: Create a table tile where you list your assumptions, variables, and suggested starting values (with units). Then create the variable chips in a fresh text tile.</p>",
+            "<p></p>",
+            "<p><strong>4. Share your ideas with your group mates.</strong> </p>",
+            "<p>Did your group mates include anything you didn’t? Did you include something that you now want to change? After you discuss, in a new text tile, <strong>describe</strong> what you will add or change to your own work.</p>",
+            "<p><strong></strong></p>",
+            "<p><strong>5. Arrange your variable cards in your diagram tile.</strong> Look at the diagram tile in your workspace. All the variable chips you made have become cards (they might be stacked, so look behind them!). Move your cards around. If you think that variable is very important to include, move it to the left side of the tile. If you think maybe it is not as important, move it to the right side of the tile. </p>",
+            "<p></p>",
+            "<p><strong>6. Create one more text tile. In it, choose two of your variables and describe in words how they are related. </strong>Why is it important to consider these two variables together?</p>",
+            "<p> </p>",
+            "<p></p>",
+            "<p></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

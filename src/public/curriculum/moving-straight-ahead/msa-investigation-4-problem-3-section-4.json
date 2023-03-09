@@ -1,0 +1,119 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles": [
+      {
+        "id": "hdV1HPEbMGfuL1Z2",
+        "title": "Text 10",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Summarize (Orchestrating the Discussion)</strong></p>",
+            "<p>Solutions and Strategies </p>",
+            "<p>Have students display their posters. Use a Gallery Walk for students to see how other students put together their groups. Have students use sticky notes to put questions and comments on other students’ posters.</p>"
+          ]
+        }
+      },
+      {
+        "id": "vLZkIC00HvYJU2nX",
+        "title": "Text 12",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Making the Mathematics Explicit </em></p>",
+            "<p>Discuss the posters from the Gallery Walk that had the most questions.  </p>",
+            "<p><strong>Suggested questions</strong></p>",
+            "<ul><li>How did you decide what to group together in the Initial Challenge?  (Answers will vary.)</li><li>How did you know if a card represented a linear relationship?  (Answers will vary.  Bring out how the rate of change shows up in a table, graph, context, equation.)</li><li>How did you find a rate of change for a linear card? (Answers will vary.)</li><li>How did you find the y-intercept for a linear card? (Answers will vary.)</li><li>How did you find groups for the cards that weren’t linear?  (Answers will vary.  Bring out how students were able to “tell the story” even when it wasn’t a constant rate of change. For example, with Graph D students can recognize that it isn’t linear because it isn’t a straight line.  They can find values for the points (1, 1); (2,2); (3,4).  This will match with Table T and context M with the trivia game.)</li><li>Look at all the cards.  Which cards represented a positive rate of change/slope? (Graph B, Graph C, Equation G, Equation I, Equation J, Context K, Context N, Context P, Table T, Table U, Table V)</li><li>Look at all the cards.  Which cards represent proportional relationships? (Graph C, Equation J, Context K, Graph E)</li><li>How did you decide which equations were equivalent in What If Situation A? (Answers will vary)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "uY_HPYm66By5sANW",
+        "title": "Text 13",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Discuss those equations that were most troublesome for your class.  An example from one classroom:</p>",
+            "<p></p>",
+            "<p><strong>Teacher</strong>: I heard a lot of conversations about Equation 9:  3x + 2 = 14 + x.  How did you decide if a card was equivalent to it? </p>",
+            "<p></p>",
+            "<p><strong>Tasha</strong>: That one stumped us for a while.  We decided to draw it as rubas and pouches to help us make some sense of it.  That is when we found that it matched with equation card 16.  </p>"
+          ]
+        }
+      },
+      {
+        "id": "42Yov7qkEQJwRj-3",
+        "title": "Equation 9: 3x + 2 = 14 + x",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {"type": "image", "id": "SGqaw4fksTCzZO-E", "x": 123.5, "y": 56.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "DDcSgLUnVrF5yWmo", "x": 126.5, "y": 103.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "6E48cvACNul9tUBM", "x": 218.5, "y": 55.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "3WJy_6yTLLe7MPeg", "x": 220.5, "y": 102.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "rVynuNopYxzgqeef", "x": 259.5, "y": 54.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "RBIWM84OMaac21Zw", "x": 260.5, "y": 103.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "XAWEFCDPOoD0x4Zp", "x": 301.5, "y": 52.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "rxosg5zBmiCEH-zg", "x": 300.5, "y": 101.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "_bUvEFaZwdnl-_2q", "x": 340.5, "y": 53.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "M1-ueouJJNP5mZHH", "x": 339.5, "y": 99.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "NNyGVByGm5KuWKtQ", "x": 380.5, "y": 51.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "S5HvwN-FWBFjByLT", "x": 379.5, "y": 100.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "aDDOHf3755mpTMSH", "x": 420.5, "y": 49.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "8TBjlw22wjHsqvLt", "x": 420.5, "y": 101.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "hLfcEydMr32YuAxX", "x": 460.5, "y": 50.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "V1qj_bnCfWXAwpf3", "x": 464.5, "y": 100.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "LCA1uC1w1U_0b1fZ", "x": 2, "y": 98.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "IjuLy7cVQPQiWMiK", "x": 44, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "2FCulJh_Y2HkABA2", "x": 83, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "bijws7RwFNETR5S1", "x": 179, "y": 97.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "Tit90F_HN-TK9IfM", "x": 157.5, "y": 76.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25}
+          ]
+        }
+      },
+      {
+        "id": "KUukVESWiOL2bZTW",
+        "title": "Text 15",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Teacher</strong>:  Do others agree with Tasha’s group?  (heads nod) Were there other cards that matched with Equations 9 and 16?</p>",
+            "<p></p>",
+            "<p><strong>Robert</strong>: At first we didn’t think so and then we decide to try and “crack the code” like we did before with rubas and pouches.  When we crossed off the 1 pouch that each side had in common and the two coins you end up with 2 pouches equals 12 coins. That was 2X = 12.  </p>",
+            "<p></p>",
+            "<p><strong>Tasha</strong>: Oh my gosh!  You are right!  I didn’t see that.  So, then if you divide up the coins into the two pouches there would be 6 in each pouch and that is the x = 6 card.  </p>",
+            "<p></p>",
+            "<p>To extend the conversation, pick one set and describe a context that could be represented by this set of equations.  </p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Now What Do Students Know </p>", "<p>Ask students to reflect on the discussion and answer the Now What Do You Know questions. </p>", "<p>See answers to the Problem for more information about the strategies and embedded mathematics. </p>"]
+        }
+      },
+      {
+        "id": "rhmCMy8JyFmS2h0A",
+        "title": "Text 17",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning </strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What evidence do I have that students understand the Now What Do You Know questions?</li></ul>",
+            "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

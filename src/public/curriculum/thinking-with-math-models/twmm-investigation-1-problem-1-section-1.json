@@ -1,0 +1,11 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["Many bridges are built with frames of steel beams. Steel is very strong, but any beam will bend or break if you put too much weight on it."]}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_1_1_arched_bridge_350w.png"}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["*What variables determine the strength of a bridge?*"]}}
+    ]
+  },
+  "supports": []
+}

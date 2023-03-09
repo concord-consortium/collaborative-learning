@@ -1,0 +1,40 @@
+{
+  "type": "sources",
+  "content": {
+    "tiles": [
+      {"id": "Uya5NTQdrhCsS75h", "title": "Text 6", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 1 RESOURCES</h2>"]}},
+      [
+        {
+          "id": "0-DJ4p6CpLv5Un3B",
+          "title": "Text 7",
+          "content": {"type": "Text", "format": "html", "text": ["<p><strong>EVIDENCE 1:</strong></p>", "<p><strong><a href='https://docs.google.com/presentation/d/1lBRlHpv8bzUw3UVDo9L0mJteKqYmZbdOavF6W4dsl-k/edit?usp=sharing'>How Do You Get Sick?</a></strong></p>"]}
+        },
+        {"id": "NFCQvMe3T2H_Cmb5", "title": "Evidence 1", "content": {"type": "Image", "url": "curriculum/bio4community/images/howdoyougetSickStill.png"}}
+      ],
+      {
+        "id": "AW9xGdNYhQrl137x",
+        "title": "Text 8",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Questions About Evidence 1 - <em>How Do You Get Sick?</em></strong></p>",
+            "<p>1. Immune cells are:</p>",
+            "<ul><li><strong>Red blood cells</strong>   OR    <strong>White blood cells</strong></li></ul>",
+            "<p>(underline your choice)</p>",
+            "<p></p>",
+            "<p>2. Immune cells that engulf germs also send a signal to recruit (bring in) more immune cells .  </p>",
+            "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? </li></ul>",
+            "<p>(underline your choice)</p>",
+            "<p></p>",
+            "<p>3. Immune cells cause the cells of the lining to:</p>",
+            "<ul><li><strong>A. Release less mucous    </strong></li><li><strong>B. Release more mucous       </strong></li><li><strong>C. Not change the amount of mucous    </strong>      </li></ul>",
+            "<p>(underline your choice)</p>",
+            "<p></p>",
+            "<p></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

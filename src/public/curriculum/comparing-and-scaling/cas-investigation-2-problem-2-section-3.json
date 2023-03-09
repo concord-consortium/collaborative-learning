@@ -1,0 +1,23 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "PhdFoU_NQZLhPVmO", "content": {"type": "Text", "format": "html", "text": ["<p>How can you determine if a situation is a proportional relationship?</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Possible answer:</p>",
+            "<p>We have seen proportional situations in Royal’s Pizza, Sharing Pizzas at the Tables, the Orange Juice Recipes, and with similar figures.</p>",
+            "<p>A proportional situation is multiplicative. It involves using factors or multiples of the quantities in a ratio.</p>",
+            "<p>With proportional situations, we can:</p>",
+            "<ul><li>Scale ratios by multiplying or dividing both quantities to find equivalent ratios.</li><li>Show the equivalent ratios in many ways including tables and proportions.</li><li>Use the unit rate to write equations, like Mary did for Royal’s, CR = 13n.</li><li>Make graphs that go through the origin.</li></ul>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

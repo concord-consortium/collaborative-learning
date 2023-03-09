@@ -1,0 +1,7 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [{"content": {"type": "Text", "format": "markdown", "text": ["How can you predict from the patterns in a table of data or on a graph if the relationship between variables is linear or non-linear? How does having an equation for a linear pattern help you make predictions?"]}}]
+  },
+  "supports": []
+}

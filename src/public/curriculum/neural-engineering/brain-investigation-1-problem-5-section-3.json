@@ -1,0 +1,24 @@
+{
+  "type": "reflection",
+  "content": {
+    "tiles": [
+      {
+        "id": "NqJv3nwzPTTFLSgi",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Please load your Learning journal (&quot;My Work&quot; &gt;&gt; &quot;Learning Journal&quot;).</p>",
+            "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>",
+            "<p>Lesson 1.5 Journal Entry</p>",
+            "<p>1. Today&#x27;s date:</p>",
+            "<p>2. Today&#x27;s topic:</p>",
+            "<p>3. How would you modify the design of the EMG-controlled gripper so it can help people like Tilly?</p>",
+            "<p></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

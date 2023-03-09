@@ -1,0 +1,35 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "jbURrd7lsC92A01y",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In the Comparing Quantities Unit, we looked at proportional situations that involved percents. We also used percents to solve some of the problems in this Unit, for example, Problem 1.1 Mixing Juice.</p>",
+            "<p>Recall that if a part-to-whole ratio can be scaled so that the whole is 100, then the ratio is a percent. The word percent means “out of 100.” We used percent to investigate survey results, test scores, and the number of people most likely to have dimples. Representing ratios or comparisons as percents is also useful in other situations. Percentages can help us with comparisons because we have the same size whole.</p>"
+          ]
+        }
+      },
+      {
+        "id": "9KMwvsNvc9I6JHue",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>When we buy something in a store, we often pay sales tax on the purchase price. For the sales tax, we might see percents such as 5%, 6.2%, or 8%. These are the rates by which the sales price is increased.</p>",
+            "<p>A sales tax of 6% means that for every dollar an item costs, a person needs to pay an additional 6 cents. That is, 6 cents for every 100 cents of an item purchased, or $0.06 for every dollar, is added to the cost. This is tax money collected by states. For example, with 6% tax:</p>",
+            "<p>Item purchased for $1.00</p>",
+            "<p>Sales tax is 6% of $1.00 or $0.06</p>",
+            "<p>Total cost $1.06</p>",
+            "<p>Note: When a percent calculation for sales tax does not come out to a whole number of cents, the standard practice is to round up the tax to the next penny.</p>",
+            "<p>Understanding how to compute and use percents can make us smarter consumers.</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

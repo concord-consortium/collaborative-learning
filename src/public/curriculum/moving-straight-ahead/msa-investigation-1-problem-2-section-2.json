@@ -1,0 +1,58 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": "<strong>Launch (Getting Started)</strong>  \nConnecting to Prior Knowledge\n\nStudents first learned of expressions and equations in the Grade 6 Unit Variables and Patterns. The introduction to this Problem offers a chance to revisit the vocabulary while also introducing “equivalent expressions” and “rate of change.” Both expressions and equations have variables, only equations show equality.  Expressions can implicitly imply another variable(s).  Teaching Aid 1.2: Walking Rate can provide an example for the conversation."
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": "<strong>Suggested Questions</strong>  <ul><li> What were the variables that we used in the last Problem? (distance in meters and time in seconds)</li><li> Can you recall another time that you studied the relationship between distance and time? (We studied rates of cars in Variables and Patterns. We used 50 mph, 55 mph, and 60 mph rates to examine the patterns between distance and time in tables, graphs, and equations.)</li><li> If we looked at your data on a graph, how could you describe the pattern of change for your walking rate? (Possible answer with a walking rate of 1.5: For every 1 second that I walked, I traveled 1.5 meters.)</li><li> Here is an example [show Teaching Aid 1.2 or an example of a student’s data] of a table and graph for someone who walked 1.5 meters per second. What do you notice about the data on the graph? (The data lines up because the pattern is consistent.)</li><li> How does this show up in the table? (Every increase of 1 second adds 1.5 meters to the distance.)</li><li> Because this pattern of change describes how your data consistently increases over time, we call this the rate of change. What was your rate of change in your walking experiment? (Possible answer with a walking rate of 1.5 meters per second: 1.5.)</li></ul>"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": "<strong>Note:</strong> The rate of change describes the change in a linear relationship. If the linear relationship is proportional, the rate of change is the same as the unit rate or constant of proportionality. This conversation started for students in Comparing and Scaling and will continue throughout this Unit. <ul><li> What equation can we use to represent the pattern in this data? (Distance is equal to 1.5 times the number of seconds walked, or d = 1.5t.)</li><li> The equation is made up of two expressions. The equal sign shows that the expressions are equivalent. What are the two expressions? (d and 1.5t)</li></ul>"
+        }
+      },
+      {
+        "content": {
+          "display": "teacher",
+          "type": "Text",
+          "format": "html",
+          "text": "<strong>Presenting the Challenge</strong>\nIntroduce the three students, Alana, Gilberto, and Leanne and their walking rates. Let students know that they will be analyzing the progress of the three students. Encourage students to use different colors to represent each student. For example, put Alana’s data in red, Gilberto’s data in green, and Leanne’s data in blue."
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<p>If you have graphs and tables from Problem 1.1 display them, or use the Teaching Aid 1.2:  Walking Rate, and ask:</p>",
+            "<ul><li>Make a conjecture. If you increased your walking rate, how would it change your equation, graph, and table? (Students may not be able to answer at this time. Possible answer includes: If you increase the rate at which you walk, you can cover more distance in a given time. The distance in the table would increase for each second walked, and the graph would be steeper. Similarly, if you walk faster, it takes less time to cover a certain distance. The equation would have a larger number that multiplies by the variable.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Note</strong>: Students are introduced to the word “coefficient” in the Grade 6 Unit <em>Variables and Patterns</em>. Since they may not have used the vocabulary term often in 6th grade, they are reintroduced to the term in Problem 2.2. While you may want to use that vocabulary earlier than Problem 2.2, the vocabulary term now might be too early for students. It helps students to have more experiences with the idea before the formal vocabulary is introduced.    </p>",
+            "<p>Look for students to make conjectures at this time. Tell students that they will investigate the effect of the walking rate on the relationship between distance and time by looking at the walking rates of three students. They will be asked to make a table, graph, and write an equation for each of the walkers. Students will examine these representations to see how changing the walking rate affects each representation of the data. They will relate the walking rate to the rate of change, linearity, and proportionality.  </p>",
+            "<p>To maximize class time, you may want to provide each student with <strong>Learning Aid 1.2:  Three Students Walking Rates</strong>.  Have students being this problem independently and then discuss with a partner. </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

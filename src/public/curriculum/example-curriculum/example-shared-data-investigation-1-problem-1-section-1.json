@@ -1,0 +1,35 @@
+{
+  "type": "taska",
+  "content": {
+    "sharedModels": [
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "shared-data-1",
+          "providerId": "table-1",
+          "dataSet": {
+            "id": "V8lj4GO-FCZ9NJrM",
+            "name": "Table In Section",
+            "attributes": [{"id": "feRuv9gR6L9PoUYg", "clientKey": "", "name": "x", "hidden": false, "units": "", "formula": {}, "values": ["0", "15", "0"]}, {"id": "yGRYwwl0l_VBAvBB", "clientKey": "", "name": "y", "hidden": false, "units": "", "formula": {}, "values": ["0", "0", "15"]}],
+            "cases": [{"__id__": "HR3at2-RqvnRaT9z"}, {"__id__": "O3SmGUb4iRPw29HU"}, {"__id__": "76WRbhQpTu2Wqy1c"}]
+          }
+        },
+        "tiles": ["table-1", "graph-1"]
+      }
+    ],
+    "tiles": [
+      {"content": {"type": "Text", "text": "My plain text on the right 2"}},
+      {"id": "table-1", "title": "Table in Section", "content": {"type": "Table", "name": "Table in Section"}},
+      {
+        "id": "graph-1",
+        "title": "Graph in Section",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-4.049, -2.232], "axisRange": [36.592, 19.71]}},
+          "objects": [{"type": "polygon", "parents": ["HR3at2-RqvnRaT9z:yGRYwwl0l_VBAvBB", "O3SmGUb4iRPw29HU:yGRYwwl0l_VBAvBB", "76WRbhQpTu2Wqy1c:yGRYwwl0l_VBAvBB"], "properties": {"id": "cWoEx64CKz1q6gdJ"}}]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

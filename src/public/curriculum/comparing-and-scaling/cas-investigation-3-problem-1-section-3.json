@@ -1,0 +1,117 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "id": "0NFCprTRxNWtCY5d",
+        "content": {"type": "Text", "format": "html", "text": ["<strong>Situation A. Student Strategies</strong>", "<p>After working on the Initial Challenge, students in Mr. Gomez’s class used various strategies.</p>", "<p>Examine each strategy. Which ones are correct? Explain.</p>"]}
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Possible Answers:</p>", "<p>All of the strategies are correct.</p>"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["<p><strong>Casey’s Strategy</strong></p>", "<p>To compute the total cost of an item that costs $8.95 with a 5% sales tax, I multiply $8.95 by 0.05 and then add the tax to the $8.95.</p>", "<p>  8.95 • 0.05 + 8.95</p>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Casey is using the Distributive Property finding the cost • the % tax + the cost • 100%.</p>", "<p>8.95 • 0.05 + 8.95 •1</p>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Vanessa’s Strategy</strong>",
+            "<p>I used the Distributive Property. I think this strategy will work for any bill.</p>",
+            "             0.05 • 8.95 + 1 • 8.95 = ",
+            "                         (0.05 + 1) • 8.95",
+            "                                 or",
+            "      1.05 • 8.95 to find the total bill."
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Vanessa is using a combination of what Casey and Sammi do. Vanessa uses the Distributive Property which results in multiplying by 1.05 (like Sammi does).</p>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Ash’s Strategy</strong>",
+            "<p>I used a percent bar or tape diagram. Extend the bar to find 105%.</p>",
+            "<p>Ash uses a percent bar/tape diagram. (Students learned this strategy in Comparing Quantities.) Ash extends the bar past the 100% mark to find the 105% mark. Using the amount of money for 1%, Ash can scale up to 105%. This is like Alex’s strategy with a different representation – a bar diagram rather than a proportion.</p>"
+          ]
+        }
+      },
+      {"id": "11OCT2022o800pm", "title": "Ash's Tape", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_3-1_AshsStrategy.png"}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Ash uses a percent bar/tape diagram. (Students learned this strategy in Comparing Quantities.) Ash extends the bar past the 100% mark to find the 105% mark. Using the amount of money for 1%, Ash can scale up to 105%. This is like Alex’s strategy with a different representation – a bar diagram rather than a proportion.</p>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["<p><strong>Sammi’s Strategy</strong></p>", "<p>Multiply $8.95 by 1.05.</p>", "<p>That will get the whole amount (100% or 1) and the tax (5% or 0.05).</p>"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["   x 1.05        ", "            ⃕", "8.95 = x", "____________", "100 = 105", "         ⤻", "   x 1.05"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Sammi is using a proportion to scale from 100% to 105% to find the price with tax included.</p>"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["<p><strong>Alex’s Strategy</strong></p>", "<p>I first find 1%. Then I can find any percent, like the 105% needed for this question.</p>"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["<p>   ÷ 100         x 105\n           ⃕                     ⃕   \n8.95 = 0.0895 = x\n_______________________\n100   =        1       =  105\n         ⤻               ⤻ \n     ÷ 100         x 105</p>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Alex scales the ratio down to find the unit rate (the amount of money for 1%). Then he scales the rate up to 105 to find the amount of money for 105%.</p>"]}},
+      {"id": "mmoZyLGmPB0DMDQu", "content": {"type": "Text", "format": "html", "text": ["<strong>Situation B. Student Wonderings</strong>", "<p>Below are students’ discussions about percents and ratios. Examine each discussion.</p>", "<p>Who is correct? Explain.</p>"]}},
+      {"id": "0mQOVBzftENMoDQY", "content": {"type": "Text", "format": "html", "text": ["<strong>Sam and Will</strong>", "<p>Sam says that percents are a lot like fractions.</p>", "<p>Will disagrees. He said that percents are more like ratios.</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>This discussion holds a subtle point that should be discussed with your students.</p>",
+            "<p>Percents are rates. Fractions are numbers.</p>",
+            "<p>But we use fractions or decimals to compute with percents. Sam is thinking of the fraction form and the way that the ratios/rates scale like finding equivalent fractions. Percents are a ratio because they compare two quantities – some number to 100 with 100 representing one whole.</p>"
+          ]
+        }
+      },
+      {
+        "id": "0nTdoz7aOHB91s8c",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Nicky and Marta</strong>",
+            "<p>Depending on what strategy you use, Nicky thinks that you can get two different answers when finding the tax on multiple items.</p>",
+            "<p>First Strategy: Find the cost of each item with the tax. Then add to find the total price. For example:</p>",
+            "<p>    ($9 + 5% tax) + ($7 + 5% tax) + ($4 + 5% tax) + ($4 + 5% tax) =</p>",
+            "<p>($9 + 0.05•9) + ($7 + 0.05•7) + ($4 + 0.05•4) + ($4 + 0.05•4)</p>",
+            "<p>     = one total price</p>",
+            "<p>Second Strategy: Add up the prices of each individual item.</p>",
+            "<p>Then find the tax and total.</p>",
+            "<p> $9 + $7 + $4 + $4 = total amount for all the items</p>",
+            "<p>Total amount for all the items + 5% tax = a different total price</p>",
+            "<p>Marta disagrees with Nicky. She claims the answers are the same because of the Distributive Property. And the total prices are the same.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Marta is correct. For example, when the sales tax is 5%:</p>", "<p>1.05(9 + 7 + 4 + 4) = 1.05(9) + 1.05(7) + 1.05(4) + 1.05(4)</p>", "<p>For each of these numbers when you multiply by 1.05 that is the price plus the tax that Nicky describes above.</p>"]
+        }
+      },
+      {
+        "id": "M6gBCgltYO0NenU8",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<strong>Situation C. Working Backward</strong>", "<p>Funda bought a used gaming system. She does not remember the price before tax. She does know that the 6% sales tax came to $4.80. What was the price of the used gaming system before tax? How do you know?</p>"]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>$80</p>", "<p>$4.80/(6%)=  $0.80/(1%)=  $80/(100%)</p>", "<p>Students might also use a percent bar. If the original price is 100% and 6% is $4.80, the percent bar would be divided into equal groups and when those are all totaled it would be $80.</p>"]
+        }
+      },
+      {"display": "teacher", "id": "oO3tSDj-rCnbQwY7", "title": "Percent Bar for solving Funda's tax", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/Fundastape.png", "filename": "curriculum/comparing-and-scaling/images/Fundastape.png"}}
+    ]
+  },
+  "supports": []
+}

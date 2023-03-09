@@ -1,0 +1,20 @@
+{
+  "type": "intro",
+  "content": {
+    "tiles": [
+      {
+        "id": "c-qysfELvytIFe45",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Today we will explore how the nervous system processes information about touch.  </p>",
+            "<p><strong>Do Now</strong></p>",
+            "<p>Some body parts are much more sensitive to touch than others. For example, the fingertips are one of the most touch-sensitive parts of the body, whereas the elbow is one of the least touch-sensitive body parts.  How can you explain these differences in touch sensitivity?  Enter some ideas in your workspace.  </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

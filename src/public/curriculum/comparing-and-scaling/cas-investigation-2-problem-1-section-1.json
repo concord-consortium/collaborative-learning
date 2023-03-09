@@ -1,0 +1,35 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "mh4SXT-lrxxjjLuE",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>In Investigation 1, we explored strategies for comparing quantities. We used ratios, scaling, proportions, percents, and differences. We also need to be able to recognize when a situation is proportional and which method of comparison is appropriate to solve the problem.</p>"]
+        }
+      },
+      {"id": "3lG9fMaV-VwrcFDI", "content": {"type": "Text", "format": "html", "text": ["<p>Consider the following comparisons:</p>"]}},
+      [{"content": {"type": "Text", "format": "html", "text": ["<em>We need two sandwiches for each person at the picnic</em>"]}}, {"content": {"type": "Text", "format": "html", "text": ["<em>I earn $5.50 per hour when I babysit for my neighbor.</em>"]}}],
+      [{"content": {"type": "Text", "format": "html", "text": ["<em>A 6-piece serving of chicken nuggets will provide 18 grams of protein.</em>"]}}, {"content": {"type": "Text", "format": "html", "text": ["<em>Akira's top running rate is 8.5 kilometers per hour.</em>"]}}],
+      {"id": "4rTaCcks-UHgN-uT", "content": {"type": "Text", "format": "html", "text": ["<p>What is being compared in each statement above?</p>", "<p>What is the unit of measure for each quantity?</p>"]}},
+      {
+        "id": "yQZfi5IdP1PmayPT",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Each statement can be written as a ratio, such as,</p>",
+            "<p>                                                                               5.5 dollars to 1 hour</p>",
+            "<p>                                                                                                    or</p>",
+            "<p>                                     18 grams of protein for every 6 pieces of chicken nuggets</p>",
+            "<p></p>",
+            "<p>Since each ratio is a comparison of two quantities measured in different units, they are called rates.</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

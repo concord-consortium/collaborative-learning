@@ -1,0 +1,110 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": "<strong>Summarize (Orchestrating the Discussion)</strong> \nSolutions and Strategies \nAsk for some rates. You will find that they range from about 1 meter per second to 3 or 4 meters per second. But most students will cluster around 2 to 2.5 meters per second. Use one or two of the more typical walking rates to answer the questions in the Problem. \n\nIf students record their walking rates as both a rate and a ratio, ask how they are the same. You might ask students to write their walking rates in seconds per meter. If so, you can then ask questions to relate back to concepts in Comparing and Scaling."
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": "<strong>Suggested Questions</strong>  <ul><li> What information does the rate tell you? (It tells you how long it takes a person to walk 1 meter.) </li><li> When might you use this rate rather than meters per second? (If time were an important factor, then this rate would be helpful. For example, if you were going to walk for 15 seconds, you could find the number of meters you would walk.) </li></ul>"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": "<strong>Making the Mathematics Explicit</strong> \nThe What If...? Situations provide the opportunity to formatively assess how students can connect the ideas from Variables and Patterns, Comparing Quantities, and Comparing and Scaling to the mathematics that will be studied in more depth in this Unit."
+        }
+      },
+      {
+        "id": "HbBJeLGVIlTRanLF",
+        "title": "Text 23",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested questions</strong></p>",
+            "<ul><li>How do you find how long it takes to walk a given distance, in particular, asking about 500 meters in situation A? (Note that this is informally solving for T when D is given. Students will have informal ways to find the value, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li>How do you find how far you can walk in a given time?  Use the examples from What If Situation A for students to demonstrate their thinking.  (Note that this is informally solving for D when T is given. Students will have informal ways to find the values, using numerical reasoning or proportional reasoning. Later in the Unit, students will work more on solving the equations symbolically.)</li><li>How does the equation show the relationship between the two variables? (The equation shows that the distance is the product of the walkingrate and the time, or d = rt. The walking rate is the coefficient of the independent variable.) </li><li>Explain what information the numbers and variables in your equation represent. (Take this opportunity to see how students interpret the expression 2t. They should say something like “If my walking rate is 2 meters per second, this is the distance that I walked after t seconds.” Emphasize that 2t means 2 times the value of t.) </li><li>Which variable in your equation is the independent variable, and which is the dependent variable? (Time is the independent variable, and distance is the dependent variable.) </li></ul>",
+            "<p>If some students made graphs during the Explore, display them for the class. </p>",
+            "<ul><li>How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.) </li></ul>",
+            "<p>Pick a typical equation from the class and ask students to use this equation to make a table. </p>",
+            "<ul><li>How does the walking rate show up in the table? (In the table, as the time increases by 1 second, the distance increases by a constant amount equal to the walking rate.) </li><li>Could we represent Liz’s claim with a rate table? (Yes.) What would it look like? </li></ul>",
+            "<p>Possible answer:</p>"
+          ]
+        }
+      },
+      {"content": {"type": "Table", "name": "Rate Table", "columns": [{"name": "Distance (meters)", "type": "number", "values": [1.5, 7.5, 15, 500], "width": 80}, {"name": "Time (seconds)", "type": "string", "values": ["1", "5", "10", "about 333"], "width": 80}]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<ul><li>Could we represent Liz’s claim with a “for every” statement? (Yes. Possible answer: I travel 1 ½ meters for every second I walk.)</li><li>Can we represent Liz’s claim with a proportion? (Yes. Possible answers include: </li></ul>"]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_TG_1_1_Soln.jpg"}},
+      {"content": {"type": "Text", "format": "html", "text": "•  What would a sketch of Liz’s graph look like? (It would “start” at (0,0). As every second increase by 1, the distance would increase by 1.5.)"}},
+      {
+        "layout": {"height": 300},
+        "content": {
+          "type": "Geometry",
+          "title": "Liz's Graph",
+          "board": {"properties": {"axisNames": ["Time (seconds)", "Distance (meters)"], "axisMin": [-0.5, -1], "axisRange": [10, 20]}},
+          "objects": [
+            {"type": "point", "parents": [0, 0], "properties": {"name": ""}},
+            {"type": "point", "parents": [1, 1.5], "properties": {"name": ""}},
+            {"type": "point", "parents": [2, 3], "properties": {"name": ""}},
+            {"type": "point", "parents": [3, 4.5], "properties": {"name": ""}},
+            {"type": "point", "parents": [4, 6], "properties": {"name": ""}},
+            {"type": "point", "parents": [5, 7.5], "properties": {"name": ""}},
+            {"type": "point", "parents": [10, 15], "properties": {"name": ""}}
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>How would you describe the pattern of change between the variables? (Possible answer: As the time increases by 1 second, the distance increases by 1.5 meters.)</li><li>What equation could Liz use to find other values for the table or graph? (Distance is found by multiplying 1.5 times the number of seconds that she walks. Or D = 1.5 T.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>Have students compare their equations. How do the equations compare? (Students should see that the equations are the same except for the walking rates.)</li><li>What information does the walking rate provide? (It gives the unit rate, or how far you can walk for every 1 second.)</li><li>What does it mean to walk at a constant rate? (It means that you always walk the same distance for a set amount of time.) </li><li>Suppose you do not walk at a constant rate for the walkathon. Which of the questions in Problem 1.1 can you still answer? Why? (It would be difficult to answer any of the questions since they all assume a constant walking rate. For Question A, you can find the total time it took to walk 10 meters and then compute the average rate.) If some students made graphs during the Explore, display them for the class. </li><li>How is the walking rate represented in these graphs? (The walking rate affects the steepness of the line. The person who walks fastest has the greatest walking rate and, therefore, the steepest line.) Pick a typical equation from the class and ask students to use this equation to make a table. </li></ul>",
+            "<p>Some of the above questions on graphs and tables can be used to launch the next Problem. </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<strong>Now What Do Students Know</strong>", "Ask students to reflect on the discussion and answer the Now What Do You Know.", "See answers to the problem for more information about the strategies and embedded mathematics. "]}
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong> </p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson. </p>",
+            "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li></ul>",
+            "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

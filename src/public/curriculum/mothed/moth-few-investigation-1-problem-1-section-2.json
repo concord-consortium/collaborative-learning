@@ -1,0 +1,23 @@
+{
+  "type": "fieldNotes",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Let&#x27;s go outside! Bring your science notebook to make notes and drawings of what you find.</p>",
+            "<p>When you come back  inside, add  your top three observations to the <strong>Field Notes</strong> Workspace in CLUE.</p>",
+            "<p>If you counted the number of certain items you discovered, create a table to share. </p>"
+          ]
+        }
+      },
+      {"content": {"type": "Table", "name": "What lives in our schoolyard", "columns": [{"name": "Flora", "values": ["🌲", "🌿", "🍁"]}, {"name": "Count", "values": ["3", "5", "100"]}, {"name": "location", "values": ["edge of schoolyard", "on trees", "on ground"]}]}},
+      {
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Encourage your students to try making drawings of the leaves and plants they find. See if they can make a table with the kinds of data they take - sizes and types of leaves or trees, counts of different species, etc.</p>"]}
+      }
+    ]
+  }
+}

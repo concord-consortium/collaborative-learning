@@ -1,0 +1,151 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Summarize (Orchestrating the Discussion)</strong></p>",
+            "<p>Solutions and Strategies </p>",
+            "<p>Go over each part of the Problem. Call on different students to discuss their methods. (AGENCY, IDENTITY, OWNERSHIP) After a group has presented their solutions, ask the class if they have any questions they want to ask the group. For example, encourage them to ask questions like the following: </p>",
+            "<p>For What If…? Situation A, use the graph of the two equations to determine whether Fabian made a profit.</p>"
+          ]
+        }
+      },
+      {
+        "layout": {"height": 350},
+        "content": {
+          "type": "Geometry",
+          "title": "Bakery Income and Expenses",
+          "board": {"properties": {"axisMin": [-30, -175], "axisRange": [500, 2500]}},
+          "objects": [
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [400, 3280]}]},
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 825]}, {"type": "point", "parents": [400, 2125]}]},
+            {"type": "polygon", "parents": [{"type": "point", "parents": [100, 1150], "name": "330"}, {"type": "point", "parents": [100, 820], "name": ""}]}
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Profit occurs when expenses are less than income, or when income is greater than expenses. Use the graph to show that the expenses exceed the income if Fabian makes and sells 100 cakes. Mark the difference with a vertical line segment between the point (100, 1150) on the graph of E and the point (100, 820) on the graph of I. Some students may be ready to interpret the vertical distance symbolically.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions </strong></p>",
+            "<ul><li>How can the vertical distance be interpreted as a symbolic expression? What would this expression mean? (Instead of thinking of 825 + 3.25<em>x</em> = 8.2<em>x</em>, we think of Income - Expenses, or 8.2<em>x</em> - (825 + 3.25<em>x</em>), and note when this expression is positive. When it is positive, Income is greater than Expenses, and there is a profit.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "iEuItkODYRlY-zjh",
+        "display": "teacher",
+        "title": "Text 16",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Making the Mathematics Explicit</p>",
+            "<p>Use What If Situations A and B to check on students’ understanding of linear equations. They should make the connection between solving equations symbolically and with a graph (or table). Ask students to tell you what the symbols and numbers mean in the equation and where this information is displayed in the graph. This will help them interpret the questions about equality and inequality. </p>"
+          ]
+        }
+      },
+      {
+        "id": "dKCc4bMocCMCZRdt",
+        "title": "Text 17",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>This is a conversation from one classroom on What If Situation A:</p>",
+            "<p></p>",
+            "<p><em>Franklin</em>: When our group was working on this we said that Adia in #3 is wrong- you can’t find the coordinates of the point of intersection by solving the equation.  Those are different things. </p>",
+            "<p></p>",
+            "<p><em>Teacher</em>: What did other groups discuss about Adia’s claim?</p>",
+            "<p></p>",
+            "<p><em>Liz</em>: We kind of agree with Franklin but we get the same answer with both.  When we solved the equation 8.20n = 825 + 3.25n we found that n was equal to 166. 666666.  On the graph that looks like about what n would be at the point of intersection. We just don’t know why that happened or if it will always happen. </p>",
+            "<p></p>",
+            "<p><em>Joshua</em>: It will always happen.   Remember when we did that problem with the two brothers in the walking race?</p>",
+            "<p></p>",
+            "<p><em>Teacher</em>: Henri and Emile?</p>",
+            "<p></p>",
+            "<p><em>Joshua</em>: Yeah.  On the graphs we made the point of intersection was when they were equal.  When we looked at their equations we said if we write them as equal to each other we could find that they were equal at the same amount of seconds as the graph showed.  </p>",
+            "<p></p>",
+            "<p><em>Franklin</em>: That’s right.  It was like 30 seconds I think.  So, is Liz right?</p>",
+            "<p></p>",
+            "<p><em>Liz</em>: It is!  But is it always true that if you solve the equation like we did that you will get the x value of the point of intersection on the graph?</p>",
+            "<p></p>",
+            "<p><em>Joshua</em>: Yes.  Look at the graph. (He points to the graph on the document camera and points out specific parts.) One line is the 8.20n and the other is the 825 + 3.25n.  When they meet that is where they are equal.  When Adia wrote 8.20n = 825 = 3.25n he is just writing it with symbols instead of graphing it.  Then when you solve it you are finding the x part of that point on the graph.  </p>"
+          ]
+        }
+      },
+      {
+        "id": "am6mpA4uk_ygPDyA",
+        "title": "Bakery Income and Expenses",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-71.667, -331.25], "axisRange": [500, 2500]}},
+          "objects": [
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [400, 3280]}], "properties": {"id": "NAsvH63dKtY1VXOW", "pt1": {"type": "point", "id": "NAsvH63dKtY1VXOW-point1"}, "pt2": {"type": "point", "id": "NAsvH63dKtY1VXOW-point2"}}},
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 825]}, {"type": "point", "parents": [400, 2125]}], "properties": {"id": "GpLVqCCXuUxEBpT5", "pt1": {"type": "point", "id": "GpLVqCCXuUxEBpT5-point1"}, "pt2": {"type": "point", "id": "GpLVqCCXuUxEBpT5-point2"}}},
+            {"type": "point", "parents": [100, 1150], "properties": {"id": "pyX7sb2hUd6B_yaF", "name": "330"}},
+            {"type": "point", "parents": [100, 820], "properties": {"id": "5QsKfNB6XQRa_tqf", "name": ""}},
+            {"type": "polygon", "parents": ["pyX7sb2hUd6B_yaF", "5QsKfNB6XQRa_tqf"], "properties": {"id": "geLu6CcdstQVfCPI"}}
+          ]
+        }
+      },
+      {"id": "dgkbCToe3Vr5PgSj", "title": "Text 18", "content": {"type": "Text", "format": "html", "text": ["<p>Discuss all the methods for finding the solutions.</p>", "<p>To pull all the ideas together, ask students to relate this problem to prior work. </p>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>How is this similar to the equations in Problem 3.3? (You are setting the expressions for income and expenses equal to each other and then solving this equation to find the number of cakes.) </li><li>How is this Problem similar to the walking rate between the two brothers in Problem 2.1? (Both Problems involve finding the point of intersection of two lines. In Problem 2.1, students used tables and graphs to find the intersection point. In this Problem, students have learned a new strategy: solving an equation symbolically. Also, both Problems can be solved using inequalities. In the walking race situation, the goal was for Henri’s distance to be slightly greater than Emile’s distance when the race ended. In the bakery situation, Fabian’s goal is for his income to be greater than his expenses, so that he makes a profit.)</li></ul>",
+            "<p>Tell students that this Problem is an example of finding the point of intersection of two lines by applying the principles of equality to an equation. </p>",
+            "<p>If it is needed for your program, you can introduce the language of “systems of linear equations.” In a later Unit, It’s In the System, students will develop other strategies for finding the solution to a 2‐by‐2 system of equations.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Check for Understanding </strong></p>",
+            "<p>End by giving two more equations. Ask students to find the point of intersection and solve an inequality. </p>",
+            "<ul><li>Is the point (10, 40) the point of intersection of the lines of the following equations: <em>y</em><sub><em>1</em></sub> = 70 - 3<em>x</em> and <em>y</em><sub><em>2</em></sub> = 44 + 10x? (No. The point lies on the line that represents <em>y</em><sub><em>1</em></sub> because 40 = 70 - 3(10), but it does not lie on the line that represents <em>y</em><sub><em>2</em></sub> because 40 ≠ 44 + 10(10).) </li><li>Find the point of intersection symbolically. (If 70 - 3<em>x</em> = 44 + 10<em>x</em>, then <em>x</em> = 2 and <em>y</em><sub><em>1</em></sub> = <em>y</em><sub><em>2</em></sub> = 64.) </li><li>When is <em>y</em><sub><em>1</em></sub> &gt; 60? Explain your method. (<em>y</em><sub><em>1</em></sub> &gt; 60 when <em>x</em> = 3.3. If you test out a value for <em>x</em> that is less than 3.3, the value of <em>y</em><sub><em>1</em></sub> will be greater than 60. So, <em>y</em><sub><em>1</em></sub> &gt; 60 when <em>x</em> &lt; 3.3.)</li><li>When is<em> y</em><sub><em>1</em></sub> &lt; <em>y</em><sub><em>2</em></sub>? Explain your method. (<em>y1</em> = <em>y2</em> when <em>x</em> = 2. If you test out a value for <em>x</em> that is greater than 2, the value of <em>y1</em> will be less than the value of <em>y2</em>. So, <em>y1</em> &lt; <em>y2</em> when <em>x</em> &gt; 2.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Now What Do Students Know</p>", "<p>Ask students to reflect on the discussion and answer the Now What Do You Know?</p>", "<p>See answers to the Problem for more information about the strategies and embedded mathematics. <strong></strong></p>"]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning </strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li><ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit?The next Unit?<strong></strong></li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

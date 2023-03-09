@@ -1,0 +1,35 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"id": "3JVJXDtR0a7Wd_UL", "content": {"type": "Text", "format": "html", "text": ["<p>Mr. Gomez’s class will stop at Larry’s Lunch Place on their field trip. He gives the class a menu so that they can anticipate the cost of their lunch ahead of the trip.</p>"]}},
+      {"id": "9O0KDB8Crjz7g0VD", "title": "Lenny's Lunch Place Menu", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_3-2_LarrysLunchPlace.png"}},
+      {
+        "id": "rc65nIFrj5aerEKk",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In your group use the menu to make up a lunch order. Write a list of all the items ordered by your group.</p>",
+            "<ul><li>Find the total bill for food including the 6% sales tax for your group.</li><li>How much will you leave as a tip (between 15% and 20% of the total bill)?</li><li>Your group members will share the cost of the meal equally. What is each person’s share of the cost, including tip?</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary. Look for how the students find the total bill: Do they add up all the original prices and then put in the sales tax? Do they find the 6% sales tax on each item and then find the total?</p>",
+            "<p>How are they using the 6%: Do they multiply an amount by $0.06 and then add it onto the original price? Do they multiply by 1.06? Do they create percent bars? Do they use proportions?</p>",
+            "<p>How did the students decide the total after the tip? Did they use percent bars? Did they use multiplication?</p>",
+            "<p>How did the students find the cost for each person? Did they find the total with tax and tip and then divide? Did they find each portion of the costs, divide those, and then add those quotients?</p>",
+            "<p>Note: Students may use strategies that are unique. A CMP student in the past said, “Multiply the 6% tax amount by 3 to get an approximation for an 18% tip.”</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

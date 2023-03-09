@@ -1,0 +1,46 @@
+{
+  "type": "help",
+  "content": {
+    "tiles": [
+      {
+        "id": "WXREJ3m8ATqN_1GW",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Food Waste in New York state (NYS)</strong></p><p>Effective January 1, 2022, the NYS Food Donation and Food Scraps Recycling law requires businesses and institutions (including universities) that generate an annual average of two tons of wasted food per week or more must:</p><p>1. donate excess edible food; and </p><p>2. recycle all remaining food scraps if they are within 25 miles of an organics recycler (composting facility, anaerobic digester, etc.).</p><p>How does NYS determine which universities generate 4,000 lbs of waste (or more) per week on average? They (essentially) use the following formulas:</p><p><em>Residential Institutions</em></p><p>Food waste (lbs/yr) = 0.35 lbs/meal * N of students * 405 meals/student/yr </p><p><em>Non-Residential Institutions (e.g., community colleges</em></p><p>Food waste (lbs/yr) = 0.35 lbs/meal * N of students * 108 meals/student/yr</p>"
+          ]
+        }
+      },
+      {"id": "Pa4vmyE4hbAsOri_", "title": "Interpreting Food Waste Variable Diagram", "content": {"type": "Image", "url": "curriculum/m2studio/images/FoodWasteInterpret.png", "filename": "curriculum/m2studio/images/FoodWasteInterpret.png"}},
+      {"id": "RUeVrDKwUcmyjjiM", "title": "Text 9", "content": {"type": "Text", "format": "html", "text": ["<p>Recreate the model shown here in a diagram tile, then drag these questions into your worksheet and edit them to add your responses.</p>"]}},
+      {
+        "id": "X1DZKnOboeLBni0L",
+        "title": "InterpretFoodWaste_ModelRepresent",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>What does each part of the Residential Institutions Food Waste Model represent?</strong></p><p>Use this space to share your thoughts as you examine each term of the model for <strong>Residential Institutions</strong> in more detail. </p>"]
+        }
+      },
+      {
+        "id": "bIwjvrQnqogKZUll",
+        "title": "InterpretFoodWaste_Results",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>What do results from the Residential Institutions model mean?</strong></p><p>Use this space to write your responses to questions in the <strong>Residential Institutions Food Waste Model Results</strong> section. </p>"]}
+      },
+      {"id": "6Fbs8pdmRg53itfG", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Usability of the Residential Institutions Food Waste Model</strong></p><p>Use this space to share your response to the final questions associated with this activity</p>"]}},
+      {
+        "id": "0B10hck18-CDeN2u",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>References</strong></p><p>[1] Alexander, K. C.; Atlantic Geoscience Corp.; Connecticut. Dept. of Environmental Protection.; Draper/Lennon, Inc.; &quot;Identifying, quantifying, and mapping food residuals from Connecticut businesses and institutions an organics recycling planning tool using GIS ; final report&quot; Recycling Program (Conn.), 2001.</p><p>[2] NYS Department of Environmental Education, &quot;Food Donation and Food Scraps Recycling Law&quot;, accessed online 12/31/22, https://www.dec.ny.gov/docs/materials_minerals_pdf/foodscrapsleg.pdf</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

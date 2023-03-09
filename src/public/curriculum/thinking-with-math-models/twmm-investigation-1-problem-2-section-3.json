@@ -1,0 +1,21 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["<h3>Situation A. Modeling the Data</h3>Describe the relationship between bridge length and breaking weight. Is this relationship linear? Explain. How is the relationship shown by patterns in your table and graph?"]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["<h3>Situation B. Making Predictions</h3>Use your data to predict the breaking weights for bridges of lengths 3, 5, 10, and 12 inches. Explain how you made your predictions."]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation C. Comparing Data Sets</h3>Compare your data from this experiment to the data from the experiment on bridges with different numbers of layers. How is the relationship between the number of layers in a bridge and its breaking weight similar to the relationship between bridge length and breaking weight? How is it different?"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

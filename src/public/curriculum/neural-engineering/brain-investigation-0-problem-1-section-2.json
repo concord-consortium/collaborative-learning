@@ -1,0 +1,188 @@
+{
+  "type": "labWork",
+  "content": {
+    "tiles": [
+      {
+        "id": "nktXKxeXTDkfpIkB",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>On the right is <strong>your</strong> workspace. <strong>You can arrange the screen to show My Resources or My Workspace or to have the screen split.</strong> Hover over the three vertical dots on the divider between your Resources and your Workspace and click the arrows to change the screen. You can also close the Resources view by clicking the “X” on the upper right corner of the Resources panel.</p>",
+            "<p>To edit your workspace, you must first add a <strong>tile</strong>. You get a tile in your workspace by either</p>",
+            "<ul><li><strong>Dragging a tile from My Resources (left side) in CLUE into My Workspace (right side)</strong></li><li><strong>Dragging a new  tile from the menu on the left of your workspace</strong></li><li><strong>Click a button on the menu to add a new tile to the bottom of your workspace</strong></li></ul>",
+            "<p>All tiles have a <strong>waffle</strong> (gray box with six dots) in the upper right corner if you hover over it. To drag the tile, click the waffle and hold it down as you drag it to your workspace. As you drag the tile into the workspace, a blue line shows where the tile will go when you let go.</p>",
+            "<p><strong>Tip</strong>: When your working session is over, just close the browser window. Your workspace is saved automatically (there is no Save button) If you are on a shared computer, be sure to log out of the STEM Resource Finder. </p>",
+            "<p>OK, get ready... Here we go!</p>"
+          ]
+        }
+      },
+      [
+        {
+          "layout": {"height": 350},
+          "id": "UWnx52iyDldW2ClX",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<h3>Introduction to tile types</h3>",
+              "<p>Try to make a text tile in your <strong>Workspace</strong> on the right (press the menu button with the letter A on it). Write down some things you hope to learn in this Neural Engineering unit.</p>",
+              "<p><strong>Tip</strong>: by hovering your mouse over the tile menu you will see the function of each tile. </p>",
+              "<p>Now insert an image into your workspace. You can upload using the button or you can drag images from your desktop. Describe in your workspace how you might use images to document your work.</p>",
+              "<p>Next, try to make a table. Fill the table in with some numbers, and change the column header names to something you might use in this class. Describe the meaning of your data in text.</p>"
+            ]
+          }
+        },
+        {"id": "abc050820221728", "title": "CLUE Tile Menu", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/Toolbar.jpg"}}
+      ],
+      {
+        "id": "f_KkdkpBCqi9KRxk",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Introduction to Dataflow</h3>",
+            "<p>Because these lessons involve engineering and robotics, you will also need a programming tool that can read sensor data and control outputs. In this unit, the programming tool is called Dataflow, and it can be launched from the button with two connected boxes. </p>",
+            "<p>Programs can be simple, adding or comparing two numbers, or sophisticated, with many nodes that control outputs based on inputs.</p>",
+            "<p>Try adding a Dataflow tile to your Workspace. Once you add the tile, you can add different types of blocks from the menu on the left side and connect them just like in the sample program below.</p>",
+            "<p>Blocks can be:</p>",
+            "<p>1.  Inputs (e.g., a temperatue sensor). These are the blue-ish blocks. </p>",
+            "<p>2. Processing blocks (e.g., &quot;Math&quot; or &quot;Logic&quot;). These are the green-ish blocks. </p>",
+            "<p>3. Outputs (e.g., a light bulb). These are the orange blocks.   </p>"
+          ]
+        }
+      },
+      [
+        {
+          "id": "qJGEu4HEmBOtRZLq",
+          "title": "Text 2",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>Sensor blocks </strong></p>",
+              "<p>Sensor blocks, the first choice on the Dataflow menu, allow you to put a stream of data into your program. Choose a sensor from the top dropdown menu. You will see a variety of quantities you can measure. </p>",
+              "<p>If you don&#x27;t have a real, physical sensor handy, you can pick a set of demo data from the second dropdown menu. The selection menu will let you pick your physical EMG sensors for this class when the time is right, but for now you can use any sensor type you want and set the data to a demo set.</p>",
+              "<p>When you pick a sensor type and a specific (real or demo) sensor, you will immediately see a stream of readings and units in the readout box. If you want to see a little history of values, tap the graph icon. The time spacing on this graph is controlled by the Sampling Rate at the top of the Dataflow tile.</p>",
+              "<p></p>",
+              "<p>Input blocks, like the Sensor block, have only one output dot which you connect to other blocks in the program. All are shades of blue.</p>"
+            ]
+          }
+        },
+        {"id": "bynl36tarAYaqVVe", "title": "Sensor Block", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/sensorBlocks.png", "filename": "curriculum/neural-engineering/images/sensorBlocks.png"}}
+      ],
+      [
+        {
+          "id": "NwbdYJUxduDPBwhu",
+          "title": "Text 4",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>Math and Logic Blocks</strong></p>",
+              "<p>Once you have data in your program, you will want to change it to do what you need. Green blocks are processing blocks that take one or more inputs on the left and have a single output on the right. </p>",
+              "<p></p>",
+              "<p>Here are shown Math and Logic blocks. The dropdown allows you to pick the algebraic or comparison operation you desire to perform on the two input data streams. The equivalent written expression is shown in the output box.</p>",
+              "<p></p>",
+              "<p>As soon as two data streams are connected to the input dots, the block will immediately perform it&#x27;s set operation and send the result to the output dot. If you want to see a history of calculated values, tap the graph icon.</p>"
+            ]
+          }
+        },
+        {"id": "NTHsAaRftydhRGAE", "title": "Math and Logic Blocks", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/mathLogicBlocks.png", "filename": "curriculum/neural-engineering/images/mathLogicBlocks.png"}}
+      ],
+      [
+        {
+          "id": "gB4Xd3Rb0R2IRbCj",
+          "title": "Text 5",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>O﻿utput Blocks</strong></p>",
+              "<p>P﻿rograms that manipulate data output a series of numbers. Those numbers can be a result on their own, or they can be used to control devices. Dataflow has both demo outputs and the ability to hook up to a physical output if you have one handy.</p>",
+              "<p></p>",
+              "<p>S﻿elect a type of output device, either real or demo, from the dropdown menu on the block. Demo outputs will display a picture of the device and an animation of it working according to inputs. Live outputs will prompt you to select a live connected device.</p>",
+              "<p></p>",
+              "<p>D﻿emo outputs are typically controlled by binary values, 1 = on  or 0 = off, and sometimes by extended values if more states are needed to control the output device. Different outputs have different rules for handling inputs that are not one of the special values such as 1 or 0.</p>",
+              "<p></p>",
+              "<p></p>"
+            ]
+          }
+        },
+        {"id": "u1VN1OFIJCvsiWE9", "title": "Output Blocks", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/outputBlocks.png", "filename": "curriculum/neural-engineering/images/outputBlocks.png"}}
+      ],
+      {"id": "758mGzn3UXzxTTSB", "title": "Text 3", "content": {"type": "Text", "format": "html", "text": ["<p>Try to make your own Dataflow program that adds two numbers. What are the different ways that you see the result of the program?</p>"]}},
+      {
+        "id": "qp3ALL5BqFvvnji8",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>The following Dataflow program is supposed to monitor the outside temperature and remind you to water your lawn when the temperature is above 30 degrees celsius.  However, the program is not working well. Can you drag it into your workspace and fix it? </p>"]
+        }
+      },
+      {
+        "id": "gX3nceoKGZrxqjmR",
+        "title": "Monitor Temperature",
+        "content": {
+          "type": "Dataflow",
+          "programDataRate": 1000,
+          "programZoom": {"dx": 0, "dy": 0, "scale": 1},
+          "program": {
+            "values": {"3313": {"currentValues": {}}, "3322": {"currentValues": {}}, "3327": {"currentValues": {"nodeValue": 0}}, "3337": {"currentValues": {"nodeValue": 0}}},
+            "id": "dataflow@0.1.0",
+            "nodes": {
+              "3313": {
+                "id": 3313,
+                "name": "Sensor",
+                "x": 63.114284774256284,
+                "y": 70.57511609798658,
+                "inputs": {},
+                "outputs": {"num": {"connections": {"3322-undefined-num1": {"node": 3322, "input": "num1", "data": {}}}}},
+                "data": {"plot": false, "type": "temperature", "sensor": "00001-VIR", "virtual": true}
+              },
+              "3322": {
+                "id": 3322,
+                "name": "Logic",
+                "x": 291.7448738557753,
+                "y": 110.95676741266041,
+                "inputs": {"num1": {"connections": {"3313-num-undefined": {"node": 3313, "output": "num", "data": {}}}}, "num2": {"connections": {}}},
+                "outputs": {"num": {"connections": {"3337-undefined-nodeValue": {"node": 3337, "input": "nodeValue", "data": {}}}}},
+                "data": {"plot": false, "logicOperator": "Greater Than"}
+              },
+              "3327": {"id": 3327, "name": "Number", "x": 51.9244629467631, "y": 286.68177936593975, "inputs": {}, "outputs": {"num": {"connections": {}}}, "data": {"plot": false, "nodeValueUnits": ""}},
+              "3337": {"id": 3337, "name": "Demo Output", "x": 551.8805820907344, "y": 140.5773811102751, "inputs": {"nodeValue": {"connections": {"3322-num-undefined": {"node": 3322, "output": "num", "data": {}}}}}, "outputs": {}, "data": {"outputType": "Light Bulb", "demoOutput": 0}}
+            }
+          }
+        }
+      },
+      {
+        "id": "Vgc6qoEDt_gV8hAb",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Sharing your workspace with your group</h3>",
+            "<p>CLUE allows you to share your screen in real-time with other students in your group. To do so, you need to turn on the Share option in top right of your Workspace, and click on &quot;Join group view&quot; icon next to the Share switch.  You can minimize My Resources (left side) to better view your groupmates&#x27; screens. If they haven&#x27;t shared their screen yet, ask them to do so.  </p>",
+            "<p>Within your group, discuss the Dataflow programs that each one of you has created.  </p>"
+          ]
+        }
+      },
+      {"id": "H8UPWfxYHAlWuaV8", "title": "Sharing and Editing Buttons", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/UIbuttons.jpg", "filename": "curriculum/neural-engineering/images/UIbuttons.jpg"}},
+      {
+        "id": "FFsWGlSrLofqnz1h",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Publishing your workspace </h3>",
+            "<p>When you&#x27;re done with today&#x27;s activities, try publishing your workspace. To do so, click on &quot;Publish Workspace&quot; at the top of your workspace.</p>",
+            "<p>When you publish, your workspace will appear under the pink &quot;Extension&quot; tab above. Student work will go under the Class Models and Data tab. Teacher work will go under the Custom Lessons tab. </p>",
+            "<p>Check if any of your classmates has published their workspace yet. </p>",
+            "<p> </p>"
+          ]
+        }
+      },
+      {"id": "9R8Pq1QLUzthSal0", "content": {"type": "Text", "format": "html", "text": ["<h3>Reflection</h3>", "<p>At the end of each lesson, you will be asked to post a brief reflection. Click on the &quot;Reflection&quot; tab to learn more. </p>"]}}
+    ]
+  }
+}

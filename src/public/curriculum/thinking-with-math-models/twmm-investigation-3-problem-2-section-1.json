@@ -1,0 +1,61 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "The scale factor that compares one figure to its image gives you information about how side lengths, perimeters, and areas of the figures are related. The scale factor is the ratio of corresponding side lengths. It is the multiplier that relates the length of the original length to the length of its image It tells you how one length grows or shrinks by a certain factor.\n\nIn Problem 3.2, you will use what you learned to draw scale drawings."
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "To understand a concept like linear functions it is important to look at nonlinear situations. The relationship between length and width for rectangles with a fixed area is not linear. As <em>l</em> increases, <em>w</em> decreases, but not at a constant rate. The graph is a curve showing how <em>l</em> and <em>w</em> relate to each other."
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "The relationship between <em>l</em> and <em>w</em> is an example of an important nonlinear relationship called an <strong>inverse variation</strong>. The word “inverse” suggests that as one variable increased in value, the other variable decreases in value. However, the meaning of inverse variation is more specific than that."
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<blockquote>Two nonzero variables x and y are related by an inverse variation if<blockquote>y = <em>k</em>/x &nbsp;&nbsp; or &nbsp;&nbsp; xy = <em>k</em></blockquote>where <em>k</em> is a constant other than 0. The value of <em>k</em> is determined by the specific relationship.</blockquote>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["<ul><em><li>How are the equations y = k/x and xy = k related?</li><li>For the same x-value, will the two equations give different y-values?</li></em></ul>"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["Inverse variation occurs in many situations. For example, consider the table and graph below. They show the (bridge length, breaking weight) data collect by a group of students."]}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_3.2_bridge_breaking_experiment_450w.png"}},
+      {"content": {"type": "Text", "format": "html", "text": ["Some students tried to find an equation that fits the inverse data and wrote 160 = <em>bl</em>, where <em>b</em> is the breaking weight and <em>l</em> is the length."]}},
+      {"content": {"type": "Text", "format": "html", "text": ["<ul><em><li>Does this equation make sense? Why?</li><li>Is there an equation that fits the data better? Explain.</li></em></ul>"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["We will study more about inverse variation in high school. In this unit inverse variation shows us that not all relationships are linear. Some equations are linear models and some equations are nonlinear models."]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "As we continue to explore linear and nonlinear situations, we might ask ourselves the following questions:",
+            "<em><lu><li>How does the value of one variable change as the value of the other changes? Is it a linear function?</li><li>How is that pattern of change shown in a table of data and on a graph?</li><li>If it is a linear function, what equation shows how the two variables are related?</li></em>",
+            "In the following problem we will investigate how the length of a trip depends on speed."
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

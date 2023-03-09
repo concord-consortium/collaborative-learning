@@ -1,0 +1,36 @@
+{
+  "type": "sharing",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Sharing</strong>\nWhen you are ready to <strong>share work</strong> with your group, use the share slider, and switch to the Group View. You will see your workspace next to the others in your group. You can drag tiles and individual shapes from your groups documents into your own."
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/help/images/sharingScreen.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "When you are ready to share work with your whole class, click the <strong>publish</strong> icon. This will put your file into the Class Work tab. Your teacher may ask you to do this so your work can be discussed or reused by more classmates than those in your group. You can share content back into your own documents from any tab on the left, including your own files. For example, you might wish to copy content from 'My Work' into a Learning Log so that you can remind yourself how you solved problems as you work through the lessons."
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Your teacher may share content with you too, either in the class work tab or in the Supports tab. If new teacher content is posted, you'll see a small bubble on the Support tab. You might find a graph or some data to help you get started on a problem, or find a more challenging extension to work on."
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

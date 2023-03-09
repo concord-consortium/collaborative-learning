@@ -1,0 +1,28 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "The Cordova family lives in Detroit, Michigan. They are planning a trip from Detroit to Mackinac Island, near the upper peninsula of Michigan. Mr. Cordova does some calculations to see how the travel time will change if the family drives at different average speeds. The island is 300 miles from Detroit."
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["<strong>Travel Times for Different Speeds</strong>"]}},
+      {"content": {"type": "Table", "columns": [{"name": "Average Speed (mi/h)", "type": "number", "values": [30, 40, 50, 60, 70]}, {"name": "Travel Time (h)", "type": "number", "values": [10, 7.5, 6, 5, 4.3]}]}, "layout": {"height": 160}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul> <li>Describe the change in travel time as the average speed increases.</li> <li>If the distance is 300 miles, what equation relates travel time <em>t</em> to average speed <em>s</em>?</li> <li>How is the pattern relating travel time to average speed shown in a graph of (<em>s, t</em>) data?</li> <li>Is the relationship between travel time and average speed a function? A linear function? Explain why or why not.</li> </ul>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

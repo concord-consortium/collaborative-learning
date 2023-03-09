@@ -1,0 +1,23 @@
+{
+  "type": "reflection",
+  "content": {
+    "tiles": [
+      {"id": "MZ4cKTjrMTzZuqX0", "title": "Text 10", "content": {"type": "Text", "format": "html", "text": ["<p>Add the following entry to your learning journal:</p>"]}},
+      {
+        "id": "DUzt8TK2_FhTUBIJ",
+        "title": "Text 9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Lesson 2.3 Journal Entry</strong></p>",
+            "<p>1. Today&#x27;s date:</p>",
+            "<p>2. Today&#x27;s topic:</p>",
+            "<p>3. Based on your analysis of the strengths and weaknesses of the touch-sensitive gripper, what modification would you make to improve the gripper&#x27;s functionality? </p>",
+            "<p>4. Pressure receptors are just one type of sensor.  What sensors do you think would be most useful for Tilly (the girl with the bionic arms)?</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

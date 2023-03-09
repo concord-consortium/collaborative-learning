@@ -1,0 +1,100 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {"id": "IuCyW0R_HGM8H0HK", "content": {"type": "Text", "format": "html", "text": ["<strong>Situation A. Buying Tickets</strong>", "<p>Noralie is buying tickets for a concert online. The cost of the tickets is represented in a table, graph, and equation.</p>"]}},
+      [
+        {
+          "id": "QPIw_hR9ye-iDU1G",
+          "title": "Cost of Tickets from the Box Office",
+          "content": {"type": "Table", "name": "Cost of Tickets from the Box Office", "columns": [{"name": "Number of Tickets", "width": 99.49609375, "values": ["0", "1", "2", "1x4 = 4"]}, {"name": "Total Cost of Tickets", "width": 122.85546875, "values": ["0", "30", "60", "30 x 4 = 120"]}]}
+        },
+        {"id": "GRJjpe07QzPACiT_", "title": "Cost Graph", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_2-3_BoxOfficeTicketsGraph_350w.jpg"}}
+      ],
+      {"content": {"type": "Text", "format": "html", "text": ["<p><em>C</em> is the cost of the tickets</p>", "<p><em>N</em> is the number of tickets</p>", "<p><em>C = 30N</em></p>", "<p><em>120 = 30N</em></p>"]}},
+      {"id": "WHa2OXqPVTld1uOG", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How is the constant of proportionality (or unit rate) represented in each?</li></ul>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The constant of proportionality is represented:</p>",
+            "<p>In the table when one quantity is 1.</p>",
+            "<p>In the graph by the amount of increase in the total cost (y value) each time the number of tickets (x value) increases by 1.</p>",
+            "<p>In the equation by the number being multiplied by N (number of tickets).</p>"
+          ]
+        }
+      },
+      {"id": "L5kUqYJEbXrNFnVY", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How does this information help us answer questions about proportional situations?</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>If we know one of the quantities is 1, we can scale to any amount to answer a question.</p>"]}},
+      {"id": "LK0TQpCSeT5OE8OC", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How many tickets could you buy for $120. How did you determine your answer?</li></ul>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>(4,120)  or 4 tickets.</p>",
+            "<p>  To find the number of tickets, see blue notations on the representations above.</p>",
+            "<p>With the table, scale the $30 up to $120.</p>",
+            "<p>With the graph, find the point (x, 120).</p>",
+            "<p>With the equation we can substitute 120 for C and then solve for the number of tickets.</p>",
+            "<p>120 = 30N.</p>",
+            "<p>N = 4.</p>",
+            "<p>Note: Students have not worked on formal strategies for solving equations at this point. They will use strategies on their knowledge of operations and/or fact families to solve the problem. For example, they may say that the equation is asking them to find what number (N) times 30 will result in the product of 120. So, they need to use division: 120 ÷ 30 = N, so N =4. This will be developed further in Moving Straight Ahead.</p>"
+          ]
+        }
+      },
+      {"id": "crfvyzDO8jCkd_Tk", "content": {"type": "Text", "format": "html", "text": ["<ul><li>The concert organizers decide to add processing fee of $10. How does this affect the representations? Is this still a proportional situation? Explain.</li></ul>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>It is no longer proportional if you add in a processing fee.</p>", "<p>See the change in red to the representations below.</p>", "<p>Table – $10 is added to the cost</p>", "<p>Graph – the line slides up 10</p>", "<p>Equation – the $10 is added to the cost</p>"]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Table",
+          "name": "Cost of Ticket from the Box Office",
+          "columns": [{"name": "Number of Tickets", "width": 120, "values": ["0", "1", "2"]}, {"name": "Total Cost of Tickets", "width": 120, "values": ["0", "30", "60"]}, {"name": "Cost with Process Fee", "width": 120, "values": ["10", "40", "70"]}]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Geometry",
+          "title": "Ticket Cost",
+          "board": {"properties": {"axisMin": [-1, -1], "axisRange": [6, 100], "axisNames": ["N", "C"], "axisLabels": ["", ""]}},
+          "objects": [
+            {"type": "point", "parents": [0, 0], "properties": {"id": "Ihr5BjKOynTl0c2A", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [1, 30], "properties": {"id": "aS5Ew5Rwy5tdn8ch", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [2, 60], "properties": {"id": "GGcrdtotKoPYP-uP", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "polygon", "parents": ["Ihr5BjKOynTl0c2A", "aS5Ew5Rwy5tdn8ch", "GGcrdtotKoPYP-uP"], "properties": {"id": "g1vwVrUCfVpRRuke"}},
+            {"type": "point", "parents": [2, 70], "properties": {"id": "vn-OfinQf3FDj2yu", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [1, 40], "properties": {"id": "6E5sNTUokvEsW4-i", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [0, 10], "properties": {"id": "ujmL3sAA0FcGouDh", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "polygon", "parents": ["vn-OfinQf3FDj2yu", "6E5sNTUokvEsW4-i", "ujmL3sAA0FcGouDh"], "properties": {"id": "5w8yzNODx5N45pNA"}}
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>C is cost of the tickets</p>", "<p>N is the number of tickets</p>", "<p>C = 30N</p>", "<p>C = 30N + 10</p>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Note that 0 tickets for $10 does not make sense in the real world.</p>"]}},
+      {"id": "GeqrPrMDBg2kxvhG", "content": {"type": "Text", "format": "html", "text": ["<strong>Situation B. Using the Constant of Proportionality: Best Buy for Pasta</strong>", "<p>Mia is shopping for pasta. She sees two advertisements:</p>"]}},
+      [
+        {"id": "km896IPq4ZfTT2bj", "content": {"type": "Text", "format": "html", "text": ["<strong>Little Giant Store</strong>", "<p>7 boxes of pasta for $6</p>"]}},
+        {"id": "pZpxWg9qhehUapRM", "content": {"type": "Text", "format": "html", "text": ["<strong>Foodfresh Store</strong>", "<p>6 boxes of pasta for $5</p>"]}}
+      ],
+      {"id": "uX0CPq4WUgNIMlL1", "content": {"type": "Text", "format": "html", "text": ["<p>She claims that she can use the constant of proportionality to decide which store has the better price. Is she correct? Explain.</p>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Yes. The constant of proportionality is the same as the unit rate. It will tell you how the prices relate when one of the quantities is 1.</p>"]}},
+      [
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Little Giant Store</p>", "<p>7 boxes of pasta for $6</p>", "<p></p>", "<p>1 box of pasta about $0.86</p>", "<p></p>", "<p>OR</p>", "<p></p>", "<p>For $1 you get about 1.16 boxes</p>", "<p></p>"]}},
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Foodfresh Store</p>", "<p>6 boxes of pasta for $5</p>", "<p></p>", "<p>1 box of pasta about $0.83</p>", "<p></p>", "<p>OR</p>", "<p></p>", "<p>For $1 you get about 1.2 boxes</p>"]}}
+      ]
+    ]
+  },
+  "supports": []
+}

@@ -1,0 +1,17 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "In Investigation 1, you explored the relationship of strength, number of layers, and length of a bridge. You found that the relationship between strength and number of layers was approximately linear. You also found that the relationship between strength and length was not linear. In this investigation, you will explore other nonlinear functions."
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

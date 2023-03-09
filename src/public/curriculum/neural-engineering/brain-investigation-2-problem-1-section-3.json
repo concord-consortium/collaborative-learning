@@ -1,0 +1,23 @@
+{
+  "type": "reflection",
+  "content": {
+    "tiles": [
+      {"id": "vsLAfG7znk0cZlwS", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<p>Add the following entry to your learning journal:</p>"]}},
+      {
+        "id": "6SsD215pUdu1fauJ",
+        "title": "Text 8",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Lesson 2.1 Journal Entry</strong></p>",
+            "<p>1. Today&#x27;s date:</p>",
+            "<p>2. Today&#x27;s topic:</p>",
+            "<p>3. Based on today&#x27;s lesson,  describe how information about touch/pressure affects our movement. </p>",
+            "<p>4. How do you think Tilly (the teen with the bionic arms) would react to the improved gripper that you designed today?</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

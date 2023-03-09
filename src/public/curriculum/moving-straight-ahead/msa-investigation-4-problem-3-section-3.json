@@ -1,0 +1,38 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "-bGLNMxEmuSSqGx_",
+        "title": "Text 9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Explore (Digging In)</strong></p>",
+            "<p>Providing for Individual Needs<strong></strong></p>",
+            "<p><strong>Suggested questions</strong></p>",
+            "<ul><li>Is there a rate of change suggested on this card? (Answers will vary.)</li><li>Is there a y-intercept suggested on this card? (Answers will vary.)</li><li>How do you know if this card is a linear relationship? (constant rate of change; line;        y = mx + b)</li><li>For this context card, can you draw with your hand a graph to represent the situation? (Answers will vary)</li><li>For this table, how do you look for a possible rate of change?  (find out the change in the y-values as the x values increase by 1)</li><li>What “story” does this graph say to you?  (Answer will vary.)</li></ul>",
+            "<p>For What If Situation A you may want to suggest to students to draw rubas and pouches to help them make sense of the equation.  You may want to suggest that they look at “cracking the code” of the rubas and pouches to make sense of some equivalent equations. <strong></strong></p>"
+          ]
+        }
+      },
+      {
+        "id": "y0SyGroKahRuUu01",
+        "display": "teacher",
+        "title": "Text 11",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Planning for the Summary</strong></p>",
+            "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know questions? What will you do if you do not have evidence? </p>",
+            "<p><strong>Now What Do You Know?</strong></p>",
+            "<p><strong>Describe some strategies for recognizing equivalent representations.</strong></p>",
+            "<p>(Collect examples from students on how they determined which cards were equivalent representations. Listen for how they are deciding if a situation is linear.  Listen for how they are finding the rate of change and y-intercepts for different representations.)</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

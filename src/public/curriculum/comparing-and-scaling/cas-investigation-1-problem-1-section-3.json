@@ -1,0 +1,165 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Situation A. Mr. Zhoa’s Students’ Strategies</strong>",
+            "<p>Mr. Zhoa’s class had some interesting strategies for answering the questions about the orange juice recipes which they displayed on posters. Examine the work of each group.</p>",
+            "<ol><li>Do you agree with the students’ strategies? Can you use the strategy to decide which recipe is the most orangey? Explain.</li><li>How are the strategies alike? Different?</li></ol>"
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>All of the groups use strategies that can answer the question of which recipe is the most orangey.</p>"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["Moja's Group"]}},
+      {"id": "UM57UqDw8SpnKqxE", "title": "Moja's Group Strategy", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-1_MojasGroup.png"}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["Moja’s group scales up each part-to-part recipe to 90 cups of water. Since the water is all the same amount, you can see which one has more concentrate – or is the most orangey. Mix A has the most concentrate (60) for the 90 cups of water."]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["Lima's Group"]}},
+      {"id": "THU06OCT2022E", "title": "Lima's Group Strategy", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-1_LimasGroup_350w.jpg"}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Lima’s group uses a picture to show a part-to-part relationship. They seem to look at how the concentrate is “spread out” over the water. They also show the unit rate of how much water per cup of concentrate. Since you have the same amount of concentrate, you can see which recipe has more water – or is more watered down.  Mix A has the least water (1 1/2 ) for the 1 cup of water. So it is the least watered down and will have the strongest orangey taste."
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["Tatu's Group"]}},
+      {"id": "THU06OCT2022E0427PM", "title": "Tatu's Group Strategy", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-1_TatusGroup_350w.png"}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["Tatu’s group uses percents of the part-to-whole recipe. The largest percent of concentrate will be the most orangey. Mix A is 40% concentrate."]}},
+      {"content": {"type": "Text", "format": "html", "text": ["Sanji's Group"]}},
+      {"id": "THU06OCT2022E0430PM", "title": "Sanji's Group Strategy", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-1_SanjisGroup.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Sanji’s group uses part-to-whole amounts of the recipes. They scale all of the concentrates to 15.Since there is the same amount of concentrate, you can see which recipe makes the most juice — in other words, where the concentrate is most watered down and thus the least orangey (Mix C). Mix A makes the least amount of juice (37.5 cups) for the 15 cups of concentrate. So it is the juice that contains the must orangey concentrate."
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Possible answers about how the strategies are alike and different:</p>"]}},
+      {
+        "id": "chm5hy6sl43ZLGsX",
+        "display": "teacher",
+        "title": "Table 1",
+        "content": {
+          "type": "Table",
+          "name": "Differences and Similarities in Strategies",
+          "columns": [
+            {
+              "name": "Alike",
+              "width": 225,
+              "values": [
+                "All use correct strategies that can be used to answer the question.",
+                "All of them set one of the quantities equal, so they could compare the amount of the other quantity.",
+                "Moja – 90 cups of water",
+                "Lima – 1 cup concentrate",
+                "Tatu – 100% juice",
+                "Sanji – 15 cups of concentrate",
+                "Part-to-part ratio was used by Moja and Lima. Part-to-whole ratio was used by Tatu and Sanji."
+              ]
+            },
+            {
+              "name": "Different",
+              "width": 200,
+              "values": [
+                "All the strategies are slightly different",
+                "",
+                "Moja scaled up each part-to-part recipe to 90 cups water.",
+                "Lima used a picture to show the unit rate of water per cup of concentrate in the part-to-part recipes.",
+                " Tatu used percents to get all the juice amounts to 100. Percents are a part-to-whole ratio with 100 as the whole.",
+                "Sanji scaled up to 15 parts concentrate per the whole amounts of juice.",
+                ""
+              ]
+            }
+          ]
+        }
+      },
+      {"id": "6UpFCZYRwElS1Wph", "content": {"type": "Text", "format": "html", "text": ["<strong>Situation B. More Student Strategies</strong>", "<p>Examine the strategies below and answer the question.</p>"]}},
+      {
+        "id": "Ua3w8wmjrNSHOAjj",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Max’s Strategy</p>", "<p>I think that recipes A and C are both the most “orangey” since the difference between the number of cups of water and the number of cups of concentrate is 1. Is Max correct? Explain.<u><strong></strong></u></p>"]
+        }
+      },
+      [
+        {"id": "pD9YAK7OFfsFq77S", "title": "Recipe A", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-1_MaxsStrategyRecipieA.png"}},
+        {"id": "pHKnr2piefEZcRq0", "title": "Recipe B", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-1_MaxsStrategyRecipieC.png"}}
+      ],
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Max’s thinking is incorrect.</p>",
+            "<p>He is using additive thinking rather than multiplicative thinking. He subtracted the first quantity from the second quantity.</p>",
+            "<p></p>",
+            "<p>The recipes are 2 to 3 and 1 to 2. Both quantities in the ratios are 1 apart. However, to determine the orangey-ness, you have to consider the relationship between the two quantities. In Recipe A, you have 2 for every 3. In Recipe C, you have 1 for every 2.</p>",
+            "<p></p>",
+            "<p>If we think about this as a sharing situation. For example, if you are in a band, you get $2 for every $3 that your band makes. It is not the same as getting $1 for every $2 that you band makes. It is much better to get $2 for every $3.</p>",
+            "<p>To help Max see this, we might scale Recipe C to have one of the quantities the same amount. If we think of making batches of Recipe C:</p>",
+            "<p>Recipe A  Recipe C</p>",
+            "<p>2 to 3          1 to 2</p>",
+            "<p>                     2 to 4</p>",
+            "<p>Now with the concentrates the same, you can see that the difference between the total quantities is different. <strong><u></u></strong></p>"
+          ]
+        }
+      },
+      {
+        "id": "0KZuq4lRRUDLxi36",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Stella’s Groups Suggestions</p>",
+            "<p>Stella’s group suggested rewriting the statements into equivalent statements to make them easier to compare. Different members came up with different statements. Who is correct? Explain.</p>",
+            "<p>Stella</p>",
+            "<p> 3 cups of water to 2 cups of concentrate or</p>",
+            "<p> 1 cup of water for 2/3 cup of concentrate.</p>",
+            "<p>Elise</p>",
+            "<p>2 cups of concentrate for 3 cups of water or</p>",
+            "<p>1 cup of concentrate for 3/2 cups of water.</p>",
+            "<p>Dan</p>",
+            "<p>2 cups of concentrate for 5 cups of juice or</p>",
+            "<p>1 cup of concentrate for 5/2 cups of juice.</p>"
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>These are all correct unit rates.</p>", "<p>Stella used the part-to-part ratio and scaled it down to 1 cup of water.</p>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["3 cups of water to 2 cups of concentrate or", "↓   ÷    3                            ↓   ÷    3", " 1 cup of water for 2/3 cup of concentrate."]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Elise used the part-to-part ratio and scaled it down to 1 cup of concentrate.</p>", "2 cups of concentrate for 3 cups of water or", "↓   ÷    2                                          ↓   ÷    2", "1 cup of concentrate for   3/2 cups of water."]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Dan used the part-to-whole ratio and scaled it down to 1 cup of concentrate.</p>", "2 cups of concentrate for 5 cups of juice or", " ↓   ÷    2                                        ↓   ÷    2", "1 cup of concentrate for 5/2 cups of juice."]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

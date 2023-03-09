@@ -1,0 +1,20 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "The owner of Sandy’s Boat House advertises the cost to rent a canoe is $15 per hour for trips on the Red Cedar River. He is also willing to break down the $15 per hour if a customer rents for only a part of an hour.",
+            "The manager suggests another deal for customers. She uses the equation <em>c<sub>mangager</sub></em> = 0.15<em>t</em> + 2.50 to find the charge c in dollars for renting a canoe for t minutes."
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_2_canoe_rental_400w.png"}},
+      {"content": {"type": "Text", "format": "html", "text": ["• Which option would you choose, the manager’s equation or the owner’s cost of $15 per hour? Explain."]}}
+    ]
+  },
+  "supports": []
+}

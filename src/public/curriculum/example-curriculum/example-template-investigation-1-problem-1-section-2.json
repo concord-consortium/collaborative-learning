@@ -1,0 +1,72 @@
+{
+  "type": "taska",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>The school board wonders how long the school building should be open every day. If they close the building they can save money on operating costs, but then students might not have a place to study. The school board hires you to figure out how long each day the school should be open. Your first task is to determine what percentage of the day students typically spend at school. </strong></p>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["<p>1. Describe your first task in your own words.</p>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>2. What do you need to know about the school in order to help the board?</p>",
+            "<p>a) List as many factors (<strong>key quantities and variables</strong>) as you can:</p>",
+            "<p></p>",
+            "<p>b) Next to each factor above, write down where you can find out the information or what you would need to do to figure it out. \nExamples:</p>",
+            "<p>- I need to know know how many pets the students have. --> I will conduct a survey to collect this information. </p>",
+            "<p>- I wonder how many books are at the library. --> Ask the librarian if they have this on record. </p>",
+            "<p>c) Bonus: Use the [v=] button to formally make the variables in line above. For example: [cats] or [books in the library] </p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>3. What <strong>assumptions</strong> can you make about the context or factors to help you complete this task? <em>Create at least 3 assumptions!</em></p>",
+            "<p>Example: By saying 'typical day', the school board likely means to consider only days that school is in session. </p>",
+            "<p>Example: We probably only care about the [pets] owned by the students on the soccer team. </p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p> 4. Select <strong>2</strong> of the factors and explain how/why they are important for helping you to complete the task. Note: You can use the [v=] button to get a list and then select from the 'Reference existing variable' list to get you started!</p>",
+            "<p>Example: We need to know the number of [pets] so that we buy enough pet food.</p>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["<p> 5. Describe in words how some of these factors are related.</p>", "<p>Example: The more [pets] we allow in the library, the more [books in the library] will be ripped up.</p>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p> 6. Use mathematical language to describe the relationship between at least two variables, or create a formula, or sketch a graph.<em>Note: If you want to create a formula, or sketch a graph, click on the pencil in the left panel to create a drawing tile!</em></p>"]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>7. <strong>Create a Diagram tile to sort your factors. Add one input block for each factor. If factors are really important to completing the task, move them to the left hand side of the screen. If they can be ignored (either because you have changed your mind or found a better way to incorporate that idea), move them to the right of the screen. If the factor might be important, move it to the middle. </strong></p>",
+            "<p>If you need more space, click on the small triangle on the bottom right of the tile, then drag it down and make the tile bigger.</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

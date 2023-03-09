@@ -1,0 +1,125 @@
+{
+  "type": "sources",
+  "content": {
+    "tiles": [
+      {"id": "HXNr2yCndseRnnWh", "title": "Text 13", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 5 RESOURCES</h2>"]}},
+      [
+        {
+          "id": "D7OFiQenaZz4ogQJ",
+          "title": "Text 19",
+          "content": {"type": "Text", "format": "html", "text": ["<p></p>", "<p><strong>EVIDENCE 5a: </strong></p>", "<p><strong><a href='https://docs.google.com/document/u/0/d/1rsWBPn4qtwrYiLRBK_U7U0bNpk7f3Sm6x9bzvRVxtfw/edit'>Conversation with Dr. Zeiders</strong></a></p>", "<p></p>"]}
+        },
+        {"id": "u8mvhsCWtpoirIlT", "title": "Conversation with Dr. Z", "content": {"type": "Image", "url": "curriculum/bio4community/images/drZ.png"}}
+      ],
+      [
+        {
+          "id": "KtQUBXVMVHhEVA3v",
+          "title": "Text 34",
+          "content": {"type": "Text", "format": "html", "text": ["<p><strong></strong></p>", "<p><strong>EVIDENCE 5b: </strong></p>", "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=simulation&organ=heart'>Plaque Model Simulator</a></strong></p>", "<p></p>"]}
+        },
+        {"id": "gDtbD7PIMz9W1UuH", "title": "Plaque Model Simulator", "content": {"type": "Image", "url": "curriculum/bio4community/images/plaqueModel1.png"}}
+      ],
+      [
+        {
+          "id": "JaBtNraITIPV9K5Y",
+          "title": "Text 24",
+          "content": {"type": "Text", "format": "html", "text": ["<p></p>", "<p><strong>EVIDENCE 5c: </strong></p>", "<p><strong><a href='https://docs.google.com/document/u/0/d/1f7rEE_0v3dTYeXRUMhvRVP0m8fcJbJhlPgQX5WbDIjE/edit'>Missing Link Report</a></strong></p>"]}
+        },
+        {"id": "D4MMkikv1pLGWkQM", "title": "Missing Link", "content": {"type": "Image", "url": "curriculum/bio4community/images/cholesterolLink.png"}}
+      ],
+      {
+        "id": "NaV4HWpyfBFsV5Gr",
+        "title": "Text 27",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Questions About Evidence 5b, </strong><em><strong>Plaque Model Simulator</strong></em></p>",
+            "<p>1. When immune cell signaling is high it causes less immune cells to come into the lining and less sticky proteins to appear.  </p>",
+            "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+            "<p></p>",
+            "<p>2. When cortisol levels are high but the cortisol is ignored this causes the plaque to form:</p>",
+            "<ul><li><strong>Faster</strong>   OR  <strong>Slower</strong> ? (underline your choice)</li></ul>",
+            "<p></p>",
+            "<p>3. The sticky proteins: (underline your choice)</p>",
+            "<ul><li>A.  allow cholesterol into the lining</li><li>B. allow immune cells into the lining</li><li>C. block the entry of immune cells into the lining</li><li>D. block the entry of cholesterol into the lining</li></ul>",
+            "<p>(underline your choice)</p>"
+          ]
+        }
+      },
+      {
+        "id": "-iceRIPGa_y64nyD",
+        "title": "Text 25",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Questions About Evidence 5a and 5c, </strong><em><strong>Conversation with Dr. Zeiders</strong></em><strong>  and </strong><em><strong>Missing Link Report</strong></em></p>",
+            "<p><em></em></p>",
+            "<p>1. Foam cells are:  (underline your choice)</p>",
+            "<ul><li><strong>White blood cells</strong></li><li><strong>Red blood cells      </strong></li><li><strong>White blood cells after engulfing cholesterol </strong></li><p><strong></strong></p></ul>",
+            "<p>2. Normally cortisol prevents immune cells from getting into the blood vessel and making the plaque bigger.  </p>",
+            "<ul><li><strong>True</strong>   OR  <strong>False</strong> ?  (underline your choice)</li></ul>",
+            "<p></p>",
+            "<p>3. If cortisol is high for a long time the body starts to ignore it.  </p>",
+            "<ul><li><strong>True</strong>   OR  <strong>False</strong> ?  (underline your choice)</li></ul>",
+            "<p></p>"
+          ]
+        }
+      },
+      {"id": "y6DybJtbDZRFCyHn", "title": "Text 11", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 4 RESOURCES</h2>"]}},
+      [
+        {"id": "PAQrqeJe7CWI7RXm", "title": "Text 17", "content": {"type": "Text", "format": "html", "text": ["<p></p>", "<p><strong>EVIDENCE 4a:</strong></p>", "<p><strong><a href='https://youtu.be/hmzYniXqc7k'>Saliva Stress Test Video</a></strong></p>"]}},
+        {"id": "sA8hUUwRZPPtnxqJ", "title": "Stress Test Video", "content": {"type": "Image", "url": "curriculum/bio4community/images/salivaVideo.png"}}
+      ],
+      [
+        {
+          "id": "d_TOGGHRK-thLI3k",
+          "title": "Text 18",
+          "content": {"type": "Text", "format": "html", "text": ["<p></p>", "<p><strong>EVIDENCE 4b:</strong></p>", "<p><strong><a href='https://docs.google.com/document/u/0/d/1rG8YHG9_qjX1ePlh7eGF33agObLBnxDTT9fH-0EQaLU/edit'>Saliva Stress Test Results</a></strong></p>"]}
+        },
+        {"id": "l5XnTQKXRgjoMVVb", "title": "Stress Test Results", "content": {"type": "Image", "url": "curriculum/bio4community/images/SalivaTest.jpg"}}
+      ],
+      {"id": "pJWMxrvtD-WqOCVt", "title": "Text 9", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 3 RESOURCES</h2>"]}},
+      [
+        {
+          "id": "K0BDbmfEe2EO8hlX",
+          "title": "Text 15",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<p><strong></strong></p>", "<p><strong>EVIDENCE 3:</strong></p>", "<p><strong><a href='https://docs.google.com/document/u/0/d/1wsHs1AqpJRZwwZwetX6H7daeN-8LVPSaa2PE2MJJY7c/edit'>Rakesh Sharma Blood Test Report</a></strong></p>", "<p></p>"]
+          }
+        },
+        {"id": "SugYDH2bCKsWhycl", "title": "Blood Test Report", "content": {"type": "Image", "url": "curriculum/bio4community/images/MetabolicPanel.jpg"}}
+      ],
+      {"id": "lPVRGOOHSGjE1y9p", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 2 RESOURCES</h2>"]}},
+      [
+        {
+          "id": "OtokwmPZWbmTVWIi",
+          "title": "Text 5",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<p><strong></strong></p>", "<p><strong>Evidence 2a: </strong></p>", "<p><strong><a href='https://docs.google.com/document/d/1YSXBIHHgoGicQuyuoH9gZ-80ioT_1hHPcJbaxsLLgks/edit?usp=sharing'>All the Fuss About Cholesterol</a> (blog post)</strong></p>", "<p></p>"]
+          }
+        },
+        {"id": "rlxmohFtxdrShvw1", "title": "Blog Post", "content": {"type": "Image", "url": "curriculum/bio4community/images/blogCholesterol.png"}}
+      ],
+      [
+        {
+          "id": "ve4OAvnDcW4-lz4H",
+          "title": "Text 20",
+          "content": {"type": "Text", "format": "html", "text": ["<p><strong></strong></p>", "<p><strong>Evidence 2b: </strong></p>", "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=heart'>Plaque Animation</a></strong></p>"]}
+        },
+        {"id": "F1AduVhRZwwaS7Gx", "title": "Plaque Animation", "content": {"type": "Image", "url": "curriculum/bio4community/images/plaqueAnimation.png"}}
+      ],
+      {"id": "hXuK-DHuwuXmx9Lz", "title": "Text 8", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 1 RESOURCES</h2>"]}},
+      [
+        {"id": "YcJHTQkBql9Rm5Ss", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong></strong></p>", "<p><strong>Evidence 1: <a href='https://youtu.be/9d__Qy0NaJk'>The Effects of Stress on the Heart</a> (video)</strong></p>", "<p></p>"]}},
+        {"id": "XKBxVzPoEkDC-YQr", "title": "Effects of Stress Video", "content": {"type": "Image", "url": "curriculum/bio4community/images/effectsofStress.png"}}
+      ]
+    ],
+    "supports": []
+  }
+}

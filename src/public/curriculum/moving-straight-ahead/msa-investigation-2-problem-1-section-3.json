@@ -1,0 +1,62 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "yGR3lFv3tpyFXjDs",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Explore (Digging In) </strong></p>",
+            "<p><u>Providing for Individual Needs</u></p>",
+            "<p>For the Initial Challenge</p>",
+            "<p>Circulate and ask groups to explain their thinking. Put the emphasis on what evidence the group will use to justify their conclusion. Encourage all groups to listen to each member in order to reach a consensus on a single answer or to agree that more than one choice is reasonable and explain why. </p>",
+            "<p>If students hesitate about how to begin, you might offer suggestions for how to represent the data of the race. Ask the questions, but do not look for answers at this time. The questions are to suggest representation strategies.</p>"
+          ]
+        }
+      },
+      {
+        "id": "eck7UQ0hOwibiDTB",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>How might a table help? </li><li>How might a graph help? </li><li>Would an equation help? </li><li>Would a diagram or picture help?</li><li>What do we know about the race at the beginning?</li><li>If you were watching this race, what would you see happening with the brothers?</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "4Ik9jnpGsPbN87RJ",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>If students did not make tables or graphs in the Initial Challenge, then have some students make tables and graphs for each or have them ready for display. Or you can hand out <strong>Teaching Aid 2.1A: Emile and Henri’s Race</strong> with the example tables, graphs, and equations.</p>",
+            "<p></p>",
+            "<p>For Situation B: Using Equations, the claims are available on<strong> Teaching Aid 2.1B:  Amit’s Claims</strong>. You might want to print and cut apart the Teaching Aid. After formatively assessing students during the Initial Challenge, you can decide which claims to assign to groups, pairs, or individual students.</p>",
+            "<p>Also, you might want to display the claims for the class discussion.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p><u>Planning for the Summary</u></p>", "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know questions? What will you do if you do not have evidence? </p>"]}
+      },
+      {
+        "id": "L4LLESt3Hovv3Qld",
+        "title": "Text 14",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em><strong>Now What Do You Know?</strong></em></p>",
+            "<p><em><strong>Describe some strategies for solving problems that involve linear relationships. </strong></em></p>",
+            "<p><em>(Select student work that will show how to use a table, graph, or numeric reasoning to find how long the race will be.  Use this student work to show the connections between the representations.)</em></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

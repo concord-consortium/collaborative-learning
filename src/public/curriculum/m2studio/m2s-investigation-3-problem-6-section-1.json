@@ -1,0 +1,18 @@
+{
+  "type": "help",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<h2>Introduction to Math Modeling in CLUE</h2>", "<p>CLUE has three important tools to let you do modeling. They are already present in your workspace. Here are guides to the buttons on each tool tile.</p>", "<p><strong>Are you ready? Let&#x27;s go!</strong></p>"]
+        }
+      },
+      {"id": "njCI4Wmr6eYNc5go", "title": "CLUE Toolbar", "content": {"type": "Image", "url": "curriculum/m2studio/images/CLUEToolbar.png", "filename": "curriculum/m2studio/images/CLUEToolbar.png"}},
+      {"id": "cP2E6t6w3HOYTCUi", "title": "Toolbar buttons for the text tile", "content": {"type": "Image", "url": "curriculum/m2studio/images/Toolbar_Text.png", "filename": "curriculum/m2studio/images/Toolbar_Text.png"}},
+      {"id": "ePTfYCm7Q-oWGR2R", "title": "Toolbar buttons for the drawing tile", "content": {"type": "Image", "url": "curriculum/m2studio/images/Toolbar_Drawing.png", "filename": "curriculum/m2studio/images/Toolbar_Drawing.png"}},
+      {"id": "r8R3q6_aIIroLzYl", "title": "Toolbar buttons for the diagram tile", "content": {"type": "Image", "url": "curriculum/m2studio/images/Toolbar_Diagram.png", "filename": "curriculum/m2studio/images/Toolbar_Diagram.png"}}
+    ]
+  }
+}

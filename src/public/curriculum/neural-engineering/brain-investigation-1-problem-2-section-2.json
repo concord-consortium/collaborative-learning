@@ -1,0 +1,144 @@
+{
+  "type": "labWork",
+  "content": {
+    "tiles": [
+      {
+        "id": "mmCGD7TNgByT8ylv",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Program a Light Bulb to Turn On and Off</strong></p>", "<p>We can use a computer program to turn lights on and off in the same way you just did with the energy sticks. </p>", "<p>Here is a very simple program that turns a light bulb on and off based on a timer:</p>"]
+        }
+      },
+      {
+        "id": "KTt3F0BDHQIy_q9o",
+        "title": "Timer Controlled Lightbulb",
+        "content": {
+          "type": "Dataflow",
+          "programDataRate": 1000,
+          "programZoom": {"dx": 0, "dy": 0, "scale": 1.3973154362416127},
+          "program": {
+            "values": {"3": {"currentValues": {"nodeValue": 0}}, "5": {"currentValues": {"nodeValue": 0}}},
+            "id": "dataflow@0.1.0",
+            "nodes": {
+              "3": {
+                "id": 3,
+                "name": "Timer",
+                "x": 13.327721929811837,
+                "y": 78.80637617101036,
+                "inputs": {},
+                "outputs": {"num": {"connections": {"5-undefined-nodeValue": {"node": 5, "input": "nodeValue", "data": {}}}}},
+                "data": {"plot": false, "timeOnUnits": "sec", "timeOn": 5, "timeOffUnits": "sec", "timeOff": 5}
+              },
+              "5": {"id": 5, "name": "Demo Output", "x": 308.8563084366732, "y": 117.96238923739458, "inputs": {"nodeValue": {"connections": {"3-num-undefined": {"node": 3, "output": "num", "data": {}}}}}, "outputs": {}, "data": {"outputType": "Light Bulb", "demoOutput": 0}}
+            }
+          }
+        }
+      },
+      {
+        "id": "E_FBVtB8YmRI-PrO",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Drag this program to your workspace and modify it in the following way: instead of a timer, use a generator to control the light bulb. To do so, delete the timer and add a generator. Select the &quot;Square&quot; option and add some logic to make the light bulb only turn on when the generated signal is over 0.5. </p>"
+          ]
+        }
+      },
+      {
+        "id": "YG4F_eF_sf5xRTaY",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Measure your reaction time</strong></p>",
+            "<p>How long does it take you to react to signals, such as a changing street crossing sign or catching a ball? </p>",
+            "<p>As explained in the <a href=' https://www.youtube.com/watch?v=gJEuT3aKcMI'>video</a> that you watched in class, you will work with a partner to measure your reaction time, comparing your dominant and non-dominant hand. Do you expect to observe a difference in reaction time between your two hands?</p>",
+            "<p>To find out, follow these steps:</p>",
+            "<p>1. Decide who is the Dropper and who is the Catcher.</p>",
+            "<p>2. The catcher should extend their <strong>dominant</strong> hand (the hand used for writing) with the index finger and thumb about 1 cm apart. The dropper should hold the ruler at the top such that catcher has their thumb and index fingers on either side of the zero cm mark.</p>",
+            "<p>3. When the catcher says they are ready. the dropper should count up, in their head, to a number between 3 and 5 (use a different number each time). When the number is reached, they drop the ruler.</p>",
+            "<p>4. Catcher catches the ruler as fast as they can. Ignore any times the ruler falls on the ground. </p>",
+            "<p>5. Enter the ruler cm value closest to Catcher’s pinch point in the table below (you should first drag the table to your worksheet). </p>",
+            "<p>6. Repeat steps 2-5 five times.</p>",
+            "<p>7. Repeat the process with the catcher&#x27;s <strong>non-dominant</strong> hand. </p>"
+          ]
+        }
+      },
+      {"id": "t6WGDE4bXbZiFY18", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Results Table </strong></p>", "<p>Drag these tables into your Workspace and use them to record and calculate your results.</p>"]}},
+      [
+        {
+          "id": "PLU-GBhowTU1JCQx",
+          "content": {
+            "type": "Table",
+            "name": "Dominant Hand",
+            "columns": [
+              {"name": "Result", "width": 80, "values": ["1", "2", "3", "4", "5", "Shortest (s)", "Longest (l)", "Range (l - s)", "Average"]},
+              {"name": "Distance (cm)", "width": 90, "values": ["", "", "", "", "", "", "", "", ""]},
+              {"name": "Time (ms)", "width": 90, "values": ["", "", "", "", "", "", "", "", ""]}
+            ]
+          }
+        },
+        {
+          "id": "CwAr5X7907oa2lHB",
+          "content": {
+            "type": "Table",
+            "name": "Non-Dominant Hand",
+            "columns": [
+              {"name": "Result", "width": 80, "values": ["1", "2", "3", "4", "5", "Shortest (s)", "Longest (l)", "Range (l - s)", "Average"]},
+              {"name": "Distance (cm)", "width": 90, "values": ["", "", "", "", "", "", "", "", ""]},
+              {"name": "Time (ms)", "width": 90, "values": ["", "", "", "", "", "", "", "", ""]}
+            ]
+          }
+        }
+      ],
+      {"id": "0OF_cK5_L_qGX9-6", "content": {"type": "Text", "format": "html", "text": ["<p>Use the table below to convert drop distance (in cm) to time (in milliseconds, which is thousands of a second):</p>"]}},
+      {
+        "id": "X9ptLq-bG2EiGRWN",
+        "content": {
+          "type": "Table",
+          "name": "Reaction Time Look Up Table",
+          "columns": [
+            {"name": "distance (cm)", "width": 120, "values": ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "28", "29", "30"]},
+            {"name": "time (ms)", "width": 120, "values": ["101", "111", "120", "128", "136", "143", "150", "156", "163", "169", "175", "181", "186", "192", "197", "202", "207", "212", "217", "221", "226", "235", "239", "243", "247"]}
+          ]
+        }
+      },
+      {
+        "id": "JbUupMvRge3gzTsN",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Discuss the following questions with your partner and enter your answers in your workspace:</p>", "<p>1. Why were you asked to measure your reaction time five times with each hand?</p>", "<p>2. What factors affect our reaction time?</p>"]
+        }
+      },
+      {
+        "id": "JsvQJqP1wapfHCyt",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Extension activity</strong></p>",
+            "<p>With your partner, take a video of one of you catching an object and play it in slow motion.</p>",
+            "<p>On iPhone: Go into the camera and click “Slo-mo” to take slow motion video</p>",
+            "<p>On Android: Go into the camera, click “video” and then select “slow motion” option.</p>",
+            "<p>What did you observe when watching the slow motion videos? Please document your observation in your worksheet. </p>"
+          ]
+        }
+      },
+      {
+        "id": "vQNxXhP0yeYb6bGi",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Making models</strong></p>",
+            "<p>With a group of 2-3 other students, make a list of all body systems that affect reaction time. With these body systems in mind, make an illustrated (drawing) and annotated (text) model of the sequence of events occurring during the time at which the ruler was falling. You can use a drawing tile to make your model within your workspace or draw the model on paper/whiteboard and then upload a picture to your workspace. Be prepared to share your thinking during a whole class discussion. </p>",
+            "<p><strong>Reflection</strong></p>",
+            "<p>At the end of the activity, please record your current thinking and learning in your Learning journal (see Reflection tab). </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

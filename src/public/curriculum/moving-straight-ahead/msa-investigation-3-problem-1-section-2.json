@@ -1,0 +1,58 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "91vRj_sL2o5_Z67S",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Launch (Getting Started)</strong></p>",
+            "<p>Connecting to Prior Knowledge</p>",
+            "<p>Review the strategies students have used for solving equations in this unit:  using a table; using a graph; and using numeric reasoning.  </p>",
+            "<p>Display <strong>Teaching Aid 3.1</strong>. Tell students that the graph and table are for Alana’s pledge plan, which is represented by the equation <em>A</em> = 5 + 0.5<em>d</em>, where <em>A</em> is the amount of money Alana collects from each sponsor for walking <em>d</em> kilometers</p>"
+          ]
+        }
+      },
+      [
+        {"content": {"type": "Table", "name": "", "columns": [{"name": "d", "type": "number", "values": [0, 1, 2, 3, 4, 20, 25, 30]}, {"name": "A", "type": "number", "values": [5, 5.5, 6, 6.5, 7, 15, 17.5, 20]}]}},
+        {
+          "layout": {"height": 365},
+          "content": {
+            "type": "Geometry",
+            "title": "Walkathon Earnings",
+            "board": {"properties": {"axisLabels": ["d", "$"], "axisNames": ["Distance (km)", "Amount Earned"], "axisMin": [-2, -5], "axisRange": [60, 50]}},
+            "objects": [{"type": "movableLine", "parents": [{"type": "point", "parents": [3, 6.5]}, {"type": "point", "parents": [30, 20]}]}]
+          }
+        }
+      ],
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "A = 5 + 0.5d",
+            "<p><strong>Suggested Questions </strong> </p>",
+            "<ul><li>How are the points (3, 6.5) and (30, 20) related to the equation A = 5 + 0.5d? (The point (3, 6.5) means that d = 3 and A = 6.5, so6.5 = 5 + 0.5(3) is a true statement. Similarly, for (30, 20), 20 = 5 + 0.5(30) is also true.) </li><li>We say that (3, 6.5) and (30, 20) are solutions to the equationA = 5 + 0.5d. Find another point on the line whose coordinates area solution to the equation. (Be sure students explain why they are solutions—substitute the values into the equation and check if the resulting equation is true. Students can find other solutions by choosing a value for d or A and finding the corresponding value of the other variable.) </li><li>Do you think every point on the line corresponds to a solution to the equation? (Yes, although some values may not be realistic. For example, (100, 55) is not realistic because 100 km is an unreasonable distance for a student to walk in a walkathon.)  </li></ul>",
+            "<p>Take one or two of the points suggested by students and ask:   </p>",
+            "<ul><li>How can you locate this point on the line? (Draw the vertical and horizontal lines corresponding to the coordinates of the point.) </li><li>Find a pair of corresponding values in the table that are solutions to the equation. (Students may have to extend the table.)  </li><li>Write two questions about Alana’s pledge plan that could be answered by the coordinates of the point (14, 12). (Students can say either “How far did Alana walk if a sponsor donates +12?” or “How much money would a sponsor donate if Alana walked 14 kilometers?”)  </li><li>How can you use the equation for Alana’s plan to check the answer to the question you made up? (You can substitute d = 14 and A = 12 into the equation A = 5 + 0.5d. If the resulting equation is true, then (14, 12) is a solution.)  </li><li>How can you use a graph to find the number of kilometers that Alana walked if a sponsor donated $17? (You go to 17 on the vertical axis and move straight across horizontally until you intersect the line. Then, move directly down until you intersect the horizontal axis. The value you hit on the horizontal axis is the number of kilometers walked.)  </li><li>How can you use a graph to solve 20 = 5 + 0.5d? What would the answer mean? (Go to 20 on the vertical axis and move horizontally until you intersect the line. Read the “d” value at that point. This gives the distance Alana must walk in order to raise $20 from each sponsor.) </li><li>What happens if you choose a point that is not visible on this sectionof the graph, such as (70, 40)? Does this point lie on the line? Explain. (Students might suggest extending the line. Some might suggest checking to see if the coordinates of the point make the equation a true statement.)  </li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Presenting the Challenge</p>",
+            "<p>Display <strong>Graphic Organizer 3.1: Pouches and Coins</strong>. Tell the class about the pouches and gold coins used in the Kingdom of Montarek. </p>",
+            "<ul><li>The number of gold coins on each side of the equal sign is the same, but some coins are hidden in the pouches. </li><li>In each situation, each pouch contains the same number of one-dollar gold coins.</li><li>The challenge is to find the number of coins in each pouch</li></ul>",
+            "Have students begin this work independently and then compare their strategies for finding the number of coins in the pouches with a partner."
+          ]
+        }
+      }
+    ]
+  }
+}

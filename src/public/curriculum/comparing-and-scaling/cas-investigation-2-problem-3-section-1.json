@@ -1,0 +1,36 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "StDJGTIiommfYvQv",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In a proportional relationship the multiplicative relationship between the quantities is always the same. The unit rate or <em>constant of proportionality</em> tells us about the multiplicative relationship between the two quantities. </p>",
+            "<p>For example, the unit rate for the cost of one pizza at Royal’s is $13.</p>"
+          ]
+        }
+      },
+      {"id": "ClNpnLccfxYgj354", "content": {"type": "Text", "format": "html", "text": ["5 pizzas for $65", "              or", "1 pizza for $13", "<p>We can use the unit rate to write a general equation:</p>", "Cost C for N pizzas is 13N", "              or", "C = 13N"]}},
+      {
+        "id": "7MgYzWCYj6RcAfZy",
+        "content": {"type": "Text", "format": "html", "text": ["<p>The equation C = 13N relates cost of pizza and number of pizzas. This equation represents a proportional relationship because we multiply one variable by a constant number to get the value of the other variable.</p>"]}
+      },
+      {
+        "id": "hY7w8AOKvLjaMzDf",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>C = 13N</p>",
+            "<p>13 is the unit rate or <strong>constant of proportionality</strong></p>",
+            "<p><em>What is the other constant of proportionality? Is it useful in this situation?</em></p>",
+            "<p>In this Problem we will look at tables, equations, and graphs of proportional relationships.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

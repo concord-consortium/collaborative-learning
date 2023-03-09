@@ -1,0 +1,64 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"id": "O9QDXCQOqVyYnwLl", "content": {"type": "Text", "format": "html", "text": ["For each scenario answer the questions. Explain your reasoning."]}},
+      {
+        "id": "xlviXyZheH7sqgK2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Smoothie Bar</strong>",
+            "<p>Zane is 12 years old and decides to share a Smoothie Bar with his sister Stella, who is 4 years old. He shares it according to the ratio of their ages. The bar is marked into 4 equal segments.</p>",
+            "<ul><li>How would they share the Smoothie Bar?</li></ul>"
+          ]
+        }
+      },
+      {"id": "123407OCT2020", "title": "Smoothie Bar", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-3_SmoothieBar.png"}},
+      {"id": "08OCT20200322pm", "title": "Smoothie Bar Possible Answer", "display": "teacher", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-3_SmoothieSolution_350w.png"}},
+      {
+        "id": "sm2hnZD2H05KPpab",
+        "content": {"type": "Text", "format": "html", "text": ["<strong>Reading Speeds</strong>", "<p>Mitch reads 480 words in 3 minutes.</p>", "<ul><li>How long will it take him to read a book that has 20,000 words?</li><li>How many words can he read in an hour?</li></ul>"]}
+      },
+      {"display": "teacher", "id": "08OCT20200323pm", "title": "Reading Speed Possible Answer", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-3_ReadingSpeedsSolution_350w.png"}},
+      {"id": "KBwsVGW_xmCL6Jm2", "content": {"type": "Text", "format": "html", "text": ["<strong>Height of Trees</strong>", "<p>The triangles in this picture are similar.</p>", "<ul><li>Find the height of the tallest tree.</li></ul>"]}},
+      {"id": "08OCT20200324pm", "title": "Height of Trees", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-3_HeightOfTrees.png"}},
+      {"display": "teacher", "id": "08OCT20200325pm", "title": "Tree Height Possible Answer", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-3_HeightOfTreesSolution_350w.png"}},
+      {
+        "id": "aT6cE74grKUNClQu",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Student Council Representation</strong>",
+            "<p>Students at the Mighty Middle School create a student council. The number of students in each grade is:</p>",
+            "<p>Grade 6 has 121 students</p>",
+            "<p>Grade 7 has 119 students</p>",
+            "<p>Grade 8 has 135 students</p>",
+            "<p>Each grade will get one student representative for every 30 students in the grade.</p>",
+            "<ul><li>How many representatives will each class have?</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p></p>",
+            "<p>Grade 6  (1 representative)/(30 students in the grade) = (4.03333… representatives)/(121 students in the grade)</p>",
+            "<p>Grade 7  (1 representative)/(30 students in the grade) = (3.966666… representatives)/(119 students in the grade)</p>",
+            "<p>Grade 8  (1 representative)/(30 students in the grade) = (4.5  representatives)/(135 students in the grade)</p>",
+            "<p>Depending on how the parts of 30 are handled, the grades might get:</p>",
+            "<p>Grade 6: 4 Representatives,</p>",
+            "<p>Grade 7: 3 or 4 Representatives, and</p>",
+            "<p>Grade 8: 4 or 5 Representatives.</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

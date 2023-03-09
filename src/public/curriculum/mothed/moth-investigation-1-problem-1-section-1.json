@@ -1,0 +1,99 @@
+{
+  "type": "getStarted",
+  "content": {
+    "tiles": [
+      {
+        "id": "D-ugOewQGtaRzAEb",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h2>Introduction to working and collaborating in CLUE</h2>",
+            "<p><strong>1. Orientation - who am I here?</strong></p>",
+            "<p>During the first session with CLUE, please <strong>use this time to start learning about moths </strong><strong><em>as an adult learner, without thinking about your students</em></strong><em>.</em> Allow yourself time to learn and think, to experience the material as a learner, not as a middle or primary school student or a teacher.  During subsequent sessions, we will vary the role you play.</p>"
+          ]
+        }
+      },
+      {"id": "2RlvDLXdo1r8marQ", "title": "Group work is a key to CLUE", "content": {"type": "Image", "url": "curriculum/mothed/images/classroom.png"}},
+      {
+        "id": "VcE8xbkZ9mOCVAsw",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>2. Groups in CLUE</strong></p>",
+            "<p>In CLUE, everyone works in a group with up to four people. When you start an activity, CLUE suggests a group randomly or asks you to start a new group.  You can do either: then, <strong>change groups by clicking on the group number in the upper right corner.</strong>  Join your table&#x27;s group. When you change groups, your work moves with you.</p>",
+            "<p><strong>Groups are important in CLUE.</strong> You can learn from table-mates in your group and they can learn from you. Many features of CLUE are designed to help you share information and learn from others in your group and in your class.</p>"
+          ]
+        }
+      },
+      {
+        "id": "EBCpyeDU_FkLtXq8",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>3. You in CLUE</strong></p>",
+            "<p>On the right is <strong>your</strong> workspace. To edit your workspace, you must first add a <strong>tile</strong>. You get a tile in your workspace by either</p>",
+            "<ul><li><strong>Dragging a tile from the content (left side) in CLUE into your workspace</strong></li><li><strong>Dragging a new  tile from the menu on the left of your workspace</strong></li><li><strong>Click a button on the menu to add a new tile to the bottom of your workspace</strong></li></ul>",
+            "<p>All tiles have a <strong>waffle</strong> (gray box with six dots) in the upper right corner if you hover over it. To drag the tile, click the waffle and hold it down as you drag it to your workspace. As you drag the tile into the workspace, a blue line shows where the tile will go when you let go.</p>",
+            "<p>OK, get ready... Here we go!</p>"
+          ]
+        }
+      },
+      {
+        "id": "_rU9plvleix0FlBS",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>4. Group work - discussion</strong></p>",
+            "<p><em>First, check that all the members of your group have the same group number at the top right of your screen. </em></p>",
+            "<p>Talk about moths with your group.  What do you know about moths? </p>",
+            "<p>Take some notes on your discussion in CLUE. Open a text tile on the right in your <strong>Workspace</strong> (click the menu button with the letter A on it). </p>",
+            "<p>Take notes and make a list of what your group knows. </p>"
+          ]
+        }
+      },
+      {"id": "uotBFbYpZfaMbTBf", "content": {"type": "Text", "format": "html", "text": ["<p><strong>5. Brainstorm some research questions</strong></p>", "<p>What do you want to know more about? Take time to think about it and write potential questions in a new tile.</p>"]}},
+      {
+        "id": "_aucv3h3VrZ_VNPK",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>6. When ready, share with the group</strong></p>", "<p>Use the group controls so that you can see and share each others&#x27; notes. See the image below for how to do that.  (Ignore the &quot;Publish&quot; feature for now).</p>"]
+        }
+      },
+      {"id": "lJEIgDWNRXk02nZi", "title": "CLUE Interfaces for Sharing", "content": {"type": "Image", "url": "curriculum/mothed/images/share.jpg"}},
+      {"id": "eGVyLGBx1SzYZJYh", "content": {"type": "Text", "format": "html", "text": ["<p><strong>7. Discuss the research questions</strong></p>", "<p>Work with the members of your group to explore each other&#x27;s questions and ideas. </p>"]}},
+      {
+        "id": "sA84OvZZVt-8LVM3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>8. Publish (see image above) your work to the class</strong></p>",
+            "<p>You can choose one member of your group to publish a summary of the group&#x27;s work, or you may each publish.  When you publish, your workspace will appear under the pink &quot;Class Work&quot; tab (right-hand side of CLUE).</p>"
+          ]
+        }
+      },
+      {"id": "K3Rf_sGYF6qq41qE", "content": {"type": "Text", "format": "html", "text": ["<h3>---------------------------- BIODIVERSITY ------------------------------</h3>"]}},
+      {
+        "id": "EvTt2Ui0YeSiM8NV",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>1. In a text tile, answer the following questions. <em>[Hint: drag </em><strong><em>this</em></strong><em> tile into your workspace, then type your answers into it.]</em></p>",
+            "<ol><li>How many different species (or types) of insects are there in the entire world?</li><li>How many different species of insects are there in Michigan?</li><li>How many different species (or types) of moths are there in the entire world?</li><li>How many different species of moths are there in Michigan?</li><li>How many different species (or types) of birds are there in the entire world?</li><li>How many different species of birds are there in Michigan?</li><p></p></ol>",
+            "<p>2.  Share with your group and come to a consensus answer for each question.</p>",
+            "<p></p>",
+            "<p>3.  Open a Table tile and enter your numbers from above in a table format.  (Text in tables does not wrap yet, so shorten and abbreviate the questions!)</p>",
+            "<p></p>",
+            "<p>4. Decide as a group on a table format, and choose one person to publish the group&#x27;s table.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

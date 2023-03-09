@@ -1,0 +1,19 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["<h3>Situation A. Modeling the Data</h3>Does the relationship between the number of layers and the breaking weight appear to be linear or nonlinear?\n\nHow do the graph and the table show this relationship?"]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation B. Making Predictions</h3><ol><li>Suppose you could split layers of paper in half. What breaking weight would you predict for a bridge 2.5 layers thick? Explain.</li><li>Predict the breaking weight for a bridge 6 layers thick. Explain your reasoning.</li><li>Test your prediction of strength for the 6-layer bridge. Explain why results from such a test might not exactly match predictions.</li></ol>"
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

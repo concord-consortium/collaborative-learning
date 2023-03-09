@@ -1,0 +1,15 @@
+{
+  "type": "MathReflection4",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["In this unit we are exploring quadratic functions and expressions and how they can be used to solve problems and make predictions. At the end of this Investigation, <em>What do you know about quadratic functions and expressions? </em>"]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

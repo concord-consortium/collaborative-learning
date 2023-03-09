@@ -1,0 +1,49 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Explore (Digging In)</strong></p>",
+            "<p>Providing for Individual Needs</p>",
+            "<p>As you move from group to group, watch and listen to how students are discussing equivalent expressions. It will be important for them to be flexible with equivalent expressions.</p>",
+            "<p>For example, if <em>ax + b = cx + d</em> and <em>y1 = ax + b</em> and <em>y2 = cx + d</em>, then <em>y1 = y2</em>.</p>",
+            "<p>Be sure students are recording their methods and checking their answers. See how students are translating the pouches and coins in Equation 2. Students can write the left side as (<em>x</em> + 2) + (<em>x</em> + 2) + (<em>x</em> + 2) or as 3(<em>x</em> + 2) and the right side as 12. (PORTAYAL) Return to this in the Summary and ask if the two expressions are equivalent and why. This will review the Distributive Property, which was developed in earlier Units.</p>",
+            "<p>Some students may struggle with writing the solutions to the equations.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<p>For Equation 1, ask:</p>",
+            "<ul><li>What is your equation? (4x + 2 = 18 or 2(2x + 1) = 18)</li><li>What was the first thing you did with the pictorial equation to begin solving it? (Using the first method above, the first step would be to take away 2 coins from each side.)</li><li>How can you show this with your equation? (Subtract 2 from each side. This results in 4x + 2 - 2 = 18 - 2 or 4x = 16.)</li><li>What did you do next? (Split the coins into four equal sets.)</li><li>How can you show this with your equation? (4x = 4(4)) </li><li>What was your next step? (Set each of the 4 pouches equal to one of the 4 sets of coins.)</li><li>How can you show this with your equation? (Divide by 4 on each side. So, x = 4.) </li><li>How can you check your answer? (Using the coins and pouches, you can add up all the coins inside and outside the pouches on the left side and then check to make sure your result equals the number of coins on the right side. On the left side, there are 4 pouches, each of which we think contains 4 coins. If we are correct, there are 16 coins in the pouches. If you add those 16 coins to the 2 coins outside the pouches, the result is 18 coins on the left side. There are also 18 coins on the right side, so the answer is correct.",
+            "Or, you can substitute 4 into the equation for x. The result shows that 4 is correct.</li>",
+            "     4(4) + 2 = 18",
+            "       16 + 2 = 18",
+            "           18 = 18"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Planning for the Summary</p>",
+            "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence?</p>",
+            "<p><strong>Now What Do You Know?</strong></p>",
+            "<p><strong>Describe a strategy for solving equations using what you know about equality. How do you know if your answer is correct?</strong></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

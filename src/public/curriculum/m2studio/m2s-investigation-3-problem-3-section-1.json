@@ -1,0 +1,59 @@
+{
+  "type": "help",
+  "content": {
+    "tiles": [
+      {
+        "id": "eyaeZR9mZLtcZNnb",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Food Waste in New York state (NYS)</strong></p><p>[2] Effective January 1, 2022, the NYS Food Donation and Food Scraps Recycling law requires businesses and institutions (including universities) that generate an annual average of two tons of wasted food per week or more must: </p><p>1. donate excess edible food; and </p><p>2. recycle all remaining food scraps if they are within 25 miles of an organics recycler (composting facility, anaerobic digester, etc.).</p><p>How does NYS determine which universities generate 4,000 lbs of waste (or more) per week on average? They (essentially) use the following formulas:</p><p><em>Residential Institutions</em> </p><p>Food waste (lbs/yr) = 0.35 lbs/meal * N of students * 405 meals/student/yr </p><p><em>Non-Residential Institutions (e.g., community colleges) </em></p><p>Food waste (lbs/yr) = 0.35 lbs/meal * N of students * 108 meals/student/yr</p>"
+          ]
+        }
+      },
+      {
+        "id": "NDHxutUepD9_UjnW",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Choice of 0.35 </strong></p><p>“Several of the studies cited above, and others as well, have reported information on food waste generation from college and university dining facilities. These include U.S. Environmental Protection Agency (1998d), Kim et al. (1997), Shanklin et al. (1997), Smith et al. (1998), the California Integrated Waste Management Board (2001), and Clark &amp; Law (2000). These have most commonly reported waste generation per meal served, with values ranging from 0.27 lbs/meal to 0.73 lbs/meal, a mean value of 0.39 lbs/meal, and a median value of 0.34 lbs/meal. A value of 0.35 lbs/meal, between the mean and median literature values, was used to estimate food waste generation for this study. This value was judged to be more accurate than the information self-reported by Connecticut institutions that provided information for this study.” [1]</p>"
+          ]
+        }
+      },
+      {
+        "id": "YwwEee4hJXa4HLSA",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Meal estimates</strong></p><p>&quot;Again, an estimate of the number of meals served per year was required to convert food waste generated per meal to total food waste generated per year. Meals served per year were estimated as a function of enrollment, dependent also on whether a school is classified as a residential or non-residential institution. Seven residential institutions provided data that generated a mean estimate of 1.5 meals served per  student per day (range: 0.66 meals/student-day - 2.98 meals/student-day; median = 1.38 meals/student-day).  Assuming that food service operates 270 days a year, this generates an estimate of 405 meals served per enrolled student per year for residential institutions. Five non-residential institutions provided data with a mean value of approximately 0.4 meals/student-day (range: 0.17 meals/student-day - 0.96 meals/student-day; median = 0.29 meals/student-day). Assuming the same value for food service activity on 270 days out of the year, this generates an estimate of 108 meals served per enrolled student per year for non-residential institutions.&quot; [1]  </p>"
+          ]
+        }
+      },
+      {"id": "OdSkEm-ZkZ4uG_4x", "title": "Food Waste Validation Model", "content": {"type": "Image", "url": "curriculum/m2studio/images/FoodWasteValidate.png", "filename": "curriculum/m2studio/images/FoodWasteValidate.png"}},
+      {"id": "RUeVrDKwUcmyjjiM", "title": "Text 9", "content": {"type": "Text", "format": "html", "text": ["<p>Recreate the model shown here in a diagram tile, then drag these questions into your worksheet and edit them to add your responses.</p>"]}},
+      {"id": "VN_25iI3RPwFoPni", "title": "FoodWasteValid_ModelSense", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Does the Food Waste Model make sense?</strong></p><p>Use this space to share your thoughts as you examine each term of the model for in more detail. </p>"]}},
+      {
+        "id": "Z035-QbbZr6MNr4s",
+        "title": "FoodWasteValid_Practice",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>How does the Food Waste Model work in practice?</strong></p><p>Use this space to write your responses to questions in the <strong>Test the model</strong> section. </p>"]}
+      },
+      {
+        "id": "jHWN3eLr-eKHUPiO",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>References</strong></p><p>[1] Alexander, K. C.; Atlantic Geoscience Corp.; Connecticut. Dept. of Environmental Protection.; Draper/Lennon, Inc.; &quot;Identifying, quantifying, and mapping food residuals from Connecticut businesses and institutions an organics recycling planning tool using GIS ; final report&quot; Recycling Program (Conn.), 2001.</p><p>[2] NYS Department of Environmental Education, &quot;Food Donation and Food Scraps Recycling Law&quot;, accessed online 12/31/22, https://www.dec.ny.gov/docs/materials_minerals_pdf/foodscrapsleg.pdf</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

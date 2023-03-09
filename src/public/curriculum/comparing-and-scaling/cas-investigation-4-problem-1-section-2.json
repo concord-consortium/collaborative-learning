@@ -1,0 +1,48 @@
+{
+  "type": "MathReflection2",
+  "content": {
+    "tiles": [
+      {"id": "AiO4MFTlQtT9guF3", "content": {"type": "Text", "format": "html", "text": ["<p>In this Unit and in prior Units we have been exploring problem situations that require proportional reasoning.</p>", "<p>What does it mean to reason proportionally?</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Recognize and analyze proportional statements.</p>",
+            "<p>Broaden understanding that proportional reasoning uses multiplicative thinking instead of additive thinking, and can be used to make decisions and solve problems.</p>",
+            "<p>Notice that:</p>",
+            "<ul><li>proportional reasoning is about making comparisons: part-to-part and part-to-whole</li><li>Rates are a type of ratio</li><li>Unit rates can be helpful in solving problems</li><li>Unit rate or constant of proportionality can be found in tables, graphs, and equations</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "uH29JbhCKLNV7ybj",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflections on the Mathematical Practices</strong></p>",
+            "<p>As we worked on the Problems in this Investigation, we used prior mathematical knowledge to make sense of them. We also applied Mathematical Practices to solve the Problems. Think back over your work, the ways you thought about the Problems, and how you used Mathematical Practices.</p>",
+            "<p>In Problem 2.1, our group used two different methods. In the first method we doubled the cost of 10 pizzas to find the cost of 20 pizzas at Royal Pizza. In the second method we found the cost of 1 pizza at Royal. Then we multiplied that unit rate by 20 to find the cost of 20 pizzas. Both methods gave  the same answer. We agreed that both methods work and both used ratios.</p>"
+          ]
+        }
+      },
+      [{"id": "meQEaB-vfJt6q3Pl", "content": {"type": "Text", "format": "html", "text": ["<p>Sophie' Work:</p>"]}}, {"id": "5KcrV7fz9iVJUS3A", "content": {"type": "Text", "format": "html", "text": ["<p>Marla's Work:</p>"]}}],
+      [
+        {"content": {"type": "Text", "format": "html", "text": ["  10              10 × 2              20", "______ = ___________ = _______", "$120       $120 × 2       $240 "]}},
+        {"content": {"type": "Text", "format": "html", "text": ["   10              1               1 × 20              20", "_______ =  ____  = ____________ = ________", "$120          $12       $12 × 20        $240 "]}}
+      ],
+      {
+        "id": "63f4llCTMkeiq7mr",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<ul><li>What Mathematical Practice(s) did the group use to solve this Problem?</li><li>What other Mathematical Practices did you use to solve Problems in this Investigation?</li><li>In what ways is the mathematics in this Problem connected to prior mathematics?</li></ul>"]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

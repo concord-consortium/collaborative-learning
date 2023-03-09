@@ -1,0 +1,21 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "The manager of TTF is considering how much money they should charge each customer. The total money he collects from customers is called his ***income*** or ***revenue***. But he also has ***costs***, which he has to pay out of his revenue. What is left is called his ***profit***. Answer the questions below to help the manager analyze his income and profit and other expenses.",
+            "For the income, profit, and unpaid balance below, describe how the equation can be used to make predictions."
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "markdown", "text": ["**Daily Income**", "If the standard charge per customer at TTF is $25, what equation relates the daily income *I* to the number *n* of customers?"]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["**Daily Profit**", "If the operating costs of TTF is $500 per day, what equation relates the daily profit *P* to the number *n* of customers?"]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["**Unpaid Balance**", "If TTF bought a new rope bridge for $4,500 and then makes monthly payments of $350, what equation relates the unpaid balance *B* after *m* monthly payments?"]}}
+    ]
+  },
+  "supports": []
+}

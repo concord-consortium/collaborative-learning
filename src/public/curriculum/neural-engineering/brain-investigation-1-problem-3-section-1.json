@@ -1,0 +1,21 @@
+{
+  "type": "intro",
+  "content": {
+    "tiles": [
+      {
+        "id": "V-hej2RQXhIlHFUd",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Today you will learn about the nervous system and investigate different neurological conditions that could affect movement. </p>",
+            "<p><strong>Learning Objectives</strong></p>",
+            "<p>By the end of this activity, you should be able to describe how different neurological conditions (e.g., spinal cord injury) impact movement.</p>"
+          ]
+        }
+      },
+      {"id": "7ya4R1wIYZnjlebp", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Do Now</strong></p>", "<p>What do you already know about how the nervous system controls movement? Add a text tile in your workspace and answer this question.  </p>"]}},
+      {"id": "msAcurKPDmjIhMnE", "title": "Spine [Credit: Montana DPHHS]", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/lesson3NervousSystem1.jpeg", "filename": "curriculum/neural-engineering/images/lesson3NervousSystem1.jpeg"}}
+    ]
+  }
+}

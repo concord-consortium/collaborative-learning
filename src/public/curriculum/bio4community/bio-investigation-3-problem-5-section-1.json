@@ -1,0 +1,72 @@
+{
+  "type": "chapter3",
+  "content": {
+    "tiles": [
+      {"id": "taHIt0qOAxxRpjOn", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<h3>CHAPTER 5: JOSUÉ’S SOLUTION</h3>"]}},
+      {
+        "id": "q2FQk6x5y94A_pAq",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The report helped Felix piece the story together. He now understood what was happening to him. Josué was right all along, stress was making him sick. Now the question was what on Earth could he do about it?</p>",
+            "<p>That evening while relaxing on the couch with Josué, Felix told him everything he figured out. He expected Josué to be smug with satisfaction that he won this argument. Josué wasn’t. Instead, he handed him his phone. </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {"id": "zZEL3hhP1DVhc4xQ", "title": "Felix with Josue using a stress app", "content": {"type": "Image", "url": "curriculum/bio4community/images/Felix_S3.jpg", "filename": "curriculum/bio4community/images/Felix_S3.jpg"}},
+      {
+        "id": "LX7WQPgIquRRE1du",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Josué</strong>: Look I found this app called “InsightTimer” that can help you. It’s a meditation app that can help you relax. I looked at a bunch of them and this is the best rated. I tried it too and it is really easy to use. Please, just try it. </p>",
+            "<p><strong>Felix</strong>: You found this for me?</p>",
+            "<p><strong>Josué</strong>: Of course I did, mi amor. I care about you!</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "VIfU2_RiIIs5bwfL",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Josué gave him one of his sarcastic half smiles, the one that was both sweet and annoying at the same time. It was good to know Josué always had his back. Felix downloaded the app and tried it out. The app guided him through a series of meditations and breathing exercises. Every time he used it, he felt like he could breathe a little easier and the heavy feeling in his chest would go away for a bit. As he kept it up regularly, Felix began to notice himself sniffling a lot less. He still got sick more often than Josué, but not as often as before he started using the app. His health was better, but still not 100%. </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "bn3YEHakSdnViIG8",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Felix</strong>: Remember how I said I was going to make more time for myself to do some stuff that I love.</p>",
+            "<p><strong>Josué</strong>: Yeah</p>",
+            "<p><strong>Felix</strong>: Well, I haven’t played guitar in a while and I really used to love it.</p>",
+            "<p><strong>Josué</strong>: Of course I remember. You played for me on our first date, remember? It was so cheesy but cute. </p>",
+            "<p><strong>Felix</strong>: Rude. (Josué laughs) Well anyway, I decided to join the guitar club.</p>",
+            "<p><strong>Josué</strong>: Isn’t Camila in one of those?</p>",
+            "<p><strong>Felix</strong>: Yeah! She’s actually the one that told me about it. The people who started the movie club also started this. So it just feels like such a safe space.</p>",
+            "<p><strong>Josué</strong>: That’s so great! </p>",
+            "<p><strong>Felix</strong>: I know right? I’m so excited, I couldn’t wait to tell you! </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {"id": "2zuIgUcqt5M9_Rkp", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<p>They both laugh, enjoying the light heartedness they felt from knowing Felix was taking steps in the right direction towards a healthier lifestyle.</p>"]}},
+      {"id": "OS4ualLezTokmm3C", "title": "Text 6", "content": {"type": "Text", "format": "html", "text": ["<h2>The End!</h2>"]}},
+      {"id": "6LSk26QkUQ15lhEw", "title": "Text 8", "content": {"type": "Text", "format": "html", "text": ["<ul><li><strong>Use your evidence table to develop a model that shows how long-term stress can result in feeling sick more often.</strong></li></ul>"]}}
+    ],
+    "supports": []
+  }
+}

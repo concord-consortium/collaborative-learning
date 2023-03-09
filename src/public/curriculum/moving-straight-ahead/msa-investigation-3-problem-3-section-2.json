@@ -1,0 +1,36 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Launch (Getting Started)</strong></p>",
+            "<p>Connecting to Prior Knowledge</p>",
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Display these two equations: 2x + 10 = 16 and 2x - 10 = 16. (LANGUAGE) How do the equations compare? (They are the same except that 10 is added to the left side of the first equation and 10 is subtracted from the left side of the second equation.)</li><li>How would you begin solving these two equations? (In the first equation, you would subtract 10 from each side, since we want to “undo” the “+10.” In the second equation, you would add 10 to each side, since we want to “undo” the “-10.” Some students may note that you could divide by 2 first.) </li><li>In the first equation, instead of subtracting 10 from each side, could we add -10 to each side? (Yes, because subtracting 10 is the same as adding -10.) </li></ul>",
+            "<p>Refer back to Completely Rational if students need more help with this. </p>",
+            "<ul><li>How can you solve the second equation? (Some students may note that it is like you owe 10 coins. Add 10 coins to each side. Since 2x = 26, x = 13. Students may comment that this is similar to the red chips in Completely Rational.)</li></ul>",
+            "<p>To help students focus on individual parts of the equations, ask:</p>",
+            "<ul><li>In the Initial Challenge Set 1, how are the equations alike and how are they different? (All of the equations have the same numbers. The only differences are the signs of those numbers.</li></ul>",
+            "<p>If you did not introduce properties of equality in the Summarize of the last Problem, introduce the term now.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Presenting the Challenge</p>",
+            "<p>Ask students to consider non-whole number and non-positive situations.</p>",
+            "<ul><li>We have not seen many negative numbers or fractions in the pouches and coins. Could we have negative numbers in a coin situation? (Various answers. Students might mention owing someone money or using a debit card.) </li><li>Could we have fractions in a coin situation? (Various answers. Students might say that money can be thought of in portions, for example, a quarter represents ¼ of a dollar.)</li></ul>",
+            "<p>Ask the class to solve the equations, show their work, and check their answers. Have students work with a partner as they work through the problem.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "type": "instructors",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Instructors get an extra tab labeled Dashboard at the top of the window which shows all the work done on a particular problem by all students. Clicking on the groups will show a closeup view of just one group member. Selecting the section labels on the right side of the dashboard will scroll all the document views to that section."
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/help/images/dashboard.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Instructors can send sticky notes from the dashboard to either a group or an individual. These will show as soon as they are sent as yellow stickies next to the workspace header for students. \n\nInstructors can make documents with all the same tools available for students by flipping to the Workspace view. They can copy content from student documents to further comment on and share. Demonstrations, additional problems, or summary posters can be published as a support or Class Work. Supports are published with the green arrow, Class Work with the blue arrow. "
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

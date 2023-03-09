@@ -1,0 +1,62 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation A. Serena, Rashida and Omar’s Strategies</h3>Some students in Summit Heights Middle School used different strategies to answer the question “which cost plan is the better deal?” Explain how each strategy would or would not work to decide which cost plan is the best\n\n<strong>Serena Uses Tables</strong>"
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_2_serena_table_400w.png"}},
+      {"content": {"type": "Text", "format": "html", "text": ["<strong>Rashida Uses Graphs</strong>"]}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_2_rashida_graph_450w.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Omar Uses Equations</strong>\nI wrote the equation, <em>C<sub>manager</sub></em> = 0.15<em>t</em> + 2.50 for the cost that the manager charges. For the owner's suggestion, I wrote the equation <em>C<sub>owner</sub></em> = 0.25<em>t</em> where <em>t</em> is the number of minutes. Then I set the two expressions for cost equal.\n0.25<em>t</em> = 0.15<em>t</em> + 2.50"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["<h3>Situation B. River Fun Boat Rides</h3>River Fun Boats (RFB) also rents canoes. The equation <em>c<sub>RFB</sub></em> = 4 + 0.10<em>t</em> gives the charge in dollars <em>c</em> for renting a canoe for <em>t</em> minutes."]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "1. What is the charge to rent a canoe for 20 minutes?",
+            "2. A customer at River Fun is charged $9. How long did the customer use a canoe?",
+            "3. Suppose you want to spend at most $12. How long could you use a canoe?",
+            "4. How does the cost to rent a boat from River Fun Boat Rides compare to the cost to rent canoes from Sandy’s Boat House?"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["<h3>Situation C. Solving Equations- Which Strategy?</h3>", "<strong>Serena Uses Tables</strong>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "For the following equations students used different strategies to solve each equation for a given value of one of the variables.<ul><li><strong>Equation 1</strong> y = -x + 6 &nbsp;What is x if y = 4?</li><li><strong>Equation 2</strong> y = 5x - 3 &nbsp;What is y if x = 4?</li></ul>\n\nWhich of the following strategies go with each equation?"
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_strategy1_300w.png"}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_strategy2_350w.png"}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_strategy3_300w.png"}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_strategy4_250w.png"}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_strategy5_350w.png"}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_strategy6_250w.png"}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["<h3>Situation D. Linear Functions</h3>", "Do any of the three cost plans in this problem represent linear functions? Explain why or why not."]}}
+    ]
+  },
+  "supports": []
+}

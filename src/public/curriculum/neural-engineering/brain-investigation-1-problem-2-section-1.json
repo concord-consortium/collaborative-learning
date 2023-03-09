@@ -1,0 +1,27 @@
+{
+  "type": "intro",
+  "content": {
+    "tiles": [
+      {
+        "id": "M7NOi4drS5LYJ3qz",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In this lesson, you will learn about electrical signals in the human body, measure your reaction time, and develop a model to explain how body systems interact during limb movement. This will help you understand how bionic arms work (like the ones used by <a href='https://www.youtube.com/watch?v=q2MjTcmLuIQ&amp;t=1s'>Tilly</a>). </p>",
+            "<p><strong>Learning Objective</strong></p>",
+            "<p>By the end of this activity, you will be able to explain what body systems are involved in limb movement and how they interact with one another. </p>",
+            "<p><strong>Do Now</strong></p>",
+            "<p>Working with your classmates, explore the behavior of energy sticks. You may try the following: </p>",
+            "<p>1) Have one person touch both ends of the energy sticks.</p>",
+            "<p>2) Have two people touch the energy stick while holding hands. </p>",
+            "<p>3) Get a group of students to hold hands in a circle. Put the energy stick between two of the students. Does it turn on?</p>",
+            "<p>4) Give one pair of students something to hold between them (e.g.,  a metal key or a pencil). Do these objects conduct or insulate?</p>"
+          ]
+        }
+      },
+      {"id": "nI77bXEWPDtKRtS2", "title": "Energy Sticks (image source: Amazon)", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/Lesson1img2.png"}},
+      {"id": "nxwHzbnk-MnuuPyd", "content": {"type": "Text", "format": "html", "text": ["<p>In your workspace, answer the following question:  How can energy sticks help us understand how Tilly&#x27;s bionic arms work?</p>"]}}
+    ]
+  }
+}

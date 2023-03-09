@@ -1,0 +1,51 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "DNzaoecYbAJGOTiD",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Launch (Getting Started)</strong></p>",
+            "<p>Connecting to Prior Knowledge</p>",
+            "<p>Display <strong>Teaching Aid 4.2A: A Set of Stairs</strong>. </p>",
+            "<p>Tell students that the steepness of the line is the ratio of rise to run, or vertical change to horizontal change, for each step. Tell students that this ratio is called the slope of the line. </p>"
+          ]
+        }
+      },
+      {"id": "wlU-mqAW9o6b_6wZ", "title": "Text 8", "content": {"type": "Text", "format": "html", "text": ["<p>&nbsp;                     verticalchange                  rise</p>", "Slope = ______________________    = ______", "<p>&nbsp;                   horizontalchange              run</p>"]}},
+      {
+        "id": "wwo8oMqUBOnGWShX",
+        "title": "Text 9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested questions</strong></p>",
+            "<ul><li>Does the slope change if we take two stairs at a time? Explain. (No, because you just create an equivalent ratio. For example, suppose the rise to run between two stairs is 3 to 5. Then if you take two stairs at a time, the rise‐to‐run ratio is 6 to 10, which is equivalent to the ratio of 3 to 5.) </li><li>Is the slope the same between any two stairs? Explain. (Yes. See previous answer.) </li><li>How is this “steepness” or slope related to the rate of change for a linear situation?  (It is the same.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "shq-lXp0z0MiggTJ",
+        "title": "Text 10",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Presenting the Challenge</p>",
+            "<p>Pose the challenge of using what they know about slope/rate of change, linearity and proportionality they will be investigations some new contexts.  Introduce the situation in the Initial Challenge of the field trip after the walkathon to watch a movie.    </p>",
+            "<p><strong>Suggested questions</strong></p>",
+            "<ul><li>What does income mean? (money coming into a business)</li><li>What does the term operating expenses mean? (money it takes to run a business)</li><li>What does it mean for income and operating expenses to be equal? (when a company breaks even)</li></ul>",
+            "<p></p>",
+            "<p>Have students work in groups of 2 on this problem. </p>",
+            "<p></p>",
+            "<p><strong>Implementation Note</strong>:  What If Situation D could be used as homework.  </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

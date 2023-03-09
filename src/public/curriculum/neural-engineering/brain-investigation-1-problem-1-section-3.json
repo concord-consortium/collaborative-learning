@@ -1,0 +1,34 @@
+{
+  "type": "reflection",
+  "content": {
+    "tiles": [
+      {
+        "id": "P7m0jRM_FltsX8Gt",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>As you recall, throughout the neural engineering unit, you will keep a learning journal.</p>",
+            "<p>To access your journal, click on &quot;My Work&quot; &gt;&gt; &quot;Learning Journals&quot;</p>",
+            "<p>Click on &quot;My First Learning Log&quot; and click &quot;Edit&quot; .</p>",
+            "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>"
+          ]
+        }
+      },
+      {
+        "id": "YMXYngGJlN6ss7na",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Lesson 1.1 Journal Entry</strong></p>",
+            "<p>1. Today&#x27;s date:</p>",
+            "<p>2. Today&#x27;s topic:</p>",
+            "<p>3. Based on the video and the class discussion, please describe your current understanding of how bionic arms work. </p>",
+            "<p>4. What questions would you like to ask Tilly (the teen with the bionic arms from the video)?</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

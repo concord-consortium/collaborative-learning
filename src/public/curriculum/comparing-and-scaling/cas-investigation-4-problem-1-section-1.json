@@ -1,0 +1,42 @@
+{
+  "type": "MathReflection1",
+  "content": {
+    "tiles": [
+      {"id": "FB9kQRUgi8BXPUV4", "content": {"type": "Text", "format": "html", "text": ["<p>In this Unit and in prior Units we have been exploring problem situations that require proportional reasoning.</p>", "<p>What does it mean to reason proportionally?</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Emerging Mathematical Ideas</strong>",
+            "<p>Understand that proportional reasoning is about making comparisons, using multiplicative thinking instead of additive thinking.</p>",
+            "<p>Identify strategies for comparing quantities: ratio tables, equivalent ratios, scaling, and percent.</p>",
+            "<p>Begin to formalize the process of setting up proportions and solving for an unknown value.</p>",
+            "<p>Understand that to compare ratios you must relate the same two quantities in the same order: part-to-part or part-to-whole.</p>"
+          ]
+        }
+      },
+      {
+        "id": "OkPcVr6a8UGKCMNb",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflections on the Mathematical Practices</strong></p>",
+            "<p>As we worked on the Problems in this Investigation, we used prior mathematical knowledge to make sense of them. We also applied Mathematical Practices to solve the Problems. For example,</p>",
+            "<p>Jayden described his group’s strategy for Problem 1.1 in the following way:</p>",
+            "<p>Our group scaled down each recipe to find how much water is needed for 1 cup of concentrate.</p>",
+            "<p>                 For A, we need 1 cup concentrate for 3/2 cups of water.</p>",
+            "<p>                 For B, we need 1 cup concentrate for 9/5 cups of water.</p>",
+            "<p>                 For C, we need 1 cup concentrate for 2 cups of water.</p>",
+            "<p>                 For D, we need 1 cup concentrate for 5/3 cups of water.</p>",
+            "<p>The recipe with the least amount of water for 1 cup of concentrate is the most orangey. It is Recipe A.</p>",
+            "<ul><li>What mathematical practice(s) did Jayden’s group use to solve this Problem?</li><li>What other Mathematical Practices did you use to solve Problems in this Investigation?</li><li>In what ways is the mathematics in this Problem connected to prior mathematics?</li></ul>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

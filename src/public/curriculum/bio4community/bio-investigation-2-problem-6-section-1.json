@@ -1,0 +1,74 @@
+{
+  "type": "chapter3",
+  "content": {
+    "tiles": [
+      {"id": "17SEP20221154AM", "content": {"type": "Text", "format": "html", "text": ["<h3>CHAPTER 6: FINDING SOLUTIONS TOGETHER </h3>"]}},
+      {
+        "id": "ponD7qOi1qpD082e",
+        "title": "Text 1",
+        "content": {"type": "Text", "format": "html", "text": ["<p>After reading the email, Estrella smiled to herself. Abuela was right - she always was. Estrella was so excited she had to share the news with Abuela. She thanked Ms. Guerra and rushed home. </p>", "<p></p>"]}
+      },
+      {
+        "id": "kdVF-H33bX7VmKT2",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Estrella</strong>: ¡Abuela! ¡Abuela! ¡Abuela! [Grandma, Grandma, Grandma]</p>", "<p><strong>Abuela</strong>: ¡Sí! ¡Sí! ¡Sí! [Yes, Yes, Yes]</p>", "<p><strong>Estrella</strong>: I have to tell you something. I learned some stuff about my focus problem.</p>", "<p></p>"]
+        }
+      },
+      {
+        "id": "9n3mwy1tRqYeaGju",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Estrella energetically filled her grandmother in on her breakthrough. She barely took breaths between sentences, her words running into each other. Her grandmother listened intently and when Estrella was done she told her that this was important information that the whole family should hear and talk about at dinner. That night, as Estrella, Abuela, Papá, Mamá, and Estrella’s younger siblings - Tito, Paco and Sandra - were sitting around the table, Estrella carefully explained to them everything she learned. </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "ZWQcr-PPtZaIV9M1",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Estrella</strong>: So that’s why I’m not focused during school. I’m not motivated by it even though I want to do well. </p>",
+            "<p><strong>Estrella</strong>: Wow, you learned all that and you worked so hard to learn it. Good job, mija [daughter]. </p>",
+            "<p><strong>Tito</strong>: Wh-what’s motiwasion?</p>",
+            "<p> </p>",
+            "<p>[Estrella giggled at her youngest brother’s pronunciation.]</p>",
+            "<p></p>",
+            "<p><strong>Papá</strong>: It’s like when you manage to somehow climb onto the cabinet when you want a cookie but can’t climb into bed when it’s bedtime. The cookie is your motivation. </p>",
+            "<p><strong>Paco</strong>: So hermana (sister) just needs a cookie?</p>",
+            "<p><strong>Mamá</strong>: A cookie helps, but maybe you should also talk to your teachers about making school more motivating to learn. </p>",
+            "<p><strong>Estrella</strong>: I like that idea Mamá. I’m worried about talking to Ms. Parker for honors Calculus because she doesn’t think I’m smart enough for that class…but I can talk to Ms. Guerra for Science. </p>",
+            "<p><strong>Abuela</strong>: I think we all need to get to sleep earlier too. Pobrecitos are always dragging their heads in the morning going to school. </p>",
+            "<p><strong>Papá</strong>: I wouldn’t mind a few extra minutes of shut eye. </p>",
+            "<p><strong>Sandra</strong>: Papá, you fall asleep the earliest! </p>",
+            "<p></p>",
+            "<p>[The whole family burst into laughter.]</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "MhnwjhL2Om9dJ9pH",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>That night Estrella went to bed an hour earlier. She did feel more rested the next day. She was also looking forward to talking with Ms. Guerra about stress, motivation, and school work. Ms. Guerra was a great teacher, she would probably have some good ideas to make science more interesting, relevant, and motivating to learn. Estrella hopes that Ms. Guerra might also give her some advice on how to talk to Ms. Parker about helping her stay motivated in honors Calculus. </p>"
+          ]
+        }
+      },
+      {"id": "Fla_8SJwdN4yhvz8", "title": "Text 6", "content": {"type": "Text", "format": "html", "text": ["<h2>The end!</h2>"]}},
+      {"id": "6NoE9yaG6h0O-tWZ", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<ul><li><strong>Use your evidence table to develop a model that shows how long-term stress can result in difficulty in focusing.</strong></li></ul>"]}}
+    ],
+    "supports": []
+  }
+}
