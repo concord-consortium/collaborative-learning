@@ -7,6 +7,7 @@ import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultLabel, EditFacet } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
+import { useErrorAlert } from "../../../components/utilities/use-error-alert"
 
 import '../data-card-tile.scss';
 
@@ -115,14 +116,12 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const RequireUniqueAlert = () => {
-    return <p> Attribute names must be unique.</p>;
+    return <p>Each field should have a unique name.  Enter a name that is not already in use in this collection.</p>;
   };
 
-  const [showRequireUniqueAlert] = useCautionAlert({
-    title: "Delete Attribute",
-    content: RequireUniqueAlert,
-    confirmLabel: "OK",
-    onConfirm: () => {}
+  const [showRequireUniqueAlert] = useErrorAlert({
+    title: "Error Naming Data Card Field",
+    content: RequireUniqueAlert
   });
 
   const handleCompleteValue = () => {
