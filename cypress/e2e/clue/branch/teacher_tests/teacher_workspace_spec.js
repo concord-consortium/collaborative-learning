@@ -30,28 +30,6 @@ context('Teacher Workspace', () => {
     cy.fixture("teacher-dash-data-msa-test.json").as("clueData");
   });
 
-  describe('teacher specific navigation tabs', () => {
-    it('verify problem tab solution switch', () => {
-      // cy.get('.collapsed-resources-tab').click();
-      cy.wait(500);
-      cy.get('.top-tab.tab-problems').should('exist').click();
-      cy.get('.prob-tab').contains('What If...?').click();
-      cy.get('[data-test=solutions-button]').should('have.class', "toggled");
-      cy.get('.has-teacher-tiles').should("exist");
-      cy.get('[data-test=solutions-button]').click();
-      cy.get('[data-test=solutions-button]').should('have.not.class', "toggled");
-      cy.get('.has-teacher-tiles').should("not.exist");
-    });
-
-    it('verify teacher guide', () => {
-      cy.get('.top-tab.tab-teacher-guide').should('exist').click({force:true});
-      cy.get('.prob-tab.teacher-guide').should('exist').and('have.length', 4).each(function (subTab, index, subTabList) {
-        const teacherGuideSubTabs = ["Overview", "Launch", "Explore", "Summarize"];
-        cy.wrap(subTab).text().should('contain', teacherGuideSubTabs[index]);
-      });
-    });
-  });
-
   describe('teacher document functionality', function () {
     before(function () {
       clueCanvas.addTile('table');
@@ -83,6 +61,28 @@ context('Teacher Workspace', () => {
       cy.openSection('my-work', 'workspaces');
       clueCanvas.deleteTile('draw');
       clueCanvas.deleteTile('table');
+    });
+  });
+
+  describe('teacher specific navigation tabs', () => {
+    it('verify problem tab solution switch', () => {
+      // cy.get('.collapsed-resources-tab').click();
+      cy.wait(500);
+      cy.get('.top-tab.tab-problems').should('exist').click();
+      cy.get('.prob-tab').contains('What If...?').click();
+      cy.get('[data-test=solutions-button]').should('have.class', "toggled");
+      cy.get('.has-teacher-tiles').should("exist");
+      cy.get('[data-test=solutions-button]').click();
+      cy.get('[data-test=solutions-button]').should('have.not.class', "toggled");
+      cy.get('.has-teacher-tiles').should("not.exist");
+    });
+
+    it('verify teacher guide', () => {
+      cy.get('.top-tab.tab-teacher-guide').should('exist').click({force:true});
+      cy.get('.prob-tab.teacher-guide').should('exist').and('have.length', 4).each(function (subTab, index, subTabList) {
+        const teacherGuideSubTabs = ["Overview", "Launch", "Explore", "Summarize"];
+        cy.wrap(subTab).text().should('contain', teacherGuideSubTabs[index]);
+      });
     });
   });
 
