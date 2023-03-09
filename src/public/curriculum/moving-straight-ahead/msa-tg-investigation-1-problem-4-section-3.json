@@ -1,0 +1,51 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "p1lM8wCrikt2mtXR",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Explore (Digging In)        </strong></p>",
+            "<p>Providing for Individual Needs</p>",
+            "<p>This is the first time that students have encountered negative rates of change or negative slope. You can ask students why the line slants down or is decreasing from left to right.</p>"
+          ]
+        }
+      },
+      {
+        "id": "NVIbzsbK0J6xeSdg",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions </strong></p>",
+            "<ul><li>How can you represent this change in a table? (You can start with a row that shows the starting value is $144 and then for each new row, subtract $2 for each week.)</li></ul>",
+            "<p>For Mr. Mamer’s data, students may need help finding the constant rate for the graph. Suggest that they make a table of values—this should help them find the constant rate. Be sure to have students share their strategies in the Summary.</p>",
+            "<ul><li>How could you represent Mr. Mamer’s class data in a table? (The week in one column/row and the amount of money in the other column/row.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "agv8VbgafEQzKY1Y",
+        "title": "Table 1",
+        "content": {"type": "Table", "name": "Mr. Mamer's Class Data", "columns": [{"name": "Week", "width": 80, "values": ["0", "5", "10", "15", "20", "25", "30"]}, {"name": "Amount of Money ($)", "width": 140.23046875, "values": ["500", "450", "400", "350", "300", "250", "200"]}]}
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Planning for the Summary</p>", "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence?</p>"]}},
+      {
+        "id": "iEJ145CzJR5FtpkC",
+        "title": "Text 13",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Now What Do You Know?</em></p>",
+            "<p><em><strong>If a relationship is linear, how can you tell if the pattern of change is decreasing, increasing, or neither?</strong></em></p>",
+            "<p>Listen during the Explore for how students are describing what is happening with the money in the class accounts- are they noticing that on a table that as the number of weeks is increasing the amount of money is decreasing at a constant rate; that on a table the line will decrease (fall) from left to right; and in an equation the coefficient will be negative.  Listen for how students contrast these representations to those in previous problems.  Use their conversations to lead the summary. </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

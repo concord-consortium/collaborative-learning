@@ -1,0 +1,235 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles": [
+      {
+        "id": "c2UhywuTocMSzac5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Solutions and Strategies</u></p>",
+            "<p>Begin by having students discuss why Mia has only one table while she has two equations and two graphs.</p>",
+            "<p></p>",
+            "<p><strong>Note:</strong> One table works for both unit rates. With a table, the variables can be put in either row (or column, if you have a vertical table). There is no mathematical convention for setting up a table in a certain way. However, each unit rate has a unique graph and equation. For the graph and equation, you must identify which variable is independent and which is dependent. For the situation of buying oranges, it depends on which unit rate you want to focus on.</p>"
+          ]
+        }
+      },
+      {
+        "id": "rAPZ1tcy1gNOBn4k",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Why does Mia have only one table when she has two equations and two graphs? (Both unit rates are in the table. The equation and graph represent just one of the two unit rates.)</li></ul>",
+            "<p></p>",
+            "<p>Extend the conversation to look at how the unit rate appears in the equations and graphs.</p>"
+          ]
+        }
+      },
+      {
+        "id": "kvhamCCLw3N-yGVL",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What do Mia’s equations tell us? C = 0.20N? (Total Cost C for any number of oranges, N) N = 5C? (Number of Oranges for the cost in dollars, C)</li><li>With the equation C = 0.20N, what is the independent variable? (number of oranges) Dependent variable? (cost in dollars)</li><li>What is the unit rate? ($0.20 for each orange)</li><li>Where do you see the unit rate in the table? (When the amount of oranges is 1.) Equation? (The coefficient of N.) Graph? (The value of the dependent variable when the independent variable is 1. The coordinate pair (1, 0.2).)</li><li>With the equation N = 5C, what is the independent variable? (cost in dollars) Dependent variable? (number of oranges)</li><li>What is the unit rate? (5 for each dollar)</li><li>Where do you see the unit rate in the table? (When the total cost is 1.) Equation? (The coefficient of N.) Graph? (The value of the dependent variable when the independent variable is 1. The coordinate pair (1, 5).)</li><li>Which unit rate would you use to answer the following questions?</li></ul>",
+            "<p>How many oranges can you buy for $5? (5 oranges for every 1 dollar or N = 5C)</p>",
+            "<p>How much do 25 oranges cost? ($0.20 for every orange or C = 0.20N)</p>"
+          ]
+        }
+      },
+      {"id": "l1JspeufbRaMHS_S", "content": {"type": "Text", "format": "html", "text": ["<p><u>Making the Mathematics Explicit</u></p>", "<p></p>"]}},
+      {
+        "id": "n2T5P1JnW8YBrAI3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>What If Situation A. Buying Tickets</em></p>",
+            "<p></p>",
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What is the unit rate or constant of proportionality for Noralie’s concert ticket? ($30)</li><li>Where do you see the constant of proportionality in the graph and the equation? (In the graph it is when the independent variable is 1 at the point (1, 30). In the equation, it is the coefficient of N.)</li><li>If I know that this is a proportional situation and 2 tickets cost $60, how can I find how many tickets I can buy with $120? (Since it is proportional, if the money is doubled then the tickets will be doubled. So 4 tickets will cost $120.)</li><li>If we start at the origin, then go over and up to draw a triangle to each of those points, what is the relationship between the 2 triangles?  (They are similar or scale drawings. We doubled the base and height of the original triangle by doubling each quantity in the rate.)</li></ul>",
+            "<p><strong>Note</strong>: This should be a review from their work with scaled drawing/similar figures in the Stretching and Shrinking Unit. Show students the triangles on the graph.</p>"
+          ]
+        }
+      },
+      [
+        {
+          "content": {
+            "type": "Geometry",
+            "title": "Ticket Cost",
+            "board": {"properties": {"axisMin": [-0.5, -5], "axisRange": [10, 200], "axisNames": ["x", "y"], "axisLabels": ["Number of Tickets", "Cost"]}},
+            "objects": [
+              {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [2, 60]}], "properties": {"id": "VZcS9PetlmRLtU_h"}},
+              {"type": "point", "parents": [1, 30], "properties": {"name": "(1, 30)", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [2, 60], "properties": {"id": "myvertex1", "name": "(2, 60)", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [2, 0], "properties": {"name": "", "id": "myvertex2", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [0, 0], "properties": {"id": "myvertex3", "name": "(0, 0)", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "polygon", "parents": ["myvertex1", "myvertex2", "myvertex3"], "properties": {"id": "RzDRwOXZcBunyfdG"}}
+            ]
+          }
+        },
+        {
+          "content": {
+            "type": "Geometry",
+            "title": "Ticket Cost 2",
+            "board": {"properties": {"axisMin": [-0.5, -5], "axisRange": [10, 200], "axisNames": ["x", "y"], "axisLabels": ["Number of Tickets", "Total Cost of Tickets"]}},
+            "objects": [
+              {"type": "point", "parents": [2, 60], "properties": {"id": "htshVg-g-9oyuH-2", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1, "name": "(2, 60)"}},
+              {"type": "point", "parents": [2, 0], "properties": {"id": "wZWVSjdEdNMJL0LX", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1, "name": ""}},
+              {"type": "point", "parents": [0, 0], "properties": {"id": "N_VPhTYvkf4Jn2wK", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1, "name": "(0, 0)"}},
+              {"type": "polygon", "parents": ["htshVg-g-9oyuH-2", "wZWVSjdEdNMJL0LX", "N_VPhTYvkf4Jn2wK"], "properties": {"id": "MLYdUp1BzA6QkYdD"}},
+              {"type": "point", "parents": [4, 120], "properties": {"name": "(4, 120)", "id": "nT9wRK-ENMZGOUeW", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [4, 0], "properties": {"name": "", "id": "ps3v8Dw5qO-hBHD9", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [0, 0], "properties": {"name": "", "id": "00xdez3uyHEDwEl8", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "polygon", "parents": ["nT9wRK-ENMZGOUeW", "ps3v8Dw5qO-hBHD9", "00xdez3uyHEDwEl8"], "properties": {"id": "6joamvcLbnXD6kwg"}},
+              {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [3, 90]}], "properties": {"id": "CUglZNyyWEFktb3v"}}
+            ]
+          }
+        }
+      ],
+      {
+        "id": "LB1K3rCIfifTSIbU",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>What If Situation A question 4 gives another counter-example to proportional relationships. By analyzing non-proportional relationships, students can gain a deeper understanding of what it means to be proportional. Ask students questions to push them to compare and contrast.</p>"
+          ]
+        }
+      },
+      {
+        "id": "W39SaySMpAfn9ThT",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>How are the representations (description, equation, graph, table) the same and different with a $10 processing fee?</li></ul>",
+            "<p></p>",
+            "<p>Answers should include a discussion of:</p>",
+            "<p>Description: There is a $10 fee added in.</p>",
+            "<p>Equation: The equation has the 10 added in. P = 30N + 10</p>",
+            "<p>Table: Every amount would have $10 added to the cost.</p>"
+          ]
+        }
+      },
+      {"content": {"type": "Table", "name": "Cost of Ticket from Box Office", "columns": [{"name": "No. Tickets", "values": ["0", "1", "2"]}, {"name": "Total Cost ", "values": ["1", "30", "40"]}, {"name": "Cost with Fee", "values": ["10", "40", "70"]}]}},
+      {
+        "id": "qgA56nv2aHCNsKAb",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Graph: The line has slid up. Students may mention that this is like what happened with Mug’s hats in <em>Stretching and Shrinking</em> Problem 2.2. When you added to the rule for a hat, it slid the figure.</p>"]}
+      },
+      {
+        "content": {
+          "type": "Geometry",
+          "title": "Cost of Tickets from Box Office",
+          "board": {"properties": {"axisMin": [-0.5, -5], "axisRange": [6.094, 168.153], "axisNames": ["x", "y"], "axisLabels": ["Number of Tickets", "Cost"]}},
+          "objects": [
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [2, 60]}], "properties": {"id": "CoHfUHot7WXIJmLy"}},
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 10]}, {"type": "point", "parents": [2, 70]}], "properties": {"id": "r-IQhXBhfEdAxNdj"}},
+            {"type": "point", "parents": [0, 0], "properties": {"name": "(0, 0)", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [1, 30], "properties": {"name": "(1, 30)", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [2, 60], "properties": {"name": "(2, 60)", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}}
+          ]
+        }
+      },
+      {"id": "B3qxrQ9nx1aIyhit", "content": {"type": "Text", "format": "html", "text": ["<p>With question 4, we can help students understand proportionality by contrasting to this non-proportional relationship.</p>"]}},
+      {
+        "id": "kVJ6xjwQBPR0R2S4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Suggested Questions</strong></p>", "<ul><li>How can we tell whether or not this is a proportional relationship? (It is not proportional. We cannot scale the amount on the table to make proportions. Possible student reasoning may include the following:</li></ul>"]
+        }
+      },
+      {"id": "W7HYfE9bdKBjQ7EA", "content": {"type": "Text", "format": "html", "text": ["<p><em>Table Reasoning:</em></p>"]}},
+      {"id": "tZIbjzd9TpG8VgjQ", "title": "Table Reasoning", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-3_TableReasoning.png"}},
+      {"id": "T_yum0Emr_trAbui", "content": {"type": "Text", "format": "html", "text": ["<p><em>Proportion Reasoning:</em></p>", "<p>1/$35  ≠  4/$130</p>"]}},
+      {
+        "id": "vuDL6YH53j49s-Rc",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Unit Rate/Constant of Proportionality Reasoning:</em></p>",
+            "<p>There is no unit rate. If I buy 1 ticket, it costs $40. If I but 2 tickets, each ticket costs $35 (70 ÷ 2). If I buy 4 tickets, each ticket costs $32.50 (130 ÷ 4). The rate per ticket is not constant. This is because as I buy more tickets, the $10 processing fee gets spread out among more tickets.</p>"
+          ]
+        }
+      },
+      {"id": "Dug4CN7ocgCTWnY_", "content": {"type": "Text", "format": "html", "text": ["<p><em>Graph Reasoning:</em></p>", "<p>This might be the first time that students notice that non-proportional relationships do not go through (0, 0).</p>"]}},
+      {
+        "content": {
+          "type": "Geometry",
+          "title": "Cost of Tickets from Box Office",
+          "board": {"properties": {"axisMin": [-0.5, -5], "axisRange": [6.094, 168.153], "axisNames": ["x", "y"], "axisLabels": ["Number of Tickets", "Cost"]}},
+          "objects": [
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [2, 60]}], "properties": {"id": "CoHfUHot7WXIJmLy"}},
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 10]}, {"type": "point", "parents": [2, 70]}], "properties": {"id": "r-IQhXBhfEdAxNdj"}},
+            {"type": "point", "parents": [0, 0], "properties": {"name": "(0, 0)", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [1, 30], "properties": {"name": "(1, 30)", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [2, 60], "properties": {"name": "(2, 60)", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}}
+          ]
+        }
+      },
+      {"id": "NBdjYlKW4WXrhlRf", "content": {"type": "Text", "format": "html", "text": ["<p><em>Situation B</em></p>", "<p></p>", "<p>This situation gives students a chance to synthesize their thinking about unit rates.</p>"]}},
+      {
+        "id": "bCR53lHcMQz4Mlty",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Question</strong></p>",
+            "<ul><li>For each store what if Mia did two divisions? 6 ÷ 7 = 0.857 and 7 ÷ 6 = 1.16666. What do the numbers tell us about the pasta at that store? (These numbers are the unit rates.</li></ul>",
+            "<p>                              For Little Giant store:  6 ÷ 7 = 0.857 and 7 ÷ 6 = 1.16666…</p>",
+            "<p>                              0.857 tells us how much money for 1 box.</p>",
+            "<p>                              1.16666… tells us how many boxes you get for $1.</p>",
+            "<p></p>",
+            "<p>                               For Foodfresh Store:  5 ÷ 6 = 0.833…. and 6 ÷ 5 = 1.2</p>",
+            "<p>                               0.833…. tells us how much money for 1 box</p>",
+            "<p>                               1.2 tells us how many boxes you get for $1.</p>"
+          ]
+        }
+      },
+      {"id": "N6bHsSxaj0xZKd-e", "content": {"type": "Text", "format": "html", "text": ["<p>Some students will need to see the division in relation to a proportion to make sense of the question.</p>"]}},
+      {"id": "TUN2Wpa6CM5XQnTm", "content": {"type": "Text", "format": "html", "text": ["<p><em>Little Giant Store</em></p>"]}},
+      [
+        {"id": "hLX-yEKDcR36QXif", "title": "Little Giant 1", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-3_LittleGiantStore_1.png"}},
+        {"id": "ZZXAbF4pFSNVn6l5", "title": "Little Giant 2", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-3_LittleGiantStore_2.png"}}
+      ],
+      {"id": "9D2bcPZkIwzRmDuE", "content": {"type": "Text", "format": "html", "text": ["<p>Foodfresh Store</p>"]}},
+      [
+        {"id": "UfjyujhivqFFk_2-", "title": "Food Fresh 1", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-3_FoodFreshStore_1.png"}},
+        {"id": "Xgz8CJ9rdaSSZ6HL", "title": "Food Fresh 2", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-3_FoodFreshStore_2.png"}}
+      ],
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Now What Do Students Know</u></p>",
+            "<p>Ask students to reflect on the discussion and answer the Now What Do You Know.</p>",
+            "<p>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph? In what ways is a unit rate or the constant of proportionality helpful for solving a problem?</p>",
+            "<p>See answers for more information about the strategies and embedded mathematics.</p>"
+          ]
+        }
+      },
+      {
+        "id": "lecF_qpm9gn-kVrX",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+            "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

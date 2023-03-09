@@ -1,0 +1,57 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "ctnSZOeWGD8hT8Y6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The mathematics in this Problem reviews and connects the three main proportional reasoning focuses of this Unit: ratios, rates, and percents. Like the orange juice Problem earlier in the Unit, students are presented with a mixture context. This time, students will be answering questions about food mixtures for baby and adult chimps. The Problem also includes a connection to a free throw context and a purely mathematical context that students have to relate to a situation.</p>",
+            "<p><strong>Implementation Note</strong>: You may want to hold a discussion after the Initial Challenge before moving on to the What If. This will allow you to highlight your students’ strategies before analyzing the strategies of other students that are presented in the What If. You can use the strategies in the What If to connect to how your students thought about the proportional reasoning in chimp food questions.</p>",
+            "<p>Have students work on the Initial Challenge using <strong>Learning Aid 3.3: Chimp Food Mixtures</strong>.  For Situations A and B, you might have students think about and discuss as a class the strategies not already presented by your students. This may allow a discussion of strategies different from students’ own thinking for solving the Initial Challenge. The situations also allow you to connect the reasoning in the chimp questions to prior mathematical reasoning in the Unit. (Problem Solving Environment)</p>",
+            "<p>You may want to wait until the Summary discussion to have students do Situations C and D. While these situations review and connect the mathematics of the Unit, they take the student away from the chimp recipes to new contexts. Situation C offers an opportunity to connect the mathematical reasoning to a new context of free throws in basketball. Situation D works backward, offering an opportunity for students to create a contextual story to a mathematical representation.</p>"
+          ]
+        }
+      },
+      {"id": "VVjltR35KgpgiOEL", "content": {"type": "Text", "format": "html", "text": ["<p>AoL: Synthesis, Abstraction</p>", "<p>CCSSM: 7.RP. A.1, 7.RP. A.2, 7.RP. 2.A, 7.RP.2.B, 7.RP. A.2.C, 7.RP.A.2.D, 7.RP.A.3, 7.EE.B.4</p>"]}},
+      {
+        "id": "E6B-IlhjAdL7YAa_",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Use percents, fractions, decimals, ratios, proportions, unit rate, and /or rate tables to solve problems.</p>",
+            "<p></p>",
+            "<p>Look for and make connections among representation of proportional relationships and solution strategies.</p>"
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>NWDYK</p>", "<p>How are percents useful to solve problems?</p>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#RevisionComments'><strong>Revision Comments</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#StemProblemFormat'><strong>Stem Problem Format</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guiide/comparing-and-scaling/#UnitDescriptions'><strong>Unit Descriptions</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#SummaryInvestigations'><strong>Summary Investigations</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitGoals'><strong>Unit Goals</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAlignment'><strong>Unit Alignment</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#GeneralAoL'><strong>General AoL</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAoL'><strong>Unit AoL</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#MathOverview'><strong>Math Overview</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

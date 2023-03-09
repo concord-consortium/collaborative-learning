@@ -1,0 +1,45 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "qKqWqeeh-RWxDHIu",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started)</strong></u></p>",
+            "<p><u>Connecting to Prior Knowledge</u></p>",
+            "<p></p>",
+            "<p>This Problem is intended to bring together the proportional reasoning of ratio, rate, and percent. It may be a time to revisit a few previous Problems from each Investigation. You may want to look back at Summary notes or anchor charts where you kept track of what students were taking away from the problems. Problems to revisit might include: Problem 1.2 Mixing Juice, Problem 2.1 Sharing Pizzas, Problem 2.2 Comparing Pizza Prices, and Problem 3.1 Using Percents. For your class, there may be different Problems that resulted in reflective moments on the mathematical highlights. (Time)</p>"
+          ]
+        }
+      },
+      {
+        "id": "dzL0hwwOuZVlyCjr",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What were the questions that we were answering? (Answers depend on the Problem being revisited.)</li><li>What strategies helped us answer the questions? (Answers depend on the Problem being revisited.)</li><li>How did we determine if the situation was proportional or not? (Answers depend on the Problem being revisited.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "qtwSbJFLbenoEEIf",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p></p>",
+            "<p>For the Initial Challenge, have students keep their books closed or look only at the Initial Challenge. The What If portion of the Problem presents student strategies that you may not want students to see until after working on the baby and adult chimp mixture questions.</p>",
+            "<p></p>",
+            "<p>Introduce the chimp recipes using <strong>Learning Aid 3.3: Chimp Food Mixtures.</strong> You can use one Learning Aid per group of two students.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

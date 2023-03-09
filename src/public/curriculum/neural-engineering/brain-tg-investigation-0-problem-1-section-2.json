@@ -1,0 +1,21 @@
+{
+  "type": "teach",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The proposed activities in the Lessons tab should take about 45-60 minutes for students to complete. </p>",
+            "<p>At the end of the proposed sequence of activities, you can ask some students to present their Dataflow programs.  As students share their work, introduce the term &quot;computational thinking&quot; and bring to mind when and how students used computational thinking. Inform students that they will continue to apply and develop their ability to use computational thinking as the unit unfolds. </p>",
+            "<p>Make sure that students add their first Learning Journal entry (see instructions in the student-facing lesson).  The Learning Journal is a resource that can be used as both formative assessment of students’ thinking,  as well as a document in which students can record their knowledge and wonderings over time. Let students know that this is where they will record their learning and wonderings over the course of the unit. </p>",
+            "<p><strong>Teacher Resources</strong></p>",
+            "<p><a href='https://docs.google.com/presentation/d/1-nJ9tyrOD-N2WNjea3segkPSMy9MxITv/edit?usp=sharing&amp;ouid=107168184189898639613&amp;rtpof=true&amp;sd=true'>Computational thinking</a></p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

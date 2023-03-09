@@ -1,46 +1,86 @@
 {
-  "type": "explore",
+  "type": "whatIf",
   "content": {
     "tiles": [
+      {"id": "0QKsbnEyVfk0qANO", "title": "Text 27", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation A. More Pouches</strong></p>", "<p>A messenger has 6 pouches and 27 coins. There is a total of 105 coins. </p>"]}},
+      {"id": "dMtXWrRDFSdylenD", "title": "Text 28", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Write an equation to represent the situation. Then solve the equation to find the number of dollars in each pouch.</li></ul>"]}},
+      {"id": "zVwSS3GtlT06UxUd", "display": "teacher", "title": "Text 31", "content": {"type": "Text", "format": "html", "text": ["<p>6P + $27 = $105</p>", "<p>6P = $78</p>", "<p>P = $13</p>"]}},
+      {"id": "xF7V1cTDcnTe_qqa", "title": "Text 32", "content": {"type": "Text", "format": "html", "text": ["<ul><li>AJ claims that there is more than one way to write the equation. Is he correct? Explain.</li></ul>"]}},
+      {"id": "PJzbFgeipAruZS8D", "display": "teacher", "title": "Text 35", "content": {"type": "Text", "format": "html", "text": ["<p>He is correct. For example, he could write 27 + 6P = 105.</p>"]}},
+      {"id": "yVNt1GaX6p_CKorb", "title": "Text 36", "content": {"type": "Text", "format": "html", "text": ["<ul><li>If there is more than one equation, will the solution for each equation be the same? Explain</li></ul>"]}},
+      {"id": "Pny31f61xhEyaPJ7", "display": "teacher", "title": "Text 39", "content": {"type": "Text", "format": "html", "text": ["<p>Yes. For the example above, the Commutative Property of Addition tells you that the answer will be the same.</p>"]}},
       {
+        "id": "XBUbK-XgMC_A5JoN",
+        "title": "Text 40",
         "content": {
           "type": "Text",
           "format": "html",
-          "text": [
-            "<p><strong>Explore (Digging In)</strong></p>",
-            "<p>Providing for Individual Needs</p>",
-            "<p>As you move from group to group, watch and listen to how students are discussing equivalent expressions. It will be important for them to be flexible with equivalent expressions.</p>",
-            "<p>For example, if <em>ax + b = cx + d</em> and <em>y1 = ax + b</em> and <em>y2 = cx + d</em>, then <em>y1 = y2</em>.</p>",
-            "<p>Be sure students are recording their methods and checking their answers. See how students are translating the pouches and coins in Equation 2. Students can write the left side as (<em>x</em> + 2) + (<em>x</em> + 2) + (<em>x</em> + 2) or as 3(<em>x</em> + 2) and the right side as 12. (PORTAYAL) Return to this in the Summary and ask if the two expressions are equivalent and why. This will review the Distributive Property, which was developed in earlier Units.</p>",
-            "<p>Some students may struggle with writing the solutions to the equations.</p>"
-          ]
+          "text": ["<p><strong>Situation B.  Applying Your Strategies </strong></p>", "<p>Use your strategies to solve each equation. Check your answer. </p>", "<ol><li>30 = 6 + 4x    </li><li>7x = 6 + 5x    </li><li>7x+ 2 = 12 + 5x    </li><li>2(x+4) = 16 </li></ol>"]
         }
       },
       {
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p><strong>Suggested Questions</strong></p>",
-            "<p>For Equation 1, ask:</p>",
-            "<ul><li>What is your equation? (4x + 2 = 18 or 2(2x + 1) = 18)</li><li>What was the first thing you did with the pictorial equation to begin solving it? (Using the first method above, the first step would be to take away 2 coins from each side.)</li><li>How can you show this with your equation? (Subtract 2 from each side. This results in 4x + 2 - 2 = 18 - 2 or 4x = 16.)</li><li>What did you do next? (Split the coins into four equal sets.)</li><li>How can you show this with your equation? (4x = 4(4)) </li><li>What was your next step? (Set each of the 4 pouches equal to one of the 4 sets of coins.)</li><li>How can you show this with your equation? (Divide by 4 on each side. So, x = 4.) </li><li>How can you check your answer? (Using the coins and pouches, you can add up all the coins inside and outside the pouches on the left side and then check to make sure your result equals the number of coins on the right side. On the left side, there are 4 pouches, each of which we think contains 4 coins. If we are correct, there are 16 coins in the pouches. If you add those 16 coins to the 2 coins outside the pouches, the result is 18 coins on the left side. There are also 18 coins on the right side, so the answer is correct.",
-            "Or, you can substitute 4 into the equation for x. The result shows that 4 is correct.</li>",
-            "     4(4) + 2 = 18",
-            "       16 + 2 = 18",
-            "           18 = 18"
-          ]
-        }
-      },
-      {
+        "id": "37WJZ4AYCBhYlARR",
         "display": "teacher",
+        "title": "Text 43",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<p>Planning for the Summary</p>",
-            "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence?</p>",
-            "<p><strong>Now What Do You Know?</strong></p>",
-            "<p><strong>Describe a strategy for solving equations using what you know about equality. How do you know if your answer is correct?</strong></p>"
+            "<p>1.  30 = 6 + 4x</p>",
+            "<p>         24= 4x</p>",
+            "<p>           6 = x</p>",
+            "<p>Check: 30 = 6 + 4(6)</p>",
+            "<p>    30 = 6 + 24</p>",
+            "<p>    30 = 30</p>",
+            "<p></p>",
+            "<p>2.  7x = 6 + 5x</p>",
+            "<p>        2x = 6</p>",
+            "<p>           x = 3</p>",
+            "<p>Check: 7(3) = 6 + 5(3)</p>",
+            "<p>    21 = 6 + 15</p>",
+            "<p>    21 = 21</p>",
+            "<p></p>",
+            "<p>3.  7x + 2 = 12 + 5x</p>",
+            "<p>        2x + 2 = 12</p>",
+            "<p>                2x = 10</p>",
+            "<p>                  x = 5</p>",
+            "<p>Check: 7(5)+2 = 12 + 5(5)</p>",
+            "<p>    35 + 2 = 12 + 25</p>",
+            "<p>    37 = 37</p>",
+            "<p></p>",
+            "<p>4.  2(x+4) = 16</p>",
+            "<p>         2x + 8 = 16</p>",
+            "<p>                 2x = 8</p>",
+            "<p>                    x = 4</p>",
+            "<p>Check: 2(4+4) = 16</p>",
+            "<p>    2(8) = 16</p>",
+            "<p>    16 = 16</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "YajHdpbPo6UBx_nX",
+        "title": "Text 44",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation C. More or Less</strong></p>", "<p>A messenger has 6 pouches and 30 coins. The total must be less than 102 coins</p>", "<p>How would you write this inequality? What are some solutions?</p>"]}
+      },
+      {
+        "id": "iHZvziZoytke1liD",
+        "display": "teacher",
+        "title": "Text 47",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The inequality is written 6P + 30 &lt; 102. </p>",
+            "<p>We can solve the inequality by thinking of it as an equation:</p>",
+            "<p>  6P + 30 = 102</p>",
+            "<p>             6P = 72</p>",
+            "<p>               P = 12</p>",
+            "<p>Then, we can consider the solutions to P &lt; 12. So, there could be 1 coin in each pouch, 2 coins in each pouch, 3 coins in each pouch, or up to 11 coins in each pouch to make this inequality true.</p>",
+            "<p>We can check to make sure that this is correct by entering a value into the inequality </p>",
+            "<p>6(11) + 30 &lt; 102, then</p>",
+            "<p>66 + 30 &lt; 102 is true so the solutions are correct.</p>"
           ]
         }
       }

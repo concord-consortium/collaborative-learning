@@ -1,0 +1,81 @@
+{
+  "type": "MathReflection1",
+  "content": {
+    "tiles": [
+      {"id": "_Nue-H8iWupkEo0j", "content": {"type": "Text", "format": "html", "text": ["<p>Mathematical Reflection 1</p>"]}},
+      {"id": "yefwqb10qNrwpMgl", "content": {"type": "Text", "format": "html", "text": ["<p>AoL: Synthesis</p>", "<p>CCSSM: 7.RP. A.1, 7.RP. A.2, 7.RP. A.2.A, 7.RP.A.2.C, 7.RP.A.3</p>"]}},
+      {
+        "id": "yMhFVaIf3bPfQIaz",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p></p>",
+            "<p>Understand that <em>proportional reasoning</em> is about making comparisons, using multiplicative thinking instead of additive thinking.</p>",
+            "<p></p>",
+            "<p>Identify strategies for comparing quantities: ratio tables, equivalent ratios, scaling, and percent.</p>",
+            "<p></p>",
+            "<p>Begin to formalize the process of setting up <em>proportions</em> and solving for an unknown value.</p>",
+            "<p></p>",
+            "<p>Understand that to compare ratios you must relate the same two quantities in the same order: part-to-part or part-to-whole.</p>",
+            "<p></p>",
+            "<p>Note that relevant developing vocabulary in this Investigation has been <em>italicized</em>.</p>"
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Mathematical Reflection</p>", "<p></p>", "<p>What does it mean to reason proportionally?</p>"]}},
+      {
+        "id": "gZ6XalDThCrHq3JS",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The Mathematical Reflection question provides an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over time.</p>",
+            "<p></p>",
+            "<p>After the class discussion, students can record their responses to the Mathematical Reflection to create a record of their current understandings of the big ideas of the Unit.</p>",
+            "<p></p>",
+            "<p>A teacher can gain an understanding of student thinking during a discussion of the reflection question. Then you can assess individual understanding based on each student’s written work.</p>",
+            "<p></p>",
+            "<p><em>What does it mean to reason proportionally?</em></p>",
+            "<p></p>",
+            "<p>(Students should be able to discuss that to compare ratios you must relate the same two quantities in the same order: part to part or part to whole. Students should have begun to understand that proportional reasoning is about making comparisons using multiplicative thinking instead of additive thinking. They should be able to identify strategies for comparing quantities: ratio tables, equivalent ratios, scaling, and percent. Students are beginning to formalize the process of setting up proportions and solving for an unknown value.)</p>"
+          ]
+        }
+      },
+      {
+        "id": "k4rmvfnrnf-lKwXG",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Student Responses</strong></p>",
+            "<p></p>",
+            "<p>Each Investigation contributes to students’ conceptual understandings of the ideas in the Unit. Students’ explanations at the beginning of a Unit might be just forming. As you progress through the Unit, students can use the contexts, representations, and connections to express a more solid understanding. By the end of the Unit, students can create a complete picture of understanding.</p>",
+            "<p></p>",
+            "<p></p>",
+            "<p><strong>Example Strategies for Student Participation</strong></p>",
+            "<p>Teachers use many creative strategies to encourage students’ ownership of their learning. (AGENCY, IDENTITY, OWNERSHIP)</p>",
+            "<p></p>",
+            "<p>In this first Investigation, it is important to ask students to reflect on prior learning with questions like:</p>",
+            "<ul><li>How do you recognize a proportional situation?</li><li>What strategies can you use to solve a problem involving proportional reasoning?</li></ul>",
+            "<p></p>",
+            "<p>From their experiences in this Unit and in prior Units, students should be using various strategies. In Grade 6 Units, they used rate tables, unit rate, scaling ratios, tape diagrams, double number lines, and pictures. In the Grade 7 Units so far, students have revisited some of those strategies and have added writing proportions to their experiences.</p>"
+          ]
+        }
+      },
+      {
+        "id": "n8lFNTxJN4YWzkFP",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What in evidence in students’ work shows an understanding of the ideas in this Unit?</li><li>What mathematical ideas will still need emphasis?</li><li>What opportunities exist in the rest of the Unit, or in future Units, to extend and connect the students’ learning?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

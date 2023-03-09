@@ -1,0 +1,155 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles": [
+      {
+        "id": "voW2u98X8aQKW2vz",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
+            "<p><u>Solutions and Strategies</u></p>",
+            "<p><em>Day 1:</em></p>",
+            "<p>Have students share their results from the Leaky Faucet Experiment. Have students share how they used this data to make predictions in the Initial Challenge.</p>",
+            "<p></p>",
+            "<p><em>Day 2:</em></p>",
+            "<p>Have students discuss the Situations in What If Situation A. Have students display their work for What It Situation B in a Gallery Walk.</p>"
+          ]
+        }
+      },
+      {
+        "id": "Rk1KQfC5PyanyOGF",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Making the Mathematics Explicit</u></p>",
+            "<p><em>Day 1:</em></p>",
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>How did you use your data to make predictions in the Initial Challenge? (Answers will vary. Focus the conversations on their use of rates.)</li></ul>",
+            "<p></p>",
+            "<p>Example from one classroom conversation group:</p>",
+            "<p></p>",
+            "<p><strong>Teacher</strong>: Scarlett, Wren, Carter, and Alan’s group, how did you use your data to determine how much water is lost in a day?</p>"
+          ]
+        }
+      },
+      {
+        "id": "sEUbolNIOMwFf35G",
+        "content": {
+          "type": "Table",
+          "name": "Leaky Faucet Experiment",
+          "columns": [{"name": "Number of Seconds", "width": 100, "values": ["0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60"]}, {"name": "Amount of Water (ml)", "width": 100, "values": ["0", "5", "9", "14", "18", "24", "29", "35", "41", "43", "49", "55", "61"]}]
+        }
+      },
+      {
+        "id": "D84_HTYdJp6644Qn",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Scarlett</strong>:  We were disappointed that we didn’t have really nice proportional data to work with.</p>",
+            "<p></p>",
+            "<p><strong>Teacher</strong>: How did you know it wasn’t proportional?</p>",
+            "<p></p>",
+            "<p><strong>Carter</strong>: We looked at 5 seconds and 15 seconds. That would be multiplying by 3 and if you multiplied the water amounts by 3, it didn’t work?</p>",
+            "<p></p>",
+            "<p><strong>Kathy</strong>: I don’t know what you mean, Carter.</p>",
+            "<p>Carter draws this on their data:</p>"
+          ]
+        }
+      },
+      {"id": "q-O-yKv9q1-33AGK", "title": "Scaling by 3", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-4_CartersIdea.png"}},
+      {
+        "id": "EoVfVDoitArOIJ_u",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Kathy</strong>:  Okay, I get what you did now.</p>",
+            "<p></p>",
+            "<p><strong>Scarlett</strong>: Because of that we thought we couldn’t scale it up, but then we thought it was close to being proportional and it might have been proportional if we had better tools to measure with or if we were more accurate. So we just looked at it to see what seemed to happen the most often.</p>",
+            "<p></p>",
+            "<p><strong>Wren</strong>: Yeah. Since we were measuring every 5 seconds, we decided to look at the totals for each of those, like this:</p>"
+          ]
+        }
+      },
+      {
+        "id": "ML3sAJ6ptdcLJxkG",
+        "title": "Rate Table",
+        "content": {
+          "type": "Table",
+          "name": "Rate Table",
+          "columns": [{"name": "Number of Seconds", "width": 100, "values": ["0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60"]}, {"name": "Amount of Water (ml)", "width": 100, "values": ["0", "5", "9", "14", "18", "24", "29", "35", "41", "43", "49", "55", "61"]}]
+        }
+      },
+      {
+        "id": "9rjx7_2OXzMTQuYE",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Since 6 ml every 5 seconds occurred more than any other we decided to use that as the rate    to predict for how much water is lost in a day.</p>", "<p></p>", "<p><strong>Alan</strong>: So this is what we did with that:</p>"]}
+      },
+      {"id": "HdBpYhBqGXFh_gfJ", "title": "Water calculation per minute", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-4_AlansIdea.png"}},
+      {
+        "id": "rZS3ljlFrXQAjJvP",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>This gave us how much water we’d have in a minute.</p>",
+            "<p></p>",
+            "<p><strong>Jeff</strong>: But Alan, in your table you said 60 seconds was 61 ml.</p>",
+            "<p></p>",
+            "<p><strong>Alan</strong>: That bothered us a little, but then we remembered that we had used the 6 ml for every 5 seconds and sometimes we’d gotten less than that, so that is why our scaled-up rate was more than what happened in our experiment. So we knew it was just an estimate that we were using.</p>",
+            "<p></p>",
+            "<p><strong>Scarlett:</strong> Once we had 1 minute, we could use that to get an hour and then a day like this:</p>"
+          ]
+        }
+      },
+      {"id": "ifgWmc750ng9qlZ_", "title": "Water calculation per hour", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-4_ScarlettsIdea_1.png"}},
+      {"id": "n9UZDt8uoDapLTFU", "title": "Water calculation per day", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-4_ScarlettsIdea_2.png"}},
+      {
+        "id": "0ELkW9gCBiHokoxh",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Note</strong>: Students will have to make sense of data that isn’t perfectly proportional and then use it to make predictions. Accept any strategies that seem reasonable. The goal is for students to take a rate and then scale it to represent other situations. Some students may use a strategy like the one in the classroom conversation above. Some other strategies that students have used involve using the Mean Absolute Deviation of the data, using the rate they got for the first 5 seconds, using a unit rate, etc. (Problem Solving Environment)</p>"
+          ]
+        }
+      },
+      {"id": "NSnB5-rBJ1dCQzKE", "content": {"type": "Text", "format": "html", "text": ["<p><em>Day 2:</em></p>", "<p>In What If Situation A, discuss the ratio application(s).</p>"]}},
+      {
+        "id": "8Rr_Qi3kKlfbLQW9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What is the ratio in this application?</li><li>How did you use the ratio to answer the questions in this application? (Look for how students are using proportional reasoning)</li></ul>",
+            "<p></p>",
+            "<p>During the Gallery Walk for What If Situation B have students look at two or more other posters and decide if they agree or disagree with the posters.</p>",
+            "<ul><li>Do you agree with the posters you looked at? Why or why not? (Answers will vary.  Bring out the use of rates in the different representations and in the different situations created by the students.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p><u>Now What Do Students Know</u></p>", "<p>Ask students to reflect on the discussion and answer the Now What Do You Know.</p>", "<p></p>", "<p>See answers for more information about the strategies and embedded mathematics.</p>"]}
+      },
+      {
+        "id": "FaWqN7dmk_QRHidM",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+            "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Explore (Digging In)</strong>\nProviding for Individual Needs",
+            "<p>As you move from group to group, listen as students discuss strategies. Look for interesting explanations of what information each equation represents and discuss these in the Summarize.\n\nStudents may need help with the negative coefficient in the equation for Plan 2. You can ask students to explain why the line slants down or why the relationship is decreasing.</p>",
+            "<strong>Suggested questions</strong>",
+            "<ul><li>Does the table help you decide whether the graph of the relationship is increasing or decreasing? (Yes. You can use the table to see how the dependent variable changes as the independent variable increases. If the dependent variable decreases, then the line will slant down. If the dependent variable increases, then the relationship is increasing and the line will slant up.)</li><li>Pick a point on this line. Can you find this point in the table? Explain. (Answers will vary. Sample answers: Yes, the point (2, 4) is also an entry in the table where the value of <em>x</em> is 2 and the value of <em>y</em> is 4. No, the point (6, 0) is not a row in the table that I made, but if I extended the table, it would be there.)</li><li>How do you know the ordered pair you picked is a solution to the equation? (It makes the equation <em>y</em> = -<em>x</em> + 6 true, because, for the point (2, 4), 4 = -2 + 6.)</li></ul>",
+            "For What If Situation A, choosing the plan that could use 8 = 5x-3, some students may discard Plan 3 because the equation does not have a solution with a y-value of 8. Students may mistakenly reject Plan 2 for the same reason if they are only looking in the first quadrant. If they look in the second quadrant, they will find that the equation has a solution with a y-value of 8: (-2, 8). Although the equation for Plan 2 has the solution (-2, 8), remind students that the solution corresponds to walking -2 kilometers, which may not make sense in this real-world situation. Some students might find some interesting ways to interpret y = -x + 6 in this context. However, this equation can represent many situations, and (-2, 8) might well make sense for a different situation. It is a solution for this equation, but does not make sense within the context."
+          ]
+        }
+      },
+      {
+        "id": "dSlHmfjt9jdPqPkQ",
+        "title": "Text 9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Planning for the Summary</p>",
+            "What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>",
+            "<p><strong>Now What Do You Know?</strong></p>",
+            "<p><em><strong>Describe the advantages and disadvantages of using tables, graphs, and symbolic methods to solve equations.</strong></em></p>",
+            "<p>(As you are circulating during the Explore, listen to how students are making decisions on which representations to use to solve problems.  Select students to share how they used tables, graphs or symbolic methods in the summary.  Use this work to lead conversations on the connections between the representations and the advantages and disadvantages of each.)</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

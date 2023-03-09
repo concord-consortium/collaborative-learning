@@ -1,0 +1,48 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Launch (Getting Started)</strong></p>",
+            "<p>Connecting to Prior Knowledge</p>",
+            "<p>Display Teaching Aid 3.4: Two T-Shirt Plans and use it to review how to interpret the information that the point of intersection provides in this situation. Explain that the point of intersection lies on both lines, so its coordinates must be a solution to the equation of each line. Revisit how inequalities represent multiples solutions. (LANGUAGE)</p>",
+            "<p>Choose a point, such as (10, 45).</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Does it lie on both lines? (No, it only lies on the line representing <em>C</em><sub><em>n</em></sub> = 4.5<em>n</em>.) </li><li>What information does it represent? (10 T-shirts cost $45. Because the point lies below the line representing <em>C</em><sub><em>m</em></sub> = 49 + n, the cost of 10 T-shirts from No-Shrink is cheaper than the cost of 10 T-shirts from Mighty Tee.) </li></ul>",
+            "<p>Choose a point that does not lie on either line, such as (6, 40). </p>",
+            "<ul><li>Does this point lie on either line? (No, it falls below the line for <em>C</em><sub><em>m</em></sub> and above the line for <em>C</em><sub><em>n</em></sub>.)</li></ul>",
+            "<p>Draw students’ attention to the point of intersection on the graph. </p>",
+            "<ul><li>What information do the coordinates of the point of intersection of the two lines give you about this situation? (They tell you the number of T-shirts required for the cost of the two plans to be equal.) </li><li>Show how you could use the two equations to find the coordinates of the point of intersection of the two lines. That is, for what number of T-shirts <em>n</em> is <em>C</em><sub><em>mighty</em></sub> = <em>C</em><sub><em>No-Shrink</em></sub>? (You can solve the equation 4.5<em>n</em> = 49 + <em>n</em>. <em>n</em> = 14. You substitute this value into one of the equations to find the value of <em>C</em>, which is 63.) </li><li>For what number(s) of T-shirts is plan <em>C</em><sub><em>mighty</em></sub> less than plan <em>C</em><sub><em>No-Shrink</em></sub>? That is, when is <em>C</em><sub><em>mighty</em></sub><em> &lt; C</em><sub><em>No-Shrink</em></sub>? (Once you know for what value of n the two plans are equal, you can choose a value either greater or less than this value of <em>n</em>. You can substitute this value into the equality to determine which cost is greater for that value of <em>n</em>.)</li><li>How could you use the equation or its graph or table to find the number of T-shirts where the cost is less than $60? That is, for values of <em>n</em> is <em>C</em><sub><em>mighty</em></sub> &lt; 60?   Or 49 + <em>n</em> &lt; $60? (Students could change the inequality to 49 + <em>n</em> = $60 and solve for <em>n</em>. Then use the value of the n to reason about the solutions to the inequality. Another way to find solutions to the inequality is to look at the graph. Students will see that when <em>n</em> = 18, the graph of <em>C</em><sub><em>mighty</em></sub> is below the graph of <em>C</em><sub><em>No-Shrink</em></sub>. In fact, for all values of <em>n</em> that are greater than 14, the graph of <em>C</em><sub><em>mighty</em></sub> is below the graph of <em>C</em><sub><em>No-Shrink</em></sub>. This means that all numbers greater than 14 are solutions to the inequality <em>C</em><sub><em>mighty</em></sub> &lt; <em>C</em><sub><em>No-Shrink</em></sub>. Be sure students are comfortable using the graph to answer these questions.)</li></ul>",
+            "<p>You may want to review inequality statements that were explored in earlier Units, such as <em>x</em> &lt; 6, <em>x</em> &gt; 5, or –3 &lt; <em>x</em>. Ask students to show the solution to each on a number line.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Presenting the Challenge</p>",
+            "<p>Tell the story of Fabulous Fabian's bakery or show the Launch Video. If needed, review the concepts of income, expense, and profit with the students.</p>",
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>In the equations for income and expenses, what information do the <em>y</em>-intercepts give? (In the equation for income, the <em>y</em>-intercept tells you the income the bakery makes for selling 0 cakes in a month. In the equation for expenses, the y-intercept tells you the expenses the bakery has each month before it sells any cakes.)</li><li>What information do the coefficients of <em>n</em> represent? (In the equation for income, the coefficient of <em>n</em> represents the income the bakery earns for each cake sold. In the equation for expenses, the coefficient of <em>n</em> represents the cost to make each cake.)</li></ul>",
+            "Have students work with a partner.  ",
+            "<p><strong>Implementation Note:</strong>  You may want to summarize after What If Situation B to be sure that students are comfortable finding the profit numerically and recognizing how this solution is represented on a graph. This will set the scene for representing the answers to the inequalities on graphs in What If Situation C.</p> "
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,283 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles": [
+      {
+        "id": "BHhgULHApjtBsryF",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
+            "<p><u>Solutions and Strategies</u></p>",
+            "<p></p>",
+            "<p><em>For the Initial Challenge</em></p>",
+            "<p></p>",
+            "<p>Students will come up with a variety of ways to reason about this Problem. Let them present their strategies to one another and justify the validity of their approaches.</p>",
+            "<p></p>",
+            "<p>As students share their strategies, it is important to be clear about what comparisons are being made by the ratios. You can do this either by showing students directly or by asking them to be clearer in their explanations.</p>",
+            "<p></p>",
+            "<p>It is important that when students use certain strategies, such as scaling a ratio to an equivalent ratio, you explicitly call attention to that strategy for the class. Also, with unit rates, it is important for students to see how scaling a ratio so that one quantity is 1 connects to dividing to find a unit rate.</p>",
+            "<p></p>",
+            "<p>There are basically two ways to reason about pizzas and people. Those ways are related to the two unit rates, how much pizza for every 1 person or how many people share 1 pizza. Using pictures, students may use estimation. The basic notion is that to compare ratios, we need one of the two quantities to be constant, so we can reason about the multiplicative comparison.</p>"
+          ]
+        }
+      },
+      {
+        "id": "MG4UB2IYHhL7qndQ",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Example Student Strategies and Reasoning</em></p>",
+            "<p></p>",
+            "<p> <em>Strategy 1: Reasoning with Pictures and Estimation</em></p>",
+            "<p></p>",
+            "<p>Some students will use the pictures to reason about the quantities. They often discuss how the pizza is shared without doing exact numerical calculations.</p>"
+          ]
+        }
+      },
+      {
+        "id": "2za7x3B8rwN-ly9M",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Group 1: Groups of 2 and Groups of 3 People</em></p>",
+            "<p>The people at the large table get more pizza. We know this because there are more groups of two people sharing a pizza. At the small table, you have two groups of 3 people and only one group of 2 people sharing the pizza. This means that there is more pizza for each person at the large table.</p>"
+          ]
+        }
+      },
+      [
+        {"id": "lZzMVPIQlHGNKNI4", "title": "Large Table", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group1LargeTable.png"}},
+        {"id": "cF7EL9S7l6pLy7IC", "title": "Small Table", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group1SmallTable.png"}}
+      ],
+      {"id": "eQf3BYVy7A7rr3fi", "content": {"type": "Text", "format": "html", "text": ["<p>Note: This is a version of how many people share every 1 pizza.</p>"]}},
+      {"id": "emi-PV0uryCSzeGl", "content": {"type": "Text", "format": "html", "text": ["<p><em>Group 2: Groups of 2 Share with the Extra People</em></p>", "<p>We looked at each pizza being shared with 2 people.</p>"]}},
+      [
+        {"id": "c4M0UpgTasB0uTj4", "title": "4 Groups of 2 Share with 2 people", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group2LargeTable.png"}},
+        {"id": "EE9xKvJ_GINm9bO6", "title": "3 Groups of 2 Share with 2 people", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group2SmallTable.png"}}
+      ],
+      {
+        "id": "QlxIIAVy7yyB4YUG",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Then we thought about sharing the pizza with the “extra” people. At the large table, we can see people get more pizza because the “extra” people (at the ends of the table) get some of two pizzas. At the small table, the “extra” people get some of 1½ pizza. So at the small table, people get less.</p>"
+          ]
+        }
+      },
+      {"id": "d9hIjlauLHNMKUfF", "content": {"type": "Text", "format": "html", "text": ["<p>Note: This is a version of how much pizza is available for every 1 person.</p>"]}},
+      {
+        "id": "-Y5n6B_wHT-RdVCv",
+        "content": {"type": "Text", "format": "html", "text": ["<p><em>Group 3: Handing out Slices</em></p>", "<p></p>", "<p>We cut each pizza into 8 slices. Then we thought about passing out slices to each person at the table. We gave away slices in a clockwise order.</p>", "<p></p>"]}
+      },
+      [
+        {"id": "3nTHvYaRlbCex1i5", "content": {"type": "Text", "format": "html", "text": ["<p>Small Table</p>", "<p></p>", "<p>We gave a slice to each of the 8 people from each pizza.</p>"]}},
+        {"id": "sW4NLq-qrUYQa6cm", "content": {"type": "Text", "format": "html", "text": ["<p>Large Table</p>", "<p></p>", "<p>1st pizza – we gave a slice to people 1-8.</p>", "<p></p>"]}}
+      ],
+      [
+        {"id": "SrrU5yU-fdtM6Yi7", "title": "8 slices in 3 pizzas", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3SmallTable.png"}},
+        {"id": "j8dhTU7Zk4cUXLEk", "title": "8 slices Pizza 1", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable1st.png"}}
+      ],
+      [
+        {"id": "hcBSsj6VdilkO7V7", "content": {"type": "Text", "format": "html", "text": ["<p>Each person got 3 slices and there was no pizza left.</p>"]}},
+        {"id": "RKJKgyFHD4VYLpA6", "content": {"type": "Text", "format": "html", "text": ["<p>2nd pizza – we gave a slice to persons 9 and 10, then we had enough to give a piece to 1-6.</p>"]}}
+      ],
+      [{"id": "DjSqp8u9vJ_60AIM", "content": {"type": "Text", "format": "html", "text": [" "]}}, {"id": "_MdYhg2ssHbsLPi-", "title": "8 slices Pizza 2", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable2nd.png"}}],
+      [{"id": "hTaDy1_e1s-JGBJO", "content": {"type": "Text", "format": "html", "text": ["<p> </p>"]}}, {"id": "UqYnFrsaFa6cjUrO", "content": {"type": "Text", "format": "html", "text": ["<p>3rd pizza – we gave a slice to 7, 8, 9, and 10, then still had enough to give 1-4 another slice.</p>"]}}],
+      [
+        {"id": "TDa8wkmqgVIQUSTS", "title": "8 slices Pizza 3", "content": {"type": "Text", "format": "html", "text": ["<p> </p>"]}},
+        {"id": "yMHPpaDgzLzETAa3", "title": "Group 3 Large Table", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable3rd.png"}}
+      ],
+      [{"id": "8UCr2WaWA7-kYfjc", "content": {"type": "Text", "format": "html", "text": ["<p </p>"]}}, {"id": "UD30-L3wXtkN-Xu2", "content": {"type": "Text", "format": "html", "text": ["<p>4th pizza – we gave a slice to people 5-10.</p>"]}}],
+      [{"id": "LA1e2PO8pYTOGEpQ", "content": {"type": "Text", "format": "html", "text": ["<p> </p>"]}}, {"id": "P1kEZWx9JAIgEO6q", "title": "2 slices Pizza 4", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group3LargeTable4th.png"}}],
+      [{"id": "ATWWbTjPW9QcIQKK", "content": {"type": "Text", "format": "html", "text": ["<p> </p>"]}}, {"id": "B3JeGP7UjBJjaVrH", "content": {"type": "Text", "format": "html", "text": ["<p>Each person got 3 slices and there were 2 pieces left over.</p>"]}}],
+      {
+        "id": "cFQGT8ih1FsJ-SLS",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>At each table, the people got 3 slices. But at the large table, there is more to share. So you would get more pizza at the large table.</p>", "<p></p>", "<p>Note: This is a version of how much pizza is available for every 1 person.</p>"]
+        }
+      },
+      {"id": "d0UztBq8b3Mk_RcE", "content": {"type": "Text", "format": "html", "text": ["<p><em>Strategy 2: How Much Pizza for a Fixed Number of People</em></p>"]}},
+      {"id": "5pgQxtVbU7rrb5VX", "content": {"type": "Text", "format": "html", "text": ["<p>Group 4: Unit Rate (How much pizza for every 1 person)</p>"]}},
+      {"id": "Pp4kfbosYfLAniaS", "title": "Unit Rate", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group4.png"}},
+      {"id": "kJj4wtnWngqob0JJ", "content": {"type": "Text", "format": "html", "text": ["<p>Note that some students will lose track of the meaning of the numbers when dividing. To help, have other students show labeling and scaling quantities in the rate.</p>"]}},
+      {"id": "Atn3Tasasdfdffsdahj8KghQgK", "content": {"type": "Text", "format": "html", "text": ["Explaining the Rate Calculation", "4 pizzas for 10 people", "⤸ ÷10             ⤸ ÷10", "0.4 pizzas for 1 person"]}},
+      {"id": "Atasfn3Tasj8KghQgK", "content": {"type": "Text", "format": "html", "text": ["Explaining the Rate Calculation", "3 pizzas for 8 people", "⤸ ÷8             ⤸ ÷8", "0.375 pizzas for 1 person"]}},
+      {
+        "id": "aDXPRXp6MerqO9qy",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><em>Group 5: Equal Numbers of People</em></p>", "<p>We found how much pizza there would be for the same number of people. We found that the number of people could easily be scaled to 40 people, because 40 is the least common multiple of 10 and 8.</p>"]
+        }
+      },
+      {"id": "vU2oIyB-CcMBLAGc", "title": "Least Common Multiple", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy2Group5.png"}},
+      {
+        "id": "F2VSzKi7b5amd0EP",
+        "content": {"type": "Text", "format": "html", "text": ["<p>The larger table is better, because there is more pizza (first quantity) for the same amount of people (second quantity). It shows having an extra pizza for the 40 people. So there will be more pizza per person.</p>"]}
+      },
+      {"id": "raVeI-cICwYBcVrR", "content": {"type": "Text", "format": "html", "text": ["<p><em>Group 6: Percentage of Pizza</em></p>"]}},
+      {"id": "D8g0eoWLYx4cowha", "title": "Example Percentage of Pizza Calculation", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_GROUP6.png"}},
+      {"id": "Yz-XjnXjn3tyvJKl", "content": {"type": "Text", "format": "html", "text": ["<p>Note that some students lose track of the meaning of the numbers when dividing then multiplying. To help, have other students show labeling and scaling quantities out of 100.</p>"]}},
+      {"id": "AtF0n3Thj8Kg092df4", "content": {"type": "Text", "format": "html", "text": ["4 pizzas for 10 people", "⤸ x10                ⤸ x10", "40 pizzas for 100 people"]}},
+      {"id": "AtF0n3Tasdffsdahj8KghQgK", "content": {"type": "Text", "format": "html", "text": ["3 pizzas for 8 people", "⤸ x12.5             ⤸ x12.5", "37.5 pizzas for 100 people"]}},
+      {
+        "id": "Lx5jU0XVyGvK5kzE",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>The percentage strategy connects to both the unit rate and the “equal number of people.” The percent strategy is like having an “equal number of people” of 100. The unit rate strategy shows a scaled down version of the percentages, which are a rate per 100.</p>"]
+        }
+      },
+      {"id": "Zd3-QYguWUL5acrQ", "content": {"type": "Text", "format": "html", "text": ["<p>Group 7: Finding Slices Per Person</p>"]}},
+      {"id": "8uEZKoukxO1Z_WOR", "title": "Slices per person", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_GROUP7.png"}},
+      {"id": "a1mlNJG07MTRhRbo", "content": {"type": "Text", "format": "html", "text": ["<p>Group 8: Slicing Pizza to Share a Fraction of the Pizza</p>", "<p>We split each pizza into the number of people at the table.</p>"]}},
+      [
+        {"id": "tjIC_4JTDVYGmlCK", "title": "Large Table", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group8_LargeTable.png"}},
+        {"id": "w4IpojoW8OyNOtqV", "title": "Small Table", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Group8_SmallTable.png"}}
+      ],
+      [
+        {"id": "7z0pGwvSVggGPQF2", "content": {"type": "Text", "format": "html", "text": ["<p>Each person gets 4 of the 1/10 slices or</p>", "<p>4/10 of a pizza.</p>"]}},
+        {"id": "ELoLsqSpzhda5Y4x", "content": {"type": "Text", "format": "html", "text": ["<p>Each person gets 3 of the 1/8 slices or</p>", "<p>3/8 of a pizza.</p>"]}}
+      ],
+      {"id": "iYB0pL2r5jN9d0jJ", "content": {"type": "Text", "format": "html", "text": ["<p>4/10  (0.4) of a pizza is more than 3/8 (0.375) of a pizza. So the large table gets more.</p>"]}},
+      {"id": "5UFnFy_OXxHVcbWE", "content": {"type": "Text", "format": "html", "text": ["<p><em>Strategy 3: How Many People for a Fixed Number of Pizzas</em></p>"]}},
+      {
+        "id": "xLgcv95c7HPBTQAk",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Group 9: Equal Numbers of Pizza</em></p>",
+            "<p>Step 1: We found a common number of pizzas.</p>",
+            "<p></p>",
+            "<p>       4 pizzas/ 10 people  =   12 pizzas/30 people</p>",
+            "<p>       3 pizzas/ 8 people =  12 pizzas/32 people</p>",
+            "<p>Step 2: See which is greater.</p>",
+            "<p>         12/30      &gt;      12/32</p>",
+            "<p></p>",
+            "<p>The larger table is better, because the amount of pizza (first quantity) is the same for a smaller amount of people (second quantity). So there will be more pizza per person.</p>"
+          ]
+        }
+      },
+      {"id": "LDXzjLpii-dCw5ax", "content": {"type": "Text", "format": "html", "text": ["<p><em>Group 10: Unit Rate (How many people for every 1 pizza)</em></p>"]}},
+      [
+        {"id": "otWk5GQcotHH8Uz8", "content": {"type": "Text", "format": "html", "text": ["<p>Large Table</p>", "<p>10 people need to share 4 pizzas.</p>", "<p></p>", "<p>10 ÷ 4 = 2.5 number of people per pizza</p>", "<p>OR</p>"]}},
+        {"id": "W_tl0jRCGibznHYe", "content": {"type": "Text", "format": "html", "text": ["<p>Small Table</p>", "<p></p>", "<p>8 people need to share 3 pizzas.</p>", "<p></p>", "<p>8 ÷ 3 = 2 2/3 number of people per pizza</p>", "<p>OR</p>"]}}
+      ],
+      [
+        {"id": "h9G4YdAe65yZebLc", "title": "10 people to 4 pizzas", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy3Group10_1.png"}},
+        {"id": "KLw2FGBCP2kqBODW", "title": "8 people to 3 pizzas", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-1_Strategy3Group10_2.png"}}
+      ],
+      {"id": "-tlqwrMWiJ-SZB5q", "content": {"type": "Text", "format": "html", "text": ["<p>The people at the large table would get a bit more pizza than at the small table.</p>", "<p></p>", "<p>                                 2.5 &lt; 2.6</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Making the Mathematics Explicit</u></p>",
+            "<p>During the discussion of strategies, have students begin sorting their work into similar kinds of thinking. They should begin to see that there are two ways to think about this situation:</p>",
+            "<ul><li>How much pizza for a fixed number of people.</li><li>How many people share a fixed number of pizzas.</li></ul>",
+            "<p></p>",
+            "<p>After sorting the student work, lay the foundation for the next Problem by discussing rates.</p>"
+          ]
+        }
+      },
+      {
+        "id": "Wcz0RgJNt2JPQ5aL",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>I noticed that most of you did a part-to-part ratio. Did anyone do a part to whole ratio? (No. It would not make sense to combine the pizza and people into a whole.)</li><li>What quantities are you comparing? Do they have the same units of measure? (They are different types of quantities: pizza and people.)</li><li>Since each ratio is a comparison of two quantities measured in different units (pizza and tables), they are called rates. Can you think of other rates (comparisons with different units that would not combine to a part to whole ratio) that we have used? (Answers will vary. Investigation 1 examples include number of batches and number of 1 cup servings, miles jogged to calories burned, time and miles jogged. In Grade 6 Comparing Quantities examples included, students looked at; cupcakes and cost, Chewy Fruit Worm sold and amount of money collected, ounces of kernels and cups of popcorn, time and distance traveled.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "pcxnw3YnJJ6nxfT5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>For the What If</em></p>",
+            "<p></p>",
+            "<p><strong>Suggested Questions for Situation A</strong></p>",
+            "<ul><li>How did Selma find the amount of pizza per person? (She scaled down each quantity. For the Large Table, she divided each quantity by 10 to find the amount for 1 person. For the Small Table, she divided each quantity by 8 to find the amount for 1 person.)</li><li>Do you agree with her conclusion that the Large Table would get more pizza? (Yes. That is what we found in the Initial Challenge.)</li><li>How did Tony find the number of people sharing one pizza? (He scaled down each quantity. For the Large Table, he divided each quantity by 4 to find the amount for 1 pizza. For the Small Table, she divided each quantity by 3 to find the amount for 1 pizza.)</li><li>Do you agree with his conclusion that the Small Table would get more pizza? (No. He did the correct calculations. But his conclusion is incorrect. 2.5 &lt; 2 2/3. So, at the Large Table you have less people (2.5) eating the pizza which means everyone gets more pizza.)</li><li>How did Terry make his conclusion? (He subtracted. The difference of 6 at the Large Table has no meaning. You cannot subtract pizza from people. Also, you cannot find ratio equivalence by subtracting.)</li></ul>"
+          ]
+        }
+      },
+      {"id": "5klZMtKe_R6x-he5", "content": {"type": "Text", "format": "html", "text": ["<p>In Grade 6 in the <em>Comparing Quantities</em> unit, students learned that ratios are multiplicative reasoning. So additive reasoning is not the way to ratio equivalence.</p>"]}},
+      {
+        "id": "3Q6mC29w-Z1oEimA",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions for Situation  B</strong></p>",
+            "<ul><li>What strategies did you use to find how many pizzas are needed? (Answers will vary.)</li><li>Would a unit rate be helpful?  (Yes.  A rate table may be used by some students to find and use the unit rate:</li></ul>"
+          ]
+        }
+      },
+      {"content": {"type": "Table", "name": "Rate Table", "columns": [{"name": "No. People", "values": ["5/2", "5", "10", "20", "30", "40", "50", "", "210"]}, {"name": "No. Pizzas", "values": ["1", "2", "4", "8", "12", "16", "20", " ", "84"]}]}},
+      {
+        "id": "F8CsWnEK39bAGr7u",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>Would setting up a proportion be helpful? (Yes.)</li><li>How would the proportion be set-up? (Possible Answers.</li></ul>",
+            "<p>        Small Table: (8 people)/(3 pizzas)=  (210 people)/(x pizzas)</p>",
+            "<p></p>",
+            "<p>  Large Table: : (10 people)/(4 pizzas)=  (210 people)/(x pizzas)</p>"
+          ]
+        }
+      },
+      {
+        "id": "WDrthInYqdsEXLjT",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions for Situation C</strong></p>",
+            "<p>Students have to think about how many pizzas make sense for an extra-large table. Then they have to figure out what to do with the fact that at least one table will not be full, since 25 is not a factor of 210.</p>",
+            "<ul><li>How many pizzas make sense for the extra-large table? (Answers will vary. Possible reasoning may include: 25 is about 3 times 8, so there could be 3 x 3 or 9 pizzas at an extra-large table. Or 25 is 2.5 times 10, so there could be 2.5 x 4 or 10 pizzas at an extra-large table. Or somewhere between 3/8 and 4/10 of a pizza per person. Or just use the amount on the large table because that had the most pizza for each person.)</li><li>What strategies did you use to find the number of pizzas? (Answers will vary. Possible answers may include proportions, equivalent ratios, or scaling up.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Now What Do Students Know</u></p>",
+            "<p>Ask students to reflect on the discussion and answer the Now What Do You Know.</p>",
+            "<p>Students used proportions in Investigation 1, but probably not in this Problem. They may have compared ratios or scaled up or down. Investigation 1 had part to part and part to whole comparisons. Problem 2.1 is all part-to-part ratios.</p>",
+            "<p>See answers for more information about the strategies and embedded mathematics.</p>"
+          ]
+        }
+      },
+      {
+        "id": "GwC8YVmuD9_HbVMS",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+            "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "type": "teach",
+  "content": {
+    "tiles": [
+      {
+        "id": "t3o4RNkq9fYiJpJ6",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Instructional Sequence:</strong></p>",
+            "<p><em>10 minutes</em></p>",
+            "<p>Review the engineering design process, highlighting the value for use (see resources). Outline the design thinking process using an informative graphic as reference. Inform students that they will embark on the first step – empathize – by researching the experiences and challenges of someone who has a sensory or motor condition. </p>",
+            "<p>5 minutes</p>",
+            "<p>Survey students as to which case they would like to support. This can be introduced in two ways:</p>",
+            "<p>Option 1:</p>",
+            "<p>Present the following cases to students (see student-facing lesson):</p>",
+            "<ul><li>Help Mrs. Marcus</li><li>Help Tilly</li><li>Help Mr. Johnson</li></ul>",
+            "<p>Survey students as to which person they would like to help and organize teams of three or four students based on their responses (try to have two teams per case)</p>",
+            "<p>Option 2:</p>",
+            "<p>Ask each pre-established group to review the four cases and decide who they want to help.</p>",
+            "<p><em>15 minutes</em></p>",
+            "<p>Ask each team to prepare a response to the following questions (these questions should help orient students towards designing a solution) and record their responses in a journal template.</p>",
+            "<p>What are the challenges experienced by [person’s name]?</p>",
+            "<p>Why is it important to help reduce these challenges?</p>",
+            "<p>How can we apply what we have learned throughout the unit to help this individual?</p>",
+            "<p><em>10 minutes</em></p>",
+            "<p>After each team has prepared a response, ask teams who are working on helping the same person to exchange their ideas and summarize common ideas on paper. Ask one representative working on helping each person to share the collective ideas with the entire class. </p>",
+            "<p><em>35 minutes</em></p>",
+            "<p>Direct each team to use their knowledge of body systems and technology to propose a product that can help [the person] circumvent the challenge described in the case. Direct students to sketch the product on whiteboards/chart paper, with annotations.  </p>",
+            "<p>As students work on the proposed products, circulate between teams and prompt students’ empathic design thinking by asking the following questions:</p>",
+            "<p>Will [person’s name] find the product safe?</p>",
+            "<p>Will [person’s name] find the product easy to use?</p>",
+            "<p>Will [person’s name] find the product comfortable?</p>",
+            "<p>Will [person’s name] find the product useful?</p>",
+            "<p><em>20 minutes</em></p>",
+            "<p>After students have completed their illustrated and annotated models of the proposed products, ask each team to share their design, including the design considerations made to ensure that the person they are helping would find the product easy to use, safe, useful, and comfortable. This can be accomplished much like a professional science meeting poster session – one team member can represent the work to others, while the rest of the team visits other teams’ posters to gain insight and provide feedback (ask students to write down questions and comments on sticky notes and attach them to the poster).</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

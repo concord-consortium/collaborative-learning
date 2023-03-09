@@ -1,0 +1,175 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles": [
+      {
+        "id": "d6i9UgVi0gJ7G9zc",
+        "title": "Text 15",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Summarize (Orchestrating the Discussion)</strong></p>",
+            "<p>Solutions and Strategies </p>",
+            "<p>Have groups share how they solved the Initial Challenge.  Highlight different representations to help students make connections.  </p>",
+            "<p>Have students share their solutions for the inequalities in What If Situation B. </p>",
+            "<p>Discuss the use of graphs/equations for the problems in Jasmine’s Observation in What If Situation C.</p>",
+            "<p>Discuss when the two theater companies make the same profit in What If Situation D.</p>"
+          ]
+        }
+      },
+      {
+        "id": "4pBqQ5OBUg1bD7SO",
+        "title": "Text 16",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Making the Mathematics Explicit </p>",
+            "<p><strong>Suggested questions</strong></p>",
+            "<ul><li>How did you find how many students need to attend the movie so that the theater’s income will equal its operating expenses? (Answers will vary.  Bring out as many strategies/representations as you have in your classroom.)</li><li>Where do you find the break-even point on the graph?  (point of intersection when the number of students is 40)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "9-AB5J_XI2flrfSQ",
+        "title": "Break even point",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-7.038, -21.739], "axisRange": [84.457, 347.826], "axisNames": ["x", "y"], "axisLabels": ["Number of Students", "Money"]}},
+          "objects": [
+            {
+              "type": "movableLine",
+              "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [40.08283598332111, 175.03969938858697]}],
+              "properties": {"id": "6-n2q0qknIOLHsxw", "pt1": {"type": "point", "id": "6-n2q0qknIOLHsxw-point1"}, "pt2": {"type": "point", "id": "6-n2q0qknIOLHsxw-point2"}}
+            },
+            {"type": "point", "parents": [40, 175.10000000000002], "properties": {"id": "aioLnr3JYfRiF8oa", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {
+              "type": "movableLine",
+              "parents": [{"type": "point", "parents": [-0.18746563416422285, 124.88217561141303]}, {"type": "point", "parents": [40.05663203354105, 174.1921731700068]}],
+              "properties": {"id": "GX_AqlBcXaaTQscH", "pt1": {"type": "point", "id": "GX_AqlBcXaaTQscH-point1"}, "pt2": {"type": "point", "id": "GX_AqlBcXaaTQscH-point2"}}
+            },
+            {"type": "point", "parents": [40.44652675953079, 214.8140285326087], "properties": {"id": "LINHPK1B7uqm8_W8", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}}
+          ]
+        }
+      },
+      {
+        "id": "KkSskUJljrH8_4we",
+        "title": "Text 17",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>How does using the idea of finding when the expenses equal the income get the same answer as using a graph?  (The 4.50n is the blue line on the graph.  The 130 + 1.25n is the orange line on the graph.  When you solve for n this is the same as the x value when the lines meet.)</li><li>How does using a profit equation get the same answer as using a graph or setting the expenses equal to the income? (When you are solving the I = E equation you end up subtracting the expenses)</li><li>How does using a table get the same answer as using a graph or using the equations?  (When you are using the rate to fill in the table it is the same as the “steepness” or slope of the line on the graph so when they are the same on the table it is the same as finding the point of intersection on the line.)</li><li>How was the rate of change helpful?  (Answers will vary. Example: In the Initial Challenge students can discuss the $4.50 per student and the $1.25 per student for film rental and how those influenced the table, graph, equation, and ultimate solution.)</li><li>How does Geraldo’s Strategy (or if someone in the class made a similar table, use that instead) help to solve the problem? (Finding when the Income and Expenses are the same and knowing that this is where the movie company would break even.)</li><li>How does Anna’s Strategy (or if someone in the class made a similar graph, use that instead) help to solve the problem? (Finding where the two lines intersect is where the movie company would break even.)</li><li>How does Sze’s Strategy (or if someone in the class wrote a Profit equation, use that instead) help to solve the problem? (By making one equation you can solve it for the number of students when the profit is 0 to find where the movie company would break even.)</li><li>How did you solve What If Situation B? (Answers will vary. Look for students who used graphs, tables, and symbolic manipulation. Share the different strategies and help students see connections.) (Agency, Identity, Ownership)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "DFurs5rdq0d075oG",
+        "title": "Text 18",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Below is a conversation that took place in one classroom:</p>",
+            "<p><strong>Teacher</strong>: How did you find the number of students that made $125n +$130 &lt; $255 true? </p>",
+            "<p></p>",
+            "<p><strong>Jordan: </strong>Our group looked on the graph we made for the problem. We drew a horizontal line when y = 255 to help us see where the expenses were $255. This showed us that anything below that was less than the $255.  </p>"
+          ]
+        }
+      },
+      {
+        "id": "pR4Gbt3pHZfwKW8I",
+        "title": "Graph of y < 255",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-23.46, -21.739], "axisRange": [281.525, 347.826], "axisNames": ["x", "y"], "axisLabels": ["x", "y"]}},
+          "objects": [
+            {
+              "type": "movableLine",
+              "parents": [{"type": "point", "parents": [210.56319877199414, 261.8790336277174]}, {"type": "point", "parents": [0.46084585777125575, 260.03709212593407]}],
+              "properties": {"id": "MbWnWrDiQqfNmG7r", "pt1": {"type": "point", "id": "MbWnWrDiQqfNmG7r-point1"}, "pt2": {"type": "point", "id": "MbWnWrDiQqfNmG7r-point2"}}
+            },
+            {
+              "type": "movableLine",
+              "parents": [{"type": "point", "parents": [-0.3164520711143695, 135.9845368758492]}, {"type": "point", "parents": [100.13752061950146, 260.6300951086957]}],
+              "properties": {"id": "xL7GtWIgY0_s0GNz", "pt1": {"type": "point", "id": "xL7GtWIgY0_s0GNz-point1"}, "pt2": {"type": "point", "id": "xL7GtWIgY0_s0GNz-point2"}}
+            },
+            {"type": "point", "parents": [145.26667888563048, 230.01443614130434], "properties": {"id": "URHap0tf-wqxcY_k", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}}
+          ]
+        }
+      },
+      {
+        "id": "8MKi6bFQoDUiNIxK",
+        "title": "Text 19",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Teacher:</strong>  Do others agree or disagree with this strategy?</p>",
+            "<p></p>",
+            "<p><strong>Rachael</strong>: I think that works. We used the table and just looked when the profits were going to be below $255. It was exactly $255 at 100 students so anything less than 100 students makes it true.  </p>",
+            "<p></p>",
+            "<p><strong>Jordan</strong>: Yeah. If you draw a line straight down on our graph you see that at 100 students it is exactly $255 so anything below it makes it true.  </p>"
+          ]
+        }
+      },
+      {
+        "id": "6VjC3SmvUIUsBjhl",
+        "title": "Graph 3",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-23.46, -21.739], "axisRange": [281.525, 347.826], "axisNames": ["x", "y"], "axisLabels": ["x", "y"]}},
+          "objects": [
+            {"type": "point", "parents": [100, 0], "properties": {"id": "LwaY_Gn-A6EV7akW", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [100, 279], "properties": {"id": "SgthmqPu-A38Ys6l", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "polygon", "parents": ["LwaY_Gn-A6EV7akW", "SgthmqPu-A38Ys6l"], "properties": {"id": "lGDVhnezXiFjjreg"}},
+            {"type": "point", "parents": [0, 260], "properties": {"id": "obEdeRYDAEUktQbg", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [191, 260], "properties": {"id": "viy94Rvj8WVXU-rB", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "polygon", "parents": ["obEdeRYDAEUktQbg", "viy94Rvj8WVXU-rB"], "properties": {"id": "4DoupY6hQUhznwAV"}},
+            {"type": "point", "parents": [0, 125.10000000000001], "properties": {"id": "r2vGQNRu3chTWDLr", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [139.5191795729472, 313.2164893108865], "properties": {"id": "3wUOEJW1UtbGYL3C", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "polygon", "parents": ["r2vGQNRu3chTWDLr", "3wUOEJW1UtbGYL3C"], "properties": {"id": "yadul5nGg3S3gVnJ"}}
+          ]
+        }
+      },
+      {
+        "id": "SkmuV8UPmgindDWs",
+        "title": "Text 20",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Teacher</strong>: Do others agree or disagree with these ideas?</p>",
+            "<p></p>",
+            "<p><strong>Ashley</strong>: In our group we used Sze’s Strategy and got what Jordan and Rachael did for the number of students to make it true. We took the inequality and solved it for n.  $1.25n + $130 &lt; $255.  So, we first subtracted away the $130 for the staff which made the inequality now $1.25n &lt; $125. Then we divided 125 by 1.25 = 100. So, 100 students make it true.   </p>",
+            "<p></p>",
+            "<ul><li>Is Jasmine correct in What If Situation C?  (Graph can be used to find solutions.  Sometimes, it is difficult to get an exact coordinate pair on the graph and an equation can be helpful.)</li><li>How did you find when the 2 theaters in What If Situation D make the same profit? (Answers will vary.  Show student work using tables, graphs, and equations to help students make connections between their strategy and other strategies.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Now What Do Students Know</p>", "<p>Ask students to reflect on the discussion and answer the Now What Do You Know question.</p>", "<p>See answers to the Problem for more information about the strategies and embedded mathematics. </p>"]
+        }
+      },
+      {
+        "id": "CzKXXgJN8We4LeQ4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning </strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson. </p>",
+            "<ul><li>What evidence do I have that students understand the Now What Do You Know question?</li></ul>",
+            "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit? </li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

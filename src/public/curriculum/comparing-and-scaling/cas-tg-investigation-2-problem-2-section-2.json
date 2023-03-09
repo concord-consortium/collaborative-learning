@@ -1,0 +1,65 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "pMun37ewcnwz9EVr",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><u><strong>Launch (Getting Started)</strong></u></p>", "<p><u>Connecting to Prior Knowledge</u></p>", "<p>Use <strong>Learning Aid 2.2</strong>: Royal and Howdy’s Pizza Costs to discuss the comparison statements in the Introduction.</p>"]
+        }
+      },
+      {
+        "id": "czJ1ukE_CHhM_B0T",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Comparisons have two quantities. What are the two quantities in each statement? (number of pizzas and cost)</li></ul>",
+            "<p>If you did not introduce the term and description of a rate in the Summarize of Problem 2.1, introduce the term now.</p>",
+            "<ul><li>Since each ratio is a comparison of two quantities measured in different units (pizza and tables), they are called rates. Can you think of other rates (comparisons with different units that would not combine to a part to whole ratio) that we have used? (Answers will vary. Investigation 1 examples include number of batches and number of 1 cup servings, or the words Mitch can read in hour. In Grade 6 Comparing Quantities examples included cupcakes and cost, Chewy Fruit Worms sold and amount of money collected, ounces of kernels and cups of popcorn, time and distance traveled.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "x1CYnzHv3xWcuB2u",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Use <strong>Teaching Aid 2.2</strong>: Introduction to review the rate table and proportion strategies in the Introduction. These strategies review finding the number of pizzas for 210 people in the previous Problem.</p>"]}
+      },
+      {"id": "vp9SZS1P_3r_RE5G", "content": {"type": "Text", "format": "html", "text": ["<p><em>Tony’s Rate Table: To find the number of pizzas for 210 people</em>.</p>", "<p>Students might use what they know about multiples and scale up from 30 people to 210 people.</p>"]}},
+      {"id": "N8ujiuxvF0u53GMX", "title": "Tony's Rate", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-2_TonysRateGreen.png"}},
+      {"id": "2joGn7u_IenLUDhA", "content": {"type": "Text", "format": "html", "text": ["<p>Students might combine the ratios of 200 people get 80 pizzas and 10 people get 4 pizzas to find that 210 people get 84 pizzas.</p>"]}},
+      {"id": "oy2bl6hQtuqXnImu", "title": "Tony's Bigger Rate", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-2_TonysRateRed.png"}},
+      {"id": "zwwonQtazRMA3_4V", "content": {"type": "Text", "format": "html", "text": ["<p>Students might use what they know about multiples and scale up from 10 people to 210 people.</p>"]}},
+      {"id": "TmkQvK91VFGYSic6", "title": "Tony's Biggest Rate", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-2_TonysRatePurple.png"}},
+      {"id": "3TrsLvz-GQlJMSPV", "content": {"type": "Text", "format": "html", "text": ["<p><em>Selma’s Proportion: To find the number of pizzas for 210 people.</em></p>"]}},
+      {"id": "8MAaGdjloCyTjtmW", "title": "Selma's Proportion", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-2_SelmasProportion.png"}},
+      {
+        "id": "wJ_piwDMEqPhUs9A",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p></p>",
+            "<p>For the Initial Challenge, have students keep their books closed or keep them from looking at the What If. The What If presents student strategies that you may not want students to see until after working on the tables with pizzas.</p>",
+            "<p>Introduce the Royal Pizza and Howdy’s Pizza deals using <strong>Learning Aid 2.2: Royal and Howdy’s Pizza Costs</strong>. You will want one Learning Aid per student to optimize class time. Tell students that Royal Pizza and Howdy’s Pizza are advertising their prices. Students need to notice the different costs for the different amounts of pizza.</p>"
+          ]
+        }
+      },
+      {
+        "id": "Szmkqp-ZfMgfBG8F",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>We are considering buying pizza for a class celebration. I found adds from two pizzerias. What do you notice and what do you wonder? (Answer will vary. Students may wonder and notice things about the names of the pizzerias, the quality of the pizzas, the price for different numbers of pizzas, what the toppings might be or cost, and the delivery charges.)</li></ul>"
+          ]
+        }
+      },
+      {"id": "Ly0_kxp2HywofOwf", "content": {"type": "Text", "format": "html", "text": ["<p>Have students work with a partner on this Problem.</p>"]}}
+    ]
+  }
+}

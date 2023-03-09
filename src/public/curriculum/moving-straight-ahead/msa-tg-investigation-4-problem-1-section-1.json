@@ -1,0 +1,53 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "1tw7ecc8VyGg44_h",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Overview</strong></p>",
+            "<p>Students investigate the “steepness” of a set of stairs by measuring the rise and run of the stairs and comparing their data to carpenters’ guidelines. The ratio of “rise‐to‐run” informally introduces the concept of slope of a line. </p>"
+          ]
+        }
+      },
+      {"id": "A_8eoesXoERkAfyi", "content": {"type": "Text", "format": "html", "text": ["<p>AoL: Linear Relationships: Analysis & Algebraic Expressions and Equations: Analysis</p>", "<p>CCSSM: 7.RP.A, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c</p>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>NWDYK</p>", "<p>How does the steepness of stairs expressed as a ratio relate to a straight-line graph? To the linear rate of change?  To a linear equation that represents the graph?</p>"]}},
+      {
+        "id": "qZW4rBN9_P-0Ru8g",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Emerging Mathematical Ideas</p>",
+            "<p>Begin to analyze linear relationships (proportional and non-proportional) to understand how the constant rate of change can be understood and represented as a ratio. </p>",
+            "<p>Notice that the:  </p>",
+            "<ul><li>ratio of the rise (height of each step) to the run (the depth of each step) is the same for each step along a staircase, </li><li>the steeper the staircase the bigger the ratio of rise to run for each step and vise-versa, and</li><li>the constant rate of change in every linear relationship (represented as graphs or equations) can be described as the ratio of the vertical change to the horizontal change for any section of the graph. </li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learning</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,99 +1,46 @@
 {
-  "type": "overview",
+  "type": "MathReflection1",
   "content": {
     "tiles": [
       {
-        "id": "Uh5TlY3HG1o-ARl_",
-        "title": "Text 1",
+        "id": "qaXmQo0dlVNqvSZI",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>In this unit we are continuing to explore patterns of change between two variables using linear situations. We use tables, graphs, expressions, equations, and inequalities to represent and these linear patterns and solve problems. At the end of this Investigation,</p>"]
+        }
+      },
+      {"id": "wEMd7OzxRHP2ce4U", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What do you know about linear relationships, expressions, equations, and inequalities?</li></ul>"]}},
+      {
+        "display": "teacher",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<p>The Mathematical Reflection provides an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over the time. (TIME)</p>",
-            "<p></p>",
-            "<p>Each Investigation contributes to students’ conceptual understandings of the ideas in the Unit. Students’ explanations at the beginning of a Unit might be just forming. As you progress through the Unit, students can use the contexts, representation, and connections to express a more solid understanding. By the end of the Unit, students can create a complete picture of understanding.</p>",
-            "<p></p>",
-            "<p>After the class discussion, students can record their responses to the Mathematical Reflection to create a record of their current understandings of the big ideas of the Unit. </p>",
-            "<p></p>",
-            "<p>A teacher can gain an understanding of student thinking during a discussion of the reflection question. Then one can assess individual understanding based on each student’s written work.</p>"
+            "<p>Main idea: In a linear relationship, as the independent variable increases in equal increments, the corresponding dependent variable increases (or decreases) by a consistent amount.  Students might describe this as the rate of change. They should realize that this could be zero (as with Leanne) or negative (as with Ms. Chang and Mr. Mamer). They may realize that the rate of change can be measured anywhere on the graph or table. A linear relationship can be represented by the equation y = ax + b. The point where the line crosses the y-axis is b, the y-intercept. The rate of change is represented by a. If b is 0, then the relationship is also proportional. In a linear and proportional relationship, the rate of change is also a unit rate that is the constant of proportionality. Inequalities appeared briefly as a contrast to equality in Problem 1.4. </p>"
           ]
         }
       },
+      {"id": "2AvbxffDEG8szNKD", "title": "Text 6", "content": {"type": "Text", "format": "html", "text": ["<p>If a relationship is linear, you can tell if it is proportional in the following ways:  </p>"]}},
+      {"id": "eee-Ur7D0xpp7spC", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<p>Table: Values from the table are proportional. You can use the values to write proportions or “for every” ratio statements. For example, in the table for Gilberto:</p>"]}},
+      {"id": "gF_JB7Nes95aMHXW", "title": "Gilberto's Pledge Table", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/Inv_1_MR_Table.png", "filename": "curriculum/moving-straight-ahead/images/Inv_1_MR_Table.png"}},
+      {"id": "SKsM6bhc5c0FyNTh", "title": "Text 9", "content": {"type": "Text", "format": "html", "text": ["<p>Equation: The amount added into the equation is zero. Or the y-intercept is zero. For example, in the equation for Gilberto:</p>"]}},
+      {"id": "zF2prrQXTQVtDXtE", "title": "Text 10", "content": {"type": "Text", "format": "html", "text": ["<p>Gilberto&#x27;s Equation</p>", "<p>m=2d</p>", "<p>OR</p>", "<p>m=2d + 0</p>"]}},
+      {"id": "j-KMntJs1cx1UiJT", "title": "Text 11", "content": {"type": "Text", "format": "html", "text": ["<p>Graph: The graph of a proportional relationship is passes through the point (0,0). For example, in the graph for Gilberto:</p>"]}},
+      {"id": "jvuAR-I2oiaV9-Iy", "title": "Pledges", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/Inv_1_MR_Graph.png", "filename": "curriculum/moving-straight-ahead/images/Inv_1_MR_Graph.png"}},
       {
-        "id": "PPJ_d5zKPGqyz4BJ",
-        "title": "Text 2",
+        "id": "K0uoFSUIdQrIO5NR",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<p><u>Student Responses</u></p>",
-            "<p>At the beginning of the Unit, students will need more collaboration to outline and summarize the important ideas. (Agency, Identity, Ownership) They may need examples of writing, diagrams, and/or justifications from other students to help build their vision of what is expected when answering the Mathematical Reflection question. Early in the year you may want to start writing Mathematical Reflections as a whole group. Then as the year progresses, move to small groups, pairs, and finally individuals.</p>"
-          ]
-        }
-      },
-      {
-        "id": "l9h8T6jKMRUehxDA",
-        "title": "Text 3",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p><strong>Notes on Student Responses</strong></p>",
-            "<p>As the first Investigation of the Unit, students will need may need more collaboration to outline and summarize the important ideas. </p>",
-            "<ul><li>Students will be more confident in discussing the constant of proportionality since this conversation began in Comparing and Scaling. </li><li>Students may rely on contexts to discuss particular expressions and equations. Their general understandings may be fragile at this time.</li><li>Students’ understandings of finding solutions to equations in stories, tables, graphs, and words are at the beginning stages. Students will continue to explore solutions to equations throughout this Unit.</li><li>Students’ understandings about inequalities are at a very informal stage. More will be done in later Investigations.</li></ul>"
-          ]
-        }
-      },
-      {
-        "id": "Kqn06UmXEWRR-kRf",
-        "title": "Text 4",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": ["<p><em><strong>What do you know about linear expressions, equations, inequalities, and relationships?</strong></em></p>", "<p><em><strong></strong></em></p>", "<p>See Student Edition with answers for possible responses to the question.</p>"]
-        }
-      },
-      {
-        "id": "yphHa8n96BK_o3R-",
-        "title": "Text 5",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p><strong>Reflecting on Student Learning   </strong></p>",
-            "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
-            "<ul><li>What evidence in students’ work shows an understanding of the ideas in this Unit?</li><li>What mathematical ideas will still need emphasis?</li><li>What opportunities exist in the rest of the Unit, or in future Units, to extend and connect the students’ learning?</li></ul>"
-          ]
-        }
-      },
-      {
-        "id": "WJ92hrI-VHSqzxH9",
-        "title": "Text 6",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p><strong>Mathematical Practice Implementation</strong></p>",
-            "<p><strong></strong></p>",
-            "<p>Every day, students use “habits of mind” to make sense of problems and apply learning to new situations. Some of these habits are described by the Common Core State Standards for Mathematical Practices (MP). Using the Mathematical Practices at the close of each Investigation allows students to name their reasoning.</p>",
-            "<p></p>",
-            "<p>Students demonstrate to themselves (AGENCY, IDENTITY, OWNERSHIP) the power of the practices. </p>",
-            "<p></p>",
-            "<p>Some teachers discuss the Mathematical Practices during the Summarize of Problems where a specific practice was evident and widely used by students. This can enhance students’ understanding of their mathematical learning and processing.</p>"
-          ]
-        }
-      },
-      {
-        "id": "bUjvs_p2itHyBJQ2",
-        "title": "Text 7",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p><strong>Suggested Questions</strong></p>",
-            "<ul><li><em>What mathematics have you learned by solving this Problem?</em></li><li><em>What Mathematical Practices were helpful in learning this mathematics?</em></li></ul>",
-            "<p></p>",
-            "<p>Students may answer that the example of the Mathematical Practice explained in the SE is an example of MP1 Make sense of problems and persevere in solving them, MP2 Reason abstractly and quantitatively, MP4 Model with mathematics, MP7 Look for and make use of structure, or MP8 Look for and express regularity in repeated reasoning. </p>"
+            "<p><strong>Reflections on the Mathematical Practices</strong></p>",
+            "<p>As we worked on the Problems in this Investigation, we used prior mathematical knowledge to make sense of them. We also applied Mathematical Practices to solve the Problems. For example,</p>",
+            "<p>At the end of Problem 1.3, Eli’s group noticed that the linear relationship with the greatest positive pattern of change had the steepest line. For example, A<sub>Gilberto</sub> = 2n and A<sub>Alana</sub> = 5 + 0.5n. The line of Gilberto’s equation is steeper since it has a greater rate of change. </p>",
+            "<p>This makes sense since as the number of kilometers increases by one unit, the money each sponsor donates to Gilberto increases by $2. The money each sponsor donates to Alana increases by $0.50. </p>",
+            "<p>For Leanne, the equation is A<sub>Leanne</sub> = 10, so the change is 0. As the number of kilometers increases by one unit, the money each sponsor donates to Leanne does not change. The graph is a horizontal line. </p>",
+            "<p>We also noted that the amount of money that Gilberto raises represents a proportional situation. For every kilometer he walks he collects $2. The other two situations are not proportional.</p>",
+            "<ul><li><em>What mathematical practice(s) did the Eli’s group use to solve this problem?</em></li><li><em>What other mathematical practices did you use to solve problems in this Investigation?</em></li><li><em>In what ways is the mathematics in this problem connected to prior mathematics?</em></li></ul>"
           ]
         }
       }

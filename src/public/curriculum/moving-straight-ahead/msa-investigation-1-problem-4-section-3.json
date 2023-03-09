@@ -1,48 +1,78 @@
 {
-  "type": "explore",
+  "type": "whatIf",
   "content": {
     "tiles": [
+      {"id": "GLZllJE2uMowxk-e", "title": "Text 18", "content": {"type": "Text", "format": "html", "text": ["<p><em>Situation A. Using the Data to Answer Questions</em></p>", "<p>For each class: </p>"]}},
+      {"id": "2w06mLj6cB50dwcl", "title": "Text 19", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How much money is in the account at the start? Explain.</li></ul>"]}},
       {
-        "id": "p1lM8wCrikt2mtXR",
+        "id": "rV7z5-CJNR09xShT",
+        "display": "teacher",
+        "title": "Text 22",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Ms. Chang: $144 because this is the amount of money in the account for week 0, or the start of keeping track of the money.</p>", "<p>Mr. Mamer: $500 because this is the amount of money in the account for week 0, or the start of keeping track of the money.</p>"]
+        }
+      },
+      {"id": "Tp7vVedT4n0sryGE", "title": "Text 23", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How much money is withdrawn each week?</li></ul>"]}},
+      {"id": "sEl926Cwm9M3Diva", "display": "teacher", "title": "Text 26", "content": {"type": "Text", "format": "html", "text": ["<p>Ms. Chang: $12.</p>", "<p>Mr. Mamer: $10, $50 for every 5 weeks.</p>"]}},
+      {"id": "YGvs4wAMUx3JI0bk", "title": "Text 27", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Write an equation that represents the relationship. Explain what information each number and variable represent.</li></ul>"]}},
+      {
+        "id": "D2Q3nY7kLemmPn3N",
+        "display": "teacher",
+        "title": "Text 30",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<p><strong>Explore (Digging In)        </strong></p>",
-            "<p>Providing for Individual Needs</p>",
-            "<p>This is the first time that students have encountered negative rates of change or negative slope. You can ask students why the line slants down or is decreasing from left to right.</p>"
+            "<p>Ms. Chang: A = 144 + –12n or 144 – 12n, where <em>n </em>represents the number of weeks and A represents the amount of money in the account after <em>n </em>weeks. The rate at which the amount of money in the account is changing is –$12 per week, and the starting amount of money in the club’s account is $144.</p>",
+            "<p>Mr. Mamer: A = 500 + –10<em>n</em> or 500 – 10<em>n</em>, where n represents the number of weeks and A represents the amount of money in the account after <em>n</em> weeks. The rate at which the amount of money in the account is changing is –$10 per week, and the starting amount of money in the club’s account is $500. </p>"
+          ]
+        }
+      },
+      {"id": "1pb-0pYtX8K5bTZ2", "title": "Text 31", "content": {"type": "Text", "format": "html", "text": ["<ul><li>After 10 weeks, how much money was used to buy items for the children’s ward at the hospital?  How much money was left?  Explain how you found the answer. </li></ul>"]}},
+      {
+        "id": "TSrkUXpr4Xuf7G6c",
+        "display": "teacher",
+        "title": "Text 34",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Ms. Chang: The rate at which the amount of money in the account is changing is -$12 per week, so after 10 weeks the club has donated $12(10) = $120. Since they started with $144, they now have $144-$120=$24 left in the account.</p>",
+            "<p>Mr. Mamer: The rate at which the amount of money in the account is changing is -$10 per week, so after 10 weeks the club has donated $10(10) = $100. Since they started with $500, they now have $500-$100=$400 left in the account.</p>"
+          ]
+        }
+      },
+      {"id": "Tn0_EX4GTu99ZZ4i", "title": "Text 35", "content": {"type": "Text", "format": "html", "text": ["<ul><li>At what week will all the money be spent? Where is this point on the graph?</li></ul>"]}},
+      {
+        "id": "Ozgbe9ilP40C1CWp",
+        "display": "teacher",
+        "title": "Text 38",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Ms. Chang: If they spent $12 per week and they had $144 at the beginning, then all the money would be spent after 144/12 = 12 weeks.</p>",
+            "<p>Mr. Mamer: If they spent $10 per week and they had $500 at the beginning, then all the money would be spent after 500/10 = 50 weeks. This is the point where the graph crosses the horizontal axis, since that represents A=0.</p>"
           ]
         }
       },
       {
-        "id": "NVIbzsbK0J6xeSdg",
+        "id": "MG_yFSfAU082bFaH",
+        "title": "Text 39",
+        "content": {"type": "Text", "format": "html", "text": ["<p><em>Situation B. What’s the Question?</em></p>", "<p>One of Mr. Mamer’s students wrote the following two statements to help her answer questions about their account. What questions was she trying to answer?</p>"]}
+      },
+      {"id": "6lW76V2UZ8J5b_9u", "title": "Text 40", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Jamie&#x27;s Statements</strong></p>", "<p>500 − 10t = 100</p>", "<p>500 − 10t &lt; 100 </p>"]}},
+      {
+        "id": "KoJTJgqQ0Q9aPVeM",
+        "display": "teacher",
+        "title": "Text 43",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<p><strong>Suggested Questions </strong></p>",
-            "<ul><li>How can you represent this change in a table? (You can start with a row that shows the starting value is $144 and then for each new row, subtract $2 for each week.)</li></ul>",
-            "<p>For Mr. Mamer’s data, students may need help finding the constant rate for the graph. Suggest that they make a table of values—this should help them find the constant rate. Be sure to have students share their strategies in the Summary.</p>",
-            "<ul><li>How could you represent Mr. Mamer’s class data in a table? (The week in one column/row and the amount of money in the other column/row.)</li></ul>"
-          ]
-        }
-      },
-      {
-        "id": "agv8VbgafEQzKY1Y",
-        "title": "Table 1",
-        "content": {"type": "Table", "name": "Mr. Mamer's Class Data", "columns": [{"name": "Week", "width": 80, "values": ["0", "5", "10", "15", "20", "25", "30"]}, {"name": "Amount of Money ($)", "width": 140.23046875, "values": ["500", "450", "400", "350", "300", "250", "200"]}]}
-      },
-      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Planning for the Summary</p>", "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence?</p>"]}},
-      {
-        "id": "iEJ145CzJR5FtpkC",
-        "title": "Text 13",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p><em>Now What Do You Know?</em></p>",
-            "<p><em><strong>If a relationship is linear, how can you tell if the pattern of change is decreasing, increasing, or neither?</strong></em></p>",
-            "<p>Listen during the Explore for how students are describing what is happening with the money in the class accounts- are they noticing that on a table that as the number of weeks is increasing the amount of money is decreasing at a constant rate; that on a table the line will decrease (fall) from left to right; and in an equation the coefficient will be negative.  Listen for how students contrast these representations to those in previous problems.  Use their conversations to lead the summary. </p>"
+            "<p>The first equation is setting the expression for how much money is left in the account after t weeks equal to 100, so she is trying to find how many weeks it will take for there to be $100 left in the account. The second equation is trying to find how many weeks it will take for there to be less than $100 left in the account.</p>"
           ]
         }
       }

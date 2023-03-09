@@ -1,35 +1,21 @@
 {
-  "type": "explore",
+  "type": "nowWhatDoYouKnow",
   "content": {
     "tiles": [
+      {"id": "n-W-FN-gjQLqupbe", "title": "Text 73", "content": {"type": "Text", "format": "html", "text": ["<p>Describe some strategies for recognizing equivalent representations?</p>"]}},
       {
-        "id": "-bGLNMxEmuSSqGx_",
-        "title": "Text 9",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p><strong>Explore (Digging In)</strong></p>",
-            "<p>Providing for Individual Needs<strong></strong></p>",
-            "<p><strong>Suggested questions</strong></p>",
-            "<ul><li>Is there a rate of change suggested on this card? (Answers will vary.)</li><li>Is there a y-intercept suggested on this card? (Answers will vary.)</li><li>How do you know if this card is a linear relationship? (constant rate of change; line;        y = mx + b)</li><li>For this context card, can you draw with your hand a graph to represent the situation? (Answers will vary)</li><li>For this table, how do you look for a possible rate of change?  (find out the change in the y-values as the x values increase by 1)</li><li>What “story” does this graph say to you?  (Answer will vary.)</li></ul>",
-            "<p>For What If Situation A you may want to suggest to students to draw rubas and pouches to help them make sense of the equation.  You may want to suggest that they look at “cracking the code” of the rubas and pouches to make sense of some equivalent equations. <strong></strong></p>"
-          ]
-        }
-      },
-      {
-        "id": "y0SyGroKahRuUu01",
+        "id": "jmCoP_TkkZprJA5v",
         "display": "teacher",
-        "title": "Text 11",
+        "title": "Text 75",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<p><strong>Planning for the Summary</strong></p>",
-            "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know questions? What will you do if you do not have evidence? </p>",
-            "<p><strong>Now What Do You Know?</strong></p>",
-            "<p><strong>Describe some strategies for recognizing equivalent representations.</strong></p>",
-            "<p>(Collect examples from students on how they determined which cards were equivalent representations. Listen for how they are deciding if a situation is linear.  Listen for how they are finding the rate of change and y-intercepts for different representations.)</p>"
+            "<p>Answers will vary.</p>",
+            "<p>Students may begin by finding general sorts and then refine them. General sorts may include:</p>",
+            "<ul><li>increasing linear, decreasing linear, and non-linear.</li><li>proportional or non-proportional</li></ul>",
+            "<p>Students may </p>",
+            "<ul><li>determine the y-intercepts and rates of change. Then use those to find the equivalent representation.</li><li>use one representation to find another. For example, they may put the equations into a graphing calculator to get the graph and table. </li><li>find the ratio of the rise to the run for the representation. Then, find other representations with the same ratio.</li><li>Use the properties of equality to find equivalent equations.</li><li>Look for values that match, for example find an x and y value on the table that is the coordinate pair of a point on the graph. Substitute the values into the equation(s) to see if the equation is true for those values.</li></ul>"
           ]
         }
       }

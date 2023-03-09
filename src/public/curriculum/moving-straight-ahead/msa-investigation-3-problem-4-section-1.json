@@ -1,54 +1,44 @@
 {
-  "type": "overview",
+  "type": "introduction",
   "content": {
     "tiles": [
       {
+        "id": "g7ZqnWOmb5bNpXkA",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<h3>Problem Overview</h3>",
-            "<p>In this Problem, students explore a symbolic method for finding the point of intersection of two lines. Students connect this method to other methods of finding the point of intersection, such as using a graph or table of data that represents each relationship.</p>",
-            "<p>Students find the point of intersection of two lines by setting the expressions for <em>y</em> equal to each other and then solving for <em>x</em>. They use the <em>x</em>-value to find the <em>y</em>-value for the coordinates of the intersection point. If the two relationships are represented by <em>y</em><sub><em>1</em></sub><em> = mx + b</em> and <em>y</em><sub><em>2</em></sub><em> = kx + c</em>, then the point of intersection of the lines representing each equation occurs when <em>y</em><sub><em>1</em></sub><sub> </sub>= <em>y</em><sub><em>2</em></sub>, or<em> mx + b = kx + c</em>.</p>",
-            "<p>Students find the values of x that satisfy the inequalities <em>y</em><sub><em>1</em></sub> &lt;<em>y</em><sub><em>2</em></sub> and <em>y</em><sub><em>1</em></sub> &gt; <em>y</em><sub><em>2</em></sub>. They also write and interpret equivalent expressions and solve inequalities using graphs and equations.</p>",
-            "<p>Note that by finding the point of intersection of two lines they are also  solving a system of two linear equations which is studied more formally in the 8th grade unit, It’s in the System.</p>"
-          ]
-        }
-      },
-      {"content": {"type": "Text", "format": "html", "text": ["<p>AoL:  Linear Relationships: Analysis & Algebraic Expressions and Equations: Analysis</p>", "<p>CCSSM: 7.NS.A.2c, 7.EE.A, 7.EE.A.1, 7.EE.A.2, 7.EE.B, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b</p>"]}},
-      {
-        "display": "teacher",
-        "content": {"type": "Text", "format": "html", "text": ["<p><strong>NWDYK</strong></p>", "<p>Describe how you can solve an equation of the form <em>ax + b = y</em>?</p>", "<p>Describe how you can solve an inequality of the form <em>ax + b &lt; c</em> or <em>ax + b &gt; c</em>?</p>"]}
-      },
-      {
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p><strong>Emerging Mathematical Ideas</strong></p>",
-            "<p>Extend and apply strategies for solving equations using symbols and graphs to solve two related equations and to answer questions about the relationships.</p>",
-            "<p>Use symbolic and graphical strategies to answer questions about two linear relationships with the same independent variable including:</p>",
-            "<ul><li>using symbolic methods to find the value for <em>x</em> where the two equations are equal (that is have the same <em>y</em> value),</li><li>understanding the meaning of the point where the graphs of the two equations intersect for a given context, and</li><li>using graphs and equations to answer questions about the two related equations such as when one equation is greater or less than the other.</li></ul>"
+            "<p>In Problem 2.2, we used graphs and tables to find when the costs of two different plans for buying T-shirts were equal. The graphs of the two cost plans are shown below. C<sub>No-Shrink</sub> represents the costs of the No-Shrink Tee. C<sub>Mighty </sub>represents the costs of the Mighty Tee. The point of intersection of the two lines tells us when the costs for the two t-shirt plans are equal.</p>"
           ]
         }
       },
       {
+        "id": "MTKDKXSVEpOzM22W",
+        "content": {
+          "type": "Geometry",
+          "title": "Two T-Shirt Plans",
+          "board": {"properties": {"axisMin": [-2, -10], "axisRange": [20, 100], "axisNames": ["n", "Cn"], "axisLabels": ["Number of T-Shirts", "Total Cost"]}},
+          "objects": [
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [14, 63]}], "properties": {"id": "aomPehRi8TZQR3Jh"}},
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 49]}, {"type": "point", "parents": [14, 63]}], "properties": {"id": "MWBGzgFC1ppHCEyG", "pt2": {"name": "(14, 63)"}}}
+          ]
+        },
+        "layout": {"height": 403}
+      },
+      {
+        "id": "o1Z7rxG10IO9qS4C",
+        "title": "Text 2",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learning</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+            "<p>How could we use the two equations to find the coordinates of the point of intersection of the two lines? </p>",
+            "<p>That is, for what number of T-shirts n is<em> C</em><em><sub>Mighty</sub></em><em> = C</em><em><sub>No-Shrink</sub></em><em> </em>or <em>49+n = 4.5n?</em></p>",
+            "<p>How could we use the equation or its graph or table to find the number of T-shirts where the cost is less than $60? </p>",
+            "<p>That is, for values of n is </p>",
+            "<p><em>C</em><em><sub>Mighty</sub></em><em> &lt;60?   or  49 + n &lt; $60</em></p>",
+            "<p>When either the value of <em>x</em> or <em>y</em> is known what strategies do we have for solving </p>",
+            "<ul><li>equations of the form <em>y = ax+ b? </em></li><li>inequalities of the form <em>ax +b &lt; y </em>or <em>ax +b &gt; y?</em></li></ul>"
           ]
         }
       }

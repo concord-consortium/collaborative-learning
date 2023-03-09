@@ -1,0 +1,27 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "wzVQm262uEx239sW",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In this lesson, students will be introduced to electrical signals in the human body, measure their reaction time, and construct a model of limb movement. </p>",
+            "<p><strong>Learning Objectives</strong></p>",
+            "<p>Students will measure the time it takes for them to react (grab a dropped ruler) and collaboratively construct an illustrated and annotated model that captures the sequence of steps associated with limb movement.</p>",
+            "<p><strong>NGSS alignment</strong></p>",
+            "<p><a href='https://www.nextgenscience.org/pe/hs-ls1-2-molecules-organisms-structures-and-processes'>NGSS HS-LS1-2.</a></p>",
+            "<p><strong>Formative Assessment</strong></p>",
+            "<p>Students’ models and discussions; Learning Journals</p>",
+            "<p><strong>Materials</strong></p>",
+            "<p>A 30 cm ruler for every two students. </p>",
+            "<p>Optional: A whiteboard or chart paper and markers for every group of 3-4 students. </p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

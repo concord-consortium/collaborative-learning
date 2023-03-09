@@ -1,51 +1,43 @@
 {
-  "type": "overview",
+  "type": "introduction",
   "content": {
     "tiles": [
       {
-        "id": "xMOmqhW0teDB9k7X",
-        "title": "Text 2",
+        "id": "Hv_sfErIhv8jW5Gk",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<p><strong>Problem Overview</strong></p>",
-            "<p>In this problem students will use what they know about rates, linear relationships, and solving equations to look at situations.  Students will draw on their knowledge of different representations to make connections and solidify their understanding of linearity.  Students will informally encounter systems of linear equations and linear inequalities.</p>"
-          ]
-        }
-      },
-      {"id": "S13wx0-n1bsqEKoA", "content": {"type": "Text", "format": "html", "text": ["<p>AoL: Linear Relationships: Analysis/Synthesis & Algebraic Expressions and Equations: Analysis</p>", "<p>CCSSM: 7.RP.A, 7.RP.A.1, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2df</p>"]}},
-      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>NWDYK</p>", "<p>How is the rate of change of a linear relationship related to the constant of proportionality? </p>"]}},
-      {
-        "id": "1mt6zqjqOw53lYl9",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p><strong>Emerging Mathematical Ideas</strong></p>",
-            "<p>Make connections, where appropriate, among the rate of change for linear relationships, the constant of proportionality for proportions, and the constant ratio of the vertical change to horizontal change for linear relationships using a variety of representations.</p>",
-            "<p>Notice that:</p>",
-            "<ul><li>some linear relationships are proportional and others are not,</li><li>the rate of change describes how one variable in the relationship changes with respect to the other variable and can be found using a table of values, graph, or equation, </li><li>for linear relationships that are also proportional, the rate of change, the constant of proportionality, the ratio of vertical change to horizonal change, and the unit rate of change are all the same, and </li><li>the ordered pair (1, a) for a proportional relationship represents the unit rate of change for the relationship (that is a/1) where a is the constant of proportionality, and the equation of the line is y = ax. </li></ul>"
+            "<p>The method for finding the steepness of stairs suggests a way to find the steepness of a line. A line drawn from the bottom step of a set of stairs to the top step touches each step at one point. The rise and the run of a step are the vertical and the horizontal changes, respectively, between two points on the line. </p>"
           ]
         }
       },
       {
+        "id": "s6_sevOrE9eqiVii",
+        "title": "Text 3",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learning</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+            "<p>The steepness of the line is the ratio of rise (vertical change) to run (horizontal change) for this step. We call this ratio the <em>rate of change</em> or <strong>slope</strong> of the line. </p>",
+            "<p>                    vertical change            rise</p>",
+            "<p>Slope  =  __________________   =  ______</p>",
+            "                   horizontal change          run"
+          ]
+        }
+      },
+      {"id": "ZL91_xMcHp6S9Smy", "title": "Rise over Run from a line on stairs", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_4_2_In_stairs_350w.png"}},
+      {"id": "L2bwZ2UpG-Q901VX", "title": "Rise over Run on a graph", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_4_2_stairgraph.png"}},
+      {"id": "9nINzYTa1Z_FAP5b", "title": "Slope calculation", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_4-2_Intro_Pic4_350.jpg"}},
+      {
+        "id": "3u-_k05_uBWmlEbN",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Unlike the steepness of stairs, the rate of change of a line can be negative. To determine the rate of change of a line, we need to consider the direction, or sign, of the vertical and horizontal changes (the slope of a line) from one point to another. </p>",
+            "<p>We will learn more about slopes of lines in the Grade 8 unit <em>Thinking with Mathematical Models</em>.</p>"
           ]
         }
       }

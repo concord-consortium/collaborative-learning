@@ -1,0 +1,48 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Problem Overview</h3>",
+            "Students investigate various pledge plans from sponsors of the walkathon. The plans are represented by equations. In this Problem, students identify the constant rate of change from various representations. They decide whether the graph of a linear relationship is decreasing, increasing, or staying the same from different representations of the relationship. They decide if the relationships are proportional. They also begin to make the connections among the points on a line, the pairs of data in a row of a table, and a solution of an equation of the form <em>y = b + ax</em>. This latter goal provides a transition to solving equations using algebraic methods. "
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["AoL: Linear Relationships: Analysis & Algebraic Expressions and Equations: Analysis", "CCSSM: 7.RP.A.2, 7.RP.A.2a, 7.EE.A.1, 7.EE.A.2, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b</strong>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<strong>NWDYK</strong>\nDescribe the advantages and disadvantages of using tables, graphs, and symbolic methods to solve equations."]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Emerging Mathematical Ideas</strong>\nContinue working to develop strategies for finding solutions for linear relationships using multiple representations including: graphs, tables, equations, and inequalities. The focus of Problem 2.3 is to make connections between solutions found using one representation (e.g., graphs) to each of the other representations (e.g., tables and equations) where they are also visible.\n\nLook for patterns connecting solutions for a linear relationship found on a graph, table, equation, or inequality to solutions found using other representations including:<ul><li>the coordinates of a point (<em>a,b</em>) on the graph of a line is a solution for the linear relationship. The ordered pair (<em>a,b</em>) can also be found as a corresponding pair of values on a table representing solutions for the line, and when the equation is evaluated at <em>x = a</em>, the value found for <em>y</em> will be equal to <em>b</em>.</li></ul>\nNotice that answering some questions about a linear relationship can be easier or harder depending on the representation. For example,<ul><li>it can be harder to find rate of change for a linear relationship on a graph or table than it is to find it using an equation, or</li><li>it can be easier to find the solution (y value) for a linear relationship for a given value of the independent variable using a table or a graph</li></ul>\nIdentify and represent proportional relationships as tables, graphs, and equations and distinguish from non-proportional linear relationships."
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learning</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

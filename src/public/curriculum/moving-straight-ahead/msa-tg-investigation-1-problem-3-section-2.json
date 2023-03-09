@@ -1,0 +1,45 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Launch (Getting Started)</strong></p>",
+            "<p>Connecting to Prior Knowledge</p>",
+            "<p>In the last two Problems, students looked at proportional, linear relationships that involved time as the independent variable and distance as the dependent variable. In this Problem, students will look at a relationship in which distance is the independent variable. </p>",
+            "<p>Students first learned the terms independent variable and dependent variable in Grade 6 Variables and Patterns. If you have not used the terms in this unit, reintroduce students to the vocabulary of independent variable and dependent variable in the introduction of Problem 1.3.</p>",
+            "<p>Pick one of the previous examples to review dependent variables and independent variables. </p>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["<p>Presenting the Challenge</p>", "<p>Many schools have walkathons or something similar to raise funds for charity. Ask students how they determined what to charge their patrons. </p>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions </strong></p>",
+            "<ul><li>What variables can affect the amount of money that a student raises? (The variables are the pledge amount for each sponsor, the distance a student walks, and the number of sponsors.) </li><li>How can you use these variables to estimate the amount of money each student will collect? (If you know how much a sponsor pledges to donate and how far the student plans to walk, you can figure out how much each student might collect from each sponsor. For example, if the sponsor pledges to donate $4 for each kilometer walked, and the student plans to walk 5 kilometers, then you can estimate that the student will collect 4 * 5 = $20 from each sponsor.) </li><li>Will the amount of money raised be the same for each walker? Explain. (No. The amount of money raised might depend on the distance that each student walks, as well as his or her pledge plan, so the amount of money raised may not be the same for each walker.) </li><li>Which variable is the independent variable? Which is the dependent variable? (Distance walked is the independent variable, and the amount of money raised from each sponsor is the dependent variable.) </li></ul>",
+            "<p>Display the three pledge plans of Leanne, Alana, and Gilberto.</p>",
+            "<ul><li>How might you decide who is going to raise the most money? (Various answers. Do not have students go into detail. Asking the question is just to get a formative assessment of whether students may have solution strategies in mind.)</li></ul>",
+            "<p>If students hesitate, offer a solution strategy by asking questions.</p>",
+            "<ul><li>How might a table, graph, or equation help you decide who will raise the most money? (Various answers. No exact answer is needed at this time.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Learning Aid 1.3:</strong> Three Students Pledge is available to maximize students’ time in making the representations. ",
+            "An alternative approach to making the representations would be to provide students with <strong>Teaching Aid 1.3: Matching Representations</strong>.  The Teaching Aid has tables, graphs, and equations that can be sorted and matched to each of the Pledge Plans. Students can cut apart and sort the representations to match the pledge plans."
+          ]
+        }
+      }
+    ]
+  }
+}

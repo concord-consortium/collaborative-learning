@@ -1,0 +1,101 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "ga5Z7td9ii6drV7f",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Explore (Digging In)</strong></u></p>",
+            "<p><u>Providing for Individual Needs</u></p>",
+            "<p></p>",
+            "<p><em>Initial Challenge Questions</em></p>",
+            "<p></p>",
+            "<p>As students work on the Initial Challenge, circulate and ask them questions.</p>",
+            "<p>Use questions to have students consider ways to think about filling the quantities in the table.</p>"
+          ]
+        }
+      },
+      {
+        "id": "vIP0GY3I4-6pvP3A",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Suggested Questions</strong></p>", "<ul><li>If we consider Royal Pizza, what do we know about the pizza costs there? (5 pizzas cost $65.)</li><li>How might we draw a picture to represent that?</li></ul>"]}
+      },
+      {"id": "LjcMdqM9i-6UbkFa", "title": "Royal Pizza", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalsPizza_1.png"}},
+      {"id": "eB1H1kes8JA0BPFa", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What does that mean for how the $65 relates to the 5 pizzas? (The cost of the 5 pizzas was added up to $65 or the cost per pizza is multiplied to get $65.)</li></ul>"]}},
+      {"id": "0XCwM8r-rAw8INlG", "title": "Royal 2", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalsPizza_2.png"}},
+      {"id": "0U9cMVVYKpq7jhJk", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How can we determine the cost of one of the pizzas? (We can break the $65 into 5 groups to find the cost of 1 pizza.)</li></ul>"]}},
+      {"id": "RDVZBV79R_ELgW0B", "title": "Royal 3", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalsPizza_3.png"}},
+      {"id": "X6igKy8j2XEj4GFx", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Now that we know the cost for each pizza, how can we find the cost for 2 pizzas? Or 3 pizzas? Or 4 pizzas? (We can add that many groups of $13 dollars.)</li></ul>"]}},
+      {
+        "id": "yqscCb1S2y3_L6Ss",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>When you know that students understand that this is a multiplicative relationship, that is, how the cost of the pizza is shared equally among the pizzas, you can ask questions to encourage students to use proportional reasoning.</p>"]
+        }
+      },
+      {
+        "id": "jYN6KXeYJU2sLojS",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>For Royal, we know the cost for 5 pizzas. How can we find the cost for 10 pizzas? (If you double the pizzas, you double the cost.) You may want help students see the connection between their words and mathematical notation. When they verbally describe a proportion, link it to the mathematical equation that shows the proportion.</li></ul>"
+          ]
+        }
+      },
+      {"id": "xjY7xvHNGQKDeQzY", "title": "Royal Proportion", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalPizzaProportion_1.png"}},
+      {
+        "id": "-7L9nwo53Yl7Ovro",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>How can we find the cost for 15 pizzas? (Combine the cost for 5 and 10 pizzas. $65 + $130 = $195 Or, scale both quantities by 3.)</li><li>For Royal, we know the cost for 5 pizzas. How can we find the cost for 20 pizzas? (Since we are scaling the number of pizzas by 4, we can scale the price by 4.)</li></ul>"
+          ]
+        }
+      },
+      {"id": "TNLC-882X1CqfgQf", "title": "Royal Proportion 2", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-2_RoyalPizzaProportion_2.png"}},
+      {
+        "id": "GrEs1tjJKGw43tfY",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Students need to be aware that there is a delivery charge for Howdy’s. You can use questions to draw their attention to the added fee. Do not push too much at how to add in the $30 charge. Leave some of that conversation until the Summarize.</p>"]
+        }
+      },
+      {
+        "id": "fP8BsH2QliRU_Jsm",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>For Howdy’s Pizza, if I look at the ad, it says that 15 pizzas cost $165. Why does the table show $195 for 15 pizzas? (Students may or may not be able to answer that the amount in the table has the delivery charge added in.)</li><li>If students don’t recognize why the amounts are different, direct them back to the ad. What do you notice on the ad for Howdy’s Pizza for any money added to the cost? (It says that there is a price for 15 pizzas and a $30 delivery charge.)</li></ul>"
+          ]
+        }
+      },
+      {"id": "JT3M4rkDBMH4AM-o", "content": {"type": "Text", "format": "html", "text": ["<p>This is an inequality situation. Groups should have different answers depending on the number of pizzas being considered. Push students to consider when the price is better.</p>"]}},
+      {
+        "id": "vTee5BL3xFnOCxRI",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Who has the cheaper price for pizza? (Students may answer either pizzeria, because it depends on how many pizzas are being ordered.)</li><li>Will that pizzeria always be the cheapest? (No. Order from Royal when the number of pizzas, N, ≤ 15. Order from Howdy’s when N ≥ 15.)</li></ul>"
+          ]
+        }
+      },
+      {"id": "En9QfV7yC16wZEKE", "content": {"type": "Text", "format": "html", "text": ["<p>As groups finish, you can have them look at the What If to compare their thinking and strategies to the students in the What If.</p>"]}},
+      {
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p><u>Planning for the Summary</u></p>", "<p></p>", "<p>What evidence will you use in the summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"]}
+      },
+      {"id": "6_c7ptqmp1n5lqeb", "content": {"type": "Text", "format": "html", "text": ["<p><em>Now What Do You Know?</em></p>", "<p><em>How can you determine if a situation is proportional?</em></p>"]}}
+    ]
+  }
+}

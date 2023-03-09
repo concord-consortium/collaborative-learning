@@ -1,0 +1,32 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "0J23weWypf8QldIJ",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Students will use Electromyography (EMG) to investigate their own muscle activity. </p>",
+            "<p><strong>Learning Objectives</strong></p>",
+            "<p>Students will use computation to acquire, digitize, and make sense of muscle electrical activity (EMG). </p>",
+            "<p><strong>NGSS Alignment</strong></p>",
+            "<p><em>Under development</em></p>",
+            "<p><strong>Formative Assessment</strong></p>",
+            "<p>EMG and Learning Journals</p>",
+            "<p><strong>Materials</strong></p>",
+            "<p>For each group of 3-4 students:</p>",
+            "<ul><li>EMG shield &amp; Arduino board, </li><li>EMG surface electrodes (each student will need 3; students should save these electrodes for subsequent activities)</li><li>Blue USB cable</li><li>Orange cable with alligator clips (all these materials are part of the <a href='https://backyardbrains.com/products/clawbundle'>Backyard Brains Claw Kit</a>)</li><li>Hand <a href='https://www.amazon.com/Edisalute-smartinlife-Strengthener-Gripper-Grippers/dp/B01MXHXSNP/ref=sr_1_5?crid=1U94UEC7O4HFK&keywords=hand+grip&qid=1660235040&s=sporting-goods&sprefix=hand+gri%2Csporting%2C222&sr=1-5'>gripper</a></li><li>A computer with the Backyard Brains <a href='https://backyardbrains.com/products/spikerecorder'>Spike Recorder App</a></li></ul>",
+            "<p><strong>Preparation</strong></p>",
+            "<p>Before class you will need to install the Backyard Brains <a href='https://backyardbrains.com/products/spikerecorder'>Spike Recorder App</a> on student computers [https://backyardbrains.com/products/spikerecorder]</p>",
+            "<p><a href='https://help.backyardbrains.com/support/solutions/articles/43000607444-spike-recorder-for-chromebook'>Click here</a> if your school uses Chromebooks</p>",
+            "<p>You will also need to upload this <a href='https://raw.githubusercontent.com/BackyardBrains/SpikerShield/master/Muscle/Arduino%20Code/SpikeRecorder/SpikeRecorderSpikerShield_V1_1.ino'>Arduino sketch</a> on each Arduino board.</p>",
+            "<p>To do so, please create a free account on <a href='https://cloud.arduino.cc/'>Arduino Cloud</a> and install the <a href='https://create.arduino.cc/getting-started/plugin/welcome'>Arduino Agent</a></p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

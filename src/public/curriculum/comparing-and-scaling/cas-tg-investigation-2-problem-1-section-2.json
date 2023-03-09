@@ -1,0 +1,57 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "ts7G_4L2-EVJ4b-z",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong><u>Launch (Getting Started)</u></strong></p>",
+            "<p><u>Connecting to Prior Knowledge</u></p>",
+            "<p></p>",
+            "<p>Remind students of the story about Arvin and Mariah making orange juice for campers in Problem 1.2. Let students know that you are going to consider another situation at the camp.</p>",
+            "<p></p>",
+            "<p>If you have the time, you may want to review some of the strategies that students used in Investigation 1 to solve problems, such as ratio tables and proportions.</p>"
+          ]
+        }
+      },
+      {
+        "id": "86iv3_KGEzBTWrvN",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p>For the Initial Challenge, have students keep their books closed or do not let them see the What If to start out. The What If presents student strategies that you may not want students to see until after working on the tables with pizzas.</p>",
+            "<p>Introduce the Problem using <strong>Learning Aid 2.1A: Pizzas and Tables</strong>. You can use one Learning Aid per group. Tell students that the camp has a large table and a small table setup when campers come into the cafeteria. They need to understand that the pizzas will be shared equally by everyone at the table and that a camper will be sitting at each plate.</p>"
+          ]
+        }
+      },
+      {
+        "id": "DyXQzLXTJTfQsU_P",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What do you notice about the tables and pizzas? What do you wonder? (Notice: The tables have different numbers of pizzas and different numbers of seats. More people sit in the middle at the large table. With more plates, there is also more pizza. Wonder: Where will I want to sit? Where will my friends sit? Where will I get the most pizza?)</li></ul>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "abaXxKH6_vGlYlz2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Remind students that the campers’ only motivation in choosing a table is to get the greatest amount of pizza. Ask the following questions, but do not analyze students’ answers. Leave the analysis for the Summarize.</p>",
+            "<ul><li>What quantities are being compared?</li><li>Will any of the strategies you used in Investigation 1 work for this situation?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

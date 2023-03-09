@@ -1,0 +1,57 @@
+{
+  "type": "teach",
+  "content": {
+    "tiles": [
+      {
+        "id": "PhU1sDCoX8LIu1Zm",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong><em>10 minutes</em></strong></p>",
+            "<p>Solicit what students currently know about bionic arms via the following prompts. Ask students to individually record their answers in their CLUE workspace and then share their answers:</p>",
+            "<p>1) What do you know about bionic arms? (e.g., what do they look like, why people might use them, in what ways are they connected to the person’s body, how do they work)</p>",
+            "<p>2) If you were tasked to design a bionic arm, what do you think the people who use them would like in terms of appearance and function?</p>",
+            "<p><strong><em>5 minutes</em></strong></p>",
+            "<p>Inform students that throughout this unit we will explore how bionic arms work. Bionic arms are designed for people with congenital or acquired limb differences (e.g., people who lost a limb as a result of an accident). With recent developments in science and engineering, these individuals can now directly control a prosthetic arm as if it was their own biological arm.  Consider showing students <a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4128433/'>how hand replacements have changed over time</a>. For additional information on bionic arms <a href='https://openbionics.com/how-does-a-bionic-arm-work/'>click here</a>. Note: any content or links from this guide you find useful can be dragged into your teacher Workspace and published to the class. They will show under the <strong>Extensions</strong> tab.</p>",
+            "<p><strong><em>10 minutes</em></strong></p>",
+            "<p>Let students know that they will next watch a video clip of a young woman named Tilly who is the first teenager in the U.K. to use bionic arms. Direct students to observe Tilly’s use of the bionic arms and record their observations and thinking as to how it works in their CLUE workspace. Orient students to think about the following questions:</p>",
+            "<p>- How does the bionic lower arm appear to be physically attached to Tilly’s upper arm?</p>",
+            "<p>- How does Tilly control her bionic arm?</p>",
+            "<p>Present the &quot;Teen with Bionic Arms Applies Flawless Makeup&quot; <a href='https://www.youtube.com/watch?v=q2MjTcmLuIQ'>video</a></p>",
+            "<p><strong><em>10 minutes</em></strong></p>",
+            "<p>Review students’ observations and thinking and bring to mind those that will be most useful for subsequent lessons. Potential student observations and thinking may include:</p>",
+            "<p>“There appears to be an adjustable outer case that clamps the bionic arm to Tilly’s upper arm. I saw that someone adjusted the plastic exterior for her during the video clip.”</p>",
+            "<p>“There is something that allows the residual muscles in Tilly’s upper arm to move the bionic arm.&quot;</p>",
+            "<p>“Somehow Tilly’s brain sends the information to the bionic arm.&quot;</p>",
+            "<p><strong><em>20 minutes</em></strong></p>",
+            "<p>Direct students to individually, and then collectively (in teams of three to four) create an illustrated and annotated model that shows how Tilly’s bionic arm works. </p>",
+            "<p>If students use chart paper or a whiteboard, ask them to take a picture of their model and upload it to their CLUE workspace. </p>"
+          ]
+        }
+      },
+      {"id": "5-_zIo7l3UatWgAD", "title": "A potential initial student illustrated and annotated model", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/sampleStudentAnnotatedTilly.png"}},
+      {
+        "id": "-PNMcqB80NiUVIy0",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>10 minutes</strong></p>",
+            "<p>Ask students to add an entry to their learning journal where they record their current understanding of how Tilly’s bionic arm works. Encourage students to apply what they observed in the video and reference their model. </p>",
+            "<p>The learning journal is a resource that can be used as a formative assessment of students’ thinking over time. Let students know that this is where they will record their learning and wonderings over the course of the unit. If students haven&#x27;t created their journal in Lesson 0, they should do so today by navigating to My Work &gt;&gt; Learning Journals (the &quot;edit&quot; button will open the journal in students&#x27; workspace).</p>",
+            "<p><em><strong>1 minute</strong></em></p>",
+            "<p>Let students know that throughout the unit will further explore how Tilly’s bionic arm works using a model of a bionic arm that they would be able to control with their own muscle activity. </p>",
+            "<p><em><strong>Extensions</strong></em></p>",
+            "<p>* If time permits (or as a homework assignment), ask students to watch the &quot;Beyond Bionics&quot; <a href='https://youtu.be/GgTwa3CPrIE'>video</a> and develop additional questions on bionic arms.</p>",
+            "<p>* Ask students to develop questions for a hypothetical interview with Tilly.</p>",
+            "<p><em><strong>Teacher Resources</strong></em></p>",
+            "<p>Facilitating student questions via the <a href='https://www.teachingchannel.com/blog/5-tips-for-blending-the-question-formulation-technique-qft-with-ngss'>question formulation technique</a></p>",
+            "<p>Introducing and establishing an <a href='https://ambitiousscienceteaching.org/presentations-on-anchoring-events-and-modeling/#1479473299605-ab2574f8-d6bab811-f21c'>anchoring phenomenon routine </a></p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

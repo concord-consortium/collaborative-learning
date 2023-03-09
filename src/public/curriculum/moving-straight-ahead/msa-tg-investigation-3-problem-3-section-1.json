@@ -1,0 +1,54 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Problem Overview</h3>",
+            "<p>In this Problem, students develop symbolic strategies for solving equations of the form <em>px + q = r</em> and <em>p(x + q) = r</em>, where <em>p</em>, <em>q</em>, and <em>r</em> are specific rational numbers. Students find the solutions to these linear equations using the properties of equality. Students compare this method with other methods they have used for solving equations. Students may mention finding solutions using tables and graphs.",
+            "Students also continue to solve word problems leading to inequalities of the form <em>px + q &gt; r</em> or <em>px + q &lt; r</em>, where <em>p</em>, <em>q</em>, and <em>r</em> are specific rational numbers. </p>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["AoL: Analysis & Explore/Analysis\nCCSSM: 7.NS.A.2c, 7.EE.A, 7.EE.A.1, 7.EE.A.2, 7.EE.B, 7.EE.B.4, 7.EE.B.4a, 7.EE.B.4b"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>NWDYK</p>", "<p>Describe the strategies you can use to solve linear equations using the properties of operations and equality.  </p>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Emerging Mathematical Ideas</h3>",
+            "<p>Extend and apply strategies for solving equations algebraically to equations with integer, fractional, and decimal values (coefficients and constants).</p>",
+            "<p>Find the solutions to linear equations using symbolic methods (properties of operations and equality) including:</p>",
+            "<ul><li>identifying and applying needed operations to both sides (such as adding 10 to both sides or dividing both sides by 2.5) in order to keep the expressions on each side of the equation equal,</li><li>identifying when to apply the Distributive Property as needed to reach a solution efficiently (factored or expanded),</li><li>applying order of operations appropriately as needed to simplify equations, and <li>understanding the goal is to isolate the variable on one side of the equation.</li></ul>",
+            "<p>Connect newly developed symbolic methods for solving equations (answering questions about relationships) to prior experiences with solution strategies that use tables and graphs including:</p>",
+            "<ul><li>recognizing that equations with linear expressions on both sides of the equal sign (2<em>x</em> – 5 = x + 7) can be viewed as two equations (<em>y</em> = 2<em>x</em> - 5 and <em>y</em> = <em>x</em> + 7), where the solution to the original equation (2<em>x</em> – 5 = <em>x</em> + 7) is the point where the two lines intersect on the graph,</li><li>strategically selecting an efficient method to use for a given situation such as when a symbolic approach would be quick or when a calculator could be easily used to generate a graph or table to answer many questions about the relationship, and</li><li>generating questions for a given relationship and making sense of questions asked about variables for a given equation</li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learning</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

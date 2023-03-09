@@ -1,0 +1,48 @@
+{
+  "type": "teach",
+  "content": {
+    "tiles": [
+      {
+        "id": "pJ6Zjt2CJfnWlXGs",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Instructional Sequence</strong>:</p>",
+            "<p><em>5 minute</em>s</p>",
+            "<p>Begin with a brief overview of the previous lesson (How does sensory information impact movement?). Then, inform students that today’s lesson will help them explore how the nervous system processes sensory (and more specifically tactile) information and what problems could arise in this process. </p>",
+            "<p><em>15 minutes</em></p>",
+            "<p>Inform students that in today’s activity they will measure their touch sensitivity across different parts of the body and enter the information to a webpage to map how the brain represents their body (“homunculus”).  </p>",
+            "<p>Students should follow the instructions in a handout (see resources below) and enter their measurements to https://brainmapper.org/ (Experiment tab → Enter the Results). </p>",
+            "<p><em>10 minutes</em></p>",
+            "<p>Ask students to discuss the following questions in their groups and record their answers and then collect students’ answers:</p>",
+            "<p>1. What is the most/least sensitive body part?</p>",
+            "<p>2. Why do different parts of the body have different sensitivity to touch?</p>",
+            "<p>3. Were there differences between students in their touch sensitivity? What can explain these differences? </p>",
+            "<p>Extension activity: Ask students to enter their measurements into a shared Google Spreadsheet and create the averaged homunculus of all students in the class. </p>",
+            "<p><em>15 minutes</em></p>",
+            "<p>Back in their groups, ask students to read this brief text on the neuroscience of touch.</p>",
+            "<p>Students should identify which body parts are involved in processing touch information and revise their illustrated and annotated models so that they communicate how the parts are connected to each other. To do so, students will need to read online about:</p>",
+            "<p></p>",
+            "<ul><li>Touch receptors</li><li>Sensory nerves</li><li>Spinal cord</li><li>Thalamus</li><li>Somatosensory cortex </li><p>Extension activity: Ask students to compare their model to the one created in the first module (control of movement). </p></ul>",
+            "<p></p>",
+            "<p><em>10 minutes</em></p>",
+            "<p>Ask one member from each team to share their model. Facilitate a whole-class conversation about what is similar and different about the models, and list these observations on the classroom board. </p>",
+            "<p><em>5 minutes</em></p>",
+            "<p>Ask one member from each team to share their model. Facilitate a whole-class conversation about what is similar and different about the models, and list these observations on the classroom board. </p>",
+            "<p><em>15 minutes</em></p>",
+            "<p>Introduce pressure sensors to students.  Ask students to propose and how these sensors could be incorporated in the design of the gripper via a DataFlow model.</p>",
+            "<p>5 minutes</p>",
+            "<p>Ask students to record three every day challenges in Tilly&#x27;s life if her bionic arms do not have sensors to provide feedback about objects she touches.</p>",
+            "<p><strong>Resources</strong>:</p>",
+            "<p><a href='https://www.brainfacts.org/'>Brain Facts</a>: https://www.brainfacts.org/ </p>",
+            "<p><a href='https://brainmapper.org/'>Brain Mapper</a>: https://brainmapper.org/ </p>",
+            "<p>Article: <a href='https://www.science.org/content/article/sensors-may-soon-give-prosthetics-lifelike-sense-touch'>Sensors may soon give prosthetics a lifelike sense of touch</a></p>",
+            "<p>Article: <a href='https://www.fierceelectronics.com/components/intelligent-prosthetic-pressure-sensors-could-ease-pain-for-lower-limb-amputees'>Intelligent prosthetic pressure sensors</a></p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

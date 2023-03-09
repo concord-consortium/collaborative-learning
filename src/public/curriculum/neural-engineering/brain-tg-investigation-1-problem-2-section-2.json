@@ -1,0 +1,41 @@
+{
+  "type": "teach",
+  "content": {
+    "tiles": [
+      {
+        "id": "Ioo5Y9AUU6xpDK4D",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong><em>10 minutes</em></strong></p>",
+            "<p>Students explore “energy sticks” to bring to mind that electricity flows through the human body. Ask students questions to provoke their thinking and observations. See suggested explorations in the student-facing lesson. </p>",
+            "<p><strong><em>10 minutes</em></strong></p>",
+            "<p>Facilitate a discussion about how the energy sticks can help us understand how Tilly&#x27;s bionic arms work. The goal is to get students to think about how the human body (and specifically the nervous and muscular systems) uses electrical signals to control movement. In the discussion, ask students why electrical signals are an effective way to send messages throughout the body (fun fact: nerve impulses can propagate at a speed of up to 100 meters/300 feet per second. Source: Britanicca).</p>",
+            "<p><strong><em>10 minutes</em></strong></p>",
+            "<p>Students use Dataflow to program a virtual light bulb to turn on and off (see student-facing lesson for instructions). The goal of this activity is to build student confidence in Dataflow and encourage students to think about the speed at which the light bulb turns on and off. </p>",
+            "<p><strong><em>10 minutes</em></strong></p>",
+            "<p>Ask students to think about how fast they react in day-to-day life (e.g., the time it takes them to start crossing the street once the light changes to green). What affects their reaction time? Why is reaction time important?</p>",
+            "<p>Present a short <a href='https://www.youtube.com/watch?v=gJEuT3aKcMI&amp;t=3s'>video</a> on reaction time measurement (3:36) </p>",
+            "<p><strong><em>15 minutes</em></strong></p>",
+            "<p>As described in the video, students will pair up and measure their reaction times using their dominant and non-dominant hands (see detailed instructions in the student-facing lesson). </p>",
+            "<p>Extension activity #1: After students to enter their results into a Google spreadsheet to compute the class average.</p>",
+            "<p>Extension activity #2: Ask students to take a video of themselves catching an object and play it in slow motion (like this <a href='https://www.youtube.com/watch?v=3XM-4Qavh5k'>video</a>) </p>",
+            "<p><strong><em>20 minutes</em></strong></p>",
+            "<p>Assign students to teams composed of 3-4 classmates. Optional: provide each team a whiteboard and dry erase markers or chart paper and markers.</p>",
+            "<p>Ask teams to list all body systems that affect our reaction time in the upper right corner of the whiteboard/chart paper. Then, ask teams to co-construct an illustrated and annotated model of the sequence of events associated with the reaction time activity. Students should then a picture of their model and upload it to their CLUE workspace. Alternatively, students can use a Drawing tile to make the model on their computers. </p>",
+            "<p><strong><em>15 minutes</em></strong></p>",
+            "<p>Ask one member from each team to share their model. Facilitate a whole-class conversation about what is similar and different about the models, and list these observations on the classroom board. </p>",
+            "<p>Collapse teams’ understandings into a class consensus model. Inform students that this model will be used as a reference and will be revised over the coming weeks as they continue their investigation.</p>",
+            "<p><strong><em>5 minutes</em></strong></p>",
+            "<p>Ask students to fill out their Learning Journal. </p>",
+            "<p><strong>Teacher Resources</strong></p>",
+            "<p>Facilitating class <a href='https://www.philasd.org/etvl/2022/02/22/consensus-model-discussion/'>consensus model</a></p>",
+            "<p><a href='https://stemteachingtools.org/brief/18'>Formative assessment</a> in NGSS congruent classrooms</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

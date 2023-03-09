@@ -1,34 +1,54 @@
 {
-  "type": "launch",
+  "type": "initialChallenge",
   "content": {
     "tiles": [
+      {"id": "3JR65T_U4e1m4n4j", "title": "Text 2", "content": {"type": "Text", "format": "html", "text": ["<p>For each equation:</p>", "<ul><li>Find a solution.</li><li>Record each step you take to find a solution.</li><li>Then, check your answer.</li></ul>"]}},
       {
+        "id": "SK7Vtchc4qxzDEE2",
+        "title": "Text 3",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Set 1.</p>", "<p>  a. 5x + 10 = 20                b. 5x – 10 = 20               c. 5x + 10 = -20</p>", "<p>  d. 5x – 10 = -20              e. 10 - 5x = 20                f. 10 – 5x = -20</p>"]}
+      },
+      {
+        "id": "uP4oygP9B-SBkg2O",
+        "display": "teacher",
+        "title": "Text 6",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<p><strong>Launch (Getting Started)</strong></p>",
-            "<p>Connecting to Prior Knowledge</p>",
-            "<p><strong>Suggested Questions</strong></p>",
-            "<ul><li>Display these two equations: 2x + 10 = 16 and 2x - 10 = 16. (LANGUAGE) How do the equations compare? (They are the same except that 10 is added to the left side of the first equation and 10 is subtracted from the left side of the second equation.)</li><li>How would you begin solving these two equations? (In the first equation, you would subtract 10 from each side, since we want to “undo” the “+10.” In the second equation, you would add 10 to each side, since we want to “undo” the “-10.” Some students may note that you could divide by 2 first.) </li><li>In the first equation, instead of subtracting 10 from each side, could we add -10 to each side? (Yes, because subtracting 10 is the same as adding -10.) </li></ul>",
-            "<p>Refer back to Completely Rational if students need more help with this. </p>",
-            "<ul><li>How can you solve the second equation? (Some students may note that it is like you owe 10 coins. Add 10 coins to each side. Since 2x = 26, x = 13. Students may comment that this is similar to the red chips in Completely Rational.)</li></ul>",
-            "<p>To help students focus on individual parts of the equations, ask:</p>",
-            "<ul><li>In the Initial Challenge Set 1, how are the equations alike and how are they different? (All of the equations have the same numbers. The only differences are the signs of those numbers.</li></ul>",
-            "<p>If you did not introduce properties of equality in the Summarize of the last Problem, introduce the term now.</p>"
+            "<p>Set 1:</p>",
+            "<p>a.  5x = 10</p>",
+            "<p>           x = 2</p>",
+            "<p>b.  5x = 30</p>",
+            "<p>           x = 6</p>",
+            "<p>c.  5x = -30</p>",
+            "<p>           x = -6</p>",
+            "<p>d.  5x = -10</p>",
+            "<p>           x = -2</p>",
+            "<p>e.  -5x = 10</p>",
+            "<p>            x = -2</p>",
+            "<p>f.  -5x= -30</p>",
+            "<p>            x = 6</p>",
+            "<p></p>"
           ]
         }
       },
+      {"id": "Qlwbr8DvMe9SnFK9", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<p>Set 2. </p>", "<p>  a. 1/4 x + 6 = 12                   b. 3/5 = -x + 1                  c. 3.5x = 130 + 10x </p>"]}},
       {
+        "id": "YPT3TwvXlrYcTAxc",
+        "display": "teacher",
+        "title": "Text 11",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Set 2:</p>", "<p>a.  ¼ x = 6</p>", "<p>            x = 24</p>", "<p>b.  -2/5 = -x</p>", "<p>               x = 2/5</p>", "<p>c.  -6.5x = 130</p>", "<p>                 x = -20</p>"]}
+      },
+      {"id": "JptKg0GN8qKeMXmb", "title": "Text 14", "content": {"type": "Text", "format": "html", "text": ["<p>Set 3. </p>", "<p>  a. 3(x + 1) = 21               b. 2+3(x + 1) = 6x              c. -2(2x – 3) = -2</p>"]}},
+      {
+        "id": "-VFaMhsrU_NNnvX8",
+        "display": "teacher",
+        "title": "Text 10",
         "content": {
           "type": "Text",
           "format": "html",
-          "text": [
-            "<p>Presenting the Challenge</p>",
-            "<p>Ask students to consider non-whole number and non-positive situations.</p>",
-            "<ul><li>We have not seen many negative numbers or fractions in the pouches and coins. Could we have negative numbers in a coin situation? (Various answers. Students might mention owing someone money or using a debit card.) </li><li>Could we have fractions in a coin situation? (Various answers. Students might say that money can be thought of in portions, for example, a quarter represents ¼ of a dollar.)</li></ul>",
-            "<p>Ask the class to solve the equations, show their work, and check their answers. Have students work with a partner as they work through the problem.</p>"
-          ]
+          "text": ["<p>Set 3:</p>", "<p>a.  x + 1 = 7</p>", "<p>                x = 6</p>", "<p>b.  2 + 3x + 3 = 6x</p>", "<p>                          5 = 3x</p>", "<p>                          x = 5/3</p>", "<p>c.  2x – 3 = 1</p>", "<p>                2x = 4</p>", "<p>                  x = 2</p>"]
         }
       }
     ]

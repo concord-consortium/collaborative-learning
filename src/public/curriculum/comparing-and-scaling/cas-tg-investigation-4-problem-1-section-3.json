@@ -1,0 +1,79 @@
+{
+  "type": "MathReflection3",
+  "content": {
+    "tiles": [
+      {"id": "SgDR8hHd-Xd4z7ma", "content": {"type": "Text", "format": "html", "text": ["<p>Mathematical Reflection 3</p>"]}},
+      {"id": "iaBtQlwPJTK1M1gn", "content": {"type": "Text", "format": "html", "text": ["<p>AoL: Synthesis, Abstraction</p>", "<p>CCSSM: 7.RP.A.1, 7.RP. A.2, 7.RP. 2.A, 7.RP.2.B, 7.RP. A.2.C, 7.RP.A.2.D, 7.RP.A.3, 7.EE.A.2, 7.EE.B.4</p>"]}},
+      {
+        "id": "XR88-qJPYUxISMg_",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Recognize and analyze proportional statements.</p>",
+            "<p></p>",
+            "<p>Notice that:</p>",
+            "<ul><li>proportional reasoning is about making comparisons: part-to-part and part-to-whole</li><li>Rates are a type of ratio</li><li>Unit rates can be helpful in solving problems</li><li>Unit rate or constant of proportionality can be found in tables, graphs, and equations</li></ul>",
+            "<p></p>",
+            "<p>Consolidate understanding that proportional reasoning uses multiplicative thinking instead of additive thinking, and can be used to make decisions and solve problems.</p>",
+            "<p></p>",
+            "<p>Look for and make connections among representations of proportional relationships and solution strategies.</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {"id": "PeucERxCxzGcC9eo", "content": {"type": "Text", "format": "html", "text": ["<p>Mathematical Reflection</p>", "<p>What does it mean to reason proportionally?</p>", "<p></p>"]}},
+      {
+        "id": "dOaQODQuB2fkbbwf",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The Mathematical Reflection provides an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over time. (TIME)</p>",
+            "<p></p>",
+            "<p>For this reflection, emphasize the big ideas of the Unit by asking students to include the thinking of these two questions:</p>",
+            "<ul><li>How do you recognize a proportional situation?</li><li>What strategies can you use to solve a problem involving proportional reasoning?</li></ul>",
+            "<p></p>",
+            "<p>After the class discussion, students can record their responses to the Mathematical Reflection to create a record of their current understandings of the big ideas of the Unit.</p>",
+            "<p></p>",
+            "<p>You can gain an understanding of student thinking during a discussion of the reflection question. Then you can assess individual understanding based on each student’s written work.</p>",
+            "<p></p>",
+            "<p><em>What does it mean to reason proportionally?</em></p>",
+            "<p></p>",
+            "<p>(Students should be able to consolidate their understanding that proportional reasoning uses multiplicative thinking instead of additive thinking, and can be used to make decisions and solve problems.</p>",
+            "<p>Students will be able to discuss making connections among representations of proportional relationships and solution strategies.)</p>"
+          ]
+        }
+      },
+      {
+        "id": "DgFwCaR0LZ-dJ_cz",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Student Responses</strong></p>",
+            "<p>At the beginning of the year, students may need to collaborate to outline and summarize the important ideas. They may need examples of writing, diagrams, and/or justifications from other students to help build their vision of what is expected when answering a Mathematical Reflection. Early in the year you may want to start writing Mathematical Reflections as a whole group. Then as the year progresses, move to small groups, pairs, and finally individuals.</p>",
+            "<p></p>",
+            "<p>Each Investigation contributes to students’ conceptual understandings of the ideas in the Unit. Students’ explanations at the beginning of a Unit might be just forming. As you progress through the Unit, students can use the contexts, representations, and connections to express a more solid understanding. By the end of the Unit, students can create a complete picture of their understanding.</p>",
+            "<p></p>",
+            "<p><strong>Example Strategies for Student Participation</strong></p>",
+            "<p>You use many creative strategies to encourage students’ ownership of their learning. (AGENCY, IDENTITY, OWNERSHIP)</p>"
+          ]
+        }
+      },
+      {
+        "id": "6xweP9DgxxH5_c4C",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What evidence in students’ work shows an understanding of the ideas in this Unit?</li><li>What mathematical ideas will still need emphasis?</li><li>What opportunities exist in the rest of the Unit, or in future Units, to extend and connect the students’ learning?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,62 +1,33 @@
 {
-  "type": "launch",
+  "type": "initialChallenge",
   "content": {
     "tiles": [
       {
-        "id": "iO6rBnwh49-UXj2R",
+        "id": "9ZB8EKED-EtzNund",
+        "title": "Text 7",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Henri challenges Emile to a walking race. Because Emile’s walking rate is faster, Emile gives Henri a 45-meter head start. Emile knows his brother would enjoy winning the race, but he does not want to make the race so short that it is obvious his brother will win.</p>"]
+        }
+      },
+      {"id": "-FNaq5UO2_3V_k2q", "title": "Text 8", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How long should the race be so that Henri will win in a close race? Give evidence to support your answer. </li></ul>"]}},
+      {
+        "id": "R__puSo25lgIWgqP",
+        "display": "teacher",
+        "title": "Text 11",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<p><strong>Launch (Getting Started)</strong></p>",
-            "<p>Connecting to Prior Knowledge</p>",
-            "<p>If you did not pose the following questions at the end of the Summarize for Problem 1.4, ask them now. Begin by having students list several equations from Investigation 1 that represent linear relationships. </p>"
+            "<p>With a 45-meter head start, Emile will catch up to Henri after 30 seconds at the 75-meter mark. The race should be less than 30 seconds or 75 meters, depending on how they determine the length of the race.</p>",
+            "<p>Possible student answers may include tables, graphs, words, and diagrams. Some examples include the following. </p>"
           ]
         }
       },
-      {
-        "id": "ENxs79eJ7_Fe87np",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p><strong>Suggested Questions </strong></p>",
-            "<ul><li>Which relationship has the greatest rate of change? (Answers will vary. Look for students to choose the relationship that when written in the form y = b + ax has the greatest value of a. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of a.) </li><li>Which relationship(s) has a graph that crosses the y-axis at a point witha positive y-coordinate? With a y-coordinate of zero? With a negative y-coordinate? (Answers will vary. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of b. Positive y-coordinate: Look for students to choose the relationship(s) that when written in the form y = b + ax has a positive value of b. Sample: The line that represents Alana’s pledge plan. Zero y-coordinate: Look for students to choose a proportional relationship. Sample: Gilberto’s pledge plan can be modeled by a line that passes through the origin. Negative y-coordinate: Look for students to choose the relationship(s) that when written in the form y = b + mx has a negative value of b. Sample: The line that represents Gilberto’s pledge plan after purchasing a T-shirt for each sponsor.) You can tell students that they will continue to look at linear relationships in this Problem. </li></ul>"
-          ]
-        }
-      },
-      {
-        "id": "R3UnV3WkJvYC98s8",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p><u>Presenting the Challenge</u></p>",
-            "<p></p>",
-            "<p>Tell the story of the race between Emile and his younger brother, Henri. This Problem is intended to show what knowledge students already have concerning linear relationships. </p>",
-            "<p></p>",
-            "<p>Because the Problem asks “how long” the race should be, some students will choose to focus on length and some will focus on time. </p>",
-            "<p></p>",
-            "<p>Students may suggest that once Emile is about to catch up to Henri, he can slow his walking rate so that Henri maintains the lead until the race is finished. If students give this suggestion, you can tell them to assume that each walking rate remains constant. </p>",
-            "<p></p>",
-            "<p>Help students imagine the race situation. </p>"
-          ]
-        }
-      },
-      {
-        "id": "eDHRgCDgAAFzT_kq",
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<p><strong>Suggested Questions</strong></p>",
-            "<ul><li>What do we know about the race at the beginning? (Possible answer: The younger brother, Henri, has a head start. The brothers are not starting in the same spot.)</li><li>If you were watching this race, what would you see happening with the brothers? (Possible answer: The two brothers would start walking at the same time. The older brother, Emile, would be walking faster and would be catching up with each step. Some students may want to model what would happen with some physical movement.)</li></ul>",
-            "<p>Encourage students to think about how the race can be represented mathematically. Do not look for answers to these questions at this time. During the Explore and Summarize, listen and watch to see how students make sense of the situation.</p>",
-            "<ul><li>What data would you collect to document what happens in the race?</li><li>What are the variables that you would keep track of?</li><li>How could you represent the data to show what happens as they race?</li></ul>",
-            "<p>Have students work in groups of 4 as they investigate the brother’s walking race.</p>"
-          ]
-        }
-      }
+      {"id": "6KV8Les0v3JO0LZk", "display": "teacher", "title": "Table: Meters and Brothers’ Distances", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_2-1_InitialChallenge_Table.png"}},
+      {"id": "ouPnCbuQYc0LTN4F", "display": "teacher", "title": "Guess and Check", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_2-1_InitialChallenge_Guess&Check.png"}},
+      {"id": "W0O_IuEmP8bGsyu8", "display": "teacher", "title": "Graph: Meters and Brothers’ Distances", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_2-1_InitialChallenge_Graph.png"}}
     ]
   }
 }

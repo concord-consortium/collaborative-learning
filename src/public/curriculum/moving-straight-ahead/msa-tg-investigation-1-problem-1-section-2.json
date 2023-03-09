@@ -1,0 +1,75 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Launch (Getting Started)</strong>",
+            "Connecting to Prior Knowledge",
+            "The introduction to the Investigation revisits Adrian’s Bike Rental from Grade 6 Variables and Patterns. In that Unit, students used contextual situations, tables, graphs, and equations to represent patterns relating variables such as cost, income, and profit. They looked at both consistent relationships (such as linear patterns) and non-consistent relationships to explain the pattern of change between two variables.",
+            "The four questions in the introduction to the Investigation offer overarching questions that the students should explore throughout the unit. You may want to display these questions in the classroom in some way to help keep students focused on the big ideas in the Unit.",
+            "<ul><li> What are the variable in the problem?</li><li>Do the variables in the problem have a linear relationship to each other?</li><li>What patterns in the problem suggest that the relationship is linear? Proportional?</li><li> How can the linear relationship be represented with a verbal description, a table, a graph, or an equation?</li><li>How do changes in one variable affect changes in a related variable? How are these changes captured in a table, a graph, or an equation?</li><li>How can tables, graphs, equations, inequalities of linear relationships be used to solve problems?</li></ul>",
+            "After setting the scene for the Unit with the four questions, begin to introduce students to the context of the Problem.",
+            "Ask students to describe if they are fast or slow walkers and to describe their evidence."
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>In the 6th grade unit, <em>Comparing Quantities</em> you looked at a problem about a walking backwards race.  The average middle school student walks backwards ¼ of a mile in 6 minutes.  What does this rate mean? (Answers will vary.  Some students may suggest it would mean it would take 24 minutes to walk 1 mile)</li><li>Who is the slowest walker you know? Who is the fastest walker you know? (Various answers.)</li><li>Do you walk fast or slow? How do you know? (Various answers. Students should offer some reasoning for saying that they are fast or slow, such as, Teri always passes me in the hall because I walk slowly.) </li><li>What do you think your walking rate is in miles per hour? In meters per second? (Various answers. Students’ conjectures will help set up the Problem.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Student predictions will likely be much higher than their actual walking rates. They may have some knowledge about walking rates if they have used a treadmill. On a treadmill, a person might set the walking speed at 4 miles per hour. One interesting thing about treadmills is that the rate of 4 miles per hour may also be reported as 15 minutes per mile. You might discuss why both these rates are reported or why treadmills do not report the rate in miles per minute or meters per hour. </p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Presenting the Challenge</strong></p>",
+            "<p><strong></strong></p>",
+            "<p>Tell a story about walkathons. Students may have some experience with other “–athons.” The Discuss the walkathon described in the student edition and that Ms. Chang’s class suggests finding their walking rates. Ask students what they think their walking rate is.</p>",
+            "<p>Now tell students that they will have a chance to check their guesses about their walking rates. </p>",
+            "<p>Describe the experiment. </p>",
+            "<p>Have students work in groups of 4. Give each group access to meter sticks (or a pre-set measurement of 10 meters) and a timer or a clock with seconds. Students should do the experiment twice to get a more accurate walking rate. They can choose either the rate they want or the average of the two. Make sure there is a person checking the time in each group. As the groups finish collecting their data, they can work on the questions on the What If…? questions. </p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Suggested Questions</strong>",
+            "<ul><li> What does meters per second mean? (A rate where we know how many meters in one second.)</li><li> How might meter sticks and a timer help? (We can line-up 10 sticks and find how long it takes to walk 10 meters.)</li><li> What are the variables? (meters and seconds) What is the relationship between the variables? (The more distance I walk, the more time it will take.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "You could extend this Problem by asking some groups to record their data on a display such as a graph. Students may also record their graphs on transparent or electronic grids so that they can be used in the Summarize. \n\nThe following optional suggestions are designed to enrich the experiment: <ul><li> Let the groups decide whether they want to calculate meters per second or seconds per meter. </li><li> Ask one group to change their walking rate—maybe walk, jog, sprint, and so on. </li><li> Ask some students to walk for 10 seconds rather than 10 meters. Be sure to discuss these suggestions in the Summarize if you assign them. </li></ul>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

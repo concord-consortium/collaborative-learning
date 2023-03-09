@@ -1,0 +1,51 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h2>Problem Overview</h2>",
+            "<p>This Problem pulls together the main ideas in the Unit.  Students will look for a rate of change and a y-intercept from context cues and write equations for linear relationships. They will look at representing linear relationships with graphs, tables, and equations. Students will informally encounter systems of linear equations and  linear inequalities. They deepen their understanding of what it means for a relationship to be linear, and they see the connection between a constant rate of change and the slope of a line.  </p>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["<p>4AoL: Linear Relationships: Synthesis & Algebraic Expressions and Equations: Synthesis</p>", "CCSSM: 7.RP.A, 7.RP.A.1, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p><strong>NWDYK</strong></p><p>Describe some strategies for recognizing equivalent linear representations.</p>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Work to consolidate and refine emerging key mathematical concepts associated with linear relationships, both proportional and non-proportional, into a coherent constellation of ideas.</p>",
+            "<p>Recognize that:</p>",
+            "<ul><li>linear relationships are identified by their constant rate of change that can be found using a problem context, table of values, graph, or equation, </li><li>some linear relationships are proportional, and others are not,</li><li>proportional relationships will always include the value (0,0), and will be of the form <em>y = ax</em> where a is the constant of proportionality, and</li><li>when given the value of one variable for a linear relationship you can find the value of the other variable strategically using a variety of representations including graphs, tables, and equations.</li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learning</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

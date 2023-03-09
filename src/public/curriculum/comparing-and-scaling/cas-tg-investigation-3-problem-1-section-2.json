@@ -1,0 +1,54 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "8QKWQK3ydBWuNauh",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started</strong></u>)</p>",
+            "<p><u>Connecting to Prior Knowledge</u></p>",
+            "<p></p>",
+            "<p>Use <strong>Teaching Aid 3.1: Introduction</strong> to begin the Problem with students. This will allow you to have students keep their books closed or not look at the Problem for the Introduction. Explain the use of percentages for discounts and taxes. It is important for students to understand that discounts take a percentage off of an amount and that taxes add a percentage to an amount. Some students may be familiar with this use of percentages.</p>"
+          ]
+        }
+      },
+      {
+        "id": "9_YME9MJPn2IwYRY",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Another way to think about this is to remember that $1.00 is 100 pennies.</p>", "<p>100 pennies + (6% of 100) = 100 pennies + 6 pennies</p>", "<p>                                           = 106 pennies</p>", "<p>                                           = $1.06</p>"]
+        }
+      },
+      {
+        "id": "pshmipmc3fd1GVBv",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p></p>",
+            "<p>For the Initial Challenge, have students keep their books closed or look only at the Initial Challenge. The What If portion of the Problem presents student strategies that you may not want students to see until after working on the estimate and total bill with tax.</p>",
+            "<p></p>",
+            "<p>Introduce the Jason’s school items with tax using <strong>Learning Aid 3.1A: Cost of Skylar’s School Items</strong>. You can use one Learning Aid per partner group. Although estimating is a common strategy when shopping, many students will resist doing an estimate. You may have to encourage them to do the estimate before finding the actual amount of the bill with tax.</p>"
+          ]
+        }
+      },
+      {
+        "id": "xPJgrwCencd53a_6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<p></p>",
+            "<ul><li>Why is it important to estimate? (Sometimes in a situation like this one, an estimate is all you need to do. Jason just needs to know if he has enough money. Estimates also tell us if our actual answer is reasonable.)</li><li>How do we find estimates? (We change the numbers, often by rounding slightly up or down, to make them easier to compute with.)</li><li>What is an estimate for the price of the sticky notes? ($4.)</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

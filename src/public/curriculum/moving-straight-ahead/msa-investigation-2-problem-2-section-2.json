@@ -1,62 +1,140 @@
 {
-  "type": "launch",
+  "type": "initialChallenge",
   "content": {
     "tiles": [
       {
-        "id": "4CNPDUfNbGB2PmWM",
-        "title": "Text 6",
+        "id": "6sfLSrSmdI_rjm0R",
+        "title": "Text 5",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<p><strong>Launch (Getting Started) </strong></p>",
-            "<p><strong>Connecting to Prior Knowledge</strong> </p>",
-            "<p>Students will have been introduced to  the vocabulary word “coefficient” in the 6th grade unit Variables and Patterns.  Briefly review coefficient and y-intercept using the previous problem. </p>",
-            "<p><strong>Suggested questions</strong> </p>",
-            "<ul><li>What were the coefficients for the Henri and Emile equations?  (1 and 2.5)   </li><li>What did the coefficients tell you about the situation? (each brother’s walking rate) </li><li>How do you see the coefficient in the equation? (the number multiplied by x) Table? (the amount the y-values increase as the x-values increase by 1) Graph? (how much the graph goes up, or how “slanty” it is.  It isn’t necessary at this point to push for slope understanding just a general sense of the slant of the line.) </li><li>What were the y- intercepts for the Henri and Emile problem? ( (0,0) and (0, 45)) </li><li>What did the y-intercepts tell you about the situation? (the starting point for each brother in the race) </li><li>How do you see the y-intercepts in the equation?  (the number added on) Table? (the y-value when the x-value is zero) Graph? (where the line crosses the y-axis) </li></ul>"
+            "<p>Ms. Chang’s class decides to give T-shirts to each person who participates in the walkathon. They obtain the cost of the T-shirts from two different companies. Mighty Tee charges $49 plus $1 per T-shirt. No-Shrink Tee charges $4.50 per T-shirt. Ms. Chang writes the following equations to represent the relationships relating cost to the number of T-shirts: </p>",
+            "<p>C<sub>Mighty</sub> = 49 + n C<sub>No-Shrink</sub> = 4.5n</p>",
+            "<p>The number of T-shirts is <em>n</em>. C<sub>Mighty</sub> is the cost in dollars for Mighty Tee. C<sub>No-Shrink</sub> is the cost in dollars for No-Shrink Tee. </p>"
+          ]
+        }
+      },
+      {"id": "C7dVhzdOW98jHEeb", "title": "Text 6", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Which company should they choose? Give evidence for your answer. </li></ul>"]}},
+      {
+        "id": "D4YDWVxoeyU4qGfe",
+        "display": "teacher",
+        "title": "Text 9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>The amount spent on t-shirts will be the same if the class buys 14 t-shirts. If they want to buy fewer than 14 t-shirts, they should choose No-Shrink Tee; if they want to buy more than 14 t-shirts, they should choose Mighty Tee.</p>"]
+        }
+      },
+      [
+        {
+          "id": "ls4oD8ITmsTh447a",
+          "display": "teacher",
+          "title": "No-Shrink vs. Mighty-T",
+          "content": {
+            "type": "Geometry",
+            "board": {"properties": {"axisMin": [-1, -1], "axisRange": [50, 80], "axisNames": ["x", "y"], "axisLabels": ["T Shirts", ""]}},
+            "objects": [
+              {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 49]}, {"type": "point", "parents": [10, 59]}], "properties": {"id": "-94mMi-np62wbQDb", "pt1": {"type": "point", "id": "-94mMi-np62wbQDb-point1"}, "pt2": {"type": "point", "id": "-94mMi-np62wbQDb-point2"}}},
+              {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [8, 36]}], "properties": {"id": "j0whRpfXEeqi2ph_", "pt1": {"type": "point", "id": "j0whRpfXEeqi2ph_-point1"}, "pt2": {"type": "point", "id": "j0whRpfXEeqi2ph_-point2"}}},
+              {"type": "point", "parents": [14, 63], "properties": {"id": "LNqnytBjQsSlnKvh", "name": "(14, 63)", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "comment", "parents": [3.2258416666666676, -1.6459093749999987], "properties": {"id": "jrVCjQBAQ66ukKMF", "text": "No-Shrink", "anchor": "j0whRpfXEeqi2ph_"}},
+              {"type": "comment", "parents": [-10.1174125, 3.5213656250000085], "properties": {"id": "tTzfHXGsI5dY3bhK", "text": "Mighty T", "anchor": "-94mMi-np62wbQDb"}}
+            ]
+          }
+        },
+        {
+          "id": "Y_BlvAcLQHYqGew9",
+          "display": "teacher",
+          "content": {
+            "type": "Table",
+            "name": "T-shirt Costs",
+            "columns": [
+              {"name": "x", "width": 80, "values": [0, 2, 4, 6, 8, 10, 12, "14", "16"]},
+              {"name": "Mighty", "width": 80, "values": ["49", "51", "53", "55", "57", "59", "61", "63", "65"]},
+              {"name": "NoShrink", "width": 94.80078125, "values": ["0", "9", "18", "27", "36", "45", "54", "63", "72"]}
+            ]
+          }
+        }
+      ],
+      {"id": "qCv4wnqk2qIP1S7K", "title": "Text 10", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Explain how a graph or a table could be helpful in making your decision</li></ul>"]}},
+      {
+        "id": "tDGDBmrDF56P20A6",
+        "display": "teacher",
+        "title": "Text 11",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>A graph or table would tell you how much you would spend on n t-shirts from each company. </p>",
+            "<p></p>",
+            "<p>A graph would give a visual of the inequality that No-Shrink is cheaper until 14 shirts. Then after more than 14 shirts, Mighty would be cheaper with a line below the other company’s.</p>"
           ]
         }
       },
       {
-        "id": "v5jbTkAxB6Xrr2EF",
-        "title": "Text 7",
+        "id": "znFZqN7vJ-DUPkCa",
+        "display": "teacher",
+        "title": "Text 14",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<p>Discuss with students that they have been finding <strong>solutions of an equation</strong> when they were given one variable and found another or that a coordinate pair of a point on a graph will substitute into the equation. Using tables, graphs, and numerical relationships, they have found many solutions to an equation to answer questions in this and in previous Units.  </p>",
-            "<p> </p>",
-            "<p>You can show the equations, graphs, and tables from Problem 2.1 to connect the ideas. (LANGUAGE) This might be a good time to create an anchor chart. <strong>Teaching Aid 2.2A:  Introduction</strong>  provides a possible example.  </p>",
-            "<p>  </p>",
-            "<p>dHenri = 45 + t and dEmile = 2.5t </p>"
+            "<p>In the graph, we can find where the two lines intersect. This shows the point when both companies have the same cost for the same number of shirts. </p>",
+            "<p></p>",
+            "<p>Before that point, we can see that No-Shrink is cheaper, because the y-values are below the y-values of Mighty. After that point, we can see that the y-values of Might are less that No-Shrink. </p>"
+          ]
+        }
+      },
+      {"id": "pglSXEAbyXuWCOp9", "display": "teacher", "title": "Mighty vs. No-Shrink", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/2.2_IC_Mighty_vs_NoShrink.png", "filename": "curriculum/moving-straight-ahead/images/2.2_IC_Mighty_vs_NoShrink.png"}},
+      {
+        "id": "lEMyKRHXqhod-ECK",
+        "display": "teacher",
+        "title": "Text 16",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>On a table, you can see how the money amounts change for equal increments of change in the number of shirts. No-Shrink is cheaper until you get to 14 shirts, when the companies both would charge $63. For more than 14 shirts, Mighty would have a cheaper cost.</p>"]
+        }
+      },
+      {
+        "id": "u1M4NOHiiUaH-vRq",
+        "display": "teacher",
+        "title": "Text 17",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In the table, we can find where we have the same cost for the same number of shirts. </p>",
+            "<p></p>",
+            "<p>Before that, we can see that No-Shrink is cheaper, because the y-values are less than the y-values of Mighty. After that point, we can see that the y-values of Might are less that No-Shrink. </p>"
           ]
         }
       },
       {
+        "id": "uxl0DDbVkvxTRLWr",
+        "display": "teacher",
+        "title": "Table 1",
         "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "<strong>Suggested Questions</strong>\n<ul><li>What information do the variables and numbers represent in each equation? (The variable <em>t</em> represents time, and the variable <em>d</em> represents each brother’s distance from the starting line. The number 45 represents Henri’s head start, and the number 2.5 represents how many meters Emile walks per second. Henri’s rate of 1 m/s is the assumed coefficient of <em>t</em>.)</li></ul>\nDisplay a graph and a table for each of the two questions.\n<ul><li>Where do the lines cross the y-axis? (The line for Henri crosses the y-axis at the point (0, 45), and the line for Emile crosses the y-axis at the point (0, 0).)</li><li>Why is the name <strong>y-intercept</strong> a good name for these points? (This is the point where each line intersects, or intercepts, the <em>y</em>-axis.)</li><ul>",
-            "Go over the definition of <strong>coefficient</strong> with students. Then ask:<ul><li>How does the walking rate show up in the equations? (The walking rate of each brother is the coefficient of t in the equation for each relationship. In Henri’s equation, the coefficient is 1, which is not written, but assumed.)</li></ul>"
+          "type": "Table",
+          "name": "T-shirt Costs",
+          "columns": [
+            {"name": "x", "width": 80, "values": [0, 2, 4, 6, 8, 10, 12, "14", "16"]},
+            {"name": "Mighty", "width": 80, "values": ["49", "51", "53", "55", "57", "59", "61", "63", "65"]},
+            {"name": "NoShrink", "width": 94.80078125, "values": ["0", "9", "18", "27", "36", "45", "54", "63", "72"]},
+            {"name": "Which is cheaper?", "width": 93.4140625, "values": ["No-Shrink", "No-Shrink", "No-Shrink", "No-Shrink", "No-Shrink", "No-Shrink", "No-Shrink", "Same cost", "Mighty"]}
           ]
         }
       },
       {
+        "id": "6yXkTwfKVFQRIMkY",
+        "display": "teacher",
+        "title": "Solution",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "Define the <strong>solution of an equation</strong> using the explanation in the student book. Tell students that a solution of the equation d = 45 + t is a pair of values that makes the equation true, or an ordered pair that lies on the graph of the line.\n<ul><li>Is (0, 45) a solution of this equation? Explain. (Yes. If <em>t</em> = 0 and <em>d</em> = 45, 45 = 45 + 0 is a true equation.)</li><li>What would the value of d be if (48, <em>d</em>) is a solution? Explain. (93 meters. If (48, <em>d</em>) is a solution, then <em>d</em> = 45 + 48, or <em>d</em> = 93; 93 = 45 + 48 is a true equation.)</li><li>What would the value of <em>t</em> be if (<em>t</em>, 50) is a solution? Explain. (5 seconds. If (<em>t</em>, 50) is a solution, then 50 = 45 + <em>t</em>, or <em>t</em> = 5; 50 = 45 + 5 is a true equation.)</li><li>What is the <em>y</em>-intercept of this equation? Are the coordinates of the <em>y</em>-intercept a solution of the equation? Explain. (The graph of the equation has a <em>y</em>-intercept of (0, 45), which is a solution of the equation.)</li></ul>"
-          ]
-        }
-      },
-      {
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": [
-            "Presenting the Challenge\n\nOnce the class is comfortable with how to read these equations, tell the story of the cost plans offered by two T-shirt companies. Challenge students to pick a company and justify their answer. After answering the Initial Challenge, students may continue working on the What If...? questions. These questions may encourage students to refine their justifications"
+            "<p>This informal comparison of two linear equations will be formalized in Grade 8. Students will learn that when you find the point at which the costs are the same for the same number of shirts, it is solving a system of linear equations. These informal experiences lay the foundation for connecting ideas in more formal learning later on.</p>"
           ]
         }
       }

@@ -1,0 +1,59 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "4f2OyGvQkj7omGLf",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In Problem 2.2, students scale ratios to solve problems. The ratios in Problem 2.2 are rates. Each ratio/rate compares two quantities measured in different units, number of pizzas and price in dollars. This is not the first time students have used rates, but it is the first time the word has been explicitly defined. Student also used rate tables in the Grade 6 unit, Comparing Quantities.</p>",
+            "<p></p>",
+            "<p>While using rate tables to compare pizza prices at two different pizzerias.   The pizza prices foreshadow the introduction of the “constant of proportionality,” which is introduced in Problem 2.3. Students find patterns within a rate table contrasting two different situations, one of which is proportional and the other is not. Students will need to determine the impact of a delivery charge being added to the price of pizzas from one company. Presenting students with a non-proportional situation allows students to compare and contrast to a proportional situation. This makes it more explicit how to describe a proportional relationship.</p>",
+            "<p><strong>Implementation Note</strong>: Be sure to hold a discussion after the Initial Challenge before moving on to the What If. This will allow you to highlight your students’ strategies before analyzing the strategies of other students that are presented in the What If. You can use the strategies in the What If to connect to how your students thought about the proportional and non-proportional costs when making the tables.</p>",
+            "<p>Have students work on the Initial Challenge. As the groups finish, have them look at the What If questions and compare their thinking and strategies to the students in the What If. This may allow a discussion of strategies different from students’ own thinking for solving the Initial Challenge.</p>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["<p>AoL: Analysis, Synthesis</p>", "<p>CCSSM: 7.RP. A.1, 7.RP. A.2, 7.RP.A.2.A, 7.RP.A.2.B,  7.RP.A.2.C, 7.EE.B.3, 7.EE.B.4, 7.EE.B.4.A</p>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Build on understanding of ratios and their usefulness to make comparisons. Deepen understanding that a rate is the comparison of two quantities measured in different units.</p>",
+            "<p></p>",
+            "<p>Explore situations that require recognizing and analyzing proportional relationships to solve problems. Find and use unit rates, scaling, and equivalent ratios.</p>",
+            "<p></p>",
+            "<p>Begin to think about when a situation is not proportional, e.g. cannot be represented by equivalent ratios.</p>"
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>NWDYK</p>", "<p>How can you determine if a situation is proportional?</p>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#RevisionComments'><strong>Revision Comments</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#StemProblemFormat'><strong>Stem Problem Format</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guiide/comparing-and-scaling/#UnitDescriptions'><strong>Unit Descriptions</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#SummaryInvestigations'><strong>Summary Investigations</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitGoals'><strong>Unit Goals</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAlignment'><strong>Unit Alignment</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#GeneralAoL'><strong>General AoL</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#UnitAoL'><strong>Unit AoL</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#MathOverview'><strong>Math Overview</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#LearningAids'><strong>Learning Aids</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#TeachingAids'><strong>Teaching Aids</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#FamilyLetters'><strong>Family Letters</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#Assessments'><strong>Assessments</strong></a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/comparing-and-scaling/#ACEHomework'><strong>ACE Homework</strong></a></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

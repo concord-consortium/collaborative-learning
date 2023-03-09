@@ -1,0 +1,47 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "lpFKpmEceYDAw2oa",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><u><strong>Explore (Digging In)</strong></u></p>", "<p><u>Providing for Individual Needs</u></p>", "<p></p>", "<p>As you move around the room listening to students discuss the Problem, these are some questions you might ask for the Initial Challenge.</p>"]
+        }
+      },
+      {
+        "id": "N41JHH0lKmpCaMtp",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested questions</strong></p>",
+            "<ul><li>Are you using the recipe as part-to-part or part-to-whole comparison? How did you decide? (Answers will vary depending on which question of the Problem you are looking at.)</li><li>Did you scale up a ratio? How did you decide what to multiply by? How do you know that the relationship between the ingredients is still correct? (Answers may vary, depending on the recipe. The relationship should still be correct since you are taking multiples of a recipe. Doing this will maintain the relationship between the quantities.)</li><li>How can you tell if two ratios are equivalent? (Two ratios are equivalent if you can get one ratio from the other by multiplying [or dividing] by a scale factor).</li><li>How could scaling help solve a problem? How can you decide on a scale factor to use? (Scaling could give you easier numbers to work with. You can decide on a scale factor by finding a common factor or common multiple.)</li></ul>"
+          ]
+        }
+      },
+      {"id": "GhCCymwiIg-xSanE", "content": {"type": "Text", "format": "html", "text": ["<p>As you move around the room listening to students discuss the Problem, these are some questions you might ask for the What If.</p>"]}},
+      {
+        "id": "l97TcqS7ikmNphNv",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>How did each student find equivalent ratios? (Adia used a rate table. Otis made an equation to help him think about scaling the ratio.)</li><li>For Otis, what does each number in the equation represent? (1 represents 1 batch of Recipe A, 5 represents 5 cups of juice in one batch of Recipe A, 210 represents how many total cups of juice we need, x represents the number of Recipe A batches needed to make juice for all the campers.)</li><li>Adia said that her method is like Otis’s because she also used scaling. “I scaled the ratio — 1 recipe per 5 cups of juice, 2 recipes for 10 cups of juice, etc. and put them into a table.” Is she correct? Why?</li></ul>"
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p><u>Planning for the Summary</u></p>", "<p>What evidence will you use in the summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"]}},
+      {
+        "id": "O2mBpPnU2-Myfe_w",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><em>Now What Do You Know?</em></p>", "<p><em>How do the strategies you used in this problem compare to those used in Problem 1.1?</em></p>", "<p>(Look for student work examples to show using scaling strategies- rate tables, unit rates, proportions, etc.)</p>"]
+        }
+      }
+    ]
+  }
+}

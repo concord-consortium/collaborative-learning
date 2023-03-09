@@ -1,0 +1,26 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "WiXXZSavJxhoDr9W",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Lesson 2.2 - How do we perceive touch?</strong></p>",
+            "<p><strong>Lesson Overview</strong>: </p>",
+            "<p>Students will explore the variance in touch sensitivity of different body parts and different people, and examine how the nervous system is responsible for this variance. </p>",
+            "<p><strong>Materials:</strong></p>",
+            "<p>1 caliper for each team of 3 students</p>",
+            "<p>Chart paper and markers</p>",
+            "<p>Learning Objectives:</p>",
+            "<p>Students develop a model in which they describe the relationship “between components, including: (1) The functions of at least two major body systems in terms of contributions to overall function of an organism and (2) Ways the functions of the two different systems affect one another; and (3) A system’s function and how that relates both to the system’s parts and the overall function of the organism.”  (HS-LS1-2)</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

@@ -1,44 +1,51 @@
 {
-  "type": "overview",
+  "type": "introduction",
   "content": {
     "tiles": [
+      {"id": "3haDCCDsKsykIJ9d", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Problem 1.2 Walking Rates: Exploring Linear Relationships with Tables, Graphs, and Equations</strong></p>"]}},
       {
+        "id": "0qbWDirt2af3eKHN",
+        "title": "Text 2",
         "content": {
           "type": "Text",
           "format": "html",
           "text": [
-            "<h3>Problem Overview</h3>",
-            "Students explore the walking rates of three students. They look at the walking rate and its effect on various representations of the relationship between distance and time. This Problem introduces ways to represent proportional linear relationships between two variables using tables, graphs, and equations. It is also the first time that students are asked to explain why a relationship is linear or to recognize a linear relationship from a table or an equation."
+            "<p>In earlier units we explored relationships which were linear and proportional. For example, we graphed the relationship between cost and number of bikes rented in Variables and Patterns. We also explored the relationship between time and distance walking backwards in Comparing Quantities. In Comparing and Scaling, we learned to recognize the difference between proportional and non-proportional relationships when we investigated pizza prices. </p>"
           ]
         }
       },
-      {"content": {"type": "Text", "format": "html", "text": ["AoL: Linear Relationships; Introduce & Algebraic Expressions and Equations; Explore", "CCSSM: 7.RP.A.2, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2d, 7.EE.B.4"]}},
-      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": "<strong>NWDYK</strong>\nHow do you recognize a linear pattern of change in a verbal context, table, a graph, expression, or an equation? "}},
       {
-        "content": {
-          "type": "Text",
-          "format": "html",
-          "text": "<strong>Emerging Mathematical Ideas</strong>\nBegin to make sense of linear patterns of change such as distance, and time (for given rates) including how to identify them and how to represent them in words, in a table, in a graph, as equivalent expressions, and as an equation connecting to prior experiences with proportional relationships.\n\nBegin to notice: <ul><li> the connection between equivalent expressions and an equation, that is, an equation equates two or more equivalent expressions, </li><li> how a constant rate of change is represented in a verbal context, table, graph, and equation, </li><li> the ways different representations of linear patterns (tables, graphs, or equations) are more or less useful in easily answering questions depending on the nature of the question (e.g., you can quickly see the rate of change from an equation, but the graph of a relationship is a quick way to see if the relationship is linear), </li><li> the characteristics in a table, graph and equation that can be used to identify a proportional relationship and the constant of proportionality (unit rate), and  </li><li> how variations in the way axes of a coordinate graph are partitioned can make the graph of a relationship look very different e.g., steeper or flatter lines. </li></ul>"
-        }
+        "id": "gH6msVET3gm0idqm",
+        "title": "Text 3",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Malcom determined that his walking rate was 1.5 meters per second. For every 1 second he walks, his distance increases by 1.5 meters. This information can be represented in expressions and equations.</p>"]}
       },
+      [
+        {
+          "id": "X2W_FUQWTWfWcbID",
+          "title": "Text 4",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<h3>Expressions</h3>", "<p>1.5t</p>", "<p>is an <strong>expression</strong> that represents the <em>distance</em> walked every second.</p>", "<p>d</p>", "<p>can is also be an <strong>expression</strong> for the distance that he walked every second.</p>"]
+          }
+        },
+        {
+          "id": "5qESy4xl71_I6zdO",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<h3>Equations</h3>", "<p>d = 1.5t</p>", "<p>the equation shows the equivalence of two expressions (<em>d</em> and 1.5<em>t</em>)</p>", "<p>The equation also represents the relationship between the two variables, <em>d </em>and<em> t</em></p>"]
+          }
+        }
+      ],
+      {"id": "hE0VreFwxPDsG-ky", "title": "Text 5", "content": {"type": "Text", "format": "html", "text": ["<p>The expressions d and 1.5t are <strong>equivalent expressions</strong>. They both represent the <em>distance</em> that Malcom walks at 1.5 <em>meters per second</em></p>"]}},
       {
+        "id": "CgHHbhjIp9IrDRbF",
+        "title": "Text 6",
         "content": {
           "type": "Text",
           "format": "html",
-          "text": [
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learning</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
-            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
-          ]
+          "text": ["<p>Think about the effect a walking rate has on the relationship between time walked and distance walked. This will provide some important clues about how to identify linear relationships from tables, graphs, expressions, and equations.</p>"]
         }
       }
     ]

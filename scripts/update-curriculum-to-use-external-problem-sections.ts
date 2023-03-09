@@ -13,7 +13,7 @@ import stringify from "json-stringify-pretty-compact";
  * copying their data to a new external file and replacing the inline
  * data with a reference the external file.
  */
-const processProblemSections = (content: any, subdir: string) => {
+const processProblemSections = (content: any, subdir: string, isTeacherGuide: boolean) => {
   const curriculumCode = content.code;
   let sectionFileCount = 0;
   for (const investigation of content.investigations) {
@@ -22,8 +22,9 @@ const processProblemSections = (content: any, subdir: string) => {
       const problemOrdinal = problem.ordinal;
       for (let i = 0; i < problem.sections.length; i++) {
         const section = problem.sections[i];
-        const sectionFileName =
-          `${curriculumCode}-investigation-${investigationOrdinal}-problem-${problemOrdinal}-section-${i+1}.json`;
+        const sectionFileName = isTeacherGuide
+          ? `${curriculumCode}-tg-investigation-${investigationOrdinal}-problem-${problemOrdinal}-section-${i+1}.json`
+          : `${curriculumCode}-investigation-${investigationOrdinal}-problem-${problemOrdinal}-section-${i+1}.json`;
         const sectionFilePath = `${subdir}/${sectionFileName}`;
         if (typeof section !== "string") { // don't update if it's already a reference to an external file
           const sectionData = section;
@@ -40,18 +41,21 @@ const processProblemSections = (content: any, subdir: string) => {
 
 const curriculumDir = "../src/public/curriculum";
 const curriculumSubdirs = fs.readdirSync(curriculumDir).filter(name => !name.endsWith(".json"));
+// If you're only updating a specific unit, add its directory name to this array (e.g. "bio4community")
+const onlyUpdateUnits: string[] = [];
 
 for (const subdirName of curriculumSubdirs) {
-  const subdir = `${curriculumDir}/${subdirName}`;
-  const files = fs.readdirSync(subdir).filter(name => name.toLowerCase().endsWith(".json"));
+  if (onlyUpdateUnits.length === 0 || onlyUpdateUnits.includes(subdirName)) {
+    const subdir = `${curriculumDir}/${subdirName}`;
+    const files = fs.readdirSync(subdir).filter(name => name.toLowerCase().endsWith(".json"));
 
-  for (const filename of files) {
-    //if (subdirName !== "stretching-and-shrinking") {
+    for (const filename of files) {
+      const isTeacherGuide = filename.toLowerCase().includes("-teacher-guide");
       const fileContent = fs.readFileSync(`${subdir}/${filename}`, "utf8");
       const fileData = JSON.parse(fileContent);
       // write data to original file
-      const updatedFileData = processProblemSections(fileData, subdir);
+      const updatedFileData = processProblemSections(fileData, subdir, isTeacherGuide);
       fs.writeFileSync(`${subdir}/${filename}`, stringify(updatedFileData, {maxLength: 300}));
-    //}
+    }
   }
 }
