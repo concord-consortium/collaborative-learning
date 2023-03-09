@@ -9,16 +9,6 @@ import fs from "fs";
 import stringify from "json-stringify-pretty-compact";
 
 /* 
- * Returns a date string in yyyy-mm-dd format.
- */
-const getTimestamp = () => {
-  const todaysDate = new Date();
-  const offset = todaysDate.getTimezoneOffset();
-  const timestamp = new Date(todaysDate.getTime() - (offset*60*1000));
-  return timestamp.toISOString().split('T')[0];
-};
-
-/* 
  * Iterates over unit content and updates any inline problem sections by
  * copying their data to a new external file and replacing the inline
  * data with a reference the external file.
@@ -56,16 +46,12 @@ for (const subdirName of curriculumSubdirs) {
   const files = fs.readdirSync(subdir).filter(name => name.toLowerCase().endsWith(".json"));
 
   for (const filename of files) {
-    if (subdirName !== "stretching-and-shrinking") {
+    //if (subdirName !== "stretching-and-shrinking") {
       const fileContent = fs.readFileSync(`${subdir}/${filename}`, "utf8");
       const fileData = JSON.parse(fileContent);
-      // copy content to back-up file
-      // const backupFilename = `${filename.split(".")[0]}--back-up-${getTimestamp()}.json`;
-      // const backupFilePath = `${subdir}/${backupFilename}`;
-      // fs.writeFileSync(backupFilePath, fileContent);
       // write data to original file
       const updatedFileData = processProblemSections(fileData, subdir);
       fs.writeFileSync(`${subdir}/${filename}`, stringify(updatedFileData, {maxLength: 300}));
-    }
+    //}
   }
 }
