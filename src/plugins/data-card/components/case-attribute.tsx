@@ -109,18 +109,18 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
       if (!names.includes(labelCandidate)){
         caseId && content.setAttName(attrKey, labelCandidate);
       } else {
-        showUniqueAttributeAlert();
+        showRequireUniqueAlert();
       }
     }
   };
 
-  const UniqueAttributeAlertContent = () => {
+  const RequireUniqueAlert = () => {
     return <p> Attribute names must be unique.</p>;
   };
 
-  const [showUniqueAttributeAlert] = useCautionAlert({
+  const [showRequireUniqueAlert] = useCautionAlert({
     title: "Delete Attribute",
-    content: UniqueAttributeAlertContent,
+    content: RequireUniqueAlert,
     confirmLabel: "OK",
     onConfirm: () => deleteAttribute()
   });

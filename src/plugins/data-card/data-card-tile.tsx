@@ -12,9 +12,10 @@ import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
 import { EditFacet } from "./data-card-types";
+import { DataCardSortArea } from "./components/sort-area";
 
 import "./data-card-tile.scss";
-import { DataCardSortArea } from "./components/sort-area";
+
 
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { model, onRequestUniqueTitle, readOnly, documentContent, tileElt, onRegisterTileApi,
@@ -217,7 +218,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
         </div>
 
         <div className="panel sort">
-          <SortSelect model={model} onSortAttrChange={(e) => setSort(e)} />
+          <SortSelect model={model} onSortAttrChange={setSort} />
         </div>
 
         { displayAs === "single" &&
