@@ -61,7 +61,7 @@ context("Teacher Space", () => {
                     dashboard.getClassList().find('.list-item').should('have.length', clueData.classes.length);
                     dashboard.getClassDropdown().click({ force: true });
                     dashboard.getClassList().should('not.have.class','show');
-                    // //Check Teacher Username visibility and content
+                    // Check Teacher Username visibility and content
                     // header.getUserName().should('be.visible').and('contain', clueData.teacherName)
                 });
             });
@@ -97,21 +97,15 @@ context("Teacher Space", () => {
                         cy.waitForLoad();
                         tempProblemIndex += 1;
                     });
-
-                    // TODO: Fix whatever causes the following test to fail. The changes that added support for separate problem 
-                    // section files for units (https://github.com/concord-consortium/collaborative-learning/pull/1602) resulted
-                    // in the test failing even though the expected behavior occurs when the steps are followed manually. It 
-                    // seems to be related to how the teacher guide problem sections are loaded in the addDisposer section of 
-                    // src/models/stores/stores.ts. If the loading of those sections is moved outside the addDisposer section and
-                    // the user type check, then the test passes.
-                    // dashboard.getProblemDropdown().should('contain', problems[tempProblemIndex].problemTitle);
+                    dashboard.getProblemDropdown().should('contain', problems[tempProblemIndex].problemTitle);
                     dashboard.getGroups().should('have.length',0);
 
                     //switch back to original problem for later test
                     dashboard.getProblemDropdown().click({force:true});
                     dashboard.getProblemList().find('.list-item').contains(problems[initProblemIndex].problemTitle).click({ force: true });
-                    // cy.wait(1000)
+                    // cy.wait(1000);
                     cy.waitForLoad();
+                    cy.wait(10000);
                 });
             });
             it('verify selected class is shown in class dropdown', () => {

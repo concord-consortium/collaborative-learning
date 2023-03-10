@@ -1,13 +1,14 @@
-import { inject, observer } from "mobx-react";
+import { observer } from "mobx-react";
 import React from "react";
 import { EPanelId, IPanelGroupSpec } from "../../components/app-header";
-import { BaseComponent, IBaseProps } from "../../components/base";
+import { IBaseProps } from "../../components/base";
 import { ClassMenuContainer } from "../../components/class-menu-container";
 import { NetworkStatus } from "../../components/network-status";
 import { ProblemMenuContainer } from "../../components/problem-menu-container";
 import { ToggleGroup } from "@concord-consortium/react-components";
 import { GroupModelType, GroupUserModelType } from "../../models/stores/groups";
 import { CustomSelect } from "./custom-select";
+import { useStores } from "../../hooks/use-stores";
 
 // cf. https://mattferderer.com/use-sass-variables-in-typescript-and-javascript
 import styles from "./toggle-buttons.scss";
@@ -21,96 +22,15 @@ interface IProps extends IBaseProps {
   showGroup: boolean;
 }
 
-@inject("stores")
-@observer
-export class ClueAppHeaderComponent extends BaseComponent<IProps> {
+export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAppHeaderComponent(props) {
+  const { showGroup } = props;
+  const { appConfig, appMode, appVersion, db, user, problem, groups, investigation, ui, unit } = useStores();
+  const myGroup = showGroup ? groups.groupForUser(user.id) : undefined;
+  const userTitle = appMode !== "authed" && appMode !== "demo"
+                      ? `Firebase UID: ${db.firebase.userId}` : undefined;
 
-  public render() {
-    const { showGroup } = this.props;
-    const { appConfig, appMode, appVersion, db, user, problem, groups, investigation, unit } = this.stores;
-    const myGroup = showGroup ? groups.groupForUser(user.id) : undefined;
-    const userTitle = appMode !== "authed" && appMode !== "demo"
-                        ? `Firebase UID: ${db.firebase.userId}` : undefined;
-
-    if (user.isTeacher && appConfig.showClassSwitcher) {
-      return this.renderTeacherHeader(userTitle);
-    }
-    return (
-      <div className="app-header">
-        <div className="left">
-          <div className="unit">
-            <div className="title" data-test="unit-title">
-              {unit.title}
-            </div>
-            <div className="investigation" data-test="investigation">
-              {investigation.title}
-            </div>
-          </div>
-          <div className="separator"/>
-          <CustomSelect
-            items={[{text: `${problem.title}${problem.subtitle ? `: ${problem.subtitle}`: ""}`}]}
-            isDisabled={true}
-          />
-        </div>
-        <div className="middle student">
-          {this.renderPanelButtons()}
-        </div>
-        <div className="right">
-          <NetworkStatus user={user}/>
-          <div className="version">Version {appVersion}</div>
-          {myGroup ? this.renderGroup(myGroup) : null}
-          <div className="user" title={userTitle}>
-            <div className="user-contents">
-              <div className="name" data-test="user-name">{user.name}</div>
-              <div className="class" data-test="user-class">{user.className}</div>
-            </div>
-            <div className="profile-icon">
-              <div className="profile-icon-inner"/>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  private renderTeacherHeader(userTitle: string | undefined) {
-    const { appVersion, investigation, unit } = this.stores;
-    return (
-      <div className="app-header">
-        <div className="left">
-          <div className="unit" data-test="investigation-title">
-            <div className="title">
-              {unit.title}
-            </div>
-            <div className="investigation">
-              {investigation.title}
-            </div>
-          </div>
-          <div className="separator"/>
-          <div className="problem-dropdown" data-test="user-class">
-            <ProblemMenuContainer />
-          </div>
-        </div>
-        <div className="middle">
-          {this.renderPanelButtons()}
-        </div>
-        <div className="right">
-          <div className="version">Version {appVersion}</div>
-          <div className="user teacher" title={userTitle}>
-            <div className="class" data-test="user-class">
-              <ClassMenuContainer />
-            </div>
-            <div className="profile-icon teacher">
-              <div className="profile-icon-inner"/>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  private renderPanelButtons() {
-    const { panels, onPanelChange, current} = this.props;
+  const renderPanelButtons = () => {
+    const { panels, onPanelChange, current} = props;
     if (!panels || (panels.length < 2)) return;
 
     const panelButtons = panels
@@ -151,10 +71,9 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
         return { label, onClick, key, selected, colors };
       });
     return <ToggleGroup options={panelButtons} />;
-  }
+  };
 
-  private renderGroup(group: GroupModelType) {
-    const {user} = this.stores;
+  const renderGroup = (group: GroupModelType) => {
     const groupUsers = group.users.slice();
     const userIndex = groupUsers.findIndex((groupUser) => groupUser.id === user.id);
     // Put the main user first to match 4-up colors
@@ -162,46 +81,45 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
       groupUsers.unshift(groupUsers.splice(userIndex, 1)[0]);
     }
     return (
-      <div onClick={this.handleResetGroup} className="group">
+      <div onClick={handleResetGroup} className="group">
         <div className="name" data-test="group-name">{`Group ${group.id}`}</div>
         <div className="group-center"/>
         <div className="members" data-test="group-members">
           <div className="row">
-            {this.renderGroupUser(groupUsers, 0, "nw")}
-            {this.renderGroupUser(groupUsers, 1, "ne")}
+            {renderGroupUser(groupUsers, 0, "nw")}
+            {renderGroupUser(groupUsers, 1, "ne")}
           </div>
           <div className="row">
-            {this.renderGroupUser(groupUsers, 3, "sw")}
-            {this.renderGroupUser(groupUsers, 2, "se")}
+            {renderGroupUser(groupUsers, 3, "sw")}
+            {renderGroupUser(groupUsers, 2, "se")}
           </div>
         </div>
       </div>
     );
-  }
+  };
 
-  private renderGroupUser(groupUsers: GroupUserModelType[], index: number, direction: "nw" | "ne" | "se" | "sw") {
+  const renderGroupUser = (groupUsers: GroupUserModelType[], index: number, direction: "nw" | "ne" | "se" | "sw") => {
     if (groupUsers.length <= index) {
       return (
         <div key={`empty-${index}`} className={`member empty ${direction}`}/>
       );
     }
 
-    const user = groupUsers[index];
-    const className = `member ${user.connected ? "connected" : "disconnected"}`;
-    const title = `${user.name}: ${user.connected ? "connected" : "disconnected"}`;
+    const groupUser = groupUsers[index];
+    const className = `member ${groupUser.connected ? "connected" : "disconnected"}`;
+    const title = `${groupUser.name}: ${groupUser.connected ? "connected" : "disconnected"}`;
     return (
       <div
-        key={user.id}
+        key={groupUser.id}
         className={`${className} ${direction}`}
         title={title}
       >
-        <div className="initials">{user.initials}</div>
+        <div className="initials">{groupUser.initials}</div>
       </div>
     );
-  }
+  };
 
-  private handleResetGroup = () => {
-    const {ui, db} = this.stores;
+  const handleResetGroup = () => {
     ui.confirm("Do you want to leave this group?", "Leave Group")
       .then((ok) => {
         if (ok) {
@@ -209,4 +127,80 @@ export class ClueAppHeaderComponent extends BaseComponent<IProps> {
         }
       });
   };
-}
+
+  const renderTeacherHeader = () => {
+    return (
+      <div className="app-header">
+        <div className="left">
+          <div className="unit" data-test="investigation-title">
+            <div className="title">
+              {unit.title}
+            </div>
+            <div className="investigation">
+              {investigation.title}
+            </div>
+          </div>
+          <div className="separator"/>
+          <div className="problem-dropdown" data-test="user-class">
+            <ProblemMenuContainer />
+          </div>
+        </div>
+        <div className="middle">
+          {renderPanelButtons()}
+        </div>
+        <div className="right">
+          <div className="version">Version {appVersion}</div>
+          <div className="user teacher" title={userTitle}>
+            <div className="class" data-test="user-class">
+              <ClassMenuContainer />
+            </div>
+            <div className="profile-icon teacher">
+              <div className="profile-icon-inner"/>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  if (user.isTeacher && appConfig.showClassSwitcher) {
+    return renderTeacherHeader();
+  }
+
+  return (
+      <div className="app-header">
+        <div className="left">
+          <div className="unit">
+            <div className="title" data-test="unit-title">
+              {unit.title}
+            </div>
+            <div className="investigation" data-test="investigation">
+              {investigation.title}
+            </div>
+          </div>
+          <div className="separator"/>
+          <CustomSelect
+            items={[{text: `${problem.title}${problem.subtitle ? `: ${problem.subtitle}`: ""}`}]}
+            isDisabled={true}
+          />
+        </div>
+        <div className="middle student">
+          {renderPanelButtons()}
+        </div>
+        <div className="right">
+          <NetworkStatus user={user}/>
+          <div className="version">Version {appVersion}</div>
+          {myGroup ? renderGroup(myGroup) : null}
+          <div className="user" title={userTitle}>
+            <div className="user-contents">
+              <div className="name" data-test="user-name">{user.name}</div>
+              <div className="class" data-test="user-class">{user.className}</div>
+            </div>
+            <div className="profile-icon">
+              <div className="profile-icon-inner"/>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+});

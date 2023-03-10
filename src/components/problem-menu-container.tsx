@@ -1,28 +1,30 @@
 import { IDropdownItem } from "@concord-consortium/react-components";
-import { inject, observer } from "mobx-react";
+import { observer } from "mobx-react";
 import React from "react";
-import { IBaseProps, BaseComponent } from "./base";
+import { IBaseProps } from "./base";
 import { CustomSelect } from "../clue/components/custom-select";
 import { Logger } from "../lib/logger";
 import { LogEventMethod, LogEventName } from "../lib/logger-types";
+import { useStores } from "../hooks/use-stores";
 
 interface IProps extends IBaseProps {}
 
-@inject("stores")
-@observer
-export class ProblemMenuContainer extends BaseComponent <IProps> {
+export const ProblemMenuContainer: React.FC<IProps> = observer(function ProblemMenuContainer(props) {
+  const { problem, ui, unit, user } = useStores();
 
-  public render() {
-    const problemMenuItems = this.getProblemMenuItems();
-    return <CustomSelect items={problemMenuItems} />;
-  }
+  const showUnassignedLinkAlert = (problemName: string) => {
+    ui.alert(
+      `You must first assign ${problemName} from the portal.`,
+      "Problem not currently assigned"
+    );
+  };
 
-  private handleMenuItemClick = (item: IDropdownItem, problemName: string) => {
+  const handleMenuItemClick = (item: IDropdownItem, problemName: string) => {
     const {link, text} = item;
     if (link) {
       window.location.replace(link);
     } else {
-      this.showUnassignedLinkAlert(problemName);
+      showUnassignedLinkAlert(problemName);
     }
     const logItem = {
       event: LogEventName.DASHBOARD_SWITCH_CLASS,
@@ -31,16 +33,7 @@ export class ProblemMenuContainer extends BaseComponent <IProps> {
     Logger.log(logItem.event, logItem.parameters, LogEventMethod.DO);
   };
 
-  private showUnassignedLinkAlert(problemName: string) {
-    const { ui } = this.stores;
-    ui.alert(
-      `You must first assign ${problemName} from the portal.`,
-      "Problem not currently assigned"
-    );
-  }
-
-  private getProblemMenuItems() {
-    const { user, unit, problem } = this.stores;
+  const getProblemMenuItems = () => {
     const investigations = unit.investigations;
     const links: IDropdownItem[] = [];
 
@@ -64,10 +57,14 @@ export class ProblemMenuContainer extends BaseComponent <IProps> {
           link: portalOffering ? portalOffering.location : undefined,
           disabled: false
         };
-        link.onClick = () => this.handleMenuItemClick(link, invProb.title);
+        link.onClick = () => handleMenuItemClick(link, invProb.title);
         links.push(link);
       });
     });
     return links;
-  }
-}
+  };
+
+  const problemMenuItems = getProblemMenuItems();
+  return <CustomSelect items={problemMenuItems} />;
+
+});
