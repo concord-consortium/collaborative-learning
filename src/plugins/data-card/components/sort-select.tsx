@@ -8,6 +8,10 @@ interface IProps {
   onSortAttrChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
+// TODO - refactor this so that it gets currentSortId and attrsWithNames
+// as props - then it will update on time and prevent ability to choose
+// an attribute that no longer exists
+
 export const SortSelect: React.FC<IProps> = ({ model, onSortAttrChange }) => {
   const content = model.content as DataCardContentModelType;
   const attrs = content.existingAttributesWithNames();

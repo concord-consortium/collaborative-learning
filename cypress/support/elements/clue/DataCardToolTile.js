@@ -9,8 +9,12 @@ class DataCardToolTile {
     return cy.get(`${workspaceClass || ".primary-workspace"} .sort-select-input`);
   }
   getNameInputAsInactive(workspaceClass){
-    const nameInputSelector = ".attribute-name-value-pair .name";
-    return cy.get(`${workspaceClass || ".primary-workspace"} ${nameInputSelector}`);
+    const nameSelector = ".attribute-name-value-pair .name";
+    return cy.get(`${workspaceClass || ".primary-workspace"} ${nameSelector}`);
+  }
+  getValueInputAsInactive(workspaceClass){
+    const valueSelector = ".attribute-name-value-pair .value";
+    return cy.get(`${workspaceClass || ".primary-workspace"} ${valueSelector}`);
   }
 }
 export default DataCardToolTile;

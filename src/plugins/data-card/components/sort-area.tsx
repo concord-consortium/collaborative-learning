@@ -20,7 +20,7 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
   const uniqeOrderedValues = orderBy(uniq(allAttrValues));
 
    // if one of the categories is a category for no value, put this stack last
-   uniqeOrderedValues.includes("") && uniqeOrderedValues.push(uniqeOrderedValues.shift());
+  uniqeOrderedValues.includes("") && uniqeOrderedValues.push(uniqeOrderedValues.shift());
 
   const renderPlaceholderCells = () => {
     const rowsNeeded = Math.ceil(uniqeOrderedValues.length / 3);
