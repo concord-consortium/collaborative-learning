@@ -13,7 +13,7 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId }
   const content = model.content as DataCardContentModelType;
   const caseIds = content.caseIdsWithAttributeValue(inAttributeId, stackValue);
   const units = caseIds.length > 1 ? "cards" : "card";
-  const stackValueDisplay = stackValue !== "" ? stackValue : "(no value)"
+  const stackValueDisplay = stackValue !== "" ? stackValue : "(no value)";
   return (
     <div className="stack cell">
       <div className="stack-heading">
@@ -26,8 +26,9 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId }
               key={cid}
               model={model}
               caseId={cid}
-              stackSpot={i}
-            />
+              indexInStack={i}
+              totalInStack={caseIds.length}
+            />;
           })
         }
       </div>

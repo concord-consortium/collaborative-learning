@@ -5,15 +5,20 @@ import { DataCardContentModelType } from "../data-card-content";
 interface IProps {
   caseId: string;
   model: ITileModel;
-  stackSpot: number;
+  indexInStack: number;
+  totalInStack: number;
 }
 
-export const SortCard: React.FC<IProps> = ({ model, caseId, stackSpot }) => {
+export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalInStack }) => {
   const content = model.content as DataCardContentModelType;
+  const deckCardNumberDisplay = content.dataSet.caseIndexFromID(caseId) + 1;
+  const stackCardNumberDisplay = indexInStack + 1;
 
   return (
     <div className="card sortable">
-      <div style={{ fontFamily: 'monospace', padding: "2px"}}>{caseId}</div>
+      {caseId}<br/>
+      { `${ stackCardNumberDisplay } of ${ totalInStack } cards in stack`}<br/>
+      { `${ deckCardNumberDisplay } of ${ content.totalCases } cards in deck`}
     </div>
   );
 };

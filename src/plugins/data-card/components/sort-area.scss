@@ -40,18 +40,13 @@ $sort-view-width: ($sort-view-card-width * 3 );
     }
 
     .sortable.card {
-      border:1px solid $charcoal-light-1;
       display: grid;
-      grid-template-columns: 40px auto;
+      // temporary styles for dev
+      margin:3px;
+      padding:3px;
+      font-family: monospace;
+      border: 1px solid $charcoal-light-1;
+      transform: translateX(-1px);
     }
   }
 }
-
-
-// .sorting-cards-data-area {
-//   // each card is specified as 160px, plus 6 * 10px margins over three columns
-//   width: 540px;
-//   background-color: $workspace-teal-light-4;
-//   border: solid 1px $charcoal-light-1;
-//   padding:$cell-padding;
-// }

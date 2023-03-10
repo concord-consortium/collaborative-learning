@@ -5,8 +5,7 @@ import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { SortStack, SortStackPlaceholder } from "./sort-stack";
 
-import "./sort-area.scss"
-import { render } from "@testing-library/react";
+import "./sort-area.scss";
 
 interface IProps {
   model: ITileModel;
@@ -15,7 +14,6 @@ interface IProps {
 export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
   const content = model.content as DataCardContentModelType;
   const sortById = content.selectedSortAttributeId;
-  const sortByName = sortById ? content.dataSet.attrFromID(sortById).name : " "; //TODO handle unfinished attr
 
   const attrsSnap = getSnapshot(content.attributes);
   const allAttrValues = attrsSnap.filter((a) => a.id === sortById)[0].values;
