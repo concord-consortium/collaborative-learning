@@ -105,7 +105,6 @@ context("Teacher Space", () => {
                     dashboard.getProblemList().find('.list-item').contains(problems[initProblemIndex].problemTitle).click({ force: true });
                     // cy.wait(1000);
                     cy.waitForLoad();
-                    cy.wait(10000);
                 });
             });
             it('verify selected class is shown in class dropdown', () => {
