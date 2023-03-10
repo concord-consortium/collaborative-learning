@@ -7,7 +7,7 @@ import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultLabel, EditFacet } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
-import { useErrorAlert } from "../../../components/utilities/use-error-alert"
+import { useErrorAlert } from "../../../components/utilities/use-error-alert";
 
 import '../data-card-tile.scss';
 

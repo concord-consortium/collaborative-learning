@@ -18,6 +18,7 @@ export const SortSelect: React.FC<IProps> = ({ model, onSortAttrChange }) => {
       <label>
         Sort
         <select
+          className="sort-select-input"
           name="selectedSortAttribute"
           onChange={onSortAttrChange}
           value={content.selectedSortAttributeId}
