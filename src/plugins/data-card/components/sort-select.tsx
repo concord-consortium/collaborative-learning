@@ -6,16 +6,16 @@ import { orderBy } from "lodash";
 interface IProps {
   model: ITileModel;
   onSortAttrChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
+  attrIdNamePairs: any[];
 }
 
 // TODO - refactor this so that it gets currentSortId and attrsWithNames
 // as props - then it will update on time and prevent ability to choose
 // an attribute that no longer exists
 
-export const SortSelect: React.FC<IProps> = ({ model, onSortAttrChange }) => {
+export const SortSelect: React.FC<IProps> = ({ model, attrIdNamePairs, onSortAttrChange }) => {
   const content = model.content as DataCardContentModelType;
-  const attrs = content.existingAttributesWithNames();
-  const alphaAttrs = orderBy(attrs, [attr => attr.attrName.toLowerCase()]);
+  const alphaAttrs = orderBy(attrIdNamePairs, [attr => attr.attrName.toLowerCase()]);
 
   return (
     <div className="sort-select">

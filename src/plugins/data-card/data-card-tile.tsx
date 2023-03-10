@@ -31,6 +31,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
   const displaySingle = !content.selectedSortAttributeId;
   const shouldShowAddField = !readOnly && isTileSelected && displaySingle;
+  const attrIdsNames = content.existingAttributesWithNames();
 
   useEffect(() => {
     if (!content.title) {
@@ -221,7 +222,11 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
         </div>
 
         <div className="panel sort">
-          <SortSelect model={model} onSortAttrChange={setSort} />
+          <SortSelect
+            model={model}
+            onSortAttrChange={setSort}
+            attrIdNamePairs={attrIdsNames}
+          />
         </div>
 
         { displaySingle &&

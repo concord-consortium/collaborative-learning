@@ -25,7 +25,7 @@ context('Data Card Tool Tile', function () {
     });
     it("can add a value to an attribute", () => {
       dc.getValueInputAsInactive().dblclick().type("Hi{enter}");
-      //TODO not sure why below fails, I can see it is there in cy test runner
+      // FIXME / TODO not sure why below assertion fails, I can see it is there in cy test runner
       // dc.getValueInputAsInactive().should("contain","Hi");
     });
     it("can toggle between single and sort views", () => {
@@ -35,9 +35,13 @@ context('Data Card Tool Tile', function () {
       dc.getSortSelect().select("None");
       cy.get('.single-card-data-area').should('exist');
     });
-    it("attributes deleted from dataset should immediately dissapear from sort menu", () => {
-      // above is what causes a crash
-      // see TODO item in sort-select
+    it("has sort menu with same attributes as card", () => {
+      dc.getNameInputAsInactive().dblclick().type("Attribute Two{enter}");
+      dc.getSortSelect().select("Attribute Two");
+      cy.get('.sorting-cards-data-area').should('exist');
+      dc.getSortSelect().select("None");
+
+      // TODO - find the correct one, delete it, and make sure it is not in the menu
     });
   });
 });
