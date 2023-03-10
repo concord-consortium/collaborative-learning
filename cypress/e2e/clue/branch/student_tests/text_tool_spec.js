@@ -10,12 +10,12 @@ const textToolTile = new TextToolTile;
 context('Text tool tile functionalities', function(){
     before(function(){
         const queryParams = `${Cypress.config("queryParams")}`;
-    
+
         cy.clearQAData('all');
         cy.visit(queryParams);
         cy.waitForLoad();
     });
-        
+
     let title;
     before(()=>{
         clueCanvas.getInvestigationCanvasTitle()
