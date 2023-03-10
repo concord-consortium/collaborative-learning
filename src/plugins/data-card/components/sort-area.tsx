@@ -21,6 +21,9 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
   const allAttrValues = attrsSnap.filter((a) => a.id === sortById)[0].values;
   const uniqeOrderedValues = orderBy(uniq(allAttrValues));
 
+   // if one of the categories is a category for no value, put this stack last
+   uniqeOrderedValues.includes("") && uniqeOrderedValues.push(uniqeOrderedValues.shift());
+
   const renderPlaceholderCells = () => {
     const rowsNeeded = Math.ceil(uniqeOrderedValues.length / 3);
     const placeholders = (rowsNeeded * 3) - uniqeOrderedValues.length;
