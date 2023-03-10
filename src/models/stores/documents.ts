@@ -11,9 +11,9 @@ import {
 import { ClassModelType } from "./class";
 import { UserModelType } from "./user";
 import { DEBUG_DOCUMENT } from "../../lib/debug";
-import { IUserContext } from "../../../functions/src/shared";
 import { Firestore } from "../../lib/firestore";
 import { TreeManagerType } from "../history/tree-manager";
+import { UserContextProvider } from "./user-context-provider";
 
 const extractLatestPublications = (publications: DocumentModelType[], attr: "uid" | "originDoc") => {
   const latestPublications: DocumentModelType[] = [];
@@ -40,7 +40,7 @@ export const DocumentsModel = types
   })
   .volatile(self => ({
     appConfig: undefined as AppConfigModelType | undefined,
-    userContext: undefined as IUserContext | undefined,
+    userContextProvider: undefined as UserContextProvider | undefined,
     firestore: undefined as Firestore | undefined,
     requiredDocuments: {} as Record<string, IRequiredDocumentPromise>,
     all: observable<DocumentModelType>([])
@@ -170,8 +170,8 @@ export const DocumentsModel = types
     setAppConfig(appConfig: AppConfigModelType) {
       self.appConfig = appConfig;
     },
-    setUserContext(userContext: IUserContext) {
-      self.userContext = userContext;
+    setUserContextProvider(userContextProvider: UserContextProvider) {
+      self.userContextProvider = userContextProvider;
     },
     setFirestore(firestore: Firestore) {
       self.firestore = firestore;
@@ -196,9 +196,9 @@ export const DocumentsModel = types
           documentEnv.appConfig = self.appConfig;
         }
 
-        const {firestore, userContext} = self;
+        const {firestore, userContextProvider} = self;
 
-        if (!firestore || !userContext) {
+        if (!firestore || !userContextProvider) {
           // TODO: There is a chance that we'll lose history if the documents
           // model isn't setup right. However, there are several cases where the
           // documents does not need to save history so the firestore and
@@ -225,7 +225,7 @@ export const DocumentsModel = types
         const treeManager = document.treeManagerAPI as TreeManagerType;
         treeManager.setPropsForFirestoreSaving({
           firestore,
-          userContext
+          userContextProvider
         });
 
       } else {

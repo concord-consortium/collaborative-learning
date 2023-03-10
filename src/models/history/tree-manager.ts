@@ -9,10 +9,11 @@ import { TreePatchRecord, HistoryEntry, TreePatchRecordSnapshot,
   HistoryOperation, HistoryEntrySnapshot } from "./history";
 import { DEBUG_HISTORY } from "../../lib/debug";
 import { getFirebaseFunction } from "../../hooks/use-firebase-function";
-import { ICommentableDocumentParams, IDocumentMetadata, IUserContext,
+import { ICommentableDocumentParams, IDocumentMetadata,
   networkDocumentKey } from "../../../functions/src/shared";
 import { Firestore } from "../../lib/firestore";
 import { UserModelType } from "../stores/user";
+import { UserContextProvider } from "../stores/user-context-provider";
 
 /**
  * Helper method to print objects in template strings
@@ -37,7 +38,7 @@ export const CDocument = types
 export interface CDocumentType extends Instance<typeof CDocument> {}
 
 interface IFirestoreSavingProps {
-  userContext: IUserContext;
+  userContextProvider: UserContextProvider;
   firestore: Firestore;
 }
 
@@ -81,7 +82,7 @@ export const TreeManager = types
   numHistoryEventsApplied: 0 as number | undefined,
   loadingError: undefined as firebase.firestore.FirestoreError | undefined,
   mainDocument: undefined as IMainDocument | undefined,
-  userContext: undefined as IUserContext | undefined,
+  userContextProvider: undefined as UserContextProvider | undefined,
   firestore: undefined as Firestore | undefined
 }))
 .views((self) => ({
@@ -235,8 +236,8 @@ export const TreeManager = types
     self.loadingError = error;
   },
 
-  setPropsForFirestoreSaving({userContext, firestore}: IFirestoreSavingProps) {
-    self.userContext = userContext;
+  setPropsForFirestoreSaving({userContextProvider, firestore}: IFirestoreSavingProps) {
+    self.userContextProvider = userContextProvider;
     self.firestore = firestore;
   },
 
@@ -614,15 +615,17 @@ const historyEntryConverter = {
 };
 
 interface IPrepareFirestoreHistoryInfoArgs {
-  userContext?: IUserContext;
+  userContextProvider?: UserContextProvider;
   mainDocument?: IMainDocument;
   firestore?: Firestore;
 }
 
 async function prepareFirestoreHistoryInfo(
-    {userContext, mainDocument, firestore}: IPrepareFirestoreHistoryInfoArgs): Promise<IFirestoreHistoryInfo> {
+    {userContextProvider, mainDocument, firestore}: IPrepareFirestoreHistoryInfoArgs): Promise<IFirestoreHistoryInfo> {
+  // TODO: Wait for userContext to be valid.
+  const userContext = userContextProvider?.userContext;
 
-  if (!userContext || !mainDocument || !firestore || !userContext.uid) {
+  if (!userContextProvider || !mainDocument || !firestore || !userContext?.uid) {
     console.error("cannot record history entry because environment is not valid",
       { userContext, mainDocument, firestore });
     throw new Error("cannot record history entry because environment is not valid");

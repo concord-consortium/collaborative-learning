@@ -15,7 +15,7 @@ import { getAssetUrl } from "../../utilities/asset-utils";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { NavTabsConfigModel } from "../stores/nav-tabs";
 import { SettingsMstType } from "../stores/settings";
-import { IBaseStores } from "../stores/stores";
+import { IBaseStores } from "../stores/base-stores-types";
 import { UnitConfiguration } from "../stores/unit-configuration";
 
 const PlanningDocumentConfigModel = types

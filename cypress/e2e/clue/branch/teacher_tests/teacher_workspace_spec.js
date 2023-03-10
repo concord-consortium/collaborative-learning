@@ -64,6 +64,11 @@ context('Teacher Workspace', () => {
     });
   });
 
+  // TODO: The placement of this context in the order matters because for some reason the
+  // Teacher Guide tab doesn't appear until after the test user clicks on the My Work tab
+  // in the above context (although it does appear immediately for real-world teachers).
+  // See the TODO comment above addDisposer in src/models/stores/stores.ts. After that is
+  // addressed, this context should be moved so it's first in the order.
   describe('teacher specific navigation tabs', () => {
     it('verify problem tab solution switch', () => {
       // cy.get('.collapsed-resources-tab').click();
