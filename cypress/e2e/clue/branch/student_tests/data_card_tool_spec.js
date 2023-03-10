@@ -20,11 +20,11 @@ context('Data Card Tool Tile', function () {
       dc.getTile().contains("Data Card Collection");
     });
     it("can create a new attribute", () => {
-      dc.getNameInputAsInactive().dblclick().type("Foo{enter}")
+      dc.getNameInputAsInactive().dblclick().type("Hello{enter}");
     });
     it("can toggle between single and sort views", () => {
       cy.get('.single-card-data-area').should('exist');
-      dc.getSortSelect().select("Foo");
+      dc.getSortSelect().select("Hello");
       cy.get('.sorting-cards-data-area').should('exist');
       dc.getSortSelect().select("None");
       cy.get('.single-card-data-area').should('exist');

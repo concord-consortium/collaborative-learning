@@ -16,7 +16,6 @@ import { DataCardSortArea } from "./components/sort-area";
 
 import "./data-card-tile.scss";
 
-
 export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const { model, onRequestUniqueTitle, readOnly, documentContent, tileElt, onRegisterTileApi,
             onUnregisterTileApi } = props;
@@ -30,8 +29,8 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const [imageUrlToAdd, setImageUrlToAdd] = useState<string>("");
   const shouldShowAddCase = !readOnly && isTileSelected;
   const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
-  const displayAs = !content.selectedSortAttributeId ? "single" : "sorted";
-  const shouldShowAddField = !readOnly && isTileSelected && displayAs === "single";
+  const displaySingle = !content.selectedSortAttributeId;
+  const shouldShowAddField = !readOnly && isTileSelected && displaySingle;
 
   useEffect(() => {
     if (!content.title) {
@@ -221,7 +220,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
           <SortSelect model={model} onSortAttrChange={setSort} />
         </div>
 
-        { displayAs === "single" &&
+        { displaySingle &&
           <div className="panel nav">
             <div className="card-number-of-listing">
               <div className="cell-text">
@@ -242,7 +241,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
             }
           </div>
         }
-        { displayAs === "single" &&
+        { displaySingle &&
           <div className="single-card-data-area">
             { content.totalCases > 0 &&
               <DataCardRows
@@ -263,7 +262,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
         { shouldShowAddField && !readOnly &&
           <AddIconButton className="add-field" onClick={handleAddField} />
         }
-        { displayAs === "sorted" &&
+        { !displaySingle &&
           <div className="sorting-cards-data-area">
             <DataCardSortArea model={model} />
           </div>
