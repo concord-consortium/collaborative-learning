@@ -1,43 +1,843 @@
 {
-  "code": "brain",
-  "abbrevTitle": "BRAIN",
-  "title": "Neural Engineering Teacher Guide",
-  "subtitle": "",
-  "placeholderText": "Enter notes here",
-  "settings": {"table": {"numFormat": ".2~f"}},
-  "sections": {"overview": {"initials": "OV", "title": "Overview", "placeholder": "Work area for\nOverview section"}, "teach": {"initials": "IS", "title": "Instructional Sequence", "placeholder": "Work area for\nInstructional Sequence section"}},
-  "investigations": [
-    {
-      "description": "Investigation 0",
-      "ordinal": 0,
-      "title": "Introduction to CLUE",
-      "overview": {"tiles": []},
-      "problems": [{"description": "Problem 0.1", "ordinal": 1, "title": "Introduction to CLUE", "subtitle": "", "sections": ["brain-tg-investigation-0-problem-1-section-1.json", "brain-tg-investigation-0-problem-1-section-2.json"]}]
+    "code": "brain",
+    "abbrevTitle": "BRAIN",
+    "title": "Neural Engineering Teacher Guide",
+    "subtitle": "",
+    "placeholderText": "Enter notes here",
+    "settings": {
+      "table": {
+        "numFormat": ".2~f"
+      }
     },
-    {
-      "description": "Investigation 1",
-      "ordinal": 1,
-      "title": "Module 1",
-      "overview": {"tiles": []},
-      "problems": [
-        {"description": "Problem 1.1", "ordinal": 1, "title": "Introduction to Teaching Neural Engineering", "subtitle": "", "sections": ["brain-tg-investigation-1-problem-1-section-1.json", "brain-tg-investigation-1-problem-1-section-2.json"]},
-        {"description": "Problem 1.2", "ordinal": 2, "title": "Introduction to Teaching Neural Engineering", "subtitle": "", "sections": ["brain-tg-investigation-1-problem-2-section-1.json", "brain-tg-investigation-1-problem-2-section-2.json"]},
-        {"description": "Problem 1.3", "ordinal": 3, "title": "Introduction to Teaching Neural Engineering", "subtitle": "", "sections": ["brain-tg-investigation-1-problem-3-section-1.json", "brain-tg-investigation-1-problem-3-section-2.json"]},
-        {"description": "Problem 1.4", "ordinal": 4, "title": "Introduction to Teaching Neural Engineering", "subtitle": "", "sections": ["brain-tg-investigation-1-problem-4-section-1.json", "brain-tg-investigation-1-problem-4-section-2.json"]},
-        {"description": "Problem 1.5", "ordinal": 5, "title": "Introduction to Teaching Neural Engineering", "subtitle": "", "sections": ["brain-tg-investigation-1-problem-5-section-1.json", "brain-tg-investigation-1-problem-5-section-2.json"]}
-      ]
+    "sections": {
+      "overview": {
+        "initials": "OV",
+        "title": "Overview",
+        "placeholder": "Work area for\nOverview section"
+      },
+      "teach": {
+        "initials": "IS",
+        "title": "Instructional Sequence",
+        "placeholder": "Work area for\nInstructional Sequence section"
+      }
     },
-    {
-      "description": "Investigation 2",
-      "ordinal": 2,
-      "title": "Module 2",
-      "overview": {"tiles": []},
-      "problems": [
-        {"description": "Problem 2.1", "ordinal": 1, "title": "Introduction to Teaching Neural Engineering", "subtitle": "", "sections": ["brain-tg-investigation-2-problem-1-section-1.json", "brain-tg-investigation-2-problem-1-section-2.json"]},
-        {"description": "Problem 2.2", "ordinal": 2, "title": "Introduction to Teaching Neural Engineering", "subtitle": "", "sections": ["brain-tg-investigation-2-problem-2-section-1.json", "brain-tg-investigation-2-problem-2-section-2.json"]},
-        {"description": "Problem 2.3", "ordinal": 3, "title": "Introduction to Teaching Neural Engineering", "subtitle": "", "sections": ["brain-tg-investigation-2-problem-3-section-1.json", "brain-tg-investigation-2-problem-3-section-2.json"]},
-        {"description": "Problem 2.4", "ordinal": 4, "title": "Introduction to Teaching Neural Engineering", "subtitle": "", "sections": ["brain-tg-investigation-2-problem-4-section-1.json", "brain-tg-investigation-2-problem-4-section-2.json"]}
-      ]
-    }
-  ]
-}
+    "investigations": [
+      {
+        "description": "Investigation 0",
+        "ordinal": 0,
+        "title": "Introduction to CLUE",
+        "overview": {
+          "tiles": [ ]
+        },
+        "problems": [
+          {
+            "description": "Problem 0.1",
+            "ordinal": 1,
+            "title": "Introduction to CLUE",
+            "subtitle": "",
+            "sections": [
+              {
+                "type": "overview",
+                "content": {
+                  "tiles": [
+                    {
+                      "id": "gvCW4G1XLOhLxRgG",
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>As a Teacher, you have extra tabs in your CLUE Resources. One of them is this tab, entitled Teacher Guide. It contains content your students will not see. You may choose to copy tiles from this section or any other into your workspace by dragging them to the right. You may edit them or use them as they are, and of course you may add new content of your own.</p>",
+                          "<p>Once your Workspace content is complete, you can publish it to the class. It will appear in the <strong>Extensions</strong> tab on the <strong>Custom Lessons</strong> section. Your students&#x27; published work will appear in the <strong>Class Models and Data</strong> section.</p>",
+                          "<p>Lesson 0 is designed as a self-guided exploration of CLUE, a collaborative learning platform that we will use throughout the neural engineering unit. </p>",
+                          "<p>As part of CLUE, students are also introduced to Dataflow, our visual computer programming interface. </p>"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "supports": [ ]
+              },
+              {
+                "type": "teach",
+                "content": {
+                  "tiles": [
+                    {
+                      "content": {
+                        "type": "Text",
+                        "format": "html",
+                        "text": [
+                          "<p>The proposed activities in the Lessons tab should take about 45-60 minutes for students to complete. </p>",
+                          "<p>At the end of the proposed sequence of activities, you can ask some students to present their Dataflow programs.  As students share their work, introduce the term &quot;computational thinking&quot; and bring to mind when and how students used computational thinking. Inform students that they will continue to apply and develop their ability to use computational thinking as the unit unfolds. </p>",
+                          "<p>Make sure that students add their first Learning Journal entry (see instructions in the student-facing lesson).  The Learning Journal is a resource that can be used as both formative assessment of students’ thinking,  as well as a document in which students can record their knowledge and wonderings over time. Let students know that this is where they will record their learning and wonderings over the course of the unit. </p>",
+                          "<p><strong>Teacher Resources</strong></p>",
+                          "<p><a href='https://docs.google.com/presentation/d/1-nJ9tyrOD-N2WNjea3segkPSMy9MxITv/edit?usp=sharing&amp;ouid=107168184189898639613&amp;rtpof=true&amp;sd=true'>Computational thinking</a></p>"
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "supports": []
+              }
+            ]
+          }
+        ]
+      },
+      {
+          "description": "Investigation 1",
+          "ordinal": 1,
+          "title": "Module 1",
+          "overview": {
+            "tiles": [ ]
+          },
+          "problems": [
+            {
+              "description": "Problem 1.1",
+              "ordinal": 1,
+              "title": "Introduction to Teaching Neural Engineering",
+              "subtitle": "",
+              "sections": [
+                {
+                  "type": "overview",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "bfsShgpMoj8B6Kc0",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>In this lesson, students will be introduced to emerging robotics technology that helps people with neurological conditions or missing limbs. </p>",
+                            "<p><strong>Learning Objectives</strong></p>",
+                            "<p>The goal of this lesson is to introduce the anchoring phenomenon of the unit and elicit student questions about bionic arms. </p>",
+                            "<p><strong>NGSS Alignment</strong></p>",
+                            "<p>See <a href='https://www.nextgenscience.org/pe/hs-ls1-2-molecules-organisms-structures-and-processes'>NGSS HS-LS1-2</a></p>",
+                            "<p><strong>Formative assessment</strong></p>",
+                            "<p>Listening to group conversations; reflecting on students’ questions; Learning Journals (found in student-facing CLUE tab for lesson 1.1).</p>",
+                            "<p><strong>Materials</strong></p>",
+                            "<p>Whiteboards and markers or chart paper (for each group of students)</p>"
+                          ]
+                        }
+                      }    
+                    ]
+                  },
+                  "supports": [ ]
+                },
+                {
+                  "type": "teach",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "PhU1sDCoX8LIu1Zm",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Solicit what students currently know about bionic arms via the following prompts. Ask students to individually record their answers in their CLUE workspace and then share their answers:</p>",
+                            "<p>1) What do you know about bionic arms? (e.g., what do they look like, why people might use them, in what ways are they connected to the person’s body, how do they work)</p>",
+                            "<p>2) If you were tasked to design a bionic arm, what do you think the people who use them would like in terms of appearance and function?</p>",
+                            "<p><strong><em>5 minutes</em></strong></p>",
+                            "<p>Inform students that throughout this unit we will explore how bionic arms work. Bionic arms are designed for people with congenital or acquired limb differences (e.g., people who lost a limb as a result of an accident). With recent developments in science and engineering, these individuals can now directly control a prosthetic arm as if it was their own biological arm.  Consider showing students <a href='https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4128433/'>how hand replacements have changed over time</a>. For additional information on bionic arms <a href='https://openbionics.com/how-does-a-bionic-arm-work/'>click here</a>. Note: any content or links from this guide you find useful can be dragged into your teacher Workspace and published to the class. They will show under the <strong>Extensions</strong> tab.</p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Let students know that they will next watch a video clip of a young woman named Tilly who is the first teenager in the U.K. to use bionic arms. Direct students to observe Tilly’s use of the bionic arms and record their observations and thinking as to how it works in their CLUE workspace. Orient students to think about the following questions:</p>",
+                            "<p>- How does the bionic lower arm appear to be physically attached to Tilly’s upper arm?</p>",
+                            "<p>- How does Tilly control her bionic arm?</p>",
+                            "<p>Present the &quot;Teen with Bionic Arms Applies Flawless Makeup&quot; <a href='https://www.youtube.com/watch?v=q2MjTcmLuIQ'>video</a></p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Review students’ observations and thinking and bring to mind those that will be most useful for subsequent lessons. Potential student observations and thinking may include:</p>",
+                            "<p>“There appears to be an adjustable outer case that clamps the bionic arm to Tilly’s upper arm. I saw that someone adjusted the plastic exterior for her during the video clip.”</p>",
+                            "<p>“There is something that allows the residual muscles in Tilly’s upper arm to move the bionic arm.&quot;</p>",
+                            "<p>“Somehow Tilly’s brain sends the information to the bionic arm.&quot;</p>",
+                            "<p><strong><em>20 minutes</em></strong></p>",
+                            "<p>Direct students to individually, and then collectively (in teams of three to four) create an illustrated and annotated model that shows how Tilly’s bionic arm works. </p>",
+                            "<p>If students use chart paper or a whiteboard, ask them to take a picture of their model and upload it to their CLUE workspace. </p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "5-_zIo7l3UatWgAD",
+                        "title": "A potential initial student illustrated and annotated model",
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/neural-engineering/images/sampleStudentAnnotatedTilly.png"
+                        }
+                      },
+                      {
+                        "id": "-PNMcqB80NiUVIy0",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>10 minutes</strong></p>",
+                            "<p>Ask students to add an entry to their learning journal where they record their current understanding of how Tilly’s bionic arm works. Encourage students to apply what they observed in the video and reference their model. </p>",
+                            "<p>The learning journal is a resource that can be used as a formative assessment of students’ thinking over time. Let students know that this is where they will record their learning and wonderings over the course of the unit. If students haven&#x27;t created their journal in Lesson 0, they should do so today by navigating to My Work &gt;&gt; Learning Journals (the &quot;edit&quot; button will open the journal in students&#x27; workspace).</p>",
+                            "<p><em><strong>1 minute</strong></em></p>",
+                            "<p>Let students know that throughout the unit will further explore how Tilly’s bionic arm works using a model of a bionic arm that they would be able to control with their own muscle activity. </p>",
+                            "<p><em><strong>Extensions</strong></em></p>",
+                            "<p>* If time permits (or as a homework assignment), ask students to watch the &quot;Beyond Bionics&quot; <a href='https://youtu.be/GgTwa3CPrIE'>video</a> and develop additional questions on bionic arms.</p>",
+                            "<p>* Ask students to develop questions for a hypothetical interview with Tilly.</p>",
+                            "<p><em><strong>Teacher Resources</strong></em></p>",
+                            "<p>Facilitating student questions via the <a href='https://www.teachingchannel.com/blog/5-tips-for-blending-the-question-formulation-technique-qft-with-ngss'>question formulation technique</a></p>",
+                            "<p>Introducing and establishing an <a href='https://ambitiousscienceteaching.org/presentations-on-anchoring-events-and-modeling/#1479473299605-ab2574f8-d6bab811-f21c'>anchoring phenomenon routine </a></p>"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "supports": [ ]
+                }
+              ]
+            },
+            {
+              "description": "Problem 1.2",
+              "ordinal": 2,
+              "title": "Introduction to Teaching Neural Engineering",
+              "subtitle": "",
+              "sections": [
+                {
+                  "type": "overview",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "wzVQm262uEx239sW",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>In this lesson, students will be introduced to electrical signals in the human body, measure their reaction time, and construct a model of limb movement. </p>",
+                            "<p><strong>Learning Objectives</strong></p>",
+                            "<p>Students will measure the time it takes for them to react (grab a dropped ruler) and collaboratively construct an illustrated and annotated model that captures the sequence of steps associated with limb movement.</p>",
+                            "<p><strong>NGSS alignment</strong></p>",
+                            "<p><a href='https://www.nextgenscience.org/pe/hs-ls1-2-molecules-organisms-structures-and-processes'>NGSS HS-LS1-2.</a></p>",
+                            "<p><strong>Formative Assessment</strong></p>",
+                            "<p>Students’ models and discussions; Learning Journals</p>",
+                            "<p><strong>Materials</strong></p>",
+                            "<p>A 30 cm ruler for every two students. </p>",
+                            "<p>Optional: A whiteboard or chart paper and markers for every group of 3-4 students. </p>"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "supports": [ ]
+                },
+                {
+                  "type": "teach",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "Ioo5Y9AUU6xpDK4D",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Students explore “energy sticks” to bring to mind that electricity flows through the human body. Ask students questions to provoke their thinking and observations. See suggested explorations in the student-facing lesson. </p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Facilitate a discussion about how the energy sticks can help us understand how Tilly&#x27;s bionic arms work. The goal is to get students to think about how the human body (and specifically the nervous and muscular systems) uses electrical signals to control movement. In the discussion, ask students why electrical signals are an effective way to send messages throughout the body (fun fact: nerve impulses can propagate at a speed of up to 100 meters/300 feet per second. Source: Britanicca).</p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Students use Dataflow to program a virtual light bulb to turn on and off (see student-facing lesson for instructions). The goal of this activity is to build student confidence in Dataflow and encourage students to think about the speed at which the light bulb turns on and off. </p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Ask students to think about how fast they react in day-to-day life (e.g., the time it takes them to start crossing the street once the light changes to green). What affects their reaction time? Why is reaction time important?</p>",
+                            "<p>Present a short <a href='https://www.youtube.com/watch?v=gJEuT3aKcMI&amp;t=3s'>video</a> on reaction time measurement (3:36) </p>",
+                            "<p><strong><em>15 minutes</em></strong></p>",
+                            "<p>As described in the video, students will pair up and measure their reaction times using their dominant and non-dominant hands (see detailed instructions in the student-facing lesson). </p>",
+                            "<p>Extension activity #1: After students to enter their results into a Google spreadsheet to compute the class average.</p>",
+                            "<p>Extension activity #2: Ask students to take a video of themselves catching an object and play it in slow motion (like this <a href='https://www.youtube.com/watch?v=3XM-4Qavh5k'>video</a>) </p>",
+                            "<p><strong><em>20 minutes</em></strong></p>",
+                            "<p>Assign students to teams composed of 3-4 classmates. Optional: provide each team a whiteboard and dry erase markers or chart paper and markers.</p>",
+                            "<p>Ask teams to list all body systems that affect our reaction time in the upper right corner of the whiteboard/chart paper. Then, ask teams to co-construct an illustrated and annotated model of the sequence of events associated with the reaction time activity. Students should then a picture of their model and upload it to their CLUE workspace. Alternatively, students can use a Drawing tile to make the model on their computers. </p>",
+                            "<p><strong><em>15 minutes</em></strong></p>",
+                            "<p>Ask one member from each team to share their model. Facilitate a whole-class conversation about what is similar and different about the models, and list these observations on the classroom board. </p>",
+                            "<p>Collapse teams’ understandings into a class consensus model. Inform students that this model will be used as a reference and will be revised over the coming weeks as they continue their investigation.</p>",
+                            "<p><strong><em>5 minutes</em></strong></p>",
+                            "<p>Ask students to fill out their Learning Journal. </p>",
+                            "<p><strong>Teacher Resources</strong></p>",
+                            "<p>Facilitating class <a href='https://www.philasd.org/etvl/2022/02/22/consensus-model-discussion/'>consensus model</a></p>",
+                            "<p><a href='https://stemteachingtools.org/brief/18'>Formative assessment</a> in NGSS congruent classrooms</p>"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "supports": [ ]
+                }
+              ]
+            },
+            {
+              "description": "Problem 1.3",
+              "ordinal": 3,
+              "title": "Introduction to Teaching Neural Engineering",
+              "subtitle": "",
+              "sections": [
+                {
+                  "type": "overview",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "pyTc5zoakVWtalVa",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p>In this lesson, students will explore the structure of the nervous system and investigate how nerve injury could impact movement. </p>",
+                            "<p><strong>Learning Objectives</strong></p>",
+                            "<p>1. Students will describe the general structure of the nervous system</p>",
+                            "<p>2. Students will explain how injury to different parts of the nervous system (brain, spinal cord, peripheral nerves) impact movement. </p>",
+                            "<p><strong>NGSS Alignment</strong></p>",
+                            "<p><a href='https://www.nextgenscience.org/pe/hs-ls1-2-molecules-organisms-structures-and-processes'>NGSS HS-LS1-2</a></p>",
+                            "<p>This activity also supports Common Core English Language Arts Standards – <a href='http://www.corestandards.org/ELA-Literacy/RST/9-10/'>Disciplinary Literacy Science, 9-10.</a></p>",
+                            "<p><strong>Formative Assessment</strong></p>",
+                            "<p>Students’ models and discussions; Learning Journals</p>"
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "teach",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "vJcIDh3l1ocfQwNT",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong><em>5 minutes</em></strong></p>",
+                            "<p>Do Now:  students are asked to activate prior knowledge they may have on the nervous system and how it controls limb movement. </p>",
+                            "<p><strong><em>5 minutes</em></strong></p>",
+                            "<p>Ask students to annotate the nervous system diagram in the student-facing lesson based on the provided information. </p>",
+                            "<p><strong><em>20 minutes</em></strong></p>",
+                            "<p>Teams of students can either choose or be assigned to explore how movement is affected by injury to the (1) brain, (2) spinal cord, or (3) peripheral nerves. </p>",
+                            "<p>Students should review the resources provided in the student-facing lesson and discuss how this injury might impact limb movement.   </p>",
+                            "<p><strong><em>15 minutes</em></strong></p>",
+                            "<p>Students will create a computerized model of limb movement using Dataflow. The program provided in the student-facing lesson is pre-populated with a simulated gripper that represents the arm. Students are challenged to make the gripper move by adding a &quot;brain&quot; to the program (e.g., a timer block) and connecting it to the gripper. Prompt students to think about what each block in their program represents and how information flows between blocks in relation to how information spreads throughout the nervous system.  </p>",
+                            "<p>Next, students should modify their Dataflow program to represent the injury that they read about. For example, a spinal injury can be represented by disconnecting the timer (&quot;the brain&quot;) from the gripper. </p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p> Coordinate opportunities for students to share their findings. Some potential cooperative learning strategies for sharing student findings include:</p>",
+                            "<ul><li>Jigsaw: After students explored specific injuries in their &quot;home groups,&quot; mix the groups such that each new group will have an expert in one of the three types of nerve injury. Students are responsible for teaching each other about the injury that they explored. </li><li>Gallery walk: If students made their reaction time models on paper or whiteboards, ask students to present their models along the classroom wall.  Classmates view each other’s work by walking around the room and adding questions on sticky notes.</li></ul>",
+                            "<p><strong><em>5 minutes</em></strong></p>",
+                            "<p>Instruct students to add an entry to their Learning journal based on the prompts in the &quot;Reflection&quot; tab. </p>",
+                            "<p><em>If time allows</em></p>",
+                            "<p>Facilitate a discussion based on the last reflection prompt: Of the three injury types that had been discussed (brain, spinal cord, peripheral nerve), which injury type best characterizes Tilly’s condition?  (answer: peripheral nerves in the missing limb)</p>",
+                            "<p><strong>Teacher Resources</strong></p>",
+                            "<p><a href='https://www.jigsaw.org'>Jigsaw</a></p>",
+                            "<p><a href='https://www.theteachertoolkit.com/index.php/tool/gallery-walk'>Gallery walk</a></p>",
+                            "<p><a href='https://stemteachingtools.org/brief/18'>Formative assessment</a> in NGSS congruent classrooms</p>",
+                            "<p>Strategies to <a href='https://stemteachingtools.org/sp/talk-flowchart'>facilItate student discussions</a></p>",
+                            "<p></p>"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "supports": [ ]
+                }
+              ]
+            },
+            {
+              "description": "Problem 1.4",
+              "ordinal": 4,
+              "title": "Introduction to Teaching Neural Engineering",
+              "subtitle": "",
+              "sections": [
+                {
+                    "type": "overview",
+                    "content": {
+                      "tiles": [
+                        {
+                          "id": "0J23weWypf8QldIJ",
+                          "content": {
+                            "type": "Text",
+                            "format": "html",
+                            "text": [
+                              "<p>Students will use Electromyography (EMG) to investigate their own muscle activity. </p>",
+                              "<p><strong>Learning Objectives</strong></p>",
+                              "<p>Students will use computation to acquire, digitize, and make sense of muscle electrical activity (EMG). </p>",
+                              "<p><strong>NGSS Alignment</strong></p>",
+                              "<p><em>Under development</em></p>",
+                              "<p><strong>Formative Assessment</strong></p>",
+                              "<p>EMG and Learning Journals</p>",
+                              "<p><strong>Materials</strong></p>",
+                              "<p>For each group of 3-4 students:</p>",
+                              "<ul><li>EMG shield &amp; Arduino board, </li><li>EMG surface electrodes (each student will need 3; students should save these electrodes for subsequent activities)</li><li>Blue USB cable</li><li>Orange cable with alligator clips (all these materials are part of the <a href='https://backyardbrains.com/products/clawbundle'>Backyard Brains Claw Kit</a>)</li><li>Hand <a href='https://www.amazon.com/Edisalute-smartinlife-Strengthener-Gripper-Grippers/dp/B01MXHXSNP/ref=sr_1_5?crid=1U94UEC7O4HFK&keywords=hand+grip&qid=1660235040&s=sporting-goods&sprefix=hand+gri%2Csporting%2C222&sr=1-5'>gripper</a></li><li>A computer with the Backyard Brains <a href='https://backyardbrains.com/products/spikerecorder'>Spike Recorder App</a></li></ul>",
+                              "<p><strong>Preparation</strong></p>",
+                              "<p>Before class you will need to install the Backyard Brains <a href='https://backyardbrains.com/products/spikerecorder'>Spike Recorder App</a> on student computers [https://backyardbrains.com/products/spikerecorder]</p>",
+                              "<p><a href='https://help.backyardbrains.com/support/solutions/articles/43000607444-spike-recorder-for-chromebook'>Click here</a> if your school uses Chromebooks</p>",
+                              "<p>You will also need to upload this <a href='https://raw.githubusercontent.com/BackyardBrains/SpikerShield/master/Muscle/Arduino%20Code/SpikeRecorder/SpikeRecorderSpikerShield_V1_1.ino'>Arduino sketch</a> on each Arduino board.</p>",
+                              "<p>To do so, please create a free account on <a href='https://cloud.arduino.cc/'>Arduino Cloud</a> and install the <a href='https://create.arduino.cc/getting-started/plugin/welcome'>Arduino Agent</a></p>"
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "supports": [ ]
+                },
+                {
+                  "type": "teach",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "0J23weWypf8QldIJ",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>NEW Instructional Sequence </strong></p>",
+                            "<p><strong><em>2 minutes</em></strong></p>",
+                            "<p>Inform students that today’s lesson will help them begin to learn how the activity of muscles is identified and measured. This will help them explain how bionic arms work and work with a simple robotic arm.</p>",
+                            "<p>Consider noting students’ questions recorded in their learning journals, specifically questions related to the interactions between the nervous and muscular systems.</p>",
+                            "<p><strong><em>15 minutes</em></strong></p>",
+                            "<p>Assign students to teams composed of 3-4 classmates. Ask teams to follow the instructions in the student-facing lesson to<a href='https://docs.google.com/document/d/1pRFUK_wNgOSZEqxHKXHFzomQnq_QFvCEQxojGfLLAIo/edit'></a>record and display EMG signals from their muscles</p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Teacher-led discussion on muscle contraction and EMG </p>",
+                            "<p><strong><em>30 minutes</em></strong></p>",
+                            "<p>Ask students to select 3 of the research questions listed in the student-facing lesson and answer them in their w﻿orkspace u﻿sing screenshots from SpikeRecorder as evidence.  To answer the last question (arm-wrestling), students will need to work with another team since two EMG setups are required.</p>",
+                            "<p>- How does muscle activity vary between one’s dominant vs. non-dominant hand? </p>",
+                            "<p>- How does muscle activity vary between different muscles (e.g., forearm vs. forehead muscles)?</p>",
+                            "<p>- How does muscle activity vary between <a href='https://www.bbc.co.uk/bitesize/guides/zct2hv4/revision/2#:~:text=In%20an%20antagonistic%20muscle%20pair,lengthening%20is%20called%20the%20antagonist'>agonist and antagonist</a> muscles?</p>",
+                            "<p>- What happens when we <a href='https://backyardbrains.com/experiments/rateoffatigue'>activate our hand muscles</a> for an extended period of time using a hand gripper?</p>",
+                            "<p>- Can you predict who’s going to win an arm-wrestling contest based on the contestants’ muscle activity?</p>",
+                            "<p>Encourage students to develop other questions and explore them. </p>",
+                            "<p><strong><em>15 minutes</em></strong></p>",
+                            "<p>Facilitate a class discussion on questions such as:</p>",
+                            "<p>- Why does gathering EMG signals matter to you, your family, or others in the community? </p>",
+                            "<p>- Why does this matter to scientists, physicians, physical therapists, athletic trainers, and/or biomedical engineers?</p>",
+                            "<p>- How may gathering EMG data inform the design of a device that can help people with neurological conditions or missing limbs?</p>",
+                            "<p><strong><em>10 minutes</em></strong></p>",
+                            "<p>Ask students to post a reflection in their learning journals. Encourage students to apply what they noticed in the EMG activities, insights that were sparked by the discussion, and any new knowledge or wonderings they may have. </p>",
+                            "<p>Inform students that in the next activity they will apply and expand their knowledge of  EMG and begin to explore the use of a simple robotic arm. This will help them explain how bionic arms work.</p>",
+                            "<h3>Lesson Resources</h3>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "kBJBbezdh9bxu6Dx",
+                        "title": "Arm Muscle Diagram",
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/neural-engineering/images/armMuscles.png",
+                          "filename": "curriculum/neural-engineering/images/armMuscles.png"
+                        }
+                      },
+                      {
+                        "id": "3s1CMxSi6t3ADC8Z",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><a href='https://dmr.bsu.edu/digital/collection/AnatMod/id/211'>https://dmr.bsu.edu/digital/collection/AnatMod/id/211</a></p>"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "supports": [ ]
+                }
+              ]
+            },
+            {
+              "description": "Problem 1.5",
+              "ordinal": 5,
+              "title": "Introduction to Teaching Neural Engineering",
+              "subtitle": "",
+              "sections": [
+                {
+                    "type": "overview",
+                    "content": {
+                      "tiles": [
+                        {
+                          "id": "Ja1nikPQo5z7eyEw",
+                          "content": {
+                            "type": "Text",
+                            "format": "html",
+                            "text": [
+                              "<p>In this activity, students will use Electromyography (EMG) data to control a robotic gripper. </p>",
+                              "<p><strong>Learning Objectives</strong></p>",
+                              "<p>Students will explain how signals measured from the human body (e.g., EMG) can be incorporated into engineering design. </p>",
+                              "<p>Students will design and evaluate technology solutions for people with neurological conditions. </p>",
+                              "<p><strong>NGSS Alignment</strong></p>",
+                              "<p><em>Under development</em></p>",
+                              "<p><strong>Formative Assessment</strong></p>",
+                              "<p>Dataflow programs; Learning Journals</p>",
+                              "<p><strong>Materials</strong></p>",
+                              "<p>For each group of 3-4 students:</p>",
+                              "<ul><li><a href='https://backyardbrains.com/products/clawbundle'>The Claw Kit</a></li><li>Hand <a href='https://www.amazon.com/Edisalute-smartinlife-Strengthener-Gripper-Grippers/dp/B01MXHXSNP/ref=sr_1_5?crid=1U94UEC7O4HFK&amp;keywords=hand+grip&amp;qid=1660235040&amp;s=sporting-goods&amp;sprefix=hand+gri%2Csporting%2C222&amp;sr=1-5'>gripper</a></li><li>A computer </li><li>6 plastic cups </li></ul>",
+                              "<p><strong>Preparation</strong></p>",
+                              "<p>Before class you will need to upload the following <a href='https://github.com/concord-consortium/collaborative-learning/blob/master/src/plugins/dataflow-tool/arduino/ccemgfsr/ccemgfsr.ino'>Arduino sketch</a> on each Arduino board.</p>"
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "supports": [ ]
+                },
+                {
+                  "type": "teach",
+                  "content": {
+                    "tiles": [
+                      {
+                          "id": "BfEcsBHvG1mVwV4H",
+                          "content": {
+                            "type": "Text",
+                            "format": "html",
+                            "text": [
+                              "<p><strong>Instructional Sequence</strong></p>",
+                              "<p><strong><em>5 minutes</em></strong></p>",
+                              "<p>Inform students that in today’s activity they will apply and expand their knowledge of EMG and begin to explore the use of a simple bionic arm. This will help them explain how bionic arms work, as well as inform their modification of the simple bionic arm.</p>",
+                              "<p>Consider noting specific students’ questions recorded in their Learning Journals if the questions are related to wondering about the application of EMG in the design of bionic arms or biomedical devices.</p>",
+                              "<p><strong><em>45 minutes</em></strong></p>",
+                              "<p>Assign students to teams composed of 3-4 classmates. Ask students to follow the instructions in the student-facing lesson to: </p>",
+                              "<ol><li>Design a Dataflow program to make the gripper open and close; </li><li>Design a Dataflow program that reads EMG data and controls a simulated gripper; </li><li>Design a Dataflow program that reads EMG data and controls a physical gripper.</li></ol>",
+                              "<p>Assign students to teams composed of 3-4 classmates. Ask students to follow the instructions in the student-facing lesson to: (1) design a Dataflow program to make the gripper open and close; (2) Design a Dataflow program that reads EMG data and controls a simulated gripper; (3) Design a Dataflow program that reads EMG data and controls a physical gripper.</p>",
+                              "<p>Once students have set up the claw, ask them to explore how they can make it work better by:</p>",
+                              "<p>Changing the locations of the electrodes. For example, students may have more success controlling the claw by placing the EMG electrodes on the fleshy part below their pinky and the reference electrode by their thumb. </p>",
+                              "<p>Changing the sensitivity of the device by pressing the gray button the Muscle SpikerShield. </p>",
+                              "<p>Grasping objects of different sizes/weights. Challenge students to stack 6 plastic cups using the gripper. Which team can do that most quickly? </p>",
+                              "<p><strong><em>20 minutes</em></strong></p>",
+                              "<p>In their team, ask students to evaluate the strengths and weaknesses of the EMG-controlled claw and summarize their ideas in a table format. Then, ask them to discuss how the design of the claw can be improved and sketch out their ideas. Remind students of the young woman who was portrayed in the video at the opening of the unit and think about how the claw can serve her in her day-to-day life.</p>",
+                              "<p><strong><em>20 minutes</em></strong></p>",
+                              "<p>Facilitate a class discussion as to how the gripper could be improved or modified (e.g., adding touch receptors, using a stronger servomotor, reshaping the tips of the grabber). </p>",
+                              "<p><strong><em>5 minutes</em></strong></p>",
+                              "<p>Using their Learning Journals, ask each student to revise what they know, wonder, and learned about bionic arms. </p>",
+                              "<p><strong>Lesson Resources</strong></p>",
+                              "<p><a href='https://www.twi-global.com/technical-knowledge/faqs/engineering-design-process'>Engineering design process</a></p>"
+                            ]
+                          }
+                      }
+                    ]
+                  },
+                  "supports": [ ]
+                }
+              ]
+            }
+          ]
+      },
+      {
+          "description": "Investigation 2",
+          "ordinal": 2,
+          "title": "Module 2",
+          "overview": {
+            "tiles": [ ]
+          },
+          "problems": [
+            {
+              "description": "Problem 2.1",
+              "ordinal": 1,
+              "title": "Introduction to Teaching Neural Engineering",
+              "subtitle": "",
+              "sections": [
+                {
+                  "type": "overview",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "OkqWQlPcmv0mJyhU",
+                        "title": "Human Hand Gripping a Ski Pole",
+                        "content": {
+                          "type": "Image",
+                          "url": "curriculum/neural-engineering/images/skiGloveGrip.png",
+                          "filename": "curriculum/neural-engineering/images//skiGloveGrip.png"
+                        }
+                      },
+                      {
+                        "id": "qlmLt2DcbaH6z5H6",
+                        "title": "Text 1",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Lesson Overview:</strong></p>",
+                            "<p>Students will begin Module 2 by examining how sensory input impacts our ability to move and interact with objects. </p>",
+                            "<p><strong>Materials</strong>:</p>",
+                            "<p>A 30 cm ruler and thick winter gloves (ski gloves) will be needed for each pair of students.   </p>",
+                            "<p><strong>Learning Objectives:</strong></p>",
+                            "<p>Students develop a model in which they describe the relationship “between components, including: (1) The functions of at least two major body systems in terms of contributions to overall function of an organism and (2) Ways the functions of the two different systems affect one another; and (3) A system’s function and how that relates both to the system’s parts and th overall function of the organism.”  (HS-LS1-2)</p>"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "supports": [ ]
+                },
+                {
+                  "type": "teach",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "GUz0n4_ThH-w0DBE",
+                        "title": "Text 4",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Instructional Sequence</strong>:</p>",
+                            "<p><em>5 minutes</em></p>",
+                            "<p>Warm-up: Ask students to think about the EMG-controlled gripper and discuss some challenges they may encounter when trying to hold an egg with the gripper (e.g., the egg might crack). </p>",
+                            "<p>Inform students that in Module 2 we will explore how sensory information impacts movement. Elicit from students the senses (sight and touch) associated with gripping an object. Ask students how they would improve the design of the gripper to overcome these challenges. </p>",
+                            "<p><em>15 minutes</em></p>",
+                            "<p>Remind students that previously (lesson 1.2) they had measured their reaction time using a ruler, comparing their dominant and non-dominant hand. Inform students that today we will conduct a similar experiment to investigate how tactile information impacts reaction time (in other words, how being able to feel the ruler with our fingertips impacts how fast we are at catching it?).     </p>",
+                            "<p>Ask students to discuss how they would modify the reaction time experiment to answer this new research question. In this process, students should create a table similar to the results sheet used in Lesson 1.2 to record their reaction time with and without a winter glove.</p>",
+                            "<p>After students have collected their data, ask them to discuss their findings. As an extension activity, ask students to enter their average reaction time into a Google spreadsheet to compute the class average.</p>",
+                            "<p><em>5 minutes</em></p>",
+                            "<p>Present the first 3 minutes of a PBS News Hour story (until the moment the reporter cracks an egg with his prosthetic arm).  (A link to the clip can be found in teacher resources).</p>",
+                            "<p>While watching the video, ask students to list three things that stand out to them. Collect these ideas at the end of the video. </p>",
+                            "<p><em>15 minutes</em></p>",
+                            "<p>In small groups, ask students to discuss how prosthetic arms can be improved by incorporating sensory information (similar to the prosthetic leg example from the video). Ask students to investigate ways  the functions of the two nervous and muscular systems affect one another, and then construct  an illustrated and annotated model to communicate understanding.</p>",
+                            "<p><em>5 minutes</em></p>",
+                            "<p>In their individual journal, ask students to describe potential limitations of Tilly’s prosthetic arm, and how the limited ability of her prosthetic arm to naturally function may affect her life. </p>",
+                            "<p><strong>Resources:</strong></p>",
+                            "<p>How the nervous system <a href='http://faculty.washington.edu/chudler/organ.html'>interacts with other body systems</a></p>",
+                            "<p>PBS News Hour <a href='https://www.pbs.org/newshour/show/how-sensors-rewiring-nerves-could-help-prosthetics-feel-and-function-like-real-limbs'>story on rewiring nerves</a></p>",
+                            "<p>Advanced new sensors can <a href='https://scitechdaily.com/advanced-new-sensors-could-transform-prosthetics-and-robotic-limbs/'>transform prosthetics and robotic limbs</a></p>"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "supports": [ ]
+                }
+              ]
+            },
+            {
+              "description": "Problem 2.2",
+              "ordinal": 2,
+              "title": "Introduction to Teaching Neural Engineering",
+              "subtitle": "",
+              "sections": [
+                {
+                  "type": "overview",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "WiXXZSavJxhoDr9W",
+                        "title": "Text 5",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Lesson 2.2 - How do we perceive touch?</strong></p>",
+                            "<p><strong>Lesson Overview</strong>: </p>",
+                            "<p>Students will explore the variance in touch sensitivity of different body parts and different people, and examine how the nervous system is responsible for this variance. </p>",
+                            "<p><strong>Materials:</strong></p>",
+                            "<p>1 caliper for each team of 3 students</p>",
+                            "<p>Chart paper and markers</p>",
+                            "<p>Learning Objectives:</p>",
+                            "<p>Students develop a model in which they describe the relationship “between components, including: (1) The functions of at least two major body systems in terms of contributions to overall function of an organism and (2) Ways the functions of the two different systems affect one another; and (3) A system’s function and how that relates both to the system’s parts and the overall function of the organism.”  (HS-LS1-2)</p>"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "supports": [ ]
+                },
+                {
+                  "type": "teach",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "pJ6Zjt2CJfnWlXGs",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Instructional Sequence</strong>:</p>",
+                            "<p><em>5 minute</em>s</p>",
+                            "<p>Begin with a brief overview of the previous lesson (How does sensory information impact movement?). Then, inform students that today’s lesson will help them explore how the nervous system processes sensory (and more specifically tactile) information and what problems could arise in this process. </p>",
+                            "<p><em>15 minutes</em></p>",
+                            "<p>Inform students that in today’s activity they will measure their touch sensitivity across different parts of the body and enter the information to a webpage to map how the brain represents their body (“homunculus”).  </p>",
+                            "<p>Students should follow the instructions in a handout (see resources below) and enter their measurements to https://brainmapper.org/ (Experiment tab → Enter the Results). </p>",
+                            "<p><em>10 minutes</em></p>",
+                            "<p>Ask students to discuss the following questions in their groups and record their answers and then collect students’ answers:</p>",
+                            "<p>1. What is the most/least sensitive body part?</p>",
+                            "<p>2. Why do different parts of the body have different sensitivity to touch?</p>",
+                            "<p>3. Were there differences between students in their touch sensitivity? What can explain these differences? </p>",
+                            "<p>Extension activity: Ask students to enter their measurements into a shared Google Spreadsheet and create the averaged homunculus of all students in the class. </p>",
+                            "<p><em>15 minutes</em></p>",
+                            "<p>Back in their groups, ask students to read this brief text on the neuroscience of touch.</p>",
+                            "<p>Students should identify which body parts are involved in processing touch information and revise their illustrated and annotated models so that they communicate how the parts are connected to each other. To do so, students will need to read online about:</p>",
+                            "<p></p>",
+                            "<ul><li>Touch receptors</li><li>Sensory nerves</li><li>Spinal cord</li><li>Thalamus</li><li>Somatosensory cortex </li><p>Extension activity: Ask students to compare their model to the one created in the first module (control of movement). </p></ul>",
+                            "<p></p>",
+                            "<p><em>10 minutes</em></p>",
+                            "<p>Ask one member from each team to share their model. Facilitate a whole-class conversation about what is similar and different about the models, and list these observations on the classroom board. </p>",
+                            "<p><em>5 minutes</em></p>",
+                            "<p>Ask one member from each team to share their model. Facilitate a whole-class conversation about what is similar and different about the models, and list these observations on the classroom board. </p>",
+                            "<p><em>15 minutes</em></p>",
+                            "<p>Introduce pressure sensors to students.  Ask students to propose and how these sensors could be incorporated in the design of the gripper via a DataFlow model.</p>",
+                            "<p>5 minutes</p>",
+                            "<p>Ask students to record three every day challenges in Tilly&#x27;s life if her bionic arms do not have sensors to provide feedback about objects she touches.</p>",
+                            "<p><strong>Resources</strong>:</p>",
+                            "<p><a href='https://www.brainfacts.org/'>Brain Facts</a>: https://www.brainfacts.org/ </p>",
+                            "<p><a href='https://brainmapper.org/'>Brain Mapper</a>: https://brainmapper.org/ </p>",
+                            "<p>Article: <a href='https://www.science.org/content/article/sensors-may-soon-give-prosthetics-lifelike-sense-touch'>Sensors may soon give prosthetics a lifelike sense of touch</a></p>",
+                            "<p>Article: <a href='https://www.fierceelectronics.com/components/intelligent-prosthetic-pressure-sensors-could-ease-pain-for-lower-limb-amputees'>Intelligent prosthetic pressure sensors</a></p>"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "supports": [ ]
+                }
+              ]
+            },
+            {
+              "description": "Problem 2.3",
+              "ordinal": 3,
+              "title": "Introduction to Teaching Neural Engineering",
+              "subtitle": "",
+              "sections": [
+                {
+                  "type": "overview",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "2iOE6nuoDzd9RKTm",
+                        "title": "Text 1",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<h3>Lesson 2.3 TEACHER GUIDE</h3>",
+                            "<h3>Overview</h3>",
+                            "<p>In this lesson, students are challenged to assemble and program an EMG-controlled gripper that can grab an egg without cracking it. In this process, students will explore how tactile feedback affects how we manipulate objects. </p>",
+                            "<p>Materials for each group of students:</p>",
+                            "<ul><li>The gripper kit</li><li>Two gripper “mittens” (with a pressure sensor attached to one of them with double-sided tape)</li><li>A plastic egg or a hollow (drained) egg </li></ul>"
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "teach",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "-bQohjopzRSMHLYu",
+                        "title": "Text 3",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<h3>Instructional Sequence</h3>",
+                            "<p><em>10 min</em></p>",
+                            "<p>In small groups, ask students to discuss how what they learned in lesson 2.1  (the impact of sensory information on movement) and lesson 2.2 (how the nervous system processes sensory information) can be incorporated into the design of the gripper. Inform students that the goal of this lesson is to assemble and program a gripper that can sense objects and adapt its movement accordingly. </p>",
+                            "<p><em>40 min</em></p>",
+                            "<p>Design Challenge: Can you grab an egg (with the gripper) without cracking it?</p>",
+                            "<p>Students will work in groups to incorporate touch sensors in the design of the gripper (see student-facing lesson). </p>",
+                            "<p><em>10 min</em></p>",
+                            "<p>Ask each group of students to showcase their design by crossing the room while holding a plastic egg or a drained egg with their gripper.</p>",
+                            "<p><em>15 min</em></p>",
+                            "<p>In their team, ask students to evaluate the design of the gripper and discuss what can be improved. Remind students of the young woman who was portrayed at the opening of the unit (Tilly) and think about how the touch sensors can serve her in her day-to-day life (for example, when putting on makeup).</p>",
+                            "<p><em>10 min</em></p>",
+                            "<p>Facilitate a class discussion as to how the gripper could be further improved or modified (e.g., using a stronger servomotor, reshaping the tips of the claw, making the touch sensors more reliable/sensitive). </p>",
+                            "<p><em>5 min</em></p>",
+                            "<p>Using their Learning Journals, ask each student to think about other types of sensors that could improve the operation of the gripper (e.g., temperature sensors) and help people with sensory or motor conditions.  Students will further develop these ideas in the closing lesson (2.4). </p>"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "supports": [ ]
+                }
+              ]
+            },
+            {
+              "description": "Problem 2.4",
+              "ordinal": 4,
+              "title": "Introduction to Teaching Neural Engineering",
+              "subtitle": "",
+              "sections": [
+                {
+                  "type": "overview",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "6WLwonLVfBUOyJSZ",
+                        "title": "Text 6",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Lesson 2.4: Introduction</strong></p>",
+                            "<p>Using knowledge and skills gained in the module, students will co-design a new device to improve the lives of specific users. Each student team will prepare an illustration of the proposed device. </p>",
+                            "<p><strong>Materials:</strong></p>",
+                            "<p>White boards, dry erase markers, case scenarios </p>",
+                            "<p><strong>Learning Objectives:</strong></p>",
+                            "<p>Students will design and evaluate engineering solutions that can help improve the lives of patients with sensory-motor impairments (i.e., a human-machine interface). </p>"
+                          ]
+                        }
+                      },
+                      {
+                        "id": "KFjJz6Bn8nSYVlt8",
+                        "title": "Text 4",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Resources</strong></p>",
+                            "<p><a href='https://web.stanford.edu/~mshanks/MichaelShanks/files/509554.pdf'>Introduction to design thinking</a></p>",
+                            "<p>Case studies (see student-facing lesson)</p>"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "supports": [ ]
+                },
+                {
+                  "type": "teach",
+                  "content": {
+                    "tiles": [
+                      {
+                        "id": "t3o4RNkq9fYiJpJ6",
+                        "title": "Text 2",
+                        "content": {
+                          "type": "Text",
+                          "format": "html",
+                          "text": [
+                            "<p><strong>Instructional Sequence:</strong></p>",
+                            "<p><em>10 minutes</em></p>",
+                            "<p>Review the engineering design process, highlighting the value for use (see resources). Outline the design thinking process using an informative graphic as reference. Inform students that they will embark on the first step – empathize – by researching the experiences and challenges of someone who has a sensory or motor condition. </p>",
+                            "<p>5 minutes</p>",
+                            "<p>Survey students as to which case they would like to support. This can be introduced in two ways:</p>",
+                            "<p>Option 1:</p>",
+                            "<p>Present the following cases to students (see student-facing lesson):</p>",
+                            "<ul><li>Help Mrs. Marcus</li><li>Help Tilly</li><li>Help Mr. Johnson</li></ul>",
+                            "<p>Survey students as to which person they would like to help and organize teams of three or four students based on their responses (try to have two teams per case)</p>",
+                            "<p>Option 2:</p>",
+                            "<p>Ask each pre-established group to review the four cases and decide who they want to help.</p>",
+                            "<p><em>15 minutes</em></p>",
+                            "<p>Ask each team to prepare a response to the following questions (these questions should help orient students towards designing a solution) and record their responses in a journal template.</p>",
+                            "<p>What are the challenges experienced by [person’s name]?</p>",
+                            "<p>Why is it important to help reduce these challenges?</p>",
+                            "<p>How can we apply what we have learned throughout the unit to help this individual?</p>",
+                            "<p><em>10 minutes</em></p>",
+                            "<p>After each team has prepared a response, ask teams who are working on helping the same person to exchange their ideas and summarize common ideas on paper. Ask one representative working on helping each person to share the collective ideas with the entire class. </p>",
+                            "<p><em>35 minutes</em></p>",
+                            "<p>Direct each team to use their knowledge of body systems and technology to propose a product that can help [the person] circumvent the challenge described in the case. Direct students to sketch the product on whiteboards/chart paper, with annotations.  </p>",
+                            "<p>As students work on the proposed products, circulate between teams and prompt students’ empathic design thinking by asking the following questions:</p>",
+                            "<p>Will [person’s name] find the product safe?</p>",
+                            "<p>Will [person’s name] find the product easy to use?</p>",
+                            "<p>Will [person’s name] find the product comfortable?</p>",
+                            "<p>Will [person’s name] find the product useful?</p>",
+                            "<p><em>20 minutes</em></p>",
+                            "<p>After students have completed their illustrated and annotated models of the proposed products, ask each team to share their design, including the design considerations made to ensure that the person they are helping would find the product easy to use, safe, useful, and comfortable. This can be accomplished much like a professional science meeting poster session – one team member can represent the work to others, while the rest of the team visits other teams’ posters to gain insight and provide feedback (ask students to write down questions and comments on sticky notes and attach them to the poster).</p>"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "supports": [ ]
+                }
+              ]
+            }
+          ]
+      }
+    ]
+  }
+  
+  

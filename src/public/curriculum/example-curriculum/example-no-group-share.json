@@ -8,7 +8,9 @@
     "autoAssignStudentsToIndividualGroups": true,
     "disablePublish": true,
     "defaultDocumentType": "personal",
-    "settings": {"table": {"numFormat": ".2~f"}},
+    "settings": {
+      "table": { "numFormat": ".2~f" }
+    },
     "navTabs": {
       "showNavPanel": false,
       "lazyLoadTabContents": true,
@@ -16,19 +18,75 @@
         {
           "tab": "my-work",
           "label": "My Work",
-          "sections": [{"title": "Workspaces", "type": "personal-documents", "dataTestHeader": "my-work-section-workspaces", "dataTestItem": "my-work-list-items", "documentTypes": ["personal"], "properties": ["!isDeleted"], "showStars": ["student", "teacher"], "addDocument": true}]
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["personal"],
+              "properties": ["!isDeleted"],
+              "showStars": ["student", "teacher"],
+              "addDocument": true
+            }
+          ]
         }
       ]
     },
-    "toolbar": [{"id": "Text", "title": "Text", "isTileTool": true}, {"id": "Table", "title": "Table", "isTileTool": true}, {"id": "Drawing", "title": "Drawing", "isTileTool": true}, {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false}],
+    "toolbar": [
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "Table",
+        "title": "Table",
+        "isTileTool": true
+      },
+      {
+        "id": "Drawing",
+        "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
+    ],
     "stamps": []
   },
   "sections": {
-    "first": {"initials": "FI", "title": "First Section", "placeholder": "Work area for\nFirst Section"},
-    "second": {"initials": "SE", "title": "Second Section", "placeholder": "Second Section Placeholder"},
-    "third": {"initials": "TH", "title": "Third Section", "placeholder": "Third Section content goes here"}
+    "first": {
+      "initials": "FI",
+      "title": "First Section",
+      "placeholder": "Work area for\nFirst Section"
+    },
+    "second": {
+      "initials": "SE",
+      "title": "Second Section",
+      "placeholder": "Second Section Placeholder"
+    },
+    "third": {
+      "initials": "TH",
+      "title": "Third Section",
+      "placeholder": "Third Section content goes here"
+    }
   },
-  "planningDocument": {"enable": "teacher", "default": true, "sectionInfo": {"plan": {"initials": "PL", "title": "Plan", "placeholder": "Plan the work; work the plan"}}, "sections": [{"type": "plan"}]},
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "plan": {
+        "initials": "PL",
+        "title": "Plan",
+        "placeholder": "Plan the work; work the plan"
+      }
+    },
+    "sections": [{ "type": "plan" }]
+  },
   "investigations": [
     {
       "description": "Investigation 1",
@@ -40,15 +98,37 @@
           "ordinal": 1,
           "title": "1.1 Unit Toolbar Configuration",
           "subtitle": "Text, Table, Drawing",
-          "sections": ["example-no-group-share-investigation-1-problem-1-section-1.json", "example-no-group-share-investigation-1-problem-1-section-2.json", "example-no-group-share-investigation-1-problem-1-section-3.json"]
+          "sections": [
+            { "type": "first", "content": { "tiles": [] }, "supports": [] },
+            { "type": "second", "content": { "tiles": [] }, "supports": [] },
+            { "type": "third", "content": { "tiles": [] }, "supports": [] }
+          ]
         },
         {
           "description": "Problem 1.2",
           "ordinal": 2,
           "title": "1.2 Problem Toolbar Configuration",
           "subtitle": "Text only",
-          "config": {"toolbar": [{"id": "Text", "title": "Text", "isTileTool": true}, {"id": "delete", "title": "Delete", "iconId": "icon-delete-tool", "isTileTool": false}]},
-          "sections": ["example-no-group-share-investigation-1-problem-2-section-1.json", "example-no-group-share-investigation-1-problem-2-section-2.json", "example-no-group-share-investigation-1-problem-2-section-3.json"]
+          "config": {
+            "toolbar": [
+              {
+                "id": "Text",
+                "title": "Text",
+                "isTileTool": true
+              },
+              {
+                "id": "delete",
+                "title": "Delete",
+                "iconId": "icon-delete-tool",
+                "isTileTool": false
+              }
+            ]
+          },
+          "sections": [
+            { "type": "first", "content": { "tiles": [] }, "supports": [] },
+            { "type": "second", "content": { "tiles": [] }, "supports": [] },
+            { "type": "third", "content": { "tiles": [] }, "supports": [] }
+          ]
         }
       ]
     }

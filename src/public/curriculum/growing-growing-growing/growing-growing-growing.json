@@ -3,31 +3,98 @@
   "abbrevTitle": "GGG",
   "title": "Growing, Growing, Growing",
   "subtitle": "Exponential Expressions and Exponential Functions, Non-Linear Functions",
-  "config": {"enableHistoryRoles": ["teacher"], "placeholderText": "Enter notes here", "stamps": [], "settings": {"table": {"numFormat": ".2~f"}}},
+  "config": {
+    "enableHistoryRoles": ["teacher"],
+    "placeholderText": "Enter notes here",
+    "stamps": [
+    ],
+    "settings": {
+      "table": {
+        "numFormat": ".2~f"
+      }
+    }
+  },
   "sections": {
-    "introduction": {"initials": "IN", "title": "Introduction", "placeholder": "Work area for\nIntroduction section"},
-    "initialChallenge": {"initials": "IC", "title": "Initial Challenge", "placeholder": "Work area for\nInitial Challenge section"},
-    "whatIf": {"initials": "WI", "title": "What If...?", "placeholder": "Work area for\nWhat If...? section"},
-    "nowWhatDoYouKnow": {"initials": "NW", "title": "Now What Do You Know?", "placeholder": "Work area for\nNow What Do You Know? section"},
-    "didYouKnow": {"initials": "DY", "title": "Did You Know?", "placeholder": "Work area for\nDid You Know? section"},
-    "MathReflection1": {"initials": "R1", "title": "Math Reflection 1", "placeholder": "Work area for\nMathematical Reflection 1 section"},
-    "MathReflection2": {"initials": "R2", "title": "Math Reflection 2", "placeholder": "Work area for\nMathematical Reflection 2 section"},
-    "MathReflection3": {"initials": "R3", "title": "Math Reflection 3", "placeholder": "Work area for\nMathematical Reflection 3 section"},
-    "MathReflection4": {"initials": "R4", "title": "Math Reflection 4", "placeholder": "Work area for\nMathematical Reflection 4 section"}
+    "introduction": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    },
+    "initialChallenge": {
+      "initials": "IC",
+      "title": "Initial Challenge",
+      "placeholder": "Work area for\nInitial Challenge section"
+    },
+    "whatIf": {
+      "initials": "WI",
+      "title": "What If...?",
+      "placeholder": "Work area for\nWhat If...? section"
+    },
+    "nowWhatDoYouKnow": {
+      "initials": "NW",
+      "title": "Now What Do You Know?",
+      "placeholder": "Work area for\nNow What Do You Know? section"
+    },
+    "didYouKnow": {
+      "initials": "DY",
+      "title": "Did You Know?",
+      "placeholder": "Work area for\nDid You Know? section"
+    },
+    "MathReflection1": {
+      "initials": "R1",
+      "title": "Math Reflection 1",
+      "placeholder": "Work area for\nMathematical Reflection 1 section"
+    },
+     "MathReflection2": {
+      "initials": "R2",
+      "title": "Math Reflection 2",
+      "placeholder": "Work area for\nMathematical Reflection 2 section"
+    },
+     "MathReflection3": {
+      "initials": "R3",
+      "title": "Math Reflection 3",
+      "placeholder": "Work area for\nMathematical Reflection 3 section"
+    },
+     "MathReflection4": {
+      "initials": "R4",
+      "title": "Math Reflection 4",
+      "placeholder": "Work area for\nMathematical Reflection 4 section"
+    }
   },
   "planningDocument": {
     "enable": "teacher",
     "default": true,
     "sectionInfo": {
-      "overview": {"initials": "OV", "title": "Overview", "placeholder": "Work area for\nOverview section"},
-      "launch": {"initials": "LC", "title": "Launch", "placeholder": "Work area for\nLaunch section"},
-      "explore": {"initials": "EX", "title": "Explore", "placeholder": "Work area for\nExplore section"},
-      "summarize": {"initials": "SM", "title": "Summarize", "placeholder": "Work area for\nSummarize section"}
+      "overview": {
+        "initials": "OV",
+        "title": "Overview",
+        "placeholder": "Work area for\nOverview section"
+      },
+      "launch": {
+        "initials": "LC",
+        "title": "Launch",
+        "placeholder": "Work area for\nLaunch section"
+      },
+      "explore": {
+        "initials": "EX",
+        "title": "Explore",
+        "placeholder": "Work area for\nExplore section"
+      },
+      "summarize": {
+        "initials": "SM",
+        "title": "Summarize",
+        "placeholder": "Work area for\nSummarize section"
+      }
     },
-    "sections": [{"type": "overview"}, {"type": "launch"}, {"type": "explore"}, {"type": "summarize"}]
+    "sections": [
+      { "type": "overview" },
+      { "type": "launch" },
+      { "type": "explore" },
+      { "type": "summarize" }
+    ]
   },
   "investigations": [
-    {
+    { 
       "description": "Investigation 0",
       "ordinal": 0,
       "title": "GGG Investigation 0 Introduction to CLUE",
@@ -38,7 +105,36 @@
           "title": "GGG 0.1 Introduction to CLUE",
           "subtitle": "",
           "disabled": [],
-          "sections": ["ggg-investigation-0-problem-1-section-1.json", "ggg-investigation-0-problem-1-section-2.json", "ggg-investigation-0-problem-1-section-3.json", "ggg-investigation-0-problem-1-section-4.json"]
+           "sections": [
+            {
+            "type": "introduction",
+            "content": {
+            "tiles": []
+            },
+            "supports": []
+            },
+            {
+              "type": "initialChallenge",
+              "content": {
+                "tiles": []
+              },
+              "supports": []
+            },
+            {
+              "type": "whatIf",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            },
+            {
+              "type": "nowWhatDoYouKnow",
+              "content": {
+                "tiles": [],
+                "supports": []
+              }
+            }
+          ]
         }
       ]
     },
@@ -53,7 +149,36 @@
           "title": "GGG 1.1 Making Ballots",
           "subtitle": "Introducing Exponential Functions",
           "disabled": [],
-          "sections": ["ggg-investigation-1-problem-1-section-1.json", "ggg-investigation-1-problem-1-section-2.json", "ggg-investigation-1-problem-1-section-3.json", "ggg-investigation-1-problem-1-section-4.json"],
+           "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -61,7 +186,36 @@
           "ordinal": 2,
           "title": "GGG 1.2 The King’s Reward",
           "subtitle": "Representing Exponential Functions",
-          "sections": ["ggg-investigation-1-problem-2-section-1.json", "ggg-investigation-1-problem-2-section-2.json", "ggg-investigation-1-problem-2-section-3.json", "ggg-investigation-1-problem-2-section-4.json"],
+           "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -69,7 +223,36 @@
           "ordinal": 3,
           "title": "GGG 1.3 Killer Plant Strikes Lake Victoria",
           "subtitle": "y-intercepts Other than 1",
-          "sections": ["ggg-investigation-1-problem-3-section-1.json", "ggg-investigation-1-problem-3-section-2.json", "ggg-investigation-1-problem-3-section-3.json", "ggg-investigation-1-problem-3-section-4.json"],
+          "sections": [
+                        {
+                            "type": "introduction",
+                            "content": {
+                                "tiles": []
+                            },
+                            "supports": []
+                        },
+                        {
+                            "type": "initialChallenge",
+                            "content": {
+                                "tiles": []
+                            },
+                            "supports": []
+                        },
+                        {
+                            "type": "whatIf",
+                            "content": {
+                                "tiles": [],
+                                "supports": []
+                            }
+                        },
+                        {
+                            "type": "nowWhatDoYouKnow",
+                            "content": {
+                                "tiles": [],
+                                "supports": []
+                            }
+                        }
+          ],
           "supports": []
         },
         {
@@ -77,7 +260,36 @@
           "ordinal": 4,
           "title": "GGG 1.4 Growing Mold",
           "subtitle": "Interpreting Equations for Exponential Functions",
-          "sections": ["ggg-investigation-1-problem-4-section-1.json", "ggg-investigation-1-problem-4-section-2.json", "ggg-investigation-1-problem-4-section-3.json", "ggg-investigation-1-problem-4-section-4.json"],
+           "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         }
       ]
@@ -92,7 +304,36 @@
           "ordinal": 1,
           "title": "GGG 2.1 Reproducing Rabbits",
           "subtitle": "Fractional Growth Factors",
-          "sections": ["ggg-investigation-2-problem-1-section-1.json", "ggg-investigation-2-problem-1-section-2.json", "ggg-investigation-2-problem-1-section-3.json", "ggg-investigation-2-problem-1-section-4.json"],
+           "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -100,15 +341,73 @@
           "ordinal": 2,
           "title": "GGG 2.2 Investing in the Future",
           "subtitle": "Growth Rates",
-          "sections": ["ggg-investigation-2-problem-2-section-1.json", "ggg-investigation-2-problem-2-section-2.json", "ggg-investigation-2-problem-2-section-3.json", "ggg-investigation-2-problem-2-section-4.json"],
+           "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
           "description": "Problem 2.3",
           "ordinal": 3,
           "title": "GGG 2.3 Making a Difference",
-          "subtitle": "Connecting Initial Populations to Growth Factors",
-          "sections": ["ggg-investigation-2-problem-3-section-1.json", "ggg-investigation-2-problem-3-section-2.json", "ggg-investigation-2-problem-3-section-3.json", "ggg-investigation-2-problem-3-section-4.json"],
+          "subtitle":"Connecting Initial Populations to Growth Factors",
+          "sections": [
+                        {
+                            "type": "introduction",
+                            "content": {
+                                "tiles": []
+                            },
+                            "supports": []
+                        },
+                        {
+                            "type": "initialChallenge",
+                            "content": {
+                                "tiles": []
+                            },
+                            "supports": []
+                        },
+                        {
+                            "type": "whatIf",
+                            "content": {
+                                "tiles": [],
+                                "supports": []
+                            }
+                        },
+                        {
+                            "type": "nowWhatDoYouKnow",
+                            "content": {
+                                "tiles": [],
+                                "supports": []
+                            }
+                        }
+          ],
           "supports": []
         }
       ]
@@ -123,7 +422,36 @@
           "ordinal": 1,
           "title": "GGG 3.1 Making Smaller Ballots: Introducing Exponential Decay",
           "subtitle": "",
-          "sections": ["ggg-investigation-3-problem-1-section-1.json", "ggg-investigation-3-problem-1-section-2.json", "ggg-investigation-3-problem-1-section-3.json", "ggg-investigation-3-problem-1-section-4.json"],
+           "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -131,7 +459,36 @@
           "ordinal": 2,
           "title": "GGG 3.2 Fighting Fleas",
           "subtitle": "Representing Exponential Decay",
-          "sections": ["ggg-investigation-3-problem-2-section-1.json", "ggg-investigation-3-problem-2-section-2.json", "ggg-investigation-3-problem-2-section-3.json", "ggg-investigation-3-problem-2-section-4.json"],
+           "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -139,7 +496,36 @@
           "ordinal": 3,
           "title": "GGG 3.3 Cooling Water",
           "subtitle": "Modeling Exponential Decay",
-          "sections": ["ggg-investigation-3-problem-3-section-1.json", "ggg-investigation-3-problem-3-section-2.json", "ggg-investigation-3-problem-3-section-3.json", "ggg-investigation-3-problem-3-section-4.json"],
+           "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -147,7 +533,36 @@
           "ordinal": 4,
           "title": "GGG 3.4 Wrapping Up",
           "subtitle": "Exponential Functions",
-          "sections": ["ggg-investigation-3-problem-4-section-1.json", "ggg-investigation-3-problem-4-section-2.json", "ggg-investigation-3-problem-4-section-3.json", "ggg-investigation-3-problem-4-section-4.json"],
+           "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         }
       ]
@@ -162,7 +577,36 @@
           "ordinal": 1,
           "title": "GGG 4.1 Looking for Patterns among Exponents",
           "subtitle": "",
-          "sections": ["ggg-investigation-4-problem-1-section-1.json", "ggg-investigation-4-problem-1-section-2.json", "ggg-investigation-4-problem-1-section-3.json", "ggg-investigation-4-problem-1-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -170,7 +614,36 @@
           "ordinal": 2,
           "title": "GGG 4.2 More Patterns",
           "subtitle": "Properties of Exponents",
-          "sections": ["ggg-investigation-4-problem-2-section-1.json", "ggg-investigation-4-problem-2-section-2.json", "ggg-investigation-4-problem-2-section-3.json", "ggg-investigation-4-problem-2-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -178,7 +651,36 @@
           "ordinal": 3,
           "title": "GGG 4.3 Water Usage",
           "subtitle": "Operations with Scientific Notation",
-          "sections": ["ggg-investigation-4-problem-3-section-1.json", "ggg-investigation-4-problem-3-section-2.json", "ggg-investigation-4-problem-3-section-3.json", "ggg-investigation-4-problem-3-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -186,7 +688,36 @@
           "ordinal": 4,
           "title": "GGG 4.4 Growing Amoebas",
           "subtitle": "Extending the Properties of Exponents",
-          "sections": ["ggg-investigation-4-problem-4-section-1.json", "ggg-investigation-4-problem-4-section-2.json", "ggg-investigation-4-problem-4-section-3.json", "ggg-investigation-4-problem-4-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         }
       ]
@@ -195,16 +726,85 @@
       "description": "Mathematical Reflections",
       "ordinal": 5,
       "title": "GGG MR1 - MR4",
-      "problems": [
-        {
+      "problems": [{
           "description": "Mathematical Reflections",
           "ordinal": 1,
           "title": "How Likely Is It? Mathematical Reflections",
           "subtitle": "",
-          "sections": ["ggg-investigation-5-problem-1-section-1.json", "ggg-investigation-5-problem-1-section-2.json", "ggg-investigation-5-problem-1-section-3.json", "ggg-investigation-5-problem-1-section-4.json"]
+          "sections": [
+            {
+              "type": "MathReflection1",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit, we are exploring an important non-linear function, exponential functions. At the end of this Investigation, <em>What do you know about exponential functions? What do you know about expressions with exponents?</em>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection2",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                          "In this unit, we are exploring an important non-linear function, exponential functions. At the end of this Investigation, <em>What do you know about exponential functions? What do you know about expressions with exponents?</em>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection3",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                         "In this unit, we are exploring an important non-linear function, exponential functions. At the end of this Investigation, <em>What do you know about exponential functions? What do you know about expressions with exponents?</em>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection4",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit, we are exploring an important non-linear function, exponential functions. At the end of this Investigation, <em>What do you know about exponential functions? What do you know about expressions with exponents?</em>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            }
+          ]
         }
       ],
-      "supports": []
+      "supports": [
+      ]
     }
   ],
   "supports": []

@@ -3,28 +3,95 @@
   "abbrevTitle": "CR",
   "title": "Completely Rational",
   "subtitle": "A Focus on Integers",
-  "config": {"enableHistoryRoles": ["teacher"], "placeholderText": "Enter notes here", "stamps": [], "settings": {"table": {"numFormat": ".2~f"}}},
+  "config": {
+    "enableHistoryRoles": ["teacher"],
+    "placeholderText": "Enter notes here",
+    "stamps": [
+    ],
+    "settings": {
+      "table": {
+        "numFormat": ".2~f"
+      }
+    }
+  },
   "sections": {
-    "introduction": {"initials": "IN", "title": "Introduction", "placeholder": "Work area for\nIntroduction section"},
-    "initialChallenge": {"initials": "IC", "title": "Initial Challenge", "placeholder": "Work area for\nInitial Challenge section"},
-    "whatIf": {"initials": "WI", "title": "What If...?", "placeholder": "Work area for\nWhat If...? section"},
-    "nowWhatDoYouKnow": {"initials": "NW", "title": "Now What Do You Know?", "placeholder": "Work area for\nNow What Do You Know? section"},
-    "didYouKnow": {"initials": "DY", "title": "Did You Know?", "placeholder": "Work area for\nDid You Know? section"},
-    "MathReflection1": {"initials": "R1", "title": "Math Reflection 1", "placeholder": "Work area for\nMathematical Reflection 1 section"},
-    "MathReflection2": {"initials": "R2", "title": "Math Reflection 2", "placeholder": "Work area for\nMathematical Reflection 2 section"},
-    "MathReflection3": {"initials": "R3", "title": "Math Reflection 3", "placeholder": "Work area for\nMathematical Reflection 3 section"},
-    "MathReflection4": {"initials": "R4", "title": "Math Reflection 4", "placeholder": "Work area for\nMathematical Reflection 4 section"}
+    "introduction": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    },
+    "initialChallenge": {
+      "initials": "IC",
+      "title": "Initial Challenge",
+      "placeholder": "Work area for\nInitial Challenge section"
+    },
+    "whatIf": {
+      "initials": "WI",
+      "title": "What If...?",
+      "placeholder": "Work area for\nWhat If...? section"
+    },
+    "nowWhatDoYouKnow": {
+      "initials": "NW",
+      "title": "Now What Do You Know?",
+      "placeholder": "Work area for\nNow What Do You Know? section"
+    },
+    "didYouKnow": {
+      "initials": "DY",
+      "title": "Did You Know?",
+      "placeholder": "Work area for\nDid You Know? section"
+    },
+    "MathReflection1": {
+      "initials": "R1",
+      "title": "Math Reflection 1",
+      "placeholder": "Work area for\nMathematical Reflection 1 section"
+    },
+     "MathReflection2": {
+      "initials": "R2",
+      "title": "Math Reflection 2",
+      "placeholder": "Work area for\nMathematical Reflection 2 section"
+    },
+     "MathReflection3": {
+      "initials": "R3",
+      "title": "Math Reflection 3",
+      "placeholder": "Work area for\nMathematical Reflection 3 section"
+    },
+     "MathReflection4": {
+      "initials": "R4",
+      "title": "Math Reflection 4",
+      "placeholder": "Work area for\nMathematical Reflection 4 section"
+    }
   },
   "planningDocument": {
     "enable": "teacher",
     "default": true,
     "sectionInfo": {
-      "overview": {"initials": "OV", "title": "Overview", "placeholder": "Work area for\nOverview section"},
-      "launch": {"initials": "LC", "title": "Launch", "placeholder": "Work area for\nLaunch section"},
-      "explore": {"initials": "EX", "title": "Explore", "placeholder": "Work area for\nExplore section"},
-      "summarize": {"initials": "SM", "title": "Summarize", "placeholder": "Work area for\nSummarize section"}
+      "overview": {
+        "initials": "OV",
+        "title": "Overview",
+        "placeholder": "Work area for\nOverview section"
+      },
+      "launch": {
+        "initials": "LC",
+        "title": "Launch",
+        "placeholder": "Work area for\nLaunch section"
+      },
+      "explore": {
+        "initials": "EX",
+        "title": "Explore",
+        "placeholder": "Work area for\nExplore section"
+      },
+      "summarize": {
+        "initials": "SM",
+        "title": "Summarize",
+        "placeholder": "Work area for\nSummarize section"
+      }
     },
-    "sections": [{"type": "overview"}, {"type": "launch"}, {"type": "explore"}, {"type": "summarize"}]
+    "sections": [
+      { "type": "overview" },
+      { "type": "launch" },
+      { "type": "explore" },
+      { "type": "summarize" }
+    ]
   },
   "investigations": [
     {
@@ -38,7 +105,36 @@
           "title": "CR 1.1 The Going Positive Game",
           "subtitle": "Using Positive and Negative Numbers",
           "disabled": [],
-          "sections": ["cr-investigation-1-problem-1-section-1.json", "cr-investigation-1-problem-1-section-2.json", "cr-investigation-1-problem-1-section-3.json", "cr-investigation-1-problem-1-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -46,7 +142,36 @@
           "ordinal": 2,
           "title": "CR 1.2 Falling and Rising Temperatures in Montana",
           "subtitle": "Using a Number Line",
-          "sections": ["cr-investigation-1-problem-2-section-1.json", "cr-investigation-1-problem-2-section-2.json", "cr-investigation-1-problem-2-section-3.json", "cr-investigation-1-problem-2-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -54,7 +179,36 @@
           "ordinal": 3,
           "title": "CR 1.3 The Game of Zero",
           "subtitle": "Using a Chip Model",
-          "sections": ["cr-investigation-1-problem-3-section-1.json", "cr-investigation-1-problem-3-section-2.json", "cr-investigation-1-problem-3-section-3.json", "cr-investigation-1-problem-3-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         }
       ]
@@ -69,7 +223,36 @@
           "ordinal": 1,
           "title": "CR 2.1 Extending Addition of Rational Numbers",
           "subtitle": "",
-          "sections": ["cr-investigation-2-problem-1-section-1.json", "cr-investigation-2-problem-1-section-2.json", "cr-investigation-2-problem-1-section-3.json", "cr-investigation-2-problem-1-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -77,10 +260,47 @@
           "ordinal": 2,
           "title": "CR 2.2 Extending Subtraction of Rational Numbers",
           "subtitle": "",
-          "sections": ["cr-investigation-2-problem-2-section-1.json", "cr-investigation-2-problem-2-section-2.json", "cr-investigation-2-problem-2-section-3.json", "cr-investigation-2-problem-2-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
-        {"description": "Problem 2.3", "ordinal": 3, "title": "CR 2.3 Profit or Loss", "subtitle": "The +/- Connection", "sections": [], "supports": []}
+        {
+          "description": "Problem 2.3",
+          "ordinal": 3,
+          "title": "CR 2.3 Profit or Loss",
+          "subtitle":"The +/- Connection",
+          "sections": [
+          ],
+          "supports": []
+        }
       ]
     },
     {
@@ -93,7 +313,36 @@
           "ordinal": 1,
           "title": "CR 3.1 The Game of Relay Numbers",
           "subtitle": "Multiplication Patterns with Rational Numbers",
-          "sections": ["cr-investigation-3-problem-1-section-1.json", "cr-investigation-3-problem-1-section-2.json", "cr-investigation-3-problem-1-section-3.json", "cr-investigation-3-problem-1-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -101,14 +350,72 @@
           "ordinal": 2,
           "title": "CR 3.2 Families of Facts",
           "subtitle": "Division of Rational Numbers",
-          "sections": ["cr-investigation-3-problem-2-section-1.json", "cr-investigation-3-problem-2-section-2.json", "cr-investigation-3-problem-2-section-3.json", "cr-investigation-3-problem-2-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
           "description": "Problem 3.3",
           "ordinal": 3,
           "title": "CR 3.3 Connecting Fractions to Decimals",
-          "sections": ["cr-investigation-3-problem-3-section-1.json", "cr-investigation-3-problem-3-section-2.json", "cr-investigation-3-problem-3-section-3.json", "cr-investigation-3-problem-3-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -116,7 +423,36 @@
           "ordinal": 4,
           "title": "CR 3.3 The Integer Product Game",
           "subtitle": "Applying Multiplication and Division",
-          "sections": ["cr-investigation-3-problem-4-section-1.json", "cr-investigation-3-problem-4-section-2.json", "cr-investigation-3-problem-4-section-3.json", "cr-investigation-3-problem-4-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         }
       ]
@@ -131,7 +467,36 @@
           "ordinal": 1,
           "title": "CR 4.1 The Dealing Up Game",
           "subtitle": "Writing and Evaluating Expressions",
-          "sections": ["cr-investigation-4-problem-1-section-1.json", "cr-investigation-4-problem-1-section-2.json", "cr-investigation-4-problem-1-section-3.json", "cr-investigation-4-problem-1-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -139,26 +504,132 @@
           "ordinal": 2,
           "title": "CR 4.2 Making a Profit",
           "subtitle": "More or Less",
-          "sections": ["cr-investigation-4-problem-2-section-1.json", "cr-investigation-4-problem-2-section-2.json", "cr-investigation-4-problem-2-section-3.json", "cr-investigation-4-problem-2-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
-        {"description": "Problem 4.3", "ordinal": 3, "title": "CR 4.3 Water In and Out", "subtitle": "Rational Numbers to the Rescue", "sections": [], "supports": []}
+        {
+          "description": "Problem 4.3",
+          "ordinal": 3,
+          "title": "CR 4.3 Water In and Out",
+          "subtitle": "Rational Numbers to the Rescue",
+          "sections": [
+          ],
+          "supports": []
+        }
       ]
     },
     {
       "description": "Mathematical Reflections",
       "ordinal": 5,
       "title": "Completely Rational Mathematical Reflections",
-      "problems": [
-        {
+      "problems": [{
           "description": "Mathematical Reflections",
           "ordinal": 1,
           "title": "CR Mathematical Reflections",
           "subtitle": "",
-          "sections": ["cr-investigation-5-problem-1-section-1.json", "cr-investigation-5-problem-1-section-2.json", "cr-investigation-5-problem-1-section-3.json", "cr-investigation-5-problem-1-section-4.json"]
+          "sections": [
+            {
+              "type": "MathReflection1",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit we are continuing to explore rational numbers, including operations and their properties with positive, negative numbers and zero and how to recognize and use these operations to solve problems. At the end of this Investigation, <em>What do you know about rational numbers and their operations?</em>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection2",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit we are continuing to explore rational numbers, including operations and their properties with positive, negative numbers and zero and how to recognize and use these operations to solve problems. At the end of this Investigation, <em>What do you know about rational numbers and their operations?</em>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection3",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit we are continuing to explore rational numbers, including operations and their properties with positive, negative numbers and zero and how to recognize and use these operations to solve problems. At the end of this Investigation, <em>What do you know about rational numbers and their operations?</em>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection4",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                       "In this unit we are continuing to explore rational numbers, including operations and their properties with positive, negative numbers and zero and how to recognize and use these operations to solve problems. At the end of this Investigation, <em>What do you know about rational numbers and their operations?</em>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            }
+          ]
         }
       ],
-      "supports": []
+      "supports": [
+      ]
     }
   ],
   "supports": []

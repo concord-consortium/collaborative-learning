@@ -3,28 +3,95 @@
   "abbrevTitle": "SAD",
   "title": "Shapes and Designs",
   "subtitle": "Generalizing and Using Properties of Geometric Shapes",
-  "config": {"enableHistoryRoles": ["teacher"], "placeholderText": "Enter notes here", "stamps": [], "settings": {"table": {"numFormat": ".2~f"}}},
+  "config": {
+    "enableHistoryRoles": ["teacher"],
+    "placeholderText": "Enter notes here",
+    "stamps": [
+    ],
+    "settings": {
+      "table": {
+        "numFormat": ".2~f"
+      }
+    }
+  },
   "sections": {
-    "introduction": {"initials": "IN", "title": "Introduction", "placeholder": "Work area for\nIntroduction section"},
-    "initialChallenge": {"initials": "IC", "title": "Initial Challenge", "placeholder": "Work area for\nInitial Challenge section"},
-    "whatIf": {"initials": "WI", "title": "What If...?", "placeholder": "Work area for\nWhat If...? section"},
-    "nowWhatDoYouKnow": {"initials": "NW", "title": "Now What Do You Know?", "placeholder": "Work area for\nNow What Do You Know? section"},
-    "didYouKnow": {"initials": "DY", "title": "Did You Know?", "placeholder": "Work area for\nDid You Know? section"},
-    "MathReflection1": {"initials": "R1", "title": "Math Reflection 1", "placeholder": "Work area for\nMathematical Reflection 1 section"},
-    "MathReflection2": {"initials": "R2", "title": "Math Reflection 2", "placeholder": "Work area for\nMathematical Reflection 2 section"},
-    "MathReflection3": {"initials": "R3", "title": "Math Reflection 3", "placeholder": "Work area for\nMathematical Reflection 3 section"},
-    "MathReflection4": {"initials": "R4", "title": "Math Reflection 4", "placeholder": "Work area for\nMathematical Reflection 4 section"}
+    "introduction": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    },
+    "initialChallenge": {
+      "initials": "IC",
+      "title": "Initial Challenge",
+      "placeholder": "Work area for\nInitial Challenge section"
+    },
+    "whatIf": {
+      "initials": "WI",
+      "title": "What If...?",
+      "placeholder": "Work area for\nWhat If...? section"
+    },
+    "nowWhatDoYouKnow": {
+      "initials": "NW",
+      "title": "Now What Do You Know?",
+      "placeholder": "Work area for\nNow What Do You Know? section"
+    },
+    "didYouKnow": {
+      "initials": "DY",
+      "title": "Did You Know?",
+      "placeholder": "Work area for\nDid You Know? section"
+    },
+    "MathReflection1": {
+      "initials": "R1",
+      "title": "Math Reflection 1",
+      "placeholder": "Work area for\nMathematical Reflection 1 section"
+    },
+     "MathReflection2": {
+      "initials": "R2",
+      "title": "Math Reflection 2",
+      "placeholder": "Work area for\nMathematical Reflection 2 section"
+    },
+     "MathReflection3": {
+      "initials": "R3",
+      "title": "Math Reflection 3",
+      "placeholder": "Work area for\nMathematical Reflection 3 section"
+    },
+     "MathReflection4": {
+      "initials": "R4",
+      "title": "Math Reflection 4",
+      "placeholder": "Work area for\nMathematical Reflection 4 section"
+    }
   },
   "planningDocument": {
     "enable": "teacher",
     "default": true,
     "sectionInfo": {
-      "overview": {"initials": "OV", "title": "Overview", "placeholder": "Work area for\nOverview section"},
-      "launch": {"initials": "LC", "title": "Launch", "placeholder": "Work area for\nLaunch section"},
-      "explore": {"initials": "EX", "title": "Explore", "placeholder": "Work area for\nExplore section"},
-      "summarize": {"initials": "SM", "title": "Summarize", "placeholder": "Work area for\nSummarize section"}
+      "overview": {
+        "initials": "OV",
+        "title": "Overview",
+        "placeholder": "Work area for\nOverview section"
+      },
+      "launch": {
+        "initials": "LC",
+        "title": "Launch",
+        "placeholder": "Work area for\nLaunch section"
+      },
+      "explore": {
+        "initials": "EX",
+        "title": "Explore",
+        "placeholder": "Work area for\nExplore section"
+      },
+      "summarize": {
+        "initials": "SM",
+        "title": "Summarize",
+        "placeholder": "Work area for\nSummarize section"
+      }
     },
-    "sections": [{"type": "overview"}, {"type": "launch"}, {"type": "explore"}, {"type": "summarize"}]
+    "sections": [
+      { "type": "overview" },
+      { "type": "launch" },
+      { "type": "explore" },
+      { "type": "summarize" }
+    ]
   },
   "investigations": [
     {
@@ -38,7 +105,36 @@
           "title": "SAD 1.1 Designing Triangles",
           "subtitle": "The Side Connection",
           "disabled": [],
-          "sections": ["sad-investigation-1-problem-1-section-1.json", "sad-investigation-1-problem-1-section-2.json", "sad-investigation-1-problem-1-section-3.json", "sad-investigation-1-problem-1-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -46,7 +142,36 @@
           "ordinal": 2,
           "title": "SAD 1.2 Designing Quadrilaterals",
           "subtitle": "The Side Connection",
-          "sections": ["sad-investigation-1-problem-2-section-1.json", "sad-investigation-1-problem-2-section-2.json", "sad-investigation-1-problem-2-section-3.json", "sad-investigation-1-problem-2-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         }
       ]
@@ -61,7 +186,36 @@
           "ordinal": 1,
           "title": "SAD 2.1 In a Spin",
           "subtitle": "Angles of Rotation",
-          "sections": ["sad-investigation-2-problem-1-section-1.json", "sad-investigation-2-problem-1-section-2.json", "sad-investigation-2-problem-1-section-3.json", "sad-investigation-2-problem-1-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -69,15 +223,73 @@
           "ordinal": 2,
           "title": "SAD 2.2 The Bee Dance and Amelia Earhart",
           "subtitle": "Measuring Angles and Distance",
-          "sections": ["sad-investigation-2-problem-2-section-1.json", "sad-investigation-2-problem-2-section-2.json", "sad-investigation-2-problem-2-section-3.json", "sad-investigation-2-problem-2-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
           "description": "Problem 2.3",
           "ordinal": 3,
           "title": "SAD 2.3 Vertical, Supplemental, and Complementary Angles",
-          "subtitle": "",
-          "sections": ["sad-investigation-2-problem-3-section-1.json", "sad-investigation-2-problem-3-section-2.json", "sad-investigation-2-problem-3-section-3.json", "sad-investigation-2-problem-3-section-4.json"],
+          "subtitle":"",
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         }
       ]
@@ -92,7 +304,36 @@
           "ordinal": 1,
           "title": "SAD 3.1 Relating Angle Measures to Number of Sides in Polygons",
           "subtitle": "",
-          "sections": ["sad-investigation-3-problem-1-section-1.json", "sad-investigation-3-problem-1-section-2.json", "sad-investigation-3-problem-1-section-3.json", "sad-investigation-3-problem-1-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -100,7 +341,36 @@
           "ordinal": 2,
           "title": "SAD 3.2 Back to the Bees",
           "subtitle": "Polygons in Nature",
-          "sections": ["sad-investigation-3-problem-2-section-1.json", "sad-investigation-3-problem-2-section-2.json", "sad-investigation-3-problem-2-section-3.json", "sad-investigation-3-problem-2-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
         {
@@ -108,15 +378,73 @@
           "ordinal": 3,
           "title": "SAD 3.3 The Ins and Outs of Polygons",
           "subtitle": "Using Supplemental Angles",
-          "sections": ["sad-investigation-3-problem-3-section-1.json", "sad-investigation-3-problem-3-section-2.json", "sad-investigation-3-problem-3-section-3.json", "sad-investigation-3-problem-3-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         },
-        {
+         {
           "description": "Problem 3.4",
           "ordinal": 4,
           "title": "SAD 3.4 Designing Polygons",
           "subtitle": "",
-          "sections": ["sad-investigation-3-problem-4-section-1.json", "sad-investigation-3-problem-4-section-2.json", "sad-investigation-3-problem-4-section-3.json", "sad-investigation-3-problem-4-section-4.json"],
+          "sections": [
+                        {
+                        "type": "introduction",
+                        "content": {
+                        "tiles": []
+                        },
+                        "supports": []
+                        },
+                        {
+                          "type": "initialChallenge",
+                          "content": {
+                            "tiles": []
+                          },
+                          "supports": []
+                        },
+                        {
+                          "type": "whatIf",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        },
+                        {
+                          "type": "nowWhatDoYouKnow",
+                          "content": {
+                            "tiles": [],
+                            "supports": []
+                          }
+                        }
+                      ],
           "supports": []
         }
       ]
@@ -125,10 +453,68 @@
       "description": "SAD Mathematical Reflections",
       "ordinal": 4,
       "title": "SAD MR1 - MR3",
-      "problems": [
-        {"description": "Mathematical Reflections", "ordinal": 1, "title": "Shapes and Designs Mathematical Reflections", "subtitle": "", "sections": ["sad-investigation-4-problem-1-section-1.json", "sad-investigation-4-problem-1-section-2.json", "sad-investigation-4-problem-1-section-3.json"]}
+      "problems": [{
+          "description": "Mathematical Reflections",
+          "ordinal": 1,
+          "title": "Shapes and Designs Mathematical Reflections",
+          "subtitle": "",
+          "sections": [
+            {
+              "type": "MathReflection1",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "In this unit we are investigating some general properties of geometric shapes (figures), including angles and polygons, and using this information to design shapes and solve real world problems. At the end of this Investigation, <em>What do you know about geometric shapes? How does this information help you design geometric shapes and solve problems?</em>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection2",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                           "In this unit we are investigating some general properties of geometric shapes (figures), including angles and polygons, and using this information to design shapes and solve real world problems. At the end of this Investigation, <em>What do you know about geometric shapes? How does this information help you design geometric shapes and solve problems?</em>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            },
+            {
+              "type": "MathReflection3",
+              "content": {
+                "tiles": [
+                  {
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                           "In this unit we are investigating some general properties of geometric shapes (figures), including angles and polygons, and using this information to design shapes and solve real world problems. At the end of this Investigation, <em>What do you know about geometric shapes? How does this information help you design geometric shapes and solve problems?</em>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "supports": [ ]
+            }
+          ]
+        }
       ],
-      "supports": []
+      "supports": [
+      ]
     }
   ],
   "supports": []
