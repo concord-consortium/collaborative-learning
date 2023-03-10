@@ -1,0 +1,57 @@
+@import "../../../components/vars.sass";
+
+$sort-view-card-width: 177px;
+$sort-view-column-width: $sort-view-card-width + 10px;
+$sort-view-font-size:10px;
+$sort-view-width: ($sort-view-card-width * 3 );
+
+.data-card-tool.display-as-sorted {
+  font-size: $sort-view-font-size;
+  .panel {
+    width: ($sort-view-card-width * 3 );
+  }
+
+  .sorting-cards-data-area {
+    width: ($sort-view-card-width * 3 );
+    //background-color: $workspace-teal-light-4;
+    border: solid 1px $charcoal-light-1;
+
+    .sort-area-grid {
+      display: grid;
+      grid-template-columns: $sort-view-card-width $sort-view-card-width $sort-view-card-width;
+
+      .stack {
+        width: $sort-view-card-width;
+        .stack-heading {
+          background-color: $workspace-teal-light-4;
+          font-size: 13px;
+          font-weight: bold;
+          text-align: center;
+          padding-top: 3px;
+          padding-bottom: 3px;
+        }
+      }
+
+      .empty.cell {
+        width: $sort-view-card-width;
+        background-color: $workspace-teal-light-4;
+        height:23px;
+      }
+    }
+
+    .sortable.card {
+      border:1px solid $charcoal-light-1;
+      display: grid;
+      grid-template-columns: 40px auto;
+    }
+  }
+}
+
+
+// .sorting-cards-data-area {
+//   // each card is specified as 160px, plus 6 * 10px margins over three columns
+//   width: 540px;
+//   background-color: $workspace-teal-light-4;
+//   border: solid 1px $charcoal-light-1;
+//   padding:$cell-padding;
+// }

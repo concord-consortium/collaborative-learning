@@ -34,7 +34,7 @@ export const DataCardContentModel = TileContentModel
   .props({
     type: types.optional(types.literal(kDataCardTileType), kDataCardTileType),
     caseIndex: 0,
-    selectedSortAttributeId: types.maybe(types.string)//'none'
+    selectedSortAttributeId: types.maybe(types.string)
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
@@ -115,6 +115,12 @@ export const DataCardContentModel = TileContentModel
         }
       });
       return attributesWithValues === 0;
+    },
+    caseIdsWithAttributeValue(attrId: string, value: string){
+      const allCases = this.allCases();
+      const foundCases: string[] = [];
+      allCases.forEach((c) => c && c[attrId] === value && foundCases.push(c.__id__));
+      return foundCases;
     },
     exportJson(options?: ITileExportOptions){
       return [

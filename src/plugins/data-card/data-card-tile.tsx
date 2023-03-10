@@ -170,6 +170,10 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const addCardClasses = classNames("add-card", "teal-bg", { hidden: !shouldShowAddCase });
   const removeCardClasses = classNames("remove-card", { hidden: !shouldShowDeleteCase });
 
+  const toolClasses = classNames(
+    "data-card-tool", `display-as-${ displaySingle ? 'single' : 'sorted'}`
+  );
+
   const toolbarProps = useToolbarTileApi(
     {
       id: model.id,
@@ -185,7 +189,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   };
 
   return (
-    <div className="data-card-tool">
+    <div className={toolClasses}>
       <DataCardToolbar
         model={model}
         documentContent={documentContent}
