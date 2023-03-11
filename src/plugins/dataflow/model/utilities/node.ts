@@ -281,6 +281,12 @@ export const NodeSensorTypes = [
     icon: EmgIcon
   },
   {
+    name: "ax",
+    type: "ax-reading",
+    units: "g",
+    icon: PressureIcon
+  },
+  {
     name: "Surface Pressure",
     type: "fsr-reading",
     units: "f(n)",
@@ -527,6 +533,22 @@ const fsrSensorChannel: NodeChannelInfo = {
   serialConnected: null
 };
 
+const axSensorChannel: NodeChannelInfo = {
+  hubId: "SERIAL-MICROBIT",
+  hubName: "Microbit",
+  name: "ax",
+  channelId: "ax",
+  missing: true,
+  type: "ax-reading",
+  units: "g",
+  plug: 10,
+  value: 0,
+  virtual: false,
+  usesSerial: true,
+  serialConnected: null
+};
+
+
 export const serialSensorChannels: NodeChannelInfo[] = [
-  emgSensorChannel, fsrSensorChannel
+  emgSensorChannel, fsrSensorChannel, axSensorChannel
 ];

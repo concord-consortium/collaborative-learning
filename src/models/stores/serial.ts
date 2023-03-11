@@ -39,6 +39,7 @@ export class SerialDevice {
   public hasPort(){
     const portHere = this.port !== undefined;
     const readablePort = this.port?.readable;
+    //portHere && readablePort && console.log("has port! ", portHere, readablePort)
     return portHere && readablePort;
   }
 
@@ -66,6 +67,7 @@ export class SerialDevice {
   }
 
   public async handleStream(channels: Array<NodeChannelInfo>){
+    console.log("handleStream!")
     //our port cannot be null if we are to open streams
     if (!this.port){
       return;
@@ -84,11 +86,13 @@ export class SerialDevice {
       const streamReader = textDecoder.readable.getReader();
       try {
         while (this.port.readable) {
-          const { value, done } = await streamReader.read();
-          if (done){
+          //const { value, done } = await streamReader.read();
+          const utterance = await streamReader.read();
+          console.log("utterance: ", utterance)
+          if (utterance.done){
             break;
           }
-          this.handleStreamObj(value, channels);
+          this.handleStreamObj(utterance.value, channels);
         }
       }
       catch (error) {
@@ -101,27 +105,36 @@ export class SerialDevice {
   }
 
   public handleStreamObj(value: string, channels: Array<NodeChannelInfo>){
+    //console.log("do we have chanel here>", channels)
+    //console.log("let's see what microbit sends us: ", `${value}`)
     this.localBuffer += value;
 
-    const pattern = /(emg|fsr):([0-9]+)[\r][\n]/g;
+    const pattern = /(emg|fsr|ax):-?([0-9]+)([\r][\n])*/g;
     let match: RegExpExecArray | null;
 
     do {
       match = pattern.exec(this.localBuffer);
+      match && console.log("we have a match?", match)
+     // console.log(match)
       if (!match) break;
 
       const [fullMatch, channel, numValue] = match;
+
       this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
 
       const targetChannel = channels.find((c: NodeChannelInfo) => {
         return c.channelId === channel;
       });
 
+      console.log("do we have a target channel? ", targetChannel)
       if (targetChannel){
+        console.log("about to pass channel this value: ", numValue)
         targetChannel.value = parseInt(numValue, 10);
       }
     } while (match);
   }
+
+
 
   public writeToOut(n:number){
     // number visible to user represents "percent closed"

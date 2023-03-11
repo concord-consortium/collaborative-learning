@@ -571,7 +571,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     //sensor will need serial once these particular sensors are chosen
     nodes.forEach((n) => {
-      if(n.data.sensor === "emg" || n.data.sensor === "fsr"){
+      if(n.data.sensor === "emg" || n.data.sensor === "fsr" || n.data.sensor === "ax"){
         serialNodesCt++;
       }
 
