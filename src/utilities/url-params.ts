@@ -31,6 +31,8 @@ export interface QueryParams {
   // Optional name of the demo to use as a namespace under the demo key
   demoName?: string;
 
+  admin?: boolean;
+
   //
   // Portal external report auth parameters (classOfferings is ignored)
   //
@@ -83,7 +85,8 @@ export const processUrlParams = (): QueryParams => {
                   ? params.appMode as AppMode
                   : undefined,  // appMode will be determined internally
     // allows use of ?demo without a value for demo mode
-    demo: (params.demo !== undefined)
+    demo: (params.demo !== undefined),
+    admin: (params.admin !== undefined)
   };
 };
 

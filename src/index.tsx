@@ -3,6 +3,7 @@ import "ts-polyfill";
 import { Provider } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
+import CMS from "netlify-cms-app";
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
 import { AppConfigContext } from "./app-config-context";
 import { AppComponent } from "./components/app";
@@ -44,42 +45,46 @@ const initializeApp = async () => {
     (window as any).stores = stores;
   }
 
-  if (appMode === "qa" && urlParams.qaClear === "all") {
+  if (urlParams.admin) {
+    CMS.init();
+  } else {
+    if (appMode === "qa" && urlParams.qaClear === "all") {
+      ReactDOM.render(
+        <QAClear />,
+        document.getElementById("app")
+      );
+      return;
+    }
+
+    await setUnitAndProblem(stores, unitId, problemOrdinal);
+
+    gImageMap.initialize(stores.db);
+
+    Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
+
+    if (kEnableLivelinessChecking) {
+      setLivelinessChecking("error");
+    }
+
+    setPageTitle(stores);
+    stores.ui.setShowDemoCreator(!!showDemoCreator);
+    stores.supports.createFromUnit({
+      unit: stores.unit,
+      investigation: stores.investigation,
+      problem: stores.problem,
+      documents: stores.documents,
+      db: stores.db
+    });
+
     ReactDOM.render(
-      <QAClear />,
+      <AppConfigContext.Provider value={{ appIcons }} >
+        <Provider stores={stores}>
+          <AppComponent />
+        </Provider>
+      </AppConfigContext.Provider>,
       document.getElementById("app")
     );
-    return;
   }
-
-  await setUnitAndProblem(stores, unitId, problemOrdinal);
-
-  gImageMap.initialize(stores.db);
-
-  Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
-
-  if (kEnableLivelinessChecking) {
-    setLivelinessChecking("error");
-  }
-
-  setPageTitle(stores);
-  stores.ui.setShowDemoCreator(!!showDemoCreator);
-  stores.supports.createFromUnit({
-    unit: stores.unit,
-    investigation: stores.investigation,
-    problem: stores.problem,
-    documents: stores.documents,
-    db: stores.db
-  });
-
-  ReactDOM.render(
-    <AppConfigContext.Provider value={{ appIcons }} >
-      <Provider stores={stores}>
-        <AppComponent />
-      </Provider>
-    </AppConfigContext.Provider>,
-    document.getElementById("app")
-  );
 };
 
 initializeApp();
