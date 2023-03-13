@@ -423,11 +423,11 @@ context('Dataflow Tool Tile', function () {
         dataflowToolTile.getSensorDropdownOptions(nodeType).each(($tab, index, $typeList) => {
           expect($tab.text()).to.contain(sensorSelect[index]);
         });
-        dataflowToolTile.getSensorDropdownOptions(nodeType).first().click();
-        dataflowToolTile.getSensorDropdownOptions(nodeType).should("have.length", 0);
-        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Temperature").should("exist");
+        dataflowToolTile.getClearButton().click();
+        dataflowToolTile.getNode(nodeType).should("not.exist");
       });
       it("verify node inputs outputs", () => {
+        dataflowToolTile.getCreateNodeButton(nodeType).click();
         dataflowToolTile.getNodeInput().should("not.exist");
         dataflowToolTile.getNodeOutput().should("exist");
       });

@@ -43,6 +43,7 @@ Cypress.Commands.add("setupGroup", (students, group) => {
         cy.visit('?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
         // These checks are here to make sure the workspace has loaded enough to create
         // the student
+        cy.waitForLoad();
         header.getGroupName().should('contain','Group '+group);
         header.getGroupMembers().find('div.member').should('contain','S'+students[i]);
     }
