@@ -1,6 +1,6 @@
 backend:
   name: git-gateway
-  branch: master # Branch to update (optional; defaults to master)
+  branch: 184540073-add-decap # Branch to update (optional; defaults to master)
 publish_mode: editorial_workflow
 media_folder: "images/uploads"
 collections:
