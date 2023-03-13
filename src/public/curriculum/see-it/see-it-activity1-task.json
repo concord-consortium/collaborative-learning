@@ -1,0 +1,19 @@
+{
+"type": "task",
+"content": {
+    "tiles": [
+        {
+            "id": "y5zjsg345twe45345t",
+            "content": {
+                "type": "Text",
+                "format": "html",
+                "text": [
+                "<p><strong>Welcome to See-It!</strong></p>",
+                "<p>We are going to learn about sensors and control and Internet of Things</p>",
+                "<p>It has been designed to help you do math <strong>together</strong> with your classmates.</p>"
+                ]
+            }
+        }
+    ]
+  }
+}
