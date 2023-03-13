@@ -8,13 +8,29 @@ class DataCardToolTile {
   getSortSelect(workspaceClass){
     return cy.get(`${workspaceClass || ".primary-workspace"} .sort-select-input`);
   }
-  getNameInputAsInactive(workspaceClass){
+  getAttrName(workspaceClass){
     const nameSelector = ".attribute-name-value-pair .name";
     return cy.get(`${workspaceClass || ".primary-workspace"} ${nameSelector}`);
   }
-  getValueInputAsInactive(workspaceClass){
+  getAttrValue(workspaceClass){
     const valueSelector = ".attribute-name-value-pair .value";
     return cy.get(`${workspaceClass || ".primary-workspace"} ${valueSelector}`);
+  }
+  getAttrValueInput(workspaceClass){
+    const valueSelector = ".attribute-name-value-pair .value .value-input";
+    return cy.get(`${workspaceClass || ".primary-workspace"} ${valueSelector}`);
+  }
+  getSingleCardView(workspaceClass){
+    const selector = ".data-card-tool-tile .single-card-data-area";
+    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+  }
+  getSortView(workspaceClass){
+    const selector = ".data-card-tool-tile .sorting-cards-data-area";
+    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+  }
+  getSortMenuItems(workspaceClass){
+    const itemsSelector = ".sort-select-input > option";
+    return cy.get(`${workspaceClass || ".primary-workspace"} ${itemsSelector}`);
   }
 }
 export default DataCardToolTile;
