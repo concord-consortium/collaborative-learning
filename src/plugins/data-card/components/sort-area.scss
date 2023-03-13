@@ -3,7 +3,8 @@
 $sort-view-card-width: 177px;
 $sort-view-column-width: $sort-view-card-width + 10px;
 $sort-view-font-size:10px;
-$sort-view-width: ($sort-view-card-width * 3 );
+$cards-per-row: 3; // this may be dynamic in the future
+$sort-view-width: ($sort-view-card-width * $cards-per-row );
 
 .data-card-tool.display-as-sorted {
   font-size: $sort-view-font-size;
@@ -12,8 +13,7 @@ $sort-view-width: ($sort-view-card-width * 3 );
   }
 
   .sorting-cards-data-area {
-    width: ($sort-view-card-width * 3 );
-    //background-color: $workspace-teal-light-4;
+    width: $sort-view-width;
     border: solid 1px $charcoal-light-1;
 
     .sort-area-grid {

@@ -17,26 +17,24 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
 
   const attrsSnap = getSnapshot(content.attributes);
   const allAttrValues = attrsSnap.filter((a) => a.id === sortById)[0].values;
-  const uniqeOrderedValues = orderBy(uniq(allAttrValues));
-
+  const uniqueOrderedValues = orderBy(uniq(allAttrValues));
    // if one of the categories is a category for no value, put this stack last
-  uniqeOrderedValues.includes("") && uniqeOrderedValues.push(uniqeOrderedValues.shift());
+  uniqueOrderedValues.includes("") && uniqueOrderedValues.push(uniqueOrderedValues.shift());
 
   const renderPlaceholderCells = () => {
-    const rowsNeeded = Math.ceil(uniqeOrderedValues.length / 3);
-    const placeholders = (rowsNeeded * 3) - uniqeOrderedValues.length;
-    return (
-      <>
-        { placeholders > 0 && <SortStackPlaceholder /> }
-        { placeholders === 2 && <SortStackPlaceholder /> }
-      </>
-    );
+    const columnsCount = 3; // local constant now, but may be dynamic in future
+    const rowsNeeded = Math.ceil(uniqueOrderedValues.length / columnsCount);
+    const placeholdersNeeded = (rowsNeeded * columnsCount) - uniqueOrderedValues.length;
+    const placeholders = Array.from({ length: placeholdersNeeded }, (v, i) => {
+      return <SortStackPlaceholder key={i} />;
+    });
+    return placeholders;
   };
 
   return (
     <div className="sort-area-grid">
-      { uniqeOrderedValues.length > 0 && sortById &&
-        uniqeOrderedValues.map((v, i) => {
+      { uniqueOrderedValues.length > 0 && sortById &&
+        uniqueOrderedValues.map((v, i) => {
           return (
             <SortStack
               key={i}
