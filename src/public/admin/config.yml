@@ -1,6 +1,9 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: concord-consortium/collaborative-learning
   branch: 184540073-add-decap # Branch to update (optional; defaults to master)
+  base_url: https://us-central1-cms-github-auth.cloudfunctions.net
+  auth_endpoint: /oauth/auth
 # local_backend: true
 publish_mode: editorial_workflow
 media_folder: "images/uploads"
