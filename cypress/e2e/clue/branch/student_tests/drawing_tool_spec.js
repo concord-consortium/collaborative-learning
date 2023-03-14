@@ -61,6 +61,12 @@ context('Draw Tool Tile', function () {
           .trigger("mouseup",   360, 110);
         drawToolTile.getDrawToolDelete().should("not.have.class", "disabled");
       });
+      it("verify change outline color", () => {
+        drawToolTile.getDrawToolStrokeColor().click();
+        cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
+        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(1).click();
+        drawToolTile.getFreehandDrawing().first().should("have.attr", "stroke").and("eq", "#eb0000");
+      });
       it("deletes freehand drawing", () => {
         // Without the previous test this is how to select it, using the simple click
         // approach doesn't seem to work well with paths, the location that cypress clicks
@@ -83,9 +89,18 @@ context('Draw Tool Tile', function () {
           .trigger("mouseup",   100, 50);
         drawToolTile.getVectorDrawing().should("exist").and("have.length", 1);
       });
-      it("deletes vector drawing", () => {
+      it("verify change outline color", () => {
         drawToolTile.getDrawToolSelect().click();
         drawToolTile.getVectorDrawing().click({scrollBehavior: false});
+        drawToolTile.getDrawToolStrokeColor().click();
+        cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
+        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").eq(2).click();
+        drawToolTile.getVectorDrawing().first().should("have.attr", "stroke").and("eq", "#008a00");
+        drawToolTile.getDrawToolStrokeColor().click();
+        cy.get(".toolbar-palette.stroke-color .palette-buttons").should("be.visible");
+        cy.get(".toolbar-palette.stroke-color .palette-buttons .color-swatch").first().click();
+      });
+      it("deletes vector drawing", () => {
         drawToolTile.getDrawToolDelete().click();
         drawToolTile.getVectorDrawing().should("not.exist");
       });
@@ -290,8 +305,30 @@ context('Draw Tool Tile', function () {
           .trigger("mouseup");
         drawToolTile.getImageDrawing().should("exist").and("have.length", 1);
       });
+      it("verify stamp images", () => {
+        drawToolTile.getImageDrawing().eq(0).should("have.attr", "href").and("contain", "coin.png");
+        drawToolTile.getDrawToolStampExpand().click();
+        cy.get(".toolbar-palette.stamps .palette-buttons .stamp-button").eq(1).click();
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 250, 100)
+          .trigger("mouseup");
+        drawToolTile.getImageDrawing().should("exist").and("have.length", 2);
+        drawToolTile.getImageDrawing().eq(1).should("have.attr", "href").and("contain", "pouch.png");
+        drawToolTile.getDrawToolStampExpand().click();
+        cy.get(".toolbar-palette.stamps .palette-buttons .stamp-button").eq(2).click();
+        drawToolTile.getDrawTile()
+          .trigger("mousedown", 250, 150)
+          .trigger("mouseup");
+        drawToolTile.getImageDrawing().should("exist").and("have.length", 3);
+        drawToolTile.getImageDrawing().eq(2).should("have.attr", "href").and("contain", "plus.png");
+      });
       it("deletes stamp drawing", () => {
         drawToolTile.getDrawToolSelect().click();
+        // drawToolTile.getImageDrawing().click({force:true, scrollBehavior: false});
+        drawToolTile.getImageDrawing().eq(0).click({force:true, scrollBehavior: false});
+        drawToolTile.getDrawToolDelete().click();
+        drawToolTile.getImageDrawing().eq(1).click({force:true, scrollBehavior: false});
+        drawToolTile.getDrawToolDelete().click();
         drawToolTile.getImageDrawing().click({force:true, scrollBehavior: false});
         drawToolTile.getDrawToolDelete().click();
         drawToolTile.getImageDrawing().should("not.exist");
@@ -314,5 +351,63 @@ context('Draw Tool Tile', function () {
         // drawToolTile.getImageDrawing().should("exist").and("have.length", 1);
       });
     });
+  });
+});
+
+context('Draw Tool Tile Undo Redo', function () {
+  before(function () {
+    const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&qaGroup=5&unit=msa";
+    cy.clearQAData('all');
+
+    cy.visit(queryParams);
+    cy.waitForLoad();
+    cy.closeResourceTabs();
+  });
+  describe("Drawing tile title edit, undo redo and delete tile", () => {
+    it('will undo redo drawing tile creation/deletion', function () {
+      // Creation - Undo/Redo
+      clueCanvas.addTile('drawing');
+      drawToolTile.getDrawTile().should("exist");
+      clueCanvas.getUndoTool().should("not.have.class", "disabled");
+      clueCanvas.getRedoTool().should("have.class", "disabled");
+      clueCanvas.getUndoTool().click();
+      drawToolTile.getDrawTile().should("not.exist");
+      clueCanvas.getUndoTool().should("have.class", "disabled");
+      clueCanvas.getRedoTool().should("not.have.class", "disabled");
+      clueCanvas.getRedoTool().click();
+      drawToolTile.getDrawTile().should("exist");
+      clueCanvas.getUndoTool().should("not.have.class", "disabled");
+      clueCanvas.getRedoTool().should("have.class", "disabled");
+
+      // Deletion - Undo/Redo
+      clueCanvas.deleteTile('draw');
+      drawToolTile.getDrawTile().should('not.exist');
+      clueCanvas.getUndoTool().click();
+      drawToolTile.getDrawTile().should("exist");
+      clueCanvas.getRedoTool().click();
+      drawToolTile.getDrawTile().should('not.exist');
+    }); 
+    it("edit tile title", () => {
+      const newName = "Drawing Tile";
+      clueCanvas.addTile("drawing");
+      drawToolTile.getDrawTile().should("exist");
+      drawToolTile.getTileTitle().should("exist");
+      drawToolTile.getTileTitle().first().should("contain", "Drawing 1");
+      drawToolTile.getDrawTileTitle().first().click();
+      drawToolTile.getDrawTileTitle().first().type(newName + '{enter}');
+      drawToolTile.getTileTitle().should("contain", newName);
+  });
+  it("undo redo actions", () => {
+      clueCanvas.getUndoTool().click();
+      drawToolTile.getTileTitle().first().should("contain", "Drawing 1");
+      clueCanvas.getUndoTool().click();
+      drawToolTile.getDrawTile().should("not.exist");
+      clueCanvas.getRedoTool().click().click();
+      drawToolTile.getTileTitle().should("contain", "Drawing Tile");
+  });
+  it('verify delete tile', function () {
+      clueCanvas.deleteTile('draw');
+      drawToolTile.getDrawTile().should("not.exist");
+  });
   });
 });

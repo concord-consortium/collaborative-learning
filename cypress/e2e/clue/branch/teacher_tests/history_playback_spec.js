@@ -161,5 +161,74 @@ context('History Playback', () => {
         tableToolTile.getTableCell().eq(2).should('contain', '2');
       });
     });
+    it('verify undo action in primary document and verify playback of history', () => {
+      clueCanvas.getUndoTool().click();
+      tableToolTile.getTableTile('[data-test="subtab-workspaces"] .editable-document-content').within(() => {
+        tableToolTile.getTableCell().eq(1).should('contain', '1');
+        tableToolTile.getTableCell().eq(2).should('contain', '2');
+      });
+      tableToolTile.getTableTile().within(() => {
+        tableToolTile.getTableCell().eq(1).should('contain', '1');
+        tableToolTile.getTableCell().eq(2).should('not.contain', '2');
+      });
+      cy.get('[data-testid="playback-play-button"]').click();
+      cy.wait(2000);
+      tableToolTile.getTableTile('[data-test="subtab-workspaces"] .editable-document-content').within(() => {
+        tableToolTile.getTableCell().eq(1).should('contain', '1');
+        tableToolTile.getTableCell().eq(2).should('not.contain', '2');
+      });
+      clueCanvas.getRedoTool().click();
+      tableToolTile.getTableTile().within(() => {
+        tableToolTile.getTableCell().eq(1).should('contain', '1');
+        tableToolTile.getTableCell().eq(2).should('contain', '2');
+      });
+      tableToolTile.getTableTile('[data-test="subtab-workspaces"] .editable-document-content').within(() => {
+        tableToolTile.getTableCell().eq(1).should('contain', '1');
+        tableToolTile.getTableCell().eq(2).should('not.contain', '2');
+      });
+      cy.get('[data-testid="playback-play-button"]').click();
+      cy.wait(2000);
+      tableToolTile.getTableTile('[data-test="subtab-workspaces"] .editable-document-content').within(() => {
+        tableToolTile.getTableCell().eq(1).should('contain', '1');
+        tableToolTile.getTableCell().eq(2).should('contain', '2');
+      });
+    });
+    it('verify playback icon in class work & learning logs & icon background color', () => {
+      cy.get('[data-testid="playback-component-button"]').click();
+      cy.get('.playback-toolbar-button.themed.my-work').should('have.css', 'background-color', 'rgb(183, 226, 236)');
+      clueCanvas.publishDoc("This Class");
+      cy.openSection('my-work', "learning-log");
+      cy.openDocumentWithTitle('my-work', 'learning-log','My First Learning Log');
+      cy.get('[data-testid="playback-component-button"]').should('be.visible');
+      cy.get('.playback-toolbar-button.themed.my-work').should('have.css', 'background-color', 'rgb(183, 226, 236)');
+      clueCanvas.publishDoc("This Class");
+      cy.openTopTab('class-work');
+      cy.openSection('class-work', "workspaces");
+      cy.openDocumentThumbnail('workspaces','Network User');
+      cy.get('[data-testid="playback-component-button"]').should('be.visible');
+      cy.get('.playback-toolbar-button.themed.class-work').should('have.css', 'background-color', 'rgb(236, 201, 255)');
+      cy.openSection('class-work', "learning-logs");
+      cy.openDocumentThumbnail('learning-logs','Network User');
+      cy.get('[data-testid="playback-component-button"]').should('be.visible');
+      cy.get('.playback-toolbar-button.themed.class-work').should('have.css', 'background-color', 'rgb(236, 201, 255)');
+    });
+  });
+});
+
+context('History Playback for student', () => {
+
+  before(() => {
+    cy.clearQAData('all');
+
+    cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:1');
+    cy.waitForLoad();
+    cy.wait(2000);
+    clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
+  });
+
+  it('verify playback icon not displayed for student', function() {
+    cy.openTopTab('my-work');
+    cy.openDocumentThumbnail('workspaces', this.investigationTitle);
+    cy.get('[data-testid="playback-component-button"]').should("not.exist");
   });
 });

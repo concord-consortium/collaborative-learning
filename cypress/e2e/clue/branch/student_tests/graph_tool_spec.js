@@ -3,12 +3,14 @@ import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import GraphToolTile from '../../../../support/elements/clue/GraphToolTile';
 import PrimaryWorkspace from '../../../../support/elements/common/PrimaryWorkspace';
 import ResourcePanel from '../../../../support/elements/clue/ResourcesPanel';
+import TextToolTile from '../../../../support/elements/clue/TextToolTile';
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const graphToolTile = new GraphToolTile;
 const primaryWorkspace = new PrimaryWorkspace;
 const resourcePanel = new ResourcePanel;
+const textToolTile = new TextToolTile;
 
 const problemDoc = '2.1 Drawing Wumps';
 const ptsDoc = 'Points';
@@ -245,3 +247,66 @@ const polyDoc = 'Polygon';
 
             //     // });
             // });
+
+
+context('Test undo redo functionalities', function(){
+    before(function(){
+        const queryParams = `${Cypress.config("queryParams")}`;
+        cy.clearQAData('all');
+        cy.visit(queryParams);
+        cy.waitForLoad();
+        cy.closeResourceTabs();
+    });
+
+    describe('Graph tile undo redo',()=>{
+        it('will undo redo graph tile creation/deletion', function () {
+            // Creation - Undo/Redo
+            clueCanvas.addTile('geometry');
+            graphToolTile.getGraph().should("exist");
+            textToolTile.getTextTile().should("exist");
+            clueCanvas.getUndoTool().should("not.have.class", "disabled");
+            clueCanvas.getRedoTool().should("have.class", "disabled");
+            clueCanvas.getUndoTool().click();
+            graphToolTile.getGraph().should("not.exist");
+            textToolTile.getTextTile().should("not.exist");
+            clueCanvas.getUndoTool().should("have.class", "disabled");
+            clueCanvas.getRedoTool().should("not.have.class", "disabled");
+            clueCanvas.getRedoTool().click();
+            graphToolTile.getGraph().should("exist");
+            textToolTile.getTextTile().should("exist");
+            clueCanvas.getUndoTool().should("not.have.class", "disabled");
+            clueCanvas.getRedoTool().should("have.class", "disabled");
+      
+            // Deletion - Undo/Redo
+            clueCanvas.deleteTile('geometry');
+            graphToolTile.getGraph().should("not.exist");
+            textToolTile.getTextTile().should("exist");
+            clueCanvas.getUndoTool().click();
+            graphToolTile.getGraph().should("exist");
+            textToolTile.getTextTile().should("exist");
+            clueCanvas.getRedoTool().click();
+            graphToolTile.getGraph().should("not.exist");
+            textToolTile.getTextTile().should("exist");
+            clueCanvas.getUndoTool().click();
+        });
+        it("edit tile title", () => {
+            const newName = "Graph Tile";
+            graphToolTile.getGraphTitle().first().should("contain", "Graph 1");
+            graphToolTile.getGraphTileTitle().first().click();
+            graphToolTile.getGraphTileTitle().first().type(newName + '{enter}');
+            graphToolTile.getGraphTitle().should("contain", newName);
+        });
+        it("undo redo actions", () => {
+            clueCanvas.getUndoTool().click();
+            graphToolTile.getGraphTitle().first().should("contain", "Graph 1");
+            clueCanvas.getRedoTool().click();
+            graphToolTile.getGraphTitle().should("contain", "Graph Tile");
+        });
+        it('verify delete graph', function () {
+            clueCanvas.deleteTile('geometry');
+            graphToolTile.getGraph().should("not.exist");
+            textToolTile.getTextTile().should("exist");
+        });
+    });
+    
+});
