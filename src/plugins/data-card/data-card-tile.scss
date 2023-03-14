@@ -1,6 +1,6 @@
 @import "../../components/vars.sass";
 
-$card-width: 359px;
+$single-view-card-width: 359px;
 $name-width: 34%;
 $value-width: 66%;
 $data-row-min-height: 24px;
@@ -32,7 +32,7 @@ $default-button-border-color: #979797;
 
   .panel {
     border: solid 1px $charcoal-light-1;
-    width: $card-width;
+    width: $single-view-card-width;
     height: 34px;
     font-family: Lato;
     font-size: 14px;
@@ -160,7 +160,7 @@ $default-button-border-color: #979797;
   }
 
   .single-card-data-area {
-    width: $card-width;
+    width: $single-view-card-width;
 
     /* saved state attributes */
     .attribute-name-value-pair {
@@ -260,16 +260,6 @@ $default-button-border-color: #979797;
   .add-field {
     margin-top: 5px;
     // half of 35% minus half the width of the icon
-    margin-left: ($card-width * 0.175) - 12px;
+    margin-left: ($single-view-card-width * 0.175) - 12px;
   }
-
-  .sorting-cards-data-area {
-    // each card is specified as 160px, plus 6 * 10px margins over three columns
-    width: 540px;
-    background-color: $workspace-teal-light-4;
-    border: solid 1px $charcoal-light-1;
-    padding:$cell-padding;
-  }
-
-
 }
