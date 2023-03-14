@@ -1,4 +1,4 @@
-import { types, Instance, applySnapshot, getSnapshot } from "mobx-state-tree";
+import { types, Instance, applySnapshot, getSnapshot, getType } from "mobx-state-tree";
 import { cloneDeep } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { DataflowProgramModel } from "./dataflow-program-model";
@@ -32,7 +32,7 @@ export const DataflowContentModel = TileContentModel
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programDataRate: DEFAULT_DATA_RATE,
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
-    programRecordState: 0
+    programRecordState: false,
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel
@@ -55,6 +55,16 @@ export const DataflowContentModel = TileContentModel
     get title() {
       return getTileModel(self)?.title;
     },
+    // in data card there is a getSharedModel()
+    // get sharedModel(){
+    //   const sharedModelManager = self.tileEnv?.sharedModelManager;
+    //   const firstSharedModel = sharedModelManager?.getTileSharedModels(self)?.[0];
+    //   if (!firstSharedModel || getType(firstSharedModel) !== SharedDataSet) {
+    //     return undefined;
+    //   }
+    //   return firstSharedModel as SharedDataSetType;
+
+    // },
     get isUserResizable() {
       return true;
     },
@@ -97,7 +107,7 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.scale = scale;
     },
     setProgramRecordState(){
-      self.programRecordState = (self.programRecordState + 1) % 3;
+      self.programRecordState = !self.programRecordState;
     }
   }));
 

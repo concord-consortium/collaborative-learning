@@ -28,11 +28,16 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   public static tileHandlesSelection = true;
 
   public render() {
-    // console.log("class <DataflowToolComponent> with props", this.props);
+
+    // console.log("⚡ ⚡ ⚡ class <DataflowToolComponent> with props", this.props);
     const { readOnly, height, model } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom, programRecordState } = this.getContent();
+    const numNodes = program.nodes.size;
+    // console.log("numBlocks", numBlocks.size);
+    // console.log("⚡ ⚡ ⚡ class <DataflowToolComponent>  this.getContent()", this.getContent());
+
     return (
       <>
         <ToolTitleArea>{this.renderTitle()}</ToolTitleArea>
@@ -54,6 +59,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
                   tileId={model.id}
                   onRecordDataChange={this.handleRecordDataChange}
                   programRecordState={programRecordState}
+                  numNodes={numNodes}
                 />
               );
             }}
@@ -122,20 +128,16 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   };
 
   private handleProgramDataRateChange = (program: any) => {
-    console.log("handleProgramDataRateChange with program:", program);
+    // console.log("handleProgramDataRateChange with program:", program);
     this.getContent().setProgramDataRate(program);
   };
 
   private handleProgramZoomChange = (dx: number, dy: number, scale: number) => {
-    console.log("handleProgramZoomChange with dx:", dx, "dy:", dy, "scale:", scale);
+    // console.log("handleProgramZoomChange with dx:", dx, "dy:", dy, "scale:", scale);
     this.getContent().setProgramZoom(dx, dy, scale);
   };
   private handleRecordDataChange = () => {
-    //0 - Record Data Mode
-    //1 - Stop Data Mode
-    //2 - Clear Data Mode
     this.getContent().setProgramRecordState();
-
   };
 
 

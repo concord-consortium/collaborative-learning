@@ -1,10 +1,16 @@
-import React, { useState } from "react";
+import React, { useRef } from "react";
+import Slider from "rc-slider";
 import classNames from "classnames";
 import { ProgramDataRate } from "../../model/utilities/node";
 import { IconButton } from "../../../../components/utilities/icon-button";
 import { SerialDevice } from "../../../../models/stores/serial";
+import RecordIcon from "../../assets/topbar-buttons/record-icon.png";
+import StopIcon from "../../assets/topbar-buttons/stop-icon.png";
+import PlayIcon from "../../assets/topbar-buttons/play-icon.png";
 
 import "./dataflow-program-topbar.scss";
+
+const totalSamples = 10000;
 
 interface TopbarProps {
   programDataRates: ProgramDataRate[];
@@ -15,13 +21,19 @@ interface TopbarProps {
   showRateUI: boolean;
   lastIntervalDuration: number;
   serialDevice: SerialDevice;
-  onRecordDataChange: (program: any) => void; //change this to have modes?
-  programRecordState: number;
+  onRecordDataChange: (program: any) => void;
+  programRecordState: boolean;
+  numNodes: number;
 }
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates,
-    dataRate, onRateSelectClick, onRecordDataChange, programRecordState } = props;
+    dataRate, onRateSelectClick, onRecordDataChange, programRecordState, numNodes } = props;
+    // console.log("<DataflowProgramToolbar> \n with props", props);
+
+    // console.log("<DataflowProgramToolbar> \n with dataRate", dataRate);
+    console.log("<DataflowProgramToolbar> \n with  numNodes", numNodes);
+
   // Of the boards tested, only authentic Arduinos (usbProductId === 67) raise the browser `connect` event
   // Which we use to track physical connection independently of port state
   // So we only warn of a lack of physical connection when using an known board
@@ -54,7 +66,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
 
   return (
     <div className="program-editor-topbar">
-      <div className="topbar-left">
+      <div className="topbar-icon">
         {<IconButton
           icon="serial"
           key="serial"
@@ -67,88 +79,153 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
           { serialMessage() }
         </div>
       </div>
-      <div className="topbar-center">
-        <RateSelectorComponent
-          rateOptions={programDataRates}
-          dataRate={dataRate}
-          onRateSelectClick={onRateSelectClick}
-          readOnly={readOnly}
 
-        />
-        <RecordDataButton
-          programRecordState={programRecordState}
-          onRecordDataChange={onRecordDataChange}
-        />
+      <div className="topbar-blank-or-play">
+        {
+          programRecordState && <PlaybackButton/>
+        }
       </div>
+      <RateSelectorOrPlayBack
+        rateOptions={programDataRates}
+        dataRate={dataRate}
+        onRateSelectClick={onRateSelectClick}
+        readOnly={readOnly}
+        programRecordState={programRecordState}
+        numNodes={numNodes}
+      />
+
+      <RecordOrStopButton
+        programRecordState={programRecordState}
+        onRecordDataChange={onRecordDataChange}
+      />
       <div className="topbar-right">
         {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
+      </div>
+      <div className="topbar-json">
       </div>
     </div>
   );
 };
 
+/* ==[ Sampling Rate Selector ] == */
 interface IRateSelectorProps {
   rateOptions: ProgramDataRate[];
   dataRate: number;
   onRateSelectClick: (rate: number) => void;
   readOnly: boolean;
+  programRecordState: boolean;
+  numNodes: number
 }
 
-const RateSelectorComponent = (props: IRateSelectorProps) => {
+const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
+
+  // console.log("<RateSelectorComponent with props:", props);
+  const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState, numNodes} = props;
+
+  const railRef = useRef<HTMLDivElement>(null);
+  const totalRecordingTimeSec = (dataRate / 1000) * (totalSamples/numNodes);
+
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    props.onRateSelectClick(Number(event.target.value));
+    onRateSelectClick(Number(event.target.value));
   };
   return (
-    <div className="datarate" title="Set Program Sampling Rate">
-      <div className="label-back">
-        <label className="label" htmlFor="rate-select">Sampling Rate</label>
+    <>
+      <div className="topbar-sampleratetext-or-timeslider">
+        {
+          programRecordState ?
+          <div className="slider-container">
+            <Slider
+              min={0}
+              max={20}
+              step={1}
+              value={5}
+              ref={railRef}
+              // className={`${activeNavTab}`}
+              // onChange={handleSliderValueChange}
+              // onAfterChange={handleSliderAfterChange}
+            />
+          </div>
+          :
+          <label className="samplerate-label" htmlFor="rate-select">Sampling Rate</label>
+        }
       </div>
-      <div className="datarate-options-back">
+
+      <div className="topbar-datarate-or-timer">
         <div className="datarate-options">
-          <select onChange={handleSelectChange}
-            disabled={props.readOnly}
-            value={props.dataRate.toString()}
-            id="rate-select" // TODO: The id needs to be unique to the particular DF tile
-          >
-            { props.rateOptions.map((rate: ProgramDataRate) => (
-              <option key={rate.text} value={rate.val} disabled={rate.disabled}>
-                {rate.text}
-              </option>
-            ))}
-          </select>
+          {
+            !programRecordState ?
+            <select onChange={handleSelectChange}
+              disabled={readOnly}
+              value={dataRate.toString()}
+              id="rate-select" // TODO: The id needs to be unique to the particular DF tile
+            >
+              {
+                rateOptions.map((rate: ProgramDataRate) => (
+                <option key={rate.text} value={rate.val} disabled={rate.disabled}>
+                  {rate.text}
+                </option>
+                ))
+              }
+            </select> : `sec recorded / ${totalRecordingTimeSec}`
+          }
+
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
 
-enum Mode {
-  "Record Data",
-  "Stop",
-  "Clear Data"
-}
 
-interface IRecordDataProps {
+/* ==[ Record Data Button ] == */
+interface IRecordOrStopProps {
   onRecordDataChange: (program: any) => void; //change this to have modes?
-  programRecordState: number;
+  programRecordState: boolean;
 
 }
 
-const RecordDataButton = (props: IRecordDataProps) => {
+const RecordOrStopButton = (props: IRecordOrStopProps) => {
+  // console.log("RecordDataButton with props:", props);
   const { onRecordDataChange, programRecordState } = props;
 
 
   return (
-    <div className="record-data-btn-container">
+    <div className="record-btn-container">
       <button
         className="record-data-btn"
         onClick={onRecordDataChange}
       >
-
-      {Mode[programRecordState]}
+      <div className="record-data-icon">
+        {
+          programRecordState ?
+          <img className="stop-icon-resize" src={StopIcon}/> :
+          <img src={RecordIcon}/>
+        }
+      </div>
+      <div className="record-data-txt">
+        {programRecordState ? "Stop" : "Record"}
+      </div>
       </button>
 
     </div>
   );
 };
+
+
+/* ==[ Playback Button ] == */
+
+const PlaybackButton = () => {
+  return (
+    <div className="playback-btn-container">
+      <button
+        className="playback-data-btn"
+      >
+      <div className="playback-data-icon">
+        <img src={PlayIcon}/>
+      </div>
+      Play
+      </button>
+    </div>
+  );
+};
+

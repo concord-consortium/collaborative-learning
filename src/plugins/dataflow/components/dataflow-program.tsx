@@ -65,8 +65,9 @@ interface IProps extends SizeMeProps {
   onZoomChange: (dx: number, dy: number, scale: number) => void;
   tileHeight?: number;
   tileId: string;
-  onRecordDataChange: (program: any) => void; //change this
-  programRecordState: number;
+  onRecordDataChange: (program: any) => void;
+  programRecordState: boolean;
+  numNodes: number;
 }
 
 interface IState {
@@ -107,7 +108,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { readOnly, documentProperties } = this.props;
+    console.log("dataflow-program > render()");
+    const { readOnly, documentProperties, numNodes} = this.props;
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container`;
@@ -128,6 +130,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           serialDevice={this.stores.serialDevice}
           onRecordDataChange={this.props.onRecordDataChange}
           programRecordState={this.props.programRecordState}
+          numNodes={numNodes}
+          //need to know total # of blocks
         />
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
@@ -284,6 +288,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       });
 
       this.programEditor.on("nodecreated", node => {
+        console.log("dataflow-program > nodecreated");
         this.processAndSave();
         this.moveNodeToFront(node, true);
         node.meta.inTileWithId = this.props.tileId;
