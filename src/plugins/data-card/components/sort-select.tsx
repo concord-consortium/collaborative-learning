@@ -9,10 +9,6 @@ interface IProps {
   attrIdNamePairs: any[];
 }
 
-// TODO - refactor this so that it gets currentSortId and attrsWithNames
-// as props - then it will update on time and prevent ability to choose
-// an attribute that no longer exists
-
 export const SortSelect: React.FC<IProps> = ({ model, attrIdNamePairs, onSortAttrChange }) => {
   const content = model.content as DataCardContentModelType;
   const alphaAttrs = orderBy(attrIdNamePairs, [attr => attr.attrName.toLowerCase()]);

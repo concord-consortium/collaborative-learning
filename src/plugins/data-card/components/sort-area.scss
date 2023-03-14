@@ -1,6 +1,8 @@
 @import "../../../components/vars.sass";
 
 $sort-view-card-width: 177px;
+$card-space-factor: 5px;
+$card-border: 1px solid $charcoal-light-1;
 $sort-view-column-width: $sort-view-card-width + 10px;
 $sort-view-font-size:10px;
 $cards-per-row: 3; // this may be dynamic in the future
@@ -27,26 +29,93 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row );
           font-size: 13px;
           font-weight: bold;
           text-align: center;
-          padding-top: 3px;
-          padding-bottom: 3px;
+          padding-top: $card-space-factor;
+          padding-bottom: $card-space-factor;
         }
       }
 
       .empty.cell {
         width: $sort-view-card-width;
         background-color: $workspace-teal-light-4;
-        height:23px;
+        height:26px;
+        border-bottom: 1px $charcoal-light-1;
       }
     }
 
     .sortable.card {
       display: grid;
-      // temporary styles for dev
+      border-radius:$card-space-factor;
       margin:3px;
-      padding:3px;
-      font-family: monospace;
-      border: 1px solid $charcoal-light-1;
-      transform: translateX(-1px);
+      transition: all .4s ease-in-out;
+      //transform: translateX(1px);
+
+      .heading {
+        padding:4px;
+        color: tungsten;
+        font-style: italic;
+        text-align: right;
+        border-radius: 5px 5px 0px 0px;
+        border: 1px solid $charcoal-light-1;
+        //border-bottom: 0px;
+        display:flex;
+        align-items: flex-end;
+
+        .card-count-info {
+          width:90%;
+          text-align: right;
+          justify-self: end;
+        }
+      }
+
+      .no-content {
+         border-bottom: $card-border;
+      }
+
+      .content > div {
+        //padding: $card-space-factor;
+        background-color: white;
+        border-left: $card-border;
+        border-right: $card-border;
+        border-bottom: $card-border;
+      }
+
+      .footer {
+        border-left: $card-border;
+        border-right: $card-border;
+        border-bottom: $card-border;
+        height:5px;
+        border-radius: 0px 0px 5px 5px;
+      }
+
+      .attribute-value-row {
+        .attribute {
+          border-right:1px solid $charcoal-light-1;
+          width:60px;
+          padding:5px;
+        }
+        .value {
+          width:106px;
+          padding:5px;
+        }
+        .image-value {
+          width: 100%;
+        }
+      }
+
+    }
+
+    .collapsed .heading {
+      border-bottom: 0px !important;
+    }
+
+    .expand-toggle {
+      cursor:pointer;
+      background-color: transparent;
+      border:0px;
+      padding: 0px;
+      margin-right:2px;
+      font-size: 10px;
+      text-align: left;
     }
   }
 }
