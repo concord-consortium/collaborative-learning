@@ -1,0 +1,187 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles": [
+      {
+        "id": "HV3VFRZ02x4U-ZVE",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
+            "<p><u>Solutions and Strategies</u></p>",
+            "<p></p>",
+            "<p>Have groups display their work. Then have students do a Gallery Walk to look at all of the work from other groups. Ask them what they notice and wonder about the strategies used by their classmates.</p>",
+            "<p></p>",
+            "<p>The summary on the first day should be a time for students to share their ideas and to tell why they think their ideas make sense as they answered the Initial Challenge. . (AGENCY, IDENTITY, OWNERSHIP) As a class, discuss the strategies and solutions for the determining which juice is the most orangey flavor.</p>",
+            "<p></p>",
+            "<p>You want the students to leave this Problem having experienced several problem-solving strategies, including an emphasis on ratios. The suggested questions will help students think about what they’ve learned.</p>"
+          ]
+        }
+      },
+      {
+        "id": "iV4wjur89XdIHz8J",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Suggested Questions</strong></p>", "<ul><li>What does it mean to be the most orangey tasting? To be the least orangey tasting? (Students might have a variety of ways to reason about the questions in this Problem.)</li></ul>"]
+        }
+      },
+      {"id": "YSI4aGVJ_uzuka4P", "content": {"type": "Text", "format": "html", "text": ["<p>Students may find many ways to represent their thinking. Their strategies will vary based on their use of part to part ratios or part to whole ratios. Students’ strategies may include the following:</p>"]}},
+      {
+        "id": "THfZgeLNMg2Eu4WU",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Strategies for Part to Part Ratios</strong></p>",
+            "<ul><li>Scaling up each ratio to the same number of parts for one of the quantities. This would look very much like “Common Denominator” or “Common Numerator” thinking.</li><li>Unit Rate – scaling each ratio to have one of the quantities equal to 1. For example, 1 concentrate to x water or x concentrate to 1 water.</li><li>Drawing pictures to show how much water for each cup of concentrate is in each mix. The goal is to partition the water so that each cup of concentrate gets the same amount of water.</li></ul>"
+          ]
+        }
+      },
+      {"id": "NcFSNQH19Edof2IX", "content": {"type": "Text", "format": "html", "text": ["<p>For example, with Mix A, we have 1 ½ cups of water for each cup of concentrate.</p>"]}},
+      {"id": "PLgiuNAJawP6ccTs", "title": "Mix A", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_1-1_WaterConcentrateMixA.png"}},
+      {"id": "ab4gaBhWQ1jqXX0o", "content": {"type": "Text", "format": "html", "text": ["<p>For Mix B, we have 1 4/5 cups of water for each cup of concentrate.</p>"]}},
+      {"id": "StztPqniplE7h5D5", "title": "Mix B", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_1-1_WaterConcentrateMixB.png"}},
+      {"id": "03-AjqcvOf6uss6G", "content": {"type": "Text", "format": "html", "text": ["<p>For Mix C, we have 2 cups of water for each cup of concentrate.</p>"]}},
+      {"id": "nQFQQzF2giX2nSIH", "title": "Mix C", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_1-1_WaterConcentrateMixC.png"}},
+      {"id": "2s7HIcRObXGms_SR", "content": {"type": "Text", "format": "html", "text": ["<p>For Mix D, we have 1 2/3 cups of water for each cup of concentrate.</p>"]}},
+      {"id": "h6uyBJCZhZgZqlfl", "title": "Mix D", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_1-1_WaterConcentrateMixD.png"}},
+      {
+        "id": "dqC890bDVCkBBu38",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>A common misconception to watch for is the part-to-part ratio represented in percent form. For example, 2 cups concentrate: 3 cups water interpreted as 2/3 or 66% of the mix is concentrate.</p>",
+            "<ul><li>If there are 3 cups concentrate and 3 cups water is that 3/3 or 100% concentrate?  (no)</li><li>If there is 1 cup concentrate to 2 cups water, then how would the fraction 1/2 or the percent 50% be used to describe the situation? (concentrate is 1/2 of the water, not 1/2 of the mix)</li><li>What would 66% represent in the recipe with 2 cups concentrate: 3 cups water?  (concentrate is 2/3 or 66% of the water, not the full mix)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "rOaH0s0QTp98NvdX",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Strategies Part to Whole Ratios</strong></p>",
+            "<ul><li>Scaling up each ratio to the same number of parts for one of the quantities. This would look very much like “Common Denominator” or “Common Numerator” thinking.</li><li>Percent of water and/or concentrate in mixes – scaling each ratio to have one of the quantities equal to 100.</li><li>Unit Rate – scaling each ratio to have one of the quantities equal to 1.</li></ul>",
+            "<p>For example, 1 concentrate to x total cups.</p>",
+            "<p></p>",
+            "<ul><li>Expressing the ratios as a fraction or as decimal amounts of the mix.</li></ul>",
+            "<p></p>",
+            "<p>Give students time to justify their strategies to the class. As students analyze the strategies of others, continue to ask them how the strategies compare. It is important for students to see that different representations can convey similar types of mathematical thinking.</p>"
+          ]
+        }
+      },
+      {
+        "id": "iMSDuJje1xkNH_gI",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>How are your strategies alike? How are they different?</li></ul>",
+            "<p></p>",
+            "<p><em>Check for Understanding</em></p>",
+            "<ul><li>Which of the following will taste most orangey: 2 cups of concentrate and 3 cups of water, 4 cups of concentrate and 6 cups of water, or 10 cups of concentrate and 15 cups of water? Explain your reasoning. (The recipes will all taste the same. Despite having more liquid, each recipe will have the same ratio of concentrate to juice.)</li></ul>",
+            "<p></p>",
+            "<p><em>Going Beyond</em></p>",
+            "<ul><li>If you combined all four recipes would the new recipe be the most orangey recipe? (No. 11 cups concentrate and 19 cups water would “water down” the most orangey recipe.)</li><li>Would the new recipe be the least orangey of the recipes? (No. Since we have combined some more orangey ratios with the least orangey, this new recipe will be more orangey than Recipe C. We would be averaging-out the recipes, so the orangey flavor will be in between the most and the least.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Making the Mathematics Explicit</u></p>",
+            "<p>As students explain, justify, and discuss the strategies in the What If? to the whole class, ask questions to analyze the strategies. Also, compare the strategies to each other and to the strategies that your students used in the Initial Challenge.</p>"
+          ]
+        }
+      },
+      {
+        "id": "onsqodFhqsTEvbVR",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>What If Situation A</u></p>",
+            "<p></p>",
+            "<p><em>Moja’s Group</em></p>",
+            "<p>In the Stretching and Shrinking Unit, students used scale factor as a way to scale sides of shapes to create scale drawings/similar figures.</p>",
+            "<ul><li>How did Moja’s group think about this problem? (Answers will vary. They kept it as a part-to-part relationship and scaled up each recipe to have 90 cups of water.)</li><li>Is their thinking correct? (yes)</li><li>How is this similar to or different from what groups did in our class?  (Answers will vary.)</li></ul>",
+            "<p><em>Lima’s Group</em></p>",
+            "<ul><li>What do the arrows represent in this picture? (how the concentrate is spread out over (shared among) the water)</li><li>How did Lima’s group think about this problem? (Answers will vary. They show the unit rate of how much water per cup of concentrate is in each recipe.)</li><li>Is their thinking correct? (yes)</li><li>How is this similar to or different from what groups did in our class? (Answers will vary.)</li></ul>",
+            "<p><em>Tatu’s Group</em></p>",
+            "<ul><li>How did Tatu’s group think about this problem? (They used part to whole percents)</li><li>Is their thinking correct? (yes)</li><li>How is this similar to or different from what groups did in our class? (Answers will vary.)</li></ul>",
+            "<p><em>Sanji’s Group</em></p>",
+            "<ul><li>How did Sanji’s group think about this problem? (Answers will vary. They changed the part to part ratio to a part to whole relationship and then scaled the concentrates all to 15.)</li><li>Is their thinking correct? (yes)</li><li>How is this similar to or different from what groups did in our class? (Answers will vary.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "LeXyz_v1SE1qLCVf",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Max’s Strategy</em></p>",
+            "<p>In the Grade 6 Comparing Quantities Unit, students were introduced to additive reasoning (differences as a comparison) and multiplicative reasoning (ratios as a comparison).</p>",
+            "<p></p>",
+            "<p>Suggested Questions</p>",
+            "<ul><li>Why is Max’s strategy not a ratio? (It is a difference, which is additive thinking. Ratios and proportional reasoning are multiplicate thinking. Max is not considering both quantities in his strategy.) What information is missing? (When you subtract, you lose the two quantities. A ratio is a comparison of two quantities.)</li><li>Is this additive reasoning or multiplicative (ratio) reasoning? Or, is addition/subtraction used or multiplication/division used? (Additive)"
+          ]
+        }
+      },
+      [
+        {"id": "k127x4JfR_WW_pLh", "title": "Recipe C", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_1-1_RecipeC.png"}},
+        {"id": "XXPOPixjDcfuSCaN", "title": "Recipe X", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_1-1_RecipeX.png"}}
+      ],
+      {
+        "id": "oy8cZxYw--5It3_-",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>How would Recipe X compare to Recipe C with 1 cup of concentrate and 2 cups of water? (Recipe X has almost equal parts water and concentrate. Recipe C has twice the amount of water as concentrate.)</li><li>Would they have the same amount of orangey taste? (No. Recipe C would be more orangey.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "I7Bnit9IYj0ibyAW",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Strategy 4: Stella, Elise, and Dan</u></p>",
+            "<p>Stella, Elise, and Dan scale the ratios to unit rates. Stella and Elise begin with part-to-part ratios. Dan begins with the part to whole ratio.</p>",
+            "<p></p>",
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Why do they have different unit rates? (Each person chose a different quantity to scale to 1. Stella scaled the water to 1 in her part-to-part ratio. Elise scaled the concentrate to 1 in her part-to-part ratio. Dan scaled the concentrate to 1 in his part to whole ratio.)</li><li>Can any sets of rates help to make comparisons? (Yes. It depends on what quantity you want to compare. It is important that when comparing, you choose the same type of ratio (part to part or part to whole) and choose the same quantity, e.g., concentrate, water, or total cups, to scale to 1.)</li><li>Is there any other unit rate that a student could have written? (Yes. Dan scaled the concentrate to 1. He could have scaled the total cups to 1. He would have the unit rate of 2/5 cups of concentrate for every 1 cup of juice.)</li><li>How are unit rates different from percentages? (Unit rates can be found from part to part or part to whole ratios. Percentages always have to be part to whole comparisons.)</li><li>How are unit rates like percentages? (In each case, one of the quantities is scaled up or down to 1 (for a unit rate) or 100 (for a percentage), making it easy to do a comparison between ratios. This makes it easy to do a comparison between ratios.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p><u>Now What Do Students Know</u></p>", "<p>Ask students to reflect on the discussion and answer the Now What Do You Know.</p>", "<p></p>", "<p>See answers for more information about the strategies and embedded mathematics.</p>"]}
+      },
+      {
+        "id": "5XxYIHdazoO1ll-9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+            "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

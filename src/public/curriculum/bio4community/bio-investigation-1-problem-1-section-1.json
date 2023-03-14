@@ -1,0 +1,166 @@
+{
+  "type": "chapter1",
+  "content": {
+    "tiles": [
+      {"id": "NPzj-ifRKDziyCTp", "title": "Text 16", "content": {"type": "Text", "format": "html", "text": ["<h2>STRESS AND HEART ATTACKS:</h2>", "<h2>Rakesh’s Story</h2>"]}},
+      {"id": "FpOSCcoHEK2u0r7X", "title": "Text 17", "content": {"type": "Text", "format": "html", "text": ["<h3>CHAPTER 1: DEAUNDRE</h3>"]}},
+      {
+        "id": "0zQ2tgORdGAv9iYx",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Rakesh (Rah-kay-sh) sat in the small break room in the Amazon warehouse, fidgeting with his lunch. He smiled as he looked down at the small post-it note poking out from inside the crumpled brown bag that read “Good luck at work today, Dad!” He loved when his kids snuck him little notes in his lunch. They always knew how to make him smile. He wanted to give them a stable life so he worked 15-hour days and woke up early to make his kids breakfast before going to work. It was hard being a single dad. </p>",
+            "<p>Even though his kids were older and in 7th grade and high school, it still felt like all the world’s burdens were on his shoulders; but seeing them happy helped. Raising his kids on his own had been difficult ever since Sorayah (So-raa-yaa), his wife or… well…ex-wife, and him split up. That left little time for Rakesh (Rah-kay-sh) to destress and have “me” time. But it was worth it if it meant he could eventually be promoted to manager. A higher pay and more stable hours would mean more time with his kids. As he looked at the note, Rakesh remembered the conversation he had with his kids that morning. </p>"
+          ]
+        }
+      },
+      {
+        "id": "tlvHCWX2a-MiE2ZQ",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Ajay</strong> (Uh-jay): Ugh. I just can’t study for this math test.</p>",
+            "<p><strong>Zainab</strong> (Zay-nab): Just do it.</p>",
+            "<p><strong>Ajay</strong> (Uh-jay): Okay, genius. </p>",
+            "<p><strong>Zainab</strong> (Zay-nab): I know, I’m so helpful, right? </p>",
+            "<p><strong>Rakesh</strong>: What’s going on? What’s the issue?</p>",
+            "<p><strong>Ajay</strong>: Dad... I can’t focus in class. Ms. Ross will put the equations on the board and next thing I know she got to the answer but I just don’t know how. </p>",
+            "<p><strong>Rakesh</strong>: Well, you need to pay more attention when she’s teaching! Math is important so you have to try harder. You kids have opportunities that I never had. You have to make use of them.</p>",
+            "<p><strong>Zainab</strong>: Like what, appa (father in Tamil)?</p>",
+            "<p><strong>Rakesh</strong>: You’re going to a good school, with good teachers, and you actually have a chance to learn, for free! You can get a degree and do what you want to do with your life here. I never got that in India. There, you have to pay for private school if you want a good education and you know our family couldn’t afford that…</p>",
+            "<p><strong>Ajay</strong>: Wait. What did you want to be when you were younger?</p>",
+            "<p><strong>Rakesh</strong>: I wanted to be an aerospace engineer since I was very young. </p>",
+            "<p><strong>Zainab</strong>: What’s that?</p>",
+            "<p><strong>Rakesh</strong>: It’s someone who designs planes.  </p>",
+            "<p><strong>Zainab</strong>: So why not just become that now?</p>",
+            "<p><strong>Rakesh</strong>: No... My time for studying and all is done.. It’s your turn now. You need to study hard so that you can grow up and become what you want. That will make me the happiest. So you better go now and make sure you (Rakesh points to Ajay) study for that math test. </p>",
+            "<p><strong>Ajay</strong>: Okay, dad. Fine.</p>"
+          ]
+        }
+      },
+      {
+        "id": "XMsmlOIb74cTshR8",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Working for Amazon was never Rakesh’s first choice of career. Being an immigrant without a degree made it hard to find a job. It was even harder, because Rakesh’s ex-wife Sorayah (So-raa-yaa) was still back in India which meant Rakesh had to provide for their kids by himself.  </p>",
+            "<p>Rakesh and Sorayah met in high school in India and were married soon after graduating. Sorayah was from Iran but had lived in India almost all her life. Soon after they were married, Rakesh and Sorayah had two little children for whom they wanted a better life. So, they decided to immigrate to America. Rakesh left India first with the children so that the kids could start school in America. </p>",
+            "<p>Sorayah was supposed to follow once her visa was approved by the U.S. Immigration Services. But, to their surprise, Sorayah’s visa application was denied because of a new rule that prevented people from muslim countries coming into the U.S. This meant Sorayah couldn’t immigrate to America because she had an Iranian passport.  Even after all these years, Rakesh still had a lot of anger for the U.S. Immigration rules that broke up his family. Back in the lunchroom at work, Rakesh was zoning out, pushing the rice in his container around, when one of his co-workers, Nicole, came in. </p>"
+          ]
+        }
+      },
+      {
+        "id": "Jt2L_vV5XHqePXML",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Nicole</strong>: Hey. Did you hear about Deaundre?</p>",
+            "<p><strong>Rakesh</strong>: No.What happened? Is everything alright?</p>",
+            "<p><strong>Nicole</strong>: He had a heart attack while he was here. He’s at the hospital right now.</p>",
+            "<p><strong>Rakesh</strong>: WHAT! WHEN? I just saw him clock in this morning and he looked fine! </p>"
+          ]
+        }
+      },
+      {
+        "id": "vbmKHXWxDC6W-HrZ",
+        "title": "Text 7",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Rakesh felt the concern and shock take over him. He and Deaundre have a lot in common. They both were the same age, had two kids, and both loved baseball. Deaundre was one of those guys who worked just as hard as everyone else but did it with a smile on his face. Rakesh decided to visit Deaundre at the hospital before work the next day, stopping at a local bodega to grab him a smiling bear wearing a fedora that kind of looked like him. </p>"
+          ]
+        }
+      },
+      {"id": "oxuSlTxkgkNJ5kIp", "title": "Rakesh Visits Deaundre at the Hospital", "content": {"type": "Image", "url": "curriculum/bio4community/images/Rakesh_S1.jpg", "filename": "curriculum/bio4community/images/Rakesh_S1.jpg"}},
+      {
+        "id": "0nGiS4DXgDANMxcb",
+        "title": "Text 8",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>[“Knock knock,” Rakesh entered with the bear held up to his face. Deaundre still had that smile plastered on. The two of them sat and talked for a while. ]</p>",
+            "<p><strong>Rakesh</strong>: Man, I am so glad to see you. How are you? I couldn’t believe it when I heard the news. </p>",
+            "<p><strong>Deaundre</strong>: I couldn’t believe it either. One minute I was working, the next I felt like my chest was so heavy and tight. It’s a good thing I wasn’t alone. I heard they called the ambulance right away, otherwise I don’t know what woulda happened. </p>",
+            "<p><strong>Rakesh</strong>: Did the doctors tell you what’s wrong? You look so healthy! </p>",
+            "<p><strong>Deaundre</strong>: Yeah, the doc keeps saying I’m too stressed and it’s causing blockages or something like that in my blood vessels. Somethin’ about stress causing all this bad stuff.</p>",
+            "<p></p>",
+            "<p>[This caught Rakesh’s attention.]</p>",
+            "<p></p>",
+            "<p><strong>Rakesh</strong>: “Wait. Your stress led to your heart attack?” </p>"
+          ]
+        }
+      },
+      {
+        "id": "qP9YiY4vQWonn0cz",
+        "title": "Text 9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>To say Rakesh was shocked was an understatement. He admitted that stress sometimes got to his head, he felt jittery and anxious like there were butterflies in his stomach. But he didn’t understand how something in his mind could affect his body. Stress only had mental symptoms… right? He wondered, how could stress cause blocked blood vessels? </p>"
+          ]
+        }
+      },
+      {
+        "id": "pU7njUZzQ2LsYh8r",
+        "title": "Text 10",
+        "content": {"type": "Text", "format": "html", "text": ["<p></p>", "<p><strong>Can you help him figure this out?</strong></p>", "<p>Discuss with your group--What do you think is the connection between stress and blocked blood vessels?</p>", "<p></p>"]}
+      },
+      {
+        "id": "k5RAu6GQ25j0ynvM",
+        "title": "Text 11",
+        "content": {"type": "Text", "format": "html", "text": ["<p><em>Continue reading to find out what happened next:</em></p>", "<p>Rakesh left the hospital even more stressed. When he got home he did his best not to show his children how worried he was. </p>"]}
+      },
+      {
+        "id": "O52To-oPV_xkTrl4",
+        "title": "Text 12",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Zainab</strong>: Hi Appa! Ajay already made the rice - the curry is just heating up now.</p>",
+            "<p><strong>Rakesh</strong>: Thanks, I’ll just wash my hands and come. </p>",
+            "<p><strong>Ajay</strong>: Hurry up dad, I’m so hungry! Coach ran us SO HARD at track. You remember we have the track meet this weekend right? Are you coming?</p>",
+            "<p><strong>Rakesh</strong>: Yes Ajay, you know I’m gonna try. It all depends on whether I can find someone to cover my shift. </p>",
+            "<p><strong>Zainab</strong>: Ok everybody come, dinner’s ready. Ajay you better not take all the rotis this time. I don’t care how hungry you are! </p>"
+          ]
+        }
+      },
+      {
+        "id": "Z8V_OV-2o1DEht_l",
+        "title": "Text 13",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>After dinner, when the kids were cleaning the kitchen, Rakesh decided to do some research on his own. He googled “<em>heart attack and stress</em>”. One of the links that came up caught his eye. It was a video of some monkeys and it showed a blocked blood vessel, he decided to check it out. He clicked on the link: “<em>The Effects of Stress on the Heart</em>”</p>"
+          ]
+        }
+      },
+      {
+        "id": "vgCFRLd5bNqzz2FX",
+        "title": "Text 14",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li><strong>Watch the video- </strong><strong><em>EVIDENCE 1-The Effects of Stress on the Heart</em></strong><strong> - in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Discuss the video with your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li><p><strong></strong></p></ul>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

@@ -1,0 +1,21 @@
+{
+  "type": "intro",
+  "content": {
+    "tiles": [
+      {
+        "id": "JjW7uhD05hjNttkr",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In this lesson, you will use a technique called Electromyography (EMG) to measure your muscle electrical activity. </p>",
+            "<p><strong>Learning Objectives</strong></p>",
+            "<p>By the end of today&#x27;s lesson, you will be able to acquire and make sense of muscle electrical activity (EMG) data.  </p>"
+          ]
+        }
+      },
+      {"id": "Hrv_5ES6azIrisdb", "title": "Flexing muscles to make a EMG trace [Credit: Backyard Brains]", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/Lesson1_4img1.png", "filename": "curriculum/neural-engineering/images/Lesson1_4img1.png"}},
+      {"id": "-rSXitCykW7FD_q2", "content": {"type": "Text", "format": "html", "text": ["<p><strong>D﻿o Now</strong></p>", "<p>Drag and drop the following tile into your workspace and answer the following question:</p>", "<p>What do you already know about how muscles contract?</p>"]}}
+    ]
+  }
+}

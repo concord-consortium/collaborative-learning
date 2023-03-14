@@ -1,0 +1,102 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "Uh5TlY3HG1o-ARl_",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The Mathematical Reflection provides an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know? questions to summarize their learning over the time. (TIME)</p>",
+            "<p></p>",
+            "<p>Each Investigation contributes to students’ conceptual understandings of the ideas in the Unit. Students’ explanations at the beginning of a Unit might be just forming. As you progress through the Unit, students can use the contexts, representation, and connections to express a more solid understanding. By the end of the Unit, students can create a complete picture of understanding.</p>",
+            "<p></p>",
+            "<p>After the class discussion, students can record their responses to the Mathematical Reflection to create a record of their current understandings of the big ideas of the Unit. </p>",
+            "<p></p>",
+            "<p>A teacher can gain an understanding of student thinking during a discussion of the reflection question. Then one can assess individual understanding based on each student’s written work.</p>"
+          ]
+        }
+      },
+      {
+        "id": "PPJ_d5zKPGqyz4BJ",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Student Responses</u></p>",
+            "<p>At the beginning of the Unit, students will need more collaboration to outline and summarize the important ideas. (Agency, Identity, Ownership) They may need examples of writing, diagrams, and/or justifications from other students to help build their vision of what is expected when answering the Mathematical Reflection question. Early in the year you may want to start writing Mathematical Reflections as a whole group. Then as the year progresses, move to small groups, pairs, and finally individuals.</p>"
+          ]
+        }
+      },
+      {
+        "id": "l9h8T6jKMRUehxDA",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Notes on Student Responses</strong></p>",
+            "<p>As the first Investigation of the Unit, students will need may need more collaboration to outline and summarize the important ideas. </p>",
+            "<ul><li>Students will be more confident in discussing the constant of proportionality since this conversation began in Comparing and Scaling. </li><li>Students may rely on contexts to discuss particular expressions and equations. Their general understandings may be fragile at this time.</li><li>Students’ understandings of finding solutions to equations in stories, tables, graphs, and words are at the beginning stages. Students will continue to explore solutions to equations throughout this Unit.</li><li>Students’ understandings about inequalities are at a very informal stage. More will be done in later Investigations.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "Kqn06UmXEWRR-kRf",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><em><strong>What do you know about linear expressions, equations, inequalities, and relationships?</strong></em></p>", "<p><em><strong></strong></em></p>", "<p>See Student Edition with answers for possible responses to the question.</p>"]
+        }
+      },
+      {
+        "id": "yphHa8n96BK_o3R-",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning   </strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.  </p>",
+            "<ul><li>What evidence in students’ work shows an understanding of the ideas in this Unit?</li><li>What mathematical ideas will still need emphasis?</li><li>What opportunities exist in the rest of the Unit, or in future Units, to extend and connect the students’ learning?</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "WJ92hrI-VHSqzxH9",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Mathematical Practice Implementation</strong></p>",
+            "<p><strong></strong></p>",
+            "<p>Every day, students use “habits of mind” to make sense of problems and apply learning to new situations. Some of these habits are described by the Common Core State Standards for Mathematical Practices (MP). Using the Mathematical Practices at the close of each Investigation allows students to name their reasoning.</p>",
+            "<p></p>",
+            "<p>Students demonstrate to themselves (AGENCY, IDENTITY, OWNERSHIP) the power of the practices. </p>",
+            "<p></p>",
+            "<p>Some teachers discuss the Mathematical Practices during the Summarize of Problems where a specific practice was evident and widely used by students. This can enhance students’ understanding of their mathematical learning and processing.</p>"
+          ]
+        }
+      },
+      {
+        "id": "bUjvs_p2itHyBJQ2",
+        "title": "Text 7",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li><em>What mathematics have you learned by solving this Problem?</em></li><li><em>What Mathematical Practices were helpful in learning this mathematics?</em></li></ul>",
+            "<p></p>",
+            "<p>Students may answer that the example of the Mathematical Practice explained in the SE is an example of MP1 Make sense of problems and persevere in solving them, MP2 Reason abstractly and quantitatively, MP4 Model with mathematics, MP7 Look for and make use of structure, or MP8 Look for and express regularity in repeated reasoning. </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

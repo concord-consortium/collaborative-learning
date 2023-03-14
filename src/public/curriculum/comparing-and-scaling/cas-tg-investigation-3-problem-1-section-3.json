@@ -1,0 +1,51 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "m-A2BWwMxF9d565X",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Explore (Digging In)</strong></u></p>",
+            "<p><u>Providing for Individual Needs</u></p>",
+            "<p></p>",
+            "<p>As you move around the room, listen to students discuss the Problem. Find appropriate opportunities to ask students about connections among percents, ratios, and rates.</p>",
+            "<p></p>",
+            "<p>Encourage students to make their reasoning and conclusion visible to others.</p>",
+            "<p></p>",
+            "<p>Keep notes on these multiple ways to solve problems. Be sure to discuss and compare these strategies in the Summarize.</p>",
+            "<p></p>",
+            "<p>Students may have various strategies for solving percent problems. In Grade 6 Comparing Quantities, students used strategies such as drawing tape diagrams or percent bars, double number lines, rate tables, and informal proportions.</p>",
+            "<p></p>",
+            "<p>Below is an example of the strategies that students analyzed in Comparing Quantities (computing the percent for 136 out of 400) and how that strategy may transfer to the current question (computing 5% tax on $24).</p>"
+          ]
+        }
+      },
+      {"id": "-tCH2orEQCRcRQt-", "content": {"type": "Text", "format": "html", "text": ["<p><em>Possible Strategy Connecting to Work in Comparing Quantities: Percent Bar or Tape Diagram</em></p>", "<p>For computing the percent for 136 out of 400</p>"]}},
+      {"id": "b9WmGoNP-Klup8yi", "title": "Suri's Strategy 1", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy1_Suri.png"}},
+      {"id": "DuZrEqKFYdhunGBw", "content": {"type": "Text", "format": "html", "text": ["<p>How this strategy might be used to find the total bill of $23.75 with 5% tax.</p>"]}},
+      {"id": "TSiu71rHmEXu3f5L", "title": "Suri's Strategy 2", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy1_Suri_2.png"}},
+      {"id": "4jmjcGcgj0UhDAmX", "content": {"type": "Text", "format": "html", "text": ["<p><em>Possible Strategy Connecting to Work in Comparing Quantities: Double Number Lines</em></p>", "<p>For computing the percent for 136 out of 400</p>"]}},
+      {"id": "MYpi4MtsSfUsZcEf", "title": "Zane's Strategy 1", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy2_Zane.png"}},
+      {"id": "Iu4sCwQNxR41MB6L", "content": {"type": "Text", "format": "html", "text": ["<p>How this strategy might be used to find the total bill of $23.75 with 5% tax.</p>"]}},
+      {"id": "WcGHtJahPlTxAGo1", "title": "Zane's Strategy 2", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy2_Zane_2.png"}},
+      {"id": "XXX7oUSrnAKTWmeN", "content": {"type": "Text", "format": "html", "text": ["<p><em>Possible Strategy Connecting to Work in Comparing Quantities: Rate Table</em></p>", "<p>For computing the percent for 136 out of 400</p>"]}},
+      {"id": "veM-AS4OzsHcTb-3", "title": "Julia's Strategy 1", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy3_Julia.png"}},
+      {"id": "siol2OIrawlQ7IX1", "content": {"type": "Text", "format": "html", "text": ["<p>How this strategy might be used to find the total bill of $23.75 with 5% tax.</p>"]}},
+      {"id": "sZCW4-BMJ1Nhomxs", "title": "Julia's Strategy 2", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy3_Julia_2.png"}},
+      {"id": "bC7GGv76e9zz1MZp", "content": {"type": "Text", "format": "html", "text": ["<p><em>Possible Strategy Connecting to Work in Comparing Quantities: Informal Proportion</em></p>", "<p>For computing the percent for 136 out of 400</p>"]}},
+      {"id": "v4o0ERRz6fpQBQQw", "title": "Kelly's Strategy 1", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy4_Kelly.png"}},
+      {"id": "8wI7qsyVkVdz5rKc", "content": {"type": "Text", "format": "html", "text": ["<p>How this strategy might be used to find the total bill of $23.75 with 5% tax.</p>"]}},
+      {"id": "cS9XsNeVfrq7kgUa", "title": "Kelly's Strategy 2", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-1_Strategy4_Kelly_2.png"}},
+      {"id": "xjZWaTKkcc1Py2Bj", "content": {"type": "Text", "format": "html", "text": ["<p><em>Possible Strategy from This Unit: Proportion</em></p>"]}},
+      {"id": "KEXF8L_Jh29sae5Q", "title": "Proportion Strategy", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-1_PossibleStrategy_Proportions.png"}},
+      {
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p><u>Planning for the Summary</u></p>", "<p></p>", "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"]}
+      },
+      {"id": "T-HbbFjEI0CPSgcS", "content": {"type": "Text", "format": "html", "text": ["<p><em>Now What Do You Know?</em></p>", "<p><em>How are percent problems like ratio and rate problems?</em></p>"]}}
+    ]
+  }
+}

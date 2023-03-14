@@ -1,0 +1,51 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "Egt3CNkIr4L3igZj", "title": "Text 53", "content": {"type": "Text", "format": "html", "text": ["<p>How can you predict where the graph of a linear relationship intersects the y-axis from a context, table, or equation that represent the relationship?</p>"]}},
+      {
+        "id": "yRSg1EV23fW8Ybnx",
+        "display": "teacher",
+        "title": "Text 55",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Context</p>", "<p>The y-intercept is the starting amount when the independent variable is 0.</p>", "<p>It might be some set cost, a fee, or some other amount added in or subtracted at the beginning.</p>"]}
+      },
+      {"id": "Dr7CbkRkUYikQ1Pe", "display": "teacher", "content": {"type": "Table", "name": "Variables", "columns": [{"name": "Independent", "width": 114.6484375, "values": ["0", "1", "2"]}, {"name": "Dependent", "width": 109.94140625, "values": ["5", "6", "7"]}]}},
+      {
+        "id": "uPncf54i6hZ7CDWs",
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p>On a table, when the independent variable is 0, the y-intercept will be the value of the dependent variable. </p>", "<p>If the equation is of the form y = ax + b, the b value is where the line crosses the y-axis.</p>"]}
+      },
+      {"id": "CxZyz47VS--PjQpQ", "title": "Text 60", "content": {"type": "Text", "format": "html", "text": ["<p>What are the advantages of using a table, graph, or eqation to solve a problem?</p>"]}},
+      {
+        "id": "bXyA5gwSvdnrTnmv",
+        "display": "teacher",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Table: Sometimes the answer is right there. You look for the variable value that you know to find the other variable value that will answer the question.</p><p>Sometimes it is easy to use the pattern to find values not on the table. You can extend the table or find &quot;in between&quot; values on the table.</p>"
+          ]
+        }
+      },
+      {
+        "id": "oIVIsvFVVXpxxP-6",
+        "display": "teacher",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Graph: The graph makes it easy to see the patterns of change.</p><p>So to answer a question, you can find the point on the graph that answers the question. If you know the x-value, you can</p><ol><li> follow the x-axis to that amount</li><li> see where that value &quot;hits the line&quot;</li><li> find the y-value of that point</ol><p>Sometimes you cannot tell the exact amount of a point so you have to estimate.</p>"
+          ]
+        }
+      },
+      {
+        "id": "yTOFFhXg8NRLNazp",
+        "display": "teacher",
+        "title": "Text 4",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Equation: You can substitute the value that you know into the equation. Use the equation to find the unknown value.</p><p>Sometimes you have to use guess and check to find the value of the variable you do not know.</p>"]}
+      }
+    ]
+  }
+}

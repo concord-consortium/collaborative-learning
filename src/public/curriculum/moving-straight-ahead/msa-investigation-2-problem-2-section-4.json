@@ -1,0 +1,23 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "T1gvqdvG9k3vsK6O", "title": "Text 64", "content": {"type": "Text", "format": "html", "text": ["<p>How do you know if the ordered pair of numbers for a point on a graph or table is a solution to an equation? How can you use a table or graph to find a solution for an equation?</p>"]}},
+      {
+        "id": "YKV5QCiZrlcbxbnO",
+        "display": "teacher",
+        "title": "Text 67",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>An ordered pair is a solution to an equation when evaluating the equation for the first coordinate results in the second coordinate. For example, you try the x-value of the coordinate pair in the equation and see if you get the y-value. </p>",
+            "<p>You can use a graph to find a solution for an equation by selecting a point that lies on the line. You can check the solution by using the coordinate pair in the equation.</p>",
+            "<p>You can use a table to find a solution for an equation by choosing a row of the table. </p>",
+            "<p>Note: If the equations are of the form y = ax or y = a + x then students can use what they learned in 6th grade to solve these using fact families, graphs, tables, or other numerical reasoning.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

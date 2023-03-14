@@ -1,0 +1,37 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation A. Rectangles with Area of 32 square feet.</h3> <ol><li>Write an equation for the relationship between the width <em>w</em> and the length <em>l</em>.</li><li>Make a table and a graph of values for <em>w</em> and <em>l</em>.</li><li>Compare tables, graphs, and equations for the functions relating width and length of rectangles with area 24 square inches and area 32 square inches.</li></ol>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation B. Rectangles with Area of 24,000 square feet.</h3> <ol><li>Write an equation for the relationship between <em>L</em> and <em>W</em> if the Area is 24000 square feet. Would the graph of this relationship be linear? Explain.</li>Use the results of your exploration of the relationship between <em>L</em> and <em>W</em> for fixed areas of 24 and 32 square feet to describe the shape of possible rectangular lots with an area of 24000 square feet.</li><li>Which lots should the builder use? What are the advantages and disadvantages of each shape?</li></ol>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation C. Niral’s Claim</h3><blockquote><em>The relationship between length and width for rectangles with a fixed area, like 24 square feet, is not linear. But the relationship between area and width for rectangles with a fixed length, like 15 inches, is linear. They are both functions.</em></blockquote><em>What evidence can you use to show his claims are or are not correct?</em>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

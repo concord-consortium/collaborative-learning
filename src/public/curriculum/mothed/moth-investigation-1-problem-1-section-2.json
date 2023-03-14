@@ -1,0 +1,12 @@
+{
+  "type": "trapBuilding",
+  "content": {
+    "tiles": [
+      {
+        "id": "WgvCVh_rfY1KzMVH",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Trap Tutorial Video</strong></p>", "<p>Watch the video showing how to <a href='https://drive.google.com/file/d/135oeHF8WYpVd8iXIYk9Zaoyn-rQx7efG/view'>build a moth trap</a> using (mostly) stuff you&#x27;ve already got!</p>"]}
+      },
+      {"id": "-i5DaNf-CUUJSvUO", "title": "Diagram of the Trap You'll Build!", "content": {"type": "Image", "url": "curriculum/mothed/images/mothTrapAssembly.png"}}
+    ]
+  }
+}

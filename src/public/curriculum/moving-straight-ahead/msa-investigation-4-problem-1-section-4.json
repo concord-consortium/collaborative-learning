@@ -1,0 +1,20 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "7WNR_CWQeSTl6wG4", "content": {"type": "Text", "format": "html", "text": ["<p>How does the steepness of stairs expressed as a ratio relate to a straight-line graph?  To the linear rate of change? To a linear equation that represents the graph?</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The steepness of stairs is represented by the slope (ratio of the rise to run) of a straight-line graph. The ratio describes how much the line rises or falls for every change of 1 in the independent variable.</p>",
+            "<p>The slope ratio is the linear rate of change.</p>",
+            "<p>In a linear equation that represents the graph, the steepness of the stairs is represented by the coefficient of x.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

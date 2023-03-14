@@ -1,0 +1,25 @@
+{
+  "type": "reflection",
+  "content": {
+    "tiles": [
+      {
+        "id": "It3Z2npmOo0ov-JL",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Please load your Learning Journal (&quot;My Work&quot; &gt;&gt; &quot;Learning Journal&quot;). </p>", "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>"]}
+      },
+      {
+        "id": "ZONlY5CgomZkjkx_",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Lesson 1.2 Journal Entry</strong></p>",
+            "<p>1. Today&#x27;s date:</p>",
+            "<p>2. Today&#x27;s topic:</p>",
+            "<p>3. How do body systems and their interaction help us respond quickly to stimuli?</p>",
+            "<p>4. How would your reaction time be affected if you used bionic arms like Tilly? Why?</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

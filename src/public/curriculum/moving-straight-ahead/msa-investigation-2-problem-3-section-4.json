@@ -1,0 +1,26 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "aIRQZRJDoHbttN01", "title": "Text 55", "content": {"type": "Text", "format": "html", "text": ["<p>Describe the advantages and disadvantages of using tables, graphs, and symbolic methods to solve equations.</p>"]}},
+      {
+        "id": "k8MNmEW3ulZmyca3",
+        "display": "teacher",
+        "title": "Text 56",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>A point on a graph represents a solution to an equation and a possible table entry.</p>",
+            "<p></p>",
+            "<p>Graphs show all possible values that solve the equation to give you a visual way of looking at the pattern, but they often require you to estimate in order to find the solution. </p>",
+            "<p></p>",
+            "<p>Tables give you many of values that solve the equation. And it is clear how the independent and dependent variables are paired in each solution. However, tables cannot show all of the solutions. Sometimes you have to extend the tables a long way or search to find a solution in-between values on your table.</p>",
+            "<p></p>",
+            "<p>Symbolic methods can help you solve the equation for any value, but the calculations can be more time consuming.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

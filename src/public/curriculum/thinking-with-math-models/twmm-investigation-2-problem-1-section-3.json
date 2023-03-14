@@ -1,0 +1,31 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation A. Group Admission Fees</h3>One operator of a Tree Top Fun suggested they consider offering discounts for groups. He recorded the admission fees in a table. <ol><li>Explain how you know the relationship between the admission fee for a group and the number of people in the group is linear. Is it a linear function? Explain.</li><li>How much money would a group expect to pay if the group size is 0? 21? 30? </li><li>What equation relates admission fee <em>A</em> to the number <em>n</em> in the group? Use the equation to check your predictions for Part 2.</li></ol>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["<strong>Group Admission Fees</strong>"]}},
+      {"content": {"type": "Table", "columns": [{"name": "Number in Group", "type": "number", "values": [1, 2, 3, 4, 5, 10, 15, 20]}, {"name": "Admission (dollars)", "type": "number", "values": [75, 90, 105, 120, 135, 210, 285, 360]}]}, "layout": {"height": 380}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["<h3>Situation B. Matching Representations</h3>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Match each graph with an equation or set of criteria that is represent by the graph\n<strong>Equation 1</strong>\ny = 2x - 1\n\n<strong>Equation 2</strong>\ny = 2\n\n<strong>Equation 3</strong>\ny = 3 - x\n\n<strong>Criteria 4</strong>\ny-intercept = 0 and rate of change is 1\n\n"
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_1_four_graphs_450w.png"}}
+    ]
+  },
+  "supports": []
+}

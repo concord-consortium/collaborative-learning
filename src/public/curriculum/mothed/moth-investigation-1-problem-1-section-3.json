@@ -1,0 +1,23 @@
+{
+  "type": "pinning",
+  "content": {
+    "tiles": [
+      {
+        "id": "ToVynRaDMqiF10Ld",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Moth Pinning Video</strong></p>",
+            "<p>Learn how to pin moths for studying, comparing, and identifying them.</p>",
+            "<p>Oregon State <a href='https://extension.oregonstate.edu/video/pinning-butterflies-moths'>Pinning Tutorial</a></p>",
+            "<p>https://extension.oregonstate.edu/video/pinning-butterflies-moths</p>"
+          ]
+        }
+      },
+      {"id": "hpfMKRZ9QlXXhhIm", "content": {"type": "Text", "format": "html", "text": ["<h3>---------------------------- MOTH IDENTIFICATION ------------------------------</h3>"]}},
+      {"id": "MxDhzaHuPDlBA3OD", "title": "MOTH ID GUIDE: Features", "content": {"type": "Image", "url": "curriculum/mothed/images/MothIDGuide.png"}},
+      {"id": "1DIc3Wvt5-5sunQE", "title": "Moth Ed ID Guide Flowchart", "content": {"type": "Image", "url": "curriculum/mothed/images/MothIDFlowchart.png"}}
+    ]
+  }
+}

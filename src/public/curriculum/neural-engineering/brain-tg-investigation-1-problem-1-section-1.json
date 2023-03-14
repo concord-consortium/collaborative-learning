@@ -1,0 +1,26 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "bfsShgpMoj8B6Kc0",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In this lesson, students will be introduced to emerging robotics technology that helps people with neurological conditions or missing limbs. </p>",
+            "<p><strong>Learning Objectives</strong></p>",
+            "<p>The goal of this lesson is to introduce the anchoring phenomenon of the unit and elicit student questions about bionic arms. </p>",
+            "<p><strong>NGSS Alignment</strong></p>",
+            "<p>See <a href='https://www.nextgenscience.org/pe/hs-ls1-2-molecules-organisms-structures-and-processes'>NGSS HS-LS1-2</a></p>",
+            "<p><strong>Formative assessment</strong></p>",
+            "<p>Listening to group conversations; reflecting on students’ questions; Learning Journals (found in student-facing CLUE tab for lesson 1.1).</p>",
+            "<p><strong>Materials</strong></p>",
+            "<p>Whiteboards and markers or chart paper (for each group of students)</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

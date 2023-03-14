@@ -1,0 +1,33 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "9ZB8EKED-EtzNund",
+        "title": "Text 7",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Henri challenges Emile to a walking race. Because Emile’s walking rate is faster, Emile gives Henri a 45-meter head start. Emile knows his brother would enjoy winning the race, but he does not want to make the race so short that it is obvious his brother will win.</p>"]
+        }
+      },
+      {"id": "-FNaq5UO2_3V_k2q", "title": "Text 8", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How long should the race be so that Henri will win in a close race? Give evidence to support your answer. </li></ul>"]}},
+      {
+        "id": "R__puSo25lgIWgqP",
+        "display": "teacher",
+        "title": "Text 11",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>With a 45-meter head start, Emile will catch up to Henri after 30 seconds at the 75-meter mark. The race should be less than 30 seconds or 75 meters, depending on how they determine the length of the race.</p>",
+            "<p>Possible student answers may include tables, graphs, words, and diagrams. Some examples include the following. </p>"
+          ]
+        }
+      },
+      {"id": "6KV8Les0v3JO0LZk", "display": "teacher", "title": "Table: Meters and Brothers’ Distances", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_2-1_InitialChallenge_Table.png"}},
+      {"id": "ouPnCbuQYc0LTN4F", "display": "teacher", "title": "Guess and Check", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_2-1_InitialChallenge_Guess&Check.png"}},
+      {"id": "W0O_IuEmP8bGsyu8", "display": "teacher", "title": "Graph: Meters and Brothers’ Distances", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_2-1_InitialChallenge_Graph.png"}}
+    ]
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "id": "aPMjmVAaxSbx3ROl",
+        "title": "Text 20",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation A.  Monica, Roland, and Naomi’s Strategies </strong></p>", "<p>Explain how each strategy can or cannot help each student decide which company to choose. </p>", "<p></p>"]}
+      },
+      [
+        {"id": "TbVFTgcLxERulWD1", "title": "Text 22", "content": {"type": "Text", "format": "html", "text": ["<p><u>Monica’s Strategy</u></p>", "<p></p>", "<p>I found the number of </p>", "<p>T-shirts when the cost of the two companies is equal.</p>"]}},
+        {"id": "ttIcUK9efqCRgZSy", "title": "Text 21", "content": {"type": "Text", "format": "html", "text": ["<p><u>Roland’s Strategy</u></p>", "<p></p>", "<p>I assumed that the class had $120 to spend. </p>", "<p></p>", "<p></p>", "<p></p>", "<p></p>", "<p></p>"]}},
+        {"id": "kSVz02tFONqF9m2R", "title": "Text 23", "content": {"type": "Text", "format": "html", "text": ["<p><u>Naomi’s Strategy</u></p>", "<p> I wrote the inequality </p>", "<p>CMighty &lt; CNo-Shrink. </p>", "<p>I found the number of T- shirts that satisfy this inequality. </p>"]}}
+      ],
+      [
+        {
+          "id": "l_byWM_6DQmE9H0-",
+          "display": "teacher",
+          "title": "Text 30",
+          "content": {"type": "Text", "format": "html", "text": ["<p>This tells when the company costs are the same for the same number of shirts.</p>", "<p></p>", "<p>This helps use decide when one company switches from being more expensive to less expensive.</p>", "<p></p>", "<p></p>", "<p></p>"]}
+        },
+        {
+          "id": "IvkBRGqBakFsBHtE",
+          "display": "teacher",
+          "title": "Text 31",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>If the class only had $120 to spend, they should try to maximize the number of shirts they can buy.</p>",
+              "<p></p>",
+              "<p>We know that 14 t-shirts costs $63. And, after that amount, Mighty would be cheaper. So, they might go with Mighty for the whole order. 26 shirts for $4.50 each is $117.</p>",
+              "<p></p>",
+              "<p>Or, they could order 14 t-shirts from No-Shrink and pay $63. Then order 12 from Mighty for $54. This would give them 26 shirts for $117.</p>",
+              "<p></p>",
+              "<p>Or, to get the most shirts for their money, they could order 17 t-shirts from No-Shrink and pay $66. Then order 12 from Mighty for $54. This would give them 29 shirts for $120.</p>"
+            ]
+          }
+        },
+        {
+          "id": "g-YhyXVKEeEfXeCh",
+          "display": "teacher",
+          "title": "Text 32",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>We can put each expression in the inequality shown. Then find the value for when Mighty is less than No-Shrink.</p>",
+              "<p></p>",
+              "<p>Students might use the values on the table or points on the graph. </p>",
+              "<p>Then might guess and check quantities to find when the inequality is true.</p>",
+              "<p>49 + 10 &lt; 4.50•10  not true</p>",
+              "<p>49 + 12 &lt; 4.50•12  not true</p>",
+              "<p>49 + 13 &lt; 4.50•13  not true</p>",
+              "<p>49 + 14 = 4.50•14 </p>",
+              "<p>49 + 15 &lt; 4.50•15  true</p>",
+              "<p></p>",
+              "<p>Or, students might reason about the equation to think about how to solve the inequality.</p>",
+              "<p>49 + n = 4.50n</p>",
+              "<p>    $49 = $3.5n</p>",
+              "<p>      14 = n</p>",
+              "<p>At 14 shirts they are the same. So, more than 14 will make the inequality true.</p>"
+            ]
+          }
+        }
+      ],
+      {
+        "id": "dfpQ0a6jY2r5KC4b",
+        "title": "Text 33",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation B. Using Tables, Graphs, and Equations</strong></p>", "<p>Explain how you could use a table, graph, or equation to answer each question about the companies in the Initial Challenge.</p>"]}
+      },
+      {"id": "_vNq2fQ-WJ686T4A", "title": "Text 34", "content": {"type": "Text", "format": "html", "text": ["<ul><li>For each company, find the costs of 20 T-shirts?</li></ul>"]}},
+      {
+        "id": "SzR_yM79AAvkrtBL",
+        "display": "teacher",
+        "title": "Text 37",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>For Mighty, 20 shirts cost $69.</p>",
+            "<p>For No-Shrink, 20 shirts cost $90.</p>",
+            "<p>Table: Find 20 shirts on the table; the cost will be in the other column.</p>",
+            "<p>Graph: Trace the lines to find out which y-coordinate corresponds with an x-coordinate of 20.</p>",
+            "<p>Equation: Evaluate the equation for an independent value of 20 t-shirts.</p>"
+          ]
+        }
+      },
+      {"id": "uCxueyfGJBDT61qW", "title": "Text 38", "content": {"type": "Text", "format": "html", "text": ["<ul><li>For each company what is the number of T-shirts you can buy for $135. Less than $135? Greater than $135?</li></ul>"]}},
+      {
+        "id": "IFl5gF0n1KV0srWq",
+        "display": "teacher",
+        "title": "Text 41",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Table: The cost closest to $135 without exceeding $135 will show how many t-shirts you can buy. Then all table entries with smaller numbers of t-shirts will cost less than $135, and all table entries with larger numbers of t-shirts will cost more than $135.</p>",
+            "<p>Graph: Trace the lines to find out which x-coordinate corresponds with a y-coordinate of $135. Then all x-coordinates to the left of that point will be numbers of t-shirts that you could buy for less than $135, and all x-coordinates to the right of that point will be numbers of t-shirts that you could buy for more than $135.</p>",
+            "<p>Equation: For a dependent value of $135, evaluate the number of t-shirts needed. Then all numbers of t-shirts less than that value would cost less than $135, and all numbers of t-shirts greater than that value would cost more than $135.</p>"
+          ]
+        }
+      },
+      {"id": "_6Rfu5i2ltORsoNw", "title": "Text 42", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Nic saw the point (50,99) on one of his graphs. Which graph was he using? What information was he looking for?</li></ul>"]}},
+      {"id": "KO6jqCtKSmhJrySf", "display": "teacher", "title": "Text 45", "content": {"type": "Text", "format": "html", "text": ["<p>This would be on the graph for Mighty.  C<sub>Mighty</sub> = 49 + n = 49 + 50 = 99</p>", "<p>(50,99)</p>", "<p>[50 shirts, Cost is $99]</p>"]}},
+      {"id": "Mt_zga2CMsEZgcSK", "title": "Text 46", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation C. More Competition</strong></p>", "<p>The following table represents the costs from another company, The Big Tee.</p>"]}},
+      {"id": "PMRZ6ZG918YNUP-D", "title": "Text 47", "content": {"type": "Text", "format": "html", "text": ["<p></p>", "<ul><li>Compare the cost for this company to the costs for the other two companies.</li></ul>"]}},
+      {"id": "5AogGbhoRYnftraa", "content": {"type": "Table", "name": "T-shirt Costs", "columns": [{"name": "n", "width": 80, "values": ["0", "3", "5", "8", "10"]}, {"name": "C", "width": 80, "values": ["34", "41.5", "46.5", "54", "59"]}]}},
+      {
+        "id": "Vp_eR29lcAQeR6kX",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>The cost for n t-shirts for The Big T is $34 + $2.5n. The cost per t-shirt for this company is $2.50 and the down payment (or cost for no t-shirts) is $34. The cost per t-shirt is less than No-Shrink Tee and greater than Mighty Tee. </p>"]
+        }
+      },
+      {"id": "Lvn20ZOmPW6ZfW1a", "title": "Text 50", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What is the cost of 12 T-shirts?</li></ul>"]}},
+      {"id": "EmeU1DOKIDyuLnV6", "display": "teacher", "title": "Text 53", "content": {"type": "Text", "format": "html", "text": ["<p>$64</p>"]}},
+      {"id": "n1AR8REpDAHaeO1d", "display": "teacher", "title": "Table showing how values of C are generated", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_2-2_SitC_CostofTShirts_350.jpg"}},
+      {"id": "jUw9vS_zyYyUQzzs", "title": "Text 54", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How many T-Shirts can you buy for $84?</li></ul>"]}},
+      {
+        "id": "PZxLKzJqqtm2uVQx",
+        "display": "teacher",
+        "title": "Text 57",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Possible Strategies</p>",
+            "<p>Reasoning using the Previous Answer:</p>",
+            "<p>If 12 shirts cost $64 and every 2 shirts add another $5, we can add-on 8 shirts for another $20.</p>",
+            "<p>So, 20 shirts would be $84.</p>",
+            "<p></p>",
+            "<p>Guess and Check reasoning – knowing that each shirt costs $2.50</p>",
+            "<p>34 + 2.5(12) = $64  - not enough</p>",
+            "<p>34 + 2.5(15) = $71.50 - not enough</p>",
+            "<p>34 + 2.5(16) = $77  - not enough</p>",
+            "<p>34 + 2.5(18) = $79  - not enough</p>",
+            "<p>34 + 2.5(21) = $86.50   - too much</p>",
+            "<p>34 + 2.5(20) = $84</p>"
+          ]
+        }
+      },
+      {
+        "id": "KeqN1UnA_-q8sfgr",
+        "display": "teacher",
+        "title": "Table 2",
+        "content": {"type": "Table", "name": "Extending the Table", "columns": [{"name": "n", "width": 80, "values": ["0", "2", "4", "6", "8", "10", "12", "14", "16", "18", "20"]}, {"name": "C", "width": 122.109375, "values": ["34", "39", "44", "49", "54", "59", "64", "69", "74", "79", "84"]}]}
+      },
+      {"id": "ySdwd57G9cFUayX-", "display": "teacher", "title": "Text 58", "content": {"type": "Text", "format": "html", "text": ["<p>We can check the answer using the equation:</p>", "<p>C<sub>BigTee</sub> = 34 + 2.5(20) = $84</p>"]}},
+      {"id": "j6ITj2-RhPmrLc6l", "title": "Text 59", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Are any of the relationships represented by the three companies linear? Proportional?  Explain.</li></ul>"]}},
+      {
+        "id": "9xpSTv3WAHzakuTk",
+        "display": "teacher",
+        "title": "Text 62",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The relationships represented by the three companies are all linear because they involve constant rates of change. </p>",
+            "<p>Only the No-Shrink Tee’s cost relationship is proportional because there is no down payment. So, to find the cost for a number of shirts, we can multiply by the unit rate (which is the constant of proportionality) because there is no amount that you have to add-in,</p>"
+          ]
+        }
+      },
+      {
+        "id": "QV8FJSG7dJ5h4UVA",
+        "display": "teacher",
+        "title": "Text 63",
+        "content": {"type": "Text", "format": "html", "text": ["<p>C<sub>Mighty</sub> = 49 + n              C<sub>no-Shrink</sub> = 4.5n                 C<sub>BigTee</sub> = 34 + 2.5n</p>", "<p>                                                 ^^^^^^^^^^^^^</p>"]}
+      },
+      {
+        "id": "MDqB0da-IKXfKyVK",
+        "display": "teacher",
+        "title": "Mighty vs. No-Shrink",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-14.898, -10.611], "axisRange": [57.581, 75.382], "axisNames": ["n", "$"], "axisLabels": ["number shirts", "cost"]}},
+          "objects": [
+            {
+              "type": "movableLine",
+              "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [14, 63]}],
+              "properties": {"id": "OeftjktzaL9uZqe-", "pt1": {"type": "point", "id": "OeftjktzaL9uZqe--point1", "name": "No-Shrink"}, "pt2": {"type": "point", "id": "OeftjktzaL9uZqe--point2"}}
+            },
+            {
+              "type": "movableLine",
+              "parents": [{"type": "point", "parents": [0, 49]}, {"type": "point", "parents": [14, 63]}],
+              "properties": {"id": "rN52SdPt2jUKny2F", "pt1": {"type": "point", "id": "rN52SdPt2jUKny2F-point1", "name": "Mighty"}, "pt2": {"type": "point", "id": "rN52SdPt2jUKny2F-point2"}}
+            },
+            {
+              "type": "movableLine",
+              "parents": [{"type": "point", "parents": [0, 34]}, {"type": "point", "parents": [10, 59]}],
+              "properties": {"id": "1yHTnMw0WGC30Gph", "pt1": {"type": "point", "id": "1yHTnMw0WGC30Gph-point1", "name": "Big Tee"}, "pt2": {"type": "point", "id": "1yHTnMw0WGC30Gph-point2"}}
+            }
+          ]
+        },
+        "layout": {"height": 536}
+      }
+    ]
+  }
+}

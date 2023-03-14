@@ -1,0 +1,32 @@
+{
+  "type": "getStarted",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Our town is part of the <strong>US Eastern deciduous forest </strong>region. What evidence of that can we observe outside? </p>",
+            "<p><strong>Get Started: </strong>Divide your team  into roles: Recorder;  (2-3)Researchers; Presenter</p>",
+            "<p>Work with your group to draw and/or make a list of what you expect to find when you go outside to look. </p>",
+            "<p>To gather ideas, <strong>Researchers  </strong>might...</p>",
+            "<ul><li>look out the window, </li><li>look around your classroom/home for books  or magazines,</li><li>find images or take photos.</li></ul>",
+            "<p>Your <strong>Recorder </strong>can record everyone&#x27;s ideas  in  their CLUE workspace.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Welcome to CLUE</strong>! Clue is short for <em>Collaborative Learning User Environment. </em>This environment is designed to make it easy for groups of up to four students to share their work and learn from each other. </p>",
+            "<p>When the class starts an activity, CLUE drops students into groups randomly. If you prefer to assign students to groups, have them switch groups by clicking on the group number at upper right. </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

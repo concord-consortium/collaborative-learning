@@ -1,0 +1,58 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "id": "1NGQK6Ryu9bCgDmX",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<strong>Situation A. Table and Equation Strategies</strong>", "<p>Students in Ms. Lopez’s class used different strategies to find the number of recipes needed for 210 campers. Examine each strategy. How are the two strategies the same? Different?</p>"]
+        }
+      },
+      {"id": "E2rQF_q8VamwREoC", "content": {"type": "Text", "format": "html", "text": ["<strong>Adia’s Strategy</strong>", "<p>I used a rate table to find the number of batches of Recipe A to serve 210 campers.</p>"]}},
+      {
+        "id": "Geco2vI8XAFZ8DX8",
+        "title": "Table 1",
+        "content": {
+          "type": "Table",
+          "name": "Adia's Strategy",
+          "columns": [{"name": "Number of batches of Recipe A", "width": 140, "values": ["1", "2", "3", "4", "5", "10", "20", "40", "41", "        ?"]}, {"name": "Number of 1 cup servings of juice", "width": 122, "values": ["5", "", "", "", "", "", "", "", "", "210"]}]
+        }
+      },
+      {"id": "cSLYigd0r8c_nXSD", "content": {"type": "Text", "format": "html", "text": ["<strong>Otis’s Strategy</strong>", "<p>I used an equation to show how the ratios are equal and to find the number of batches of Recipe A.</p>", "<p>1/5=  x/210</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>They both used equivalent ratios.  Otis used the unit rate of 1batch/(5 c.juice) and scaled it directly up to 210 c. juice.  Adia used the unit rate of 1batch/(5 c.juice)  and scaled it up several times by changing the total number of cups of juice and then scaling up the number of batches until she got to 210 total cups.</p>"
+          ]
+        }
+      },
+      {
+        "id": "UosVT5U9_kafjN6D",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Situation B. Cece Makes Lemonade</strong>",
+            "<p>After the camp, Cece makes lemonade for her family. She uses the unit rate of one cup of concentrate to three cups of cold water. She needs 160 ounces of juice. Note that one cup is equal to 8 ounces.</p>",
+            "<p>1.  How much concentrate will she need?</p>",
+            "<p>2.  How much water will she need?</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Table",
+          "name": "Cece's Lemonade",
+          "columns": [{"name": "Recipe", "width": 140, "values": ["Concentrate", "Water", "Total Lemonade"]}, {"name": "Cups", "values": ["1", "3", "4"]}, {"name": "Oz", "values": ["8", "24", "32"]}, {"name": "x 5", "values": ["40", "120", "160"]}, {"name": "x 5 Cups", "values": ["5", "15", "20"]}]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

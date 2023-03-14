@@ -1,0 +1,9 @@
+{
+  "type": "taskc",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation C</strong></p>", "<p></p>", "<p><strong>The foo in the blah.... </strong></p>"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["<p>1. Describe your first task in your own words:</p>", "<p></p>", "<p><em>{Write you answer here}  </em></p>"]}}
+    ]
+  }
+}

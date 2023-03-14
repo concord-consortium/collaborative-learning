@@ -1,0 +1,24 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "markdown", "text": ["In Problem 1.1, Ms. Gomez’s students noticed that the points do not lie exactly on a line. But they thought they could draw a line which might approximate the data pattern and could be used to make predictions."]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["Data from Ms. Gomez's Class"]}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_1_3_gomez_data_combined_400w.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "*- What equation could represent each line?*",
+            "*- Would the equations for these lines be different?*",
+            "*- Would the equations give the same predictions for the breaking weight for 3.5 layers?*",
+            " ",
+            "Before we can answer these questions, you will explore the skills needed to write equations for lines that represent linear relationships or linear functions. A *linear relationship or function* is one whose graph is a straight line.   We will return to these questions in Investigation 4."
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

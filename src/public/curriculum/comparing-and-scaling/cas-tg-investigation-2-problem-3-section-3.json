@@ -1,0 +1,38 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "9vggRGaUkA3LPVYy",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong><u>Explore (Digging In</u></strong>)</p>", "<p><u>Providing for Individual Needs</u></p>", "<p></p>", "<p>As groups work on this Problem, make sure that students are relating the two quantities in the rate table to the variables in the equations and graphs.</p>"]
+        }
+      },
+      {
+        "id": "WV8OKLgHJmAo_mdw",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What does the N stand for in the equations? (number of oranges)</li><li>Where do you see number of oranges in the table? (top row) In the graph? (In one graph it is the dependent variable. In the other graph it is the independent variable.)</li><li>What does the C stand for in the equations? (total cost in dollars)</li><li>Where do you see total cost in dollars in the table? (bottom row) In the graph? (In one graph it is the dependent variable. In the other graph it is the independent variable.)</li><li>In What if Situation A, what does the table, graph, or equation say to you? (Answers will vary. Get students to discuss how each relates to Noralie buying tickets for the concert.)</li><li>For What if Situation B, is there a previous strategy that could help you? (Answers will vary. Students may suggest a table, graph, unit rate, equation, scaling, etc.)</li></ul>"
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p><u>Planning for the Summary</u></p>", "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"]}},
+      {
+        "id": "d-tu-6qCU9CXdlby",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Now What Do You Know?</em></p>",
+            "<p><em>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph. In what ways is a unit rate or the constant of proportionality helpful for solving a problem? Select student work for each representation to discuss how they found the unit rate or the constant of proportionality.</em></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"id": "6t4n29wt4xSQ9exR", "content": {"type": "Text", "format": "html", "text": ["<p>Arvin and Mariah need to decide on which recipe to use during camp.</p>", "<p>Each camper gets a cup of juice. </p>"]}},
+      {"id": "uRYDN667aYd5kt96", "title": "Recipe A through D", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-1_RecipieList.png", "filename": "curriculum/comparing-and-scaling/images/C&S_1-1_RecipieList.png"}},
+      {
+        "id": "6t4n29wdafdsf30t4xSQ9exR",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>For each of the four recipes, determine:</p>", "<ul><li>How much concentrate is needed to make 1 cup of juice? How much water is needed?</li><li>How much concentrate and how much water are needed to make juice for 210 campers?</li></ul>"]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Student may use either the number of batches to scale up the recipe (found to answer bullet #1) or the unit rate (found in bullet #2) to answer the question in the 3rd bullet.</p>", "<p>Answers below use the number of batches to scale up the recipe.</p>"]
+        }
+      },
+      {"id": "07OCt20220459PM", "title": "Recipe A Solution", "display": "teacher", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeA_350w.png"}},
+      {"id": "07OCt20220500pM", "title": "Recipe B Solution", "display": "teacher", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeB_350w.png"}},
+      {"id": "07OCt20220501PM", "title": "Recipe C Solution", "display": "teacher", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeC_350w.png"}},
+      {"id": "07OCt20220502PM", "title": "Recipe D Solution", "display": "teacher", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeD_350w.png"}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Students may make sense of this in table format. (It is similar to how they compared making popcorn in Comparing Quantities.)</p>"]}},
+      [
+        {"id": "07OCT20220505PM", "title": "Recipe A Solution", "display": "teacher", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeA2_350w.png"}},
+        {"id": "07OCT20220504PM", "title": "Recipe B Solution", "display": "teacher", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeB2_350w.png"}}
+      ],
+      [
+        {"id": "07OCT20220503PM", "title": "Recipe C Solution", "display": "teacher", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeC2_350w.png"}},
+        {"id": "07OCT20220555PM", "title": "Recipe D Solution", "display": "teacher", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-2_RecipeD2_350w.png"}}
+      ]
+    ]
+  },
+  "supports": []
+}

@@ -1,0 +1,139 @@
+{
+  "type": "chapter1",
+  "content": {
+    "tiles": [
+      {"id": "rVfNvjNxjeFtSjd9", "title": "Text 3", "content": {"type": "Text", "format": "html", "text": ["<h2>STRESS AND FOCUS:</h2>", "<h2>Estrella’s Story</h2>"]}},
+      {"id": "3bnHIJ4eNI8--KUd", "title": "Text 4", "content": {"type": "Text", "format": "html", "text": ["<h3>CHAPTER I: MATH TEST</h3>"]}},
+      {
+        "id": "lDyrFdl5Ce8dHais",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Estrella loved her family very much. She would go to the ends of the earth for them and knew that they would do the same for her. Her mom and step-dad worked long hours everyday to put a roof over their head. Estrella’s abuela (grandma) stayed home and watched over the kids. Abuela did a lot for them but sometimes it got hard for her to take care of so many things, so Estrella took it upon herself to help out.</p>",
+            "<p>Estrella often dropped off and picked up her younger brothers and sister from their school bus stop and they would tell her everything that happened during their day with bright eyes and wide smiles. Once they got home Estrella would spend the afternoon making sure her siblings did their homework and daily chores, and then she walked the family dog before dinner.  Estrella also made time for her two best friends in the evenings when they played online together.  This meant most days Estrella stayed up until midnight to get her work done. Sometimes she was so tired she wished she could just go to sleep, but her grades were important to her and she was doing well in school. </p>",
+            "<p>However, in school she often had trouble focusing. She really did want to focus in class, but sometimes the teacher’s voice became nothing but white noise and Estrella would zone out. She needed to be able to pay attention in class if she wanted to stay in honors math even though her best friends were in the lower level general math. </p>"
+          ]
+        }
+      },
+      {"id": "FzU8y2P1Kaweg8tl", "title": "Estrella in School", "content": {"type": "Image", "url": "curriculum/bio4community/images/Estrella_S1.jpg"}},
+      {
+        "id": "RyhF27bC1E7DjgdX",
+        "title": "Text 15",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>One day after school, Estrella felt like she was dragging her body home because she was so upset. That morning she was late to school - again - because her siblings’ school bus didn’t come on time. As per the school rules, she had to get a tardy-note from the main office that made her even more late for math. The class was taking a math test and she had missed the first 10 minutes but was still expected to finish it on time like everyone else. In addition to being late, Estrella found she just couldn’t focus. She found herself staring at the paper and the numbers were glaring back at her, making no sense. She had the sinking feeling that she didn’t do well on the test. On the way home, her siblings just would not listen to her. They were almost to the front of their house when they started fooling around.</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "zIT-SWPxBLJk86b4",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Paco</strong>: Tito, watch me do a handstand.  </p>",
+            "<p><strong>Tito</strong>: Whatever. I bet you can’t run as fast as me</p>",
+            "<p><strong>Paco</strong>: Bet I can!</p>",
+            "<p><strong>Sandra</strong>: Hermana (sister), I wanna run too!</p>",
+            "<p><strong>Estrella</strong>: No running, it’s the street. we have to go home. </p>",
+            "<p><strong>Tito</strong>: Catch me if you can!</p>",
+            "<p><strong>Sandra</strong>: Me too! Me too!</p>",
+            "<p><strong>Estrella</strong>: STOP RUNNING! What are you doing?</p>",
+            "<p>[Estrella grabs her siblings by the back of their shirts]</p>",
+            "<p><strong>Estrella</strong>: Why do you never listen to me? STOP fooling around!</p>"
+          ]
+        }
+      },
+      {"id": "hSZzIaK8HPEPpwNu", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<p>Her siblings were shocked by the snap in her tone. Sandra began to cry, and ran into the house and straight to Abuela. </p>"]}},
+      {
+        "id": "xe_2kUmRx5NAO2tF",
+        "title": "Text 8",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Abuela</strong>: Nena, ¿Por qué estás llorando? (Baby girl, why are you crying?)</p>",
+            "<p><strong>Sandra</strong>: She screamed at me!</p>",
+            "<p><strong>Estrella</strong>: I did not! You weren’t listening to me and were about to run out into the street. </p>",
+            "<p><strong>Tito</strong>: We were not! </p>",
+            "<p><strong>Abuela</strong>: Estrella, they’re little. You’re older, be patient with them.</p>",
+            "<p><strong>Estrella</strong>: You’re never on my side! You always choose them over me. </p>",
+            "<p><strong>Abuela</strong>: Estrella, Mija (daughter), that’s not true. I am on your side. What’s going on with you, Nena (baby girl)?</p>",
+            "<p><strong>Estrella</strong>: Es nada (it&#x27;s nothing), Abuela. </p>",
+            "<p><strong>Abuela</strong>: Ay. I know you too well for that. I can tell something is bothering you.</p>",
+            "<p><strong>Estrella</strong>: Well… I was late to school, missed half of math class, and didn’t do well on the test. </p>",
+            "<p><strong>Abuela</strong>: But you normally do so well. What happened?</p>",
+            "<p><strong>Estrella</strong>: I don’t know. Sometimes I can’t focus in class. I’m just so tired and I think of everything else in the world. I try to focus, I really do. But, I just can’t. </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {"id": "abO6rbPNbFZHjuaD", "title": "Estrella talks to her Abuela", "content": {"type": "Image", "url": "curriculum/bio4community/images/Estrella_S3.jpg", "filename": "curriculum/bio4community/images/Estrella_S3.jpg"}},
+      {"id": "dBOtDNvxQZQZ5oSd", "title": "Text 9", "content": {"type": "Text", "format": "html", "text": ["<p>Estrella choked back tears, trying to hide how upset she was. She felt as though no matter how hard she tried, her efforts were useless. </p>"]}},
+      {
+        "id": "gSOSqg1I9G2IKHdi",
+        "title": "Text 13",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Abuela</strong>: Mi corazón (my heart), you’re tired. Of course you can’t focus. You’re stressed and sleep deprived. I’ve been telling you it’s not good to stay up till midnight so often. Why don’t you talk to your school counselor about how you feel? Aren’t you close with your science teacher? Maybe talk to her. I’m sure they’ll understand and try to help you. </p>",
+            "<p><strong>Estrella</strong>: I just feel like I don’t even belong in these classes.</p>",
+            "<p><strong>Abuela</strong>: Why would you say that? Of course you do.</p>",
+            "<p><strong>Estrella</strong>: It’s just… I remember Ms. Parker telling me that I don’t.</p>",
+            "<p><strong>Abuela</strong>: What? When?</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "ojPmRO2jeyG3o48C",
+        "title": "Text 12",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>~~ FLASHBACK ~~</strong></p>",
+            "<p>[Ms. Parker was handing back the math tests for honors Calculus. This one was particularly hard and Estrella knew she didn’t do as well as she would have liked.]</p>",
+            "<p><strong>Ms. Parker</strong>: Estrella, can I talk to you for a second?</p>",
+            "<p><strong>Estrella</strong>: Y-yes, of course. </p>",
+            "<p><strong>Ms. Parker</strong>: I noticed that you haven’t been doing well on your tests lately. I talked to the school counselor and we think it might be best if you dropped down to the easier general level math class.</p>",
+            "<p><strong>Estrella</strong>:  Why? I like math….</p>",
+            "<p><strong>Ms. Parker</strong>: I’m just saying it might be better for you. Honors classes are difficult as it is and I don’t think you really need it anyway. People in your neighborhood don’t usually go to college so why waste your time. Might as well enjoy high school instead of struggling so much.  </p>",
+            "<p><strong>Estrella</strong>: O-oh.</p>",
+            "<p></p>",
+            "<p><strong>~~ END FLASHBACK ~~</strong></p>"
+          ]
+        }
+      },
+      {
+        "id": "9MxWn_MQLdjw3QcE",
+        "title": "Text 11",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Abuela</strong>: Estrella. Do not listen to her!!</p>", "<p><strong>Estrella</strong>: What if she’s right, Abuela?</p>", "<p><strong>Abuela</strong>: She is not and you know it! You know you are going to universidad (university).</p>"]
+        }
+      },
+      {
+        "id": "r37UQ-aAVE1oyKn1",
+        "title": "Text 10",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Estrella knew her grandma was usually right about these things. She had never considered that maybe what she was feeling inside, the tense muscles and racing heartbeat, could be stress. Or that stress could be the reason she couldn’t focus. Estrella decided to talk to her science teacher after school tomorrow. </p>"
+          ]
+        }
+      },
+      {"id": "6OFBBbqkmJyRqKvM", "title": "Text 14", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Do you think Abuela is right?</strong></p>", "<p>Discuss with your group--What do you think is the connection between stress and focus?</p>"]}}
+    ]
+  },
+  "supports": []
+}

@@ -1,0 +1,27 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "markdown", "text": ["- How do you think the length and strength of a bridge are related?", "We can do an experiment to find out how the length and strength of a bridge are related."]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["**A Bridge-Length Experiment**", "Materials:", "- Two books of the same thickness", "- A small paper cup", "- About 50 pennies", "- 4¼-inch paper strips with lengths 4, 6, 8, 9, and 11 inches"]}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_1_2_five_paper_bridges_400w.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "Instructions:",
+            "- Fold the paper strips to make bridges as shown above.",
+            "- Start with the 4-inch bridge. Suspend the bridge between the two books as you did before.",
+            "- Put pennies into the cup, one at a time, until the bridge collapses. Record the number of pennies you added to the cup. As in the first experiment, this number is the breaking weight of the bridge.",
+            "- Repeat the experiment to find breaking weights for the other bridges."
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["- Conduct the experiment.", "- Collect the data and represent the data in a table and graph.", "- What patterns do you observe in the data? Do they support your original conjecture? Explain."]}}
+    ]
+  },
+  "supports": []
+}

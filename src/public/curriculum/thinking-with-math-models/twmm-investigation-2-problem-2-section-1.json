@@ -1,0 +1,15 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": "When we have a relationship between two quantities or variables, we can use numeric reasoning, tables, graphs and equations to find the value of a variable. We have used these strategies in several *Connected Mathematics* units in 6th and 7th grade. We will continue to explore these strategies as we examine the strategies used by students in the following problem."
+        }
+      }
+    ]
+  },
+  "supports": []
+}

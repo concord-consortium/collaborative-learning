@@ -1,0 +1,30 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "U7aDP_NY4DhWhMk6",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>All of the patterns of change you have explored in this Unit involved rates of change. For example, we worked with walking rates expressed in meters per second and pledge rates expressed in dollars per kilometer. In these situations, we found that the rate a affects the following in a linear relationship represented by y = ax + b: </p>"
+          ]
+        }
+      },
+      {
+        "id": "kJWeyO9LsxG4nvx8",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>the steepness of the graph </li><li>how the y-values in the table change for each unit change in the x-values </li><li>and if b = 0, then the relationship is also proportional</li></ul>",
+            "<p>In this Investigation, we will explore another way to express the rates of change. </p>"
+          ]
+        }
+      },
+      {"id": "qYz0j9gWzYc96pkx", "title": "Skier going down a mountain", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_4_In_skiing_350w.png"}}
+    ]
+  }
+}

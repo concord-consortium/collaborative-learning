@@ -1,0 +1,21 @@
+{
+  "type": "intro",
+  "content": {
+    "tiles": [
+      {
+        "id": "xC4RUqsgRn4TNf8r",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In the last two lessons we explored the significant role of the nervous system in processing sensory information, as well as the impact of refined sensory information on movement. In this activity we will explore how a simple model of a bionic arm can be designed so that pressure can be sensed. In this activity, you will be presented with the following challenge:</p>",
+            "<p>How can robotic grippers can sense objects?</p>",
+            "<p><strong>Do Now</strong></p>",
+            "<p>Think back to what you have learned in lesson 2.1  (how does touch impact movement?) and lesson 2.2 (how do we perceive touch?). Answer the following question in your workspace: How would change the design of the gripper to make it &quot;feel&quot; objects?  </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

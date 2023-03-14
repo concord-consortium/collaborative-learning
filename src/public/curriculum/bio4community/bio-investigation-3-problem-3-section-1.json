@@ -1,0 +1,118 @@
+{
+  "type": "chapter3",
+  "content": {
+    "tiles": [
+      {"id": "Lx4mCkxu13SZrR7J", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<h3>CHAPTER 3: MOVIE NIGHT</h3>"]}},
+      {
+        "id": "eIP3lrJRPF56Q-NQ",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Felix thought about the video and had to admit it worried him a bit. Maybe he really was getting sick because of stress? But how? And was he really stressed that much? Enough to make him sick? Ugh, was Josué actually right?</p>",
+            "<p>Felix made his way over to the school library to study for an exam that was coming up soon. This class was one of his pre-Law classes so it was important and the professor was known to be strict with grading. It was fair to say Felix was stressed about this exam and knew there were a lot of things he had to study still. But, no matter how hard he stared at the textbook, he couldn’t focus. The words were blurring together and his thoughts were getting in the way.</p>",
+            "<p></p>",
+            "<p><em>Felix thought to himself as he read the textbook -- </em></p>",
+            "<p><em>Okay so the government had established laws regarding immigration… uhh my head hurts so much. none of this makes sense. Ok FOCUS.  I only have three days to cover 7 chapters. If I get through the harder chapters today, maybe tomorrow can just be review. But I can’t focus… My body feels so weak.</em></p>",
+            "<p><em></em></p>",
+            "<p>Felix kept trying to read the same paragraph over and over again. At some point, he must have fallen asleep. Next thing he knew, he woke up and it was 2 hours later. He rushed to the bathroom to splash water on his face and noticed the lines of the book imprinted onto his face. Well. That’s one way of taking in the information, he thought to himself. By the time Felix got home from the library, Josué could practically see the stress rolling off him. </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "HhYNdrPIbyfaWGwl",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Josué</strong>: Felix. You look dead on your feet. </p>",
+            "<p><strong>Felix</strong>: It’s fine, I got through the chapters I had to for the exam.</p>",
+            "<p><strong>Josué</strong>: Your body is screaming from the stress, I can hear it. You watched the video about stress and getting sick, right? Remember that?  </p>",
+            "<p><strong>Felix</strong>: I know, I know. I just really need to do well on this exam. </p>",
+            "<p><strong>Josué</strong>: Okay but know that you have already studied so much, you need a break. I think we both do. </p>",
+            "<p><strong>Felix</strong>: Fine…Maybe you’re right.</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "NWzEH9HnEEGFEIa2",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Being around their community and friends usually helped them feel better and so they decided to go to the movie night that the LGBTQ+ club on campus hosts every Friday. There were always good snacks, cool friends and an entertaining movie to watch. Today, they ran into their friend Camila, who they hadn’t seen for quite a while. </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {"id": "p-ntAzHuCqXjKq0g", "title": "Felix, Josue and Camila at Movie Night", "content": {"type": "Image", "url": "curriculum/bio4community/images/Felix_S2.jpg", "filename": "curriculum/bio4community/images/Felix_S2.jpg"}},
+      {
+        "id": "Jj8mXvYKA-RjFS6l",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Camila</strong>: Felix! Josué! How are you! How has everything been? It’s been so long. Where you two been hiding?</p>",
+            "<p><strong>Felix</strong>: It’s good, I feel good! Girl, you look fantastic! </p>",
+            "<p></p>",
+            "<p>[Camila was just about to hug Felix, when he sneezed. This earned him a disappointed look from Josué. Camila gave Josué a questioning look.]</p>",
+            "<p></p>",
+            "<p><strong>Josué</strong>: What he’s not mentioning is that he’s been working so hard his stress is making him sick. </p>",
+            "<p><strong>Camila</strong>: What?</p>",
+            "<p><strong>Felix</strong>: Is not. Camila. Josué is just being dramatic. </p>",
+            "<p></p>",
+            "<p>[As if on cue, Felix sneezed again.] </p>",
+            "<p></p>",
+            "<p><strong>Josué</strong>: Ay Dios mío [Oh my God], yes it can! Stop fighting with me about this! </p>",
+            "<p><strong>Camila</strong>: Okay, listen. I don’t know what this whole argument is about. But Felix, if you’re feeling stressed why don’t you just get a stress test? That way you’ll know if Josué is right or not! </p>",
+            "<p><strong>Felix</strong>: A what?</p>",
+            "<p><strong>Camila</strong>: A stress test! All you have to do is go to a clinic near you. They have a program for people who don’t have health insurance and you can tell them you need to get your stress levels tested.  </p>",
+            "<p><strong>Felix</strong>: We don’t have anything near us - not a clinic, not a bank, even the grocery store is so bad.. Remember where we live? </p>",
+            "<p><strong>Camila</strong>: Oh yeah, I forgot how unfortunate that part of town is. </p>",
+            "<p><strong>Josué</strong>: Excuse me? Unfortunate?</p>",
+            "<p><strong>Felix</strong>: Camila, you used to live there too. Just cause your parents got fancy jobs and bought a house in the suburbs with all the rich white people….Don’t forget your roots. </p>",
+            "<p><strong>Camila</strong>: Yeah.... I know. I’m not forgetting my roots, okay? It’s obviously weird not seeing any black or brown people like us around. And I know it’s not fair at all, but do you know how easy it is for me to get to a clinic or the nice grocery store from my house now?</p>",
+            "<p><strong>Felix</strong>: (getting irritated) Hey, at least when we get home late at night, our neighbors don’t call the cops on us cause they think we don’t belong there!</p>",
+            "<p><strong>Josué</strong>: Exactly. Sure you guys moved out and live in a more fancy area, but we still have the best taqueria and Señor Sanchez still lets us take the chili mango candies for free when we go to his bodega. We have a community of people that look out for each other. </p>",
+            "<p><strong>Camila</strong>: Yeah, you’re right I’m sorry. I didn’t mean to come off rude. I haven’t had a good birria [meat] taco in such a long time, I think it’s getting to my head. </p>",
+            "<p><strong>Felix</strong>: Well come over and we can change that. (Felix playfully nudges Camila.)</p>",
+            "<p><strong>Camile</strong>: I would love that. And really, I’m sorry about what I said... But Felix, you should still look for somewhere to get a stress test and then you can finally prove who is right.</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "lLyC8uW4STGQPzGN",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Josué and Felix looked at each other briefly before nodding in agreement! Before the test, Felix decided he needed to know more about what this stress test was going to involve. So, he searched and found a video on how stress test works. He clicked the link: “Saliva Stress Test” and watched the short video. The test seemed simple enough. He went to the clinic the next day and did the test himself. Within two days the results came in! Felix opened the email with bated breath, eager to see who was right. He clicked on the attachment: “Saliva Stress Test”, and he and Josué read the results.</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "WVd9QaHjhL4PHwwh",
+        "title": "Text 7",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li><strong>Watch the video- </strong><em><strong>EVIDENCE 3a-Saliva Stress Test</strong></em><strong> - in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Then review the test results-  </strong><em><strong>EVIDENCE 3b-Saliva Stress Test Results</strong></em><strong> - in the Resource Library.</strong></li></ul>",
+            "<ul><li><strong>Discuss the video and test results with your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "type": "sources",
+  "content": {
+    "tiles": [
+      {"id": "EnV8K9C9uPUl3h3X", "title": "Text 5", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 2 RESOURCES</h2>"]}},
+      [
+        {"id": "6fdXZgY4CIx8FzSN", "title": "Text 10", "content": {"type": "Text", "format": "html", "text": ["<p><strong>EVIDENCE 2a: </strong></p>", "<p><strong><a href='https://youtu.be/RW-KF0nUm0M'>Stress and Sickness</a></strong></p>", "<p></p>"]}},
+        {"id": "AiAfi8Vqh8_Pdbll", "title": "Stress and Sickness", "content": {"type": "Image", "url": "curriculum/bio4community/images/stressSicknessStill.png"}}
+      ],
+      [
+        {
+          "id": "eD-Fkv2VoArYCEHc",
+          "title": "Text 11",
+          "content": {"type": "Text", "format": "html", "text": ["<p><strong>EVIDENCE 2b:</strong></p>", "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=nose'>Immune Response Animation</a></strong></p>", "<p></p>"]}
+        },
+        {"id": "EI3_xCw2Q0IXbG2j", "title": "Immune Response Animation", "content": {"type": "Image", "url": "curriculum/bio4community/images/immuneAnimation.png"}}
+      ],
+      {
+        "id": "43WX0u7-l-G71E3x",
+        "title": "Text 12",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Questions About Evidence 2a - <em>Stress and Sickness</em></strong></p>",
+            "<p></p>",
+            "<p>1. Dr. Cohen’s study found that:</p>",
+            "<ul><li><strong>A. People with less chronic stress caught fewer colds</strong></li><li><strong>B. People with less chronic stress caught more colds</strong></li><li><strong>C. Stress level did not impact how many colds people go</strong>t</li></ul>",
+            "<p>(underline or circle your choice)</p>",
+            "<p></p>",
+            "<p>2. Chronic stress means stress that is ongoing and doesn’t stop.  </p>",
+            "<p><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "62rDY7tSixSWFiz-",
+        "title": "Text 13",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Questions About Evidence 2b - <em>Immune Response Animation</em></strong></p>",
+            "<p></p>",
+            "<p>1. When Stress Level and Amount of Bacteria are high, more mucus is made and the person feels sick.  </p>",
+            "<p><strong>True</strong>   OR  <strong>False</strong> ?  (underline your choice)</p>",
+            "<p></p>",
+            "<p>2. The cells that engulf and kill germs are:</p>",
+            "<ul><li><strong>A.  Immune cells      </strong></li><li><strong>B. Nose lining cells     </strong></li><li><strong>C. Mucus producing cells   </strong></li></ul>",
+            "<p>(underline your choice)</p>"
+          ]
+        }
+      },
+      {"id": "Uya5NTQdrhCsS75h", "title": "Text 6", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 1 RESOURCES</h2>"]}},
+      [
+        {
+          "id": "0-DJ4p6CpLv5Un3B",
+          "title": "Text 7",
+          "content": {"type": "Text", "format": "html", "text": ["<p><strong>EVIDENCE 1:</strong></p>", "<p><strong><a href='https://docs.google.com/presentation/d/1lBRlHpv8bzUw3UVDo9L0mJteKqYmZbdOavF6W4dsl-k/edit?usp=sharing'>How Do You Get Sick?</a></strong></p>"]}
+        },
+        {"id": "NFCQvMe3T2H_Cmb5", "title": "Evidence 1", "content": {"type": "Image", "url": "curriculum/bio4community/images/howdoyougetSickStill.png"}}
+      ]
+    ]
+  }
+}

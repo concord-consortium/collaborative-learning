@@ -1,0 +1,126 @@
+{
+  "type": "labWork",
+  "content": {
+    "tiles": [
+      {
+        "id": "rJt5kDc73bJomWKx",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Working with pressure sensors</strong></p>",
+            "<p>Today we will work with pressure sensors to make the gripper &quot;feel&quot; objects. To do so, you will need to attach sensing &quot;mittens&quot; to your gripper:</p>",
+            "<p>Step 1: Flip the gripper over so the black battery is facing up and lay the mittens in front of the gripper so the arcs of the mittens are facing each other:</p>"
+          ]
+        }
+      },
+      {"id": "tXdlGWYpv6_5OdO-", "title": "Step 1", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/mittensStep1.png"}},
+      {"id": "UOXrVRlQ4v_mvtFT", "title": "Text 12", "content": {"type": "Text", "format": "html", "text": ["<p>Step 2: Slide the mitten under the gripper like so, and gently push on the orange arm into the mitten. It should be a snug fit. Repeat with the other mitten. </p>"]}},
+      {"id": "isT7GydSe_TamHum", "title": "Step 2", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/mittensStep2.png", "filename": "curriculum/neural-engineering/images/mittensStep2.png"}},
+      {
+        "id": "xtGortNUEVAPNJi2",
+        "title": "Text 13",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Step 3: If the mittens do not fit the arm of the gripper snug, then repeat step two,  but pull the mitten up while holding the gripper arm steady. The mitten should tighten around the arm of the gripper.</p>"]}
+      },
+      {"id": "v1xEmofre1JL7gtz", "title": "Step 3", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/mittensStep3.png", "filename": "curriculum/neural-engineering/images/mittensStep3.png"}},
+      {
+        "id": "10p-RetC503aMsaJ",
+        "title": "Text 14",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Step 4: After the mittens are securely attached to the gripper arm, you will need to attach the touch sensor (if the sensor is already attached to one of the mittens, skip steps #4-5). Guide the pressure sensor through the small slit of one of the mittens (doesn&#x27;t matter which one):</p>"
+          ]
+        }
+      },
+      {"id": "LB59H45EIKOgrqFs", "title": "Step 4", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/mittensStep4.png", "filename": "curriculum/neural-engineering/images/mittensStep4.png"}},
+      {
+        "id": "3Q71M0ZjYeGFj4el",
+        "title": "Text 15",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Step 5: Take a small piece of double sided tape and attach the sensor to the arc of the mitten.Push the back of the pressure sensor into the double-sided tape. Make sure that the striped side of the sensor is facing OUT (note: The pressure sensor will not work if the wrong side is taped):</p>"
+          ]
+        }
+      },
+      {"id": "zCgYPSTozc_REVqg", "title": "Step 5", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/mittensStep5.png", "filename": "curriculum/neural-engineering/images/mittensStep5.png"}},
+      {
+        "id": "a6O5yNWtW-CGadj6",
+        "title": "Text 4",
+        "content": {"type": "Text", "format": "html", "text": ["<p>The next step is to connect the pressure sensor to the Muscle Spiker Shield (orange board).  You will notice that there are three wires coming out of the sensor: red, black, and blue. Plug these wires to the following sockets:</p>"]}
+      },
+      {"id": "iRLH-JgZYIUmUb6w", "title": "Connecting the sensor to the muscle spiker shield (orange board)", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/arduinowPressure.png", "filename": "curriculum/neural-engineering/images/arduinowPressure.png"}},
+      {"id": "G4St3ETHDxn6Xxb0", "title": "Zoom in", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/connectorColors.png", "filename": "curriculum/neural-engineering/images/connectorColors.png"}},
+      {
+        "id": "dTTzuz68xecRDgTs",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Next, you will need to connect the Arduino board to your computer using the blue USB cable, open a DataFlow tile and click on the lightning bolt connection button to pair your device. Add a sensor to your DataFlow program and choose &quot;Surface Pressure&quot; from the first drop-down menu and &quot;connect for live fsr&quot; from the second drop-down menu. Click on the graph icon to visualize the data that is received from the sensor and change the sampling rate to 100ms.</p>",
+            "<p>Try pressing the sensor with your fingers. Do you see any changes in your graph? If not, make sure you properly followed all the previous steps. </p>"
+          ]
+        }
+      },
+      {
+        "id": "Pbmb_5NSuyphX0nR",
+        "title": "Program 1",
+        "content": {
+          "type": "Dataflow",
+          "programDataRate": 1000,
+          "programZoom": {"dx": 0, "dy": 0, "scale": 1},
+          "program": {"values": {"1": {"currentValues": {}}}, "id": "dataflow@0.1.0", "nodes": {"1": {"id": 1, "name": "Sensor", "x": 40, "y": 5, "inputs": {}, "outputs": {"num": {"connections": {}}}, "data": {"plot": false, "type": "fsr-reading", "sensor": "fsr", "virtual": false}}}}
+        }
+      },
+      {
+        "id": "WY0kXUDfbiDWaHIb",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Control the gripper with your muscles</strong></p>",
+            "<p>Follow the same steps from lesson 1.5 to control the gripper with your muscles (go back to lesson 1.5 if you need additional information):</p>",
+            "<p>1. Connect the gripper to the Muscle SpikerShield. </p>",
+            "<p>2. Stick two EMG surface electrodes on your forearm and one on your elbow.</p>",
+            "<p>3. Connect the black alligator clip to the electrode on your elbow and the red alligator clips to the electrodes on your forearm. </p>",
+            "<p>4. Plug the end of the orange wire into the orange connection box on the Muscle SpikerShield.</p>",
+            "<p>5. Create a new DataFlow tile and add a sensor block:</p>",
+            "<p>- In the &quot;Select a sensor type&quot; drop-down menu, select EMG</p>",
+            "<p>- In the &quot;Select a sensor&quot; drop-down menu, select &quot;connect for live EMG&quot;</p>",
+            "<p>6. Add a Live Output Block. In the drop-down menu, choose &quot;Grabber.&quot; </p>",
+            "<p>7. Add logic and number blocks and connect all the blocks (just like you did in lesson 1.5). </p>",
+            "<p>8. Power up the gripper by connecting a 9V battery to the Muscle SpikerShield (the yellow board). </p>",
+            "<p>Can you make the gripper open and close by contracting your arm muscles? If not, check your work and make sure you followed all the previous steps correctly.  </p>"
+          ]
+        }
+      },
+      {
+        "id": "rlC-zkmUWgRhuT5K",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Your challenge, should you choose to accept it...</strong></p>",
+            "<p>Your goal in this final activity is to program the gripper to hold an egg without cracking it. Your DataFlow program should do two main things: (1) when a muscle is contracted, the signal is detected and triggers the gripper to close. (2) When the pressure applied on an object becomes too strong, the pressure sensor tells the gripper to keep its current position. This is meant to prevent the gripper from closing too strongly on the egg and cracking it. </p>",
+            "<p>Hint: You will need to use a &quot;control&quot; block (see lesson 2.2). </p>",
+            "<p>Before you test your program with a real egg, try pressing the sensor with your fingers and contracting your muscles at the same time. Does your gripper move? Why or why not?  </p>"
+          ]
+        }
+      },
+      {
+        "id": "Rqu8k407eNNyE-Co",
+        "title": "Text 7",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Evaluate the design of the touch-sensitive gripper</strong></p>", "<p>With your team, discuss the strengths and weaknesses of the touch-sensitive gripper. Drag the following table to your workspace and fill it in:</p>"]}
+      },
+      {"id": "Kyjs5g52AYRfAHnS", "title": "Table 1", "content": {"type": "Table", "name": "Gripper evaluation", "columns": [{"name": "Strengths", "width": 200}, {"name": "Weaknesses", "width": 200}]}},
+      {"id": "OpA7t27RXurcLg-k", "title": "Text 8", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Reflection</strong></p>", "<p>At the end of the activity, please record your current thinking and learning in your learning journal (see Reflection tab). </p>"]}}
+    ]
+  }
+}

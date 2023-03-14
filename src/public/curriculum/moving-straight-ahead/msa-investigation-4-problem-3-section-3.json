@@ -1,0 +1,24 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "n-W-FN-gjQLqupbe", "title": "Text 73", "content": {"type": "Text", "format": "html", "text": ["<p>Describe some strategies for recognizing equivalent representations?</p>"]}},
+      {
+        "id": "jmCoP_TkkZprJA5v",
+        "display": "teacher",
+        "title": "Text 75",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary.</p>",
+            "<p>Students may begin by finding general sorts and then refine them. General sorts may include:</p>",
+            "<ul><li>increasing linear, decreasing linear, and non-linear.</li><li>proportional or non-proportional</li></ul>",
+            "<p>Students may </p>",
+            "<ul><li>determine the y-intercepts and rates of change. Then use those to find the equivalent representation.</li><li>use one representation to find another. For example, they may put the equations into a graphing calculator to get the graph and table. </li><li>find the ratio of the rise to the run for the representation. Then, find other representations with the same ratio.</li><li>Use the properties of equality to find equivalent equations.</li><li>Look for values that match, for example find an x and y value on the table that is the coordinate pair of a point on the graph. Substitute the values into the equation(s) to see if the equation is true for those values.</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {"id": "G5xyHVA0N4ePMQum", "title": "Text 14", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation A. Walking at a Consistent Rate</strong></p>", "<p>Assume you continue to walk at the rate determined in the Initial Challenge</p>"]}},
+      {
+        "id": "Y58VNP_NyC1Fs--y",
+        "display": "teacher",
+        "title": "Text 15",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Answers will vary depending on the student’s walking rate. Sample answers are provided for a walking rate of 2 meters per second, and for a student who walks <em>r</em> meters per second.</p>"]}
+      },
+      {"id": "DP79vXw_ASo5sPfK", "title": "Text 16", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How long would it take you to walk 500 meters?</li></ul>"]}},
+      {
+        "id": "6pi8vuPNcVNLTh8q",
+        "title": "Text 17",
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p>A student who walks 2 meters per second will walk 500 meters in 250 seconds, or 4 minutes and 10 seconds.</p>", "<p>A student who walks <em>r</em> meters per second will walk 500 meters in 500/<em>r</em> seconds.</p>"]}
+      },
+      {"id": "m4P30Y_MoDy2UkrS", "title": "Text 18", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How far could you walk in 5 seconds, 10 seconds, 30 seconds? In 60 seconds? In 1 hour?</li></ul>"]}},
+      {
+        "id": "ApJTjVnFM-HnEfn_",
+        "title": "Text 19",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>A student who walks 2 meters per second will walk 10 meters in 5 seconds, 20 meters in 10 seconds, 60 meters in 30 seconds, 120 meters in 60 seconds, and 7200 meters in 1 hour.</p>",
+            "<p>A student who walks <em>r</em> meters per second will walk 5<em>r</em> meters in 5 seconds, 10<em>r</em> meters in 10 seconds, 30<em>r</em> meters in 30 seconds, 60<em>r</em> meters in 60 seconds, and 3600<em>r</em> meters in 1 hour.</p>"
+          ]
+        }
+      },
+      {"id": "nD02DnzypFkvWWbO", "title": "Text 20", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Write an equation that represents the distance d in meters that you could walk in t seconds. Compare your equation to your classmates’ equations. </li></ul>"]}},
+      {
+        "id": "5S_tXc-529maHtZb",
+        "title": "Text 21",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>For a walking rate of 2 meters per second, an equation is d=2t, where d is the distance in meters and t is the time in seconds.</p>",
+            "<p>For a walking rate of <em>r </em>meters per second, an equation is d = <em>r</em>t, where d is the distance in meters and t is the time in seconds.</p>"
+          ]
+        }
+      },
+      {"id": "8WBqVzNFeU0esLfI", "title": "Text 22", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Describe what a graph of your equation would look like. Check your answer by making a graph of your data.  </li></ul>"]}},
+      {
+        "id": "uJThrFdgQ70EYui2",
+        "title": "Text 23",
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Possible answers.</p>", "<p>For a walking rate of 2 meters per second: The graph would be a line starting at (0,0). For every one second walked, the distance increases by 2.</p>"]}
+      },
+      {
+        "id": "TmNUXMyQVhk0aDVd",
+        "display": "teacher",
+        "title": "Walking Rate",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-0.5, -1.938], "axisRange": [10, 15], "axisNames": ["Time (seconds)", "Distance (meters)"], "axisLabels": ["", ""]}},
+          "objects": [{"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [4, 8]}], "properties": {"id": "hS9En_gWFrJLpvCo", "pt1": {"type": "point", "id": "hS9En_gWFrJLpvCo-point1"}, "pt2": {"type": "point", "id": "hS9En_gWFrJLpvCo-point2"}}}]
+        }
+      },
+      {"id": "BYsMrt7xOTEgWJjo", "title": "Text 24", "display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>For a walking rate of r meters per second: The graph would be a line starting at (0,0). For every one second walked, the distance increases by r.</p>"]}},
+      {"id": "214PwkjVMyxrKXTc", "title": "Text 25", "content": {"type": "Text", "format": "html", "text": ["<h3>Situation B.  Liz’s Strategy</h3>", "<p>Examine Liz’s strategy. Is she correct? Explain.</p>"]}},
+      {
+        "id": "b8dSg7MMfFFEyXAh",
+        "title": "Text 26",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Liz’s Strategy</p>",
+            "<p>I think walking rates are like ratios. So, I used proportional reasoning to write &#x27;for every&#x27; statements to answer the questions in Situation A. </p>",
+            "<p>For every</p>",
+            "<p>1.5 m per            1 second, I walk </p>",
+            "<p>⤹x5                       ⤹ x5</p>",
+            "<p>7.5 m in              5 seconds, or</p>",
+            "<p>⤹x2                      ⤹x2</p>",
+            "<p>15 m in               10 seconds, …or</p>",
+            "<p>⤹x 33.5              ⤹x33.5</p>",
+            "<p>500m in about 333 seconds</p>"
+          ]
+        }
+      },
+      {
+        "id": "D_WEmXeVX3HAPCCt",
+        "title": "Text 28",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Sample answer: She is correct. The ratio of meters walked to seconds always stays the same, so, for example, (1.5 meters)/(1 second) = (7.5 meters)/(5 seconds) = (15 meters)/(10 seconds). So you can always predict how long it will take to walk a specific distance based on this constant ratio.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

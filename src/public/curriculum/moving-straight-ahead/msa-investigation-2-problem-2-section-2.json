@@ -1,0 +1,143 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "6sfLSrSmdI_rjm0R",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Ms. Chang’s class decides to give T-shirts to each person who participates in the walkathon. They obtain the cost of the T-shirts from two different companies. Mighty Tee charges $49 plus $1 per T-shirt. No-Shrink Tee charges $4.50 per T-shirt. Ms. Chang writes the following equations to represent the relationships relating cost to the number of T-shirts: </p>",
+            "<p>C<sub>Mighty</sub> = 49 + n C<sub>No-Shrink</sub> = 4.5n</p>",
+            "<p>The number of T-shirts is <em>n</em>. C<sub>Mighty</sub> is the cost in dollars for Mighty Tee. C<sub>No-Shrink</sub> is the cost in dollars for No-Shrink Tee. </p>"
+          ]
+        }
+      },
+      {"id": "C7dVhzdOW98jHEeb", "title": "Text 6", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Which company should they choose? Give evidence for your answer. </li></ul>"]}},
+      {
+        "id": "D4YDWVxoeyU4qGfe",
+        "display": "teacher",
+        "title": "Text 9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>The amount spent on t-shirts will be the same if the class buys 14 t-shirts. If they want to buy fewer than 14 t-shirts, they should choose No-Shrink Tee; if they want to buy more than 14 t-shirts, they should choose Mighty Tee.</p>"]
+        }
+      },
+      [
+        {
+          "id": "ls4oD8ITmsTh447a",
+          "display": "teacher",
+          "title": "No-Shrink vs. Mighty-T",
+          "content": {
+            "type": "Geometry",
+            "board": {"properties": {"axisMin": [-1, -1], "axisRange": [50, 80], "axisNames": ["x", "y"], "axisLabels": ["T Shirts", ""]}},
+            "objects": [
+              {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 49]}, {"type": "point", "parents": [10, 59]}], "properties": {"id": "-94mMi-np62wbQDb", "pt1": {"type": "point", "id": "-94mMi-np62wbQDb-point1"}, "pt2": {"type": "point", "id": "-94mMi-np62wbQDb-point2"}}},
+              {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [8, 36]}], "properties": {"id": "j0whRpfXEeqi2ph_", "pt1": {"type": "point", "id": "j0whRpfXEeqi2ph_-point1"}, "pt2": {"type": "point", "id": "j0whRpfXEeqi2ph_-point2"}}},
+              {"type": "point", "parents": [14, 63], "properties": {"id": "LNqnytBjQsSlnKvh", "name": "(14, 63)", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "comment", "parents": [3.2258416666666676, -1.6459093749999987], "properties": {"id": "jrVCjQBAQ66ukKMF", "text": "No-Shrink", "anchor": "j0whRpfXEeqi2ph_"}},
+              {"type": "comment", "parents": [-10.1174125, 3.5213656250000085], "properties": {"id": "tTzfHXGsI5dY3bhK", "text": "Mighty T", "anchor": "-94mMi-np62wbQDb"}}
+            ]
+          }
+        },
+        {
+          "id": "Y_BlvAcLQHYqGew9",
+          "display": "teacher",
+          "content": {
+            "type": "Table",
+            "name": "T-shirt Costs",
+            "columns": [
+              {"name": "x", "width": 80, "values": [0, 2, 4, 6, 8, 10, 12, "14", "16"]},
+              {"name": "Mighty", "width": 80, "values": ["49", "51", "53", "55", "57", "59", "61", "63", "65"]},
+              {"name": "NoShrink", "width": 94.80078125, "values": ["0", "9", "18", "27", "36", "45", "54", "63", "72"]}
+            ]
+          }
+        }
+      ],
+      {"id": "qCv4wnqk2qIP1S7K", "title": "Text 10", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Explain how a graph or a table could be helpful in making your decision</li></ul>"]}},
+      {
+        "id": "tDGDBmrDF56P20A6",
+        "display": "teacher",
+        "title": "Text 11",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>A graph or table would tell you how much you would spend on n t-shirts from each company. </p>",
+            "<p></p>",
+            "<p>A graph would give a visual of the inequality that No-Shrink is cheaper until 14 shirts. Then after more than 14 shirts, Mighty would be cheaper with a line below the other company’s.</p>"
+          ]
+        }
+      },
+      {
+        "id": "znFZqN7vJ-DUPkCa",
+        "display": "teacher",
+        "title": "Text 14",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In the graph, we can find where the two lines intersect. This shows the point when both companies have the same cost for the same number of shirts. </p>",
+            "<p></p>",
+            "<p>Before that point, we can see that No-Shrink is cheaper, because the y-values are below the y-values of Mighty. After that point, we can see that the y-values of Might are less that No-Shrink. </p>"
+          ]
+        }
+      },
+      {"id": "pglSXEAbyXuWCOp9", "display": "teacher", "title": "Mighty vs. No-Shrink", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/2.2_IC_Mighty_vs_NoShrink.png", "filename": "curriculum/moving-straight-ahead/images/2.2_IC_Mighty_vs_NoShrink.png"}},
+      {
+        "id": "lEMyKRHXqhod-ECK",
+        "display": "teacher",
+        "title": "Text 16",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>On a table, you can see how the money amounts change for equal increments of change in the number of shirts. No-Shrink is cheaper until you get to 14 shirts, when the companies both would charge $63. For more than 14 shirts, Mighty would have a cheaper cost.</p>"]
+        }
+      },
+      {
+        "id": "u1M4NOHiiUaH-vRq",
+        "display": "teacher",
+        "title": "Text 17",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In the table, we can find where we have the same cost for the same number of shirts. </p>",
+            "<p></p>",
+            "<p>Before that, we can see that No-Shrink is cheaper, because the y-values are less than the y-values of Mighty. After that point, we can see that the y-values of Might are less that No-Shrink. </p>"
+          ]
+        }
+      },
+      {
+        "id": "uxl0DDbVkvxTRLWr",
+        "display": "teacher",
+        "title": "Table 1",
+        "content": {
+          "type": "Table",
+          "name": "T-shirt Costs",
+          "columns": [
+            {"name": "x", "width": 80, "values": [0, 2, 4, 6, 8, 10, 12, "14", "16"]},
+            {"name": "Mighty", "width": 80, "values": ["49", "51", "53", "55", "57", "59", "61", "63", "65"]},
+            {"name": "NoShrink", "width": 94.80078125, "values": ["0", "9", "18", "27", "36", "45", "54", "63", "72"]},
+            {"name": "Which is cheaper?", "width": 93.4140625, "values": ["No-Shrink", "No-Shrink", "No-Shrink", "No-Shrink", "No-Shrink", "No-Shrink", "No-Shrink", "Same cost", "Mighty"]}
+          ]
+        }
+      },
+      {
+        "id": "6yXkTwfKVFQRIMkY",
+        "display": "teacher",
+        "title": "Solution",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>This informal comparison of two linear equations will be formalized in Grade 8. Students will learn that when you find the point at which the costs are the same for the same number of shirts, it is solving a system of linear equations. These informal experiences lay the foundation for connecting ideas in more formal learning later on.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

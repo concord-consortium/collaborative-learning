@@ -1,0 +1,73 @@
+{
+  "type": "sources",
+  "content": {
+    "tiles": [
+      {"id": "y6DybJtbDZRFCyHn", "title": "Text 11", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 4 RESOURCES</h2>"]}},
+      [
+        {"id": "PAQrqeJe7CWI7RXm", "title": "Text 17", "content": {"type": "Text", "format": "html", "text": ["<p></p>", "<p><strong>EVIDENCE 4a:</strong></p>", "<p><strong><a href='https://youtu.be/hmzYniXqc7k'>Saliva Stress Test Video</a></strong></p>"]}},
+        {"id": "sA8hUUwRZPPtnxqJ", "title": "Stress Test Video", "content": {"type": "Image", "url": "curriculum/bio4community/images/salivaVideo.png"}}
+      ],
+      [
+        {
+          "id": "d_TOGGHRK-thLI3k",
+          "title": "Text 18",
+          "content": {"type": "Text", "format": "html", "text": ["<p></p>", "<p><strong>EVIDENCE 4b:</strong></p>", "<p><strong><a href='https://docs.google.com/document/u/0/d/1rG8YHG9_qjX1ePlh7eGF33agObLBnxDTT9fH-0EQaLU/edit'>Saliva Stress Test Results</a></strong></p>"]}
+        },
+        {"id": "l5XnTQKXRgjoMVVb", "title": "Stress Test Results", "content": {"type": "Image", "url": "curriculum/bio4community/images/SalivaTest.jpg"}}
+      ],
+      {
+        "id": "KjKMTddmVDKkoL9U",
+        "title": "Text 22",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Question about Evidence 4a and 4b, </strong><em><strong>Saliva Stress Test Video </strong></em><strong>and</strong><em><strong> Saliva Stress Test Results</strong></em></p>",
+            "<p>1. Rakesh’s cortisol levels are? (underline your choice)</p>",
+            "<ul><li><strong>A. Low              B. Normal           C. High</strong></li></ul>"
+          ]
+        }
+      },
+      {"id": "pJWMxrvtD-WqOCVt", "title": "Text 9", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 3 RESOURCES</h2>"]}},
+      [
+        {
+          "id": "K0BDbmfEe2EO8hlX",
+          "title": "Text 15",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<p><strong></strong></p>", "<p><strong>EVIDENCE 3:</strong></p>", "<p><strong><a href='https://docs.google.com/document/u/0/d/1wsHs1AqpJRZwwZwetX6H7daeN-8LVPSaa2PE2MJJY7c/edit'>Rakesh Sharma Blood Test Report</a></strong></p>", "<p></p>"]
+          }
+        },
+        {"id": "SugYDH2bCKsWhycl", "title": "Blood Test Report", "content": {"type": "Image", "url": "curriculum/bio4community/images/MetabolicPanel.jpg"}}
+      ],
+      {"id": "lPVRGOOHSGjE1y9p", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 2 RESOURCES</h2>"]}},
+      [
+        {
+          "id": "OtokwmPZWbmTVWIi",
+          "title": "Text 5",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<p><strong></strong></p>", "<p><strong>Evidence 2a: </strong></p>", "<p><strong><a href='https://docs.google.com/document/d/1YSXBIHHgoGicQuyuoH9gZ-80ioT_1hHPcJbaxsLLgks/edit?usp=sharing'>All the Fuss About Cholesterol</a> (blog post)</strong></p>", "<p></p>"]
+          }
+        },
+        {"id": "rlxmohFtxdrShvw1", "title": "Blog Post", "content": {"type": "Image", "url": "curriculum/bio4community/images/blogCholesterol.png"}}
+      ],
+      [
+        {
+          "id": "ve4OAvnDcW4-lz4H",
+          "title": "Text 20",
+          "content": {"type": "Text", "format": "html", "text": ["<p><strong></strong></p>", "<p><strong>Evidence 2b: </strong></p>", "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=heart'>Plaque Animation</a></strong></p>"]}
+        },
+        {"id": "F1AduVhRZwwaS7Gx", "title": "Plaque Animation", "content": {"type": "Image", "url": "curriculum/bio4community/images/plaqueAnimation.png"}}
+      ],
+      {"id": "hXuK-DHuwuXmx9Lz", "title": "Text 8", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 1 RESOURCES</h2>"]}},
+      [
+        {"id": "YcJHTQkBql9Rm5Ss", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong></strong></p>", "<p><strong>Evidence 1: <a href='https://youtu.be/9d__Qy0NaJk'>The Effects of Stress on the Heart</a> (video)</strong></p>", "<p></p>"]}},
+        {"id": "XKBxVzPoEkDC-YQr", "title": "Effects of Stress Video", "content": {"type": "Image", "url": "curriculum/bio4community/images/effectsofStress.png"}}
+      ]
+    ],
+    "supports": []
+  }
+}

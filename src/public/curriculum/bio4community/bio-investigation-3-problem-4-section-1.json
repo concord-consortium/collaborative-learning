@@ -1,0 +1,80 @@
+{
+  "type": "chapter1",
+  "content": {
+    "tiles": [
+      {"id": "17SEP20221154AM", "content": {"type": "Text", "format": "html", "text": ["<h3>CHAPTER 4: PROFESSOR NASSIR</h3>"]}},
+      {
+        "id": "70xsdRtKg3GwtRh2",
+        "title": "Text 1",
+        "content": {"type": "Text", "format": "html", "text": ["<p>As he read the report, Felix’s heart was racing, how stressed was he? Is Josué right about him? The test showed that his cortisol levels were way too high. He was, in fact, very stressed.</p>", "<p></p>"]}
+      },
+      {
+        "id": "ohXQbBQhhcKRe1fm",
+        "title": "Text 2",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Josué</strong>: Mi vida (my world), I didn’t want to be right. I’m so worried. </p>", "<p><strong>Felix</strong>: Yo sé (I know). I didn’t think I was that stressed and it could be making me sick.</p>", "<p></p>"]}
+      },
+      {
+        "id": "AfJg1syzed_LJYoD",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Knowing about his cortisol levels made Felix feel even more anxious. What could he do? He realized he could reach out to his immunology professor from undergrad. Professor Nassir was one of the best professors Felix had in college. She was always so helpful with any of his questions and cared about her students a lot. She would know how to interpret this and wouldn’t mind him asking her for help. Her office hours were every Thursday from 1:00 - 3:00 pm so he emailed her letting her know he would be dropping in. At 2:30, Felix found Professor Nassir getting ready to leave. He knocked on the office door:</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "4_bdsAg_yCiM-QSS",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Felix</strong>: Hi, Professor Nassir, how are you?</p>",
+            "<p><strong>Prof. Nassir</strong>: Hey Felix! It’s so wonderful to see you! Aren’t you in law school now? What brings you here? </p>",
+            "<p><strong>Felix</strong>: Yes, yes, I am. Law school is going really well, but I’ve been struggling a bit with my health and I had a biology-related question that I was hoping you may be able to help me figure out.</p>",
+            "<p><strong>Prof. Nassir</strong>: Sure, of course, what is it?</p>",
+            "<p><strong>Felix</strong>: OK. Well, I’ve been getting sick a lot lately and I think it may be because I’m stressed. I took a stress test and found out my cortisol levels are too high. But I don’t understand how cortisol could make me sick, I just don’t get the connection.</p>",
+            "<p><strong>Prof. Nassir</strong>: Oh Felix, I’m sorry to hear about your stress levels. Balancing college, work, family, and friends is really difficult. You have always been such a good student so I know you must be working hard. </p>",
+            "<p><strong>Felix</strong>: Thank you, I’m doing OK. It is super hard right now, I had several assignments due this week including a huge presentation that I gave the other day.</p>",
+            "<p><strong>Prof. Nassir</strong>: That sounds like a lot, you really need to take time for yourself as well. You know, our immune systems are really sensitive in reacting to the germs we’re exposed to. When we feel sick, it usually means our immune system is responding and clearing out germs from our nose and throat. But once our immune system is done, we usually go back to feeling normal. </p>",
+            "<p><strong>Felix</strong>: Oh yeah I remember that from class. But what does this have to do with stress and the cortisol hormone?</p>",
+            "<p><strong>Prof. Nassir</strong>: It’s actually really interesting, cortisol is really important in our immune system. Turns out, cortisol stops the immune response and helps it return to a normal state. This is usually when people stop feeling sick. </p>",
+            "<p><strong>Felix</strong>: But then in stressed people? My cortisol levels are so high…</p>",
+            "<p><strong>Prof. Nassir</strong>: Honestly I’m not really sure what happens when you have high levels of cortisol for a long time, but I do know that people who are stressed and have higher levels of cortisol also tend to feel sick more often..</p>",
+            "<p><strong>Felix</strong>: Hmm. I feel like that doesn’t really make sense. If cortisol stops the immune response and makes you feel less sick, why would high levels of cortisol make people feel sick for longer?</p>",
+            "<p><strong>Prof. Nassir</strong>: You know, I’m not entirely sure. </p>",
+            "<p></p>",
+            "<p>[At that moment, a student of Professor Nassir knocked on the door]</p>",
+            "<p></p>",
+            "<p><strong>Prof. Nassir</strong>: Felix I’m so sorry. I have to meet with Kareem now. (Professor Nasir points at the student waiting at the door). How about this though, I know of this simulator that might be helpful. Why don’t you take a look at it and see if you can figure it out? I’ll email you the link?</p>",
+            "<p><strong>Felix</strong>: Oh thank you so much! I really appreciate you helping me out!   </p>",
+            "<p></p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "RZrdzK83UWrxwM_Y",
+        "title": "Text 5",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Felix really liked  Prof. Nassir, she cared about her students and how they were doing. He looked down at the report in his hand. He planned to read it after his double shift, when he got home.</p>", "<p></p>"]}
+      },
+      {
+        "id": "ffuXa0Uuxaum8Z4t",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li><strong>Explore - </strong><em><strong>EVIDENCE 4a-Immune Response Simulator</strong></em><strong> - in the Resource Library. Change the options in the simulator and notice the effects.</strong></li></ul>",
+            "<ul><li><strong>Read the report - </strong><em><strong>EVIDENCE 4b- Effect of Cortisol on the Immune System</strong></em><strong> - in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Discuss the report with your group and together, answer the questions about the evidence in the Resource Library.</strong></li></ul>",
+            "<ul><li><strong>Write what you learned from this evidence in your table.</strong></li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

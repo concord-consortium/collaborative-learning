@@ -1,0 +1,27 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Situation A. Jose's Example</strong>\nHe claims that the following two lines have the same pattern as one of those in the Initial Challenge. Which Group or Pair of lines does each line belong? Explain why.<ul><li>Line 1 contains the points (1,4) and (3, 12)</li><li>Line 2 contains the points (1, 6) and (3, 14)</li></ul>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Situation B. Boat Rentals Again</strong>\nSeveral competing canoe rentals use expressions to represent the rental cost <em>C</em>.<ul><li><em>C<sub>1</sub><em> = 2.5 + 0.25<em>t</em></li><li><em>C<sub>2</sub><em> = 0.25(10 + <em>t</em>)</li><li><em>C<sub>3</sub><em> = 0.25(10 + 10<em>t</em>)</li><li><em>C<sub>4</sub><em> = 0.5(10 + 0.5<em>t</em>)</li></ul> <ol><li>Which plan(s) is the least expensive per minute?</li><li>Describe the shape of each graph. What information about rental costs does the slope represent?</li></ul>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

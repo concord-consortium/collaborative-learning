@@ -1,0 +1,230 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {"id": "wLXDzlkBXWbetBxy", "title": "Text 29", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation A. Nicole’s Strategy</strong></p>"]}},
+      {
+        "id": "geyU2n160yBaTNTA",
+        "title": "Text 30",
+        "content": {"type": "Text", "format": "html", "text": ["<p>In Code 2, I thought of the left-hand side of the equation as having two groups. Each group contained one pouch and two coins. I used the following steps to help find the number of coins in a pouch. </p>"]}
+      },
+      {
+        "id": "0CZk_zTaOhb-MZ5I",
+        "title": "Nicole's strategy: Original Equation",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {"type": "image", "id": "OxK9Fqme1MVxgGNq", "x": 23, "y": 77.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "UCPXx63cE-cYeTje", "x": 58.5, "y": 39.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "YB8uyNr8rkaZsudv", "x": 59.5, "y": 84.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "ZucoBnKE3n-Iu41G", "x": 97, "y": 79.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "dLlZ_aLZsAswJv_T", "x": 133.5, "y": 40.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "WXeQKfjwlHPiL4hI", "x": 134.5, "y": 85.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "SR9h0KFGublBZHia", "x": 163.5, "y": 65.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+            {"type": "image", "id": "7Af1kjGkwmGoAjOB", "x": 186.5, "y": 84.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Pk0yKkhyezQA5WW2", "x": 228.5, "y": 85.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "zGZpbBPUx72Euj8S", "x": 273.5, "y": 83.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "8Y3lCeD-maogWZXt", "x": 318.5, "y": 83.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Sm19UuzIrrknyo_b", "x": 365.5, "y": 81.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "zBoSpdsknKVHpV-W", "x": 410.5, "y": 81.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "8GcAKULtuPaQm-vp", "x": 184.5, "y": 42.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "gwpPWBhNojQqKd3l", "x": 228.5, "y": 41.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "VeLdMSSPPKfWs0B9", "x": 274.5, "y": 41.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "_78IekDheHxnyqtL", "x": 317.5, "y": 40.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "LNVXuzdhpMZaMU7t", "x": 365.5, "y": 40.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "g-fVge9XGNat0prV", "x": 409.5, "y": 40.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+          ]
+        }
+      },
+      {
+        "id": "mQzsdmkem_lX67Ux",
+        "title": "Nicole's strategy: Step 1",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {"type": "image", "id": "zX4az4Agpz-rCL6H", "x": 41, "y": 64.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "R7d-dsJLp5IYwNXa", "x": 79.5, "y": 44.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Rv8ms96ThZ4umZ0k", "x": 80.5, "y": 84.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "cYwYZWKmHu8L0ZJT", "x": 127.5, "y": 66.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+            {"type": "image", "id": "INsK30BkFYvmo-6I", "x": 155.5, "y": 40.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "X-RIYjxb3jZbQKMv", "x": 155.5, "y": 87.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "LocdgqtoMU9cfmVE", "x": 200.5, "y": 38.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "sE6kFZ6kUBUmcS9k", "x": 203.5, "y": 86.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "CqaQ2eFXMfxhDhKA", "x": 250.5, "y": 37.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "P-cwcQZ8cu9Z1-MO", "x": 251.5, "y": 87.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+          ]
+        }
+      },
+      {
+        "id": "urXamCUsGAQHYA2d",
+        "title": "Nicole's strategy: Step 2",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {"type": "image", "id": "JVrN4a0MdHgYTFH9", "x": 39, "y": 66.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "RNpRmoRMUazT7Qnl", "x": 84.5, "y": 71.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+            {"type": "image", "id": "gSmcndBVC_xIelKW", "x": 116.5, "y": 47.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "DSRjGVDoYzarudFf", "x": 169.5, "y": 46.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "a-fdvmNKe17XOqH7", "x": 120.5, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "ssnYHZKBIfcOZu1e", "x": 172.5, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+          ]
+        }
+      },
+      {"id": "dV7zWlmryfRmPxgn", "title": "Text 34", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Noah looked at Nicole’s strategy and claimed that she was applying the Distributive Property. Is Noah’s claim correct? Explain.</li></ul>"]}},
+      {
+        "id": "851BPJ1G8SpRHhwy",
+        "display": "teacher",
+        "title": "Text 35",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Yes, Noah is correct. Nicole is applying the Distributive Property. The left side of the equation can be thought of as 2(x+2), or two times a group of 1 pouch plus 2 coins. This situation can also be thought of as 2 pouches and 2 sets of 2 coins, or 2x+2(2). The Distributive Property states that these two expressions are equivalent.</p>"
+          ]
+        }
+      },
+      {"id": "34zVXxcGw6q484Ct", "title": "Text 36", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Zoey thought that Nicole was just dividing both sides of the original equation by 2. Is she correct? Explain. </li></ul>"]}},
+      {"id": "SDOCX0VN3Jo1m2Pn", "display": "teacher", "title": "Text 39", "content": {"type": "Text", "format": "html", "text": ["<p>Zoey is also correct because in order to solve the problem, Nicole did have to divide both sides by 2.</p>"]}},
+      {"id": "udid1Zb8e4FUVy9Q", "title": "Text 40", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Can Nicole&#x27;s strategy be used for other coin and pouch situations? Explain why or why not.</li></ul>"]}},
+      {"id": "4KAWXcTQmmzKhe_T", "display": "teacher", "title": "Text 41", "content": {"type": "Text", "format": "html", "text": ["<p>Nicole&#x27;s strategy involves removing equivalent amounts from both sides of the equation until she is left with “pouch = 4 gold coins.” </p>"]}},
+      {
+        "id": "CG2TCB2J_VazLqDy",
+        "display": "teacher",
+        "title": "Remove equivalent amounts from each side",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {"type": "image", "id": "rZuImlKt6JqUFTHL", "x": 160.5, "y": 7.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "E7YroOukICpDTOpA", "x": 162.5, "y": 42.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "QYStA6pAHhtDWFUr", "x": 44, "y": 32.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "O8Q_efTWx41A_ioU", "x": 120, "y": 38.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "fzYVfasOW1NxQozh", "x": 123, "y": 94.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "Ggp6kpLxlqrj7_3c", "x": 79.5, "y": 41.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "W7GcA0VUIo--DgEz", "x": 78.5, "y": 8.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "ah7cjcJBUWHBHJnA", "x": 229.5, "y": 12.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Ym1sXpMrY6VvZKWJ", "x": 230.5, "y": 47.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "FPW70f3CAYVkb-Xt", "x": 265.5, "y": 10.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Q8IdQCo2f3z6q9y8", "x": 265.5, "y": 47.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "y6RuTdRrlynSkhpg", "x": 300.5, "y": 11.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "6iNZDp4URdBBlai7", "x": 299.5, "y": 46.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "USip0KKBJwQkU81e", "x": 339.5, "y": 10.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "LY-ntvEI_CCvc8Sd", "x": 340.5, "y": 44.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "haD-x5b7ZuFgwFPg", "x": 372.5, "y": 9.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "nGk8r3HU9c01J1HP", "x": 373.5, "y": 44.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "O5YYJUUlKAByIaY-", "x": 405.5, "y": 9.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "cxJqZbIG5329XtnY", "x": 404.5, "y": 44.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "6qvIynGgXbWe0f6C", "x": 158.5, "y": 84.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "gOeumg0nDd1dM79h", "x": 160.5, "y": 117.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "BAyztxCIjydI7whu", "x": 211.5, "y": 89.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "dwD6yfy9S9i579n-", "x": 214.5, "y": 117.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Hn5FHLsJrgy83fxg", "x": 252.5, "y": 90.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "6aLM4WfTJyFowJ01", "x": 253.5, "y": 119.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "3wFSd9tErDukB3oG", "x": 294.5, "y": 88.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "dv5QKo3dMRDUJf_i", "x": 295.5, "y": 116.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "7oJ7FyNADjViWBhz", "x": 201.5, "y": 24.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+            {"type": "image", "id": "ppTyHvzZGJhhSvBV", "x": 186.5, "y": 101.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+            {"type": "ellipse", "id": "nik_PGSqfNRHrhSU", "x": 75.5, "y": 43, "stroke": "#eb0000", "strokeDashArray": "", "strokeWidth": 2, "fill": "none", "rx": 38, "ry": 40},
+            {"type": "ellipse", "id": "lngMii-AMuMVq42p", "x": 157.5, "y": 41, "stroke": "#eb0000", "strokeDashArray": "", "strokeWidth": 2, "fill": "none", "rx": 42, "ry": 41},
+            {"type": "ellipse", "id": "V3eFKPyzxaDSo2sD", "x": 277.5, "y": 45, "stroke": "#eb0000", "strokeDashArray": "", "strokeWidth": 2, "fill": "none", "rx": 57, "ry": 45},
+            {"type": "ellipse", "id": "3jC6pYgyNoEaLryU", "x": 387.5, "y": 47, "stroke": "#eb0000", "strokeDashArray": "", "strokeWidth": 2, "fill": "none", "rx": 58, "ry": 48}
+          ]
+        }
+      },
+      {"id": "TTbnoqAZ0aeBjv6Y", "display": "teacher", "title": "Text 44", "content": {"type": "Text", "format": "html", "text": ["<p>Nicole’s method could work in other situations in which each side can be equally divided into the same number of groups.</p>"]}},
+      {
+        "id": "CbC17cWi_ntFdjzC",
+        "title": "Text 45",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Situation B. Aman’s Clue</strong></p>", "<p>Aman made up another Clue, but then he forgot the number of coins he put in the pouches. But he did remember that there were 5 pouches and 10 coins with a total of 35 dollars.</p>"]
+        }
+      },
+      {"id": "6J_oS0iDc94rLHT5", "title": "Text 46", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What might the pouches and coin picture look like? </li></ul>"]}},
+      {"id": "ZhxEsvVktBvjtxz-", "display": "teacher", "title": "Text 49", "content": {"type": "Text", "format": "html", "text": ["<p>Answers will vary but should represent 5 pouches + 10 coins on one side of the equation and 35 coins on the other side. Such as the following.</p>"]}},
+      {
+        "id": "A-MYreqsrU6Dm4Kk",
+        "display": "teacher",
+        "title": "Aman's Clue",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {"type": "image", "id": "tYU8LqbNjAsSUQOz", "x": 19, "y": 135.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "gFrz62N5177akSTs", "x": 60, "y": 136.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "nFpibv-7nAtPuykH", "x": 102, "y": 136.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "CJ7B_4y7cv8_YV_c", "x": 60, "y": 184.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "nL-HKte97uuY8_1d", "x": 104, "y": 183.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "CXbPmhWvOBokQfvy", "x": 152.5, "y": 188.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "rR58O5iB_4e_Slba", "x": 189.5, "y": 189.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "IvppfOt0ZoD8W-Wt", "x": 226.5, "y": 190.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "sIjtO5e_fPUoaJgt", "x": 263.5, "y": 190.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Qq56dppE4DHjGreL", "x": 302.5, "y": 190.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "hGwuERl39pCCV57p", "x": 150.5, "y": 142.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "bYUQQioxjyK1gb9R", "x": 189.5, "y": 143.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "wSdBt74ncUk79wIo", "x": 227.5, "y": 143.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "mu0LMYUPELmNmo9U", "x": 264.5, "y": 144.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Xstkvvgn4JtRK2iU", "x": 302.5, "y": 143.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "5jP3EZ8hFeh9KdvM", "x": 336.5, "y": 166.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+            {"type": "image", "id": "Sf5ZZiSuY-f-UdfB", "x": 369.5, "y": 224.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "9QLpcLjyen9-buea", "x": 410.5, "y": 222.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "rK5GWwp0PTQxmBUJ", "x": 461.5, "y": 219.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "wsyEV5_Cks0cqkGz", "x": 505.5, "y": 220.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "T9JyYMfzApLHcyGc", "x": 550.5, "y": 219.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "qkJMP1-ndbZFG9zj", "x": 595.5, "y": 218.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "FpbF-P1G8c2OqROW", "x": 645.5, "y": 217.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "LYB7ol4JwaknMAeP", "x": 369.5, "y": 180.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "HFyz5JcvmvT3G5vk", "x": 409.5, "y": 178.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Qnr0CkMP2jZGREzl", "x": 459.5, "y": 178.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "RqqZtN05lAawbh7D", "x": 505.5, "y": 177.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "IjbAam5CvHtkw3SS", "x": 551.5, "y": 176.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "icW191tWUTWTUK6o", "x": 597.5, "y": 176.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "qha-Q2UHssVR9kZy", "x": 646.5, "y": 175.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "BS3q87BDSM4HTYzp", "x": 368.5, "y": 133.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "dDNaJYDL8r7PUZrl", "x": 410.5, "y": 131.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "-ffio9RZmLrIC80f", "x": 458.5, "y": 131.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "0v6_fzkPU4E6zkHR", "x": 502.5, "y": 131.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Pcw-OU8qRMVjNZOE", "x": 547.5, "y": 129.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "8RSAFtYyW6s5GliJ", "x": 598.5, "y": 130.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "_YmJBvhjULMnyf4h", "x": 644.5, "y": 129.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "iPmRBiTOQw6IfjzQ", "x": 365.5, "y": 88.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "lrp5UiKsTGlLXiyI", "x": 411.5, "y": 89.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "AQkeFoF7qLJFRv6n", "x": 458.5, "y": 88.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Rq5RGOIMcay8nyE4", "x": 501.5, "y": 88.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "km-FQGPRPlS-Wv3f", "x": 547.5, "y": 85.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "JB4_FnwV0xbdj8mZ", "x": 594.5, "y": 85.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "-hBEECLvdu4hRQN8", "x": 642.5, "y": 86.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Fwx2HHiiCJ93i1xu", "x": 364.5, "y": 47.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "JloroBHFt8DteP4D", "x": 413.5, "y": 46.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "nQZSILl-0m-Lg7gD", "x": 455.5, "y": 45.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "IL-m-LTNd2aESOlv", "x": 501.5, "y": 46.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "8We7Y4yx_1Xq_muC", "x": 547.5, "y": 45.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "3pn2_s6ZF0GJI0ff", "x": 595.5, "y": 43.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Ex-tb597uPhNMYvp", "x": 637.5, "y": 45.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+          ]
+        }
+      },
+      {"id": "n191mGg98hPBLcXD", "title": "Text 50", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How many dollars are in a pouch?</li></ul>"]}},
+      {"id": "zmSqXPpWM_C7Ckbk", "display": "teacher", "title": "Text 53", "content": {"type": "Text", "format": "html", "text": ["<p>$5</p>", "<p></p>", "<p>5P + $10 = $35</p>", "<p>5P = $25</p>", "<p>P = $5</p>"]}},
+      {
+        "id": "__OwR1W8dk17nOMw",
+        "title": "Text 54",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation C. Another Donor</strong></p>", "<p>A local merchant donates $200 for the Walkathon. She wants the amount recorded in a code using B to represent the number of coins in one bag.</p>"]}
+      },
+      {"id": "U7KnSbpEqTNFsgbS", "title": "Text 55", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Amanda suggested the following clue:</li></ul>", "<p>                             6B + $20 = $200. How much money is in each bag?</p>"]}},
+      {"id": "KaVIppbueEvfjx8O", "display": "teacher", "title": "Text 56", "content": {"type": "Text", "format": "html", "text": ["<p>$30</p>", "<p>6B + 20 = 200</p>", "<p>6B = 180</p>", "<p>B = 30</p>"]}},
+      {
+        "id": "37bYgFGxR8jAWLG9",
+        "title": "Text 59",
+        "content": {"type": "Text", "format": "html", "text": ["<ul><li>Mateo wrote two expressions that could be codes to represent the $200. For each expression how much money is in each bag.</li></ul>", "<p>                                          2B + $45      4B + $20</p>"]}
+      },
+      {
+        "id": "xhm5zdkut7qJfdrR",
+        "title": "Text 62",
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p>For the first expression: $77.50</p>", "<p>2B + 45 = 200</p>", "<p>2B = 155</p>", "<p>B = 77.5</p>", "<p>For the second expression: $45</p>", "<p>4B + 20 = 200</p>", "<p>4B = 180</p>", "<p>B = 45</p>"]}
+      },
+      {"id": "FYQEMSkRwiisLGFT", "title": "Text 63", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Design another clue that the merchant could use. Give it to a classmate to solve. </li></ul>"]}},
+      {"id": "rTzeZnJiarMf05u4", "display": "teacher", "title": "Text 66", "content": {"type": "Text", "format": "html", "text": ["<p>Student answers will vary. Example: For a clue with the expression, 9B + 20. The equation would be 9B + 20 = 200. The solution would be B = $20. </p>"]}}
+    ]
+  }
+}

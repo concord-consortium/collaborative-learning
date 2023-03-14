@@ -1,0 +1,77 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "pyqe9G3EXAuwt9Ad",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In the last Problem, we used pictures of pouches and gold coins to solve equations. Our solutions maintained the equality of coins on both sides of the equal sign. For example, we might have removed (or subtracted) the same number of coins on both sides of the equation. To better understand how to maintain equality, let’s look first at numerical statements. </p>"
+          ]
+        }
+      },
+      {
+        "id": "V1WNQd0D84w29WEV",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The equation 85 = 70 + 15 states that the quantities 85 and 70 + 15 are equal. </p>",
+            "<p><em>What do we have to do to maintain equality if we:</em></p>",
+            "<ul><li><em>subtract 15 from the left-hand side of the original equation?</em></li><li><em>add 10 to the right-hand side of the original equation?</em></li><li><em>divide the left-hand side of the original equation by 5?</em></li><li><em>multiply the right-hand side of the original equation by 4?</em></li></ul>"
+          ]
+        }
+      },
+      {"id": "5-7vx-Vgrl0ZoBNU", "title": "Text 3", "content": {"type": "Text", "format": "html", "text": ["<p>The picture below shows a situation from Problem 3.1.</p>"]}},
+      {
+        "id": "4bvWQIBD98yW6UbO",
+        "title": "2 pouches + 4 coins = 12 coins",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {"type": "image", "id": "-j3S9IL4McIMXiDq", "x": 24, "y": 103.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "OV4E1DSagw9yNuEa", "x": 103, "y": 103.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "dBCl8En7E4R-6FgI", "x": 65.5, "y": 109.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "48z-KMWSeG6vfRCE", "x": 66.5, "y": 60.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "KiC8yMCFuzZZcats", "x": 144.5, "y": 110.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "xGxegbKl2OeBE8zY", "x": 142.5, "y": 60.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "ZPWtz8wO4d2r9sz8", "x": 176.5, "y": 87.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+            {"type": "image", "id": "-Kk5yJ-XZXQG8iWA", "x": 203.5, "y": 113.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "v6maf4nzhxshWGYU", "x": 242.5, "y": 113.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Jh9-n8hGbO6cECO4", "x": 282.5, "y": 114.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "ppbO7w52bxwqpgJg", "x": 323.5, "y": 114.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "UqZxwgr_qgUK5YdW", "x": 361.5, "y": 114.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "wLNfIDM3yH5K7-LT", "x": 404.5, "y": 114.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "dyX-ogOCxrNSjp2P", "x": 201.5, "y": 57.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "G-Rs0p14C5Og7-Bv", "x": 240.5, "y": 59.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "1kYACsLjyPzEYTl0", "x": 282.5, "y": 58.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "J8Ud7xEjZq6iqR2R", "x": 323.5, "y": 59.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "SjC4RHhYJWtCp2Ih", "x": 363.5, "y": 58.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "m1V26s56oGqs4h8S", "x": 404.5, "y": 58.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+          ]
+        }
+      },
+      {
+        "id": "V_36X78P1oNGV3QD",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Because the number of gold coins in each pouch is unknown, we can let x represent the number of coins in one pouch. We can let 1 represent the value of one gold coin. Then this situation can be represented with one of the following equivalent equations:</p>"]
+        }
+      },
+      {"id": "IVVQHiRSi06RpaTO", "title": "Text 5", "content": {"type": "Text", "format": "html", "text": ["<p>2x + 4 = 12     or      2(x + 2) = 12      or      x + 2 + x + 2 = 12</p>"]}},
+      {"id": "M7L0wV8w29Y5FOfl", "title": "Text 6", "content": {"type": "Text", "format": "html", "text": ["<p>Recall from several of the Grade 6 grade units that we have been solving linear equations of the form y = ax and y = x + b. We used tables, graphs, and numeric reasoning. </p>"]}},
+      {
+        "id": "R3QKqRg6QFbZXj4S",
+        "title": "Text 7",
+        "content": {"type": "Text", "format": "html", "text": ["<p>In this Problem, we will revisit problems that involve linear situations with pouches and coins, but we will also use symbolic equations to represent our solution process to equations of the form, </p>"]}
+      },
+      {"id": "kmyU9ZCHmDI-1Fqi", "title": "Text 8", "content": {"type": "Text", "format": "html", "text": ["<p>y = ax + b     or     ax + b = cx + d.</p>"]}}
+    ]
+  }
+}

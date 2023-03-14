@@ -1,0 +1,40 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<h3>Situation A. Student Claims from Mr. Cai's Class.</h3>Mr. Cai asked his class to look for patterns in the representations in the Initial Challenge. The follow are some claims his student made about linear functions.<p>Study each claim. Are they correct? Explain.</p>"]
+        }
+      },
+      {"content": {"type": "Text", "format": "markdown", "text": ["**Jackie's Claim**", "To find the slope of a line it makes a difference which two points you use to find the slope."]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["**Gus's Claim**", "For each unit change in the independent variable there is a constant change in the dependent variable."]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["**Yvonne's Claim**", "Both a horizontal line and a vertical line are linear functions."]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["**Malcolm's Claim**", "The slope is the same as the constant rate of change *m* between the variables x and y."]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "**Kevin's Claim**",
+            "The line with equation y = 2x passes through the points (0, 0) and (1, 2). The line with equation y = - 3x passes through the points (0, 0) and (1, - 3). In general, lines with equations of the form y = *m*x always pass through the points (0, 0) and (1, *m*). And *m* is the constant of proportionality."
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation B. Connecting Rates and Slopes</h3>Juan was studying a table of values. He noticed that as x increases by 1, y increases by 2. He says this is a linear function. But he wonders where in the table the ratio of rise/run is indicated. Is it possible to find the slope from the table of values?"
+          ]
+        }
+      },
+      {"content": {"type": "Table", "columns": [{"name": "x", "type": "number", "values": [-1, 0, 1, 2, 3]}, {"name": "y", "type": "number", "values": [3, 5, 7, 9, 11]}]}, "layout": {"height": 160}}
+    ]
+  },
+  "supports": []
+}

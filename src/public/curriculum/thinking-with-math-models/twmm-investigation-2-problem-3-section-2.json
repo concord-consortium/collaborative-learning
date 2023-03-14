@@ -1,0 +1,17 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "markdown", "text": ["- For the linear functions described below, find the slope and y-intercept.", "- Then write the equations for the lines in the form y = *m*x + *b*."]}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_linear_function_1_350w.png"}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_linear_function_2_350w.png"}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_linear_function_3_350w.png"}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_linear_function_4_350w.png"}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_linear_function_5_350w.png"}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_linear_function_6_350w.png"}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["**Linear Function 7**", "The line that passes through (6, 1) and (2, -1)."]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["**Linear Function 8**", "The line that passes through (0, 3) and (3, 3)."]}}
+    ]
+  },
+  "supports": []
+}

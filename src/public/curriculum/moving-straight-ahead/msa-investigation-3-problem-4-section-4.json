@@ -1,0 +1,20 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "mU3m7ZJHxSJ13ecd", "title": "Text 4", "content": {"type": "Text", "format": "html", "text": ["<p>Describe how you can solve an equation of the form ax + b  = y? </p><p>Describe how you can solve an inequality of the form ax + b &lt; c or ax + b &gt; c?</p>"]}},
+      {
+        "id": "HgNAIpQR3jMzHza6",
+        "display": "teacher",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>If you have an equation of the form y = ax+b and you know what the value of y is, you can find the solution using a table, graph, or equation. </p><p>On a table, you can find the needed value of y and look at the value of x. This is the same as finding the coordinate pair on the graph. </p><p>Using a graph, you can find the point of intersection of y1 = ax + b and y2 = y to solve the equation. </p><p>You can use the equation: subtract b from y and divide by a to solve for x. If you have an equation of the form y = ax+b and you know what the value of x is, you can substitute the value of x into the equation and compute the value of y. </p><p>If you have an inequality of that form, then you can use algebraic methods to solve the associated equation as before. Then check a few values greater or less than the equation’s solution in the original inequality to determine if the solutions to the inequality should be greater than or less than the solution to the associated equation.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

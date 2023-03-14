@@ -1,0 +1,27 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "WxCKWbVqkYSXVbVg",
+        "title": "Text nmmnmns",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>In Problems 1.1 and 1.2, the distance walked depended on the time. This tells us that distance is the <em>dependent variable </em>and time is the <em>independent variable</em>. In this Problem, we will look at relationships between two other variables in a walkathon.</p>"]
+        }
+      },
+      {
+        "id": "cD2y5qAfbut8JU6i",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The students in Ms. Chang’s class are trying to estimate how much money they might raise for charity by doing a walkathon. Each participant in the walkathon must find sponsers to pledge a certain amount of money for each kilometer he or she walks. The class refers to these as pledge plans.</p><p>Several questions come up in their discussions:</p><ul><li><em>What variables can affect the amount of money that is collected?</em></li><li><em>How can we use these variables to estimate the amount of money each student will collect?</em></li><li><em>Will the amount of money collected be the same for each walker?</em></li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "type": "chapter3",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 4: WHAT’S IN YOUR SALIVA</h2>"]}},
+      {
+        "id": "XQN1hTfn5MQis5zM",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>A few days later Rakesh went to the doctor’s  discuss the results. Rakesh was not a fan of the doctor’s office. It always seemed so cold, and the waiting room was usually very crowded. Finally, the nurse took him to the exam room inside and he waited for a few minutes for the doctor to see him.</p>"
+          ]
+        }
+      },
+      {
+        "id": "4pAvy0Aa8BPBaKTu",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Dr. Adebayo </strong>(Ah-de-baa-yo): Nice to see you Mr. Sharma. I have the results of your test here and they look fine to me. I know you were concerned about your cholesterol levels, but they are well within range. I don’t think you need to do anything about it. </p>",
+            "<p>Let th impulse die in the middle: Oh, thank you Dr. Adebayo. That is such a relief to hear!</p>",
+            "<p><strong>Dr. Adebayo</strong> (Ah-de-baa-yo): I’m glad! But Mr. Sharma, why were you concerned about your cholesterol in the first place?</p>",
+            "<p><strong>Rakesh</strong>: A close friend of mine had a minor heart attack last week. His doctor said that his blood vessels were clogged, and I read that cholesterol can cause clogged arteries. So, I just wanted to make sure that my cholesterol levels are not something I need to worry about. </p>",
+            "<p><strong>Dr. Adebayo</strong>: Ah yes, that’s true Mr. Sharma. High cholesterol can cause issues in your blood vessels, but stress has also been linked to heart attacks.</p>",
+            "<p><strong>Rakesh</strong>: Right. I remember finding a video online that showed that stress can cause blocked blood vessels too. My friend and I have the same job and similar responsibilities and I am stressed a lot too…. </p>",
+            "<p></p>",
+            "<p>[Rakesh didn’t finish his sentence and Dr. Adebayo could tell that Rakesh seemed to be getting worried again. ]</p>",
+            "<p></p>",
+            "<p><strong>Dr. Adebayo</strong>: Listen Mr. Sharma, why don’t we order a test to measure your stress hormone levels? I can ask the nurse to administer the blood test before you leave today, and you will get the results in a week.”</p>",
+            "<p></p>",
+            "<p>[Rakesh still looked a bit worried but agreed and went to see the nurse.]</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "q2LllJwngIOl0zK5",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Once he got home, Rakesh was still feeling anxious about stress tests and decided to research it more after dinner. He googled ‘how to test for stress’ and found that there were many ways to measure cortisol levels. He noticed a video explaining how saliva (spit) can be used to measure cortisol levels easily and quickly. The website also had a link to order the test and get results within 24 hours. Out of restlessness, and not wanting to wait a whole week for his results from Dr. Adebayo, Rakesh decided to order a saliva stress test as well. The test arrived the next day, he followed the instructions and then mailed it back to the lab. As promised, within 24 hours, Rakesh got an email back from the lab with the results from his saliva test. His stomach was tight with nervousness as he opened the email: “Saliva Stress Test”.</p>"
+          ]
+        }
+      },
+      {
+        "id": "wVijc2B6SMundebC",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li><strong>Watch the video- </strong><em><strong>EVIDENCE 4a-Saliva Stress Test </strong></em><strong>- in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Then review the test results-  </strong><em><strong>EVIDENCE 4b-Saliva Stress Test Results</strong></em><strong> - in the Resource Library.</strong></li></ul>",
+            "<ul><li><strong>Discuss the video and test results with your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library.</strong></li></ul>",
+            "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li><p><strong></strong></p></ul>"
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

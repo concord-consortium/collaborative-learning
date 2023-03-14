@@ -1,0 +1,49 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "dOlquIRs61iyXZ0R",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In the last Investigation, we examined linear relationships. For example, the distance, d, a person walks at a rate depends on the amount of time, t, the person walks. Also, the amount of money, A, a person raises from each sponsor depends on the distance, d, walked in the walkathon. Both of these relationships are linear. You might have written the following equations to represent these two relationships for Alana.</p>"
+          ]
+        }
+      },
+      [
+        {"id": "Ep2oQ6fSsE2M1lx6", "title": "Text 3", "content": {"type": "Text", "format": "html", "text": ["<p>Distance <em>d</em>, Alana walks at 1 meter per second for t seconds</p>", "<p><em>d</em>  = 1 x t or <em>d  </em>= t</p>"]}},
+        {"id": "PUmrgLs6EwEWbRTo", "content": {"type": "Text", "format": "html", "text": ["<p>The amount of money A that Alana collects for walking d meters</p>", "<p>A = 5 + 0.5<em>d</em></p>"]}}
+      ],
+      {
+        "id": "vFK0sUDJlSb4tO9k",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>We used tables and graphs to represent these relationships. These representations are useful in answering questions about linear relationships. For example,</p>",
+            "<p>                                                                              A = 5 + 0.5d</p>",
+            "<p><em>If we know something about distance d, how can we find the corresponding value of A?</em></p>",
+            "<p><em>If we know something about A, how can we find the corresponding value of d?</em></p>",
+            "<p>In this Investigation, we will continue to solve problems involving walking rates and other linear relationships using tables, graphs, and equations.</p>"
+          ]
+        }
+      },
+      {"id": "EXwSmD5-eINXJvAo", "title": "Text 5", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Problem 2.1 Henri and Emile&#x27;s Race: Developing Strategies to Find a Solution</strong></p>"]}},
+      {
+        "id": "49WC4ldIeS11F_7H",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In Ms. Chang’s class, Emile found out that his walking rate is 2.5 meters per second. That is, Emile walks 2.5 meters for every 1 second. When he gets home from school, he helps his younger brother Henri determine his walking rate. They find that Henri’s walking rate is 1 meter per second. </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

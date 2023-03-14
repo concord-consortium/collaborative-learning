@@ -1,0 +1,89 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {"id": "1PzGI_VHApygtsvN", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p>All the linear relationships we have studied so far can be written in the form y = ax, y = ax + b, or y = b + ax. In these equations, y depends on x.</p>"]}},
+      {
+        "id": "LIevGzVpseY1BlGZ",
+        "title": "Equation of a Line (example)",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-2.833, -5.75], "axisRange": [10, 12], "axisNames": ["x", "y"], "axisLabels": ["", ""]}},
+          "objects": [
+            {
+              "type": "movableLine",
+              "parents": [{"type": "point", "parents": [0, 1]}, {"type": "point", "parents": [4, 6]}],
+              "properties": {"id": "kILGROQtyFho-K6a", "pt1": {"type": "point", "id": "kILGROQtyFho-K6a-point1", "name": "y-intercept (0, b)"}, "pt2": {"type": "point", "id": "kILGROQtyFho-K6a-point2"}}
+            },
+            {"type": "comment", "parents": [6, -0.5108781250000005], "properties": {"id": "HcxNZ4YgdQvLL8gR", "text": "y = ax + b", "anchor": "kILGROQtyFho-K6a"}}
+          ]
+        }
+      },
+      {
+        "id": "sMOh3bu_BUt8bMdn",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The coordinates of the y-intercept for the graph shown above are (0, b). To save time, we sometimes refer to the number b, rather than the coordinates of the point (0, b), as the y-intercept. </p>",
+            "<p></p>",
+            "<p>A coefficient is the number that multiplies a variable in an equation. The a in y = ax + b is the coefficient of x, so ax means a times x.</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "XJsTwCA9QbQ_Se-z",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>A <strong>solution of an equation</strong> is an ordered pair that makes the equation true and lies on the graph of the line. For example, in the equation that represents the distance Henri walks </p>",
+            "<p>d<sub>Henri </sub>= 45 + t,</p>",
+            "<p>(0,45) is a solution to the equation.</p>",
+            "<p>When the coordinate values are substituted into the equation it is a true statement; </p>",
+            "<p>(45) = 45 + (0)</p>"
+          ]
+        }
+      },
+      [
+        {
+          "id": "agKes9sWzuxl1K8R",
+          "title": "Henri",
+          "content": {
+            "type": "Geometry",
+            "board": {"properties": {"axisMin": [-8.333, -15], "axisRange": [40, 80], "axisNames": ["t", "d"], "axisLabels": ["time", "distance"]}},
+            "objects": [
+              {
+                "type": "movableLine",
+                "parents": [{"type": "point", "parents": [0, 45]}, {"type": "point", "parents": [5, 50]}],
+                "properties": {"id": "k3dPkME7EDJHEd2Z", "pt1": {"type": "point", "id": "k3dPkME7EDJHEd2Z-point1", "name": "y-intercept (0, 45)"}, "pt2": {"type": "point", "id": "k3dPkME7EDJHEd2Z-point2"}}
+              }
+            ]
+          },
+          "layout": {"height": 383}
+        },
+        {
+          "id": "LXftOd808yytZsmF",
+          "title": "Table 1",
+          "content": {"type": "Table", "name": "Points on Henri's line", "columns": [{"name": "Time (seconds)", "width": 96.1640625, "values": ["0", "10", "20", "30", "40"]}, {"name": "Henri's Distance (meters)", "width": 108.94140625, "values": ["45", "55", "65", "75", "85"]}]}
+        }
+      ],
+      {
+        "id": "OB9hWapKR31kqNUy",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>What does the point (0,45) represent in the context of the race?</em></p>",
+            "<p><em>If the coordinates of a point on the graph or values in the table are (t, 48), what is the value of t? </em></p>",
+            "<p><em>If the coordinates of a point on the graph or values in the table are (10, d), what is the value of d?</em></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

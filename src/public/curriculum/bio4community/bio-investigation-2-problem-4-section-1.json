@@ -1,0 +1,62 @@
+{
+  "type": "chapter3",
+  "content": {
+    "tiles": [
+      {"id": "17SEP20221154AM", "content": {"type": "Text", "format": "html", "text": ["<h3>CHAPTER 4: IT’S ALL ABOUT THE NETWORKS</h3>"]}},
+      {
+        "id": "zbaHoNMnarYRK3fK",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>After going through the blog, Estrella began to understand that stress hormones were blocking her ability to pay attention. Who knew something in your brain could stop you from focusing? If stress hormones were stopping her from focusing, what else could they do? Her mind seemed fixated on these scary thoughts and she felt anxious and unsettled. She decided to visit Ms. Guerra again tomorrow.</p>",
+            "<p>Estrella didn’t have science the next day, so she waited till the end of the day to walk over to Ms. Guerra’s room. When she got there, Ms. Guerra was cleaning the classroom so Estella helped with the cleaning.</p>"
+          ]
+        }
+      },
+      {
+        "id": "sdZk2qFTfmd7OX6n",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Estrella</strong>: Remember my question a few days ago about stress, Ms. Guerra? </p>",
+            "<p><strong>Ms. Guerra</strong>: Yeah I do. Did you look into that more? </p>",
+            "<p><strong>Estrella</strong>: I did actually. Yesterday, I was thinking about how my stress may be related to  my focusing so I googled up stress and neuron signaling. </p>",
+            "<p><strong>Ms. Guerra</strong>: That’s really smart Estrella. What did you find out?</p>",
+            "<p><strong>Estrella</strong>: I found this really cool blog post by this scientist. Her name is Dr. Mackey? I think. </p>",
+            "<p><strong>Ms. Guerra</strong>: Oh that’s awesome. </p>",
+            "<p></p>",
+            "<p>[Ms. Guerra stopped what she was doing, and thought for a moment.]</p>",
+            "<p></p>",
+            "<p><strong>Ms. Guerra</strong>: You know it seems like you’re really interested in this topic, and spending a lot of time on it. Do you want to do a project about stress and focus for your science honors project this year? </p>",
+            "<p><strong>Estrella</strong>: I.. I can do that? But.. I already tried to look online and I couldn’t find much more…it’s all really confusing</p>",
+            "<p><strong>Ms. Guerra</strong>: Oh don’t worry Estrella. Why don’t I email the scientist, Dr. ...</p>",
+            "<p><strong>Estrella</strong>: Dr. Mackey?</p>",
+            "<p><strong>Ms. Guerra</strong>: Yes. Dr. Mackey! And I’ll ask her for some helpful resources for you. </p>",
+            "<p><strong>Estrella</strong>: Wow.. you’re gonna email a real scientist? </p>",
+            "<p><strong>Ms. Guerra</strong>: Why not! Let’s see what happens! </p>"
+          ]
+        }
+      },
+      {
+        "id": "FMqcIlJATvLOMPyY",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li><strong>Review the report- </strong><em><strong>EVIDENCE 3a- Dr. Mackey’s Report</strong></em><strong> - in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Then watch the video- </strong><em><strong>EVIDENCE 3b- Dr. Mackey Video</strong></em><strong> - in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Explore the animation - </strong><em><strong>EVIDENCE 3c- Focus Animation</strong></em><strong> - in the Resource Library. Change the options in the animation and notice the effects.</strong></li></ul>",
+            "<ul><li><strong>Discuss the report and the animation with your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li></ul>"
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "type": "firstinsight",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p> Your class may have visited a nearby coastal area that is vulnerable to erosion. If you haven&#x27;t, take a peek at this video on coastal erosion. Then answer these questions with your group. </p>",
+            "<p> You can drag images out of this activity, or upload them from your computer, or draw pictures to support your point of view. </p>"
+          ]
+        }
+      },
+      {
+        "id": "byXY9AyX8_d5hhRv",
+        "content": {
+          "type": "Dataflow",
+          "programDataRate": 100,
+          "programZoom": {"dx": -0.125, "dy": -0.6953125, "scale": 1},
+          "program": {
+            "values": {
+              "1": {"currentValues": {"nodeValue": -0.34}},
+              "3": {"currentValues": {"nodeValue": 2}},
+              "6": {"currentValues": {"nodeValue": 1}},
+              "16": {"currentValues": {"nodeValue": 0.6599999999999999}},
+              "21": {"currentValues": {"nodeValue": 0.32999999999999996}},
+              "92": {"currentValues": {"nodeValue": 1, "speed": 0, "tilt": 0}},
+              "159": {"currentValues": {"nodeValue": 0}}
+            },
+            "id": "dataflow@0.1.0",
+            "nodes": {
+              "1": {
+                "id": 1,
+                "name": "Generator",
+                "x": 40.1171875,
+                "y": 5,
+                "inputs": {},
+                "outputs": {"num": {"connections": {"16-undefined-num1": {"node": 16, "input": "num1", "data": {}}}}},
+                "data": {"plot": false, "generatorType": "Sine", "amplitudeUnits": "", "amplitude": 1, "periodUnits": "sec", "period": 1.5, "inputKeys": []}
+              },
+              "3": {"id": 3, "name": "Number", "x": 274.29296875, "y": 285.58984375, "inputs": {}, "outputs": {"num": {"connections": {"21-undefined-num2": {"node": 21, "input": "num2", "data": {}}}}}, "data": {"plot": false, "nodeValueUnits": "", "inputKeys": []}},
+              "6": {"id": 6, "name": "Number", "x": 13.9453125, "y": 229.14453125, "inputs": {}, "outputs": {"num": {"connections": {"16-undefined-num2": {"node": 16, "input": "num2", "data": {}}}}}, "data": {"plot": false, "nodeValueUnits": "", "inputKeys": []}},
+              "16": {
+                "id": 16,
+                "name": "Math",
+                "x": 273.71875,
+                "y": 117.125,
+                "inputs": {"num1": {"connections": {"1-num-undefined": {"node": 1, "output": "num", "data": {}}}}, "num2": {"connections": {"6-num-undefined": {"node": 6, "output": "num", "data": {}}}}},
+                "outputs": {"num": {"connections": {"21-undefined-num1": {"node": 21, "input": "num1", "data": {}}}}},
+                "data": {"plot": false, "mathOperator": "Add", "inputKeys": []}
+              },
+              "21": {
+                "id": 21,
+                "name": "Math",
+                "x": 521.11328125,
+                "y": 81.99609375,
+                "inputs": {"num1": {"connections": {"16-num-undefined": {"node": 16, "output": "num", "data": {}}}}, "num2": {"connections": {"3-num-undefined": {"node": 3, "output": "num", "data": {}}}}},
+                "outputs": {"num": {"connections": {"92-undefined-nodeValue": {"node": 92, "input": "nodeValue", "data": {}}}}},
+                "data": {"plot": false, "mathOperator": "Divide", "inputKeys": []}
+              },
+              "92": {
+                "id": 92,
+                "name": "Demo Output",
+                "x": 821.928021904811,
+                "y": 8.819698284746867,
+                "inputs": {"nodeValue": {"connections": {"21-num-undefined": {"node": 21, "output": "num", "data": {}}}}, "speed": {"connections": {}}, "tilt": {"connections": {"159-num-undefined": {"node": 159, "output": "num", "data": {}}}}},
+                "outputs": {},
+                "data": {"plot": true, "outputType": "Grabber", "demoOutput": 1, "inputKeys": []}
+              },
+              "159": {
+                "id": 159,
+                "name": "Timer",
+                "x": 519.9765625,
+                "y": 237.48828125,
+                "inputs": {},
+                "outputs": {"num": {"connections": {"92-undefined-tilt": {"node": 92, "input": "tilt", "data": {}}}}},
+                "data": {"plot": false, "timeOnUnits": "sec", "timeOn": 1, "timeOffUnits": "sec", "timeOff": 1, "inputKeys": []}
+              }
+            }
+          }
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["<p>Cultural Stories and pictures: </p>", "<p><a href='http://storymap.systemsecology.org/'>Barrow Systems Ecology</a> </p>", "<p><a href='http://www.yupikscience.org/index.html'>Hooper Bay - Yup&#x27;ik Science</a></p>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ol><li>What do you think is important to know about or from this place? Why do you think it is important to know these things about this place?</li><li>How do you think we can learn about this place? Why do you think these are good ways to learn about this place?</li><li>Do you think people are a part of this place? If yes, how do you think people are a part of this place? If no, why do you think people are separate from this place?</li><li>What do you think peoples’ role in this place should be? For example, how should people act in this place? How should people treat this place?</li><li>What do you think an elder might think or say or do about coastal erosion? </li><li>How has the coastline changed over time and how has it affected your life?</li><p></p></ol>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

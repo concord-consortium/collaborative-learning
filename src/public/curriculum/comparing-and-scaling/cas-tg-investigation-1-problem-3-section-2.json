@@ -1,0 +1,35 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "pQBlwIlKb4iBRoG5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started)</strong></u></p>",
+            "<p><u>Connecting to Prior Knowledge</u></p>",
+            "<p>In the first two Problems of Investigation 1, students analyzed statements comparing quantities in various forms and made claims about how these ratios compared to each other. In Problems 1.1 and 1.2, students used a variety of strategies to scale ratios while solving contextual problems. In Problem 1.3, students formalize what they learned by setting up proportions and using the scaling up or scaling down strategy to find unknown values.</p>",
+            "<p>Introduce the vocabulary of proportions and proportional reasoning.  Revisit Adia’s and Otis’s strategies to introduce the terms from Problem 1.2. Note that students have been solving proportions since the third Unit of Grade 6: <em>Comparing Quantities.</em> And students were solving proportions when they were finding missing side lengths on scale drawings in Stretching and Shrinking. Ask students for examples of finding a missing quantity from their prior Units. <strong>Teaching Aid 1.3 Proportional Reasoning Examples</strong> can be used to show a couple of examples from prior Units.</p>",
+            "<p>It is important that students understand that when setting up a proportion, the ratios are relating the same two quantities. Labeling the quantities will help students make sure that they are comparing.</p>"
+          ]
+        }
+      },
+      {
+        "id": "pQDD7HyzQ2wd1Ug5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p></p>",
+            "<p>Challenge students to answer the questions for each situation in the Initial Challenge. Make sure students know to show their work so strategies can be discussed in the Summarize.</p>",
+            "<p></p>",
+            "<p>Tell students that they are going to be working on a variety of situations where they need to find unknown values. Emphasize that they should find the unknown values using strategies you have discussed as a class (such as using equivalent ratios, rate tables, scaling, and writing proportions) and other strategies that make sense to them.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

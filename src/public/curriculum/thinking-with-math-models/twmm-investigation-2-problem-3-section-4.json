@@ -1,0 +1,17 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "What information do you need to write an equation for a linear function? How is the constant rate of change for a linear function the same as the ratio of rise/run between two points of the graph of the function? How does the ability to write an equation for a set of data help you make predictions about a situation like the bridge experiments?"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

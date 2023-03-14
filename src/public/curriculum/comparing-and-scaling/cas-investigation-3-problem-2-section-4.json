@@ -1,0 +1,21 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "vuytCdWjVFY5a_bM", "content": {"type": "Text", "format": "html", "text": ["<p>Describe some strategies you used to solve percent problems.</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Strategies will vary.</p>",
+            "<p>Students might use percent bar/tape diagrams, proportions, tables with equivalent percentage amounts, multiplying by the fraction, or decimal form of the percent.</p>",
+            "<p>Students should mention that you scale percents like you do with other proportional relationships.</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

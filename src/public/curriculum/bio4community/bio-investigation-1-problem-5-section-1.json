@@ -1,0 +1,47 @@
+{
+  "type": "chapter3",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["<h3>CHAPTER 5: DR. ZEIDERS</h3>"]}},
+      {
+        "id": "85o_sXdjn4eaYa_-",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Reading the test results and finding that his cortisol levels were too high, Rakesh could feel his chest tightening and hands sweating. He knew this was not good news, but he had no idea what to do about it. His thoughts raced and he started to feel dizzy. He closed his eyes and took several deep breaths to calm his body down. He thought about what he could do right now and decided to email the scientist in that video about saliva cortisol tests. Her name was Dr. Zeiders and her email was on the website. Rakesh emailed Dr. Zeiders: </p>"
+          ]
+        }
+      },
+      {"id": "123324sdljfasdghhkq34", "title": "Rakesh's Email to Dr. Zeiders", "content": {"type": "Image", "url": "curriculum/bio4community/images/drZeiders.png"}},
+      {
+        "id": "F9djG6Jzigf6J1UO",
+        "title": "Text 7",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Surprisingly, Dr. Zeiders responded to Rakesh’s email by the next day. She said that she would be happy to meet with Rakesh online to chat about the test results and what her lab has discovered about the link between stress, cortisol, and clogged arteries. She added that they have also created a simulator to explain the link. They set a time to meet over zoom. He was looking forward to his conversation with Dr. Zeiders.</p>"
+          ]
+        }
+      },
+      {
+        "id": "B0oxPhWhmznSwGDj",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li><strong>Read - </strong><em><strong>EVIDENCE 5a-Conversation with Dr. Zeiders</strong></em><strong> - in the Resource Library.</strong></li></ul>",
+            "<ul><li><strong>Explore - </strong><em><strong>EVIDENCE 5b-Plaque Model Simulator </strong></em><strong>- in the Resource Library. Change the options in the simulator and notice the effects. </strong></li></ul>",
+            "<ul><li><strong>Read - </strong><em><strong>EVIDENCE 5c-Missing Link Report</strong></em><strong> - in the Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Discuss the conversation, the report and your observations of the simulation with your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library.</strong></li></ul>",
+            "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li></ul>"
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

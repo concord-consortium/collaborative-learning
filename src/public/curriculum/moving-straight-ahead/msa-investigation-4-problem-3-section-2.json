@@ -1,0 +1,66 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {"id": "c5JRWBmNXEmeecqY", "title": "Text 46", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation A More Matching</strong></p>", "<p>Sort the cards into equivalent equations. </p>"]}},
+      [
+        {"id": "vXWDY_GfVk9kW7lc", "title": "Text 47", "content": {"type": "Text", "format": "html", "text": ["<p>Equation 1</p>", "<p>20 = 7x + 10</p>"]}},
+        {"id": "LIxARB6aNF0CxU0I", "title": "Text 48", "content": {"type": "Text", "format": "html", "text": ["<p>Equation 2</p>", "<p>x = 4</p>"]}},
+        {"id": "K1s4Rha9Qx3rIASS", "title": "Text 49", "content": {"type": "Text", "format": "html", "text": ["<p>Equation 3</p>", "<p>2x  = 16</p>"]}},
+        {"id": "aFtNovYBRkKPvWRr", "title": "Text 50", "content": {"type": "Text", "format": "html", "text": ["<p>Equation 4</p>", "<p>2(x – 4) = 16</p>"]}},
+        {"id": "o3Ar2_zzCcBye2r7", "title": "Text 62", "content": {"type": "Text", "format": "html", "text": ["<p>Equation 5</p>", "<p>x = 6</p>"]}}
+      ],
+      [
+        {"id": "S2IpXKF3ajOT5gV1", "title": "Text 61", "content": {"type": "Text", "format": "html", "text": ["<p>Equation 6</p>", "<p>10/7 = x</p>"]}},
+        {"id": "kwE8O76pauTpBu8B", "title": "Text 60", "content": {"type": "Text", "format": "html", "text": ["<p>Equation 7</p>", "<p>x – 4 = 8</p>"]}},
+        {"id": "_uZaWqmi3cpJT1qR", "title": "Text 59", "content": {"type": "Text", "format": "html", "text": ["<p>Equation 8</p>", "<p>7/10 = x</p>"]}},
+        {"id": "83St16zdU5xVoM3a", "title": "Text 58", "content": {"type": "Text", "format": "html", "text": ["<p>Equation 9</p>", "<p>3x + 2 = 14 + x</p>"]}},
+        {"id": "37DN2hzaOyOXjMXl", "title": "Text 57", "content": {"type": "Text", "format": "html", "text": ["<p>Equation 10</p>", "<p>x = 12</p>"]}}
+      ],
+      [
+        {"id": "uCSX_SdogvpNZozy", "title": "Text 56", "content": {"type": "Text", "format": "html", "text": ["<p>Equation 11</p>", "<p>2x = 12</p>"]}},
+        {"id": "9tfpgkl94IGTEW_s", "title": "Text 55", "content": {"type": "Text", "format": "html", "text": ["<p>Equation 12</p>", "<p>3x = 12</p>"]}},
+        {"id": "7oQPhmzDnljnQYdW", "title": "Text 54", "content": {"type": "Text", "format": "html", "text": ["<p>Equation 13</p>", "<p>10 = 7x</p>"]}},
+        {"id": "yo_hou7kE0FQAZHL", "title": "Text 53", "content": {"type": "Text", "format": "html", "text": ["<p>Equation 14</p>", "<p>2x – 4 = 16</p>"]}}
+      ],
+      [
+        {"id": "z0V9UvKmkCwHuXUB", "title": "Equation 15", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/4.3_Equation15.png", "filename": "curriculum/moving-straight-ahead/images/4.3_Equation15.png"}},
+        {"id": "DpV56mt4eNWRuWY1", "title": "Equation 16", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/4.3_Equation16.png", "filename": "curriculum/moving-straight-ahead/images/4.3_Equation16.png"}}
+      ],
+      [
+        {"id": "f2JesQlnX-xKguNr", "display": "teacher", "title": "Text 64", "content": {"type": "Text", "format": "html", "text": ["<p>3 equations that are equivalent</p>", "<p>Equation 1</p>", "<p>Equation 13</p>", "<p>Equation 6</p>", "<p></p>"]}},
+        {"id": "tS80uE95kA0rXj3R", "display": "teacher", "title": "Text 65", "content": {"type": "Text", "format": "html", "text": ["<p>3 equations that are equivalent</p>", "<p>Equation 4</p>", "<p>Equation 7</p>", "<p>Equation 10</p>"]}},
+        {"id": "GuZAmAmqnJBjlNis", "display": "teacher", "title": "Text 66", "content": {"type": "Text", "format": "html", "text": ["<p>4 equations that are equivalent</p>", "<p>Equation 16</p>", "<p>Equation 9</p>", "<p>Equation 11</p>", "<p>Equation 5</p>"]}},
+        {"id": "TQFITLrAVZYpNn52", "display": "teacher", "title": "Text 67", "content": {"type": "Text", "format": "html", "text": ["<p>3 equations that are equivalent</p>", "<p>Equation 15</p>", "<p>Equation 12</p>", "<p>Equation 2</p>"]}}
+      ],
+      {
+        "id": "JxVEwxY018jAvOEO",
+        "display": "teacher",
+        "title": "Text 68",
+        "content": {"type": "Text", "format": "html", "text": ["<p>The 3 equations below do not match any other equations. They stand alone. </p>", "<p>Students may mistake them for an equivalent equation that goes in the column above each.</p>"]}
+      },
+      [
+        {"id": "Wopc1xKjn1zmcKnO", "display": "teacher", "title": "Text 69", "content": {"type": "Text", "format": "html", "text": ["<p>20 = 7x + 10</p>", "<p>10 = 7x</p>", "<p>If you divide, but do not maintain properties of equality…</p>", "<p>Equation 8</p>"]}},
+        {"id": "BGlLFGCIQT5-77sn", "display": "teacher", "title": "Text 71", "content": {"type": "Text", "format": "html", "text": ["<p>2(x – 4) = 16</p>", "<p></p>", "<p>If you do not distribute multiplying 2 by both x and –4…</p>", "<p>Equation 14</p>"]}},
+        {"id": "T-C4GAENXUIlWTDI", "display": "teacher", "title": "Text 70", "content": {"type": "Text", "format": "html", "text": ["<p>3x + 2 = 14 + x</p>", "<p></p>", "<p>If you add rather than subtract the 2…</p>", "<p>Equation 3</p>"]}}
+      ],
+      {
+        "id": "3eff7KHvBnJ8lw9O",
+        "display": "teacher",
+        "title": "Text 72",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Student strategies for sorting might include:</p>",
+            "<p></p>",
+            "<ul><li>Start with any equation, begin to solve the equation and see if it creates any other equations on the cards. ",
+            "For example, Equation 4 is 2(x – 4) = 16 ➔ (2(x – 4))/2 = 16/2 ➔ x – 4 = 8 this is Equation 7.</li><li>Pick the “longest of the equations” like 1, 4, or 9 and begin to solve the equation using the properties of equality. Then look for the equations that match the equations you generate while solving. ",
+            "For example, Equation 1➔subtract 10 from each side and get Equation 13.</li><li>Begin with the “shortest equations” where we know the value of x, like 2, 5, 6, 8, 10. Substitute the value of x into other equations to see which are true for that value of x. ",
+            "For example, Equation 2 is x = 4. If I substitute 4 into Equation 3 ➔ 2(4) = 16, it is not true, 2(4) ≠ 16. So, Equation 2 and 3 are not equivalent.</li><li>Use technology to compare graphs and tables for the equations. The equations that produce the same table and graph are equivalent.</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

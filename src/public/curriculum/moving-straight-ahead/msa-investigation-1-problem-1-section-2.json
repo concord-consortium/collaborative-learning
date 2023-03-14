@@ -1,0 +1,47 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"id": "F9x2q4rPVLtNoL5L", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<h3>Walking Rate Experiment</h3>"]}},
+      {
+        "id": "R2UjHzUM8J6CdnuL",
+        "title": "Text 8",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Equipment</p>", "<ul><li>Measuring device, such as, meter stick or string</li><li>Timer that can count seconds</li><li>Paper and pencil or other materials to record your results</li></ul>"]}
+      },
+      {
+        "id": "3nlPBM3OQpJeMZV7",
+        "title": "Text 9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Directions (with a partner or group)</p>",
+            "<ul><li>Measure the distance you are going to walk, such as 10 meters</li><li>Have one person walk the distance at their normal pace</li><li>Keep track of how many seconds it takes the walker</li><li>Record the walking rate</li><li>Repeat for each person in the group</li></ul>"
+          ]
+        }
+      },
+      {"id": "U34gJz0uGTGzcy1O", "title": "Text 10", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Make a prediction about your walking rate.</li></ul>"]}},
+      {
+        "id": "6rjQHIqA-OsOeL2d",
+        "title": "Text 11",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Student answers will vary.</p>", "<p>Students will discuss if they are “slow walkers” or “fast walkers”. They typically have no experience measuring their walking rates. Some students may have experience with fitness trackers that measure steps per day.</p>"]
+        }
+      },
+      {"id": "Cga8PinqbCpibHu5", "title": "Text 12", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Use a meter stick and timer to find your walking rate. What is your walking rate in meters per second?</li></ul>"]}},
+      {
+        "id": "iuIiijT8Y4r95vmB",
+        "display": "teacher",
+        "title": "Text 13",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Student answers will vary.</p>", "<p>It will be easier for students to find their walking rates by seeing how far they walk in, for example, 5 or 10 seconds and then divide the number of meters they walked by the number of seconds for which they walked.</p>"]
+        }
+      }
+    ]
+  }
+}

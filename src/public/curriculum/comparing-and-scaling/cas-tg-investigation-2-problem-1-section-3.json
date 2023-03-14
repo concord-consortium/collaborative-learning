@@ -1,0 +1,76 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "9N0sYoxH-vdzoEex",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Explore (Digging In)</strong></u></p>",
+            "<p><u>Providing for Individual Needs</u></p>",
+            "<p></p>",
+            "<p>For the Initial Challenge</p>",
+            "<p></p>",
+            "<p>This is an example of a ratio that relates quantities with different units, people and pizzas. After working through Investigation 1, most students should answer the Initial Challenge without too much difficulty, although some students may find it challenging to express their solutions in the language of ratios. It is possible to reason about the quantities and answer the question without finding specific numerical answers.</p>",
+            "<p></p>",
+            "<p>As you walk around observing groups, push students to make their reasoning and conclusion visible to others.</p>"
+          ]
+        }
+      },
+      {
+        "id": "3VGr0y-GjiqsAmsq",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Do you think that your diagram, notations, and explanation will show another group how you are making sense of the question? (Answers will vary.)</li><li>Can you think of another strategy to solve the Initial Challenge? Are your two strategies related? If so, how? (Leave the analysis for the Summarize.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "YG_ulRpe-LQ4Yf4w",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>For the What If:</em></p>",
+            "<p></p>",
+            "<p>Situation A requires students to analyze the reasoning of three other students and decide whether their methods are appropriate comparisons. The broader consideration is whether finding the difference between number of people and number of pizzas is useful in determining how much pizza each person gets.</p>",
+            "<p></p>",
+            "<p>In Situation B, students use what they learned to set up equivalent ratios and solve for an unknown value.</p>"
+          ]
+        }
+      },
+      {
+        "id": "easIJu-YxgbBdE1A",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>How do you know that you set up the proportion correctly? (Possible answer: I made sure that the single table’s information was on one side of the equation and the full camp’s information was on the other side. I also made sure to match up the units.)</li></ul>",
+            "<p></p>",
+            "<p>Not all students will use proportions to answer these questions. Have students who use other methods share their strategies as well.</p>",
+            "<p></p>",
+            "<p>For Situation C, students might consider a fair number of pizzas to be somewhere between 3/8 and 4/10  of a pizza per person. Or students may choose to go with the amount on the large table because that had the most pizza for each person.</p>",
+            "<p></p>",
+            "<p>Students can set up proportions to solve for the unknown. For example, students may write.    3/8  = x/25 or 4/(10 )  =  x/25. If students are having difficulty with Situation C, ask,</p>",
+            "<ul><li>What does the 4/(10 )  represent? (It represents how much of a pizza each person is getting at the large table. It is also the ratio of pizzas to people at the table.)</li></ul>",
+            "<p></p>",
+            "<p>Calling attention to this reasoning may help students to write a proportion by making a similar comparison.</p>",
+            "<p></p>",
+            "<p>For both the large table and the small table, the number used to scale to 25 seats is not a whole number. Students might have an easier time scaling 4/(10  )  by 2.5. Starting with 3/8 provides the opportunity to estimate, however. The scale factor in this case is a little more than 3 (exactly 3.125).</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p><u>Planning for the Summary</u></p>", "<p></p>", "<p>What evidence will you use in the summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"]}
+      },
+      {"id": "7V_p9pJHfsZVMUn_", "content": {"type": "Text", "format": "html", "text": ["<p><em>Now What Do You Know?</em></p>", "<p><em>We have used several strategies for solving problems that involve ratios. How do you decide which method to use?</em></p>"]}}
+    ]
+  }
+}

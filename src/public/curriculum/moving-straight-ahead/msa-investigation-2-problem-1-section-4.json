@@ -1,0 +1,24 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "ijMLztpq6sxmPw2X", "title": "Text 44", "content": {"type": "Text", "format": "html", "text": ["<p>Describe some strategies for solving problems that involve linear relationships. </p>"]}},
+      {
+        "id": "7RqvdlSv7OdzMTyx",
+        "display": "teacher",
+        "title": "Text 47",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Table: If you are given the value of one variable you can find the corresponding value of the other variable. </p>",
+            "<p>Graph: Find the known value on the axis. Then, follow that value up or over until you intercept the line. Look over the to other axis to find the corresponding value. You will get the coordinate pair (x,y). One value of the pair is the known value, the other is the solution.</p>",
+            "<p>Equation: You can find values for the y variable by substituting values for the x variable. </p>",
+            "<p>Note that students will solve equations such as, 100 = 2x +45, symbolically in the next Investigation. Some students may use guess and check, numerical reasoning, fact families, tables, or graphs to solve equations at this time. </p>",
+            "<p>Numeric Reasoning. You can guess and check or use fact families to find values.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

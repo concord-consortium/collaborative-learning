@@ -1,0 +1,168 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "id": "o-vNsa_352FdfLM1",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation A. Baby Chimp Recipes</strong></p>", "<p>Some students in Ms. Stewart’s class used unit rates to prepare the recipes for the baby chimp recipe. Examine each strategy and then answer the question.</p>"]}
+      },
+      {"id": "L0ku64lSVw7fJHlL", "content": {"type": "Text", "format": "html", "text": ["<strong>Ahmed’s Strategy: A Table</strong>"]}},
+      {
+        "id": "nxs0dunxywsScOSV",
+        "title": "Ahmed's Strategy",
+        "content": {"type": "Table", "name": "Ahmed's Strategy", "columns": [{"name": "Fiber", "width": 100, "values": ["40", "?"]}, {"name": "Protein", "width": 100, "values": ["60", "?"]}, {"name": "Total", "width": 100, "values": ["100", 1]}]}
+      },
+      {"id": "luDwnZb9x0-U0zNQ", "content": {"type": "Text", "format": "html", "text": ["<p>How will the unit rate in the table help Ming mix up any amount she wants?</p>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<strong>Ahmed’s Strategy</strong>", "<p>When he has the unit rate, he can then scale that up using multiplication when he knows the total amount needed.</p>"]}},
+      {
+        "id": "4ClLUSyaCIA5HrKz",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Michelle’s  Strategy: Equations</strong></p>",
+            "<p>She writes two equations.</p>",
+            "<ol><li>relating the Total amount of food to the amount of Protein, and</li><li>relating the Total amount of food to the amount of Fiber.</li></ol>",
+            "<p>What equations did she write? How do these equations use unit rates?</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Michelle’s Strategy</strong>",
+            "<p>0.4 x total amount of food = amount of high fiber</p>",
+            "<p>  0.4<em>T=F</em></p>",
+            "<p>0.6 x total amount of food = amount of high protein</p>",
+            "<p>  0.6<em>T=P</em></p>",
+            "<p>The unit rates are what is multiplied by the total amount of food in each equation</p>"
+          ]
+        }
+      },
+      {"id": "_l01a28zGNAf9w9p", "content": {"type": "Text", "format": "html", "text": ["<strong>Concetta’s Strategy: Graphs</strong>", "<p></p>", "<p>Concetta used two graphs to show the relationships.</p>"]}},
+      [
+        {"id": "010GIqeMrTuRBgHG", "content": {"type": "Text", "format": "html", "text": ["<p>Relationship between the Total Amount of Food and the Amount of Protein</p>"]}},
+        {"id": "N9MHgn8Pb4emX2Mk", "content": {"type": "Text", "format": "html", "text": ["<p>Relationship between the Total Amount of Food and the Amount of Fiber</p>"]}}
+      ],
+      [
+        {
+          "id": "-HusAyiyl3O028XH",
+          "content": {
+            "type": "Geometry",
+            "title": "Food vs. Protein",
+            "board": {"properties": {"axisMin": [-1.1, -1.1], "axisRange": [13.189, 7.072], "axisNames": ["Total amount of food", "Cups of protein"], "axisLabels": ["Total amount of food", "Cups of protein"]}},
+            "objects": [
+              {"type": "point", "parents": [1, 0.6000000000000001], "properties": {"id": "HmPxmSwCZ59tX3KS", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [2, 1.2000000000000002], "properties": {"id": "cspugXnS5242Cdtt", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [3, 1.8], "properties": {"id": "PxthDRQKRqB-IgwE", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [4, 2.4000000000000004], "properties": {"id": "E3nE4Wcyu_78aZGM", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}}
+            ]
+          }
+        },
+        {
+          "id": "svf81en6E8Niadzs",
+          "content": {
+            "type": "Geometry",
+            "title": "Food vs. Fiber",
+            "board": {"properties": {"axisMin": [-1.5, -1.1], "axisRange": [20.541, 7.072], "axisNames": ["Total amount of food", "Cups of fiber"], "axisLabels": ["Total amount of food", "Cups of fiber"]}},
+            "objects": [
+              {"type": "point", "parents": [1, 0.4], "properties": {"id": "aSiMBc88DySPHvdU", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [2, 0.8], "properties": {"id": "tClBoznRbwH6klbg", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [3, 1.2000000000000002], "properties": {"id": "bWuF8GGYBZJMXH0Q", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [4, 1.6], "properties": {"id": "Yl4nJXHF0wgKwevR", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [5, 2], "properties": {"id": "tYE5nL9a6D2vK--l", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [6, 2.4000000000000004], "properties": {"id": "3P21do1cNoqdiUCP", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}}
+            ]
+          }
+        }
+      ],
+      {"id": "wH5kxZ-_TkFHlDfZ", "content": {"type": "Text", "format": "html", "text": ["<p>How do the graphs show the unit rate? How do they help Ming mix up any amount she needs?</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Concetta’s Strategy</strong></p>",
+            "<p>The unit rates show up on the graph in that each time the x value (amount of food) increases by 1 the y value (amount of high protein or high fiber) increases by the unit rate. Concetta could use her graph by finding the total number of cups of food needed on the x and then find the total amount of high fiber or high protein by finding the corresponding y value.</p>"
+          ]
+        }
+      },
+      {
+        "id": "vVs2EKX0bSvN2TpB",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation B. Adult Chimp Recipes</strong></p>", "<p>Some students in Ms. Stewart’s class used the following strategies to prepare adult chimp recipes. Examine each strategy. Explain how they make sense.</p>"]}
+      },
+      {
+        "id": "_FLfmbaXGMBLRK3u",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Sze’s Strategy</strong>",
+            "<p>He says you can use a proportion.</p>",
+            "<p> He wrote:</p>",
+            "<p>(x scoops of high fiber)/(30 scoops of high protein )=   (60%)/(40%)</p>",
+            "<p>                          or</p>",
+            "<p>(T scoops of total mix)/(30 scoops of high protein )=   (100%)/(40%)</p>",
+            "<p>He says you can use either proportion.</p>"
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Sze’s Strategy</strong></p>", "<p>Sze is looking at the ratios in two ways as a percent ratio or as a scoops ratio.  His way of thinking about it is similar to the rate table that Ahmed used.</p>"]}},
+      {"id": "p_1g-dux_aF_WlqW", "content": {"type": "Text", "format": "html", "text": ["<strong>Emily’s Strategy</strong>", "<p></p>", "<p>She uses a graph for mixing the Adult Chimp Recipe.</p>"]}},
+      {
+        "id": "nuyyMHSVprobNBG_",
+        "content": {
+          "type": "Geometry",
+          "title": "Emily's Strategy",
+          "board": {"properties": {"axisMin": [-2.186, -1.093], "axisRange": [26.23, 17.486], "axisNames": ["Total amount of food", "Cups of protein"], "axisLabels": ["Total amount of food", "Cups of protein"]}},
+          "objects": [
+            {"type": "point", "parents": [5, 2], "properties": {"id": "AwBZwSPBmOOwQamW", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [10, 4], "properties": {"id": "EF5FG8e0t7sLohK-", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [15, 6], "properties": {"id": "IEPt31HJy-0SoQaC", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [20.01223905810967, 8.032786885245907], "properties": {"id": "4jGMRnx2WXLxt78h", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [25, 10], "properties": {"id": "L4888lAgfFsn3jo_", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [30, 12], "properties": {"id": "dXCobtuaS84X1f4H", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [35, 14], "properties": {"id": "TMWLpoX4j4QbUrVv", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}}
+          ]
+        },
+        "layout": {"height": 412}
+      },
+      {"id": "f25bcpjBuFEuyMFO", "content": {"type": "Text", "format": "html", "text": ["<p>She says you just have to find the point you need on the graph.</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Emily’s Strategy</p>",
+            "<p>The point on the graph tells you the total amount of food and the cups of protein. Then you can subtract those amounts to get the cups of fiber.</p>",
+            "<p>For example (15,6):</p>",
+            "<p>The 15 is the total amount of food.</p>",
+            "<p>The 6 is the number of cups that are protein.  15 – 6 = 9 which would be the number of cups of fiber that are needed.</p>"
+          ]
+        }
+      },
+      {
+        "id": "lDpk7VmOZclFWcHE",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Situation C. Population Growth</strong>",
+            "<p>Chimpanzees are an endangered species. They are extinct in several of their original countries. They are extensively studied in biomedical research to gain an understanding of various diseases that result in substantial sickness.</p>",
+            "<p>A research team was recording the growth of chimpanzees in two remote areas. In one year, the population in Area Amber grew from 15 to 19 chimpanzees. The population in Area Blue grew from 11 to 16 chimpanzees. Which area has the greatest growth in one year? Explain why.</p>"
+          ]
+        }
+      },
+      [
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Area Amber grew from 15 to 19</p>", "<p>The increase is 4 chimpanzees for every 15.</p>", "<p>4/15=  (0.26666..)/1=  (26.6666….)/100</p>", "<p>About 26% increase.</p>"]}},
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Area Blue grew from 11 to 16 chimpanzees</p>", "<p>The increase is 11chimpanzees for every 16.</p>", "<p>11/16=  0.6875/1=  (68.75.)/100</p>", "<p>68.75% increase</p>", "<p>This is a greater growth.</p>"]}}
+      ]
+    ]
+  },
+  "supports": []
+}

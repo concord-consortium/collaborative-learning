@@ -1,0 +1,93 @@
+{
+  "type": "getStarted",
+  "content": {
+    "tiles": [
+      {
+        "id": "bRdwZLXa23pI5tXA",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>1. Groups in CLUE</strong></p>",
+            "<p>In CLUE, everyone works in a group with up to four people. Your group number is your table number.    </p>",
+            "<p><strong>Groups are important in CLUE.</strong> You can learn from table-mates in your group and they can learn from you. Many features of CLUE are designed to help you share information and learn from others in your group and in your class.</p>"
+          ]
+        }
+      },
+      {
+        "id": "8Twa2sm_KiWuQ_if",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>2. You in CLUE</strong></p>",
+            "<p>On the right is <strong>your</strong> workspace. To edit your workspace, you must first add a <strong>tile</strong>. You get a tile in your workspace by either</p>",
+            "<ul><li><strong>Dragging a tile from the content (left side) in CLUE into your workspace</strong></li><li><strong>Dragging a new  tile from the menu on the left of your workspace</strong></li><li><strong>Click a button on the menu to add a new tile to the bottom of your workspace</strong></li></ul>",
+            "<p>All tiles have a <strong>waffle</strong> (gray box with six dots) in the upper right corner if you hover over it. To drag the tile, click the waffle and hold it down as you drag it to your workspace. As you drag the tile into the workspace, a blue line shows where the tile will go when you let go.</p>",
+            "<p>OK, get ready... Here we go!</p>",
+            "<p>Watch your teacher as we model, model, model.</p>"
+          ]
+        }
+      },
+      {
+        "id": "_eKB4ujGfrqBvAHD",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>3. Group work - discussion</strong></p>",
+            "<p><strong>K</strong>- W- L</p>",
+            "<p><em>First, check that all the members of your group have the same group number at the top right of your screen. </em></p>",
+            "<p>Talk about moths with your group.  <strong>Size, Color, Location, Quantity Found, Weather, Time, A-Ha&#x27;s</strong> </p>",
+            "<p>What do you know about moths?  Draw and make a list of what your group knows. </p>",
+            "<p>Watch the <a href='https://www.youtube.com/watch?v=JQL25_hoQ1k'>Moth video</a></p>"
+          ]
+        }
+      },
+      {
+        "id": "gsElOIAMNkbBlNau",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>4. Brainstorm some research questions</strong></p>", "<p>K - <strong>W</strong>- L</p>", "<p>What do you want to know more about? Take time to think about it and write possible questions by clicking on the A icon.</p>"]}
+      },
+      {
+        "id": "XBIS4ky6zz9iaD48",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>5. When ready, share with the group</strong></p>", "<p>Use the group controls so that you can see and share each others&#x27; notes. See the image below for how to do that.  Watch your teacher model how to turn on the shared button.</p>"]
+        }
+      },
+      {"id": "8JK4w8K92EIiEJV5", "title": "Group Sharing and Publishing", "content": {"type": "Image", "url": "curriculum/mothed/images/share.jpg"}},
+      {
+        "id": "i934HJ5Rc66DTKFU",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>6. Publish (see image above) your work to the class</strong></p>",
+            "<p>You can choose one member of your group to publish a summary of the group&#x27;s work, or you may each publish.  When you publish, your workspace will appear under the pink &quot;Class Work&quot; tab (left-hand side of CLUE).</p>",
+            "<p>Watch your teacher model this.</p>"
+          ]
+        }
+      },
+      {"id": "Uiel2tWWeWlgcfPL", "content": {"type": "Text", "format": "html", "text": ["<h3>----------------------        BIODIVERSITY         ---------------------</h3>"]}},
+      {
+        "id": "lyi6BPZq5ycgeV-P",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Step 1:  What do you know?  (Prior Knowledge)</strong></p>",
+            "<p>1<strong>. In a text tile</strong>, answer the following questions.  Or on your sheet of paper number 1-6.</p>",
+            "<ol><li>How many different species (or types) of insects are there in the entire world?</li><li>How many different species of insects are there in Michigan?</li><li>How many different species (or types) of moths are there in the entire world?</li><li>How many different species of moths are there in Michigan?</li><li>How many different species (or types) of birds are there in the entire world?</li><li>How many different species of birds are there in Michigan?</li><p></p></ol>",
+            "<p>2.<strong>  Share with your group</strong> and come to a consensus answer for each question.</p>",
+            "<p></p>",
+            "<p>3<strong>.  Open a Table tile</strong> and enter your numbers from above in a table format.  (Text in tables does not wrap yet, so shorten and abbreviate the questions!)</p>",
+            "<p></p>",
+            "<p>4. <strong>Publish</strong> – Decide as a group on a table format, and choose one person to publish the group&#x27;s table.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

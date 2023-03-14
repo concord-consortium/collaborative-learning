@@ -1,0 +1,18 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "id": "EG-7bdKordXiSEOR",
+        "title": "Text 67",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Pouches with an unknown number of coins and coins are represented with an equation. What strategies can you use to find the number of coins in each pouch? How do you know if your answer is correct?</p>"]}
+      },
+      {
+        "id": "bTooacip2B0QA0b2",
+        "display": "teacher",
+        "title": "Text 70",
+        "content": {"type": "Text", "format": "html", "text": ["<p>You can do the same thing to both sides of the equation to find the number of coins in each pouch. You can check your answer by substituting the value you found back into the pouches and see if the clue comes out correctly.</p>"]}
+      }
+    ]
+  }
+}

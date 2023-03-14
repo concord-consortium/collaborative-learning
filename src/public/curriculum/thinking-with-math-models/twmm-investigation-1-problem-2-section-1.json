@@ -1,0 +1,17 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "In the last problem you tested the strength of some paper bridges. We found that as the number of layers increased so did the strength. That is, bridges with more layers are stronger than bridges with fewer layers. The data for the pair of variables, layers and strength, is called **bivariate data**. The data gathered in the following experiment is another example of bivariate data. Statisticians gather, analyze, and interpret data to aid in many business, scientific, medical, engineering and other decision-making processes. They call graphs of the data **scatter plots**."
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

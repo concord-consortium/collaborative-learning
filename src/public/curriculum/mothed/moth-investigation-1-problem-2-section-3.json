@@ -1,0 +1,58 @@
+{
+  "type": "pinning",
+  "content": {
+    "sharedModels": [
+      {
+        "sharedModel": {
+          "type": "SharedDataSet",
+          "id": "2RLUYg5P96NDMIfI",
+          "providerId": "Mf8F2TQ576QtCIkq",
+          "dataSet": {
+            "id": "pmBp0E-weI04bgsG",
+            "attributes": [
+              {"id": "lgQ-aHc3ENGlh4CC", "clientKey": "", "name": "Moth", "hidden": false, "units": "", "formula": {}, "values": ["large"]},
+              {"id": "nb9o6hyCZqVPYp9R", "clientKey": "", "name": "Date", "hidden": false, "units": "", "formula": {}, "values": [""]},
+              {"id": "jzCeWK-wTPkHjaui", "clientKey": "", "name": "image", "hidden": false, "units": "", "formula": {}, "values": [""]},
+              {"id": "mxFnkDHe2Xbceey_", "clientKey": "", "name": "Another Label ", "hidden": false, "units": "", "formula": {}, "values": [""]}
+            ],
+            "cases": [{"__id__": "01GB97G7F4QR5TBZ4D1CB50G9K"}]
+          }
+        },
+        "tiles": ["Mf8F2TQ576QtCIkq"]
+      }
+    ],
+    "tiles": [
+      {"id": "XejN-F7hDWsdjxpt", "title": "Text 13", "content": {"type": "Text", "format": "html", "text": ["<h2>Pin and organize your moths</h2>"]}},
+      {
+        "id": "R9NR96j-7MyF-Z2y",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Moth Pinning Video</strong></p>",
+            "<p>for studying, comparing, and identifying them.</p>",
+            "<p>MSU Team Moth <a href='https://drive.google.com/file/d/1sVzZNz_2TR9jvpveACbKpBR6M7JA4IhH/view?usp=drivesdk'>Pinning Tutorial</a></p>",
+            "<p>Oregon State <a href='https://extension.oregonstate.edu/video/pinning-butterflies-moths'>Pinning Tutorial</a></p>"
+          ]
+        }
+      },
+      {
+        "id": "R9NsdfR96j-7MyF-Z2y",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Organizing your moths</strong></p>",
+            "<p>Think about pinning the moths in categories that will help answer your group's research question.</p>",
+            "<p><strong>Would data cards or a table help you get organized?</strong></p>",
+            "You can start with the card below and add cards. Or to make your own, click the data card icon on the tool bar.  Decide which labels you want to add. "
+          ]
+        }
+      },
+      {"id": "Mf8F2TQ576QtCIkq", "title": "My Moths", "content": {"type": "DataCard"}},
+      {"id": "1WcMxVhDjM_iQviT", "title": "Text 11", "content": {"type": "Text", "format": "html", "text": ["<p>Or, click the table icon in the toolbar and decide on column titles you want to add. You can start with the table below, or make your own. </p>"]}},
+      {"id": "hmo9bA0tWyHk-f2t", "title": "Table 1", "content": {"type": "Table", "name": "Table 1", "columns": [{"name": "moth", "width": 80}, {"name": "date", "width": 80}, {"name": "weather", "width": 92}, {"name": "color", "width": 80}, {"name": "column title", "width": 94}]}},
+      {"id": "ffP5vaAz9sV-f2d5", "title": "Text 12", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Share your findings </strong></p><p>...with your group<strong> </strong>to discuss what you are learning.</p>"]}}
+    ]
+  }
+}

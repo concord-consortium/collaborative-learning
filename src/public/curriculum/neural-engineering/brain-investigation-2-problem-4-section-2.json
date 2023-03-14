@@ -1,0 +1,76 @@
+{
+  "type": "labWork",
+  "content": {
+    "tiles": [
+      {
+        "id": "grlntM-0y6HgUgUz",
+        "title": "Text 3",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Select a case study</strong></p>", "<p>The cases below describe people who have sensory or motor conditions that impact their life quality. Review these cases and decide who you would like to help today. </p>"]}
+      },
+      {
+        "id": "RhyzEuq9rqtjPydo",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Mrs. Marcus</h3>",
+            "<p>Maria Marcus is 84 years old. When she was younger she worked as a pharmacist. This required routine use of her hands as she measured and mixed medicines that were able to restore the health of community members. Mrs. Marcus is enjoying her retirement, with ample time to bake for her nine grandchildren and maintain her flower garden with her husband of 60 years. </p>",
+            "<p>Recently Mrs. Marcus is unsettled to find that arthritis in her hands has resulted in something her primary care physician, Dr. Romero, has diagnosed as hypoesthesia. Hypoesthesia is reduced or complete loss of sensation. In Mrs. Marcus’s case, Dr. Romero believes that inflammation of joints in Mrs. Marcus’s hands are pressing against the surrounding nerves, resulting in numbness. This is unsafe, especially given Mrs. Marcus is unable to sense temperature and touch in her fingers when she bakes.</p>"
+          ]
+        }
+      },
+      {"id": "ITUp8NUCpJG8zE9Y", "title": "Mrs. Marcus", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/mrsMarcus.jpg", "filename": "curriculum/neural-engineering/images/mrsMarcus.jpg"}},
+      {
+        "id": "rUXHJ7YT2UXPSg2i",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Tilly</h3>",
+            "<p>Tilly Lockey lost her hands at fifteen months of age due to a bacterial infection. After eleven years without hands, Tilley received a pair of bionic hands. Now sixteen years old, she is now able to open doors and cupboards without the help of her parents or sister. Tilly feels empowered by this new-found independence. She also likes to design the plastic outer cases of her bionic arms, which has become an important part of expressing who she is.</p>",
+            "<p>As you noticed in the video, Tilly is happy to be able to more easily apply makeup with her bionic hands. However, Tilly finds it difficult to do some of the eye makeup techniques she found on Instagram. Tilly would like to be able to apply false lashes on her own, but her current bionic hands are unable to pick up and hold delicate objects.  </p>"
+          ]
+        }
+      },
+      {"id": "V0DLxYNeA1KCSV2m", "title": "Tilly applies makeup with bionic hands", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/Tilly.jpg", "filename": "curriculum/neural-engineering/images/Tilly.jpg"}},
+      {
+        "id": "D38O0DQDL5zRxNQc",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Mr. Johnson</h3>",
+            "<p>Isaiah Johnson is 72 years old. When he was younger he worked as a social worker at the local Veterans Administration Medical Center. Mr. Johnson found it very rewarding to help people navigate challenges. Now that he is retired, Mr. Johnson has been spending more time volunteering with his wife Janelle at the community food garden they had initiated just before the birth of their second child.</p>",
+            "<p></p>",
+            "<p>Shortly after he was drafted to serve in the Vietnam War, at nineteen years of age, Mr. Johnson lost his sense of sight during an explosion in which shrapnel struck his face. Mr. Johnson’s guide dog, a golden labrador named Rex, helps Mr. Johnson safely stroll across the city’s sidewalks and streets. Recently Mrs. Johnson had hip surgery, and Mr. Johnson came to realize he is not as independent as he thought. As Mrs. Johnson recuperated on a rented electric hospital bed in the living room, Mr. Johnson prepared stove top and microwave meals. As he began to prepare Mrs. Johnson’s favorite pot roast, he realized that it would be unsafe to use the oven because he would not sense where the hot cast iron skillet was located. This frustrated Mr. Johnson, who has taken pride in his ability to live life fully despite eye damage.</p>"
+          ]
+        }
+      },
+      {"id": "mvYy_ChPbPzZ1sq0", "title": "Mr. Johnson and his seeing eye dog", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/mrJohnson.jpg", "filename": "curriculum/neural-engineering/images/mrJohnson.jpg"}},
+      {"id": "fMiM_-XAcQpyltf9", "title": "Text 5", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Define the challenge</strong></p>", "<p>Please drag the following questions to your workspace and answer them: </p>"]}},
+      {
+        "id": "v_CPokWvxhk24v59",
+        "title": "Text 6",
+        "content": {"type": "Text", "format": "html", "text": ["<p>What are the challenges experienced by the person that you chose?</p>", "<p>Why is it important to address these challenges?</p>", "<p>How can you apply what you have learned throughout the unit to help this individual?</p>"]}
+      },
+      {
+        "id": "8-f3M22SSbCnVHb4",
+        "title": "Text 7",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Idea generation</strong></p>",
+            "<p>Using your knowledge of body systems and technology, propose a device that can help the person described in the case. Please sketch your proposed device on a whiteboard/chart paper, with annotations.  Take a picture when you&#x27;re done and upload it to your workspace. </p>",
+            "<p>As you design your device, ask yourself: </p>",
+            "<p>Will [person’s name] find the device safe?</p>",
+            "<p>Will [person’s name] find the device easy to use?</p>",
+            "<p>Will [person’s name] find the device comfortable?</p>",
+            "<p>Will [person’s name] find the device useful?</p>"
+          ]
+        }
+      },
+      {"id": "HZI_VSmXi1E9voqy", "title": "Text 8", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Reflection</strong></p>", "<p>At the end of the activity, please record your current thinking and learning in your learning journal (see Reflection tab). </p>"]}}
+    ]
+  }
+}

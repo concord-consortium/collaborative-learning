@@ -1,0 +1,173 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "id": "_npqx_5zhDn1pHYT",
+        "title": "Text 11",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation A. Using Representations to Solve Problems</strong></p>", "<ul><li>In Alana’s plan, how is the fixed $5 donation represented in a table? A graph? An equation? </li></ul>"]}
+      },
+      {
+        "id": "hIcZliCCO5qHUwrG",
+        "display": "teacher",
+        "title": "Text 14",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The fixed $5 donation represents the amount of money she raises by walking 0 kilometers. In the table, it is the amount of the donation when the distance is 0. (0,5) is the point where Alana’s graph intersects the y-axis; it is the point on the line for her plan with an x-coordinate of 0. In the equation, 5 is the term that is added to 0.50<em>d</em> where <em>d</em> represents the distance walked.</p>"
+          ]
+        }
+      },
+      {
+        "id": "hA3y5KPHl_aqbUF5",
+        "display": "teacher",
+        "title": "Table 3",
+        "content": {"type": "Table", "name": "Alana's plan", "columns": [{"name": "Distance (km)", "width": 116.0078125, "values": ["0", "1", "2", "3", "4", "5", "6"]}, {"name": "Donation ($)", "width": 107.0703125, "values": ["5", "5.50", "6", "6.50", "7", "7.50", "8"]}]}
+      },
+      {
+        "id": "fUd7_2GkJSDxRDmg",
+        "display": "teacher",
+        "title": "Pledges",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-6.879, -2.094], "axisRange": [26.15, 17.507], "axisNames": ["d", "Dollars"], "axisLabels": ["x", "y"]}},
+          "objects": [
+            {
+              "type": "movableLine",
+              "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [5.986375416162228, 12.077697576992753]}],
+              "properties": {"id": "-uMSoP5k17rkXW6t", "pt1": {"type": "point", "id": "-uMSoP5k17rkXW6t-point1"}, "pt2": {"type": "point", "id": "-uMSoP5k17rkXW6t-point2"}}
+            },
+            {
+              "type": "movableLine",
+              "parents": [{"type": "point", "parents": [-0.06405587923728816, 9.980327219202898]}, {"type": "point", "parents": [9.981036243946734, 9.962381114130435]}],
+              "properties": {"id": "p4TXQeqXIuh1rS5j", "pt1": {"type": "point", "id": "p4TXQeqXIuh1rS5j-point1"}, "pt2": {"type": "point", "id": "p4TXQeqXIuh1rS5j-point2"}}
+            },
+            {
+              "type": "movableLine",
+              "parents": [{"type": "point", "parents": [0.02170664346246974, 5.048293138586957]}, {"type": "point", "parents": [10.008701573849882, 9.961312556612318]}],
+              "properties": {"id": "kSrsiVRU7JMuIej6", "pt1": {"type": "point", "id": "kSrsiVRU7JMuIej6-point1"}, "pt2": {"type": "point", "id": "kSrsiVRU7JMuIej6-point2"}}
+            }
+          ]
+        }
+      },
+      {
+        "id": "jb1_9ahMeZMMe05F",
+        "display": "teacher",
+        "title": "Text 65",
+        "content": {"type": "Text", "format": "html", "text": ["<p>On Alana&#x27;s line, the fixed donation is represented by the y-intercept of (0,5). </p>", "<p><em>m </em>= 5 + 0.50<em>d   </em>where 5 is the fixed donation amount added into the equation.</p>"]}
+      },
+      {"id": "0xmOEhZp0WP3GZm1", "title": "Text 15", "content": {"type": "Text", "format": "html", "text": ["<ul><li>For each plan, how is the rate of change shown in the table, graph, and equation?</li></ul>"]}},
+      {
+        "id": "XlTQELd02JRb4qui",
+        "display": "teacher",
+        "title": "Text 18",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The rate of change for Alana is $0.50 per kilometer. In the table, this is shown by the amount that the donation increases for every 1 kilometer or the amount each row of the y-variable increases for every increase of 1 km. The graph shows the rate of change as how much the line rises for every kilometer. In the equation, we see the rate of change in the coefficient, or the amount that is multiplied by the x-variable.</p>"
+          ]
+        }
+      },
+      {"id": "iAiqQQCpYPKEhwb0", "display": "teacher", "title": "Alana's rate of change in a table", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_1-3_SitATable_2.png"}},
+      {"id": "x5sdLwWGGG18AB7N", "display": "teacher", "title": "Pledges Graph showing 0.5 rise per 1 unit", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_1-3_SitAGraph_2.png"}},
+      {"id": "CXCIjCwxWsGgMx2Q", "display": "teacher", "title": "Text 66", "content": {"type": "Text", "format": "html", "text": ["<p><em>m </em>= 5 + 0.50<em>d   </em>where 0.50 is the rate of change multiplier or coefficient of the variable.</p>"]}},
+      {"id": "RFQ9dORHhNP5WvaH", "title": "Text 19", "content": {"type": "Text", "format": "html", "text": ["<ul><li>On which graph does the point (12, 11) lie? What information does this point represent?</li></ul>"]}},
+      {
+        "id": "DFP6CwR5NbSTwE4u",
+        "display": "teacher",
+        "title": "Text 22",
+        "content": {"type": "Text", "format": "html", "text": ["<p>The point (12,11) lies on Alana’s graph since $5 + $0.50 x 12 = $5 + $6 = $11. This point means that if Alana walks 12 kilometers, each sponsor will donate $11. </p>"]}
+      },
+      {"id": "6LpP_AzIWDZl3doF", "title": "Text 23", "content": {"type": "Text", "format": "html", "text": ["<ul><li>On which table can you find the entry (5,10)?</li></ul>"]}},
+      {"id": "yZCHBDgpxZrYk3Wo", "display": "teacher", "title": "Text 26", "content": {"type": "Text", "format": "html", "text": ["<p>Both, Gilberto, and Leanne  They both will collect $10 if they walk 5 km.</p>"]}},
+      {"id": "1Phv0JLPmsEAguyz", "title": "Text 27", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Which equation has the point (4,8) as a solution?</li></ul>"]}},
+      {"id": "dXY6TbRfoQs6BV90", "display": "teacher", "title": "Text 30", "content": {"type": "Text", "format": "html", "text": ["<p>Gilberto  m = 2d</p>", "<p>8 = 2(4) </p>", "<p>8 = 8</p>"]}},
+      {"id": "oJA5p24wyPvZGpi3", "title": "Text 31", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Suppose each student walks 8 kilometers in the walkathon. How much money does each sponsor donate? Explain how you found your answer.</li></ul>"]}},
+      {
+        "id": "NjJCcTqLn5m9Bz3c",
+        "display": "teacher",
+        "title": "Text 34",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Leanne: Each sponsor donates $10 because they donate $10 regardless of how far she walks.</p>",
+            "<p>Gilberto: Each sponsor donates $2 • 8 = $16 because they donate $2 per kilometer he walks.</p>",
+            "<p>Alana: Each sponsor donates $5 + $0.50 • 8 = $5 + $4 = $9 because they donate $5 plus $0.50 per kilometer she walks. </p>"
+          ]
+        }
+      },
+      {"id": "_oyNFY5O2YkBthIo", "title": "Text 35", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Suppose each student raises $10 from a sponsor. How many kilometers does each student walk? Explain.</li></ul>"]}},
+      {
+        "id": "KeCd7mRSaEZG5XRx",
+        "display": "teacher",
+        "title": "Text 36",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Leanne: We cannot determine how far she walks since the amount of money she raises does not depend on how many kilometers she walks.</p>",
+            "<p>Gilberto: 5 kilometers because $2 x 5 = 10 or 10 ÷ 2 = 5.</p>",
+            "<p>Alana: 10 kilometers because $10 - $5 = $5 so she has to raise $5 by walking; since she raises $0.50 per kilometer walked, she must walk $5 / $0.50 = 10 kilometers.</p>"
+          ]
+        }
+      },
+      {"id": "zeg1H6zXXByBFLRH", "title": "Text 39", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation B. Yvonne&#x27;s Conjecture about Proportionality</strong></p>", "<p>Is Yvonne&#x27;s conjecture correct? Explain.</p>"]}},
+      {"id": "34MoYujBXNsR5pI9", "title": "Text 40", "content": {"type": "Text", "format": "html", "text": ["<p>Yvonne&#x27;s Conjecture</p>", "<p>The relationships for Alana, Gilberto, and Leanne pledge plans are linear and proportional.</p>"]}},
+      {
+        "id": "LpBBAj0JHU4vN4Ns",
+        "display": "teacher",
+        "title": "Text 43",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Leanne’s, Gilberto’s, and Alana’s plans are linear because they all show a constant rate of money raised per kilometer walked. </p>",
+            "<p>Only Gilberto’s pledge plan is proportional because his plan doesn’t involve raising any money without walking any kilometers. The graph goes through the origin. And values from the table can be made into proportions.</p>"
+          ]
+        }
+      },
+      {
+        "id": "bU7Etv2mHKGwX5VN",
+        "title": "Text 44",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Situation C. Gilberto Gives Away T-shirts</strong></p>", "<p>Gilberto decides to give a T-shirt to each of his sponsors. Each shirt costs him $4.75. He plans to pay for each shirt with some of the money he raises from each sponsor. </p>"]
+        }
+      },
+      {"id": "snkaMNxqv_QKcsPm", "title": "Text 45", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Write an expression that represents the amount of money Gilberto raises after paying for the T-shirts?</li></ul>"]}},
+      {
+        "id": "z42DNGHOPLecHULC",
+        "display": "teacher",
+        "title": "Text 47",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>For each sponsor, Gilberto will earn $2 per kilometer walked and pay $4.75 regardless of how far he walks. The expression that represents the amount of money Gilberto will raise with this plan is 2*d – 4.75, where d represents the distance walked.</p>"]
+        }
+      },
+      {"id": "9suXJ2jsSvrSQenb", "title": "Text 49", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How does this additional cost affect the amount of money he has raised reflected in a table? Graph? Equation?</li></ul>"]}},
+      {
+        "id": "Xyw5gd-fKLv6iGpM",
+        "display": "teacher",
+        "title": "Text 51",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Every representation will be decreased 4.75. </p>",
+            "<p>Table:</p>",
+            "<p>When he has walked 0 km, he will have earned –$4.75, so (0, –4.75) will be a value on the table. After that, for each kilometer he walks, the money he raises will increase by $2. So (1, –2.75) will be the next value on the table. For each kilometer, the money raises will be $4.75 less than it was before.</p>",
+            "<p>Graph:</p>",
+            "<p>The whole line ‘slides down’. Instead of the y-axis being at the origin, the line will  intersect the y-axis at (0, –4.75). For each kilometer, the money raises will be $4.75 less than it was before.</p>",
+            "<p>Equation:</p>",
+            "<p>We subtract –$4.75 to represent this extra cost, so his profits are always decreased by $4.75, no matter how many kilometers he walks.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

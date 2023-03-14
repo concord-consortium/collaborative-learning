@@ -1,0 +1,111 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"id": "vSaHQ4FWF1By_fag", "title": "Text 2", "content": {"type": "Text", "format": "html", "text": ["<p>Ms. Chang and Mr. Mamer’s classes decide to use their walkathon money for charity. They put their money in a bank account and withdraw a fixed amount each week. </p>"]}},
+      {
+        "id": "iNJN7gzv50R3ssXW",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Ms. Chang&#x27;s Class</strong></p>", "<p>Ms. Chang’s class provides books to the children’s ward at the hospital each week. </p>", "<p>To keep track of the money, Isabella makes a table of the amount of money in the account at the end of each week.</p>"]
+        }
+      },
+      {
+        "id": "z5gRaiWlwzo9Deoq",
+        "title": "Table 1",
+        "content": {"type": "Table", "name": "Mrs. Chang's Class Account", "columns": [{"name": "Week", "width": 80, "values": [0, 1, 2, 3, 4, 5]}, {"name": "Amount of Money at the End of Each Week ($)", "width": 221.50390625, "values": [144, 132, 120, 108, 96, 84]}]}
+      },
+      {
+        "id": "-idfB5Qm-MEn5MTf",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Mr. Mamer&#x27;s Class</strong></p>", "<p>Mr. Mamer’s class buys games and puzzles for the children’s ward. Keenan uses a graph to keep track of the amount of money in the account at the end of each week.</p>"]}
+      },
+      {
+        "id": "WzS8e3U_38JeVWIg",
+        "title": "Money in Mr. Mamer's Class Account",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-9.583, -81.25], "axisRange": [55, 500], "axisNames": ["week", "$"]}},
+          "objects": [
+            {"type": "point", "parents": [0, 500], "properties": {"id": "7WzVImcV9NJTzYHL", "name": ""}},
+            {"type": "point", "parents": [5, 450], "properties": {"id": "tEiF_V8eoIiJFUu4", "name": ""}},
+            {"type": "point", "parents": [10, 400], "properties": {"id": "dNbWpVdLPlnRDLxh", "name": ""}},
+            {"type": "point", "parents": [15, 350], "properties": {"id": "jueXXG10JzOsmdu9", "name": ""}},
+            {"type": "point", "parents": [20, 300], "properties": {"id": "nw2BYO02sHgUeFg4", "name": ""}},
+            {"type": "point", "parents": [25, 250], "properties": {"id": "_eM-yYjBQaVEbl-M", "name": ""}},
+            {"type": "point", "parents": [30, 200], "properties": {"id": "t173HVcwM70y1IlV", "name": ""}},
+            {"type": "point", "parents": [35, 150], "properties": {"id": "ljSrKbQrgD9U2DyU", "name": ""}},
+            {"type": "point", "parents": [40, 100], "properties": {"id": "dXrGi8RkstgFH8QH", "name": ""}},
+            {"type": "point", "parents": [45, 50], "properties": {"id": "wpFqs8gbZLosRFNw", "name": ""}},
+            {"type": "point", "parents": [50, 0], "properties": {"id": "wi6DhNLOP9a8G27d", "name": ""}}
+          ]
+        }
+      },
+      {"id": "27oegTmf1S4StlwF", "title": "Text 4", "content": {"type": "Text", "format": "html", "text": ["<p>For each class,</p>", "<ul><li>What is the pattern of change for the relationship between the variables? Explain how you know.</li></ul>"]}},
+      {
+        "id": "zqMlO8iL44cAgWo3",
+        "display": "teacher",
+        "title": "Text 7",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The pattern of change for Ms. Chang’s class is a decrease by a consistent amount of $12 each week. Or, for every weeks the account decreases by $12. The pattern of change for Mr. Mamer’s class is a decrease of $100 for every 10 weeks or $10 a week. Or, for every week the account decreases $10.</p>"
+          ]
+        }
+      },
+      {"id": "Eg9O1yF6HFFArgsM", "title": "Text 8", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How is this pattern the same as those in previous problems? How is it different?</li></ul>"]}},
+      {
+        "id": "lN0hiXbkxLVeMqrr",
+        "display": "teacher",
+        "title": "Text 10",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary. Possible answers. </p>",
+            "<p>Same: There is a consistent pattern. As the weeks increase, there is a consistent change in the amount of money. </p>",
+            "<p>Different: As the weeks increase, the amount of money decreases. The previous patterns were increasing. </p>"
+          ]
+        }
+      },
+      {"id": "pgYaYpR9Q8NrUkQd", "title": "Text 12", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Are the relationships linear? Proportional? Explain.</ul></li>"]}},
+      {"id": "IZpPDaCyA7AR81ns", "display": "teacher", "title": "Text 14", "content": {"type": "Text", "format": "html", "text": ["<p>Both appear to be linear. Neither relationship is proportional.</p>"]}},
+      [{"id": "FYd4ca27JJlYzeGe", "display": "teacher", "title": "Text 16", "content": {"type": "Text", "format": "html", "text": ["<p>Ms. Chang’s class</p>"]}}, {"id": "Z-J3K0cfvk-iccpu", "display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Mr. Mamer’s class</p>"]}}],
+      [
+        {
+          "id": "vJb9g3SqYHuRAqat",
+          "display": "teacher",
+          "title": "Text 17",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Looking at a proportion from the table of values (or 2 points on the graph).</p>",
+              "<p>1/132 ≠ 2/120  OR  1/2 ≠ 132/120</p>",
+              "<p>The graph does not pass through (0, 0). </p>",
+              "<p></p>",
+              "<p>This means that the y-intercept is not 0. So, ratios of the variables will not be related by a multiplicative relationship. There will also be an additive relationship between the variables.</p>"
+            ]
+          }
+        },
+        {
+          "id": "cD00dJgv6Z05cTkk",
+          "display": "teacher",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Looking at a proportion from 2 points on the graph (or the table of values).</p>",
+              "<p>5/450 ≠ 10/(400 )   OR  5/10 ≠  450/(400 )</p>",
+              "<p>The graph does not pass through (0, 0)</p>",
+              "<p></p>",
+              "<p>This means that the y-intercept is not 0. So, ratios of the variables will not be related by a multiplicative relationship. There will also be an additive relationship between the variables.</p>"
+            ]
+          }
+        }
+      ]
+    ]
+  }
+}

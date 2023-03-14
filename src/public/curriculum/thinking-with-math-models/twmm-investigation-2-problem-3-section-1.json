@@ -1,0 +1,40 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "In any problem that calls for a linear mode that is an equation, the goal is to find the values of *m* and *b* for the linear equation y = *m*x + *b* that fits the data pattern well. Recall from *Moving Straight Ahead* unit that for linear relationships as x increases by a fixed increment y changes by a constant amount, *m*, called the rate of change. The y-intercept is (0,*b*) or *b*. "
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_intro_table_350w.png"}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_intro_graph_450w.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "The change in x from one point to the another is also called the *horizontal change* or **run** change. The change in y from one point to another is called the *vertical change* or **rise** change.  The ratio of rise to run is called the **slope** of the line which is also the coefficient of *m* in the equation, y = *m*x + *b*."
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_slope_formula_400w.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "This ratio, slope, describes the steepness of a line that represents the linear function. The equation y = *m*x + *b* is also called the **slope intercept** form of a linear equation. To measure the steepness of a linear equation graph, it helps to imagine a staircase that lies underneath the line."
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_2_3_staircase_400w.png"}},
+      {"content": {"type": "Text", "format": "html", "text": ["<em>What is the slope of the line that represents the steepness of the staircase?</em>"]}}
+    ]
+  },
+  "supports": []
+}

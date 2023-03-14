@@ -1,0 +1,36 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "-34u9a1RoCN2BWjo", "title": "Text 27", "content": {"type": "Text", "format": "html", "text": ["<p>Describe how the distance you walk at a constant rate of time is represented in an equation and graph.</p>"]}},
+      {
+        "id": "g_tVd0VvRkWE9x3A",
+        "display": "teacher",
+        "title": "Text 29",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Student answers will vary based on their walking rates. </p>", "<p>In general, for a walking rate of <em>r</em> meters per second, you can walk a distance in meters that is <em>r</em> times the number of seconds. <em>d= rt</em></p>"]
+        }
+      },
+      {
+        "id": "Bmgy8sEP0VDhVUtN",
+        "display": "teacher",
+        "title": "Text 30",
+        "content": {"type": "Text", "format": "html", "text": ["<p>With the graph, for every increase of 1 second, the distance will increase by the walking rate. This will be an increasing graph that begins at the origin (0,0)</p>"]}
+      },
+      {
+        "id": "W4WJ-EPMCALqQvKS",
+        "title": "Text 31",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Did You Know?</p>",
+            "<p>Did you know race walking is an Olympic event?  There are rules to ensure that participants are walking and not running.  One foot must always be touching the ground and on each stride the advancing leg must remain straight until the athlete passes over it.  In the Tokyo 2021 Olympics there were three events - the men’s 20 km, the women’s 20 km, and the men’s 50 km. The 2021 Tokyo Olympics may be the last year that the 50 km men’s race is held, however it may be replaced with a mixed gender event. At the 2021 Tokyo games the men’s 20 km gold medalist was Massimo Stano of Italy who finished in 1 hour 21 minutes and 5 seconds which puts his average pace at about 9.2 miles per hour.  The 20 km women’s gold medalist was Antonella Palmisano of Italy who finished in 1 hour 29 minutes and 12 seconds which puts her pace at about 8.4 miles per hour.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "type": "chapter2",
+  "content": {
+    "tiles": [
+      {"id": "-91Bhx_bxb5EJwP6", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<h3><strong>CHAPTER 2: HEALTHY JOSUÉ</h3>"]}},
+      {
+        "id": "JgOYsdwwQaxrT1Li",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>After watching the slide show, Felix realized that he was getting sick because his body was trying to fight germs. He was right after all! And Josué’s mother helped support Felix’s case! It was not because he was stressed after all! That night when he got home from work, Felix called out to Josué. </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "-SyOS6h6PM0Ftkp-",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Felix</strong>: Mi amor, guess what I found out today? I looked at those slides your mom sent, and, I was RIGHT! I’m just fighting off germs that are trying to get into my body! Stress has nothing to do with this! </p>",
+            "<p><strong>Josué</strong>: Oh yeah, really? That’s what my mom’s thing really said? [Felix nodded and Josué thought for moment…]</p>",
+            "<p><strong>Josué</strong>: But wait. One second. If it’s just germs and not stress, then why am I not getting sick? </p>",
+            "<p><strong>Felix</strong>: Huh? What d’u mean?</p>",
+            "<p><strong>Josué</strong>: We live together, you’d think I would be sick as often as you, sí?</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "P4Jz3JHicwbktzP5",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>This made Felix pause. He thought about it and realized that his boyfriend might actually have a point. Germs do travel from one person to the other, especially when someone coughs or sneezes - which Felix does a lot. And it’s true, Felix couldn’t even remember the last time Josué was sick. While he was thinking about this, Josué had already pulled out his phone and was looking up “stress and being sick” on YouTube. After a bit of searching, Josué found a good video. He called Felix over and clicked on the video: “<em>Stress and Sickness</em>” </p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "bKH28z8fA10QxzPt",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li><strong>Watch the video- </strong><em><strong>EVIDENCE 2a- Stress and Sickness</strong></em><strong>- in your Resource Library. </strong></li></ul>",
+            "<ul><li><strong>Explore the animation - </strong><em><strong>EVIDENCE 2b- Immune Response Animation</strong></em><strong> - in the Resource Library. Change the options in the animation and notice the effects.</strong></li></ul>",
+            "<ul><li><strong>Discuss the video with your group and </strong><u><strong>together</strong></u><strong>, answer the questions about the evidence in the Resource Library.</strong></li></ul>",
+            "<ul><li><strong>Write what you learned from this evidence in your </strong><u><strong>table</strong></u><strong>.</strong></li></ul>",
+            "<p></p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

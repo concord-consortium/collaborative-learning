@@ -1,0 +1,57 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"id": "lGO2bAi7SlykQCkJ", "content": {"type": "Text", "format": "html", "text": ["<p>In this experiment we will simulate a leaking faucet and collect data about the volume of water lost at five-second intervals. We will use our results to make predictions.</p>"]}},
+      {
+        "id": "UIcyXR3I63VlbOSk",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<strong>Equipment</strong>", "<ul><li> A timer, such as a watch, clock with a second hand, or smart phone</li><li>A Styrofoam or paper cup</li><li>A paper clip</li><li>A clear measuring container that measures milliliters (such as a graduated cylinder)</li></ul>"]
+        }
+      },
+      [
+        {
+          "id": "pkwpk-jitiZjS7k7",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Experiment Directions</p>",
+              "<ol><li>Make a table with columns for recording time (in five-second intervals) and the amount of water lost (in ml).</li><li>Use the paper clip to punch a hole in the bottom of the paper cup. Cover the hole with your finger.</li><li>Fill the cup with water.</li><li>Hold the paper cup over the measuring container.</li><li>When you are ready to begin timing, uncover the hole so that the water drips into the measuring container.</li><li>Record the amount of water in the measuring container at five-second intervals for one minute.</li></ol>"
+            ]
+          }
+        },
+        {"id": "w-Dfow057CJIDb0a", "title": "Measuring Leaks", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_3-4_InitialChallenge.png"}}
+      ],
+      {"id": "y8YjCiaT8g_eFdwr", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What is the rate of water dripping in ml per minute?</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Answers will vary based on the size of the hole in the cup.</p>", "<p></p>", "<p>A good approximation of the drip rate is about 8 ml of water every 10 seconds.</p>"]}},
+      {"id": "kyvwHThOTxWE0tqH", "content": {"type": "Text", "format": "html", "text": ["<ul><li>At this rate how much water is lost in a day? A year?</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Answers will vary. Example shown for 8 ml of water every 10 seconds.</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>8 ml of water every 10 seconds</p>",
+            "<p>⤸ x6                                   ⤸ x6</p>",
+            "<p>48 ml of water every 1 minute</p>",
+            "<p>⤸ x60                                ⤸ x60</p>",
+            "<p>2880 ml of water every 1 hour</p>",
+            "<p>⤸ x24                                   ⤸ x24</p>",
+            "<p>69210 ml of water every 1 day</p>",
+            "<p>⤸ x365                                   ⤸ x365</p>",
+            "<p>25,228,800 ml of water every 1 year</p>"
+          ]
+        }
+      },
+      {"id": "IjN0rU8aShAwlkT4", "content": {"type": "Text", "format": "html", "text": ["<ul><li>One gallon of water is approximately 3,785 ml. How many gallons of water are wasted as a result of leaks in a year?</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>25,228,800 ml of water every 1 year</p>", "<p>⤸ ÷ 3,785</p>", "<p>6,665.5 gallon of water every 1 year</p>"]}},
+      {"id": "hBYozQ7ltKZgnGD8", "content": {"type": "Text", "format": "html", "text": ["<ul><li>An average shower uses about 17gallons of water. How many showers could be taken in a year if there were no leaky showerhead?</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>6,665.5 gallon of water every 1 year</p>", "<p>    ⤸ ÷ 17</p>", "<p>392 showers of water every 1 year</p>"]}}
+    ]
+  },
+  "supports": []
+}

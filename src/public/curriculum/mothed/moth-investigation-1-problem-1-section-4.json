@@ -1,0 +1,22 @@
+{
+  "type": "summary",
+  "content": {
+    "tiles": [
+      {"id": "ry2oPXRB52CSmKsa", "content": {"type": "Text", "format": "html", "text": ["<p>Use this space to document your research. You might want to start by including the information below, but you may find other ways and additional ways to show and explain your findings. </p>"]}},
+      {"id": "SeyU5L21NqaZmcKt", "content": {"type": "Text", "format": "html", "text": ["<p>Your research question:</p>", "<p></p>"]}},
+      {"id": "y2JkyqQpwe0XEulq", "content": {"type": "Text", "format": "html", "text": ["<p>Your experimental design:</p>", "<p></p>"]}},
+      {"id": "8gCr3R4Zkm21DQrC", "content": {"type": "Text", "format": "html", "text": ["<p>Your findings:</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Show students each others documents from the Class Work tab or ask them to look at particular docs in that tab. Discuss the class findings.</p>",
+            "<p>Ask closing question for students to consider while we are gone:  What is one thing you found interesting today? What is one thing you wonder about?</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

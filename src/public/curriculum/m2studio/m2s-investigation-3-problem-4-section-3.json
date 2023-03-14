@@ -1,0 +1,19 @@
+{
+  "type": "diagram",
+  "content": {
+    "tiles": [
+      {
+        "id": "n1VqWVhmPdh7Yla0",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Model meaningful relationships between and among the variables important to your problem context using the diagram tile.</em></p><p>(   ) Create variable cards by clicking on the <strong>Create Variable</strong> button. Then you should see a pop up that asks you to provide this information about the variable:</p><ul><li>Short name (No spaces, case sensitive, should be short but informative)</li><li>Description (Space to take a few notes to jog your memory. Long ideas should be in the text tile instead)</li><li>Units (Do you already have an idea of what the units should be? If this is an output variable, you can leave this blank)</li><li>Value (This is what you are temporarily setting this value to, if you have an idea. Be sure to keep good notes to explain how you chose this number! If this is an output variable, you can leave this blank)</li></ul><p>(   ) Create a variable card by dragging a blank variable from the toolbar <strong>Create Variable </strong>button and then edit the name, unit, and value directly on the card. </p><p>(   ) If you have already created variable chip in other tiles, you can insert them now using the <strong>Insert Variable(s)</strong> button.</p><p>(   ) You can use the <strong>Edit Variable</strong> button to see the pop-up screen and make changes to the notes about your variables. </p><p>(   ) If you believe that a variable has an impact on another variable, draw an arrow to connect them (click on the circle to the right of the card and then drag from there to another card).</p><p>(   ) Once cards are connected, the cards at the arrow end of the arrow will have a new field where you can enter an expression. Use your variable names, numbers, and operators to mathematically create your expression. If you write a valid expression, it will automatically calculate the values for you and create an output unit. Check both the value and unit to verify that everything makes sense. </p><p></p>"
+          ]
+        }
+      },
+      {"id": "r8R3q6_aIIroLzYl", "title": "Toolbar buttons for the diagram tile", "content": {"type": "Image", "url": "curriculum/m2studio/images/Toolbar_Diagram.png", "filename": "curriculum/m2studio/images/Toolbar_Diagram.png"}}
+    ]
+  }
+}

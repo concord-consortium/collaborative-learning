@@ -1,0 +1,114 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "id": "H6l6seUPiPTmdvpv",
+        "title": "Text 13",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation A. Using Tables and Graphs</strong></p>", "<p>In Ms. Kreuger’s class some students used tables and graphs to find the length of the race and other information about the race. </p>"]}
+      },
+      {"id": "eSDZXaVOSOgUoBft", "title": "Text 14", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How can a table or graph be used to find the length of the race? </li></ul>"]}},
+      {
+        "id": "0G8YPzlh-dYPvomW",
+        "display": "teacher",
+        "title": "Text 17",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>You can make a table for how far both brothers will walk in a given amount of time and see when they will be in the same place at the same time. By graphing the distance both brothers will walk in a given amount of time, you can see when they will be in the same place at the same time by seeing when the lines intersect.  </p>"
+          ]
+        }
+      },
+      {"id": "45gV1qgY2nz1LwGq", "title": "Text 18", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How does the walking rate of each brother show up in the table and graph?</li></ul>"]}},
+      {"id": "IYXjCEu-Yd-jeCsh", "display": "teacher", "title": "Text 21", "content": {"type": "Text", "format": "html", "text": ["<p>The walking rate shows up in the graph as the steepness of the line. In the table, it is the constant change in distance for each second of time. </p>"]}},
+      {"id": "JZr4TusGnZeX2bfR", "title": "Text 22", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What information does the y-intercept of each graph represent in terms of the race?</li></ul>"]}},
+      {
+        "id": "cLcdyjSG5feC-guu",
+        "display": "teacher",
+        "title": "Text 1",
+        "content": {"type": "Text", "format": "html", "text": ["<p>The y-intercept of each graph represents where the brothers start the race.</p><p>At 0 seconds, Emile is at the starting line; at 0 seconds, Henri is already 45 meters past the starting line.</p>"]}
+      },
+      {"id": "aUtzlCwdQXwGCnNN", "title": "Text 26", "content": {"type": "Text", "format": "html", "text": ["<ul><li>After 20 seconds, how far apart are the brothers? How is this distance represented in the table and on the graph?</li></ul>"]}},
+      {
+        "id": "1Lf3lOJKxExtebnq",
+        "display": "teacher",
+        "title": "Text 29",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>After 20 seconds, the brothers are 15 meters apart. At 20 seconds, Emile has walked 2.5(20) = 50 meters and Henri has walked 1(20) = 20 meters, which is 65 meters from the starting line (because he had a 45-meter head start). So, 65 meters – 50 meters = 15 meters. The distance is represented in the table by subtracting the positions of the brothers at 20 seconds, and the distance is represented in the graph by the vertical distance between the brothers’ graphs.</p>"
+          ]
+        }
+      },
+      {"id": "2695mUFqmLgRv73d", "title": "Text 30", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Is the point (26, 70) on the graph or table of one of the brothers? If so, what information does it represent?</li></ul>"]}},
+      {"id": "5Ffj9KTQSNNEQ4ph", "display": "teacher", "title": "Text 33", "content": {"type": "Text", "format": "html", "text": ["<p>No. </p>", "<p>After 26 seconds, Henri is at the 45m + 1(26m) = 71-meter mark and Emile is at the 2.5(26) = 65-meter mark. </p>"]}},
+      {"id": "6vgfWy6hU9c2J6Xo", "title": "Text 34", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Mary wrote the inequality: 45 + t &lt; 2.5t. What information was she looking for? </li></ul>"]}},
+      {
+        "id": "9KJama-4S7HbUYAq",
+        "display": "teacher",
+        "title": "Text 37",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>The left side of the inequality shows Henri’s distance after t seconds and the right side of the inequality shows Emile’s distance after t seconds. So Mary is looking for when Henri’s distance from the starting line is less than Emile’s distance from the starting line.</p>"]
+        }
+      },
+      {
+        "id": "aRD2U1NqyvOC5w4z",
+        "title": "Text 38",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Situation B. Using Equations</strong></p>",
+            "<p>Amit wrote equations to represent the relationships between time and distance. He wrote </p>",
+            "<p></p>",
+            "<p>D<sub>Emile </sub>= 2.5t for Emile    and   D<sub>Henri </sub>= 45 + 1t for Henri</p>",
+            "<p></p>",
+            "<p>He makes five claims. Are they correct? Explain.       </p>"
+          ]
+        }
+      },
+      [
+        {"id": "4--5mrn0rojmCoy9", "title": "Text 39", "content": {"type": "Text", "format": "html", "text": ["<p>Claim #1</p>", "<p>I can tell the walking rate and y-intercept from the equation.</p>"]}},
+        {"id": "TVtnpGE0LZOKRCK-", "content": {"type": "Text", "format": "html", "text": ["<p>Claim #2</p>", "<p>I can determine which of the two lines will be steeper from the equation. </p>"]}}
+      ],
+      [
+        {"id": "Q37P8GckOOkDxecD", "title": "Text 40", "content": {"type": "Text", "format": "html", "text": ["<p>Claim #3</p>", "<p>Both equations represent linear relationships. </p>", "<p>But, neither of them are proportional. </p>"]}},
+        {
+          "id": "UlanV8pyNet0QLfG",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Claim #4</p>",
+              "<p>I can find the time when Emile catches Henri, by setting the expressions for distance equal.</p>",
+              "<p>        D<sub>Emile</sub>   =   D<sub>Henri  </sub> </p>",
+              "<p>          2.5t  = 45 +1t</p>",
+              "<p>Then find the value for t that makes the equation true.</p>"
+            ]
+          }
+        }
+      ],
+      {"id": "imv3D3VcbBa-TloW", "content": {"type": "Text", "format": "html", "text": ["<p>Claim #5</p>", "<p>I can use the expression </p>", "<p>      45 – (2.5t – 1t)</p>", "<p>to find the distance the brothers are apart for any given second t. </p>"]}},
+      {
+        "id": "be-pcufoJwJQPMTg",
+        "display": "teacher",
+        "title": "Text 43",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Claim 1 is true. The walking rate is the number that is multiplied by t in each equation and the y-intercept is the number that is added. So, Emile’s walking rate is 2.5 meters per second and Henri’s walking rate is 1 meter per second. Emile’s y-intercept is 0 m (because no extra amount gets added) and Henri’s y-intercept is 45 m.</p>",
+            "<p>Claim 2 is true. Since you can see their walking rates in the equation, the larger walking rate will result in a steeper line when graphed. So Emile’s graph will be steeper.</p>",
+            "<p>Claim 3 is false. Both equations do represent linear relationships, but Emile’s relationship is also proportional because at 0 seconds he has traveled 0 meters.</p>",
+            "<p>Claim 4 is true. By setting the expressions equal, we are finding the time when they are both the same distance from the starting line.</p>",
+            "<p>Claim 5 is true. The expression starts with them being 45 apart with the head start. Then subtracts the difference between their walking rates. The expression could be 45 – 1.5t which is the distance they start apart minus the difference in their walking rates for each measure of time.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

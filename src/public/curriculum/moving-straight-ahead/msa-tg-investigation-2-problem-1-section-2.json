@@ -1,0 +1,62 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "iO6rBnwh49-UXj2R",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Launch (Getting Started)</strong></p>",
+            "<p>Connecting to Prior Knowledge</p>",
+            "<p>If you did not pose the following questions at the end of the Summarize for Problem 1.4, ask them now. Begin by having students list several equations from Investigation 1 that represent linear relationships. </p>"
+          ]
+        }
+      },
+      {
+        "id": "ENxs79eJ7_Fe87np",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions </strong></p>",
+            "<ul><li>Which relationship has the greatest rate of change? (Answers will vary. Look for students to choose the relationship that when written in the form y = b + ax has the greatest value of a. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of a.) </li><li>Which relationship(s) has a graph that crosses the y-axis at a point witha positive y-coordinate? With a y-coordinate of zero? With a negative y-coordinate? (Answers will vary. At this time in the Unit, students are likely to mention the context of the problem rather than formal language of the value of b. Positive y-coordinate: Look for students to choose the relationship(s) that when written in the form y = b + ax has a positive value of b. Sample: The line that represents Alana’s pledge plan. Zero y-coordinate: Look for students to choose a proportional relationship. Sample: Gilberto’s pledge plan can be modeled by a line that passes through the origin. Negative y-coordinate: Look for students to choose the relationship(s) that when written in the form y = b + mx has a negative value of b. Sample: The line that represents Gilberto’s pledge plan after purchasing a T-shirt for each sponsor.) You can tell students that they will continue to look at linear relationships in this Problem. </li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "R3UnV3WkJvYC98s8",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p></p>",
+            "<p>Tell the story of the race between Emile and his younger brother, Henri. This Problem is intended to show what knowledge students already have concerning linear relationships. </p>",
+            "<p></p>",
+            "<p>Because the Problem asks “how long” the race should be, some students will choose to focus on length and some will focus on time. </p>",
+            "<p></p>",
+            "<p>Students may suggest that once Emile is about to catch up to Henri, he can slow his walking rate so that Henri maintains the lead until the race is finished. If students give this suggestion, you can tell them to assume that each walking rate remains constant. </p>",
+            "<p></p>",
+            "<p>Help students imagine the race situation. </p>"
+          ]
+        }
+      },
+      {
+        "id": "eDHRgCDgAAFzT_kq",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What do we know about the race at the beginning? (Possible answer: The younger brother, Henri, has a head start. The brothers are not starting in the same spot.)</li><li>If you were watching this race, what would you see happening with the brothers? (Possible answer: The two brothers would start walking at the same time. The older brother, Emile, would be walking faster and would be catching up with each step. Some students may want to model what would happen with some physical movement.)</li></ul>",
+            "<p>Encourage students to think about how the race can be represented mathematically. Do not look for answers to these questions at this time. During the Explore and Summarize, listen and watch to see how students make sense of the situation.</p>",
+            "<ul><li>What data would you collect to document what happens in the race?</li><li>What are the variables that you would keep track of?</li><li>How could you represent the data to show what happens as they race?</li></ul>",
+            "<p>Have students work in groups of 4 as they investigate the brother’s walking race.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

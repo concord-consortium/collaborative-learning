@@ -1,0 +1,66 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "-1CM9c6pbuiJ-QIM",
+        "content": {"type": "Text", "format": "html", "text": ["<p>In Problem 1.1, students used ratios to determine which recipe was the most “orangey.”</p>", "<p>Some students used a part-to-part ratio and others used a part-to-whole ratio. Recall from the Comparing Quantities Unit that:</p>"]}
+      },
+      {
+        "id": "SJK1XazgOMpi9PAI",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>A part-to-part ratio</strong></p>",
+            "<p>2 cups of concentrate to 3 cups of water</p>",
+            "<p>     2 cups concentrate :  3 cups water</p>",
+            "<p>                          2 : 3   or    2/3</p>",
+            "<p></p>",
+            "<p>It compares one part (the concentrate) to the other part (the water) in the whole (the juice).</p>"
+          ]
+        }
+      },
+      {
+        "id": "5mPegfWeVtjLfvPY",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Part-to-whole ratio</strong></p>",
+            "<p>2 cups of concentrate to 5 cups of juice</p>",
+            "<p>     2 cups concentrate :  5 cups juice</p>",
+            "<p>                             2 : 5   or   2/5</p>",
+            "<p></p>",
+            "<p>It compares one part (the concentrate) to the whole (the juice).</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "eLH98PbL0O-yZc1s",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Stella’s group used unit rates. Recall that a unit rate is a specific kind of ratio where one of the quantities being compared is 1 unit. Every ratio has two unit rates.</p>",
+            "<p></p>",
+            "<p>Stella and Elise used part-to-part comparisons to write unit rates:</p>",
+            "<p></p>",
+            "<p>3 cups of water to 2 cups of concentrate can be written as</p>",
+            "<p>1 cup of water to 2/3 cups of concentrate</p>",
+            "<p>or</p>",
+            "<p>3/2 cups of water to 1 cup of concentrate.</p>",
+            "<p></p>",
+            "<p>Dan used part-to-whole comparison to write a unit rate:</p>",
+            "<p>2 cups of concentrate for 5 cups of juice can be written as</p>",
+            "<p>1 cup of concentrate for 5/2 cups of juice</p>",
+            "<p>or</p>",
+            "<p>2/5 cup of concentrate for 1 cup of juice</p>"
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

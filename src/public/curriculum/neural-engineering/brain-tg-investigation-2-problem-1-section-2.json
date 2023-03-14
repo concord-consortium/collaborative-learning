@@ -1,0 +1,37 @@
+{
+  "type": "teach",
+  "content": {
+    "tiles": [
+      {
+        "id": "GUz0n4_ThH-w0DBE",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Instructional Sequence</strong>:</p>",
+            "<p><em>5 minutes</em></p>",
+            "<p>Warm-up: Ask students to think about the EMG-controlled gripper and discuss some challenges they may encounter when trying to hold an egg with the gripper (e.g., the egg might crack). </p>",
+            "<p>Inform students that in Module 2 we will explore how sensory information impacts movement. Elicit from students the senses (sight and touch) associated with gripping an object. Ask students how they would improve the design of the gripper to overcome these challenges. </p>",
+            "<p><em>15 minutes</em></p>",
+            "<p>Remind students that previously (lesson 1.2) they had measured their reaction time using a ruler, comparing their dominant and non-dominant hand. Inform students that today we will conduct a similar experiment to investigate how tactile information impacts reaction time (in other words, how being able to feel the ruler with our fingertips impacts how fast we are at catching it?).     </p>",
+            "<p>Ask students to discuss how they would modify the reaction time experiment to answer this new research question. In this process, students should create a table similar to the results sheet used in Lesson 1.2 to record their reaction time with and without a winter glove.</p>",
+            "<p>After students have collected their data, ask them to discuss their findings. As an extension activity, ask students to enter their average reaction time into a Google spreadsheet to compute the class average.</p>",
+            "<p><em>5 minutes</em></p>",
+            "<p>Present the first 3 minutes of a PBS News Hour story (until the moment the reporter cracks an egg with his prosthetic arm).  (A link to the clip can be found in teacher resources).</p>",
+            "<p>While watching the video, ask students to list three things that stand out to them. Collect these ideas at the end of the video. </p>",
+            "<p><em>15 minutes</em></p>",
+            "<p>In small groups, ask students to discuss how prosthetic arms can be improved by incorporating sensory information (similar to the prosthetic leg example from the video). Ask students to investigate ways  the functions of the two nervous and muscular systems affect one another, and then construct  an illustrated and annotated model to communicate understanding.</p>",
+            "<p><em>5 minutes</em></p>",
+            "<p>In their individual journal, ask students to describe potential limitations of Tilly’s prosthetic arm, and how the limited ability of her prosthetic arm to naturally function may affect her life. </p>",
+            "<p><strong>Resources:</strong></p>",
+            "<p>How the nervous system <a href='http://faculty.washington.edu/chudler/organ.html'>interacts with other body systems</a></p>",
+            "<p>PBS News Hour <a href='https://www.pbs.org/newshour/show/how-sensors-rewiring-nerves-could-help-prosthetics-feel-and-function-like-real-limbs'>story on rewiring nerves</a></p>",
+            "<p>Advanced new sensors can <a href='https://scitechdaily.com/advanced-new-sensors-could-transform-prosthetics-and-robotic-limbs/'>transform prosthetics and robotic limbs</a></p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

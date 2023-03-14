@@ -1,0 +1,22 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "2iOE6nuoDzd9RKTm",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Lesson 2.3 TEACHER GUIDE</h3>",
+            "<h3>Overview</h3>",
+            "<p>In this lesson, students are challenged to assemble and program an EMG-controlled gripper that can grab an egg without cracking it. In this process, students will explore how tactile feedback affects how we manipulate objects. </p>",
+            "<p>Materials for each group of students:</p>",
+            "<ul><li>The gripper kit</li><li>Two gripper “mittens” (with a pressure sensor attached to one of them with double-sided tape)</li><li>A plastic egg or a hollow (drained) egg </li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

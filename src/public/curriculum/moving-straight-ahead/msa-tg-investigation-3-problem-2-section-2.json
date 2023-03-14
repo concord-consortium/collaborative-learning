@@ -1,0 +1,46 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Launch (Getting Started)</strong></p>",
+            "<p>Connecting to Prior Knowledge</p>",
+            "<p>Start by presenting the example at the beginning of the Introduction. Write the equation 85 = 70 + 15 on the board. Then, pose each of the questions one at a time, always using the original equation. For example, for the first question, you could record the following:</p>",
+            "<p>  85 = 70 + 15                            85 = 70 + 15</p>",
+            "<p><u>-15       -15</u>             or        <u>85 - 15 = 70 + 15 - 15</u></p>",
+            "<p>  70 = 70                                       70 = 70</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>After subtracting 15 from the left side of the equation, you could ask:</p>",
+            "<ul><li>What should you do to keep the two sides equal? (Subtract 15 from the right side.)</li></ul>",
+            "<p>Repeat this method for each of the questions in the Introduction. Then have students try their methods on another example of equality.</p>",
+            "<ul><li>What should you do to keep the two sides equal? (Equality is maintained by adding, subtracting, multiplying, or dividing each side by the same number. For multiplication and division, the number must be nonzero.) </li></ul>",
+            "You could introduce that these are called the Properties of Equality or wait until the introduction of Problem 3.3."
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Presenting the Challenge</p>",
+            "<p>If you did not make the transition from pouches and coins to variables and numbers at the end of the Summarize for Problem 3.1, do so now. Be sure students have a general idea of the procedures. You might want to revisit one of the situations from Problem 3.2. As a part of the discussion, discuss how the pouches and coins can be represented by various equivalent expressions.</p>",
+            "<p>You might want to add to the instructions of the Initial Challenge by having students write their steps for solving, showing what is happening with the pouches and coins. Then next to each step write the equation symbolically.</p>",
+            "Have students begin this problem independently and then work with a partner to compare their thinking. "
+          ]
+        }
+      }
+    ]
+  }
+}

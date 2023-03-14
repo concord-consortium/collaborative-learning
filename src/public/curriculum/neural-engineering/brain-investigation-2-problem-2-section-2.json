@@ -1,0 +1,116 @@
+{
+  "type": "labWork",
+  "content": {
+    "tiles": [
+      {
+        "id": "0SJCrZXuVeSNnnQ7",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Measuring touch sensitivity</strong></p>",
+            "<p>Decide who is going to be the experimenter and who will be the test subject (you should take turns such that all team members will be a test subject once). </p>",
+            "<ol><li>The test subject should close their eyes.</li><li>The experimenter should gently press the caliper’s jaws against the skin of the test subject, and ask them if they feel one point or two points of contact (the two points need to touch the skin at the same time).</li><li>Set the caliper’s jaw at a distance of 60mm and keep testing smaller and smaller distances (30mm, 15mm, 7.5mm, 3.75mm) until the subject indicates that they feel one point only.</li><li>Test the forehead, back, arm, palm of the hand, leg, and feet as shown in the picture below in any order.</li><li>Record the first distance that the subject felt as one point (or the last distance that was tested) in the table below.</li><li>Enter the numbers from your table <a href='https://brainmapper.org/experiment/'>here</a> [link: https://brainmapper.org/experiment/] </li><li>Take a screenshot of the resulting homunculus. You can then upload your homunculus into your workspace by creating an image tile and dragging or uploading the image from your desktop into the tile. </li></ol>"
+          ]
+        }
+      },
+      {"id": "iDWmMK1iIkd346G5", "title": "Take these measurements for each student", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/sensitivityMeasures.png", "filename": "curriculum/neural-engineering/images/sensitivityMeasures.png"}},
+      {"id": "5Xof-8AsxUpQjWzj", "title": "Text 4", "content": {"type": "Text", "format": "html", "text": ["<p>Drag the table into your workspace so you can fill it out for each person you test:</p>"]}},
+      {
+        "id": "FaNtpxwaTSgUXW_9",
+        "title": "Table 1",
+        "content": {
+          "type": "Table",
+          "name": "Homunculus Mapping",
+          "columns": [
+            {"name": "Body Part", "width": 124.4375, "values": ["Palm of hand", "Arm", "Forehead", "Leg", "Back", "Foot"]},
+            {"name": "Subject 1", "width": 114.2000732421875, "values": ["", "", "", "", "", ""]},
+            {"name": "Subject 2", "width": 120.6500244140625, "values": ["", "", "", "", "", ""]},
+            {"name": "Subject 3", "width": 117.921875, "values": ["", "", "", "", "", ""]}
+          ]
+        }
+      },
+      {
+        "id": "A3KLxuEkPr0JYBvL",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answer the following questions in your workspace:</p>",
+            "<p>1. What is the most/least sensitive body part?</p>",
+            "<p>2. Why do different parts of the body have different sensitivity to touch?</p>",
+            "<p>3. How consistent were your results across test subjects? What can explain individual differences in touch sensitivity?</p>"
+          ]
+        }
+      },
+      {
+        "id": "o8qTPdoabFBk7-hu",
+        "title": "Text 8",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>How does the nervous system process touch?</strong></p>",
+            "<p>Information about touch is processed by several components of the nervous system:</p>",
+            "<ul><li>Somatosensory cortex </li><li>Pressure receptors in the skin</li><li>Thalamus</li><li>Sensory nerves</li><li>Spinal cord</li></ul>",
+            "<p>Read online about each of these components and make an illustrated and annotated model that communicates how these components are connected to each other. When you&#x27;re done, take a picture of your model and upload it to your workspace as an image tile.  Can you explain why some parts of the body are more sensitive to touch than others based on this model?</p>"
+          ]
+        }
+      },
+      {
+        "id": "LEbzWmtQYkWNslMq",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Modeling touch receptors in DataFlow</strong></p>",
+            "<p>Next, let&#x27;s design a DataFlow program that detects the level of pressure applied by the gripper and makes the gripper release an object when too much pressure is applied.  </p>",
+            "<p>1. Drag the following program to your workspace and connect the blocks such that the gripper stays closed. This program simulates an extended muscle contraction that keeps the gripper closed for a long period of time. </p>"
+          ]
+        }
+      },
+      {
+        "id": "yzFybGl4_G-lkK-I",
+        "title": "StarterProgram",
+        "content": {
+          "type": "Dataflow",
+          "programDataRate": 1000,
+          "programZoom": {"dx": -0.0030517578125, "dy": 0.256256103515625, "scale": 0.8499999999999999},
+          "program": {
+            "values": {"1": {"currentValues": {"nodeValue": 1000}}, "9": {"currentValues": {}}, "14": {"currentValues": {"nodeValue": 300}}, "39": {"currentValues": {"nodeValue": 0}}},
+            "id": "dataflow@0.1.0",
+            "nodes": {
+              "1": {"id": 1, "name": "Number", "x": 68.24398191802771, "y": 285.98768103606386, "inputs": {}, "outputs": {"num": {"connections": {}}}, "data": {"plot": false, "nodeValueUnits": ""}},
+              "9": {"id": 9, "name": "Logic", "x": 291.42733291741405, "y": 305.46929711056634, "inputs": {"num1": {"connections": {}}, "num2": {"connections": {}}}, "outputs": {"num": {"connections": {}}}, "data": {"plot": false, "logicOperator": "Greater Than"}},
+              "14": {"id": 14, "name": "Number", "x": 84.61335324115737, "y": 400.6200315570556, "inputs": {}, "outputs": {"num": {"connections": {}}}, "data": {"plot": false, "nodeValueUnits": ""}},
+              "39": {"id": 39, "name": "Demo Output", "x": 721.7609444398066, "y": 177.6103339940715, "inputs": {"nodeValue": {"connections": {}}, "tilt": {"connections": {}}}, "outputs": {}, "data": {"outputType": "Grabber", "demoOutput": 0}}
+            }
+          }
+        }
+      },
+      {
+        "id": "LyF-N_HJSL1mCsDI",
+        "title": "Text 7",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>2. Add a pressure sensor. To do so, click on &quot;Sensor&quot; and select &quot;Surface Pressure&quot; as a sensor type. Then, select &quot;FSR Demo Data&quot; in the second dropdown menu. </p>",
+            "<p>3. Add a logic block to check if the pressure is above 1000 (we&#x27;ll assume that 1000 represents excessive pressure that can break a fragile object).</p>",
+            "<p>4.  Next, we will need to use a new block type called &quot;Control&quot; (see image below). This block receives two inputs: </p>",
+            "<p>Input 1 (the top one) determines if the block is on or off.</p>",
+            "<p>Input 2 (the bottom one) determines which value is passed through.</p>",
+            "<p>If the control block is OFF, it simply passes input 2 through. In other words, the output would be equal to input 2.  </p>",
+            "<p>If the control block is ON, it can do different things, such as outputting the number zero. This option is useful because when the gripper receives the number zero it opens up.  </p>",
+            "<p>5. Finally, connect all the blocks together such that when the pressure is greater than 1000 the gripper opens up to release the object. </p>"
+          ]
+        }
+      },
+      {"id": "SvYY3tIyezfaZ4GT", "title": "The control block", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/controlBlock.png", "filename": "curriculum/neural-engineering/images/controlBlock.png"}},
+      {"id": "JFLeQp89Nk9jYdVh", "title": "Text 9", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Reflection</strong></p>", "<p>At the end of the activity, please record your current thinking and learning in your Learning journal (see Reflection tab). </p>"]}}
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "type": "sorting",
+  "content": {
+    "tiles": [
+      {"id": "Ub77fsa0IgrOifX5Y1a", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p>Sort and count your insects. </p>"]}},
+      {
+        "id": "OIHEOZsdffgHFldZzAgzP",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Step 3: Sorting Moths (Analyzing) </strong></p>",
+            "<p>*Sorting</p>",
+            "<p>*Using the binder</p>",
+            "<p>*Laminate the Moth/Not a Moth cards</p>",
+            "<p>*Have the students sort their discoveries into these 2 categories </p>",
+            "<p>*Then take the moths and sort into micro and macro</p>",
+            "<p>*Take all of the moths and have the students sort them into categories of their choosing.  Then have them explain why they chose those categories.</p>",
+            "<p>*Next give them the color categories and have them sort by color</p>",
+            "<p>*For the spring, increase the sorting categories to include patterns</p>",
+            "<p></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

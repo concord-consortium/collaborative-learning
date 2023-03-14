@@ -1,0 +1,134 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {"id": "UQy4nhb_uZw9lPHh", "title": "Text 28", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation A. Yvonne’s Claims </strong></p>", "<p>For each of Yvonne&#x27;s questions what answer would you give her?</p>"]}},
+      {"id": "q1qfuwtzXFioGC99", "title": "Text 29", "content": {"type": "Text", "format": "html", "text": ["<p>Question1</p>", "<p>How can I tell from the table that the relationships between time and distance are proportional?</p>"]}},
+      {"id": "dJp7G8r-vAsBPvfI", "display": "teacher", "title": "Text 33", "content": {"type": "Text", "format": "html", "text": ["<p>The relationships are proportional. On the table, you can take any two coordinate pairs and write a proportion. For example on the table for Gilberto:</p>"]}},
+      {
+        "id": "HXZK3Np_pnEbn1Z1",
+        "display": "teacher",
+        "title": "Table 3",
+        "content": {"type": "Table", "name": "Gilberto", "columns": [{"name": "Time (sec)", "width": 102.46875, "values": ["0", "1", "2", "3", "4", "5", "6"]}, {"name": "Distance (m)", "width": 145.9375, "values": ["0", "2", "4", "6", "8", "10", "12"]}]}
+      },
+      {
+        "id": "XAB2gP9PmoC5WKV6",
+        "display": "teacher",
+        "title": "Text 34",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>2 sec/ 3 sec = 4m/ 6m    OR    2 sec/ 4m - 3 sec/ 6m</p>",
+            "<p>Also, you can see this because any distance divided by time gives a constant ratio. Since the relationship is proportional, it is also linear because distance divided by time gives a constant rate of change. </p>",
+            "<p>(Note: Not all linear relationships are proportional.)</p>"
+          ]
+        }
+      },
+      {"id": "Ljbb68m7mAUHVAN-", "content": {"type": "Text", "format": "html", "text": ["<p>Question 2 </p>", "<p>How can I use a table or graph to answer the question:</p>", "<p><em>For each student, if time t increases by 1 second, by how much does the distance change?</em></p>"]}},
+      {
+        "id": "7KE3ajmLfA34lMbE",
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>GRAPH</p>",
+            "<p>If time increases by 1 second, she can find the change in distance on a graph by looking at the steepness of the line. Or, how much the y-variable changes (goes up or down) for every change of 1 in the x-variable.</p>",
+            "<p>TABLE</p>",
+            "<p>If time increases by 1 second, she can find the change in distance on a table by looking at the distance in two consecutive rows (one second apart) and calculating the difference.</p>"
+          ]
+        }
+      },
+      {"id": "GiQUMHu-Wjc_-_uM", "title": "Text 42", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation B. Valentina and Omar have the Same Walking Rate</strong></p>", "<p>Valentina and Omar have the same walking rate. Each made a graph to represent their data. </p>"]}},
+      {
+        "id": "PwCZy2-WmFczZRpc",
+        "title": "Omar's Walking Rate",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-10, -16.25], "axisRange": [60, 100], "axisNames": ["t", "d"]}},
+          "objects": [
+            {"type": "point", "parents": [0, 0], "properties": {"id": "EbBxFXPVI-BCC4Ng", "name": ""}},
+            {"type": "point", "parents": [5, 10], "properties": {"id": "MKvaMqFTrLbYt_KC", "name": ""}},
+            {"type": "point", "parents": [10, 20], "properties": {"id": "sn04YJgRO4UcroFY", "name": ""}},
+            {"type": "point", "parents": [15, 30], "properties": {"id": "H5DpKBvCF80G_S3_", "name": ""}},
+            {"type": "point", "parents": [20, 40], "properties": {"id": "nAN4zKeHiUddoQns", "name": ""}},
+            {"type": "point", "parents": [25, 50], "properties": {"id": "qXFlXP0KGuWXPh5H", "name": ""}},
+            {"type": "point", "parents": [30, 60], "properties": {"id": "ZDWIizg-DonRUgfZ", "name": ""}},
+            {"type": "point", "parents": [35, 70], "properties": {"id": "wN70rNqnUo-r3VbZ", "name": ""}},
+            {"type": "point", "parents": [40, 80], "properties": {"id": "UQ-3ui2QZfer9tXz", "name": ""}}
+          ]
+        }
+      },
+      {
+        "id": "MH9_Jjn0_k26fL3B",
+        "title": "Valentina’s Walking Rate",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-1.917, -1.688], "axisRange": [11, 11], "axisNames": ["t", "d"]}},
+          "objects": [
+            {"type": "point", "parents": [1, 2], "properties": {"id": "C9V3nsBtjMpGwLvn", "name": ""}},
+            {"type": "point", "parents": [2, 4], "properties": {"id": "Qkcizf88T8BKzaKs", "name": ""}},
+            {"type": "point", "parents": [3, 6], "properties": {"id": "Gz_yhdB4Ql3t6MtA", "name": ""}},
+            {"type": "point", "parents": [4, 8], "properties": {"id": "9J7yBns4pKgaE28B", "name": ""}}
+          ]
+        }
+      },
+      {"id": "fEMYoiZYnepkTGOT", "title": "Text 43", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Are both graphs correct? Explain.</li></ul>"]}},
+      {
+        "id": "81wJ7gkOMjUFhc0Z",
+        "display": "teacher",
+        "title": "Text 46",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Yes. They used different scales, so the graphs look different.</p>",
+            "<p></p>",
+            "<p>Valentina and Omar’s graphs are similar in that, when the points are connected, the graphs have the same rate of change and y-intercept. Omar graphed his walking rate for 40 seconds, whereas Valentina graphed his walking rate for 4 seconds. Omar uses intervals of 5 seconds and 10 meters, whereas Valentina uses intervals of 1 second and 1 meter. The different scales makes it appear that Valentina has a faster walking rate. However, their walking rates are the same. Because Omar’s vertical scale has twice the value as the horizontal scale, it appears to “pull down” the points as you have less vertical “movement” for every point. Valentina’s scales both have a value of one for every grid line. So, you will have the “same” movement on the horizontal and vertical axes for each coordinate pair.</p>"
+          ]
+        }
+      },
+      {"id": "6NCjD3F0sBpDbY3X", "title": "Text 47", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Which expression below could represent the distance of Omar? Valentine?</li></ul>"]}},
+      [
+        {"id": "5Z_J43S2bFXEb5WR", "title": "Text 48", "content": {"type": "Text", "format": "html", "text": ["<p>&nbsp;&nbsp;&nbsp;&nbsp; 5t</p>"]}},
+        {"id": "vg3G-ujpicYZeMpQ", "content": {"type": "Text", "format": "html", "text": ["<p>2t</p>"]}},
+        {"id": "Kd0ivdglPfKURWcm", "content": {"type": "Text", "format": "html", "text": ["<p>0.5t</p>"]}}
+      ],
+      {
+        "id": "27yHk2EjW1IBL0iF",
+        "display": "teacher",
+        "title": "Text 51",
+        "content": {"type": "Text", "format": "html", "text": ["<p>The expression 2t could represent both of their distances. On both graphs, the distance traveled is always twice the time in seconds, so they are traveling 2 meters every second.</p>"]}
+      },
+      {
+        "id": "s3HBHlnSDS1x7IaM",
+        "title": "Text 52",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation C.  More Walking Rates</strong></p>", "<p>Five other friends made the following representations of their Walkathon data. Could any of these relationships be linear relationships? Explain.</p>"]}
+      },
+      [
+        {"id": "e7PUjYkCd0aQbK8Q", "title": "Table 4", "content": {"type": "Table", "name": "George's Walkathon", "columns": [{"name": "Time (sec)", "width": 93.0078125, "values": [0, 1, 2, 3, 4, 5]}, {"name": "Dist (m)", "width": 80.8046875, "values": [0, 2, 9, 11, 20, 25]}]}},
+        {"id": "PBPual7wzV94aNVA", "content": {"type": "Table", "name": "Elizabeth's Walkathon", "columns": [{"name": "Time (sec)", "width": 90.66015625, "values": [0, 2, 4, 6, 8, 10]}, {"name": "Dist (m)", "width": 80, "values": [0, 3, 6, 9, 12, 15]}]}}
+      ],
+      [
+        {"id": "ZJQwx5qTjiZbZzhH", "title": "Evo's Walk- a Thon", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_1_2_Evos_Graph.jpg"}},
+        {"id": "q9LbDkd_vsZBRTfu", "title": "Text 54", "content": {"type": "Text", "format": "html", "text": ["<p>Billie&#x27;s Walk-a Thon</p>", "<p>D = 2.25t</p>", "<p></p>", "<p>D represents distance</p>", "<p>t represents time</p>", "<p></p>"]}},
+        {"id": "23Iv3lcNaAXHoUFd", "title": "Text 56", "content": {"type": "Text", "format": "html", "text": ["<p> Bob’s Walkathon</p>", "<p> = 100/r</p>", "<p>t represents time</p>", "<p>r  represents walking rate</p>"]}}
+      ],
+      {
+        "id": "dlxv49xticu_qjeJ",
+        "display": "teacher",
+        "title": "Text 58",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Elizabeth and Billie’s relationships are linear and proportional.</p>",
+            "<p>Elizabeth walks at a constant rate of 3 meters every 2 seconds, which you can see in the table. Billie walks at a constant rate of 2.25 m/s, since the equation is in the form of d = rt, similar to the equations for Alana, Gilberto, and Leanne. Both of these relationships are also proportional, since at 0 seconds they have walked 0 meters.</p>",
+            "<p>George’s, Evo’s, and Bob’s relationships are not linear. The table for George does not show a constant rate of change. Evo’s graph does not make a straight line, so it does not show a constant rate of change. In the equation for Bob, the rate is a variable, so the walking rate is not constant. (Some students may make graphs and claim the relationships are either linear or not based on whether the data lie on a straight line.)</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

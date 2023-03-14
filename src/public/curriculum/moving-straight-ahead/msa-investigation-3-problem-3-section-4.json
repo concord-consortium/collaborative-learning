@@ -1,0 +1,36 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "ckQzfqbR4-eOm0cP", "title": "Text 36", "content": {"type": "Text", "format": "html", "text": ["<p>Describe the strategies you can use to solve linear equations using the properties of operations and equality. </p>"]}},
+      {
+        "id": "FGua7I6hYvY5Y9xp",
+        "display": "teacher",
+        "title": "Text 39",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>For symbolic methods, students’ explanations should include keeping expressions equivalent on both sides of the equal sign (e.g., adding 2 to each side, dividing each side by 3, etc.). Students should also include something about using order of operations correctly, although there are some exceptions (e.g., factoring as a first step). Students should also notice that if applying the Distributive Property is possible, then it may simplify the process.</p>",
+            "<p>Tables and graphs can also be used to solve linear equations. For example, the equation 2x – 5 = x + 7 can be solved by finding the point of intersection of y1 = 2x – 5 and y2 = x + 7 on a graphing calculator. Sometimes it is quicker to use symbolic methods. However, if students are experienced with using technology to create tables and graphs, and if several questions of this type are being asked, then tables or graphs might be more efficient.</p>"
+          ]
+        }
+      },
+      [
+        {
+          "id": "NWEyF2aRHCZ-JfZA",
+          "title": "Text 40",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>Did You Know?</strong></p>",
+              "<p>Ratios within the human body are also helpful for artists.  One common ratio used in drawing humans is a 1 to 8 for head to body, often called the 8 heads method.  This means when drawing you can use the length of 8 heads to draw the height of human.  Artists also use these head length markers to draw where other body parts are too.  For example, you can draw the knees two head lengths up from the ground and the waist five head lengths up from the ground.  These measurements are only averages and are not accurate for actual human measurements since we are all different.  Some artists even prefer slightly different proportions such as 7.5 head lengths for the human height.  However, this practice of using head length ratios is a common strategy for learning to draw humans.</p>"
+            ]
+          }
+        },
+        {"id": "WrzV5BM9cOvHkjpv", "title": "Head to body ratio drawing", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_3-3_DidYouKnow.jpg"}}
+      ]
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "type": "intro",
+  "content": {
+    "tiles": [
+      {
+        "id": "5LJacKvSPaRhh7ER",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In this lesson, you will have the opportunity to use what you have learned throughout the unit to design a technological solution for one of several end users. </p>",
+            "<p><strong>Do Now</strong></p>",
+            "<p>Think about a person (other than Tilly) who could benefit from the touch-sensitive gripper that you used in the previous lesson. Describe this person and their needs in your workspace. </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

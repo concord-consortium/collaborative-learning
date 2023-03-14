@@ -1,0 +1,106 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "kYpSQFXkhmW0QpEY",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started)</strong></u></p>",
+            "<p><u>Connecting to Prior Knowledge</u></p>",
+            "<p>Use the Introduction to Investigation 1 to remind students of the mathematics in the Grade 6 Comparing Quantities Unit, including ratios, equivalent ratios, and unit rate. Review the definition of a ratio and the many ways that ratios can be written. (PROBLEM SOLVING) ACE Problem #16 can also be used to remind students of the work they did in 6th grade.</p>",
+            "<p>Writing a ratio in fraction form notation is new to students. Fraction form notation was not used in Grade 6, in order to scaffold student understanding as they learn to separate the differences between ratios and fractions. </p>",
+            "<p>Discuss and show examples of ratio statements as a comparison between two quantities. Discuss the various notations of ratios.</p>"
+          ]
+        }
+      },
+      {
+        "id": "SNKqFyPMkhBi4_7k",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>How is this fraction form of ratio the same as or different from fractions? (Students may not be familiar thinking about the differences. Students may need to revisit the question as they progress through the Unit. Possible answers at this time might include:</li></ul>",
+            "<p>The ratio shown is a part-to-part comparison of two quantities. Fractions are always part-to-whole. Ratios can be either part-to-part or part-to-whole.</p>",
+            "<p>As long as the labeling matches the quantities, ratios can be written in any order. Fractions cannot. For example, 2 green for every 3 white can be written as</p>",
+            "<p>(2 green)/(3 white) or (3 white)/(2 green).  The fraction 2/(3 ) cannot be written as 3/(2 ).</p>",
+            "<p>A fraction is a number. A ratio is a comparison between two quantities.)</p>",
+            "<ul><li>What patterns do you see among the equivalent ratios comparison statements of green and white cupcakes? (The equivalent ratios are multiples of the two quantities.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "AtF0n3Thj8KghQgK",
+        "content": {"type": "Text", "format": "html", "text": ["2 green cupcakes and 3 white cupcakes", "⤸ x2                                       ⤸ x2", "4 green cupcakes and 6 white cupcakes", "⤸ x3                                       ⤸ x 3", "12 green cupcakes and 18 white cupcakes"]}
+      },
+      {"id": "PLlIKkDo1RcO7w_O", "content": {"type": "Text", "format": "html", "text": ["<p>Tell students the story of going to camp and sharing the work of cooking and cleaning up. Also, review the context with students to make sure that they know what concentrate is.</p>"]}},
+      {
+        "id": "PWDMj6tI0npniQjG",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested questions</strong></p>",
+            "<ul><li>Have you ever been in a situation where you had to share work with other people? (Student answers will vary. Some may mention home; some may mention other places.)</li><li>We are going to look at two students on a camping trip who have to make orange juice. They have to share this task. Have you ever made orange juice or any kind of drink from a mix? (Student answers will vary. Some may have made juice or used the concentrated mix that squirts into water to flavor it.)</li><li>Arvin and Mariah do not have a lot of experience making orange juice. They have to use orange juice concentrate and water. What is a drink concentrate? (Students may say that it is a something that is a strong flavor and has to be mixed with water so you can drink it. Some students may not have any experience with using a concentrate.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "x5KGghbtncS9RcQL",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p></p>",
+            "<p>For the Initial Challenge, present the challenge without letting students look at the What If. The What If presents student strategies that you may not want students to see until after working on the orange juice recipes in the Initial Challenge.</p>",
+            "<p></p>",
+            "<p>Introduce the orange juice recipes using Teaching Aid 1.1: Orange Juice Recipes. Tell students that Arvin and Mariah ask four people for help making the juice and each person gives them a different recipe.</p>"
+          ]
+        }
+      },
+      {
+        "id": "noFqByuMypwFZLt2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What do you notice about the orange juice recipes? What do you wonder? (Students may notice general things about the recipes, for instance, all four have different amounts of concentrate and water. Some students may begin to think about the recipes, commenting that some may taste different and some may taste the same.)</li><li>Have you ever had juice or some other drink that tastes different depending on who makes it? (Student answers will vary. They may mention some adult “watering down” juice or tea, or people making the juice or tea stronger or sweeter.)</li></ul>",
+            "<p></p>",
+            "<p>Help students connect prior learning to the recipes. Do not push for the comparison statements to be in any one form or another. Students may keep the recipe in part-to-part or change the recipe to part-to-whole. (TIME) The comparison statements may help the students access the relationships in the recipes.</p>",
+            "<p></p>",
+            "<ul><li>How can you change each recipe into a comparison statement? (Answers will vary. Possible answers might include: For every 2 cups of concentrate, you pour in 3 cups of water for Recipe A or Recipe A uses 2 cups of concentrate for every 5 cups of juice.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "LPBpeRLwNTM2MQS1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Let students know that they will be analyzing the recipes to decide which is the most orangey tasting and which is the least orangey tasting.</p>",
+            "<p></p>",
+            "<p>Have students work on the Initial Challenge in groups of two or three students. Have them show their thinking on large paper to use in a Gallery Walk for the discussion on the first day and to use to compare their thinking with the What If situations on Day 2.</p>"
+          ]
+        }
+      },
+      {
+        "id": "LSv2GYKpRXJmhjKf",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>To Launch Day 2</em></p>",
+            "<p></p>",
+            "<p>You might have students think about and discuss as a class the strategies not already presented by your students. Alternately, you can have different groups work on the different strategies in the What If Situations. This would allow you to assign groups to use strategies very different from their own for solving the Initial Challenge. This is an opportunity to provide for individual needs by have students work on strategies that can push their thinking in new directions. (PORTRAYAL) Also, the strategies in the What If review some of the concepts that students studied in the Grade 6 <em>Comparing Quantities</em> Unit. <strong>Learning Aid 1.1: Strategies</strong> can be used when students are working on the What If Situations.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

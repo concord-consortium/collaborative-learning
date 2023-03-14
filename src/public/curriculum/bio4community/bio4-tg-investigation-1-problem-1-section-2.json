@@ -1,0 +1,46 @@
+{
+  "type": "teach",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["<h2>Welcome to the Bio4Community CLUE Teacher Guide</h2>"]}},
+      {
+        "id": "vxjbbJwu_koTVqj2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Student access to Bio4Community Stress Stories</strong></p>",
+            "<p>Each small group in your classroom will read one of the three Bio4Community Stress Stories.  </p>",
+            "<p>To get started, create a class for each small group in the Concord portal. You will create a unique access code for your students, called the &quot;Class Word&quot;.  Give each group their class word and have them register for accounts at https://learn.concord.org.  Then contact Frieda (freichsman@concord.org) who will assign the chapters for the stories to each group for you.  You will then be able to release each Chapter to each group in sequence. </p>"
+          ]
+        }
+      },
+      {
+        "id": "hXEw4OmgiY8zaopA",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>The Student Resource Library</strong></p>",
+            "<p>Each chapter of the three stories (Rakesh, Estrella, and Felix) is accompanied by a Resource Library for students. When you are ready, you will publish the list so the students can see it and access the Resources.</p>",
+            "<p>To publish the Resource Library List for each Chapter: </p>",
+            "<ul><li>Drag the list from your Resource Library tab (left side of screen) to your Workspace (right-hand side of screen) </li><li>There you can edit the list, if you wish, before publishing them to the Class.</li><li>Click the Publish button at the upper left of the Workspace. Note: everything in your Workspace will be published to the students&#x27; Resource Library tab. Make sure to tailor the Workspace to what you want to publish.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "rdAzsjM6DmkH55yf",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Introducing the Stories</strong></p>",
+            "<p>Tell the students that we are trying something a bit different. Instead of just giving them evidence in a packet like we did for short term stress, we are giving them a story, and different groups have different stories. The stories follow a main character as they try to figure out a health issue that is making them concerned.  The characters encounter evidence along the way and use it to figure out the issue.</p>",
+            "<p>They should work as a team and assign the cast. The narrator has  a lot to read. Other roles have much less.</p>",
+            "<p>They should answer the questions and fill in the table in their Workspace.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

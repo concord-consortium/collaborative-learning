@@ -1,0 +1,56 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Explore (Digging In)</strong> \nProviding for Individual Needs\n\nStudents should each make their own tables and graphs, but they can discuss the questions in pairs. This will give you an opportunity to examine students’ abilities to make tables and graphs. If a student is having trouble getting started, you can pair the student temporarily with another student who seems to be on target to get started. Some students may need to see the tables separately rather than collapsed into one table. Seeing the table collapsed helps some students to see the variable time as independent. ",
+            "Students may need to see the tables separately to understand that the time column is the same for all three students."
+          ]
+        }
+      },
+      {"content": {"type": "Table", "name": "Table 1", "columns": [{"name": "Time (seconds)", "width": 100}, {"name": "Alana's Distance (meters)", "width": 100}]}},
+      {"content": {"type": "Table", "name": "Table 2", "columns": [{"name": "Time (seconds)", "width": 100}, {"name": "Gilberto's Distance (meters)", "width": 100}]}},
+      {"content": {"type": "Table", "name": "Table 3", "columns": [{"name": "Time (seconds)", "width": 100}, {"name": "Leanne's Distance (meters)", "width": 100}]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Note that students first learned the terms independent variable and dependent variable in Grade 6 Variables and Patterns. Students are given informal experiences identifying the variables in this unit. Students are reintroduced to≈ the vocabulary of independent variable and dependent variable in the Introduction of Problem 1.3.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions </strong></p>",
+            "<ul><li>What are the two variables in the relationship? (time, distance)</li><li>Why do you think that there are four columns in the table? (Because all of the information is on one table.)</li><li>Which axis should represent time? Which should represent distance? Explain. (The horizontal axis usually represents time [the independent variable], and the vertical axis represents distance.) </li></ul>",
+            "<p>Students may not see how the walking rate is represented in the table or graph. This conversation may be something that you leave students thinking about until the Summary.</p>",
+            "<p>Check to see if students are able to determine if a relationship is proportional (Situation A). Students should use the ideas from Comparing and Scaling (unit rate/constant of proportionality, proportions, scaling on rate tables) to determine if the relationships are proportional.</p>",
+            "<p>Check to see if students are noticing when the x-variable (time) is not increasing by 1. This occurs in both Situation B (Omar’s graph) and Situation C (Elizabeth Walkathon). Both are linear and proportional, but the rate of change is not obvious because the time is not increasing by 1 second.</p>"
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": "<strong>Planning for the Summary</strong>\nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence?"}},
+      {
+        "id": "vipkt4JVMuMwqP7i",
+        "title": "Text 16",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Now What Do You Know?</strong></p>",
+            "<p><strong><em>How can you recognize a linear pattern of change in a verbal context, table, graph, expression, or equation? </em></strong></p>",
+            "<p>(Select student work to use in the summary.  Select tables that show the rate of change for each student (if there is a student that didn’t have the time increase by one use that also).  Select graphs that may have different scales to show how this changes the look of the graph but not the rate of change. Select equations from students to emphasize the rate of change and how it appears in the equation.)</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

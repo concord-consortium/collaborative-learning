@@ -1,0 +1,95 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {"id": "ZXC6qBqGhWpYZNCc", "content": {"type": "Text", "format": "html", "text": ["<strong>Situation A. Writing a Proportion</strong>", "Nic’s Proportions", "<p>I wrote the following proportions to solve the first part of Reading Speeds scenario.</p>"]}},
+      {
+        "id": "ogK2GhkVaO_PkOIo",
+        "content": {"type": "Text", "format": "html", "text": ["(3 minutes)/(480 words)  =  (x minutes)/(20,000 words)", "(3 minutes)/(x minutes)  =  (480 words)/(20,000 words)", "<p>1. Are Nic’s proportions correct? What other proportions could you write? Do they all have the same answer?</p>"]}
+      },
+      {"display": "teacher", "id": "uxIIowsfBkyhuMQS", "title": "Solution", "content": {"type": "Text", "format": "html", "text": ["<p>Nic’s proportions are correct. There are other ways to write the proportion correctly.</p>"]}},
+      [
+        {"display": "teacher", "id": "08OCT20200329pm", "title": "Reading Speeds Possible Answer 1", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-3_WhatIf_SitASolution1_350w.png"}},
+        {"display": "teacher", "id": "08OCT20200340pm", "title": "Reading Speeds Possible Answer 2", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-3_WhatIf_SitASolution2_350w.png"}}
+      ],
+      [
+        {"id": "08OCT20200341pm", "title": "Reading Speeds Possible Answer 3", "display": "teacher", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-3_WhatIf_SitASolution3_350w.png"}},
+        {"display": "teacher", "id": "08OCT20200342pm", "title": "Reading Speeds Possible Answer 4", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-3_WhatIf_SitASolution4_350w.png"}}
+      ],
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The answer will be 125 minutes for each proportion. The scale factor is different depending on the relationships shown. It is important to pay attention to which quantities and units you are comparing in the proportion. For example, you would not scale 20,000 words to 3 minutes. Note that some students may mention using the unit rate of 160 words in 1 minute as a way to write the proportions.</p>"
+          ]
+        }
+      },
+      {"id": "QUnYvpL30NyKmxC-", "content": {"type": "Text", "format": "html", "text": ["<p>2. Pick one of the other situations in the Initial Challenge and write it as a proportion.</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Possible answers:</p>",
+            "<p><em>Smoothie Bar</em></p>",
+            "<p>(12 (Zane&#x27;s age))/(4 (Stella&#x27;s age)) = (3 segments)/(1 segment)  OR </p>",
+            "(12 (Zane&#x27;s age))/(3 segments) = (4 (Stella&#x27;s age))/(1 segment)</p>",
+            "<p><em>Height of Trees</em></p>",
+            "<p>(5 ft.nested triangle.)/(8 ft.nested triangle) = (30  ft.large triangle )/(48 ft.large triangle ) OR (48 ft.large triangle)/(8 ft.nested triangle) = (30  ft.large triangle )/(5 ft.nested triangle.)</p>",
+            "<p>Note: With similar triangles, we used two proportions to find similar shapes.</p>",
+            "<p>In the beginning of Stretching and Shrinking, we scaled the corresponding sides from an original to an image. We did not write this as a proportion then. But now we can.</p>",
+            "<p>In Investigation 4 of Stretching and Shrinking, we looked at the ratio of sides within a triangle and compared it to the corresponding ratios of sides of the image. There we were solving proportions, but not writing them in proportion form.</p>",
+            "<p></p>",
+            "<p><em>Student Council Representation</em></p>",
+            "<p>Grade 6  (1 representative)/(30 students in the grade) = (4.03333… representatives)/(121 students in the grade)  OR (121 students in the grade)/(30 students in the grade) = (4.03333… representatives)/(1 representative)</p>",
+            "<p>Grade 7  (1 representative)/(30 students in the grade) = (3.966666… representatives)/(119 students in the grade) OR (119 students in the grade)/(30 students in the grade) = (3.9666… representatives)/(1 representative)</p>",
+            "<p>Grade 8  (30 students in the grade )/(1 representative) = (135 students in the grade)/(4.5  representatives) OR (30 students in the grade )/(135 students in the grade) = (1 representative)/(4.5  representatives)</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {"id": "r2TtwNrixnBxz-A6", "content": {"type": "Text", "format": "html", "text": ["<strong>Situation B. Taren’s Reasoning</strong>", "<p>In the Height of Trees scenario, Taren’s reasoning is shown below. Is Taren correct? Explain.</p>"]}},
+      {
+        "id": "ain51kg5qT9Xj_rU",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Taren’s Reasoning</p>", "<p></p>", "<p>The scale factor from the small triangle to large triangle is 6.</p>", "<p></p>", "<p>To find the height of the tallest tree I multiplied the corresponding length, 5ft, by the scale factor. The height of the tree is 30 feet.</p>"]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-3_HeightOfTrees.png"}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Yes.  When you match up corresponding sides the scale factor will be 6:</p>"]}},
+      {"display": "teacher", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-3_TarensReasoningSolution_350w.png"}},
+      {
+        "id": "ehxsTUmSuy50dZg4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Situation C. Fair Representation</strong>",
+            "<p>Mighty Middle School 7th and 8th Grade Complaint</p>",
+            "<p>We think that the selection of Student Council Representation was not fair.</p>",
+            "Do you agree? If yes, explain why. If not, describe a fairer method to assign delegates."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>This is an opinion of how students interpret the designation of delegates or how they deal with rounding.</p>",
+            "<p>7th grade may say it is not fair since Grade 6 has only 2 more students, but they might get one more representative.</p>",
+            "<p>8th grade may say it is not fair since Grade 7 has 16 fewer students, but they may get the same number of representatives.</p>",
+            "Students may have ideas for what they think is fair representation. For example, they may feel that each grade should get the same number of representatives (like 4 per grade)."
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

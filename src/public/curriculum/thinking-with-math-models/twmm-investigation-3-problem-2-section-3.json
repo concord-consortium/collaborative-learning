@@ -1,0 +1,27 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation A. Driving 50 Miles per Hour to Mackinac Island</h3><ol><li>Make a table and a graph to show how the distance traveled changes as time passes from when the family leaves home to when they reach their destination.</li> <li>Write an equation relating distance traveled <em>d</em> to time <em>t</em>.</li><li>Is the relationship between distance and time a linear function? Explain why or why not.</li></ol>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation B. Mr. Cordova’s Sister</h3><ol><li>Mr. Cordova’s sister also lives in Detroit and is driving to Mackinac Island which is 300 miles from Detroit. She plans on 5 hours to drive to the Island. How fast will she have to drive to make it in 5 hours? How fast will she have to drive if she wants to go to Grand Marais, Michigan, 400 miles, in 5 hours?</li> <li>Write an equation relating distance traveled <em>d</em> to speed <em>s</em>.</li> <li>Is the relationship between the variables <em>d</em> and <em>s</em> a linear function? Explain.</li></ol>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

@@ -1,0 +1,25 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "pyTc5zoakVWtalVa",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In this lesson, students will explore the structure of the nervous system and investigate how nerve injury could impact movement. </p>",
+            "<p><strong>Learning Objectives</strong></p>",
+            "<p>1. Students will describe the general structure of the nervous system</p>",
+            "<p>2. Students will explain how injury to different parts of the nervous system (brain, spinal cord, peripheral nerves) impact movement. </p>",
+            "<p><strong>NGSS Alignment</strong></p>",
+            "<p><a href='https://www.nextgenscience.org/pe/hs-ls1-2-molecules-organisms-structures-and-processes'>NGSS HS-LS1-2</a></p>",
+            "<p>This activity also supports Common Core English Language Arts Standards – <a href='http://www.corestandards.org/ELA-Literacy/RST/9-10/'>Disciplinary Literacy Science, 9-10.</a></p>",
+            "<p><strong>Formative Assessment</strong></p>",
+            "<p>Students’ models and discussions; Learning Journals</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

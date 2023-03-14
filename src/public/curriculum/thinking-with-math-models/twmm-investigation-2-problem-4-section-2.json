@@ -1,0 +1,23 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "For each group of lines answer the following questions.",
+            "- What features do the equations in each group have in common?",
+            "- Graph the equations on the same coordinate axes. What do you notice about the graphs? How might you have predicted this from the equations?",
+            "- For each group describe another example that has the same pattern."
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "markdown", "text": ["**Group A**", "- *Example 1*  y = 3x  y = 5 + 3x  y = 10 + 3x  y = 3x - 5", "- *Example 2*  y = -2x  y = -2x + 4  y = 8 - 2x  y = -4 - 2x"]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["**Group B**", "- *Example 1*  y = 2x  y = -½x", "- *Example 2*  y = 4x  y = -0.25x", "- *Example 3*  y = -3x + 5  y = ⅓x - 1"]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["**Group C**", "- *Example 1*  y = 2x + 1  y = 2(x + 1) - 1", "- *Example 2*  y = 5 - 2x  y = 3 - 2(x - 1)", "- *Example 3*  y = 2(x - 1)  y = 4x - 2x - 2"]}}
+    ]
+  },
+  "supports": []
+}

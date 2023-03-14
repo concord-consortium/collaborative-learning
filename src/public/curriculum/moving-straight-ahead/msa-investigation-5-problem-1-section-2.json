@@ -1,0 +1,47 @@
+{
+  "type": "MathReflection2",
+  "content": {
+    "tiles": [
+      {
+        "id": "RZiDu3CJ4LCJ0wlK",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>As we worked on the Problems in this Investigation, we used prior mathematical knowledge to make sense of them. We also applied Mathematical Practices to solve the Problems. For example,</p>",
+            "<p>What do you know about linear relationships, expressions, equations, and inequalities? </p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The coefficient a in the equation y = ax + b that represents a linear relationship is the rate of change between the independent variable and the dependent variable. It controls the slant of the line that represents the relationship. Greater absolute values of a mean there is a greater rate of change in the situation, so the lines are steeper. Positive values of a give lines that slant up. Negative values of a give lines that slant down. The value of b gives the y-intercept of the line. It is represented as the point (0, b) on the line or the pair of values in a table. In a table, the y-intercept is the value where the x-value is 0, and the rate of change is the difference in consecutive values of the dependent variable for constant increments in the independent variable.</p>",
+            "<p>Any ordered pair (point) that lies on the graph of a linear relationship can be used to find the solution to a problem. The ordered pair (x, y) represents specific values of the variables. If the value of one of the variables is known, then the graph can be traced to find the corresponding value of the other variable. Similarly, any ordered pair in a table for a linear relationship can be used to find the solution to a problem.</p>",
+            "<p></p>",
+            "<p>To find solutions to inequalities, we can consider the solution to the corresponding equality. Then consider the values that would make sense. Often the situation indicates the values to solve an inequality. For example, we often look at “When is one company less expensive than another company?” or “How many items do we need to sell to make a profit?”</p>"
+          ]
+        }
+      },
+      {
+        "id": "fHT98l8DomaC2_IH",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflections on the Mathematical Practices</strong></p>",
+            "<p>As we worked on the Problems in this Investigation, we used prior mathematical knowledge to make sense of them. We also applied Mathematical Practices to solve the Problems. For example,</p>",
+            "<p>In Problem 2.1, our group looked at how far apart the brothers were after t seconds. For example, at the start of the race, they are 45 meters apart. After 1 second, they are 45 - 1.5 = 43.5 meters apart. After 2 seconds, they are 42 meters apart. After 10 seconds, they are 30 meters apart. </p>",
+            "<p>We made a table and found the time it took for Emile to catch up to Henri, or when the distance between them is 0, which is 30 seconds. We used this to choose the length of the race so that Henri wins the race. </p>",
+            "<p>A third group member made a graph of the data (time, distance apart), and we saw that it is a line that is decreasing. It started at the y-intercept of 45 meters and crossed the x-axis at 30 seconds.  </p>",
+            "<p>Another group wrote an equation and then use graphs of the equation to find the answer. </p>",
+            "<ul><li>What mathematical practice(s) did the group use to solve this problem?</li><li>What other mathematical practices did you use to solve problems in this Investigation?</li><li>In what ways is the mathematics in this problem connected to prior mathematics</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

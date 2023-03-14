@@ -1,0 +1,97 @@
+{
+  "type": "getStarted",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["<p><strong>Welcome to MothEd! </strong>Together over the next few weeks we&#x27;re going to get to research moths.  Here in CLUE, we&#x27;ll record our work and we can choose to share it with our group and the class.</p>"]}},
+      {"id": "abc12307212022", "title": "", "content": {"type": "Image", "url": "curriculum/mothed/images/Day1.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Drawing</strong></p>",
+            "<p><em>What are moths?  </em>They are a type of insect, and we will learn more about them as we go along. But first... please <strong>make a drawing of a moth</strong> using a card and markers.  Then,</p>",
+            "<ol><li>On the back of your drawing, write some words that describe the moth.</li><li>Take a picture of your drawing, and a picture of the words you wrote on the back.</li><li>Put your name on the back of the drawing and hand it in to your teacher.</li></ol>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>To add your drawing to CLUE, </strong></p>",
+            "<ol><li>Click the image button in your workspace to create a tile that can hold an image </li><li>Drag the image of your drawing to the image tile</li><li>Create another image tile for the image of the back of the card, and drag the image onto the tile.</li></ol>",
+            "<p>That&#x27;s it! You&#x27;ve added your drawings to CLUE.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Group work</strong></p>",
+            "<p><em>First, make sure all the members of your group have the same group number at the top right of your screen. </em></p>",
+            "<p>We’re here to learn about moths together. What do you know about moths?</p>",
+            "<p>Talk about what you know about moths with your group. Take notes and make a list in your workspace. </p>",
+            "<p>Next, find some photos of moths online. Save them to your desktop and drag them into image tiles. </p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Have each person quickly introduces themself with their first name (“I’m Amanda or Miss Amanda, and I teach about bugs”)</p>",
+            "<p>We will tell also introduce the camera equipment.</p>",
+            "<p>The first task asks students to draw moths. If they ask, “What is a moth?” we can tell them a moth is a type of insect. They should draw what they think a moth might be. </p>",
+            "<p>Students should each do their own drawing without looking at other folks’ drawings and without talking.</p>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["<p><strong>Share</strong></p>", "<p>Use the group controls so that you can see and share each others&#x27; notes and images. See the image below for how to do that. </p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Divide class into small groups of 4 or less. Make sure each group is in the same Group shown in the top right of the screen. If they aren&#x27;t, have them click the group number, leave, and join whichever group number they are assigned. </p>",
+            "<p>It&#x27;s important that students record their own and each others exact words, not an interpretation from an adult.</p>"
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/mothed/images/share.jpg"}},
+      {"content": {"type": "Text", "format": "html", "text": ["<p><strong>Discuss</strong> what you see in the images with your group. Add anything you&#x27;d like to your notes.</p>"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Watch <strong><a href='https://www.youtube.com/watch?v=JQL25_hoQ1k'>Seven Spectacular Moths</a></strong> and write down what you notice in a text tile (letter <strong>A</strong> at right). Please note, this is a placeholder video only. If your school does not allow access to YouTube, it will not load.  We will place videos on accessible servers for the actual curricular materials .] </p>"
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/mothed/images/Day2.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Explore moth diversity and morphology</strong></p>",
+            "<p>Take a careful look at the <em>Types Of Moths</em> display below. Enter your notes into a text tile (letter <strong>A</strong> at right). <strong><em>Make as MANY observations as you can</em></strong>:</p>",
+            "<ul><li>What do you notice?  (Wing size, wing shape, wing color(s), body size, body texture, antenna size, antenna type, etc.)</li><li>How do you know you are looking at moths? </li><li>What are some things that all the moths have in common? </li><li>What are differences or variations?</li><li>It is important to know how many kinds of moths live in an area, since different kinds of moths do different things -- how do we tell the different kinds of moths apart?</li></ul>",
+            "<p>When you and your group mates are done, click the &quot;Share&quot; button (upper right) so the group can see your list and you can see theirs. </p>",
+            "<p>With your group, review each list. Select one of you to be the Recorder and build a group list of all the observations (drag and drop) to share with the class.  Recorders can publish the group list when ready. </p>"
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/mothed/images/mothtypes.jpg"}},
+      {"content": {"type": "Text", "format": "html", "text": ["<p><strong>Virtual Gallery Walk </strong>- did any group notice anything your group missed? Add anything you like to your own list by dragging the tile from other groups' content in Class Work. </p>"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["<p><strong>Exit ticket</strong> </p>", "<p>Go to <a href='https://forms.gle/knzrmTp2rUTGLDz17'>this page</a> and fill out the survey.</p>"]}}
+    ]
+  }
+}

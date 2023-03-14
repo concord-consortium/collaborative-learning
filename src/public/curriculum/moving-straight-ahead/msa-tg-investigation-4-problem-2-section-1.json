@@ -1,0 +1,54 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "xMOmqhW0teDB9k7X",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Overview</strong></p>",
+            "<p>In this problem students will use what they know about rates, linear relationships, and solving equations to look at situations.  Students will draw on their knowledge of different representations to make connections and solidify their understanding of linearity.  Students will informally encounter systems of linear equations and linear inequalities.</p>"
+          ]
+        }
+      },
+      {"id": "S13wx0-n1bsqEKoA", "content": {"type": "Text", "format": "html", "text": ["<p>AoL: Linear Relationships: Analysis/Synthesis & Algebraic Expressions and Equations: Analysis</p>", "<p>CCSSM: 7.RP.A, 7.RP.A.1, 7.RP.A.2a, 7.RP.A.2b, 7.RP.A.2c, 7.RP.A.2df</p>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>NWDYK</p>", "<p>How is the rate of change of a linear relationship related to the constant of proportionality? </p>"]}},
+      {
+        "id": "1mt6zqjqOw53lYl9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Make connections, where appropriate, among the rate of change for linear relationships, the constant of proportionality for proportions, and the constant ratio of the vertical change to horizontal change for linear relationships using a variety of representations.</p>",
+            "<p>Notice that:</p>",
+            "<ul><li>some linear relationships are proportional and others are not,</li><li>the rate of change describes how one variable in the relationship changes with respect to the other variable and can be found using a table of values, graph, or equation, </li><li>for linear relationships that are also proportional, the rate of change, the constant of proportionality, the ratio of vertical change to horizonal change, and the unit rate of change are all the same, and </li><li>the ordered pair (1, a) for a proportional relationship represents the unit rate of change for the relationship (that is a/1) where a is the constant of proportionality, and the equation of the line is y = ax. </li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#Revision%20Comments'>Revision Comments</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#StemProblemFormat'>CMP STEM Problem Format</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitDescriptions'>Unit Descriptions</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#SummaryInvestigations'>Summary of Investigations</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitGoals'>Goals of the Units</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAlignment'>Unit Alignments: Goals, CCSSM, Arc of Learning, Emerging Mathematics</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#GeneralAoL'>General Arc of Learning</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#UnitAoL'>Unit Arc of Learning</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#MathOverview'>Mathematical Overview</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#labsheets'>Labsheets</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#TeachingAids'>Teaching Aids</a></p>",
+            "<p><a href='https://connectedmath.msu.edu/teacher-guide/moving-straight-ahead/#FamilyLetters'>Family Letter</a></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

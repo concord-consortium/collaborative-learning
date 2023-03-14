@@ -1,0 +1,87 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"id": "WaFB4D9-oVea2C4J", "title": "Text 2", "content": {"type": "Text", "format": "html", "text": ["<p>Each student found sponsors who pledge to donate money according to the following descriptions.</p>"]}},
+      {
+        "id": "gXGSuk9MUfs-eUf8",
+        "title": "Table 1",
+        "content": {
+          "type": "Table",
+          "name": "Sponsor Rules per Student",
+          "columns": [{"name": "Name", "width": 80, "values": ["Leanne", "Gilberto", "Alana"]}, {"name": "Pledge Plan", "width": 150, "values": ["$10 regardless of how far she walks", "$2 per kilometer (km)", "$5 donation plus 50¢  per kilometer"]}]
+        }
+      },
+      {"id": "MUYuUlsjqHK8H4Pd", "title": "Text 3", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Who will raise the most money? Explain.</li></ul>"]}},
+      {
+        "id": "hOpWAsp3CJqMt6KU",
+        "display": "teacher",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The answer depends on how long the walkathon is. </p>",
+            "<p>Leanne will raise the most money if the walkathon is shorter than 5 kilometers; Gilberto will “catch up” to Leanne when he walks 5 kilometers because he raises $2 per kilometer.</p>",
+            "<p>Gilberto will raise the most money if the walkathon is longer than 5 kilometers.</p>",
+            "<p>Alana will never raise the most money because she has a smaller starting donation than Leanne and a smaller per-kilometer-walked donation than Gilberto.</p>"
+          ]
+        }
+      },
+      {
+        "id": "hGlkarnApZtZNOEt",
+        "display": "teacher",
+        "title": "Comparing Walking Rates",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-2, -2.938], "axisRange": [12, 20], "axisNames": ["D", "Money"], "axisLabels": ["Time (seconds)", "Distance (meters)"]}},
+          "objects": [
+            {
+              "type": "movableLine",
+              "parents": [{"type": "point", "parents": [0, 10]}, {"type": "point", "parents": [10, 10]}],
+              "properties": {"id": "7BSe6ALwMMVtOm8K", "pt1": {"type": "point", "id": "7BSe6ALwMMVtOm8K-point1", "name": "Leanne"}, "pt2": {"type": "point", "id": "7BSe6ALwMMVtOm8K-point2", "name": ""}}
+            },
+            {
+              "type": "movableLine",
+              "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [6, 12]}],
+              "properties": {"id": "SXE84DeblInqB2JO", "pt1": {"type": "point", "id": "SXE84DeblInqB2JO-point1", "name": "Gilberto"}, "pt2": {"type": "point", "id": "SXE84DeblInqB2JO-point2"}}
+            },
+            {
+              "type": "movableLine",
+              "parents": [{"type": "point", "parents": [0, 5]}, {"type": "point", "parents": [16, 10]}],
+              "properties": {"id": "zDNbTObCK6X41amc", "pt1": {"type": "point", "id": "zDNbTObCK6X41amc-point1", "name": "Alana"}, "pt2": {"type": "point", "id": "zDNbTObCK6X41amc-point2"}}
+            }
+          ]
+        }
+      },
+      {
+        "id": "TKv_Slofwe8akroQ",
+        "display": "teacher",
+        "title": "Table 2",
+        "content": {
+          "type": "Table",
+          "name": "Donations",
+          "columns": [
+            {"name": "Distance (km)", "width": 94.38671875, "values": [0, 1, 2, 3, 4, 5, 6]},
+            {"name": "Leanne's ($)", "width": 96.73046875, "values": [10, 10, 10, 10, 10, 10, "10"]},
+            {"name": "Gilberto's ($)", "width": 101.20703125, "values": [0, 2, 4, 6, 8, 10, "12"]},
+            {"name": "Alana's ($)", "width": 93.7734375, "values": ["5", "5.50", "6", "6.50", "7", "7.50", "8"]}
+          ]
+        }
+      },
+      {"id": "pTo8ODYUnBUSEMuL", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Explain why the relationship between dollars and kilometers represents a linear relationship? </li></ul>"]}},
+      {
+        "id": "lBPURH41iwTrTOvP",
+        "display": "teacher",
+        "title": "Text 10",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>They are linear relationships because the students all raise a constant rate of money for each kilometer walked. Leanne raises $0 per kilometer, Gilberto raises $2 per kilometer, and Alana raises $0.50 per kilometer. This will form a straight line as each increase in 1 km leads to a constant increase in the donation monies.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

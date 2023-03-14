@@ -1,0 +1,24 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["The students at Everett Middle School are planning a fundraising event at a local nature center. It costs $750 to rent the center facilities. They want a way to figure out what to charge per person to be sure to cover the rental cost of $750."]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Investigate the relationship between cost per person and number of people who buy tickets.<ul><li>Describe a way to represent this relationship.</li> <li>Use this relationship to help you decide how much money they should charge per person. What did you charge? How many people have to buy tickets to make a profit?</li></ul>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

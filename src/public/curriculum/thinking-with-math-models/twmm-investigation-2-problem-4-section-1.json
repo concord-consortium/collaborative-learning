@@ -1,0 +1,16 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "markdown", "text": ["We have used linear functions to model linear situations and make predictions. Our understanding of linear relationships or functions can be used to explore some ideas about groups of lines."]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": ["For example, suppose the slope of a line is 3.", "- Sketch a line with this slope.", "- Can you sketch a different line with this slope? Explain.", "In this Problem, we will use slope to explore some patterns among linear relationships."]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

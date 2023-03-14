@@ -1,0 +1,11 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["The amount of money <em>A</em> collected is related to the cost per person <em>c</em> and the number of people <em>n</em>. When is the relationship linear? What are the variables?"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["When is the relationship an inverse variation? What are the variables?"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["How do these relationships compare to the relationships in Problems 3.1 and 3.2?"]}}
+    ]
+  },
+  "supports": []
+}

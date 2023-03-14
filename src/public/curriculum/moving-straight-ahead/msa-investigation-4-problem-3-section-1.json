@@ -1,0 +1,166 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"id": "NQsigLgDb3Gc0tvy", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p>The following problem provides an opportunity to revisit some of the major ideas in this unit.</p>"]}},
+      {
+        "id": "FJ0WdpwET0ddi4_-",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The cards contain graphs, equations, contexts that represent various situations, or tables. </p>",
+            "<ul><li>Sort the cards into groups. Each group should represent the same relationships. For example, you may have a graph, context, and a table that “tell the same story” of the relationship between the variables.</li><li>Explain how each group is the same or different from other groups.</li><li>Are any of the relationships linear? Explain why. Are any of the linear relationships proportional? Explain why.</li></ul>"
+          ]
+        }
+      },
+      [
+        {"id": "ccFomWvODJ6Z_1l-", "title": "Graph A", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/4.3_GraphA.png", "filename": "curriculum/moving-straight-ahead/images/4.3_GraphA.png"}},
+        {"id": "dA6vqk_KKIGu_B7B", "title": "Graph B", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/4.3_GraphB.png", "filename": "curriculum/moving-straight-ahead/images/4.3_GraphB.png"}},
+        {"id": "OwjF7ejhamz78o79", "title": "Graph C", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/4.3_GraphC.png", "filename": "curriculum/moving-straight-ahead/images/4.3_GraphC.png"}}
+      ],
+      [
+        {"id": "5HXtszUSVwVmk5fN", "title": "Graph D", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/4.3_GraphD.png", "filename": "curriculum/moving-straight-ahead/images/4.3_GraphD.png"}},
+        {"id": "YpkHimvE-7wuaA-f", "title": "Graph E", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/4.3_GraphE.png", "filename": "curriculum/moving-straight-ahead/images/4.3_GraphE.png"}},
+        {"id": "3L3MTrUYNQAnREJu", "title": "Graph F", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/4.3_GraphF.png", "filename": "curriculum/moving-straight-ahead/images/4.3_GraphF.png"}}
+      ],
+      [
+        {"id": "5EqvA4fbeqKnAHg4", "title": "Text 17", "content": {"type": "Text", "format": "html", "text": ["<p>Equation G</p>", "<p>y= x+5</p>"]}},
+        {"id": "hMXPt5-VcrZ8mcZU", "title": "Text 18", "content": {"type": "Text", "format": "html", "text": ["<p>Equation H</p>", "<p>y= 20 - 3x</p>"]}},
+        {"id": "lZNUHa8VnL8eW4XP", "title": "Text 19", "content": {"type": "Text", "format": "html", "text": ["<p>Equation I</p>", "<p>y = 2x + 30</p>"]}},
+        {"id": "0D63wCizbTiGPcIr", "title": "Text 20", "content": {"type": "Text", "format": "html", "text": ["<p>Equation J</p>", "<p>y= 0.5x</p>"]}}
+      ],
+      [
+        {"id": "vB7iBzfE6lBDrd8v", "title": "Text 21", "content": {"type": "Text", "format": "html", "text": ["<p>Context K</p>", "<p></p>", "<p>A fire in California is burning at a rate of 0.5 square miles per hour. How many square miles have burned after a certain number of hours?</p>"]}},
+        {"id": "56JvyPkv_WnA_7CS", "title": "Text 22", "content": {"type": "Text", "format": "html", "text": ["<p>Context L</p>", "<p></p>", "<p>Mia borrows $20 from her uncle to buy a school T-shirt. Mia pays back $3 a week. How much money is left to pay off after a certain number of weeks?</p>"]}}
+      ],
+      [
+        {"id": "t34-c-6BwkjLeS8H", "title": "Text 23", "content": {"type": "Text", "format": "html", "text": ["<p>Context M</p>", "<p></p>", "<p>In a trivia game, teams get 1 point for answering the first question correctly. Then for every correct answer, their score doubles.</p>"]}},
+        {"id": "lJHUusOkrmos9vYI", "title": "Text 24", "content": {"type": "Text", "format": "html", "text": ["<p>Context N</p>", "<p></p>", "<p>Will pays $79 a month for unlimited data. What equation would show Will’s cost in a month?</p>"]}}
+      ],
+      [
+        {
+          "id": "LmlFHbMZVlv-Msal",
+          "title": "Text 32",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<p>Context O</p>", "<p></p>", "<p>The school is buying tickets, The cost for the first 20 students is $10 per student. The cost for the number of students greater than 20 is $3 per student. What is the total cost for a certain number of students?</p>"]
+          }
+        },
+        {
+          "id": "hZ0dl4ZBZetCv5ee",
+          "title": "Text 31",
+          "content": {"type": "Text", "format": "html", "text": ["<p>Context P</p>", "<p></p>", "<p>You can estimate Fahrenheit from Celsius temperature. Multiply the Celsius temperature by 2 and add 30. What equation will estimate the temperature from one temperature system to the other? </p>"]}
+        }
+      ],
+      [
+        {"id": "QtfkEWRlB8InfheS", "title": "Table 1", "content": {"type": "Table", "name": "Table Q", "columns": [{"name": "x", "width": 80, "values": ["0", "1", "2", "3", "4", "5"]}, {"name": "y", "width": 80, "values": ["20", "17", "14", "11", "8", "5"]}]}},
+        {"id": "tld_hMPEH0r6iJKr", "title": "Table 2", "content": {"type": "Table", "name": "Table R", "columns": [{"name": "x", "width": 80, "values": ["1", "2", "3", "4", "5", "6"]}, {"name": "y", "width": 80, "values": ["1", "4", "9", "16", "25", "36"]}]}}
+      ],
+      [
+        {"id": "G9oMwuP6v03mhrHh", "title": "Table 6", "content": {"type": "Table", "name": "Table S", "columns": [{"name": "x", "width": 80, "values": ["1", "2", "3", "4", "5", "6"]}, {"name": "y", "width": 80, "values": ["4.5", "4", "3.5", "3", "2.5", "2"]}]}},
+        {"id": "x-1QP_Cd9xPvSFsD", "title": "Table 5", "content": {"type": "Table", "name": "Table T", "columns": [{"name": "x", "width": 80, "values": ["1", "2", "3", "4", "5", "6"]}, {"name": "y", "width": 80, "values": ["1", "2", "4", "8", "16", "32"]}]}}
+      ],
+      [
+        {"id": "LiF3Z2_6bdp20fS2", "title": "Table 4", "content": {"type": "Table", "name": "Table U", "columns": [{"name": "x", "width": 80, "values": ["1", "2", "3", "4", "5"]}, {"name": "y", "width": 80, "values": ["79", "79", "79", "79", "79"]}]}},
+        {"id": "ZdMuJU3jYvWEGhGp", "title": "Table 3", "content": {"type": "Table", "name": "Table V", "columns": [{"name": "x", "width": 80, "values": ["1", "2", "3", "4", "5", "6"]}, {"name": "y", "width": 80, "values": ["32", "34", "36", "38", "40", "42"]}]}}
+      ],
+      {"id": "G7v-3F95ZVEo-Qbe", "display": "teacher", "title": "Text 33", "content": {"type": "Text", "format": "html", "text": ["<p>Answers</p>", "<p>Relationships are included for reference during conversations.</p>"]}},
+      [
+        {
+          "id": "7mpImW0x_NvTebW3",
+          "display": "teacher",
+          "title": "Text 34",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<p>Graph A</p>", "<p>Equation H</p>", "<p>Context L</p>", "<p>Table Q</p>", "<p>Linear – decreasing</p>", "<p>Non-proportional</p>", "<p>Pattern of Change: As the x-values increase in increments of 1, the y-values decrease by 3.</p>"]
+          }
+        },
+        {
+          "id": "XbpBMogUmXlZNT10",
+          "display": "teacher",
+          "title": "Text 35",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<p>Graph C</p>", "<p>Equation J</p>", "<p>Context K</p>", "<p>Linear – increasing</p>", "<p>Proportional</p>", "<p></p>", "<p>Pattern of Change: As the x-values increase in increments of 1, the y-values increase by 0.5.</p>", "<p></p>"]
+          }
+        }
+      ],
+      [
+        {
+          "id": "TRY9uX0iaF8txbN2",
+          "display": "teacher",
+          "title": "Text 37",
+          "content": {"type": "Text", "format": "html", "text": ["<p>Graph D</p>", "<p>Context M</p>", "<p>Table T</p>", "<p>Exponential</p>", "<p></p>", "<p>Pattern of Change: As the x-values increase in increments of 1, the y-values double.</p>"]}
+        },
+        {
+          "id": "0BYkdqcZVpGjX-LW",
+          "display": "teacher",
+          "title": "Text 36",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<p>Graph F</p>", "<p>Context O</p>", "<p>Piece-wise linear</p>", "<p></p>", "<p>Pattern of Change: There are two patterns of change. For x-values of 0-20, the rate of change is 10. For x-values larger than 20, the rate of change is 3.</p>"]
+          }
+        }
+      ],
+      [
+        {
+          "id": "cPfPZnCLVlXtL2Qa",
+          "display": "teacher",
+          "title": "Text 38",
+          "content": {"type": "Text", "format": "html", "text": ["<p>Equation I</p>", "<p>Context P</p>", "<p>Table V</p>", "<p>Linear – increasing</p>", "<p>Non-proportional</p>", "<p>Pattern of Change: As the x-values increase in increments of 1, the y-values increase by 2.</p>"]}
+        },
+        {
+          "id": "JDUyajSM0FGxh3UC",
+          "display": "teacher",
+          "title": "Text 39",
+          "content": {"type": "Text", "format": "html", "text": ["<p>Context N</p>", "<p>Table U</p>", "<p>Linear (slope of zero)</p>", "<p>Non-proportional</p>", "<p>Pattern of Change: As the x-values increase in increments of 1, the y-values change by 0. (no increase or decrease) </p>"]}
+        }
+      ],
+      {"id": "md6o7rVJ0a23KfDi", "display": "teacher", "title": "Text 40", "content": {"type": "Text", "format": "html", "text": ["<p>The following representations do not match others. They stand alone. </p>", "<p>Equations and relationships are included for reference during conversations.</p>"]}},
+      [
+        {
+          "id": "rASSoFwCAwKRiV5Y",
+          "display": "teacher",
+          "title": "Text 41",
+          "content": {"type": "Text", "format": "html", "text": ["<p>Equation G</p>", "<p>Linear – increasing</p>", "<p>Non-proportional </p>", "<p>Pattern of Change: As the x-values increase in increments of 1, the y-values increase by 1.</p>"]}
+        },
+        {
+          "id": "Rv8z5xx5NbQQarrp",
+          "display": "teacher",
+          "title": "Text 42",
+          "content": {"type": "Text", "format": "html", "text": ["<p>Table R</p>", "<p>Quadratic y = x2  (square numbers)</p>", "<p>Pattern of Change: As the x-values increase in increments of 1, the y-values increase by an increasing amount.</p>"]}
+        }
+      ],
+      [
+        {
+          "id": "CQKs7qYMVmdoQqpZ",
+          "display": "teacher",
+          "title": "Text 43",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<p>Table S</p>", "<p>y = –0.5x + 5</p>", "<p></p>", "<p></p>", "<p>Linear – decreasing</p>", "<p>Non-proportional</p>", "<p></p>", "<p>Pattern of Change: As the x-values increase in increments of 1, the y-values decrease by 0.5.</p>"]
+          }
+        },
+        {
+          "id": "Li7BFP2FtuSsm_SO",
+          "display": "teacher",
+          "title": "Text 44",
+          "content": {"type": "Text", "format": "html", "text": ["<p>Graph B</p>", "<p>y = 20 + 3x</p>", "<p></p>", "<p>Linear – increasing</p>", "<p>Non-proportional</p>", "<p>Pattern of Change: As the x-values increase in increments of 1, the y-values increase by 3.</p>"]}
+        },
+        {
+          "id": "nunh3Qr6wxLAKnfW",
+          "display": "teacher",
+          "title": "Text 45",
+          "content": {"type": "Text", "format": "html", "text": ["<p>Graph E</p>", "<p>y = –3x</p>", "<p></p>", "<p>Linear – decreasing</p>", "<p>Proportional</p>", "<p>Pattern of Change: As the x-values increase in increments of 1, the y-values decrease by 3.</p>"]}
+        }
+      ]
+    ]
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {"id": "wxCg_JlpBMiRLVFS", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation A. Kevin’s Graph</strong></p>", "<p>Kevin drew the following graph to help him find the number of cakes sold to make a profit. </p>"]}},
+      {
+        "id": "Om7lIMSCE9LL8PM4",
+        "title": "Bakery Income and Expenses",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-10, -10], "axisRange": [550, 2900], "axisNames": ["n", "$"], "axisLabels": ["Number of Cakes", "Money"]}},
+          "objects": [
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 825]}, {"type": "point", "parents": [300, 1800]}], "properties": {"id": "vMWqEpX7_igY027x", "pt1": {"type": "point", "id": "vMWqEpX7_igY027x-point1"}, "pt2": {"type": "point", "id": "vMWqEpX7_igY027x-point2"}}},
+            {"type": "comment", "parents": [21.336225328947364, -463.1059074954708], "properties": {"id": "tBpHw7TAncgqhS8a", "text": "Expense", "anchor": "vMWqEpX7_igY027x"}},
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [200, 1640]}], "properties": {"id": "pnjRfqTdlHmyZ28t", "pt1": {"type": "point", "id": "pnjRfqTdlHmyZ28t-point1"}, "pt2": {"type": "point", "id": "pnjRfqTdlHmyZ28t-point2"}}},
+            {"type": "comment", "parents": [40.59329255756579, -358.36662137681174], "properties": {"id": "517CZN7bjekKFHob", "text": "Income", "anchor": "pnjRfqTdlHmyZ28t"}},
+            {"type": "point", "parents": [100, 820], "properties": {"id": "Zb_VawWMWUPjtj3n", "name": "I", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [100, 1150], "properties": {"id": "KbPZYgTIz0S1K8Ug", "name": "E", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "polygon", "parents": ["Zb_VawWMWUPjtj3n", "KbPZYgTIz0S1K8Ug"], "properties": {"id": "o5qsm7NIMZ6Y2jmR"}},
+            {"type": "comment", "parents": [-55.04518333056297, -151.45166015624977], "properties": {"id": "CpgWTLfbFBSlHDvf", "text": "330", "anchor": "o5qsm7NIMZ6Y2jmR"}}
+          ]
+        }
+      },
+      {"id": "WKt0FPZUeYxEcCEA", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Explain how Kevin could use his graph to determine Fabian’s profit.</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Kevin can find when Fabian’s expenses and income are approximately equal. Where the lines intersect, we know that Fabian will make $0. After that, he will begin to make a profit.</p>"]}},
+      {"id": "PLEey6yeStVdipp9", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Kevin highlighted the vertical distance –330 between the two graphs. What does the  –330 represent on the graph? What does it represent in the real world?</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>The 330 shows that the value of E is higher than I. In the real world, this shows that Fabian will spend $330 more in expenses than he will earn when he sells 100 cakes.  </p>"]}},
+      {"id": "DYX-urRgbgxC-iKk", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Adia claims she can find the coordinates of the point of intersection by solving the equation, 8.20n = 825 + 3.25n. Is this possible? Explain. How does it help?</li></ul>"]}},
+      {
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p>This is possible because (8.20n) represents the income and (825 + 3.25n) represents the expenses. So, by solving this equation, you are finding the point when income and expenses are equal, or where the two lines intersect.</p>"]}
+      },
+      {"id": "l908sg_Wy-tjWG-m", "content": {"type": "Text", "format": "html", "text": ["<ul><li>If Kevin sells 125 cakes, is he losing or making money? Explain why.</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p></p>", "<p>Losing. Looking at the graphs, Income (pink line) is lower than the Expenses (blue line) until after 150 cakes. So, he will lose money until he sells more than 150 cakes.</p>"]}},
+      {"id": "HmXFtwvEp07_goVk", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation B. Fabian’s Profit Equation</strong></p>"]}},
+      {"id": "R08wXrevYE-Boicy", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Fabian uses the equation P = Income – Expenses to predict the profit. He wrote \n              P = 8.20n – (825 + 3.25n). \nDoes this make sense? Explain. </li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Yes, since he wants to subtract expenses from income for a given number of cakes, he can subtract the expenses expression from the income expression to give an expression for overall profit.</p>"]}},
+      {"id": "ri9SyS9WQDuMgsHG", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Adia rewrites Fabian’s profit equation as P = 4.95n – 825. Is she correct? Explain.</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Yes, this equation will give the same result as Fabian’s. Her equation gives the profit for each cake and subtracts the fixed, monthly expenses.</p>"]}},
+      {
+        "id": "sLAB5wertSfEV5sr",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Situation C. Fabian’s Profit Inequality</strong></p><p>Fabian and Billie are looking for ways to express how express how to find the number of cakes needed to make a profit. Explain why each representation does or does not make sense.</p><p></p>"]
+        }
+      },
+      [
+        {"id": "t-qRqRF_JFU3Wfgx", "title": "Text 2", "content": {"type": "Text", "format": "html", "text": ["<p>Fabian’s Representation: Inequality Statement</p><p>P &gt; 4.95n – 825</p><p></p>"]}},
+        {"id": "zWzG_Rl1fAGNQoBh", "title": "Billie's Representation: Number Line", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/numberline.png", "filename": "curriculum/moving-straight-ahead/images/numberline.png"}}
+      ],
+      {
+        "id": "gJs40Tc560z8EH-Z",
+        "display": "teacher",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>The inequality statement does make sense, because it says that they want their profit to be greater than their income – expenses. The number line does make sense because it shows all possible values of n for which they have a profit.</p>"]
+        }
+      }
+    ]
+  }
+}

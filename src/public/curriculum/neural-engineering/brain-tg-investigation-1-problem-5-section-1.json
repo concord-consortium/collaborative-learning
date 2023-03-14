@@ -1,0 +1,30 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "Ja1nikPQo5z7eyEw",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In this activity, students will use Electromyography (EMG) data to control a robotic gripper. </p>",
+            "<p><strong>Learning Objectives</strong></p>",
+            "<p>Students will explain how signals measured from the human body (e.g., EMG) can be incorporated into engineering design. </p>",
+            "<p>Students will design and evaluate technology solutions for people with neurological conditions. </p>",
+            "<p><strong>NGSS Alignment</strong></p>",
+            "<p><em>Under development</em></p>",
+            "<p><strong>Formative Assessment</strong></p>",
+            "<p>Dataflow programs; Learning Journals</p>",
+            "<p><strong>Materials</strong></p>",
+            "<p>For each group of 3-4 students:</p>",
+            "<ul><li><a href='https://backyardbrains.com/products/clawbundle'>The Claw Kit</a></li><li>Hand <a href='https://www.amazon.com/Edisalute-smartinlife-Strengthener-Gripper-Grippers/dp/B01MXHXSNP/ref=sr_1_5?crid=1U94UEC7O4HFK&amp;keywords=hand+grip&amp;qid=1660235040&amp;s=sporting-goods&amp;sprefix=hand+gri%2Csporting%2C222&amp;sr=1-5'>gripper</a></li><li>A computer </li><li>6 plastic cups </li></ul>",
+            "<p><strong>Preparation</strong></p>",
+            "<p>Before class you will need to upload the following <a href='https://github.com/concord-consortium/collaborative-learning/blob/master/src/plugins/dataflow-tool/arduino/ccemgfsr/ccemgfsr.ino'>Arduino sketch</a> on each Arduino board.</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

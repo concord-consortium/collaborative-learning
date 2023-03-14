@@ -1,0 +1,77 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "id": "CqIMk1R7qn4P0f04",
+        "title": "Text 15",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Situation A. The Two Variable Connection</strong></p>",
+            "<ol><li>If 3x – 7 = y, find y when x = – 2/3   </li><li>If 3x – 7 = y, find x when y = – 5</li><li>Mary thinks you could solve these equations with a graph or table. Is she correct? Explain why?</li><li>Could you solve the equations in the Initial Challenge with a graph or table? Explain why.</li></ol>"
+          ]
+        }
+      },
+      {
+        "id": "t8GRPvmKI2pb1PDO",
+        "display": "teacher",
+        "title": "Text 18",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>1.  Using substitution,   y = 3(–2/3) – 7 = –9.</p>",
+            "<p>2.  Using substitution, –5 = 3x – 7 </p>",
+            "<p>                                                    2 = 3x </p>",
+            "<p>                                                    x = 2/3.</p>",
+            "<p>3.  Yes, if you had a graph of these equations, you would find the point on the line with the x-value that you are looking for (by looking at the x-axis), and then get the corresponding y-value by looking at the y-axis. If you had a table of these equations, you would find the entry with the x-value that you are looking for, and then get the corresponding y-value by looking at the other column of the table. You could also start either of these methods with a y-value and get the corresponding x-value.</p>",
+            "<p>4.  You could solve these equations by using tables or graphs if you consider the expression on each side of the equation to be its own equation. So, you’d set y1 equal to the left side of the equation and y2 equal to the right side of the equation. Then to find the solution, you’d need to find the point where y1=y2. You could do this by making tables for each equation and looking for the points where y1=y2, or by graphing lines for each equation and looking for the points of intersection. For most cases in the Initial Challenge, y2 is equal to a constant value, but this method would also work when both y1 and y2 are equal to expressions involving x.</p>"
+          ]
+        }
+      },
+      [
+        {
+          "id": "yHfkxEe5cZEes2ec",
+          "title": "Text 19",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p><strong>Situation B. Equations Solve a Mystery </strong></p>",
+              "<p>Forensic scientists can estimate a person’s height by measuring the length of certain bones, including the femur, the tibia, the humerus, and the radius. The table below gives the equations for the relationships between the length of each bone and the estimated height of males and females. These relationships were found by scientists after much study and data collection. In the table, F represents the length of the femur, T the length of the tibia, H the length of the humerus, R the length of the radius, and h the person’s height. All measurements are in centimeters. </p>"
+            ]
+          }
+        },
+        {"id": "GsIinYQDIJjzkPFt", "title": "Skeleton with bone locations", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_3_3_WI_skeleton_350w.png"}}
+      ],
+      {
+        "id": "EetL409OooTJlJZj",
+        "title": "Table 1",
+        "content": {
+          "type": "Table",
+          "name": "Bone length/height equations",
+          "columns": [
+            {"name": "Bone", "width": 93.5859375, "values": ["Femur", "Tibia", "Humerus", "Radius"]},
+            {"name": "Male", "width": 159.2265625, "values": ["h = 69.089 + 2.238F", "h = 81.688 + 2.392T", "h = 73.570 + 2.970H", "h = 80.405 + 3.650R"]},
+            {"name": "Female", "width": 174.83984375, "values": ["h = 61.412 + 2.317F", "h = 72.572 + 2.533T", "h = 64.977 + 3.144H", "h = 73.502 + 3.876R"]}
+          ]
+        }
+      },
+      {"id": "OfJjdMUaPjDJ3ZyR", "title": "Text 20", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Do any of these equations represent linear relationships?</li></ul>"]}},
+      {"id": "8KdnDFImrmBljLH0", "display": "teacher", "title": "Text 23", "content": {"type": "Text", "format": "html", "text": ["<p>All of these represent linear relationships.</p>"]}},
+      {"id": "DT1wiAh65j1EsENC", "title": "Text 24", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Think of a question you could answer using this data. Explain how you would find the answer. </li></ul>"]}},
+      {
+        "id": "IPrZUOB1T-2UyUEx",
+        "display": "teacher",
+        "title": "Text 27",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Student answers will vary. </p>", "<p>For example: If a person is 1.8 meters tall, about how long will their tibia be? You could set the height to be 180 cm and then solve for T.</p>"]}
+      },
+      {"id": "w-W4CFWxmAiGaTaz", "title": "Text 28", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What information does the solution to the equality 61.412 + 2.317F = 150 tell you?</li></ul>"]}},
+      {"id": "IWCgFt8GsEWp1sHQ", "display": "teacher", "title": "Text 31", "content": {"type": "Text", "format": "html", "text": ["<p>The solution to this equation will be the femur length for a female who is 150 cm tall.</p>"]}},
+      {"id": "7w1R4KW6-mzh4fBi", "title": "Text 32", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What does the solution to the inequality 61.412 + 2.317F &lt; 150 tell you?</li></ul>"]}},
+      {"id": "tTCfwWqKYl4e44eR", "display": "teacher", "title": "Text 33", "content": {"type": "Text", "format": "html", "text": ["<p>The solutions to this inequality will be all possible femur lengths for a female who is less than 150 cm tall.</p>"]}}
+    ]
+  }
+}

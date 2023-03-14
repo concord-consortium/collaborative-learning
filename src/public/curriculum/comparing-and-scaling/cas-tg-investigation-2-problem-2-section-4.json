@@ -1,0 +1,118 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles": [
+      {
+        "id": "lUigUrFnbRFburql",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
+            "<p><u>Solutions and Strategies</u></p>",
+            "<p></p>",
+            "<p>Begin with a discussion of which pizzeria Julia should choose.</p>",
+            "<p></p>",
+            "<p>This is an inequality situation. Groups should have different answers depending on the number of pizzas being considered. Push the students to consider when the price is better.</p>"
+          ]
+        }
+      },
+      {
+        "id": "ceIEWL5yHDPD_Fwx",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Which company should Julia buy the pizza from? (It depends on how many pizzas she wants to get.)</li><li>What recommendation would you give her? (Order from Royal Pizza when the number of pizzas, N, ≤ 15. Order from Howdy’s Pizza  when N ≥ 15.)</li><li>How can you describe the pattern between the variables for Royal Pizza? (As the number of pizzas increase by 1, the price increases by $13.)</li><li>How can you describe the pattern between the variables for Howdy’s Pizza? (As the number of pizzas increases by 1, the price increases by varying amounts. There is not a constant increase.)</li><li>If we were to make a graph for both tables, what would happen at 15 pizzas? (The two graphs would share the same point at 15 pizzas because the price of $195 is the same for each company.) Note: You may want to use technology or quickly sketch the graphs to demonstrate this to students, if they have not looked at the graphs before this time.</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Making the Mathematics Explicit</u></p>",
+            "<p></p>",
+            "<p>Have students share their strategies for finding the values on the tables. As students discuss their proportional reasoning with the tables, make sure to connect the various ways of notating their thinking.</p>",
+            "<p></p>",
+            "<p>By the end of the discussion, students should connect finding the values in the tables to writing proportions. Students need to see that Royal’s rates are proportional and Howdy’s rates are not proportional. With Howdy’s, you cannot scale the two quantities because there is an amount added in. This changes the multiplicative nature of the two quantities.</p>",
+            "<p></p>",
+            "<p>Amit’s Strategy is introduced in the What If to help make this non-proportional relationship evident to students.</p>"
+          ]
+        }
+      },
+      {
+        "id": "zHXpReZRNYVhr90j",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Does the scaling in Amit’s table work? Will 5 pizzas cost $65 at Howdy’s? (No. Scaling will not work. Because we are adding the delivery charge, it changes the multiplicative relationship.)</li><li>What do you think about Eun Mi’s claim in Situation A, do proportions work for Royal, but not for Howdy’s? (Yes. From the table for Royal, we can look at any two sets of values and write a proportion. We cannot do that for Howdy’s. The $30 delivery charge makes it additive and multiplicative, so it is not proportional.)</li></ul>",
+            "<p></p>",
+            "<p>Examples are shown below.</p>"
+          ]
+        }
+      },
+      {"id": "9XdclT3sClizHTm3", "title": "Example 1", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example1.png"}},
+      {"id": "zF8Cmwc8GTutsr9g", "title": "Example 2", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example2.png"}},
+      {"id": "nQy0_T8Va21tYUiq", "title": "Example 3", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example3.png"}},
+      {"id": "Yd-WRhXZx30rh4If", "title": "Example 4", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_2-2_Example4.png"}},
+      {
+        "id": "rHGFrw7Wtm9hIHwF",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>How do we find the unit rate? (Royal: It is in the pattern between the variables. As the number of pizzas increase by 1, the price increases by $13.Howdy’s: Some students will discuss that the cost for each pizza changes, so there is no unit rate. For example, 1 pizza costs $41, 2 pizzas cost $52 or $26 each, 3 pizzas cost $63 or $21 each. Other students will say that the unit rate is $11 for each pizza, but then you have to add in the delivery charge.) Note that because there is an amount added for Howdy’s, 11 is not considered a unit rate. Students will learn in the next Unit that the 11 is the rate of change.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "tGFFa7-jd2JLfCuy",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>You can introduce the vocabulary of “constant of proportionality” now or wait until the Introduction of Problem 2.3. Since the quantities for Royal are proportional, the constant of proportionality is 13. Since the quantities for Howdy’s are not proportional, there is no constant of proportionality.</p>",
+            "<p></p>",
+            "<ul><li>How is this Problem similar to and/or different from previous Problems? (In this Problem Royal is proportional and you can scale up or down, which is like all the previous Problems. Howdy’s is not proportional, so you can’t use a proportion or rate table to scale it up or down.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Now What Do Students Know</u></p>",
+            "<p></p>",
+            "<p>Ask students to reflect on the discussion and answer the Now What Do You Know question.</p>",
+            "<p></p>",
+            "<p><em>How can you determine if a situation is proportional?</em></p>",
+            "<p></p>",
+            "<p>See answers for more information about the strategies and embedded mathematics. Students’ answers may be limited at this time. They will have a chance to build on this idea later in this Unit and in the next Unit, <em>Moving Straight Ahead.</em></p>"
+          ]
+        }
+      },
+      {
+        "id": "ddaNIz8Cf4KNyjdV",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+            "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

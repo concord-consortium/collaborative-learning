@@ -1,0 +1,53 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {"id": "3haDCCDsKsykIJ9d", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Problem 1.2 Walking Rates: Exploring Linear Relationships with Tables, Graphs, and Equations</strong></p>"]}},
+      {
+        "id": "0qbWDirt2af3eKHN",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In earlier units we explored relationships which were linear and proportional. For example, we graphed the relationship between cost and number of bikes rented in Variables and Patterns. We also explored the relationship between time and distance walking backwards in Comparing Quantities. In Comparing and Scaling, we learned to recognize the difference between proportional and non-proportional relationships when we investigated pizza prices. </p>"
+          ]
+        }
+      },
+      {
+        "id": "gH6msVET3gm0idqm",
+        "title": "Text 3",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Malcom determined that his walking rate was 1.5 meters per second. For every 1 second he walks, his distance increases by 1.5 meters. This information can be represented in expressions and equations.</p>"]}
+      },
+      [
+        {
+          "id": "X2W_FUQWTWfWcbID",
+          "title": "Text 4",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<h3>Expressions</h3>", "<p>1.5t</p>", "<p>is an <strong>expression</strong> that represents the <em>distance</em> walked every second.</p>", "<p>d</p>", "<p>can is also be an <strong>expression</strong> for the distance that he walked every second.</p>"]
+          }
+        },
+        {
+          "id": "5qESy4xl71_I6zdO",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<h3>Equations</h3>", "<p>d = 1.5t</p>", "<p>the equation shows the equivalence of two expressions (<em>d</em> and 1.5<em>t</em>)</p>", "<p>The equation also represents the relationship between the two variables, <em>d </em>and<em> t</em></p>"]
+          }
+        }
+      ],
+      {"id": "hE0VreFwxPDsG-ky", "title": "Text 5", "content": {"type": "Text", "format": "html", "text": ["<p>The expressions d and 1.5t are <strong>equivalent expressions</strong>. They both represent the <em>distance</em> that Malcom walks at 1.5 <em>meters per second</em></p>"]}},
+      {
+        "id": "CgHHbhjIp9IrDRbF",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Think about the effect a walking rate has on the relationship between time walked and distance walked. This will provide some important clues about how to identify linear relationships from tables, graphs, expressions, and equations.</p>"]
+        }
+      }
+    ]
+  }
+}

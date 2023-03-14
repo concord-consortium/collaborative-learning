@@ -1,0 +1,42 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["<h3>Situation A. Strategies from Everett Middle School Students</h3>The following strategies were used to answer the question in the Initial Challenge. For each strategy, explain how it will or will not help answers the questions."]}},
+      {"content": {"type": "Text", "format": "html", "text": ["<strong>Zane's Strategy</strong>\nOur group used a table to determine how much money we would have to charge just to cover our rental cost of $750 which is the break-even point."]}},
+      {"content": {"type": "Table", "columns": [{"name": "Number of People", "type": "number", "values": [50, 100, 150, 200, 250, 300, 450]}, {"name": "Cost per Person (dollars)", "type": "number", "values": []}]}, "layout": {"height": 250}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Molada's Strategy</strong>\nOur group also made a table, but then we looked at the pattern in the table and tried to write an equation that relates the cost per person <em>c</em> to the number of people <em>n</em> who buy tickets. But we could not find an equation, so we made a graph of the data and used it to make predictions."
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<strong>Xander's Strategy</strong>\nWe could see there was not a constant rate of change in the Zane’s table. So, we made a graph like Molada’s. It looked a bit like our bridge length data, so we tried to find an inverse variation equation to fit."]
+        }
+      },
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation B. Fixed Cost</h3>The students decide to charge $5 per person for the event. They want to know<ul><li>The amount of money <em>A</em> they collect if <em>n</em> people buy tickets.</li> <li>The amount of the profit <em>P</em> they will have after they pay for the rental cost.</li></ul>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["1. Write an equation that will help them predict the amount of money they collect if they charge $5 per person."]}},
+      {"content": {"type": "Text", "format": "html", "text": ["2. Write an equation that will help them predict the profit if they charge $5 per person."]}},
+      {"content": {"type": "Text", "format": "html", "text": ["3. Sketch a graph of each equation."]}},
+      {"content": {"type": "Text", "format": "html", "text": ["4. Do the graphs indicate a linear relationship or an inverse variation? Explain."]}},
+      {"content": {"type": "Text", "format": "html", "text": ["5. How would you use the graphs to show how many tickets must be sold in order to make a profit? How would you use the equations to decide how many tickets must be sold to make a profit?"]}}
+    ]
+  },
+  "supports": []
+}

@@ -1,0 +1,48 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "HbDQA4T4VNHG3kRO",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>A local bakery, Fabulous Fabian’s Bakery, wants to set up a snack booth at the Walkathon. They will donate their profits to the school. To make a profit the business has to consider the expenses that might occur. For a bakery the cost might include cost of ingredients, labor charges, advertising, etc. </p>",
+            "<p></p>",
+            "<p>At Fabulous Fabian’s Bakery, the expenses <em>E</em> to make <em>n </em>cakes per month is given by the equation: </p>",
+            "<p>                                                         <em>E</em> = 825 + 3.25<em>n</em></p>",
+            "<p>The income <em>I </em>for selling <em>n</em> cakes is given by the equation: </p>",
+            "<p>                                                            <em>I</em> = 8.20<em>n</em></p>"
+          ]
+        }
+      },
+      {"id": "qr3a7UHleFukYk6h", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What information do the numbers in each equation represent?</li></ul>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>The first equation tells us about Fabian’s expenses, which are $825 each month (regardless of how many cakes he makes) plus an additional $3.25 for each cake he makes. The second equation tells us about Fabian’s income, which is $8.20 for each cake he sells.</p>"]
+        }
+      },
+      {"id": "ghHJuT7trMMdvT7w", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How many cakes does Fabian need to sell in order to start making a profit?</li></ul>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The profit is represented by I – E:</p>",
+            "<p>  8.20n – (825 + 3.25<em>n</em>) ≤ 0</p>",
+            "<p>  8.20<em>n</em> – 3.25<em>n</em> – 825 ≤ 0</p>",
+            "<p>  4.95<em>n</em> – 825 ≤ 0</p>",
+            "<p>  4.95<em>n</em> ≤ 825</p>",
+            "<p>  <em>n</em> ≤ 166 2/3 </p>",
+            "<p>Fabian needs to sell 167 cakes in order to start making a profit.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

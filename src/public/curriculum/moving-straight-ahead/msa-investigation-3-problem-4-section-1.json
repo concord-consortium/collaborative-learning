@@ -1,0 +1,47 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "g7ZqnWOmb5bNpXkA",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In Problem 2.2, we used graphs and tables to find when the costs of two different plans for buying T-shirts were equal. The graphs of the two cost plans are shown below. C<sub>No-Shrink</sub> represents the costs of the No-Shrink Tee. C<sub>Mighty </sub>represents the costs of the Mighty Tee. The point of intersection of the two lines tells us when the costs for the two t-shirt plans are equal.</p>"
+          ]
+        }
+      },
+      {
+        "id": "MTKDKXSVEpOzM22W",
+        "content": {
+          "type": "Geometry",
+          "title": "Two T-Shirt Plans",
+          "board": {"properties": {"axisMin": [-2, -10], "axisRange": [20, 100], "axisNames": ["n", "Cn"], "axisLabels": ["Number of T-Shirts", "Total Cost"]}},
+          "objects": [
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [14, 63]}], "properties": {"id": "aomPehRi8TZQR3Jh"}},
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 49]}, {"type": "point", "parents": [14, 63]}], "properties": {"id": "MWBGzgFC1ppHCEyG", "pt2": {"name": "(14, 63)"}}}
+          ]
+        },
+        "layout": {"height": 403}
+      },
+      {
+        "id": "o1Z7rxG10IO9qS4C",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>How could we use the two equations to find the coordinates of the point of intersection of the two lines? </p>",
+            "<p>That is, for what number of T-shirts n is<em> C</em><em><sub>Mighty</sub></em><em> = C</em><em><sub>No-Shrink</sub></em><em> </em>or <em>49+n = 4.5n?</em></p>",
+            "<p>How could we use the equation or its graph or table to find the number of T-shirts where the cost is less than $60? </p>",
+            "<p>That is, for values of n is </p>",
+            "<p><em>C</em><em><sub>Mighty</sub></em><em> &lt;60?   or  49 + n &lt; $60</em></p>",
+            "<p>When either the value of <em>x</em> or <em>y</em> is known what strategies do we have for solving </p>",
+            "<ul><li>equations of the form <em>y = ax+ b? </em></li><li>inequalities of the form <em>ax +b &lt; y </em>or <em>ax +b &gt; y?</em></li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

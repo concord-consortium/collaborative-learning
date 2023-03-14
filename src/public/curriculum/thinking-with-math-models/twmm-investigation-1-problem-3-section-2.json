@@ -1,0 +1,30 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Suppose a company called Custom Steel Products (CSP for short) supplies materials to builders. One common structure that CSP makes is called a <em>truss</em>. You might see a truss holding up a bridge or the roof of a building. The following is a picture of a truss. It is made by fastening together steel rods 1 foot long."
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_1_3_seven_foot_truss_400w.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "This truss has an overall length of 7 feet. The manager at CSP needs to know the number of rods in _any length_ of truss a customer might order.",
+            "- Describe a pattern that the manager can use to predict the number of rods for any length of truss. Does the pattern represent a linear relationship? Explain.",
+            "- How does this pattern compare to the patterns found in Problems 1.1 and 1.2?",
+            "- Are you equally confident about the predictions you made for Problems 1.1 and 1.2 and this problem?"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

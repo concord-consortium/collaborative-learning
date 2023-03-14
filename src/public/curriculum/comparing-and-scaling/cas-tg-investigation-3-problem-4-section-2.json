@@ -1,0 +1,37 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {"id": "fQ0MCp1PFeb_CG59", "content": {"type": "Text", "format": "html", "text": ["<p><u><strong>Launch (Getting Started)</strong></u></p>", "<p><u>Connecting to Prior Knowledge</u></p>", "<p>Discuss their work in this Unit using rates, rate tables, and unit rates.</p>"]}},
+      {
+        "id": "CL_ZgQFqFPZ_6-Pf",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Suggested Questions</strong></p>", "<ul><li>When have we used rates in this Unit? (Answers will vary.)</li><li>When have we used rate tables in this Unit? (Answers will vary.)</li><li>When have we used unit rates in this Unit? Answers will vary.)</li></ul>"]
+        }
+      },
+      {
+        "id": "m5HxnjZoOlghhIMY",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p><em>Day 1:</em></p>",
+            "<p>Explain the situation using the Introduction in about leaky faucets wasting water every year.</p>",
+            "<p>Introduce the directions for the simulation using Teaching Aid 3.4: Leaky Faucet Experiment Directions or the Student Edition.</p>",
+            "<p></p>",
+            "<p>Have students work in groups of 3-4 to collect their data and then complete the Problem.  Distribute <strong>Learning Aid 3.4: Leaky Faucet Data</strong> for students to record their data from the simulation.</p>",
+            "<p><em>Day 2:</em></p>",
+            "<p>You may want to give each group two of the situations from What If Situation A to differentiate based on needs of each group. (Agency, Identity, Ownership)</p>",
+            "<p>Have groups do What If Situation B on large paper so that it can be used in a Gallery Walk in the Summary. (Portrayal)</p>",
+            "<p>For more census information see: https://www.census.gov/newsroom/press-releases/2021/population-changes-nations-diversity.html</p>",
+            "<p>For more information on rising sea levels see:  https://coast.noaa.gov/digitalcoast/stories/atlantic-epa.html</p>",
+            "<p></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

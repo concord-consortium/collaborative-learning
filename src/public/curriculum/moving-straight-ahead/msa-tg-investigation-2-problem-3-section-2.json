@@ -1,0 +1,39 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "WcQ1BeqXtYCOQ6eW",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Launch (Getting Started) </strong><br/>Connecting Prior Knowledge<br/>Remind students about the three students and their pledge plans from Investigation 1. Display <strong>Teaching Aid 2.3A: Alana’s Pledge Plan</strong>.</p>",
+            "<p><br/><strong>Suggested questions</strong></p>",
+            "<ul><li>Write a question that could be answered using the point (14, 12). (Sample answers: How far did Alana walk if a sponsor donates 12 dollars? How much money would Alana raise from each sponsor if she walked 14 kilometers?)</li><li>How can you use the equation for Alana’s plan to check the answer to the question you wrote? (The equation for Alana’s plan is <em>A</em> = 5 + 0.5<em>d</em>. For the first question, if you substitute 12 for A in the equation and solve for d, you will find the number of kilometers. For the second question, if you substitute 14 for <em>d</em> in the equation and solve for <em>A</em>, you will find how much each sponsor pledges.)</li><li>How can you use a graph to find the number of kilometers that Alana walked if each sponsor donated $17? (You can find 17 on the <em>y</em>-axis and move horizontally until you reach a point on the line. Then, you move vertically down until you hit the <em>x</em>-axis. The value on the <em>x</em>-axis is the number of kilometers walked.)</li></ul>",
+            "<p>Ask the class to show how the questions relate to solving the equation A = 5 + 0.5d when the value of one variable is known. Students are substituting one value into the equation and solving for the other.</p>",
+            "<p>     <em>A</em> = 5 + 0.5(14) to solve for A if <em>d</em> = 14</p>",
+            "<p>    12 = 5 + 0.5<em>d</em> to solve for <em>d</em> if <em>A</em> = 12.</p>",
+            "<p>Discuss how a graph or a table could be used to find solutions of these two equations.<br/><br/>Pick two or three other points on the line and repeat the preceding questions. Students should begin to see that there are an infinite number of coordinate pairs that are solutions of A = 5 + 0.5d. When they are solving a linear equation in one 'unknown,' they are looking for the missing coordinate of an ordered pair that is a solution of the linear equation.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Presenting the Challenge</p>",
+            "<p>Now pose the challenge in the Problem. Tell students they need to decide whether an equation represents a reasonable pledge plan for the walkathon if the idea is to raise money for charity. They will decide which points are solutions of the equation and whether the <em>y</em>-values increase, decrease, or stay the same as the <em>x</em>-values increase.</p>",
+            "<p>You might have students use a graphing calculator or a CLUE graph or <strong>Teaching Aid 2.3B: New Pledge Plans</strong>.</p>",
+            "Ask questions to help students start thinking about the plans. Do not look for students to answer the questions yet. Let them explore the questions and return to them in the Summarize.\n\n<strong>Suggested Questions</strong><ul><li>What do you notice and what do you wonder about the three plans?</li><li>Consider how much you would raise if you walked one kilometer. Two kilometers? Three kilometers?</li></ul>",
+            "<em>Optional Launch</em>",
+            "Use <strong>Teaching Aid 2.3B: New Pledge Plans</strong>, mix up the representations, and have students match the tables and graphs to the plans.",
+            "Have students work in groups of 3 on this problem."
+          ]
+        }
+      }
+    ]
+  }
+}

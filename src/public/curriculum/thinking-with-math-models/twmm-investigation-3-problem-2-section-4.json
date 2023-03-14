@@ -1,0 +1,15 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["What examples using distance, rate, and time show one variable related to another with a linear relationship? What examples using distance, rate, and time show one variable related to another with an inverse variation relationship?  Explain why."]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

@@ -1,0 +1,15 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["When the product of two variables is some fixed number, what is the pattern of change between the two variables? How is that pattern of change reflected in tables and graphs of the relationship? Is this pattern of change linear? Why or why not?"]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

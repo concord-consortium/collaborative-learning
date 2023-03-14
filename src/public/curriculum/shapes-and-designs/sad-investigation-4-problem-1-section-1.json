@@ -1,0 +1,17 @@
+{
+  "type": "MathReflection1",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "In this unit we are investigating some general properties of geometric shapes (figures), including angles and polygons, and using this information to design shapes and solve real world problems. At the end of this Investigation, <em>What do you know about geometric shapes? How does this information help you design geometric shapes and solve problems?</em>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

@@ -1,0 +1,49 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "id": "L4ZKRGawUekmpz3G",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Explore (Digging In) </strong></p>",
+            "<p>Providing for Individual Needs</p>",
+            "<p>As you move around the room, check to see if students are finding the vertical and horizontal changes correctly. Have students show you graphs where the changes are. For the most part, finding the y-intercept should be a review for students. For the tables, students may work backward in the table to find the y-intercept. (Time)</p>",
+            "<p>What If...? Situation C won’t be as familiar for students and they may need more guidance. Look for ways that students will find two more points given two points on a line. Refer to these during the Summary.</p>"
+          ]
+        }
+      },
+      {
+        "id": "qeaxGcXuZTg6OFDx",
+        "title": "Text 12",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested questions</strong></p>",
+            "<ul><li>Start at the point where x is 3. What is the corresponding value for y? (5) </li><li>Now look at the point where x is -2. What is the corresponding value for y? (10) </li><li>What is the change in the horizontal and the vertical directions between these two points? How do you know? (In order to move from 3 to -2 on the x-axis, you move 5 units to the left. So the change in the horizontal direction is -5. In order to move from 5 to 10 on the y-axis, you move up 5 units. So the change in the vertical direction is 5.) </li><li>What does this tell you about the slope of the line representing the equation? (This tells you that the slope is 5/(-5) or -1.) </li><li>If you looked at the ratio of the horizontal change to the vertical change between two different points on the graph of the line, what would the ratio be? How do you know? (The line has the same steepness throughout the graph, so the ratio would still be -1.) </li><li>How do you find where these ideas are equal on a table/graph/equation?  (on a table it is when the same value exists for the y-value at the same x-value; on a graph it is the point of intersection; using an equation you can use properties of equality and solve for x)</li></ul>",
+            "<p>Some students may use an income and expense expression and set them equal to each other to solve for x.  Some students may use a profit equation and subtract the income minus the expenses.</p>",
+            "<ul><li>For What If Situation B, what does &lt; mean? (less than)  &gt;? (greater than)</li><li>For What If Situation C, what was the Henri and Emile Race problem about?  The Cost of T-Shirts problem? (Henri and Emile were 2 brothers in a walking race and we needed to find out when they were at the same point so we could determine how long the race should be; the Cost of T-Shirts was when we looked at 2 companies and decided when they were the same price so we could decide which company had the best prices.)</li></ul>"
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Planning for the Summary</p>", "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence? </p>"]}},
+      {
+        "id": "VIwspR8h2C74wwzK",
+        "title": "Text 14",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Now What Do You Know?</em></p>",
+            "<p><em><strong>How do the situations in this problem compare to other problems in the unit?  In what ways are tables, graphs, equations, and inequalities useful for solving problems?</strong></em></p>",
+            "<p>(As you are circulating during the Explore gather student work that shows the use of tables, graphs, and equations to solve the Initial Challenge. Choose students to talk about their use of these representations to solve problems. Listen for how students are talking about inequalities in What If Situation B and choose students to lead this part of the Summary discussion. )</p>",
+            "<p></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

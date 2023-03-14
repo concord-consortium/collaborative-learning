@@ -1,0 +1,62 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "gC1NBOhDbcysZhRB",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Ming works at the zoo. She mixes food for the chimpanzees. Ming mixes up large batches of food from sacks of high fiber food and sacks of high protein food. She uses a standard scoop and the following recipes.</p>"]}
+      },
+      {"id": "3NBo-q49rqcb1a_2", "title": "Chimp Food Recipes", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_3-3_ChimpFoodRecipies.png"}},
+      {
+        "id": "FeEBfm6qAJDibd5C",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Ming asks a group of visiting middle school students to help her figure out the quantities she needs to mix for the baby chimps.</p>",
+            "<ul><li>The recipe calls for 40% high fiber and 60% high protein. She needs a total of 225 scoops altogether. How many scoops of each should she use?</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>40 High Fiber Scoops + 60 High Protein Scoops for every 100 Total Scoops</p>",
+            "<p>⤸ × 2.25                                       ⤸ × 2.25                                               ⤸ × 2.25 </p>",
+            "<p>90 High Fiber scoops + 135 High Protein scoops for every 225 total scoops</p>",
+            "<p>OR</p>",
+            "<p>60% of high protein 🡲 0.60 x 225 = 135 scoops</p>",
+            "<p>40% of high fiber 🡲 0.40 x 225 =  90 scoops</p>"
+          ]
+        }
+      },
+      {
+        "id": "lB2LdPhr7SL6pzvA",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>After mixing the baby chimp food, Ming only has 30 scoops of high protein food left.</p>", "<ul><li>She knows that high protein food has to be 40% of the adult chimp mix total. What is the total amount of food she can prepare for the adult chimps?</li></ul>"]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "                              ÷40    <strong> ⃕                   x30</strong>    <strong> ⃕</strong>",
+            "40 High Fiber              1 Scoop                 30 Scoops",
+            "_______________     =    ____________    =   _______________   ",
+            "    100 total                   2.5 Scoops             75 Scoops",
+            "                            ÷40   <strong>⤻                 x30</strong> <strong> ⤻</strong>"
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>OR</p>", "<p>0.40 x total amount of food = 30 scoops</p>", "<p>30 ÷ 0.40 = 75</p>"]}}
+    ]
+  },
+  "supports": []
+}

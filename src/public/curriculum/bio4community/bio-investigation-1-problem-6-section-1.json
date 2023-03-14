@@ -1,0 +1,74 @@
+{
+  "type": "chapter3",
+  "content": {
+    "tiles": [
+      {"id": "XgT7Y3qK-KtQedr9", "title": "Text 6", "content": {"type": "Text", "format": "html", "text": ["<h3>Chapter 6: CHILDREN ARE THE FUTURE</h3>"]}},
+      {
+        "id": "ZSJCOA-qR2AeVxNx",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>A few minutes after finishing the zoom conversation with the scientist, Rakesh heard the front door opening. He could hear Zainab and Ajay throwing their backpacks onto the ground, taking off their shoes and running into the kitchen to make a snack for themselves. Rakesh went downstairs and joined them in the kitchen. </p>"
+          ]
+        }
+      },
+      {"id": "Fv46vapPHCmxA2GY", "title": "Rakesh in the Kitchen with Kabir and Ajay", "content": {"type": "Image", "url": "curriculum/bio4community/images/Rakesh_S3.jpg", "filename": "curriculum/bio4community/images/Rakesh_S3.jpg"}},
+      {
+        "id": "reN37ExxGmrv_std",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Rakesh</strong>: So, what’d you kids do at school today? </p>",
+            "<p><strong>Ajay</strong>: Nothing really. Senior year is kinda boring. </p>",
+            "<p><strong>Rakesh</strong>: I’m sure there was at least one thing fun that happened at school today, no?  </p>",
+            "<p><strong>Zainab</strong>: We did a cool experiment in my science class!</p>",
+            "<p><strong>Ajay</strong>: Of course you did Zainab. 7th grade is way more fun than senior year. You’re so lucky….I miss those good old days…</p>",
+            "<p><strong>Zainab</strong>: Ugh why do you have to talk like some old uncle. You know you’re only 5 years older than me right? Jeez… </p>",
+            "<p><strong>Rakesh</strong>: Okay now kids , be nice to each other! Zainab, what was the experiment about? </p>",
+            "<p></p>",
+            "<p>[Zainab stuck her tongue out at Ajay as though she had won the fight and then said,]</p>",
+            "<p></p>",
+            "<p><strong>Zainab</strong>: Okay. So. In class, they showed us a graph about stress rates and I learned that black people have more stress because of racism. I also learned that because of stress you could get heart disease that can cause a heart attack . Look at this other graph, appa! [Zainab put the piece of paper on the kitchen table]. It shows that black people have more heart attacks! We learned that exercise is really good for you. It can make you feel happier and actually, dad, it can like lowers your stress also! </p>"
+          ]
+        }
+      },
+      {"id": "2vBZCa1Nmx5_Wgky", "title": "Graph About Stress Rates", "content": {"type": "Image", "url": "curriculum/bio4community/images/bloodtestbargraph.png"}},
+      {
+        "id": "JGW5eTYF983GvImc",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>[Rakesh picked up the paper Zainab placed on the table. He looked at the graphs and thought to himself oh wow - maybe I need to tell Deaundre that he needs to start working out too…]</p>",
+            "<p></p>",
+            "<p><strong>Rakesh</strong>: Wait. Really? Exercise can decrease stress? </p>",
+            "<p><strong>Zainab</strong>: Yeah! I’m not kidding! Mrs. Edwards, our PE teacher, also told us about how recess is really important for us. Because like all day we’re sitting in class. And so in recess we get a chance to exercise and lower our stress. </p>",
+            "<p><strong>Rakesh</strong>: Oh wow, that’s amazing! I had no idea! </p>",
+            "<p><strong>Ajay</strong>: Come on, really, dad? You’re not just making Zainab feel good right?</p>",
+            "<p><strong>Rakesh</strong>: No, I’m being serious! You kids teach me things all the time!</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "4vQxuQ-jz-Nc3VEK",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Rakesh loved learning from his kids. He decided to give what his daughter said a try and started to incorporate exercise into his daily routine. He may not have been lifting heavy weights, but even going for a jog in the morning before making the kids’ breakfast felt really good. After his jogs, he always felt a little lighter, like the weight on his shoulders had lifted a bit. The more he exercised, the better he started to feel. However, he was often still stressed by the end of the day.</p>",
+            "<h3>The End!</h3>"
+          ]
+        }
+      },
+      {"id": "Mmz3jNlnYMQ_MOdI", "title": "Text 5", "content": {"type": "Text", "format": "html", "text": ["<ul><li><strong>Use your evidence table to develop a model that shows how long-term stress can result in clogged blood vessels.</strong></li></ul>"]}}
+    ],
+    "supports": []
+  }
+}

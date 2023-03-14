@@ -1,0 +1,29 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "6WLwonLVfBUOyJSZ",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Lesson 2.4: Introduction</strong></p>",
+            "<p>Using knowledge and skills gained in the module, students will co-design a new device to improve the lives of specific users. Each student team will prepare an illustration of the proposed device. </p>",
+            "<p><strong>Materials:</strong></p>",
+            "<p>White boards, dry erase markers, case scenarios </p>",
+            "<p><strong>Learning Objectives:</strong></p>",
+            "<p>Students will design and evaluate engineering solutions that can help improve the lives of patients with sensory-motor impairments (i.e., a human-machine interface). </p>"
+          ]
+        }
+      },
+      {
+        "id": "KFjJz6Bn8nSYVlt8",
+        "title": "Text 4",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Resources</strong></p>", "<p><a href='https://web.stanford.edu/~mshanks/MichaelShanks/files/509554.pdf'>Introduction to design thinking</a></p>", "<p>Case studies (see student-facing lesson)</p>"]}
+      }
+    ]
+  },
+  "supports": []
+}

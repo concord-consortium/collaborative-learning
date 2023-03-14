@@ -1,0 +1,49 @@
+{
+  "type": "MathReflection1",
+  "content": {
+    "tiles": [
+      {
+        "id": "qaXmQo0dlVNqvSZI",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>In this unit we are continuing to explore patterns of change between two variables using linear situations. We use tables, graphs, expressions, equations, and inequalities to represent and these linear patterns and solve problems. At the end of this Investigation,</p>"]
+        }
+      },
+      {"id": "wEMd7OzxRHP2ce4U", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What do you know about linear relationships, expressions, equations, and inequalities?</li></ul>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Main idea: In a linear relationship, as the independent variable increases in equal increments, the corresponding dependent variable increases (or decreases) by a consistent amount.  Students might describe this as the rate of change. They should realize that this could be zero (as with Leanne) or negative (as with Ms. Chang and Mr. Mamer). They may realize that the rate of change can be measured anywhere on the graph or table. A linear relationship can be represented by the equation y = ax + b. The point where the line crosses the y-axis is b, the y-intercept. The rate of change is represented by a. If b is 0, then the relationship is also proportional. In a linear and proportional relationship, the rate of change is also a unit rate that is the constant of proportionality. Inequalities appeared briefly as a contrast to equality in Problem 1.4. </p>"
+          ]
+        }
+      },
+      {"id": "2AvbxffDEG8szNKD", "title": "Text 6", "content": {"type": "Text", "format": "html", "text": ["<p>If a relationship is linear, you can tell if it is proportional in the following ways:  </p>"]}},
+      {"id": "eee-Ur7D0xpp7spC", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<p>Table: Values from the table are proportional. You can use the values to write proportions or “for every” ratio statements. For example, in the table for Gilberto:</p>"]}},
+      {"id": "gF_JB7Nes95aMHXW", "title": "Gilberto's Pledge Table", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/Inv_1_MR_Table.png", "filename": "curriculum/moving-straight-ahead/images/Inv_1_MR_Table.png"}},
+      {"id": "SKsM6bhc5c0FyNTh", "title": "Text 9", "content": {"type": "Text", "format": "html", "text": ["<p>Equation: The amount added into the equation is zero. Or the y-intercept is zero. For example, in the equation for Gilberto:</p>"]}},
+      {"id": "zF2prrQXTQVtDXtE", "title": "Text 10", "content": {"type": "Text", "format": "html", "text": ["<p>Gilberto&#x27;s Equation</p>", "<p>m=2d</p>", "<p>OR</p>", "<p>m=2d + 0</p>"]}},
+      {"id": "j-KMntJs1cx1UiJT", "title": "Text 11", "content": {"type": "Text", "format": "html", "text": ["<p>Graph: The graph of a proportional relationship is passes through the point (0,0). For example, in the graph for Gilberto:</p>"]}},
+      {"id": "jvuAR-I2oiaV9-Iy", "title": "Pledges", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/Inv_1_MR_Graph.png", "filename": "curriculum/moving-straight-ahead/images/Inv_1_MR_Graph.png"}},
+      {
+        "id": "K0uoFSUIdQrIO5NR",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflections on the Mathematical Practices</strong></p>",
+            "<p>As we worked on the Problems in this Investigation, we used prior mathematical knowledge to make sense of them. We also applied Mathematical Practices to solve the Problems. For example,</p>",
+            "<p>At the end of Problem 1.3, Eli’s group noticed that the linear relationship with the greatest positive pattern of change had the steepest line. For example, A<sub>Gilberto</sub> = 2n and A<sub>Alana</sub> = 5 + 0.5n. The line of Gilberto’s equation is steeper since it has a greater rate of change. </p>",
+            "<p>This makes sense since as the number of kilometers increases by one unit, the money each sponsor donates to Gilberto increases by $2. The money each sponsor donates to Alana increases by $0.50. </p>",
+            "<p>For Leanne, the equation is A<sub>Leanne</sub> = 10, so the change is 0. As the number of kilometers increases by one unit, the money each sponsor donates to Leanne does not change. The graph is a horizontal line. </p>",
+            "<p>We also noted that the amount of money that Gilberto raises represents a proportional situation. For every kilometer he walks he collects $2. The other two situations are not proportional.</p>",
+            "<ul><li><em>What mathematical practice(s) did the Eli’s group use to solve this problem?</em></li><li><em>What other mathematical practices did you use to solve problems in this Investigation?</em></li><li><em>In what ways is the mathematics in this problem connected to prior mathematics?</em></li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

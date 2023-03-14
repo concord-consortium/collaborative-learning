@@ -1,0 +1,25 @@
+{
+  "type": "reflection",
+  "content": {
+    "tiles": [
+      {
+        "id": "L95aJemvzkzy04my",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Please load your Learning journal (&quot;My Work&quot; &gt;&gt; &quot;Learning Journals&quot;). </p>", "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions.</p>"]}
+      },
+      {
+        "id": "NzUHmnvCP0UID0gM",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Lesson 1.3 Journal Entry</strong></p>",
+            "<p>1. Today&#x27;s date:</p>",
+            "<p>2. Today&#x27;s topic:</p>",
+            "<p>3. How would your daily life be affected by the injury that your group has explored?</p>",
+            "<p>4. Of the three injury types that had been discussed (brain, spinal cord, peripheral nerve), which injury type best characterizes Tilly’s condition?  </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

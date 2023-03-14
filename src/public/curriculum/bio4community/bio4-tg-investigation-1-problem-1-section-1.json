@@ -1,0 +1,46 @@
+{
+  "type": "sources",
+  "content": {
+    "tiles": [
+      {
+        "id": "bU_abuyDQ1utxFFo",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Below are the Resources for the current Chapter of the story and cumulative resources for the previous chapters. </strong>When you are ready for your students to have access to the resources for the current chapter, make them available in the students&#x27; Resource Library tab as follows:</p>",
+            "<ol><li>Drag the tiles below into your Log on the right, placing them at the top (above the previous chapter&#x27;s resources). </li><li><strong>Note: you can multi-select tiles by holding down the shift key when clicking them</strong></li><li>Click the Publish button (blue rectangle with the up arrow, to the left of Log title)</li><li>Go to the Resource Library tab (pink) and delete your previously published resources, leaving only the newest published material</li></ol>",
+            "<p>Your students will now see the cumulative Resources under their Resource Library tab.</p>"
+          ]
+        }
+      },
+      {"id": "hXuK-DHuwuXmx9Lz", "title": "Text 8", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 1 RESOURCES</h2>"]}},
+      [
+        {"id": "YcJHTQkBql9Rm5Ss", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong></strong></p>", "<p><strong>Evidence 1: <a href='https://youtu.be/9d__Qy0NaJk'>The Effects of Stress on the Heart</a> (video)</strong></p>", "<p></p>"]}},
+        {"id": "XKBxVzPoEkDC-YQr", "title": "Effects of Stress Video", "content": {"type": "Image", "url": "curriculum/bio4community/images/effectsofStress.png"}}
+      ],
+      {
+        "id": "QewT7EB_gx14gU0-",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Questions About Evidence 1, </strong><em><strong>The Effects of Stress on the Heart (video) </strong></em></p>",
+            "<p><strong></strong></p>",
+            "<p>1. The subordinate monkey has: </p>",
+            "<p><strong>Less control </strong>  OR    <strong>More control    </strong>(underline your choice)</p>",
+            "<p></p>",
+            "<p>2. The subordinate monkey artery is:</p>",
+            "<p><strong>Less clogged</strong>   OR    <strong>More clogged    </strong>(underline your choice)</p>",
+            "<p></p>",
+            "<p>3. Both monkeys had the same diet and health care, the difference in their blood vessels is only due to the stress from social subordination.  </p>",
+            "<p><strong>True</strong>   OR   <strong>False</strong> ?    (underline your choice)</p>"
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

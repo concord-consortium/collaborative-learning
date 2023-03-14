@@ -1,0 +1,46 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "Hv_sfErIhv8jW5Gk",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The method for finding the steepness of stairs suggests a way to find the steepness of a line. A line drawn from the bottom step of a set of stairs to the top step touches each step at one point. The rise and the run of a step are the vertical and the horizontal changes, respectively, between two points on the line. </p>"
+          ]
+        }
+      },
+      {
+        "id": "s6_sevOrE9eqiVii",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The steepness of the line is the ratio of rise (vertical change) to run (horizontal change) for this step. We call this ratio the <em>rate of change</em> or <strong>slope</strong> of the line. </p>",
+            "<p>                    vertical change            rise</p>",
+            "<p>Slope  =  __________________   =  ______</p>",
+            "                   horizontal change          run"
+          ]
+        }
+      },
+      {"id": "ZL91_xMcHp6S9Smy", "title": "Rise over Run from a line on stairs", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_4_2_In_stairs_350w.png"}},
+      {"id": "L2bwZ2UpG-Q901VX", "title": "Rise over Run on a graph", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_4_2_stairgraph.png"}},
+      {"id": "9nINzYTa1Z_FAP5b", "title": "Slope calculation", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_4-2_Intro_Pic4_350.jpg"}},
+      {
+        "id": "3u-_k05_uBWmlEbN",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Unlike the steepness of stairs, the rate of change of a line can be negative. To determine the rate of change of a line, we need to consider the direction, or sign, of the vertical and horizontal changes (the slope of a line) from one point to another. </p>",
+            "<p>We will learn more about slopes of lines in the Grade 8 unit <em>Thinking with Mathematical Models</em>.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

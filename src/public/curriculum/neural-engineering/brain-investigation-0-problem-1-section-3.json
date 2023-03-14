@@ -1,0 +1,29 @@
+{
+  "type": "reflection",
+  "content": {
+    "tiles": [
+      {
+        "id": "L5yWAVL_sIREbhOj",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Throughout the neural engineering unit, you will keep a learning journal called a Learning Journal. </p>",
+            "<p>At the end of each lesson, you will be asked to add a journal entry to track your learning throughout the unit. </p>",
+            "<p>To start your journal, click on &quot;My Work&quot; &gt;&gt; &quot;Learning Journals&quot;</p>",
+            "<p>Click on &quot;My First Learning Log&quot; and click &quot;Edit&quot; in the top right of the pane.</p>",
+            "<p>Then, come back to this tab, drag the template below into your workspace, and answer the following questions. </p>"
+          ]
+        }
+      },
+      {
+        "id": "wM4PL8x9C83NYIRR",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>My First Journal Entry</strong></p>", "<p>Today&#x27;s date:</p>", "<p>Today&#x27;s topic:</p>", "<p>What do you like about CLUE and Dataflow?</p>", "<p>What can be improved?</p>", "<p>What kind of questions do you have?</p>"]
+        }
+      }
+    ]
+  }
+}

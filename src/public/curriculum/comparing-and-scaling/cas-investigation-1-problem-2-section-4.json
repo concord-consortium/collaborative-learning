@@ -1,0 +1,17 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "SEeJtV7bwWSaKYfw", "content": {"type": "Text", "format": "html", "text": ["<p>How do the strategies you used in this Problem compare to those used in Problem 1.1?</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>New to this Problem are the strategies of using a rate table and using a proportion. Both strategies give a way to see the ratios scaled up. The rate table allows you to see many equivalent ratios. The proportion finds a specific equivalent ratio.</p>"]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

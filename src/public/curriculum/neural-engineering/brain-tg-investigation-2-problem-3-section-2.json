@@ -1,0 +1,32 @@
+{
+  "type": "teach",
+  "content": {
+    "tiles": [
+      {
+        "id": "-bQohjopzRSMHLYu",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Instructional Sequence</h3>",
+            "<p><em>10 min</em></p>",
+            "<p>In small groups, ask students to discuss how what they learned in lesson 2.1  (the impact of sensory information on movement) and lesson 2.2 (how the nervous system processes sensory information) can be incorporated into the design of the gripper. Inform students that the goal of this lesson is to assemble and program a gripper that can sense objects and adapt its movement accordingly. </p>",
+            "<p><em>40 min</em></p>",
+            "<p>Design Challenge: Can you grab an egg (with the gripper) without cracking it?</p>",
+            "<p>Students will work in groups to incorporate touch sensors in the design of the gripper (see student-facing lesson). </p>",
+            "<p><em>10 min</em></p>",
+            "<p>Ask each group of students to showcase their design by crossing the room while holding a plastic egg or a drained egg with their gripper.</p>",
+            "<p><em>15 min</em></p>",
+            "<p>In their team, ask students to evaluate the design of the gripper and discuss what can be improved. Remind students of the young woman who was portrayed at the opening of the unit (Tilly) and think about how the touch sensors can serve her in her day-to-day life (for example, when putting on makeup).</p>",
+            "<p><em>10 min</em></p>",
+            "<p>Facilitate a class discussion as to how the gripper could be further improved or modified (e.g., using a stronger servomotor, reshaping the tips of the claw, making the touch sensors more reliable/sensitive). </p>",
+            "<p><em>5 min</em></p>",
+            "<p>Using their Learning Journals, ask each student to think about other types of sensors that could improve the operation of the gripper (e.g., temperature sensors) and help people with sensory or motor conditions.  Students will further develop these ideas in the closing lesson (2.4). </p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

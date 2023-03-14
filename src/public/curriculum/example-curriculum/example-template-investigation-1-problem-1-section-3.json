@@ -1,0 +1,42 @@
+{
+  "type": "taskb",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>The school board wonders how long the school building should be open every day. If they close the building they can save money on operating costs, but then students might not have a place to study. The school board hires you to figure out how long each day the school should be open. Your first task is to determine what percentage of the day students typically spend at school. </strong></p>",
+            "<p><strong></strong></p>",
+            "<p><strong>1. Describe your first task in your own words.</strong></p>",
+            "<p><strong></strong></p>",
+            "<p><strong>2. What do you need to know about the school in order to help the board? </strong></p>",
+            "<p>a. List as many factors (key quantities and variables) as you can:</p>",
+            "<p>b. Next to  factor, write where you can find out the information or what you would need to do to figure it out. <br/>Examples:</p>",
+            "<p>- I need to know know how many pets the students have. --&gt; I will conduct a survey to collect this information. </p>",
+            "<p>- I wonder how many books are at the library. --&gt; Ask the librarian if they have this on record. </p>",
+            "<p>c. Use the [v=] button to formally make the variables.</p>",
+            "<p></p>",
+            "<p><strong>3. What assumptions can you make about the context or factors to help you complete this task?</strong></p>",
+            "<p>Example: By saying &#x27;typical day&#x27;, the school board likely means to consider only days that school is in session. </p>",
+            "<p>Example: We probably only care about the pets owned by the students on the soccer team. </p>",
+            "<p></p>",
+            "<p><strong>4. Select 2 of the factors and explain how/why they are important for helping you to complete the task. </strong></p>",
+            "<p><em>Hint: You can use the [v=] button to get a list and then select from &#x27;Reference existing variable&#x27; to get you started!</em></p>",
+            "<p>Example: We need to know the number of [pets] so that we buy enough pet food.</p>",
+            "<p></p>",
+            "<p><strong>5. Describe in words how some of these factors are related.</strong></p>",
+            "<p>Example: The more [pets] we allow in the library, the more [books in the library] will be ripped up.</p>",
+            "<p></p>",
+            "<p><strong>6. Use mathematical language or symbols to describe the relationship between those variables. </strong></p>",
+            "<p><strong></strong></p>",
+            "<p><strong>7. In the diagram tile provided, you will see all your variables. Sort them to indicate how important you think they are to completing the task. </strong> If they are really important to completing the task, move them to the left hand side of the screen. If they can be ignored (either because you have changed your mind or found a better way to incorporate that idea), move it to the right of the screen. If the factor might be important, move it to the middle.  </p>",
+            "<p><em>Hint: If you need more space, click on the small triangle on the bottom right of the tile to make drag it down and make the tile bigger.</em></p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

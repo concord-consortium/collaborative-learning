@@ -1,0 +1,35 @@
+{
+  "type": "drawing",
+  "content": {
+    "tiles": [
+      {
+        "id": "Vt5Fa54oRfOIx9Y1",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Create a labeled sketch of the situation using the drawing tile. </em></p><p>(   ) Sketch out the situation</p><ul><li>Use the drawing tools to design sketches. Test out the different options.</li><li>Upload images from your computer and then annotate them using the drawing tools </li></ul>"
+          ]
+        }
+      },
+      {"id": "ePTfYCm7Q-oWGR2R", "title": "Toolbar buttons for the drawing tile", "content": {"type": "Image", "url": "curriculum/m2studio/images/Toolbar_Drawing.png", "filename": "curriculum/m2studio/images/Toolbar_Drawing.png"}},
+      {
+        "id": "TZAbGjYLLuBenwJB",
+        "title": "Text 9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>(   ) Create chips to label your drawing using the <strong>Create Variable</strong> button. <a href='https://project-resources.concord.org/M2Studio/Curriculum/Tutorials/CreatingVariablesInDrawingTile.mp4'>Video Tutorial</a> </p><p>Your variables can include any combination of:  </p><ul><li>Short name (No spaces, case sensitive, should be short but informative)</li><li>Description (Space to take a few notes to jog your memory. Long ideas should be in the text tile instead)</li><li>Units (Do you already have an idea of what the units should be?)</li><li>Value (This is what you are temporarily setting this value to, if you have an idea. Be sure to keep good notes to explain how you chose this number!)</li></ul><p>(   ) If you have already created variables elsewhere, insert them here using the <strong>Insert Variable(s) </strong>button to either annotate your existing sketch or to help you decide what else you need to do to improve your sketch of the situation. </p><p>(   ) Use the Edit Variable button to make any necessary changes to your existing variables.</p>",
+            "<p>Here are some images you might want to use. These can be dragged into your workspace on the right. They can be dragged into drawing tiles.</p>"
+          ]
+        }
+      },
+      {"id": "9FHA9Xi-5FaLICMC", "title": "2021 Global Smartphone Shipments (in millions)", "content": {"type": "Image", "url": "curriculum/m2studio/images/GloablSmartphones.png", "filename": "curriculum/m2studio/images/GloablSmartphones.png"}},
+      {"id": "q8i-DMRdWVGQMVBc", "title": "World Clock", "content": {"type": "Image", "url": "curriculum/m2studio/images/WorldClock.png", "filename": "curriculum/m2studio/images/WorldClock.png"}},
+      {"id": "kdgkHdGz7X0tiWju", "title": "Distribution of Global Population 2021 by continent", "content": {"type": "Image", "url": "curriculum/m2studio/images/GlobalDist.png", "filename": "curriculum/m2studio/images/GlobalDist.png"}},
+      {"id": "LwLreJIOQt4jGY6N", "title": "Population by age bracket around the world, 2022", "content": {"type": "Image", "url": "curriculum/m2studio/images/PopAges.png", "filename": "curriculum/m2studio/images/PopAges.png"}}
+    ]
+  }
+}

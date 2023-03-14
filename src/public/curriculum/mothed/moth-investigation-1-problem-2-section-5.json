@@ -1,0 +1,12 @@
+{
+  "type": "summary",
+  "content": {
+    "tiles": [
+      {"id": "idJFe3ije4divnPF", "title": "Text 16", "content": {"type": "Text", "format": "html", "text": ["<h2>Summarize your investigation</h2>"]}},
+      {"id": "Fy1q3E87LcaOpGRS", "content": {"type": "Text", "format": "html", "text": ["<p>Use this space to document your research. You might want to start by including the information below, but you may find other ways and additional ways to show and explain your findings. </p>"]}},
+      {"id": "872VzfBW_srkyhNJ", "content": {"type": "Text", "format": "html", "text": ["<p>Your research question: (What do you want to know?)</p>", "<p></p>"]}},
+      {"id": "EbVqlxtSAD_WUg9V", "content": {"type": "Text", "format": "html", "text": ["<p>Your experimental design: (How are you going to answer your question?)</p>", "<p></p>"]}},
+      {"id": "ruesvDn5NpUxwfPN", "content": {"type": "Text", "format": "html", "text": ["<p>Your findings: (What did you learn?)</p>"]}}
+    ]
+  }
+}

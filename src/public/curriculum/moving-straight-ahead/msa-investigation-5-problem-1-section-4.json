@@ -1,0 +1,41 @@
+{
+  "type": "MathReflection4",
+  "content": {
+    "tiles": [
+      {
+        "id": "eG4T_G0r0K3RWrHG",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In this unit we are continuing to explore patterns of change between two variables using linear situations. We use tables, graphs, expressions, equations, and inequalities to represent and these linear patterns and solve problems. At the end of this Investigation,</p>",
+            "<p><em>What do you know about linear relationships, expressions, equations, and inequalities? </em></p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Slope describes the steepness of a line. It is the ratio of vertical change to horizontal change. If it is positive, then the line is increasing from left to right. If it is negative, then it is decreasing from left to right. If the slope is zero, the line is horizontal. This is like walking on a flat surface as opposed to up or down a hill.</p>",
+            "<p>Finding the slope is the same as finding the rate of change between two variables in a linear relationship. The horizontal distance change between two points is the same as the difference between two corresponding x-values of points in a table. The vertical change in distance is the same as the difference between two corresponding y-values of points in a table.</p>"
+          ]
+        }
+      },
+      {
+        "id": "J7pN8BZWjZe6mkdK",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflections on the Mathematical Practices</strong></p>",
+            "<p>As you worked on the Problems in this Investigation, you used prior mathematical knowledge to make sense of them. You also applied Mathematical Practices to solve the Problems. Think back over your work, the ways you thought about the Problems, and how you used Mathematical Practices. </p>",
+            "<ul><li>What mathematical practice(s) did the group use to solve this problem?</li><li>What other mathematical practices did you use to solve problems in this Investigation?</li><li>In what ways is the mathematics in this problem connected to prior mathematics?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

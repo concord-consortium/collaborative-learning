@@ -1,0 +1,10 @@
+{
+  "type": "objectives",
+  "content": {
+    "tiles": [
+      {"id": "Mf2vKLFaBOM_YjWL", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Importance of Water Conservation</strong></p><p>Students will be able to explain at least one reason why water conservation is important in their lives and/or communities.</p>"]}},
+      {"id": "Q_3vZLK0L3wviFh6", "title": "Text 2", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Main Activities</strong></p><ul><li>Reading about water conservation</li><li>Small group and whole class discussion</li><li>Introducing a problem statement </li></ul>"]}},
+      {"id": "6D36i4u2k7QpdJr-", "title": "Text 3", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Deliverables </strong></p><ul><li>Engineer notebook: &#x27;Why water conservation is important to me and my community?&#x27;</li></ul>"]}}
+    ]
+  }
+}

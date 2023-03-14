@@ -1,0 +1,45 @@
+{
+  "type": "text",
+  "content": {
+    "tiles": [
+      {
+        "id": "zx1KHi-_yxNAfSfd",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Organize your thoughts about the task using the text tile.</em></p><p>(   ) Take notes:</p><ul><li>Interpret the question</li><li>Record key ideas</li><li>Keep track of your sources</li></ul><p>(   ) Format your notes (bullets, underline, italics, bold, paragraphs)</p><p>(   ) If you have already created variables elsewhere in your workspace, insert them into your work using the [v=&lt;--] button and add commentary.</p><p>(   ) Create variables to enhance your notes using the [v=] button. Variables can have any combination of:</p><ul><li>Short name (No spaces, case sensitive, should be short but informative)</li><li>Description (Space to take a few notes to jog your memory. Long ideas should be in the text tile itself)</li><li>Units (Do you already have an idea of what the units should be?)</li><li>Value (This is what you are temporarily setting this value to, if you have an idea. Be sure to keep good notes to explain how you chose this number!)</li></ul><p>(   ) After you have a chip in place, click on it and the Edit Variable button to see how you can make changes.</p>"
+          ]
+        }
+      },
+      {"id": "njCI4Wmr6eYNc5go", "title": "CLUE Toolbar", "content": {"type": "Image", "url": "curriculum/m2studio/images/CLUEToolbar.png", "filename": "curriculum/m2studio/images/CLUEToolbar.png"}},
+      {"id": "cP2E6t6w3HOYTCUi", "title": "Toolbar buttons for the text tile", "content": {"type": "Image", "url": "curriculum/m2studio/images/Toolbar_Text.png", "filename": "curriculum/m2studio/images/Toolbar_Text.png"}},
+      {"id": "7QvQa97zBd4PZLP6", "title": "Text 10", "content": {"type": "Text", "format": "html", "text": ["<p>You can store reference data in tables.</p>"]}},
+      {
+        "id": "FDAYvugP7pz6d3Oh",
+        "title": "Table 1",
+        "content": {
+          "type": "Table",
+          "name": "World Population by Age Range",
+          "columns": [
+            {"name": "Age Group", "width": 116.73828125, "values": ["<20 years", "20-39 years", "40-59 years", "60-79 years", "80-99 years", "100+ years"]},
+            {"name": "Number of People", "width": 232.125, "values": ["2.6 billion", "2.3 billion", "1.8 billion", "918 million", "147 million", "0.6 million"]}
+          ]
+        }
+      },
+      {
+        "id": "UBEgM8aG2Fh2ONiD",
+        "title": "Table 2",
+        "content": {
+          "type": "Table",
+          "name": "Cell Phone Use",
+          "columns": [
+            {"name": "Country", "width": 103.54296875, "values": ["China", "India", "Indonesia", "United States", "Brazil", "Russia", "Nigeria", "Bangladesh", "Pakistan", "Japan"]},
+            {"name": "Number of Cell Phone Users", "width": 158.92578125, "values": ["1.6 billion", "1.28 billion", "386 million", "327 million", "284 million", "256 million", "167 million", "166 million", "165 million", "147 million"]}
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {"id": "Ce0ddFqDIekcTc0W", "content": {"type": "Text", "format": "html", "text": ["<p>If we let C represent the cost of a pizza and N represent the number of pizzas,</p>"]}},
+      [
+        {
+          "id": "aOBBfjAILB8J9wsO",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Royal Pizza</p>",
+              "<p>Proportion    OR    Linear</p>",
+              "<p>Equation                      Equation</p>",
+              "<p>C/N  = 13/1             OR      C = 13N</p>",
+              "<p>With the proportional situation, both equations are equivalent. You can multiply one variable by a constant number to get the value of the other variable.</p>",
+              "<p></p>"
+            ]
+          }
+        },
+        {
+          "id": "VLndSuMeVRsGUjqc",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Howdy’s Pizza</p>",
+              "<p></p>",
+              "<p>Linear Equation</p>",
+              "<p></p>",
+              "<p>C = 11N + 30</p>",
+              "<p></p>",
+              "<p>You cannot write C = 11N + 30 as a proportion. The add-on changes the unit rate with each N. So there is no constant of proportionality. You cannot multiply one variable by a constant number to get the value of the other variable.</p>"
+            ]
+          }
+        }
+      ],
+      {"id": "zUaaoxdPbicBpQ-C", "content": {"type": "Text", "format": "html", "text": ["<p>Note:  The unit rate,  (5 pizzas)/$65=  (5/65)/$1  or 5/65 pizza for $1, exists but it might not be as useful depending on the situation.</p>"]}},
+      {
+        "id": "F77Bc8AeJUqG1cOM",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p>Students will be analyzing the proportionality in descriptions, tables, graphs, and equations.  Let students know that the situation involves a sale on oranges where they are 10 oranges for $2.  Students will analyze how they can use this information to think about buying any number of oranges. Have students begin this work independently for a few minutes and then work with a partner.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

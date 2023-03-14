@@ -1,0 +1,28 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "l29KgAi3qY_IK5pL",
+        "title": "Text 1",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Look again at Alana’s pledge plan from Problem 1.3. Suppose A represents the amount raised in dollars and d represents the distance walked in kilometers. We can express this plan with the equation A = 5 + 0.5d. </p>"]}
+      },
+      {"id": "uvsHdBWZy6xhefVN", "title": "Alana's Pledge Plan", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_2_4_In_alanas_plan_350w.png"}},
+      {
+        "id": "kEg6K5Zhwx5MLb6E",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The point (14, 12) is on the graph of Alana’s pledge plan.</p>",
+            "<p><em>Write a question we could answer by locating this point. </em></p>",
+            "<p><em>How can we use the equation for Alana’s pledge plan to check the answer to the question we made up? </em></p>",
+            "<p><em>How can we use a graph to find the number of kilometers that Alana walks if a sponsor donates $17? How could we use an equation to answer this question?</em> </p>",
+            "<p>In this Problem, we will investigate similar questions relating to pledge plans for a walkathon. </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

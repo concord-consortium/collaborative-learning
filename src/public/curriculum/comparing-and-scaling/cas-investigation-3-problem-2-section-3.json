@@ -1,0 +1,101 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "id": "yn43WbHFWOewmRmQ",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<strong>Situation A. Gil Uses Benchmarks</strong>", "<p>Gil’s Strategy</p>", "<p>10% is easy to find. So, I always figure out 10% of the bill, and then I use this information to calculate a 15% or 20% tip. </p>", "<p>1. Explain why Gil’s method works.</p>"]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>10% is 1/10 of the total. You can find 10% by dividing by 10 which “moves the decimal in our base ten number system.”</p>",
+            "<p>Once you find 10% you can take that amount and divide it in half to get 5%. Add together the amount for 10% and 5% and you will have the 15% tip.</p>",
+            "<p>Once you have 10% you can take that amount and double it to get the amount for a 20% tip.</p>"
+          ]
+        }
+      },
+      {"id": "xubn6Vg3Y-JMw21J", "content": {"type": "Text", "format": "html", "text": ["<p>2. Use his method to compute a 15% tip and a 20% tip if the final bill is:</p>"]}},
+      [{"content": {"type": "Text", "format": "html", "text": ["<p>     Final Bill of $24.50</p>"]}}, {"content": {"type": "Text", "format": "html", "text": ["<p>Final Bill of $17.35</p>"]}}],
+      [
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>10% of $24.50 is $2.45</p>", "<p>5% would be about $1.23</p>", "<p>15% would be $2.45 + $1.23 = $3.68</p>", "<p>20% would be $2.45 + $2.45 = $4.90</p>"]}},
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>10% of $17.35 is about $1.74</p>", "<p>5% would be $0.87</p>", "<p>15% would be $1.74 + $0.87 = $2.61</p>", "<p>20% would be $1.74 + $1.74 = $3.48</p>"]}}
+      ],
+      {
+        "id": "Aq_miGm0El57rzON",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation B. Working Backward</strong></p>", "<p>A customer left Jerome $2.50 as a tip for service. That tip is 20% of the total bill for the food.</p>", "<p>How much is the food bill? Explain your reasoning.</p>"]}
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>$12.50</p>", "<p></p>", "<p>20% of the original price is $2.50</p>", "<p>0.20 x original price = $2.50</p>", "<p>Find how many 0.20 are in $2.50</p>", "<p>$2.50 ÷ 0.20 = 12.50</p>", "<p></p>", "<p>OR</p>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["             x 5  ", "                ⃕", "$2.50 = $12.50", "_____________________", "  20% = 100%", "           ⤻", "            x5"]}},
+      {
+        "id": "U3vTBteC_DkbLyof",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Situation C. Another Meal at Larry’s</strong></p>", "<p></p>", "<p>Sandy has a 10% discount off the total price before tax is added for Larry’s Lunch Place. If the cost of the meal is $18.50,</p>", "<p>1. What is the cost of the meal after the discount?</li></ul>"]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>$16.65</p>", "<p>10% of $18.50 is $1.85</p>", "<p>$18.50 - $1.85 = $16.65</p>"]}},
+      {"id": "b8UXPpWWSQiewzEw", "content": {"type": "Text", "format": "html", "text": ["<p>2. What is the total cost with a 6% tax and a 15% tip?</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>$20.42</p>", "<p>$16.65 x $0.06 = ~$1.00 (amount of sales tax)</p>", "<p>$16.65 + $1.00 = $17.75 (amount of bill with sales tax)</p>", "<p>10% of $17.75 = $1.78  5% would be $0.89.  15% tip would be $1.78 + $0.89 = $2.67</p>", "<p>$17.75 + $2.67 = $20.42</p>"]
+        }
+      },
+      {
+        "id": "UBXo7X_VvrGzpqpW",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Situation D. Discount After Discount</strong>",
+            "<p>Aladar has a 20% discount coupon to buy new headphones priced at $95. When he got to the telecom store, he learned that they were having a 30% off sale.</p>",
+            "<p>The clerk calculated the 30% discount first and then applied the 20% off coupon to the discounted amount.</p>",
+            "<p>1. What should be the final price (without sales tax)?</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>30% of $95 is $28.50 (30% discount)</p>",
+            "<p>  $95 - $28.50 = $66.50 (Subtract the 30% discount from the headphone price)</p>",
+            "<p>  20% of $66.50 is $13.30 (20% discount off the discounted price)</p>",
+            "<p>  $66.50 - $13.30 = $53.20 (Subtract the 20% discount off the discounted price)</p>",
+            "<p>  Note: Students might find the discounts each time by finding it in groups of 10% and  subtracting those.</p>"
+          ]
+        }
+      },
+      {"id": "Sbz_cTdBcaebGZU_", "content": {"type": "Text", "format": "html", "text": ["<p>2. Is that final price the same as a 50% discount? Explain.</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>  No</p>",
+            "<p>  $95 x 0.50 = $47.50</p>",
+            "<p>Note: Some students might answer this without doing the calculation. They might reason that it would be a bigger discount if you took 50% of the $95 because the total is more so the discount you’d subtract would be greater.</p>",
+            "<p>OR</p>",
+            "<p>With the way that the clerk did the discount (which is the typical way to do it), 30% is taken off of the total price, then 20% is taken off of the discounted price, not the whole price. So, in this case, the total changes. You begin with the whole total, then you reduce it to a discounted total.</p>",
+            "<p>If you take 50% off, you would be taking the discount on the total amount.</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

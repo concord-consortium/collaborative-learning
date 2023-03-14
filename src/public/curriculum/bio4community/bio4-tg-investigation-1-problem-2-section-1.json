@@ -1,0 +1,76 @@
+{
+  "type": "sources",
+  "content": {
+    "tiles": [
+      {"id": "lPVRGOOHSGjE1y9p", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 2 RESOURCES</h2>"]}},
+      [
+        {
+          "id": "OtokwmPZWbmTVWIi",
+          "title": "Text 5",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<p><strong></strong></p>", "<p><strong>Evidence 2a: </strong></p>", "<p><strong><a href='https://docs.google.com/document/d/1YSXBIHHgoGicQuyuoH9gZ-80ioT_1hHPcJbaxsLLgks/edit?usp=sharing'>All the Fuss About Cholesterol</a> (blog post)</strong></p>", "<p></p>"]
+          }
+        },
+        {"id": "rlxmohFtxdrShvw1", "title": "Blog Post", "content": {"type": "Image", "url": "curriculum/bio4community/images/blogCholesterol.png"}}
+      ],
+      [
+        {
+          "id": "ve4OAvnDcW4-lz4H",
+          "title": "Text 20",
+          "content": {"type": "Text", "format": "html", "text": ["<p><strong></strong></p>", "<p><strong>Evidence 2b: </strong></p>", "<p><strong><a href='https://bio4community.concord.org/branch/main/?mode=animation&organ=heart'>Plaque Animation</a></strong></p>"]}
+        },
+        {"id": "F1AduVhRZwwaS7Gx", "title": "Plaque Animation", "content": {"type": "Image", "url": "curriculum/bio4community/images/plaqueAnimation.png"}}
+      ],
+      {
+        "id": "_NFXdZimtFRe1jHW",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Questions About Evidence 2a</strong><em><strong>All the Fuss About Cholesterol (blog post) </strong></em></p>",
+            "<p>1. Our body can make all the cholesterol we need.  </p>",
+            "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+            "<p></p>",
+            "<p> 2. Cholesterol is needed to build cells, make vitamins, and make hormones.  </p>",
+            "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+            "<p></p>",
+            "<p>3. A cholesterol plaque can form in: </p>",
+            "<ul><li><strong>A.  The liver        </strong></li><li><strong>B. Inside the blood vessel wall   </strong></li><li><strong>C. The stomach   </strong></li></ul>",
+            "<p>(underline your choice)</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {
+        "id": "158aLY6zwDVG-iL1",
+        "title": "Text 21",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Questions About Evidence 2b, </strong><em><strong>Plaque Animation</strong></em></p>",
+            "<p>1. Low long-term stress levels result in faster plaque formation.  </p>",
+            "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+            "<p></p>",
+            "<p>2. The cells that are formed when immune cells “eat up” cholesterol are called ________.</p>",
+            "<ul><li><strong>A.  Yellow cells</strong>      &nbsp; &nbsp; &nbsp; &nbsp;<strong>B. Foam cells</strong>      &nbsp; &nbsp; &nbsp;<strong>C. Red cells</strong></li></ul>",
+            "<p>(underline or circle your choice)</p>",
+            "<p></p>",
+            "<p>3. When there is high cholesterol in diet more foam cells form.  </p>",
+            "<ul><li><strong>True</strong>   OR  <strong>False</strong> ? (underline your choice)</li></ul>",
+            "<p></p>"
+          ]
+        }
+      },
+      {"id": "hXuK-DHuwuXmx9Lz", "title": "Text 8", "content": {"type": "Text", "format": "html", "text": ["<h2>CHAPTER 1 RESOURCES</h2>"]}},
+      [
+        {"id": "YcJHTQkBql9Rm5Ss", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p><strong></strong></p>", "<p><strong>Evidence 1: <a href='https://youtu.be/9d__Qy0NaJk'>The Effects of Stress on the Heart</a> (video)</strong></p>", "<p></p>"]}},
+        {"id": "XKBxVzPoEkDC-YQr", "title": "Effects of Stress Video", "content": {"type": "Image", "url": "curriculum/bio4community/images/effectsofStress.png"}}
+      ]
+    ],
+    "supports": []
+  }
+}

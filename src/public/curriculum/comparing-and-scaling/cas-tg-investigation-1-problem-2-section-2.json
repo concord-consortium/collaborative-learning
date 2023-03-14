@@ -1,0 +1,113 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "fCim1fRIxKFU4Bze",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started)</strong></u></p>",
+            "<p><u>Connecting to Prior Knowledge</u></p>",
+            "<p></p>",
+            "<p>If students are not using the term “scaling ratios” from <em>Stretching and Shrinking</em> or Grade 6 <em>Comparing Quantities</em>, now is the time to encourage that vocabulary. (TIME) <strong>Teaching Aid 1.2: Ratio Type Notation</strong> may be used to emphasize the scaling.</p>",
+            "<p></p>",
+            "<p>If you did not discuss part to part and part to whole ratios in the Summarize of Problem 1.1, discuss the two forms of a ratio with your students now. Students learned about part to part and part to whole ratios in <em>Comparing Quantities</em>. (TIME) <strong>Teaching Aid 1.2: Ratio Type Notation</strong> may be used to emphasize part to part and part to whole relationships.</p>",
+            "<p></p>",
+            "<p>Students were introduced to writing ratios in fraction form in <em>Stretching and Shrinking</em>. This Problem brings the form back, so students have flexibility in the notation used for expressing ratios. It is important for students to begin to differentiate between fractions and ratios written in fraction form. For example, (2c.concentrate)/(3c.water) is not the same as saying 2/3 of the mix is concentrate.  However, (2c.concentrate)/(5c.juice) can be thought of as saying 2/5 of the juice is concentrate. A part to whole situation can be a ratio if we are looking at the relationship between the two quantities – there are 2 cups of concentrate in every 5 cups of juice. It can be a fraction if we are looking at the portion of the juice that is concentrate 2/5  of the juice is concentrate.</p>",
+            "<p></p>",
+            "<p>Also, finding equivalence for fractions and ratios can have very different results.</p>"
+          ]
+        }
+      },
+      {
+        "id": "0Ow8WI7w_lHYB3uH",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Equivalent Fractions</em></p>",
+            "<p>To find equivalent fractions, we change how many pieces in the whole (denominator) and how many pieces in the part (the numerator). When finding equivalent fractions, we multiply by a form of one, a fraction equivalent to 1. The size of the whole stays the same. With equivalent fractions, students need to find portions of the whole that are the same amount.</p>",
+            "<p></p>",
+            "<p>2/3 of the whole is the same amount as 6/9 of the whole.</p>"
+          ]
+        }
+      },
+      {"id": "3TSlr2OaAI5Bs7g3", "title": "Equivalent fractions", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentFractions.png"}},
+      {
+        "id": "u_NZ38Y6AjJIMS7a",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Equivalent Ratios</em></p>",
+            "<p>When finding equivalent ratios, we scale the quantities to find two quantities with the same multiplicative relationship.</p>",
+            "<p></p>",
+            "<p>Here we find the 3rd multiple of 2 and the 3rd multiple of 3. For every 2 of one quantity we have 3 of the other quantity.</p>"
+          ]
+        }
+      },
+      {"id": "qR7SH7s_7iLvN0iW", "title": "Equivalent ratios", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios.png"}},
+      {
+        "id": "XVECoTM6IriNRQqo",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Depending on the ratio situation, the size of the whole amount can change.</p>",
+            "<p></p>",
+            "<p>Students used this thinking in Stretching and Shrinking to find scale drawings. The size of the shape changes, but the relationship between the two quantities of length stays the same. The length of the larger side remains 1.5 times the size of the smaller side.</p>"
+          ]
+        }
+      },
+      {"id": "58inAcv6DHGRYSS8", "title": "Larger = 1.5x smaller", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios2.png"}},
+      {
+        "id": "ekydjqErVPv3--k2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>For the orange juice recipes, students might think about the whole increasing when making batches of the recipes. To make three batches, students need three of the 2 to 3 ratios. The amount of the juice changes, the amount of each component of the recipe changes. We have three times as much.</p>"
+          ]
+        }
+      },
+      {"id": "8P7RAW-4XzVezgO_", "title": "Visualize 2/3 Ratios", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios3.png"}},
+      {"id": "PXYWHRWeGGV0fGXC", "content": {"type": "Text", "format": "html", "text": ["<p>To study the relationship between the two quantities in a ratio, students may keep the size of the whole the same. We can compare 2 for every 3 as the same relationship as 6 for every 9.</p>"]}},
+      {"id": "Nj7msMv-AyVMghOo", "title": "2 for every 3", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios4.png"}},
+      {"id": "LtFs9ZJUnmpMqrMA", "title": "6 for every 9", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_1-2_EquivalentRatios5.png"}},
+      {"id": "dgUxHlclXLmWPGmC", "content": {"type": "Text", "format": "html", "text": ["<p>Have students look at the two ratios written in fraction form and consider how fractions and ratios compare.</p>"]}},
+      {
+        "id": "Rv2ZmTZNOOP4jeiv",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested questions</strong></p>",
+            "<ul><li>How are these fraction forms of ratios the same as or different from fractions? (Student  answers might include: Same: The form looks the same with one number over another number. Both are multiplicative relationships. Finding equivalent fractions and scaling ratios seems a lot the same. Different: Fractions are numbers and ratios are a comparison of two numbers. Fractions are always part to whole relationships of a quantity while ratios can be part to part or part to whole comparisons of two quantities. When we find equivalent fractions, we find different names for the same amount. When we find equivalent ratios, the amount may change but the relationship between the amounts stays the same.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "7ZLgmN01kuLspcpZ",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><u>Presenting the Challenge</u></p>", "<p></p>", "<p>Use <strong>Learning Aid 1.2: Recipes</strong> to shift students’ attention back to the orange juice recipes. Have students consider making batches of each recipe for 210 campers.</p>"]
+        }
+      },
+      {
+        "id": "8A73x89cIL4nCLvT",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested questions</strong></p>",
+            "<ul><li>Arvin and Mariah are thinking about the supplies they need to make batches of juice. Does each recipe serve the same number of people? (No. Recipe A serves 5 people. Recipe B serves 14 people. Recipe C serves 3 people. Recipe D serves 8 people.)</li><li>Does this change how you will find the number of batches for each recipe? (Answers will vary. Some students may change strategies based on the numbers in the recipe. This is something to revisit in the Summary.)</li></ul>"
+          ]
+        }
+      },
+      {"id": "Iu1zYNIWL8td-yZq", "content": {"type": "Text", "format": "html", "text": ["<p>Have students work with a partner on this Problem using <strong>Learning Aid 1.2: Recipes</strong>.</p>"]}}
+    ]
+  }
+}

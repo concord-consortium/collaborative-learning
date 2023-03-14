@@ -1,0 +1,97 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"id": "-ARHpN0Kzv7P9os6", "title": "Text 3", "content": {"type": "Text", "format": "html", "text": ["<p>Consider the following pledge plans. In each equation, y is the amount pledged in dollars by each sponsor and x is the distance walked in kilometers. </p>"]}},
+      [
+        {"id": "tPD8tXjor15glw8Q", "title": "Text 4", "content": {"type": "Text", "format": "html", "text": ["<p>Plan 1</p>", "<p>  y = 5x – 3</p>"]}},
+        {"id": "0_6gGuC3aBAPLh9-", "content": {"type": "Text", "format": "html", "text": ["<p>Plan 2</p>", "<p>  y = –x + 6</p>"]}},
+        {"id": "rwSs30rhszJHu09R", "title": "Text 5", "content": {"type": "Text", "format": "html", "text": ["<p>Plan 3</p>", "<p>  y = 2</p>"]}}
+      ],
+      {"id": "AUSE_pTk6_egcsEg", "title": "Text 6", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What information does the equation give about the pledge plan? Does the plan make sense? Explain why.</li></ul>"]}},
+      {
+        "id": "x0_05DobnEuXoYv-",
+        "display": "teacher",
+        "title": "Text 9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Plan 1: A sponsor pays $5 for every kilometer walked, but you pay the sponsor $3 (or give the sponsor a t-shirt that costs $3). This makes sense because the sponsor is paying money for each kilometer walked, but you are only giving them one donation/t-shirt. </p>",
+            "<p>Plan 2: A sponsor pays $6 and then you give the sponsor $1 for every kilometer you walk. Students will say that the negative rate does not make sense because you give back money. But some may suggest that the walker in Plan 2 collects $6 and promises to walk 15 kilometers. If she does not walk the 15 kilometers, then she pays back $1 for each kilometer not walked. In this case, it is necessary to change what x represents to the number of kilometers not walked. </p>",
+            "<p>Plan 3: A sponsor donates a fixed amount of $2 no matter how far you walk. This makes sense because it’s like a one-time donation.</p>"
+          ]
+        }
+      },
+      {"id": "QDz410aaW7reRXRE", "title": "Text 10", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How might a table or graph of the equation help answer questions about the pledge plans.</li></ul>"]}},
+      {
+        "id": "QQUOVNPrw5Jhx7_B",
+        "display": "teacher",
+        "title": "Text 13",
+        "content": {"type": "Text", "format": "html", "text": ["<p>A table or graph of the equation could help answer questions about the pledge plans by giving you a visual of how much money students raise after walking various numbers of kilometers.</p>"]}
+      },
+      [
+        {
+          "id": "Ed_inADnZypNWN84",
+          "display": "teacher",
+          "title": "Plan 1",
+          "content": {
+            "type": "Geometry",
+            "board": {"properties": {"axisMin": [-1.841, -4.75], "axisRange": [10.096, 12], "axisNames": ["d", "A"], "axisLabels": ["Distance Walked (km)", "Amount Pledged ($)"]}},
+            "objects": [
+              {
+                "type": "movableLine",
+                "parents": [{"type": "point", "parents": [3.3306690738754696e-16, -3.0124999999999997]}, {"type": "point", "parents": [2, 6.949999999999997]}],
+                "properties": {"id": "OnZ27E7A4vkARojI", "pt1": {"type": "point", "id": "OnZ27E7A4vkARojI-point1"}, "pt2": {"type": "point", "id": "OnZ27E7A4vkARojI-point2", "name": ""}}
+              },
+              {"type": "point", "parents": [1, 2], "properties": {"id": "fAnt0_aHYebVtoaD", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}}
+            ]
+          },
+          "layout": {"height": 356}
+        },
+        {"id": "XN1eRgbjfe2h5Tom", "display": "teacher", "title": "Table 1", "content": {"type": "Table", "name": "Plan 1", "columns": [{"name": "x", "width": 80, "values": ["0", "1", "2", "3", "4", "5", "6"]}, {"name": "y", "width": 80, "values": ["-3", "2", "7", "12", "17", "22", "27"]}]}}
+      ],
+      [
+        {
+          "id": "mgQRyooUzaBWFMiJ",
+          "display": "teacher",
+          "title": "Plan 2",
+          "content": {
+            "type": "Geometry",
+            "board": {"properties": {"axisMin": [-1, -1], "axisRange": [9, 9], "axisNames": ["d", "A"], "axisLabels": ["Distance Walked (km)", "Amount Pledged ($)"]}},
+            "objects": [
+              {
+                "type": "movableLine",
+                "parents": [{"type": "point", "parents": [-5.342948306008566e-16, 6]}, {"type": "point", "parents": [5.9937499999999995, 0]}],
+                "properties": {"id": "pWygr3w04hVUhh7N", "pt1": {"type": "point", "id": "pWygr3w04hVUhh7N-point1"}, "pt2": {"type": "point", "id": "pWygr3w04hVUhh7N-point2", "name": ""}}
+              },
+              {"type": "point", "parents": [1, 5], "properties": {"id": "E5TlDxmtYDEL9dYZ", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [2, 4], "properties": {"id": "x2HOIndiSoYDBXdV", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [3, 3], "properties": {"id": "FnaNZ7iBlrLTBS6j", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [4, 2], "properties": {"id": "1aN33QOirvSQqV6O", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+              {"type": "point", "parents": [5, 1], "properties": {"id": "lprHZY2BiODzkbOB", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}}
+            ]
+          },
+          "layout": {"height": 356}
+        },
+        {"id": "dNlp8ruyKHxewSlm", "display": "teacher", "content": {"type": "Table", "name": "Plan 2", "columns": [{"name": "x", "width": 80, "values": ["0", "1", "2", "3", "4", "5", "6"]}, {"name": "y", "width": 80, "values": ["6", "5", "4", "3", "2", "1", "0"]}]}}
+      ],
+      [
+        {
+          "id": "G9OcEIWthN9EBnn8",
+          "display": "teacher",
+          "title": "Plan 3",
+          "content": {
+            "type": "Geometry",
+            "board": {"properties": {"axisMin": [-1, -1], "axisRange": [9, 9], "axisNames": ["d", "A"], "axisLabels": ["Distance Walked (km)", "Amount Pledged ($)"]}},
+            "objects": [
+              {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 2]}, {"type": "point", "parents": [6, 2]}], "properties": {"id": "NEX7g6XUlygns7o_", "pt1": {"type": "point", "id": "NEX7g6XUlygns7o_-point1"}, "pt2": {"type": "point", "id": "NEX7g6XUlygns7o_-point2", "name": ""}}}
+            ]
+          },
+          "layout": {"height": 356}
+        },
+        {"id": "tzOwcgovKKcr9sRm", "display": "teacher", "content": {"type": "Table", "name": "Plan 3", "columns": [{"name": "x", "width": 80, "values": ["0", "1", "2", "3", "4", "5", "6"]}, {"name": "y", "width": 80, "values": ["2", "2", "2", "2", "2", "2", "2"]}]}}
+      ]
+    ]
+  }
+}

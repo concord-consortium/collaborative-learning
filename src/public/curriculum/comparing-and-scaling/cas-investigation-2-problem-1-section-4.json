@@ -1,0 +1,23 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "UEfwkIdZKj-7EzHT", "content": {"type": "Text", "format": "html", "text": ["<p>We have used several strategies for solving problems that involve ratios. How do you decide which method to use?</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary.</p>",
+            "<p>Some students will have a preferred strategy that they always use. Other students will decide based on the quantities given in the ratio and what they need to scale to.</p>",
+            "<p>Students may mention:</p>",
+            "<p>Writing the ratio in words and scaling up to equivalent ratios, using rate/ratio tables, writing proportions, and using percents (although students might not bring up percents until Investigation 3.)</p>",
+            "<p></p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

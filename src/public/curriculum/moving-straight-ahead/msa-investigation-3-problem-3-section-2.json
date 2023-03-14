@@ -1,0 +1,56 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"id": "3JR65T_U4e1m4n4j", "title": "Text 2", "content": {"type": "Text", "format": "html", "text": ["<p>For each equation:</p>", "<ul><li>Find a solution.</li><li>Record each step you take to find a solution.</li><li>Then, check your answer.</li></ul>"]}},
+      {
+        "id": "SK7Vtchc4qxzDEE2",
+        "title": "Text 3",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Set 1.</p>", "<p>  a. 5x + 10 = 20                b. 5x – 10 = 20               c. 5x + 10 = -20</p>", "<p>  d. 5x – 10 = -20              e. 10 - 5x = 20                f. 10 – 5x = -20</p>"]}
+      },
+      {
+        "id": "uP4oygP9B-SBkg2O",
+        "display": "teacher",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Set 1:</p>",
+            "<p>a.  5x = 10</p>",
+            "<p>           x = 2</p>",
+            "<p>b.  5x = 30</p>",
+            "<p>           x = 6</p>",
+            "<p>c.  5x = -30</p>",
+            "<p>           x = -6</p>",
+            "<p>d.  5x = -10</p>",
+            "<p>           x = -2</p>",
+            "<p>e.  -5x = 10</p>",
+            "<p>            x = -2</p>",
+            "<p>f.  -5x= -30</p>",
+            "<p>            x = 6</p>",
+            "<p></p>"
+          ]
+        }
+      },
+      {"id": "Qlwbr8DvMe9SnFK9", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<p>Set 2. </p>", "<p>  a. 1/4 x + 6 = 12                   b. 3/5 = -x + 1                  c. 3.5x = 130 + 10x </p>"]}},
+      {
+        "id": "YPT3TwvXlrYcTAxc",
+        "display": "teacher",
+        "title": "Text 11",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Set 2:</p>", "<p>a.  ¼ x = 6</p>", "<p>            x = 24</p>", "<p>b.  -2/5 = -x</p>", "<p>               x = 2/5</p>", "<p>c.  -6.5x = 130</p>", "<p>                 x = -20</p>"]}
+      },
+      {"id": "JptKg0GN8qKeMXmb", "title": "Text 14", "content": {"type": "Text", "format": "html", "text": ["<p>Set 3. </p>", "<p>  a. 3(x + 1) = 21               b. 2+3(x + 1) = 6x              c. -2(2x – 3) = -2</p>"]}},
+      {
+        "id": "-VFaMhsrU_NNnvX8",
+        "display": "teacher",
+        "title": "Text 10",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Set 3:</p>", "<p>a.  x + 1 = 7</p>", "<p>                x = 6</p>", "<p>b.  2 + 3x + 3 = 6x</p>", "<p>                          5 = 3x</p>", "<p>                          x = 5/3</p>", "<p>c.  2x – 3 = 1</p>", "<p>                2x = 4</p>", "<p>                  x = 2</p>"]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "pKUcLzmOZFDvZOQV", "content": {"type": "Text", "format": "html", "text": ["<p>Describe some strategies for solving problems that involve ratios.</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary.</p>",
+            "<p>Students may mention scaling ratios to get one quantity equal so you can compare the other quantity.</p>",
+            "<p>Unit rates get one of the two quantities to 1, so you can think about the how the other quantity compares.</p>",
+            "<p>Ratios can be represented as part-to-part or part-to-whole relationships.</p>",
+            "<p>Ratios can be written as statements or percents or drawn as pictures.</p>"
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

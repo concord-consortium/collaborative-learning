@@ -1,0 +1,21 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "gvCW4G1XLOhLxRgG",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>As a Teacher, you have extra tabs in your CLUE Resources. One of them is this tab, entitled Teacher Guide. It contains content your students will not see. You may choose to copy tiles from this section or any other into your workspace by dragging them to the right. You may edit them or use them as they are, and of course you may add new content of your own.</p>",
+            "<p>Once your Workspace content is complete, you can publish it to the class. It will appear in the <strong>Extensions</strong> tab on the <strong>Custom Lessons</strong> section. Your students&#x27; published work will appear in the <strong>Class Models and Data</strong> section.</p>",
+            "<p>Lesson 0 is designed as a self-guided exploration of CLUE, a collaborative learning platform that we will use throughout the neural engineering unit. </p>",
+            "<p>As part of CLUE, students are also introduced to Dataflow, our visual computer programming interface. </p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

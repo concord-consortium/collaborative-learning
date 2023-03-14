@@ -1,0 +1,64 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": "<strong>Explore (Digging In)</strong>  \nProviding for Individual Needs\n\nAllow students to problem solve how to find their walking rates. For groups that do not know how to begin, you can ask them questions to help them decide how to conduct the experiment.\n\n<strong>Suggested Questions</strong><ul><li> What are the variables that we need to collect data on? (meters and seconds)</li><li> How can we measure those? (meters using a meter stick and seconds with a timer)</li><li> So, if someone is walking, what do we need to measure to find the walking rate? (the distance in meters and the time that it takes to walk that distance)</li><li> How long would you need to walk for someone to get an idea of how fast or slow you walk? (Answers will vary, but students might say a general distance such as walking down the hallway.)</li><li> What is a convenient distance to use? (Answers will vary. You may want to push for a distance like 10 meters.)</li></ul>"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Look to see how students are recording their walking rates. </p>", "<p>Example: Some may use unit rates, such as 2.5 meters per second, and some may use ratios, such as 2.5 m/1 sec.</p>", "<p>Some students will scale their results differently. There are two unit rates. </p>"]
+        }
+      },
+      [
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Unit Rate #1:</p>", "<p>10 meters in 4 seconds</p>", "<p> ÷ 10 ⤹               ⤸ ÷ 10 </p>", "<p>1 meter in 0.4 seconds.</p>"]}},
+        {"display": "teacher", "content": {"type": "Text", "format": "html", "text": "Unit Rate #2:\n 10 meters in 4 seconds\n ÷ 4 ⤹               ⤸ ÷ 4 \n 2.5 meters in 1 second."}}
+      ],
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Students may not know which one to use. While both are accurate unit rates, a specific rate is asked for in the Initial Challenge. You can use the “for every” language from Grade 6 <em>Comparing Quantities</em> to help students analyze which rate to use for this problem.",
+            "<ul><li> Your walking rate was 10 meters for every 4 seconds. (Using the values from the student’s walking.) There are two unit rates. Do we need to find how many seconds for every 1 meter? Or how many meters for every 1 second?</li><li> Have the student or group look back at the question in the Initial Challenge to see that it asks for meters per second. Does meters per second mean for every 1 meter or for every 1 second? (“per second” means for every 1 second)</li></ul>",
+            "Discuss these ideas in the Summary. "
+          ]
+        }
+      },
+      {
+        "id": "ofmfwXH9qAAak2eo",
+        "title": "Text 17",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>While students are answering the questions in the What If Situations, note their strategies for finding answers to the questions. </p>",
+            "<ul><li>Are students scaling the ratios? </li><li>Are students using a table? </li><li>Are students using a graph? </li></ul>",
+            "<p>These various strategies can be discussed in the Summarize.<br/><br/>As students complete the experiment and record their data, have them continue on to the What If Situation questions.<br/><br/>The way that students answer the What If...? Situation questions can provide a formative assessment of the strategies that students have for answering the questions in the unit. This will help you assess the types of questions that you will need to ask as you continue in the unit. </p>"
+          ]
+        }
+      },
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": "<strong>Planning for the Summary</strong>\n\nWhat evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?"}},
+      {
+        "id": "VPf1sbt6zm1ZRurM",
+        "title": "Text 19",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Now What Do You Know? </em></p>",
+            "<p>Describe how the distance you walk at a constant rate of time is represented in an equation and graph. </p>",
+            "<p>(As you are circulating during the Explore, listen to the way students are using their walking rate- are they using “for every” language; are they looking at scaling them up or down to fit the situation; are they seeing this constant rate in the graph; are they using a unit rate in an equation?  Find examples from student work to use in the summary.)</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

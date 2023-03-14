@@ -1,0 +1,15 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["How do graphs and tables and equations of functions such as <em>C</em> = 0.25<em>t</em> and <em>C</em> = 0.15<em>t</em> + 2.5 help you solve problems? Explain the advantages and disadvantages of each of each representation when trying to solve problems."]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

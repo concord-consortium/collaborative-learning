@@ -1,0 +1,71 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "lqx-aIV1of7FpIqQ",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In the <em>Variables and Patterns</em> unit, we investigated a bicycle touring business. We used contextual situations, tables, graphs, and equations to represent patterns relating variables such as cost, income, and profit. We looked at some linear relationships, like the relationship between cost and number of rental bikes represented in this graph.</p>"
+          ]
+        }
+      },
+      {
+        "id": "4L0IE7Y6H-V7PBWE",
+        "title": "Adrian's Weekly Rental Rates for Bikes",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-9.072, -212.5], "axisRange": [48.861, 1800], "axisNames": ["Bikes", "$"], "axisLabels": ["", ""]}},
+          "objects": [
+            {"type": "point", "parents": [0, 0], "properties": {"id": "jWGQco_rP5kJBFiT", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [5, 150], "properties": {"id": "zkGIraIhLkTT8a9r", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [10, 300], "properties": {"id": "tsHNKc1U6DM5yXdn", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [15, 450], "properties": {"id": "ndDwbyGP5F_6MQm4", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [20, 600], "properties": {"id": "qcs_IvjXIWpMVHEF", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [25, 750], "properties": {"id": "Kzqj4xs81AzaTAAe", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [30, 900], "properties": {"id": "E1h-Sj9H_UtsItAb", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [35, 1050], "properties": {"id": "pu90nprDe8UjUxqO", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [40, 1200], "properties": {"id": "tWUraIxOaJKI4oVi", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [45, 1350], "properties": {"id": "sEMo7ZUcKoPfvooh", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}},
+            {"type": "point", "parents": [50, 1500], "properties": {"id": "dFFoI24SI8h-5FnL", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}}
+          ]
+        }
+      },
+      {
+        "id": "T75Whn-mLweZ7xd_",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>A relationship between two variables for which all points lie on a straight line is called a <strong>linear relationship</strong>. The graph of Adrian’s Rental Rates is an example of a linear relationship.</p>",
+            "<p><em></em></p>",
+            "<p><em>How can we recognize a linear relationship in a context, table, or graph?</em></p>",
+            "<p><em></em></p>",
+            "<p>Consider the following problem.</p>"
+          ]
+        }
+      },
+      {"id": "e3k-GQitkRVX-j_r", "title": "Text 4", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Problem 1.1 Walkathons: Using Rates</strong></p>"]}},
+      {
+        "id": "CCL6VMOGDwpyXzg-",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Ms. Chang’s class decides to participate in a walkathon. Each participant must find sponsors to pledge a certain amount of money for each kilometer the participant walks. Leanne suggests that they determine their walking rates in meters per second, so they can make predictions about the number of meters walked and amount of money raised. She collects some meter sticks and her cell phone to use as a timer for her walking experiment.</p>"
+          ]
+        }
+      },
+      [
+        {"id": "4xgWn5pqnM8OApoa", "title": "A ruler", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_1-1_Ruler.jpg"}},
+        {"id": "15dSiMfdrMeQ9JPu", "title": "A cell phone timer", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_1_1_phone.png"}}
+      ],
+      {"id": "nXVE5aGTww47lPpk", "title": "Text 6", "content": {"type": "Text", "format": "html", "text": ["<p><em>What do you think your walking rate is?</em></p>"]}}
+    ]
+  }
+}

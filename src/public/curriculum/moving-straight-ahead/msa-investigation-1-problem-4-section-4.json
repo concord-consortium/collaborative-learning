@@ -1,0 +1,27 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "rcqfdVSDBUHlnAnd", "title": "Text 44", "content": {"type": "Text", "format": "html", "text": ["<p>If a relationship is linear, how can you tell if the pattern of change is decreasing, increasing, oe neither?</p>"]}},
+      {
+        "id": "-KDWG2QYvbHdtF4S",
+        "display": "teacher",
+        "title": "Text 47",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Both of the relationships in this Problem have decreasing rates of changes. </p>",
+            "<p>EQUATION</p>",
+            "<p>The equation will be in the form of some initial amount then subtracting the constant for every increase in the independent variable. There will be a negative coefficient.</p>",
+            "<p>y = c – mx OR y =  –mx + c</p>",
+            "<p>TABLE</p>",
+            "<p>As the independent variable increases, the dependent variable decreases. </p>",
+            "<p>GRAPH</p>",
+            "<p>The graph of the line will decrease (fall) from left to right.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

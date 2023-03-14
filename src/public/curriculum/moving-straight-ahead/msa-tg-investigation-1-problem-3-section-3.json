@@ -1,0 +1,62 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Explore (Digging In) </strong></p>",
+            "<p>Providing for Individual Needs</p>",
+            "<p>As you circulate, ask students for explanations. Look for students who have interesting ways to explain their thinking. Be sure to discuss these in the Summarize.    </p>",
+            "<p>Students may or may not start by representing the pledge plans with tables and graphs. Without the representations, it may be difficult to answer the questions with specific values. Students may make broad statements, such as saying that Leanne starts out making the most. Push students to find a value for when others might make more. </p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Who starts out making the most? (Leanne)</li><li>Will she always make the most? How much would each person raise if they walked 20 kilometers? (Leanne - $10, Gilberto - $20, Alana - $15)</li><li>When did it change? At what distance does Leanne raise less than Gilberto? Less than Alana? (Leave students to think about these detailed questions. Be sure to revisit them in the Summary.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>By this time in the unit, most students should have few problems making tables and graphs. Writing the equations may be difficult for some students. Encourage those students to write out the relationship in words. Being able to write a verbal description of the relationship in each pledge plan is the first step to being able to write the same relationship algebraically. For example, use a plan to ask questions like the following. </p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>How does Gilberto’s plan work? (A sponsor will donate $2 for each kilometer Gilberto walks.)</li><li>What are the variables and what letter name can we give them? (Amount of money, A, and number of kilometers he walks, d.)</li><li>Which is the independent variable? (Number of kilometers he walks.)</li><li>What happens with the independent variable in Gilberto’s plan? What happens for every kilometer that he walks? (He will make $2.)</li><li>How could we write that as an expression? ($2 times every kilometer walked or 2 * d.)</li><li>How can we write this an equation? (The amount a sponsor donates is found by finding $2 times every kilometer walked or A = 2 • d)</li></ul>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["<p>Remind students that 2 * d is often written 2d, so the equation becomes A = 2d, where A is the amount the sponsor donates and d is the number of kilometers walked. </p>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Planning for the Summary</p>", "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know question? What will you do if you do not have evidence? </p>"]}},
+      {
+        "id": "SP3hXu74mCfcXHUn",
+        "title": "Text 16",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Now What Do You Know?</em></p>",
+            "<p><em><strong>How can you predict where the graph of a linear relationship intersects the y-axis from a context, table, or equation that represent the relationship?</strong></em></p>",
+            "<p>(As you are circulating during the Explore, select examples of student work where students are indicating the y-intercept:  on a table where they have indicated the y-value when the x-value is zero; in the equation it is what is “added on” or the b in y = ax +b; in the context it is the “starting amount”.)</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

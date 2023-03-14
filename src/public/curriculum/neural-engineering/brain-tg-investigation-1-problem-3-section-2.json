@@ -1,0 +1,40 @@
+{
+  "type": "teach",
+  "content": {
+    "tiles": [
+      {
+        "id": "vJcIDh3l1ocfQwNT",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong><em>5 minutes</em></strong></p>",
+            "<p>Do Now:  students are asked to activate prior knowledge they may have on the nervous system and how it controls limb movement. </p>",
+            "<p><strong><em>5 minutes</em></strong></p>",
+            "<p>Ask students to annotate the nervous system diagram in the student-facing lesson based on the provided information. </p>",
+            "<p><strong><em>20 minutes</em></strong></p>",
+            "<p>Teams of students can either choose or be assigned to explore how movement is affected by injury to the (1) brain, (2) spinal cord, or (3) peripheral nerves. </p>",
+            "<p>Students should review the resources provided in the student-facing lesson and discuss how this injury might impact limb movement.   </p>",
+            "<p><strong><em>15 minutes</em></strong></p>",
+            "<p>Students will create a computerized model of limb movement using Dataflow. The program provided in the student-facing lesson is pre-populated with a simulated gripper that represents the arm. Students are challenged to make the gripper move by adding a &quot;brain&quot; to the program (e.g., a timer block) and connecting it to the gripper. Prompt students to think about what each block in their program represents and how information flows between blocks in relation to how information spreads throughout the nervous system.  </p>",
+            "<p>Next, students should modify their Dataflow program to represent the injury that they read about. For example, a spinal injury can be represented by disconnecting the timer (&quot;the brain&quot;) from the gripper. </p>",
+            "<p><strong><em>10 minutes</em></strong></p>",
+            "<p> Coordinate opportunities for students to share their findings. Some potential cooperative learning strategies for sharing student findings include:</p>",
+            "<ul><li>Jigsaw: After students explored specific injuries in their &quot;home groups,&quot; mix the groups such that each new group will have an expert in one of the three types of nerve injury. Students are responsible for teaching each other about the injury that they explored. </li><li>Gallery walk: If students made their reaction time models on paper or whiteboards, ask students to present their models along the classroom wall.  Classmates view each other’s work by walking around the room and adding questions on sticky notes.</li></ul>",
+            "<p><strong><em>5 minutes</em></strong></p>",
+            "<p>Instruct students to add an entry to their Learning journal based on the prompts in the &quot;Reflection&quot; tab. </p>",
+            "<p><em>If time allows</em></p>",
+            "<p>Facilitate a discussion based on the last reflection prompt: Of the three injury types that had been discussed (brain, spinal cord, peripheral nerve), which injury type best characterizes Tilly’s condition?  (answer: peripheral nerves in the missing limb)</p>",
+            "<p><strong>Teacher Resources</strong></p>",
+            "<p><a href='https://www.jigsaw.org'>Jigsaw</a></p>",
+            "<p><a href='https://www.theteachertoolkit.com/index.php/tool/gallery-walk'>Gallery walk</a></p>",
+            "<p><a href='https://stemteachingtools.org/brief/18'>Formative assessment</a> in NGSS congruent classrooms</p>",
+            "<p>Strategies to <a href='https://stemteachingtools.org/sp/talk-flowchart'>facilItate student discussions</a></p>",
+            "<p></p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

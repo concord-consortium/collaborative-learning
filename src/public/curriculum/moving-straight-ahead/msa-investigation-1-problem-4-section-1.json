@@ -1,0 +1,31 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "fSpymsdfyDOOgO",
+        "title": "Text 0",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>We have noticed that, as the independent variable changes by a constant amount, there is a constant pattern of change in the dependent variable. In the last Problem, the graph representing Alana’s pledge plan crossed the y-axis at point at (0, 5). Leanne’s crosses the y-axis at point at (0, 10). Gilberto’s pledge plan crossed the y-axis at (0, 0). These points are called the y-intercepts. The y-intercept is the point where the line crosses the y-axis, or when x = 0. </p>"
+          ]
+        }
+      },
+      {
+        "id": "fSpymuk3WRyDOOgO",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In this Problem we will continue to explore linear relationships in new contexts. </p>",
+            "<p><em>                                               What information does the y-intercept represent?</em></p>",
+            "<p><em>                                               How might it be useful in solving problems?</em></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

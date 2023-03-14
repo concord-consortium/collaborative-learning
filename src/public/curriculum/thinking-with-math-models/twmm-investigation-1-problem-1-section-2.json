@@ -1,0 +1,43 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "markdown", "text": ["- How do you think the strength of a beam is related to its thickness?"]}},
+      {"content": {"type": "Text", "format": "html", "text": ["To answer this question, engineers often use scale models to test their designs. We can do an experiment to discover mathematical patterns involved in building bridges."]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "**A Bridge-Thickness Experiment**",
+            "Materials:",
+            "- Two books of the same thickness",
+            "- A small paper cup",
+            "- About 50 pennies",
+            "- Several 11-inch by 4¼-inch strips of paper",
+            " ",
+            "Instructions:",
+            "- Start with one of the paper strips. Make a “bridge” by folding up 1 inch on each long side."
+          ]
+        }
+      },
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_1_1_paper_bridge_340w.png"}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["- Suspend the bridge between two books. Place a paper cup in the center of the bridge."]}},
+      {"content": {"type": "Image", "url": "curriculum/thinking-with-math-models/images/TWMM_1_1_bridges_between_books_400w.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "markdown",
+          "text": [
+            "- Using guidelines determined by your class, put pennies in the cup, one at a time until the bridge collapse. Record the number of pennies added to the cup. This number is the breaking weight of the bridge.",
+            "- Repeat the experiment with two, three, four, and five strips of new paper. Record your data."
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "markdown", "text": ["---"]}},
+      {"content": {"type": "Text", "format": "markdown", "text": ["- Conduct the experiment.", "- Collect the data and represent the data in a table and graph.", "- What patterns do you observe in the data? Do they support your original conjecture? Explain."]}}
+    ]
+  },
+  "supports": []
+}

@@ -1,0 +1,24 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {"id": "QZVJQpW3RoIPz_E8", "content": {"type": "Text", "format": "html", "text": ["<p><u><strong>Explore (Digging In)</strong></u></p>", "<p><u>Providing for Individual Needs</u></p>"]}},
+      {
+        "id": "LL5vNXNbxXQQQfom",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What could be a comparison statement for how to make the mixture for baby chimps? (40 high fiber scoops for every 60 high protein scoops.)</li><li>Is this part to part or part to whole? (part to part)</li><li>What would be a comparison statement for the total of the mixture for baby chimps? (40 high scoops fiber to 100 total scoops or 60 high protein scoops to 100 total scoops.)</li><li>Is this part to part or part to whole? (part to whole)</li><li>What is a unit rate we could find the for the Baby Chimp mixture? (We could find: How much protein for every 1 fiber, how much fiber for every 1 protein, how much protein for every 1 whole, and how much fiber for every 1 whole.)</li><li>Why is finding unit rate helpful? (We can scale to any other ratio or rate.)</li><li>What are some other strategies that we have used in this Unit to help answer proportional questions like these? (Possible answers include rate tables, proportions, finding the percent, using the unit rate to write an equation, and making a graph of the relationship between the two quantities.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {"type": "Text", "format": "html", "text": ["<p><u>Planning for the Summary</u></p>", "<p></p>", "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>"]}
+      },
+      {"id": "1wl4l5GC80zI6AJw", "content": {"type": "Text", "format": "html", "text": ["<p><em>Now What Do You Know?</em></p>", "<p><em>How are percents useful to solve problems?</em></p>"]}}
+    ]
+  }
+}

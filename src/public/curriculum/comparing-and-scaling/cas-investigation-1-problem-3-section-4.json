@@ -1,0 +1,34 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "-PFQcBC36Z0V-y7i", "content": {"type": "Text", "format": "html", "text": ["<p>How are proportions like other strategies that you have used to solve ratio problems? How are they different?</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Alike:</p>",
+            "<ul><li>Proportions scale ratios like other strategies.</li><li>Like other strategies, proportions help you answer questions</li></ul>",
+            "<p>Different:</p>",
+            "<ul><li>Proportions are an equation.</li><li>With some strategies, you get many equivalent ratios. With proportions, you get a specific equivalent ratio.</li><li>Proportions are written in fraction form.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "hLWgvEn67dy0ossn",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Did You Know?</h3>",
+            "<p>Over the years the number of Representatives in United States House has changed several times. As of 1929 the House passed the Permanent Apportionment Act of 1929, fixing the number of Representatives at 435. But the House continued to debate how to apportion the seats to the 50 states. In 1941, Congress adopted the current formula for reapportioning House seats. In the 2020 census some states gained seats and some lost seats. For example, due to a decline in population, Michigan will lose one Representative. Note there are also 6 non-voting members from Washington, D.C., American Samoa, Guam, the US Virgin Islands, the Commonwealth of Northern Mariana Islands, and Puerto Rico.</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

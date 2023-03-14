@@ -1,0 +1,32 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "sdUFq1jp7_guukQg",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>To maintain the equality of two expressions, we can add, subtract, multiply, or divide each side of the equality by the same number. These are called the properties of equality. In the last Problem, we applied properties of equality and numbers to find a solution to an equation. </p>"
+          ]
+        }
+      },
+      {
+        "id": "JadcdZs_0xQojSby",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Does it make sense to think about negative numbers in a coin situation?</em></p>",
+            "<p><em>Does it make sense to think about fractions in a coin situation?</em></p>",
+            "<p><em>What are some situations where it makes sense to use fractions or negative </em></p>",
+            "<p><em>numbers? </em></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "objectives",
+  "content": {
+    "tiles": [
+      {
+        "id": "3783LgotcLR5O2Kq",
+        "title": "Text 4",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Stakeholder Mapping </strong></p><ul><li>Students will be able to identify at least five stakeholders.</li><li>Students will be able to identify commonalities among groups of stakeholders. </li></ul>"]}
+      },
+      {"id": "5VdEm5HM4QkP0alr", "title": "Text 5", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Main Activities</strong></p><ul><li>Creating a stakeholder map</li><li>Reframing the problem statement </li></ul>"]}},
+      {"id": "B1o4sFmbbOGq6p9U", "title": "Text 6", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Deliverables </strong></p><ul><li>Stakeholder map</li><li>Notes in engineer notebook</li></ul>"]}}
+    ]
+  }
+}

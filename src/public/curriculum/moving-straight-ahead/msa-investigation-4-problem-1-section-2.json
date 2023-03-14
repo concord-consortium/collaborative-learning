@@ -1,0 +1,62 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "z2jvVtxah7s9Oz-r",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Climbing stairs is good exercise, so some athletes run up and down stairs as part of their training. Some students in Ms. Chang's class decided to run up and down stairs to prepare for their Walkathon. The steepness of stairs determines how difficult they are to climb. By investigating the steepness of stairs, we can find another important way to describe the steepness of a line. </p>",
+            "<p>Carpenters have developed the guidelines below to ensure that the stairs they build are relatively easy for a person to climb. Steps are measured in inches. </p>",
+            "<ul><li>The run plus twice the rise should be between 24 and 26 inches.</li><li>The rise plus the run for each step should be between 17 and 19 inches.  </li></ul>",
+            "<p>The steepness of stairs is determined by the ratio of the rise to the run for each step. The rise and run are labeled in the photo below. </p>"
+          ]
+        }
+      },
+      {"id": "qSHpcHrqzDSWA1GZ", "title": "Rise and Run of a set of stairs", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_4_1_In_running_stairs_350w.png"}},
+      {
+        "id": "choEfUdddJ4ixeDk",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Walking Rate Experiment</strong></p>",
+            "<p>Equipment</p>",
+            "<ul><li>Access to various sets of stars to measure</li><li>Measuring device, such as, tape measure or ruler</li><li>Paper and pencil or other materials to record your results, such as Learning Aid 4.1</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "_aAhiZmKPlxbv-q4",
+        "title": "Text 7",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Directions (with a partner or group)</p>", "<ul><li>Measure the rise and run for a few stairs</li><li>Record the ratios of the rise to the run</li><li>Repeat for a new set of stairs</li></ul>"]}
+      },
+      {
+        "id": "8ivvXlCzMYiS2tU5",
+        "title": "Text 8",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Questions</p>",
+            "<ul><li>Determine the steepness of a set of stairs in your school or home.</li><li>How can you describe the steepness of the stairs?</li><li>Is the steepness the same between any two consecutive steps?</li><li>How do the stairs you measured compare the carpenters&#x27; guidelines</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Student answers will vary. Interesting situations to think about include: spiral staircases, school stairs, large steps (like at a museum), etc.</p>",
+            "<p>Example: 7.25 in. to 11.25 inches for the rise to the run, or approximately 0.70 for the ratio of rise to run. This is the same for every step in the staircase. The ratio of rise to run is not within the carpenter’s guidelines.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

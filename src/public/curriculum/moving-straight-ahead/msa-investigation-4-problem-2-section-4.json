@@ -1,0 +1,22 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "rVJyT0LZ-2vFxzGB", "title": "Text 51", "content": {"type": "Text", "format": "html", "text": ["<p>How do the situations in this problem compare to other problems in the unit? In what ways are tables, graphs, equations, and inequalities useful for solving problems?</p>"]}},
+      {
+        "id": "TQT_Mzth-INAqpUK",
+        "display": "teacher",
+        "title": "Text 53",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Student answers will vary. Sample answer: The movie theater situations in this Problem have positive rates of change (like the staircases). Some of the other problems showed decreasing/negative rates of changes. The movie theater problems don’t make sense for fractions of students, but the staircase problems make sense for fraction or decimal measurements. None of the movie theater problems are proportional situations, because none of them would pass through the origin if graphed.</p>",
+            "<p>Tables are useful for solving problems because they show several numerical values for a given pattern. Graphs are useful because they give you a sense of the pattern’s behavior over a wide range of values, which is helpful for estimating. Equations are useful because you can use them to calculate any specific value and the coefficients give you information about the problem situation. Inequalities are useful if you are looking for a range of possible answers.</p>",
+            "<p></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

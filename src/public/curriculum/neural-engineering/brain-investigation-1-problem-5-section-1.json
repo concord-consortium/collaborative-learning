@@ -1,0 +1,17 @@
+{
+  "type": "intro",
+  "content": {
+    "tiles": [
+      {
+        "id": "c2UOT3E_nizwTfuP",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>Today we will explore how Electromyography (EMG) signals can be used to control a robotic gripper.</p>", "<p><strong>Learning Objectives</strong></p>", "<p>By the end of this activity, you will be able to model the performance of a bionic arm. </p>"]
+        }
+      },
+      {"id": "NIkxcsP7Zwth_DUf", "title": "Sketch of muscle control of a robot gripper", "content": {"type": "Image", "url": "curriculum/neural-engineering/images/13.jpg"}},
+      {"id": "rJGaJ5il77ZQulgj", "title": "Text 1", "content": {"type": "Text", "format": "html", "text": ["<p>Think about the muscle EMG signals that we measured in the previous lesson. How would you use these signals to make a robotic gripper open or close?</p>"]}}
+    ]
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {"id": "NrVdqaQA28a05mba", "title": "Text 14", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation A. Connecting Equations and Graphs</strong></p>"]}},
+      {"id": "ogq-bjoJR9DSGxIg", "title": "Text 15", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Which plan in the Initial Challenge has a graph that contains the point (2,4)? </li></ul>"]}},
+      {"id": "99lskQhBoFNVi9Md", "display": "teacher", "title": "Text 18", "content": {"type": "Text", "format": "html", "text": ["<p>Plan 2 includes the point (2,4).</p>"]}},
+      {"id": "UHeuCRfqB5Dnp952", "title": "Text 19", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What question could you answer by locating this point. </li></ul>"]}},
+      {"id": "mJ11kL-369bN6dl7", "display": "teacher", "title": "Text 25", "content": {"type": "Text", "format": "html", "text": ["<p>Answer will vary.</p>", "<p>Sample question: For Plan 2, how much money would you get if you walked 2 kilometers?</p>"]}},
+      {"id": "M_OnhmegefNWxI24", "title": "Text 22", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Which plan has a graph that you can use to find the solution for 8 = 5x – 3?  </li></ul>"]}},
+      {"id": "gDHnFufR9C1Gl6Gx", "display": "teacher", "title": "Text 26", "content": {"type": "Text", "format": "html", "text": ["<p>Plan 1. The coordinates of the point that represents the solution (2.2, 8) shows that the student raises $8 by walking 2.2 kilometers.</p>"]}},
+      {
+        "id": "cXP4hU6Wk1LtNNV5",
+        "title": "Text 27",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Situation B. Connecting Equations and Tables</strong></p>", "<p>All of the following coordinates are in the table of one of the plans from the Initial Challenge. Two coordinates have a missing value: </p>", "<p>(4, 2)    (1.2, ■)      (■, –4)</p>"]
+        }
+      },
+      {"id": "mNkgdtq1K6YK3SQI", "title": "Text 28", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Find the missing values. Explain how you found which plan has the coordinates.</li></ul>"]}},
+      {
+        "id": "b1VU4NdN_1nabt4A",
+        "display": "teacher",
+        "title": "Text 31",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The coordinate pair (4,2) does not satisfy Plan 1.</p>",
+            "<p>So, it either satisfies Plan 2 or Plan 3.</p>",
+            "<p>The ordered pair (?,-4) could not possibly satisfy the equation for Plan 3 (which would give y-values of 2 every x-value).</p>",
+            "<p>So, Plan 2 is the only plan that can have all three coordinate pairs.</p>"
+          ]
+        }
+      },
+      {"id": "QGYF47YlmvhnC135", "display": "teacher", "title": "Compare Plans", "layout": {"height": 250}, "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_2-3_SitBTable_350.jpg"}},
+      {
+        "id": "e9TLfjrLgyvstbc0",
+        "display": "teacher",
+        "title": "Text 32",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Missing values: </p>", "<p>       (1.2, 4.8)       (10, -4)</p>", "<p>Students might search the tables, estimate from the graphs, guess &amp; check, or evaluate the equations to find the missing values.</p>"]}
+      },
+      {"id": "74tohJ2QLbKgz9pU", "title": "Text 33", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Write a question you could answer by finding the missing value.</li></ul>"]}},
+      {
+        "id": "23UVpbuwhhOMTAUL",
+        "display": "teacher",
+        "title": "Text 36",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Answers will vary.</p>", "<p>Possible answer: For Plan 2, how much money does each sponsor pledge if you walk 1.2 kilometers? For Plan 2, how many kilometers does the walker need to walk to owe each sponsor $4?</p>"]}
+      },
+      {"id": "Iptq_zYIBr67dEpC", "title": "Text 37", "content": {"type": "Text", "format": "html", "text": ["<p><em>Situation C. Finding Solutions</em></p>", "<p>For Plan 1, y = 5x - 3 </p>"]}},
+      {"id": "ZH7TWsqflto4gbb4", "title": "Text 38", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Find the value of y when x = 7?</li></ul>"]}},
+      {"id": "vsb2t7Yi_CEah4Yg", "display": "teacher", "title": "Text 41", "content": {"type": "Text", "format": "html", "text": ["<p>y = 5(7) – 3 </p>", "<p>y = 35 – 3 </p>", "<p><strong>y = 32</strong></p>"]}},
+      {"id": "DGy910dJrg913JXm", "title": "Text 42", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Find the value of x when y = 32? </li></ul>"]}},
+      {"id": "1eaMkCZzO4AN28o4", "display": "teacher", "title": "Text 45", "content": {"type": "Text", "format": "html", "text": ["<p>32 = 5x – 3</p>", "<p>35 = 5x</p>", "<p><strong>7 = x</strong></p>", "<p>Note: Some students will just say that x = 7, because of question #1.</p>"]}},
+      {"id": "Pnuoof1llhLjMqgb", "title": "Text 46", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation D. Linear or Non Linear</strong></p>"]}},
+      {"id": "qMMV3w6ndWdAx8nt", "title": "Text 47", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Sally is trying to figure out if the relationships represented by the three plans are linear. How can you help her decide by looking at the equations?  </li></ul>"]}},
+      {
+        "id": "R-g7Zcupwzj1Mcb5",
+        "display": "teacher",
+        "title": "Text 49",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>All the relationships are linear because the y-values change by a constant amount when the x-values increase by 1. Even though the y-values increase, decrease, or stay the same depending on which plan you look at, the rate of change is always constant.</p>"]
+        }
+      },
+      {"id": "tnvOFZVZDMBCyOrY", "title": "Text 48", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Yvonne claims that only Plan 3 is proportional.  Do you agree? Explain why.</li></ul>"]}},
+      {
+        "id": "vbeBa0btjiml_TwJ",
+        "display": "teacher",
+        "title": "Text 50",
+        "content": {"type": "Text", "format": "html", "text": ["<p>She is incorrect. None of the plans are proportional, because they all have non-zero y-intercepts. Also, you could not write a proportion from the table values.</p>"]}
+      }
+    ]
+  }
+}

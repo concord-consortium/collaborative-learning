@@ -1,0 +1,28 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "id": "yu-X2bwhB1khEa7T",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Describe how you can determine a unit rate, or constant of proportionality, in a description, rate table, equation, or graph. In what ways is a unit rate or the constant of proportionality helpful for solving a problem? </p>"]}
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The constant of proportionality or unit rate is represented:</p>",
+            "<p></p>",
+            "<p>In a description as a ratio when one of the quantities is 1.</p>",
+            "<p>In the table when one quantity is 1.</p>",
+            "<p>In the graph by the amount of increase in the cost (y value) each time the number of tickets (x value) increases by 1. It is also at the point (1, ?).</p>",
+            "<p>In the equation by the number being multiplied by N (number of tickets).</p>",
+            "<p></p>",
+            "<p>Knowing both quantities when one quantity in a ratio is equal to 1 makes it easy to scale the ratio. So, this makes it helpful to answer questions.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

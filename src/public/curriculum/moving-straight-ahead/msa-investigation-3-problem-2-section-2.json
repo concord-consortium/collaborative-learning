@@ -1,0 +1,157 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "WRkEAz2nGQRRDwtB",
+        "title": "Text 9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Suppose x represents the number of coins in one pouch and 1 represents the value of one coin in the following situations. </p>",
+            "<ul><li>Write an equation to represent each code. </li><li>Are there other possibilities for the equations that you could write? Explain.</li><li>Use your equation to find the number of gold coins in each pouch. Check your answers.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "PkJUj2DNYNeQsJRd",
+        "title": "Code 7",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {"type": "image", "id": "BwwYa30qJqR9C58p", "x": 22, "y": 124.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "mrK9RdwwwrXcoRJ3", "x": 64, "y": 123.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "SeIQiigDLbU8GQ2A", "x": 22, "y": 68.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "FfzTFW0H3kT3WdKi", "x": 64, "y": 67.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "CYMpzZcGGX1KLPcK", "x": 103.5, "y": 120.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "O81NM3rhJeHizSR2", "x": 103.5, "y": 76.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "zZgfOTeDQ0Kjg3Cr", "x": 140.5, "y": 98.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+            {"type": "image", "id": "bcZDFT8YWR6U0fJn", "x": 165.5, "y": 141.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Zpukwg2yY_cO6tDu", "x": 209.5, "y": 141.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "LrItLZHA8x8tPzfG", "x": 249.5, "y": 141.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "UMSPMVAwsoBfkvh_", "x": 290.5, "y": 141.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "2cD9vU8-38N6vpOj", "x": 334.5, "y": 141.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Oa-zRYQhDGnikvxn", "x": 375.5, "y": 139.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "3Dx-8XK5RIq2K3n1", "x": 163.5, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "rwXpSUUahOWUoS0D", "x": 206.5, "y": 96.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "eX46M6SAUBfvK1vp", "x": 246.5, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "8Al0KXsXSLxn2L3B", "x": 290.5, "y": 96.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "LaGHOEYsdIp4aYI2", "x": 334.5, "y": 96.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "aoncAv1CRwCF3Gq7", "x": 373.5, "y": 97.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "mj0G7QXApX4eUQYu", "x": 161.5, "y": 50.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "r1iVTA-7LzT6zpfg", "x": 205.5, "y": 50.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "fglIl08IfdhGB5sW", "x": 244.5, "y": 49.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Rm8muIEwHzhwYgpk", "x": 291.5, "y": 49.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "XodDc3Q7L3Xfy3Tk", "x": 334.5, "y": 48.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "B9WgQlDwyNSaAq-Y", "x": 371.5, "y": 47.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+          ]
+        }
+      },
+      {
+        "id": "v5fyD-BDklqJpqIK",
+        "display": "teacher",
+        "title": "Text 13",
+        "content": {"type": "Text", "format": "html", "text": ["<p>4x +2 = 18    OR   2(2x + 1) =18</p>", "<p>4x +2 = 18                  2x + 1 = 9</p>", "<p>     4x = 16                        2x = 8</p>", "<p>       x = 4                            x = 4</p>"]}
+      },
+      {
+        "id": "o30-cRTY-Fs7sSf5",
+        "title": "Code 8",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {"type": "image", "id": "Z2THRNGm7RU0Bxdt", "x": 11, "y": 106.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "4dHblYUwhHKDZaXU", "x": 88, "y": 105.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "raCDw6ifydich9AJ", "x": 164, "y": 106.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "zVIUKE5O2ZBum1MP", "x": 50.5, "y": 110.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "HLlu-cIa7z3QSuKg", "x": 52.5, "y": 68.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Fhb8CIEJnCvZmB_f", "x": 125.5, "y": 112.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "52sP-ji_XoMjMdrm", "x": 126.5, "y": 69.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Be5uz4xysq4mbtH4", "x": 202.5, "y": 113.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "dLAhpnOtWPqNRMZ6", "x": 202.5, "y": 69.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "6fpz6VJT6_KFgeNx", "x": 233.5, "y": 94.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+            {"type": "image", "id": "pcXWTG3qSzj3d6N3", "x": 257.5, "y": 116.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "uaS-pekXlk_KDyqa", "x": 295.5, "y": 115.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "cl_JjX1w0xf-Fhkj", "x": 335.5, "y": 114.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "0Sm7R9NW6FYicKJ4", "x": 375.5, "y": 115.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "sxcp3cgeMB8jjXbh", "x": 413.5, "y": 115.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "9AMnLlz_AnLeGRr-", "x": 452.5, "y": 114.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "_UReoo_ozaB87SYr", "x": 257.5, "y": 67.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "4YVC3wlbHtKvWyE0", "x": 295.5, "y": 68.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "8u9vUMN3PvOvTxaR", "x": 333.5, "y": 66.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "X6cE62Xbg8oQT2sl", "x": 372.5, "y": 66.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "q8Q07xQ3JAMOrifn", "x": 411.5, "y": 65.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "eVju3GjF6iQuJrUr", "x": 451.5, "y": 66.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+          ]
+        }
+      },
+      {"id": "BwCdaxMOMr4cplIf", "display": "teacher", "title": "Text 25", "content": {"type": "Text", "format": "html", "text": ["<p>3(x+2) = 12     OR    3x+6=12</p>", "<p>   x + 2 = 4                   3x = 6</p>", "<p>         x = 2                     x = 2</p>"]}},
+      {
+        "id": "e-hkfjQBHey5rZxi",
+        "title": "Code 9",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {"type": "image", "id": "RXoQF0G_f37419zr", "x": 13, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "K9ZZUFRog0nWi1tU", "x": 56, "y": 94.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "c2wwICsw42EAUiiO", "x": 105, "y": 93.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "liAxVQ-yOzA0X7Ej", "x": 143.5, "y": 56.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "PO-Yto-5rvcoxMu6", "x": 144.5, "y": 99.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "BbEeN7AYTQD0Z-DP", "x": 185.5, "y": 98.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "NxA0LyWB6T9Sbf0z", "x": 219.5, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+            {"type": "image", "id": "LU-8BjtFOwJIUbgN", "x": 252, "y": 92.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "ODDUxs-6-l72TPZs", "x": 291, "y": 93.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "uKDMPChI5ZQXmo3s", "x": 334.5, "y": 102.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "wZFGYGQPQDAL-D3q", "x": 371.5, "y": 102.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "BR_93sG8f-Zp943l", "x": 410.5, "y": 104.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "8JGWXWk1Ec04nlCV", "x": 452.5, "y": 104.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "yRsFlfYuX6rMFB4D", "x": 329.5, "y": 48.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "01ZEtUSgMHBIVvhi", "x": 368.5, "y": 49.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "VX2wECHrSgCExRTE", "x": 407.5, "y": 49.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "K3pPxsadN5brXmEj", "x": 445.5, "y": 49.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "utv9YcFGoFzIltCo", "x": 486.5, "y": 49.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+          ]
+        }
+      },
+      {
+        "id": "XJEfCDBV-Xs5nBcj",
+        "display": "teacher",
+        "title": "Text 26",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>3x+3 = 2x+9        OR       3(x+1) = 2x+9</p>", "<p>x + 3 = 9                           3x+3 = 2x+9        </p>", "<p>      x = 6                               3x = 2x + 6</p>", "<p>                                               x = 6</p>"]
+        }
+      },
+      {
+        "id": "h14I9N8JXPF2Eqmc",
+        "title": "Code 10",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {"type": "image", "id": "u-n5x-P-oVnMuwHv", "x": 24, "y": 84.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "qPE5cJt2YOONkkvc", "x": 62, "y": 83.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "3sdXvte4KP6L4exo", "x": 105, "y": 82.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "WhqAj2ppGmbWyF5p", "x": 146.5, "y": 50.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "IszcOxfSLVMcVLec", "x": 146.5, "y": 92.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "LkPVvmwRhTQ-aTuP", "x": 186.5, "y": 93.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "M7JJriBQepKgxxgy", "x": 218.5, "y": 70.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+            {"type": "image", "id": "357BglREH-Exm7kV", "x": 255.5, "y": 92.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Vdlvzk_2dj7ltLgU", "x": 292.5, "y": 94.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "ZNio2997k1Y8XYl3", "x": 334.5, "y": 95.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Ix3tUJ_Lpf5Z9yl_", "x": 376.5, "y": 96.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "wil964WbgAvLcD9x", "x": 253.5, "y": 44.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "xO79m3L2S7N7fne2", "x": 292.5, "y": 45.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "KzdVp3jcjCCE-Nvh", "x": 334.5, "y": 45.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+          ]
+        }
+      },
+      {
+        "id": "5hW2Gm4z08queXVy",
+        "display": "teacher",
+        "title": "Text 23",
+        "content": {"type": "Text", "format": "html", "text": ["<p>3x + 3 = 7</p>", "<p>3x = 4</p>", "<p>x =  4/3  or 1 1/3  </p>", "<p></p>", "<p>Note: This may create a conversation about the possibility of a new coin worth 1/3 of a dollar.</p>"]}
+      }
+    ]
+  }
+}

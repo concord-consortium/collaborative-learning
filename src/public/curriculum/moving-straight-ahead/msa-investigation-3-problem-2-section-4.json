@@ -1,0 +1,21 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "GulCFfIZFtLuRbXT", "title": "Text 51", "content": {"type": "Text", "format": "html", "text": ["<p>Describe how the strategies you used to find the number of coins in a pouch is similar to finding the value of a variable in an equation?</p>"]}},
+      {
+        "id": "tFQQnFgvjzuRL3Ad",
+        "display": "teacher",
+        "title": "Text 50",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>You can apply the principles of equality repeatedly to the equation until you have isolated the variable on one side and a number on the other side. </p>",
+            "<p>Then you can check the solution by substituting the value of the variable into the original equation to see if the equation is true.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

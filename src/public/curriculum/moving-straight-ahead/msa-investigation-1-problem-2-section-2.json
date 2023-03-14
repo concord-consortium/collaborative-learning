@@ -1,0 +1,83 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {"id": "xB5pkuMPbUC_N30R", "title": "Text 7", "content": {"type": "Text", "format": "html", "text": ["<p>Alana, Gilberto, and Leanne were students in Ms. Chang’s class. They each did the walking experiment to find their walking rate. </p>"]}},
+      {
+        "id": "60HTS9AMp3MffHdZ",
+        "title": "Table 1",
+        "content": {
+          "type": "Table",
+          "name": "Walking Rates for Ms. Chang's Class",
+          "columns": [{"name": "Name", "width": 80, "values": ["Alana", "Gilberto", "Leanne"]}, {"name": "Walking rate", "width": 214.08203125, "values": ["1 meter per second", "2 meters per second", "2.5 meters per second"]}]
+        }
+      },
+      {"id": "dmtMc9U6wV8KtBfo", "title": "Text 8", "content": {"type": "Text", "format": "html", "text": ["<p>They had some questions about how their walking data is represented in a table, graph, or equation.</p>"]}},
+      {"id": "nkn0pzhsFP2Bz9ut", "title": "Text 9", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Make a table showing the distance walked by each student for the first ten seconds.</li></ul>"]}},
+      {
+        "id": "xgtm5jfG-Z6fgf2Z",
+        "display": "teacher",
+        "title": "Table 2",
+        "content": {
+          "type": "Table",
+          "name": "Walking Rates Time and Distances",
+          "columns": [
+            {"name": "Time (s)", "width": 80, "values": ["0", "1", "3", "4", "5", "6", "7", "8", "9", "10"]},
+            {"name": "Alana (m)", "width": 80, "values": ["0", "1", "3", "4", "5", "6", "7", "8", "9", "10"]},
+            {"name": "Gilberto (m)", "width": 80, "values": ["0", "2", "6", "8", "10", "12", "14", "16", "18", "20"]},
+            {"name": "Leanne (m)", "width": 80, "values": ["0", "2.5", "7.5", "10", "12.5", "15", "17.5", "20", "22.5", "25"]}
+          ]
+        }
+      },
+      {"id": "QJlLFw8kaoQ0mMKP", "title": "Text 10", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Graph the times and distances on the same coordinate axes. Use a different color for each student.</li></ul>"]}},
+      {
+        "id": "_RHXOBHkv4ugOCQu",
+        "display": "teacher",
+        "title": "Walking Rates",
+        "content": {
+          "type": "Geometry",
+          "board": {"properties": {"axisMin": [-1.933, -2.25], "axisRange": [10, 20], "axisNames": ["t", "D"], "axisLabels": ["Time (seconds)", "Distance (m)"]}},
+          "objects": [
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [7, 18]}], "properties": {"id": "yEmEwM0rzkoqA07p", "pt1": {"type": "point", "id": "yEmEwM0rzkoqA07p-point1"}, "pt2": {"type": "point", "id": "yEmEwM0rzkoqA07p-point2"}}},
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [9, 18]}], "properties": {"id": "NRzANO7xnT9_nccm", "pt1": {"type": "point", "id": "NRzANO7xnT9_nccm-point1"}, "pt2": {"type": "point", "id": "NRzANO7xnT9_nccm-point2"}}},
+            {"type": "movableLine", "parents": [{"type": "point", "parents": [0, 0]}, {"type": "point", "parents": [9, 9]}], "properties": {"id": "bvlZF1wU-FbC-Ca-", "pt1": {"type": "point", "id": "bvlZF1wU-FbC-Ca--point1"}, "pt2": {"type": "point", "id": "bvlZF1wU-FbC-Ca--point2"}}}
+          ]
+        }
+      },
+      {"id": "iYcT1zOSzU2WbC2R", "title": "Text 16", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Write an equation that represents the relationship between the time t and distance d walked by each student.</li></ul>"]}},
+      {"id": "l7ljv62SsPFktkcK", "display": "teacher", "title": "Text 17", "content": {"type": "Text", "format": "html", "text": ["<p>Alana: d = t or d = 1t; Gilberto: d = 2t; Leanne: d = 2.5t.</p>"]}},
+      {"id": "cdOLKAm2pwpkP5h1", "title": "Text 20", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How are the walking rates represented in the different representations? </li></ul>"]}},
+      {
+        "id": "O_EuHyqHIPAjED2c",
+        "display": "teacher",
+        "title": "Text 21",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In the equation the walking rate is represented as the number that you multiply by the time to get distance. (Note that students will learn later that the multiplier is called the coefficient.) </p>",
+            "<p>In the table, the walking rate is represented as the difference between values for distance in consecutive rows (1 second apart). So, as the x-values increase by 1, the y values will increase by the walking rate. (Note that students will learn later that this is called the rate of change.)</p>",
+            "<p>In the graph, the walking rate is represented as the steepness of the graph – the greater the walking rate, the steeper the line on the graph. (Note that students will learn later that this is called the slope.)</p>"
+          ]
+        }
+      },
+      {"id": "rNIIRa5dnW6C0FZ1", "display": "teacher", "title": "Solutions for 3 Walking Rate Tables", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_1-2_TimeDistance3groups.png"}},
+      {"id": "aKPAxlg6p3VRFyfq", "title": "Text 24", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What are the advantages and disadvantages of each representation? Explain. </li></ul>"]}},
+      {
+        "id": "H1v13G-F_VMCR57P",
+        "display": "teacher",
+        "title": "Text 26",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary. Sample answers: </p>",
+            "<p>The table is the most helpful because I can figure out the pattern, but I can also see many values that would answer questions.</p>",
+            "<p>The graph is the most important because I can see the pattern for the walking rates. I can also see how the pattern of change for one line is related to the pattern of change for another. I can also find or approximate answers to questions.</p>",
+            "<p>The equation is the most useful because I can use any amount of time to find the distance, not just small values for time like on a graph or table.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

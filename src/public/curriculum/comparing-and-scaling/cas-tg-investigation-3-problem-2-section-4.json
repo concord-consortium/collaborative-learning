@@ -1,0 +1,152 @@
+{
+  "type": "summarize",
+  "content": {
+    "tiles": [
+      {
+        "id": "kS598ws856iX5wV9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Summarize (Orchestrating the Discussion)</strong></u></p>",
+            "<p><u>Solutions and Strategies</u></p>",
+            "<p>The openness of the Initial Challenge will make it somewhat difficult to compare results from the different groups. However, the very openness makes this an inviting opportunity for groups to share their individual choices. Time will be a factor in the summary when you share their choices and work. You may want to have groups do a Gallery Walk. During the Gallery Walk, you can have groups rotate to at least two other groups’ work. Students can check the work and give feedback on sticky notes.</p>"
+          ]
+        }
+      },
+      {
+        "id": "cahJrFF3yiFh4xvv",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Some groups found the sub-total for the food items and then added 6% of that amount to the bill. How else might you calculate the total amount? (You could scale from 1% to 106%. Or you could multiply bill by 1.06 to get total + tax.)</li></ul>"
+          ]
+        }
+      },
+      {"id": "DU7w7KybXd0ux2KS", "title": "Scaling from 1% to 106%", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize1.png"}},
+      {"id": "GyY6h5bOdIZUgYyf", "title": "Scaling by multiplying by 1.06", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize2.png"}},
+      {
+        "id": "1sH6w6eCkTJb2XBl",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><u>Making the Mathematics Explicit</u></p>", "<p></p>", "<p></p>", "<p><em>Situations A and C</em></p>", "<p>Use the Situations to make sure that all students have strategies for finding percents such as tax, tips, and discounts.</p>"]
+        }
+      },
+      {
+        "id": "3F5SBTlp-DuiNLAo",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<p></p>",
+            "<ul><li>What happens when we find 10% of a number? (When we scale from 100% to 10%, the number is divided into 10 equal pieces. Dividing by 10 moves the decimal to the left, because we are changing the place value.)</li><li>How can I use the 10% rate to find the 20% rate? (If we scale from 10% to 20%, we double the percent. So, we would double the number, too.)</li></ul>"
+          ]
+        }
+      },
+      {"id": "yDOJy2t-3zyqAbtp", "title": "Scaling from 10% to 20%", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize_SitA&C.png"}},
+      {
+        "id": "8SrgE0N5QDA9jbqk",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>How can I use the 10% rate to find the 15% rate? (Students might ½ the 10% then scale by 3. Another strategy might be to find ½ between 10% and 20%. A third strategy would be to take the 10% find ½ of it, then combine the two.)</li><li>In Situation C, did you use the same strategy or did you change your strategy when finding the 6% tax then finding the 15% tip? (Student answers will vary. Some students may tend to use the same strategy for both, such as finding 1% then scaling to the percent needed. Some students may use different strategies. For example, a student might find the 15% using a benchmarking strategy and find the 6% by using the 1% and scale strategy.)</li></ul>"
+          ]
+        }
+      },
+      {"id": "1CyYXEdQMDHG1y1s", "content": {"type": "Text", "format": "html", "text": ["<p><em>Situation B</em></p>", "<p>Use the situations to make sure that all students have strategies for finding the quantity of 100% when a percentage and quantity are given.</p>"]}},
+      {
+        "id": "aUSo4nM1RK1tqGOJ",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Suggested Questions</strong></p>", "<p></p>", "<ul><li>If we know the percent and the amount, how do we find the total food bill? (Students will have various strategies that may include the following.)</li></ul>"]}
+      },
+      {"id": "iN4JfJYmIUk-vqYs", "content": {"type": "Text", "format": "html", "text": ["<p>Rate Table</p>"]}},
+      {"id": "1Gr4kEtOXE8iPFEC", "content": {"type": "Table", "name": "Table 2", "columns": [{"name": "Amount", "values": ["$2.50", "$1.25", "$12.50"]}, {"name": "Percent", "values": ["20%", "10%", "100%"]}]}},
+      {"id": "FoWp2yufrzAMznkp", "title": "Proportion", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize_SitB_Proportion.png"}},
+      {"id": "aWL7pSpUxoo6Ehhr", "title": "Percent Bar/Tape Diagram", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize_SitB_BarPercent1.png"}},
+      {
+        "id": "PEOfIgK5h1amazjf",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>While this strategy is the same mathematical reasoning as the proportion shown above, seeing the 5 groups of 20% helps to explain why the scaling works. (PROTRAYAL)  Each partition of 20% is $2.50. We have 5 groups of 20% and 5 groups of $2.50 in the whole (100%) bar.</p>"]
+        }
+      },
+      {"id": "wWIRAkXSv8cgH3Py", "title": "Partitions of the percent Bar/Tape Diagram", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-2_Summarize_SitB_BarPercent2.png"}},
+      {
+        "id": "j-3HplzvuHmQZE-r",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><em>Situation D</em></p>", "<p>This situation explores what happens when you have discounts on top of discounts. This is often counterintuitive for students. Many will think that this is an application of the Distributive Property, but it is not.</p>"]
+        }
+      },
+      {
+        "id": "9RQRslNmHhqeZYnP",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<p></p>",
+            "<ul><li>What was the cost of the headphones after a 30% discount, then a 20% coupon? ($53.20)</li><li>Is this the same as a 50% coupon? Why or why not? (No. 50% off of $95 is $47.50. When you do the 30% discount, you are taking that off the total amount. When you take the 20% discount, you are taking that off less than the total amount.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "b7qVd-Ha36MkIYjy",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em>Going Further</em></p>",
+            "<ul><li>If the clerk had done the discounts in the reverse order (20% discount, then 30% discount), would the price be the same? (Yes. In either case, we would get a 44% discount. We pay 70% of 80% or 80% of 70%. Because this is multiplicative, the order of the multiplication does not matter. Students may notice that this looks like fraction multiplication that they did with brownie pans in Grade 6: Let’s Be Rational 2.)</li></ul>",
+            "<p></p>",
+            "<p>We can use a 100 grid to show the numerical relationships. (PORTRAYAL) The shaded portions represent the discounts off and the white portions represent what we would pay.</p>"
+          ]
+        }
+      },
+      {"id": "e0DbxJc9u4ej6ASr", "title": "50% Off", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-2_GoingFurther_1.png"}},
+      {"id": "g3iPZEaqRBa1hW92", "title": "30% OFF then 20% OFF", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-2_GoingFurther_2.png"}},
+      {"id": "72102I-xitQja2Y0", "title": "20% OFF then 30% OFF", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/TG_3-2_GoingFurther_3.png"}},
+      [
+        {"id": "collpiX8v9RihZzP", "content": {"type": "Text", "format": "html", "text": ["<p>Pay 50%</p>"]}},
+        {"id": "jna61TeHJIxedGHG", "content": {"type": "Text", "format": "html", "text": ["<p>Pay 56%</p>"]}},
+        {"id": "me6WihEokc_CeBhD", "content": {"type": "Text", "format": "html", "text": ["<p>Pay 56%</p>"]}}
+      ],
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Now What Do Students Know</u></p>",
+            "<p><u></u></p>",
+            "<p>Ask students to reflect on the discussion and answer the Now What Do You Know question.</p>",
+            "<p></p>",
+            "<p><em>Describe some strategies you used to solve percent problems.</em></p>",
+            "<p></p>",
+            "<p>See answers for more information about the strategies and embedded mathematics.</p>"
+          ]
+        }
+      },
+      {
+        "id": "lhDkjks1d3_NTbmj",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Reflecting on Student Learning</strong></p>",
+            "<p>Use the following questions to assess student understanding at the end of the lesson.</p>",
+            "<ul><li>What evidence do I have that students understand the Now What Do You Know?</li></ul>",
+            "<ol><li>Where did my students get stuck?</li><li>What strategies did they use?</li><li>What breakthroughs did my students have today?</li></ol>",
+            "<ul><li>How will I use this to plan for tomorrow? For the next time I teach this lesson?</li><li>Where will I have the opportunity to reinforce these ideas as I continue through this Unit? The next Unit?</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

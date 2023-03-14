@@ -1,0 +1,48 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "vQp8l_By7JeUZewV",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In Problem 1.2, Adia and Otis recognized that the comparisons could be represented with ratios. They used scaling to find the number of batches of Recipe A.</p>",
+            "<p></p>",
+            "<p>Adia used equivalent ratios in a table to show how the original ratio, 1 to 5, was scaled to find the number of batches.</p>"
+          ]
+        }
+      },
+      {
+        "id": "OV4hI1MBtqeSapI8",
+        "content": {
+          "type": "Table",
+          "name": "Adia's strategy",
+          "columns": [{"name": "Number of Batches of Recipe A", "width": 106, "values": ["1", "2", "3", "4", "5", "10", "20", "40", "41", "x"]}, {"name": "Number of 1 cup servings of juice", "width": 117, "values": ["5", "10", "15", "20", "25", "50", "100", "200", "205", "210"]}]
+        }
+      },
+      {
+        "id": "vauIDhVz0C1Bqv-N",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Otis wrote the original ratio and an equivalent ratio in fraction form. He scaled the quantities in the ratio to find the number of batches needed for 210 cups of juice. He wrote the following equation:</p>"]}
+      },
+      {"id": "01qasdfeMrTuRBgHG", "title": "Otis' strategy", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_1-3_Intro2_350w.png"}},
+      {
+        "id": "hrruntQBxTFwDZMO",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>This equation showing two ratios that are equal is called a <strong>proportion.</strong></p>",
+            "<p>When we find equivalent ratios using strategies like Adia’s table or Otis’s equation to answer questions, we are using <strong>proportional reasoning</strong>. Both strategies involve proportions. </p>",
+            "<p>Adia’s table shows many proportions, such as</p>",
+            "1/5 = 2/10 or 2/10 = 3/15 or 5/25 = 10/50",
+            "<p>Otis’s equation shows one proportion.</p>",
+            "1/5 = x/210",
+            "<p>In the <em>Comparing Quantities</em> Unit, we worked with ratios to determine how to share Smoothie Bars. In the <em>Stretching and Shrinking Unit</em>, we worked with ratios to find missing lengths in similar figures. These examples involved proportional reasoning. There are many other situations in which setting up a proportion can help us solve a problem, as in the next problem.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

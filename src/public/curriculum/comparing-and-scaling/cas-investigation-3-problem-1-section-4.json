@@ -1,0 +1,23 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "OxPUj6RVlgdBeUZ4", "content": {"type": "Text", "format": "html", "text": ["<p>How are percent problems like ratio and rate problems?</p>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Possible answers:</p>",
+            "<p>Percent problems are proportional reasoning problems, just like ratios and rates are.</p>",
+            "<p>Percents are a new representation of a part to ratio.</p>",
+            "<p>Percent problems require finding equivalent ratios and/or scaling up quantities, just like ratio and rates.</p>",
+            "<p>Percents set one of the quantities equal, so we can think about the size of the other quantity. So, in some ways, they act like a unit rate does.</p>"
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

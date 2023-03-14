@@ -1,0 +1,15 @@
+{
+  "type": "trapBuilding",
+  "content": {
+    "tiles": [
+      {"id": "1WaqeLKS-DKS5B5n", "title": "Text 2", "content": {"type": "Text", "format": "html", "text": ["<h2>Building your trap</h2>"]}},
+      {"id": "-i5DaNf-CUUJSvUO2022", "title": "Diagram of the Trap You'll Build!", "content": {"type": "Image", "url": "curriculum/mothed/images/mothTrapAssembly.png"}},
+      {
+        "id": "WgvCVh_rfY1KzMVH",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Trap Tutorial Video</strong></p>", "<p>Watch the video showing how to <a href='https://drive.google.com/file/d/135oeHF8WYpVd8iXIYk9Zaoyn-rQx7efG/view'>build a moth trap</a> using (mostly) stuff you&#x27;ve already got!</p>"]}
+      },
+      {"id": "EchD_qdsVvHLy-mu", "title": "Text 8", "content": {"type": "Text", "format": "html", "text": ["<h2>Design an experiment to answer your research question</h2>"]}},
+      {"id": "iqu4ljTFLIAWs2Gj", "title": "Text 4", "content": {"type": "Text", "format": "html", "text": ["<p>What are you investigating?  How will you investigate? What do you think you&#x27;ll find? Make your own notes in a text tile so your group can share and discuss.</p>"]}}
+    ]
+  }
+}

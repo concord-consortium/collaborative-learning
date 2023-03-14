@@ -1,0 +1,17 @@
+{
+  "type": "reflection",
+  "content": {
+    "tiles": [
+      {"id": "MVLY1WYwPf_jYVjt", "title": "Text 9", "content": {"type": "Text", "format": "html", "text": ["<p>Add the following entry to your learning journal:</p>"]}},
+      {
+        "id": "TVmMZe8liETyai4R",
+        "title": "Text 10",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Lesson 2.4 Journal Entry</strong></p>", "<p>1. Today&#x27;s date:</p>", "<p>2. Today&#x27;s topic:</p>", "<p>3. Imagine yourself meeting the person who was described in your case. How do you think the person would react to the device that you designed?</p>"]
+        }
+      }
+    ]
+  }
+}

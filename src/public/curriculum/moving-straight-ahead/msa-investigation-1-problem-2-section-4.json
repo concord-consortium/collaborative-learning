@@ -1,0 +1,20 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"id": "bGkRZrMnMr_pqRv3", "title": "Text 59", "content": {"type": "Text", "format": "html", "text": ["<p>How can you recognize a linear pattern of change in a verbal context, table, a graph, expression, or an equation?  </p>"]}},
+      {
+        "id": "s9xVtp1UVAkbsnEE",
+        "display": "teacher",
+        "title": "Text 60",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>Main idea: Relationships are linear when there is a constant rate of change.</li><li>Verbal context: key words include “constant,” “[increase/decrease] by the same amount every [year/second/month]”</li><li>Table: The values of one variable change at a constant rate when the other variable changes at a constant rate.</li><li>Graph: The graph is a straight line.</li><li>Expression: The independent variable is multiplied by a constant.</li><li>Equation: The independent variable is multiplied by a constant, so the dependent variable will change at a constant rate.</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

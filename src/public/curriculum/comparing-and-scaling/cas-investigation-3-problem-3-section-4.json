@@ -1,0 +1,39 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {"content": {"type": "Text", "format": "html", "text": ["How are percents useful to solve problems?"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Percents are ratios/rates where one of the quantities in the comparison is equal to 100. Because one of the quantities is the same, it allows you to easily compare two different percents.</p>",
+            "<p>Percents also give us a way to discuss and solve problems that involve tax, tip, markups, and changes in something like population.</p>"
+          ]
+        }
+      },
+      {"content": {"type": "Text", "format": "html", "text": ["<strong>Did you know?</strong>"]}},
+      {"id": "11OCt20220859PM", "title": "Wild Chimpanzee", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/CS_LA_O1_monkey_350w.png"}},
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Chimpanzee, gorillas, orangutans, and bonobos are types of apes.</p>",
+            "<p>Wild chimpanzees live only in Africa.</p>",
+            "<p>Biologically, chimpanzees are more closely related to humans than they are to gorillas. We share about 95% – 98% of the same DNA.</p>",
+            "<p>Chimpanzees make and use tools. For a long time, scientists thought human beings were the only ones who made tools. Other animals make tools, too.</p>",
+            "<p>Chimpanzees in captivity have been taught sign language. Washoe, a female chimp, knew more than 240 signs.</p>",
+            "<p>Chimpanzees are omnivores. They eat fruits, nuts, seeds, flowers, leaves, and many types of insects. They sometimes hunt and eat small mammals.</p>",
+            "<p>Chimpanzees laugh. And, when frightened or angry, their hair will stand on its end.</p>",
+            "<p>An adult chimpanzees have 5 or 6 times the strength of a human.</p>",
+            "<p>Baby chimpanzees receive 24-hour attention from their mothers. The mothers will sleep with one hand on the baby to keep in constant contact.</p>",
+            "<p>Information from: https://www.janegoodall.org.uk/</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

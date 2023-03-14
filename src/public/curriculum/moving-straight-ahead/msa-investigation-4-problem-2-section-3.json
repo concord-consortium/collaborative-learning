@@ -1,0 +1,162 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "id": "5OB7_T8EU_KLROSo",
+        "title": "Text 12",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Situation A. Student Strategies</strong></p>", "<p>Students use different strategies to answer the question in the Initial Challenge. Examine each strategy below. Describe how each could be used to answer the question. </p>"]
+        }
+      },
+      {"id": "0qls4Cx7lVjoPyfD", "title": "Text 13", "content": {"type": "Text", "format": "html", "text": ["<p>Geraldo’s Strategy</p>", "<p></p>", "<p>I made the following table:</p>"]}},
+      {
+        "id": "MXycrMOrFrJjjVCq",
+        "title": "Table 2",
+        "content": {
+          "type": "Table",
+          "name": "Theater Income and Expenses",
+          "columns": [
+            {"name": "Number of Students, x", "width": 112.66015625, "values": ["0", "10", "20", "30", "40", "50", "60", "70"]},
+            {"name": "Income, I ($)", "width": 92.5078125, "values": ["", "", "", "", "", "", "", ""]},
+            {"name": "Expenses, E ($)", "width": 108.9609375, "values": ["", "", "", "", "", "", "", ""]}
+          ]
+        }
+      },
+      [
+        {"id": "XI1cieoLbEibcrxx", "title": "Text 14", "content": {"type": "Text", "format": "html", "text": ["<p>Anna’s Strategy</p>", "<p></p>", "<p>On the same set of axes, I graphed the theater’s income and operating expenses for 0 to 50 students.</p>"]}},
+        {"id": "OUgBaRXvs6ZeXchZ", "title": "Text 15", "content": {"type": "Text", "format": "html", "text": ["<p>Sze’s Strategy</p>", "<p></p>", "<p>I wrote an expression that represents the theater’s profit.</p>"]}}
+      ],
+      {
+        "id": "l0AOZaiRsc658y2R",
+        "display": "teacher",
+        "title": "Text 17",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Note: Each of these strategies is shown as a possible answer for the IC.</p>",
+            "<p>Geraldo’s strategy could be used by filling out the table and looking for the number of students when the income is the same as the expenses. </p>",
+            "<p>Anna’s strategy could be used by graphing the line for income and the line for operating expenses and looking for the intersection point. </p>",
+            "<p>Sze’s strategy could be used by making his expression into an equation equal to a profit of 0.</p>"
+          ]
+        }
+      },
+      {
+        "id": "JwMNFc861VQTikFW",
+        "title": "Text 19",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Situation B. Laneshia Uses Inequalities</strong></p>",
+            "<p>Laneshia wanted to find the number of students that make each of the following inequality statements true. </p>",
+            "<p>             Expenses  &lt; 255            Income &gt; 675</p>",
+            "<p>                            or                                  or</p>",
+            "<p>       $1.25n + $130 &lt; $255       $4.50n &gt; $675</p>"
+          ]
+        }
+      },
+      {"id": "OXL88tukbleYGJhm", "title": "Text 20", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Find the number of students that makes each inequality statement true.</li></ul>"]}},
+      {
+        "id": "Qg8KoMa-onqgmNcq",
+        "display": "teacher",
+        "title": "Text 22",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong> </strong>To find the number of students that will make expenses less than $255, we need to solve the associated equality. </p>",
+            "<p>So 1.25n + 130 =255 </p>",
+            "<p>                           1.25n = 125</p>",
+            "<p>                                  n = 100. </p>",
+            "<p>So to make the inequality statement for expenses true, there need to be less than 100 students.</p>",
+            "<p>To find the number of students that will make the income greater than $675, we need to solve the associated equality. So 4.50n = 675  n = 150. So to make the inequality statement for income true, there need to be more than 150 students.</p>"
+          ]
+        }
+      },
+      {"id": "Su1pNm7GDmou82AC", "title": "Text 24", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How might this information be helpful in making decisions about the showing of the film?</li></ul>"]}},
+      {
+        "id": "_VJ2OLhpXe_gn706",
+        "display": "teacher",
+        "title": "Text 28",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Student answers will vary. Sample answer: If you only have a fixed amount of money to spend on showing the movie, then the expenses inequality can keep you from going into debt. If you need to raise a certain amount of money from showing the movie, then the income inequality can help you calculate how many tickets to sell.</p>"
+          ]
+        }
+      },
+      {"id": "JzpO1DzTV-u2y2aA", "title": "Text 26", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation C. Jasmine’s Observation</strong></p>", "<p>Examine Jasmine’s Observation. Is she correct? Explain why.</p>"]}},
+      {
+        "id": "xyW-1V4Fm3gniAfM",
+        "title": "Text 29",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Jasmine’s Observation</p>",
+            "<p>This problem in the Initial Challenge is like the Henri and Emile Race in Problem 2.1 and the Cost of T-shirts in Problem 3.4. I used a graph to solve Problem 2.1 and 3.4. To solve this problem I used a graph. But I know I can also use an equation. I like graphs. </p>"
+          ]
+        }
+      },
+      {
+        "id": "KreR9AWFTVvGS_Wm",
+        "display": "teacher",
+        "title": "Text 31",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Graphs can be used to find solutions. Sometimes, it is difficult to get an exact coordinate pair on the graph. When that happens, the graph can give an approximate of the solution.</p>"]}
+      },
+      {"id": "NBZaV7b_kdfiX5wT", "title": "Text 33", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation D. Competing Company</strong></p>"]}},
+      {"id": "whKPwzWXqb0mEnzh", "title": "Text 34", "content": {"type": "Text", "format": "html", "text": ["<p>At another theater, they used the equation, P = 3n – 115 to find the profit P for the number of students n that attend the theater. </p>"]}},
+      {"id": "s_COxRGxSI8z8t09", "title": "Text 35", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What do the numbers 3 and –115 tell you about the relationship between the number of students and the theater’s profit? </li></ul>"]}},
+      {
+        "id": "Yf34DLT19k2-93UK",
+        "display": "teacher",
+        "title": "Text 37",
+        "content": {"type": "Text", "format": "html", "text": ["<p>The number 3 tells you how much the theater’s profit will increase for each extra student who attends the theater. The number -115 tells you some expense or initial fee for using the theatre.</p>"]}
+      },
+      {"id": "CdHuhTHX1cBMGSfO", "title": "Text 39", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What do the numbers 3 and –115 tell you about the pattern of entries that would appear in a table of sample (students, profit) data? </li></ul>"]}},
+      {
+        "id": "x8VRjlLXDTGhb76z",
+        "display": "teacher",
+        "title": "Text 42",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p>The number 3 tells you how much pattern of change. For every additional student, there is an increase of $3 between consecutive profit entries on the table. The number -115 tells you the profit entry that corresponds with zero students.</p>"]
+        }
+      },
+      {"id": "oc2gJQ36macxIm1M", "title": "Text 43", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What do the numbers 3 and –115 tell you about graph of the relationship between the number of students and the profit?</li></ul>"]}},
+      {
+        "id": "3odJbR2-umcQtq5T",
+        "display": "teacher",
+        "title": "Text 45",
+        "content": {"type": "Text", "format": "html", "text": ["<p>The number 3 tells you the rate of change, or slope, of the line (because profit increases by 3 every time the number of students increases by 1). The number -115 tells you the y-intercept of the line.</p>"]}
+      },
+      {
+        "id": "KCtgWhva2YHp28Zv",
+        "title": "Text 47",
+        "content": {"type": "Text", "format": "html", "text": ["<ul><li>Write and solve an equation you can use to find the number of students for which the theater in the <em>Initial Challenge</em> and theater in Situation C make the same profit. Then find the amount of that profit. </li></ul>"]}
+      },
+      {
+        "id": "lpj3C3RFep1wQA0P",
+        "display": "teacher",
+        "title": "Text 49",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The equation for profit for the theater in the initial challenge was P1 = I – E = 4.50n – (130 + 1.25n) = 3.25n – 130. The equation for profit for the theater in this problem is P2 = 3n – 115.  If they make the same profit, then we can set the expressions equal and solve for the number of students.</p>",
+            "<p>3.25n – 130 = 3n – 115</p>",
+            "<p>          0.25n = 15</p>",
+            "<p>                 n = 60</p>",
+            "<p>This means that these two theaters will make the same profit for 60 students.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

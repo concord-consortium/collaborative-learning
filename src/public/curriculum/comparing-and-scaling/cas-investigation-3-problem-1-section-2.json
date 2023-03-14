@@ -1,0 +1,34 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "PHowZ-dbpxYySpvD",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Skylar picked up several items he needed for school. He had $25 in cash. As he was nearing the checkout counter he wondered if he had enough cash to pay the bill. The sales tax is 5%. In the basket he has:</p>"]}
+      },
+      [
+        {"id": "thzd5hEmw35Ax_-R", "title": "Notepad: $8.95", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_3-1_Notepad.png"}},
+        {"id": "sNmCCYHXPkmleVnC", "title": "Markers: $6.75", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_3-1_Markers.png"}},
+        {"id": "3UJlgyI8YWVB3PyT", "title": "Pencils: $3.80", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_3-1_Pencils.png"}},
+        {"id": "9uKrABz1s66-ZgXy", "title": "Sticky notes: $4.25", "content": {"type": "Image", "url": "curriculum/comparing-and-scaling/images/C&S_3-1_StickyNotes.png"}}
+      ],
+      {"id": "OaMcRjmrPwlxilaS", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What is a good estimate for the total cost of the four items?</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Answers will vary.</p>", "<p>Notepad ~ $9</p>", "<p>Markers~ $7</p>", "<p>Pencils ~4</p>", "<p>Sticky Notes ~4</p>", "<p>$9 + $7 + $4 + $4 = $24</p>"]}},
+      {"id": "I46ZJG0JviVxnVnU", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What is a good estimate for the total bill with tax?</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": ["<p>Answers will vary.</p>", "<p>Using the above estimate of $24, many students will find 5% of 24 and then add that amount into the original $24.</p>", "<p>  0.05 x 24 = $1.2</p>", "<p>  24 + 1.2 = $25.20</p>"]}},
+      {"id": "_dNaZZOHhg6BJI3a", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Does Skylar have enough money?  Explain your reasoning.</li></ul>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary.</p>",
+            "<p>Using the above estimates students might say yes because we overestimated most of the prices and with our estimate being only $0.20 over the $25, he should have enough money. Others might say no because our estimate is over the $25. Students should be able to describe how they estimated and whether they used overestimates or underestimates.</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

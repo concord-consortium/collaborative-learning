@@ -1,0 +1,32 @@
+{
+  "type": "intro",
+  "content": {
+    "tiles": [
+      {
+        "id": "zyoT6wp_c7IxjDmS",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Overview: </strong></p>",
+            "<p>In this lesson, you will be introduced to emerging technology that helps people with neurological conditions or missing limbs.</p>",
+            "<p><strong>Learning Objectives: </strong></p>",
+            "<p>This activity is intended to help you come up with questions about how body systems interact with one another and with technology. We will explore these questions throughout the unit. </p>"
+          ]
+        }
+      },
+      {
+        "id": "bj5dqEB0okmYf9qy",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>To start off, please drag the following tile into your workspace and answer these questions:</p>",
+            "<p>1) What do you know about bionic arms? (e.g., what do they look like, why people might use them, in what ways are they connected to the person’s body, how do they work)</p>",
+            "<p>2) If you were tasked to design a bionic arm, what do you think the people who use them would like in terms of appearance and function?</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

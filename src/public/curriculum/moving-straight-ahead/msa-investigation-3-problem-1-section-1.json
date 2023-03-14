@@ -1,0 +1,116 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "tuVx9f_TZ5YLJZOx",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Throughout this Unit, we have been solving equations with two variables. Sometimes the value of one variable is known, and we want to find the value of the other variable. In this Investigation, we will continue to find the value of a variable without using a table or a graph or numeric reasoning. We will also learn to use <em>symbolic</em> methods to solve a linear equation.</p>",
+            "<p>In the last Investigation, we examined the patterns in the table, graph, and equation for the relationship relating Alana’s distance <em>d</em> and money earned A in the walkathon.</p>",
+            "<p>          <em>Suppose Alana raises $20 from a sponsor, how many kilometers did she walk?</em></p>",
+            "<p>We can use numeric reasoning, a table, a graph, or equation to find the value of the other variable to find the answer.</p>"
+          ]
+        }
+      },
+      {"id": "YuvoW69Ls5Tsg7YN", "title": "Text 2", "content": {"type": "Text", "format": "html", "text": ["<p>Strategies for Finding Solutions to Equations</p>"]}},
+      [
+        {
+          "id": "OawaxQPTSCrIhSor",
+          "title": "Walkathon Earnings",
+          "content": {
+            "type": "Geometry",
+            "board": {"properties": {"axisMin": [-11.508, -1.452], "axisRange": [112.899, 20.033], "axisNames": ["d", "A"], "axisLabels": ["Distance (km)", "Amount Earned ($)"]}},
+            "objects": [
+              {
+                "type": "movableLine",
+                "parents": [{"type": "point", "parents": [3, 6.5]}, {"type": "point", "parents": [30, 20]}],
+                "properties": {"id": "Y3iF65RE-6Gc3hkn", "pt1": {"type": "point", "id": "Y3iF65RE-6Gc3hkn-point1", "name": "(3, 6.5)"}, "pt2": {"type": "point", "id": "Y3iF65RE-6Gc3hkn-point2", "name": "(30, 20)"}}
+              },
+              {"type": "point", "parents": [-2.7575000000000003, 49.79171842650103], "properties": {"id": "Hu0RD4k63AUKH3w9", "snapToGrid": true, "snapSizeX": 0.1, "snapSizeY": 0.1}}
+            ]
+          },
+          "layout": {"height": 413}
+        },
+        {"id": "kEZwo8OpANVqVmLL", "content": {"type": "Table", "name": "Table 1", "columns": [{"name": "d", "width": 80, "values": [0, 1, 2, 3, 4, 20, 25, 30]}, {"name": "A", "width": 80, "values": [5, 5.5, 6, 6.5, 7, 15, 17.5, 20]}]}}
+      ],
+      [
+        {"id": "_ghD3h56zxam89oG", "title": "Text 3", "content": {"type": "Text", "format": "html", "text": ["<p>Using the graph: </p>", "<p>Locate the point on the graph with the value $20 which is (30,20). </p>", "<p>So, she walked 30 kilometers.</p>"]}},
+        {"id": "sdxTpr1LqOIJQhyA", "content": {"type": "Text", "format": "html", "text": ["<p>  Using the table: </p>", "<p>Find the coordinate in the table where $20 is the amount earned. This is at 30 km.</p>", "<p>So, she walked 30 kilometers.</p>"]}}
+      ],
+      [
+        {
+          "id": "MB-7xH1VaZHjc-OB",
+          "title": "Text 4",
+          "content": {"type": "Text", "format": "html", "text": ["<p>Using numeric reasoning:</p>", "<p>$5 plus some amount gives the $20.</p>", "<p>Subtract $5 from $20 to get $15. </p>", "<p>15 is the amount earned for walking d km. </p>", "<p>So, 15 = 0.5d or 15 ÷ 0.5 = 30 = d.</p>"]}
+        },
+        {
+          "id": "WyKS3T7aVxCS3u3n",
+          "content": {
+            "type": "Text",
+            "format": "html",
+            "text": ["<p>Using the equation: </p>", "<p>A= 5 + 0.5<em>d</em></p>", "<p>This question can also be represented by substituting 20 for <em>A</em> in the equation. We can use the equation <strong>20</strong> = 5 + 0.5d to find <em>d</em>.</p>"]
+          }
+        }
+      ],
+      {
+        "id": "7RgZyMBS65SL1rwE",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><em>How could we solve the equation </em><strong>20</strong><em> </em>= 5+ 0.5<em>d to find the distance that Alana walks if she earns $20?</em></p>", "<p>In this Investigation we will develop strategies for solving the equation of the form y = ax + b symbolically. </p>"]
+        }
+      },
+      {
+        "id": "y-1tTQtW8CbbdKuV",
+        "title": "Text 6",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>To raise more money, Ms. Chang’s class decides to hold a raffle. They put some gold coins into a pouch, and people will guess the amount of coins in the pouch. At the end of the Walkathon the class will give the pouch to the person who guessed the exact number of gold coins. </p>",
+            "<p>To make the contest interesting, they decide to add a code for the amount of money in the pouch. The code consists of an equation using gold coins and pouches. Each pouch has the same number of gold coins.  </p>"
+          ]
+        }
+      },
+      {"id": "px0qnFT3y5xGd54o", "title": "Gold coin and sealed pouch", "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/MSA_3_1_coin_and_pouch_350w.png"}},
+      {
+        "id": "C7pSGTOe6YmOerIl",
+        "title": "Text 7",
+        "content": {"type": "Text", "format": "html", "text": ["<p>The code below indicates that the number of dollars in the two pouches and 5 loose coins on the left side of the equation is equal to $11 as shown on the right side of the equation. </p>"]}
+      },
+      {
+        "id": "VsKRoaWmepBigm9T",
+        "title": "Example Code",
+        "content": {
+          "type": "Drawing",
+          "objects": [
+            {"type": "image", "id": "rZuImlKt6JqUFTHL", "x": 138.5, "y": 72.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "E7YroOukICpDTOpA", "x": 164.5, "y": 71.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "QYStA6pAHhtDWFUr", "x": 44, "y": 63.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "O8Q_efTWx41A_ioU", "x": 6, "y": 64.5, "url": "curriculum/moving-straight-ahead/stamps/pouch.png", "width": 35, "height": 40},
+            {"type": "image", "id": "Ggp6kpLxlqrj7_3c", "x": 78.5, "y": 72.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "W7GcA0VUIo--DgEz", "x": 107.5, "y": 72.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "ah7cjcJBUWHBHJnA", "x": 253.5, "y": 51.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Ym1sXpMrY6VvZKWJ", "x": 255.5, "y": 87.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "FPW70f3CAYVkb-Xt", "x": 290.5, "y": 51.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "Q8IdQCo2f3z6q9y8", "x": 290.5, "y": 88.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "y6RuTdRrlynSkhpg", "x": 325.5, "y": 50.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "6iNZDp4URdBBlai7", "x": 325.5, "y": 88.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "USip0KKBJwQkU81e", "x": 361.5, "y": 50.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "LY-ntvEI_CCvc8Sd", "x": 362.5, "y": 87.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "haD-x5b7ZuFgwFPg", "x": 397.5, "y": 51.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "nGk8r3HU9c01J1HP", "x": 398.5, "y": 88.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "cxJqZbIG5329XtnY", "x": 256.5, "y": 124.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34},
+            {"type": "image", "id": "7oJ7FyNADjViWBhz", "x": 229.5, "y": 67.5, "url": "curriculum/moving-straight-ahead/stamps/equals.png", "width": 25, "height": 25},
+            {"type": "image", "id": "eZSFSQBC2hF_GzK7", "x": 194.5, "y": 72.5, "url": "curriculum/moving-straight-ahead/stamps/coin.png", "width": 34, "height": 34}
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "type": "labWork",
+  "content": {
+    "tiles": [
+      {
+        "id": "EqKYUNT3JvLoOuzP",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Meet Tilly</strong></p>",
+            "<p>Tilly is a real-life bionic teen.  At only 15 months old, Tilly had both her hands amputated at the wrist because of a very rare infection. For years she used basic silicon arms, but in 2018 she became the first child in the UK to have bionic arms. These high-tech, 3D printed arms give Tilly a much fuller range of movement. In class, you will watch a video about Tilly,  who is now a model, public speaker and make-up vlogger. In the video, Tilly showcases her colorful arm cases, before applying a full face of make-up - and trying out a new edgy look. </p>",
+            "<p>This <a href='https://www.youtube.com/watch?v=q2MjTcmLuIQ'>video</a> received over 2M views on YouTube! You can read more about Tilly <a href='https://openbionics.com/bionic-tilly/'>here</a></p>",
+            "<p>While watching the video, think about the following questions: (drag these questions into your workspace so you are ready to answer them after watching the video):</p>"
+          ]
+        }
+      },
+      {"id": "9k2YhXILrCaG09h7", "content": {"type": "Text", "format": "html", "text": ["<p>- How does the bionic lower arm appear to be physically attached to Tilly’s upper arm?</p>", "<p>- How does Tilly control her bionic arm?</p>"]}},
+      {
+        "id": "ULWVknRyAIhw-jUC",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>How does Tilly control her bionic arms?</strong></p>",
+            "<p>Create a model on paper or a whiteboard or in a drawing tile that explains how Tilly&#x27;s bionic arms work. If you worked on paper or a whiteboard, take a picture of your model and upload it to your workspace in an image tile. </p>",
+            "<p><strong>Reflection</strong></p>",
+            "<p>At the end of the activity, please record your current thinking and learning in your Learning journal (see Reflection tab). </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

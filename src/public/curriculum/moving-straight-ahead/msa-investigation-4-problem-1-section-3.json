@@ -1,0 +1,86 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<strong>Situation A. Arch Middle School Stairs</strong>", "A set of stairs is being built for the front of the new Arch Middle School. The ratio of rise to run is 7 to 11. <ul><li>Is this ratio within the carpenters’ guidelines?</li></ul>"]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": "2(rise) + run = 2(7) + 11 = 14 + 11 = 25, which is between 24 and 26 inches. \nRise + run = 7 + 11 = 18, which is between 17 and 19 inches.\nYes, these stairs meet the carpenters’ guidelines. Note that a scaled-up equivalent ratio of 14 to 22 would not meet the guidelines. "
+        }
+      },
+      {"id": "2oHkG2AkqQlgwZyh", "title": "Text 16", "content": {"type": "Text", "format": "html", "text": ["<ul><li> Make a sketch of a set of stairs that meet this ratio. Label the lengths of the rise and run of a step. Does everyone in your class have the same sketch? Explain.</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": "Student answers will vary.\nExample: a set of stairs with a height of 3.5 inches and a depth of 5.5 inches."}},
+      {
+        "id": "mGRde2kom4HBxXkQ",
+        "display": "teacher",
+        "title": "Stairs with rise of 3.5 inches and run of 5.5 inches",
+        "content": {"type": "Image", "url": "curriculum/moving-straight-ahead/images/4.1_WI_SituationA_2.png", "filename": "curriculum/moving-straight-ahead/images/4.1_WI_SituationA_2.png"}
+      },
+      {
+        "id": "aJjOEUec2JQpF_GD",
+        "display": "teacher",
+        "title": "Text 21",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Not everyone in the class will have the same sketch because even the same ratio can be represented by different numbers. And, some students will have measured different stairs.</p>"]}
+      },
+      {"id": "JyRf6dHgauOisfUf", "title": "Text 22", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Write an equation that represents the relationship between rise and run.</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": "Student answers will vary based on their stairs.\nExample answer using the stairs at Arch Middle School, rise = (7/11)run."}},
+      {"id": "UxCjzFKDTJ4yc1GN", "title": "Text 26", "content": {"type": "Text", "format": "html", "text": ["<ul><li>How is the ratio of rise to run represented in the graph? Equation?</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": "The ratio of rise to run is represented in the graph by the steepness of the line and in the equation by the coefficient of x."}},
+      {"id": "ibkaDMwrBfQr8hXx", "title": "Text 30", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Does your graph represent a proportional relationship? Explain why. </li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": "The graph does represent a proportional relationship because it passes through the origin."}},
+      {"content": {"type": "Text", "format": "html", "text": ["<strong>Situation B. Anna’s Claim</strong>", "Anna's Claim", "The ratio of rise to run is another way to express the pattern of change between the two variables in a linear situation. <ul><li>Is she correct? Explain why.</li></ul>"]}},
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": "Yes, she is correct. The ratio of rise to run describes how much one variable changes if you change the other variable by a specific amount. If the variables are always related in this way, then they have a constant rate of change, which gives a linear relationship."
+        }
+      },
+      {"id": "o6K5ogTYRdASqSzU", "title": "Text 40", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Does the ratio change if we take two steps at a time? Explain why.</li></ul>"]}},
+      {"display": "teacher", "content": {"type": "Text", "format": "html", "text": "No, because we’re rising twice as high and running twice as far.  So, the ratio will stay the same."}},
+      {"id": "M8pA9m22TD6unpCc", "title": "Text 44", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Situation C More Lines</strong></p>", "<p>The points (3, 5) and (–2, 10) lie on a line.</p>"]}},
+      {"id": "hk046UOrB5fDdrex", "title": "Text 45", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What is the ratio of rise to run of the line?</li></ul>"]}},
+      {"id": "tH7607mc3ePLANHL", "display": "teacher", "title": "Text 46", "content": {"type": "Text", "format": "html", "text": ["<p>The ratio of rise to run of the line is (10 – 5)/( –2 – 3)= (10 –5)/(–2 –3) = 5/(–5)  = –1</p>"]}},
+      {"id": "YZJkdy1xoLBIH2YW", "title": "Text 49", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Find two more points that lie on this line. Explain your method.</li></ul>"]}},
+      {
+        "id": "JEAz4iB1RpKPI1MM",
+        "display": "teacher",
+        "title": "Text 51",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Student answers will vary. </p>", "<p>For example, (–1,9) is on the line because you can increase the x-coordinate of (–2,10) by 1 and decrease the y-coordinate of (–2,10) by 1. </p>"]}
+      },
+      {"id": "OyA50_P28zQHopD8", "title": "Text 53", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Write an equation for this line. How is the ratio of rise to run reflected in the equation?</li></ul>"]}},
+      {
+        "id": "nWv2CFhJUmsU7Fe3",
+        "display": "teacher",
+        "title": "Text 54",
+        "content": {"type": "Text", "format": "html", "text": ["<p>Equation: y = –1x + 8</p>", "<p> </p>", "<p>Possible student answer:</p>", "<p> </p>", "<p>The ratio of the rise to run is the coefficient of the equation. </p>", "<p>y = –1x + b </p>", "<p>To find b, we can use a table:   </p>"]}
+      },
+      {"id": "b_MX3FFRLOIHx-aM", "display": "teacher", "title": "Table 1", "content": {"type": "Table", "name": "Table 1", "columns": [{"name": "x", "width": 80, "values": ["-2", "-1", "0", "1", "2", "3"]}, {"name": "y", "width": 80, "values": ["10", "9", "8", "7", "6", "5"]}]}},
+      {"id": "5eWgF0YXoGShRCEe", "display": "teacher", "title": "Text 55", "content": {"type": "Text", "format": "html", "text": ["<p>To find b, we can use the equation and one of the coordinate pairs:  </p>", "<p>    5 = –1 • 3 + b</p>", "<p>    5 = –3 + b  </p>", "<p>    5 = –3 + 8  </p>"]}},
+      {"id": "1OcsPFEZgsaDNQQ-", "title": "Text 57", "content": {"type": "Text", "format": "html", "text": ["<ul><li>Does this line represent a proportional relationship? Explain.</li></ul>"]}},
+      {
+        "id": "TNPAMWG2BlNB2DE6",
+        "display": "teacher",
+        "title": "Text 59",
+        "content": {"type": "Text", "format": "html", "text": ["<p>This line does not represent a proportional situation because it does not pass through the origin. Also, the values from the table cannot be used to create proportions.</p>"]}
+      },
+      {"id": "pKWG0Pw_Z6pNbrl7", "title": "Text 61", "content": {"type": "Text", "format": "html", "text": ["<ul><li>What is the ratio of rise to run of a horizontal line? A vertical line? Explain your reasoning.</li></ul>"]}},
+      {
+        "id": "y36PGxyGEw-ik8Zm",
+        "display": "teacher",
+        "title": "Text 63",
+        "content": {"type": "Text", "format": "html", "text": ["<p>The rate of change of a horizontal line is 0 because there is no “rise” no matter how far you “run.” The rate of change of a vertical line is undefined because there is no “run” no matter how far you “rise.”</p>"]}
+      }
+    ]
+  }
+}
