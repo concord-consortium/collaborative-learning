@@ -6,7 +6,7 @@ import Rete, { NodeEditor, Engine, Node } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
 import { autorun } from "mobx";
-import { IDisposer, onSnapshot } from "mobx-state-tree";
+import { getParent, IDisposer, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
 import { forEach } from "lodash";
 import { ProgramZoomType } from "../model/dataflow-content";
@@ -514,6 +514,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
+    console.log("tick", this)
+    // if recording, if we are not already ticking, if we are on the correct instance
+    // since a number of shared madels we can see might look the same
+    // assess and scope to the tile we care about
+    // save the data from each node to an attribute in our dataset
+    //
     // Update the sampling rate
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});

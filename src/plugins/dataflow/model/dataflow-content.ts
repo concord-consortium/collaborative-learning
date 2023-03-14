@@ -1,4 +1,5 @@
-import { types, Instance, applySnapshot, getSnapshot } from "mobx-state-tree";
+import { types, Instance, applySnapshot, getSnapshot, addDisposer, getType } from "mobx-state-tree";
+import { reaction } from "mobx";
 import { cloneDeep } from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { DataflowProgramModel } from "./dataflow-program-model";
@@ -8,6 +9,11 @@ import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { getTileModel, setTileTitleFromContent } from "../../../models/tiles/tile-model";
+import { SharedModel } from "../../../models/shared/shared-model";
+import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
+
+import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
+import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -16,6 +22,15 @@ export function defaultDataflowContent(): DataflowContentModelType {
 }
 
 export const kDataflowDefaultHeight = 480;
+export const kDefaultLabel = "Dataflow Node"
+
+export function defaultDataSet() {
+  // as per slack discussion, default attribute is added automatically
+  const dataSet = DataSet.create();
+  addAttributeToDataSet(dataSet, { name: kDefaultLabel });
+  addCasesToDataSet(dataSet, [{ [kDefaultLabel]: "" }]);
+  return dataSet;
+}
 
 const ProgramZoom = types.model({
   dx: types.number,
@@ -34,9 +49,24 @@ export const DataflowContentModel = TileContentModel
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
   })
   .volatile(self => ({
-    metadata: undefined as any as ITileMetadataModel
+    metadata: undefined as any as ITileMetadataModel,
+    // used as fallback when shared model isn't available
+    emptyDataSet: DataSet.create()
   }))
   .views(self => ({
+    get sharedModel() {
+      const sharedModelManager = self.tileEnv?.sharedModelManager;
+      // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
+      // just like findFirstSharedModelByType does
+      //
+      // For now we are checking the type ourselves, and we are assuming the shared model we want
+      // is the first one.
+      const firstSharedModel = sharedModelManager?.getTileSharedModels(self)?.[0];
+      if (!firstSharedModel || getType(firstSharedModel) !== SharedDataSet) {
+        return undefined;
+      }
+      return firstSharedModel as SharedDataSetType;
+    },
     programWithoutRecentValues() {
       const { values, ...rest } = getSnapshot(self.program);
       const castedValues = values as Record<string, any>;
@@ -56,6 +86,9 @@ export const DataflowContentModel = TileContentModel
     },
     get isUserResizable() {
       return true;
+    },
+    get dataSet() {
+      return self.sharedModel?.dataSet || self.emptyDataSet;
     },
     exportJson(options?: ITileExportOptions) {
       const zoom = getSnapshot(self.programZoom);
@@ -79,6 +112,66 @@ export const DataflowContentModel = TileContentModel
     }
   }))
   .actions(self => ({
+    afterAttach() { // built-in hook is called on every model right after added to the tree
+
+      // Monitor our parents and update our shared model when we have a document parent
+      addDisposer(self, reaction(() => {
+        // disposers call the function passed to it when model is disposed
+        // and here we pass a reaction, which is a mobx thing that watches the stuff in the first argument
+        // it calls second argument when first is done
+
+        // looking in the tileEnv for the shared modelManager - "environment" is a mobx context, but must be set at root of tree
+        // tile env proxies the actual mechanism
+        const sharedModelManager = self.tileEnv?.sharedModelManager;
+
+        // collecting the stats on current sharedModels here so we can pass on to reaction on 119
+        const sharedDataSet = sharedModelManager?.isReady
+          // TODO, where is this coming from, might not want it id by any "metadata"
+          ? sharedModelManager?.findFirstSharedModelByType(SharedDataSet, self.metadata.id)
+          : undefined;
+
+        const tileSharedModels = sharedModelManager?.isReady
+          ? sharedModelManager?.getTileSharedModels(self)
+          : undefined;
+
+        return { sharedModelManager, sharedDataSet, tileSharedModels };
+      },
+      // reaction/effect ("second argument" above), a mobx reaction watches the model and "reacts" there are various flavors, e.g.
+      // autorun, when, (what we are watching, what we do if what watching changes)
+      ({sharedModelManager, sharedDataSet, tileSharedModels}) => {
+        if (!sharedModelManager?.isReady) {
+          // We aren't added to a document yet so we can't do anything yet
+          return;
+        }
+
+        if (sharedDataSet && tileSharedModels?.includes(sharedDataSet)) {
+          // The shared model has already been registered by a client, but as the
+          // "owner" of the data, we synchronize it with our local content.
+          // if (!self.importedDataSet.isEmpty) {
+          //   sharedDataSet.dataSet = DataSet.create(getSnapshot(self.importedDataSet));
+          //   self.clearImportedDataSet();
+          // }
+        }
+        else {
+          if (!sharedDataSet) {
+            // The document doesn't have a shared model yet
+            const dataSet = defaultDataSet();
+            sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
+          }
+
+         // SharedDataSet.providerId (might be a table, in the case of a new table)
+              // DataSet
+
+          // Add the shared model to both the document and the tile
+          sharedModelManager.addTileSharedModel(self, sharedDataSet);
+        }
+
+        // update the colors
+        const dataSets = sharedModelManager.getSharedModelsByType(kSharedDataSetType) as SharedDataSetType[];
+        updateSharedDataSetColors(dataSets);
+      },
+      {name: "sharedModelSetup", fireImmediately: true}));
+    },
     setProgram(program: any) {
       if (program) {
         applySnapshot(self.program, cloneDeep(program));
