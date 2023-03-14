@@ -39,9 +39,6 @@ export function createStores(params?: ICreateStores): IStores {
   const appConfig = params?.appConfig || AppConfigModel.create();
   const appMode = params?.appMode || "dev";
   const demoName = params?.demoName || appConfig.appName;
-  const classInfo = params?.class || ClassModel.create({ name: "Null Class", classHash: "" });
-  const teachers: string[] = [];
-  classInfo.users.forEach(u => (u.type === "teacher") && teachers.push(u.id));
 
   const stores: IBaseStores = {
     appMode,
