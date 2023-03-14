@@ -1,0 +1,513 @@
+{
+  "code": "mods",
+  "abbrevTitle": "MODS",
+  "title": "MODS",
+  "subtitle": "Design Strategies",
+  "config": {
+    "enableHistoryRoles": ["teacher"],
+    "placeholderText": "Enter notes here",
+
+    "stamps": [
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/plus.png",
+        "width": 25,
+        "height": 25
+      },
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/equals.png",
+        "width": 25,
+        "height": 25
+      },
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/lparen.png",
+        "width": 25,
+        "height": 25
+      },
+      {
+        "url": "curriculum/moving-straight-ahead/stamps/rparen.png",
+        "width": 25,
+        "height": 25
+      }
+    ],
+    "defaultDocumentType": "problem",
+    "settings": {
+      "table": {
+        "numFormat": ".2~f"
+      }
+    },
+    "toolbar": [
+      {
+        "id": "select",
+        "title": "Select",
+        "iconId": "icon-select-tool",
+        "isTileTool": false,
+        "isDefault": true
+      },
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "Image",
+        "title": "Image",
+        "isTileTool": true
+      },
+      {
+        "id": "DataCard",
+        "title": "Concept Cards",
+        "isTileTool": true
+      },
+      {
+        "id": "Drawing",
+        "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "Table",
+        "title": "Table",
+        "isTileTool": true
+      },
+      {
+        "id": "Geometry",
+        "title": "Graph",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
+    ],
+    "navTabs": {
+      "showNavPanel": true,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "tab": "problems",
+          "label": "Lessons",
+          "sections": [
+            {
+              "initials": "IN",
+              "title": "Introduction",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "ACT",
+              "title": "Activity",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "RF",
+              "title": "Reflection",
+              "type": "problem-documents"
+            }
+          ]
+        },
+        {
+          "tab": "my-work",
+          "label": "My Notebook",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "problem-documents",
+              "dataTestHeader": "my-work-section-investigations",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["problem", "planning"],
+              "order": "original",
+              "showStars": []
+            },
+            {
+              "title": "Workspaces",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["personal"],
+              "properties": ["!isDeleted"],
+              "showStars": [],
+              "addDocument": true
+            },
+            {
+              "title": "Learning Journal",
+              "type": "learning-logs",
+              "dataTestHeader": "learning-log-section",
+              "documentTypes": ["learningLog"],
+              "properties": ["!isDeleted"],
+              "addDocument": true
+            }
+          ]
+        },
+        {
+          "tab": "class-work",
+          "label": "Shared Ideas",
+          "sections": [
+            {
+              "title": "Class Notebooks",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["publication", "personalPublication"],
+              "properties": ["isTeacherDocument", "!isDeleted"]
+            },
+            {
+              "title": "Custom Lessons",
+              "type": "published-problem-documents",
+              "dataTestHeader": "class-work-section-published",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["publication"],
+              "showStars": ["teacher"],
+              "properties": ["!isTeacherDocument"]
+            },
+            {
+              "title": "Presentations",
+              "type": "published-personal-documents",
+              "dataTestHeader": "class-work-section-personal",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["personalPublication"],
+              "properties": ["!isTeacherDocument"]
+            }
+          ]
+        },
+        {
+          "tab": "teacher-guide",
+          "label": "Teacher Guide",
+          "teacherOnly": true,
+          "sections": []
+        },
+        {
+          "tab": "student-work",
+          "label": "Student Workspaces",
+          "teacherOnly": true,
+          "sections": []
+        }
+      ]
+    }
+  },
+  "sections": {
+    "introduction": {
+      "initials": "IN",
+      "title": "Introduction",
+      "placeholder": "Work area for\nIntroduction section"
+    },
+    "activity": {
+      "initials": "ACT",
+      "title": "Activity",
+      "placeholder": "Work area for\nActivity section"
+    },
+    "reflection": {
+      "initials": "REF",
+      "title": "Reflection",
+      "placeholder": "Work area for\nReflection section"
+    }
+  },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "objectives": {
+        "initials": "OV",
+        "title": "Objectives",
+        "placeholder": "Class Planning notes for\nObjectives section"
+      },
+      "summarize": {
+        "initials": "SM",
+        "title": "Sequence",
+        "placeholder": "Class Planning notes for\nSequence section"
+      }
+    },
+    "sections": [
+      { "type": "objectives" },
+      { "type": "sequence" }
+    ]
+  },
+  "investigations": [
+    {
+      "description": "Problem 1",
+      "ordinal": 1,
+      "title": "MODS Water Challenge",
+      "problems": [
+        {
+          "description": "Activity 1.1",
+          "ordinal": 1,
+          "title": "Activity 1.1",
+          "subtitle": "Importance of Water Conservation",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [ 
+
+                ]
+              }
+            },
+            {
+              "type": "activity",
+              "content": {
+                "tiles": [  ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            } 
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+
+                ]
+              }
+            }
+          }
+        },
+        {
+          "description": "Activity 1.2",
+          "ordinal": 2,
+          "title": "Activity 1.2",
+          "subtitle": "Stakeholder Mapping",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [ 
+
+                ]
+              }
+            },
+            {
+              "type": "activity",
+              "content": {
+                "tiles": [  ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            } 
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+
+                ]
+              }
+            }
+          }
+        },
+        {
+          "description": "Activity 1.3",
+          "ordinal": 3,
+          "title": "Activity 1.3",
+          "subtitle": "Scoping",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [ 
+
+                ]
+              }
+            },
+            {
+              "type": "activity",
+              "content": {
+                "tiles": [  ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            } 
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+
+                ]
+              }
+            }
+          }
+        },
+        {
+          "description": "Activity 1.4",
+          "ordinal": 4,
+          "title": "Activity 1.4",
+          "subtitle": "Stakeholder Interviews",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [ 
+
+                ]
+              }
+            },
+            {
+              "type": "activity",
+              "content": {
+                "tiles": [  ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            } 
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+
+                ]
+              }
+            }
+          }
+        },
+        {
+          "description": "Activity 1.5",
+          "ordinal": 5,
+          "title": "Activity 1.5",
+          "subtitle": "Research",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [ 
+
+                ]
+              }
+            },
+            {
+              "type": "activity",
+              "content": {
+                "tiles": [  ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            } 
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+
+                ]
+              }
+            }
+          }
+        },
+        {
+          "description": "Activity 1.6",
+          "ordinal": 6,
+          "title": "Activity 1.6",
+          "subtitle": "Concept Generation, Drawing Ideas",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [ 
+
+                ]
+              }
+            },
+            {
+              "type": "activity",
+              "content": {
+                "tiles": [  ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            } 
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+
+                ]
+              }
+            }
+          }
+        },
+        {
+          "description": "Activity 1.7",
+          "ordinal": 7,
+          "title": "Activity 1.7",
+          "subtitle": "Final Presentation & Reflection",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "introduction",
+              "content": {
+                "tiles": [ 
+
+                ]
+              }
+            },
+            {
+              "type": "activity",
+              "content": {
+                "tiles": [  ]
+              }
+            },
+            {
+              "type": "reflection",
+              "content": {
+                "tiles": [
+
+                ]
+              }
+            } 
+          ],
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

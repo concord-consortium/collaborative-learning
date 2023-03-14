@@ -30,6 +30,7 @@ context('Test image functionalities', function(){
         it('will upload png file from user computer', function(){
             const imageFilePath='image.png';
             clueCanvas.addTile('image');
+            imageToolTile.getImageToolTile().should("exist");
             // imageToolTile.getImageToolControl().last().click();
             cy.uploadFile(imageToolTile.imageChooseFileButton(), imageFilePath, 'image/png');
             cy.wait(2000);
@@ -84,5 +85,72 @@ context('Test image functionalities', function(){
             imageToolTile.getImageToolImage().should('have.length', 3);
         });
     });
+    
+});
+
+context('Test undo redo functionalities', function(){
+    before(function(){
+        const queryParams = `${Cypress.config("queryParams")}`;
+        cy.clearQAData('all');
+        cy.visit(queryParams);
+        cy.waitForLoad();
+        cy.closeResourceTabs();
+    });
+
+    describe('Image tile title edit, undo redo and delete tile',()=>{
+        it('will undo redo image tile creation/deletion', function () {
+            // Creation - Undo/Redo
+            clueCanvas.addTile('image');
+            imageToolTile.getImageToolTile().should("exist");
+            clueCanvas.getUndoTool().should("not.have.class", "disabled");
+            clueCanvas.getRedoTool().should("have.class", "disabled");
+            clueCanvas.getUndoTool().click();
+            imageToolTile.getImageToolTile().should("not.exist");
+            clueCanvas.getUndoTool().should("have.class", "disabled");
+            clueCanvas.getRedoTool().should("not.have.class", "disabled");
+            clueCanvas.getRedoTool().click();
+            imageToolTile.getImageToolTile().should("exist");
+            clueCanvas.getUndoTool().should("not.have.class", "disabled");
+            clueCanvas.getRedoTool().should("have.class", "disabled");
+      
+            // Deletion - Undo/Redo
+            clueCanvas.deleteTile('image');
+            imageToolTile.getImageToolTile().should('not.exist');
+            clueCanvas.getUndoTool().click();
+            imageToolTile.getImageToolTile().should("exist");
+            clueCanvas.getRedoTool().click();
+            imageToolTile.getImageToolTile().should('not.exist');
+        });
+        it("edit tile title", () => {
+            const newName = "Image Tile";
+            clueCanvas.addTile('image');
+            imageToolTile.getTileTitle().first().should("contain", "Image 1");
+            imageToolTile.getImageTileTitle().first().click();
+            imageToolTile.getImageTileTitle().first().type(newName + '{enter}');
+            imageToolTile.getTileTitle().should("contain", newName);
+        });
+        it("undo redo actions", () => {
+            clueCanvas.getUndoTool().click();
+            imageToolTile.getTileTitle().first().should("contain", "Image 1");
+            clueCanvas.getRedoTool().click();
+            imageToolTile.getTileTitle().should("contain", "Image Tile");
+        });
+        it('will undo redo image tile using keyboard', function () {
+            clueCanvas.addTile('image');
+            imageToolTile.getTileTitle().first().click();
+            imageToolTile.getTileTitle().first().type('{cmd+z}');
+            imageToolTile.getTileTitle().should("not.contain", "Image 1");
+            imageToolTile.getTileTitle().first().type('{cmd+shift+z}');
+            imageToolTile.getTileTitle().should("contain", "Image 1");
+        });
+        it('verify delete image', function () {
+            imageToolTile.getImageToolTile().first().click();
+            clueCanvas.deleteTile('image');
+            imageToolTile.getImageToolTile().first().click();
+            clueCanvas.deleteTile('image');
+            imageToolTile.getImageToolTile().should("not.exist");
+        });
+    });
+    
 });
 

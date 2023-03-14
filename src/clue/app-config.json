@@ -310,6 +310,10 @@
       "content": "curriculum/mothed/mothed.json",
       "guide": "curriculum/mothed/mothed-teacher-guide.json"
     },
+    "mods": {
+      "content": "curriculum/mods/mods.json",
+      "guide": "curriculum/mods/mods_TG.json"
+    },
     "msa": {
       "content": "curriculum/moving-straight-ahead/moving-straight-ahead.json",
       "guide": "curriculum/moving-straight-ahead/msa-teacher-guide.json"

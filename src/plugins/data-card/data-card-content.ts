@@ -33,7 +33,8 @@ export const DataCardContentModel = TileContentModel
   .named("DataCardTool")
   .props({
     type: types.optional(types.literal(kDataCardTileType), kDataCardTileType),
-    caseIndex: 0
+    caseIndex: 0,
+    selectedSortAttributeId: types.maybe(types.string)//'none'
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
@@ -188,6 +189,10 @@ export const DataCardContentModel = TileContentModel
       // current case is serialized, but navigation is not undoable
       withoutUndo();
       self.caseIndex = caseIndex;
+    },
+    setSelectedSortAttributeId(attrId: string){
+      withoutUndo();
+      self.selectedSortAttributeId = attrId;
     },
     setAttName(attrId: string, name: string){
      self.dataSet.setAttributeName(attrId, name);
