@@ -1,53 +1,30 @@
 import { addDisposer } from "mobx-state-tree";
-import { reaction } from "mobx";
-import { AppConfigModelType, AppConfigModel } from "./app-config-model";
-import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel, UnitModelType } from "../curriculum/unit";
-import { InvestigationModelType, InvestigationModel } from "../curriculum/investigation";
-import { ProblemModel, ProblemModelType } from "../curriculum/problem";
-import { UIModel, UIModelType } from "./ui";
-import { UserModel, UserModelType } from "./user";
-import { GroupsModel, GroupsModelType } from "./groups";
-import { ClassModel, ClassModelType } from "./class";
+import { when } from "mobx";
+import { AppConfigModel } from "./app-config-model";
+import { createUnitWithoutContent, getGuideJson, getUnitJson, UnitModel } from "../curriculum/unit";
+import { InvestigationModel } from "../curriculum/investigation";
+import { ProblemModel } from "../curriculum/problem";
+import { UIModel } from "./ui";
+import { UserModel } from "./user";
+import { GroupsModel } from "./groups";
+import { ClassModel } from "./class";
 import { DB } from "../../lib/db";
-import { getUserContext } from "../../hooks/use-user-context";
+import { UserContextProvider } from "./user-context-provider";
 import { registerTileTypes } from "../../register-tile-types";
-import { DemoModelType, DemoModel } from "./demo";
-import { SupportsModel, SupportsModelType } from "./supports";
-import { DocumentsModelType, DocumentsModel, createDocumentsModelWithRequiredDocuments } from "./documents";
+import { DemoModel } from "./demo";
+import { SupportsModel } from "./supports";
+import { DocumentsModel, createDocumentsModelWithRequiredDocuments } from "./documents";
 import { LearningLogDocument, PersonalDocument, PlanningDocument, ProblemDocument } from "../document/document-types";
 import { LearningLogWorkspace, ProblemWorkspace } from "./workspace";
-import { ClipboardModel, ClipboardModelType } from "./clipboard";
-import { SelectionStoreModel, SelectionStoreModelType } from "./selection";
+import { ClipboardModel } from "./clipboard";
+import { SelectionStoreModel } from "./selection";
 import { AppMode } from "./store-types";
 import { SerialDevice } from "./serial";
-import { IUserContext } from "functions/src/shared";
-
-export interface IBaseStores {
-  appMode: AppMode;
-  isPreviewing?: boolean;
-  appVersion: string;
-  appConfig: AppConfigModelType;
-  unit: UnitModelType;
-  investigation: InvestigationModelType;
-  problem: ProblemModelType;
-  teacherGuide?: ProblemModelType;
-  user: UserModelType;
-  ui: UIModelType;
-  groups: GroupsModelType;
-  class: ClassModelType;
-  documents: DocumentsModelType;
-  networkDocuments: DocumentsModelType;
-  db: DB;
-  demo: DemoModelType;
-  showDemoCreator: boolean;
-  supports: SupportsModelType;
-  clipboard: ClipboardModelType;
-  selection: SelectionStoreModelType;
-  serialDevice: SerialDevice;
-}
+import { IBaseStores } from "./base-stores-types";
 
 export interface IStores extends IBaseStores {
   problemPath: string;
+  userContextProvider: UserContextProvider;
 }
 
 export interface ICreateStores extends Partial<IStores> {
@@ -60,9 +37,11 @@ const requiredDocumentTypes = [PersonalDocument, PlanningDocument, ProblemDocume
 export function createStores(params?: ICreateStores): IStores {
   const user = params?.user || UserModel.create({ id: "0" });
   const appConfig = params?.appConfig || AppConfigModel.create();
+  const appMode = params?.appMode || "dev";
   const demoName = params?.demoName || appConfig.appName;
+
   const stores: IBaseStores = {
-    appMode: params?.appMode || "dev",
+    appMode,
     isPreviewing: params?.isPreviewing || false,
     appVersion: params?.appVersion || "unknown",
     appConfig,
@@ -95,7 +74,8 @@ export function createStores(params?: ICreateStores): IStores {
   };
   return {
     ...stores,
-    problemPath: getProblemPath(stores)
+    problemPath: getProblemPath(stores),
+    userContextProvider: new UserContextProvider(stores)
   };
 }
 
@@ -138,7 +118,7 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   // using them.
   stores.documents.setAppConfig(stores.appConfig);
   stores.documents.setFirestore(stores.db.firestore);
-  stores.documents.setUserContext(getUserContext(stores));
+  stores.documents.setUserContextProvider(stores.userContextProvider);
 
   if (investigation && problem) {
     stores.investigation = investigation;
@@ -146,23 +126,21 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   }
   stores.problemPath = getProblemPath(stores);
 
-  // need to use a listener because user type, id, name can be determined after unit initialization
-  addDisposer(unit, reaction(() => ({
-      userContext: getUserContext(stores)
-    }),
-    async ({userContext}: {userContext: IUserContext}) => {
-      // only load the teacher guide content for teachers
-      if (userContext.type === "teacher") {
-        const guideJson = await getGuideJson(unitId, stores.appConfig);
-        const unitGuide = guideJson && UnitModel.create(guideJson);
-        // Not sure if this should be "guide" or "teacher-guide", either ought to work
-        unitGuide?.setFacet("teacher-guide");
-        const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
-        stores.teacherGuide = teacherGuide;
-      }
-      stores.documents.setUserContext(userContext);
+  // TODO: It would be best to make stores a MobX object so when the teacherGuide is 
+  // updated, the Workspace component will re-render to show the teacher guide.
+  // It currently works in real-world use, but was causing a Cypress test failure.
+  addDisposer(unit, when(() => {
+      return stores.user.isTeacher;
     },
-    { fireImmediately: true }
+    async () => {
+      // only load the teacher guide content for teachers
+      const guideJson = await getGuideJson(unitId, stores.appConfig);
+      const unitGuide = guideJson && UnitModel.create(guideJson);
+      // Not sure if this should be "guide" or "teacher-guide", either ought to work
+      unitGuide?.setFacet("teacher-guide");
+      const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
+      stores.teacherGuide = teacherGuide;
+    }
   ));
 };
 

@@ -31,7 +31,6 @@ import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
 import { IGetImageDataParams, IPublishSupportParams } from "../../functions/src/shared";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
-import { getUserContext } from "../hooks/use-user-context";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
@@ -521,7 +520,7 @@ export class DB {
       throw new Error("Could not publish the specified document because its content is not available.");
     }
     return publishSupport?.({
-      context: getUserContext(this.stores),
+      context: this.stores.userContextProvider.userContext,
       caption,
       problem: problemPath,
       classes: user.classHashesForProblemPath(problemPath),
@@ -847,7 +846,7 @@ export class DB {
   }
 
   public async getCloudImage(url: string) {
-    const context = getUserContext(this.stores);
+    const context = this.stores.userContextProvider.userContext;
     const getImageData = getFirebaseFunction<IGetImageDataParams>("getImageData_v1");
     const result = await getImageData({ context, url });
     return result?.data;
