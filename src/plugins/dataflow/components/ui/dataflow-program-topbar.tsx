@@ -1,12 +1,13 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Slider from "rc-slider";
 import classNames from "classnames";
 import { ProgramDataRate } from "../../model/utilities/node";
 import { IconButton } from "../../../../components/utilities/icon-button";
 import { SerialDevice } from "../../../../models/stores/serial";
-import RecordIcon from "../../assets/topbar-buttons/record-icon.png";
-import StopIcon from "../../assets/topbar-buttons/stop-icon.png";
-import PlayIcon from "../../assets/topbar-buttons/play-icon.png";
+import RecordIcon from "../../assets/topbar-buttons/record-icon.svg";
+import StopIcon from "../../assets/topbar-buttons/stop-icon.svg";
+import PlayIcon from "../../assets/topbar-buttons/play-icon.svg";
+import ClearIcon from "../../assets/topbar-buttons/clear-icon.svg";
 
 import "./dataflow-program-topbar.scss";
 
@@ -31,8 +32,10 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
     dataRate, onRateSelectClick, onRecordDataChange, programRecordState, numNodes } = props;
     // console.log("<DataflowProgramToolbar> \n with props", props);
 
-    // console.log("<DataflowProgramToolbar> \n with dataRate", dataRate);
-    console.log("<DataflowProgramToolbar> \n with  numNodes", numNodes);
+  const [finished, setFinished] = useState(false);
+  const handleFinished = (isFinished: boolean) => isFinished && setFinished(true);
+
+
 
   // Of the boards tested, only authentic Arduinos (usbProductId === 67) raise the browser `connect` event
   // Which we use to track physical connection independently of port state
@@ -46,7 +49,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
     serialDevice.serialNodesCount > 0 ? "nodes-in-need" : "no-serial-needed",
     serialDevice.hasPort() ? "has-port" : "no-port"
   );
-
   function serialMessage(){
     // nodes that use serial, but no device physically connected
     if (lastMsg !== "connect" && serialDevice.serialNodesCount > 0){
@@ -66,43 +68,49 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
 
   return (
     <div className="program-editor-topbar">
-      <div className="topbar-icon">
-        {<IconButton
-          icon="serial"
-          key="serial"
-          onClickButton={onSerialRefreshDevices}
-          title="Refresh Serial Connection"
-          disabled={readOnly}
-          className={classes}
-        />}
-        <div className="serial-message">
-          { serialMessage() }
+
+        <div className="topbar-icon">
+          {<IconButton
+            icon="serial"
+            key="serial"
+            onClickButton={onSerialRefreshDevices}
+            title="Refresh Serial Connection"
+            disabled={readOnly}
+            className={classes}
+          />}
+          <div className="serial-message">
+            { serialMessage() }
+          </div>
         </div>
-      </div>
 
-      <div className="topbar-blank-or-play">
-        {
-          programRecordState && <PlaybackButton/>
-        }
-      </div>
-      <RateSelectorOrPlayBack
-        rateOptions={programDataRates}
-        dataRate={dataRate}
-        onRateSelectClick={onRateSelectClick}
-        readOnly={readOnly}
-        programRecordState={programRecordState}
-        numNodes={numNodes}
-      />
+        <div className="topbar-center-container">
+          <div className="topbar-blank-or-play">
+            {
+              programRecordState && <PlaybackButton/>
+            }
+          </div>
+          <RateSelectorOrPlayBack
+            rateOptions={programDataRates}
+            dataRate={dataRate}
+            onRateSelectClick={onRateSelectClick}
+            readOnly={readOnly}
+            programRecordState={programRecordState}
+            numNodes={numNodes}
+            onRecordDataChange={onRecordDataChange}
+            finished={finished}
+            handleFinished={handleFinished}
+          />
+          <RecordStopOrClearButton
+            programRecordState={programRecordState}
+            buttonClickHandler={onRecordDataChange}
+            finished={finished}
+          />
+        </div>
 
-      <RecordOrStopButton
-        programRecordState={programRecordState}
-        onRecordDataChange={onRecordDataChange}
-      />
-      <div className="topbar-right">
-        {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
-      </div>
-      <div className="topbar-json">
-      </div>
+        <div className="topbar-right">
+          {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
+        </div>
+
     </div>
   );
 };
@@ -115,15 +123,42 @@ interface IRateSelectorProps {
   readOnly: boolean;
   programRecordState: boolean;
   numNodes: number
+  finished: boolean;
+  handleFinished: (isFinished: boolean)=> void;
+  onRecordDataChange: (program: any) => void; //when timer reaches end, we set programRecordState = false
+
 }
 
 const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
-
   // console.log("<RateSelectorComponent with props:", props);
-  const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState, numNodes} = props;
+  const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState, numNodes,
+         finished, handleFinished, onRecordDataChange} = props;
+
+  const [counter, setCounter] = useState(0); //seconds that have passed after hitting Record
+  const totalRecordingTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
+  const totalRecordingTimeMin = totalRecordingTimeSec / 60;
+  console.log("totalRecordingTimeMin:", totalRecordingTimeMin);
+
+
+
+  const startTimer = programRecordState && numNodes > 0 && counter < totalRecordingTimeSec;
+  // if(counter >= totalRecordingTimeSec && !finished){ //new
+  if(counter >= totalRecordingTimeSec){ //new
+    // console.log("this should only run once");
+    // onRecordDataChange(false);
+    handleFinished(true);
+  }
+
+
+  useEffect(()=>{
+    const timer = setInterval(() => {
+      startTimer && setCounter(counter + 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [counter, startTimer]);
 
   const railRef = useRef<HTMLDivElement>(null);
-  const totalRecordingTimeSec = (dataRate / 1000) * (totalSamples/numNodes);
 
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onRateSelectClick(Number(event.target.value));
@@ -136,13 +171,10 @@ const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
           <div className="slider-container">
             <Slider
               min={0}
-              max={20}
+              max={totalRecordingTimeSec}
               step={1}
-              value={5}
+              value={counter}
               ref={railRef}
-              // className={`${activeNavTab}`}
-              // onChange={handleSliderValueChange}
-              // onAfterChange={handleSliderAfterChange}
             />
           </div>
           :
@@ -166,7 +198,11 @@ const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
                 </option>
                 ))
               }
-            </select> : `sec recorded / ${totalRecordingTimeSec}`
+            </select> :
+            numNodes > 0 &&
+            <div className="countdown-timer">
+             {`${counter}/ ${totalRecordingTimeSec}`}
+            </div>
           }
 
         </div>
@@ -178,33 +214,34 @@ const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
 
 
 /* ==[ Record Data Button ] == */
-interface IRecordOrStopProps {
-  onRecordDataChange: (program: any) => void; //change this to have modes?
+interface IRecordStopOrClearProps {
+  buttonClickHandler: (program: any) => void; //two options - if run not finished, it toggles between record and stop,
+                                              // if finished - it clears the data
   programRecordState: boolean;
-
+  finished: boolean;
 }
 
-const RecordOrStopButton = (props: IRecordOrStopProps) => {
-  // console.log("RecordDataButton with props:", props);
-  const { onRecordDataChange, programRecordState } = props;
-
+const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
+  //function being passed in is changing the programRecordState
+  //but the click handler should clear data
+  const { buttonClickHandler, programRecordState, finished } = props;
 
   return (
     <div className="record-btn-container">
       <button
         className="record-data-btn"
-        onClick={onRecordDataChange}
+        onClick={buttonClickHandler}
+        //**if this button is clear at the very end and you click it you'll update programRecord
+        // to false but you also need to update finished */
       >
-      <div className="record-data-icon">
-        {
-          programRecordState ?
-          <img className="stop-icon-resize" src={StopIcon}/> :
-          <img src={RecordIcon}/>
-        }
-      </div>
-      <div className="record-data-txt">
-        {programRecordState ? "Stop" : "Record"}
-      </div>
+        <div className="record-data-icon">
+          { programRecordState ? <StopIcon/> : <RecordIcon/> }
+        </div>
+        <div className="record-data-txt">
+          {
+            (finished && programRecordState) ? "Clear" : (programRecordState) ? "Stop" : "Record"
+          }
+        </div>
       </button>
 
     </div>
@@ -221,11 +258,15 @@ const PlaybackButton = () => {
         className="playback-data-btn"
       >
       <div className="playback-data-icon">
-        <img src={PlayIcon}/>
+        <PlayIcon/>
       </div>
       Play
       </button>
     </div>
   );
 };
+
+
+
+
 
