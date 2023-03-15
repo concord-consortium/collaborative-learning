@@ -86,7 +86,8 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         <div className="topbar-center-container">
           <div className="topbar-blank-or-play">
             {
-              (programRecordState === 1) && <PlaybackButton/>
+              (programRecordState === 1 || programRecordState === 2) &&
+              <PlaybackButton programRecordState={programRecordState}/>
             }
           </div>
           <RateSelectorOrPlayBack
@@ -129,39 +130,51 @@ interface IRateSelectorProps {
 }
 
 const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
-  // console.log("<RateSelectorComponent with props:", props);
   const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState, numNodes,
          finished, handleFinished, onRecordDataChange} = props;
-
-  const [counter, setCounter] = useState(0); //seconds that have passed after hitting Record
-  const totalRecordingTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
-  const totalRecordingTimeMin = totalRecordingTimeSec / 60;
-  console.log("totalRecordingTimeMin:", totalRecordingTimeMin);
+  // console.log("<RateSelectorComponent with props:", props);
 
 
+  const count = useRef(0); //seconds that have passed after hitting Record
 
-  const startTimer = numNodes > 0 && counter < totalRecordingTimeSec;
-  // if(counter >= totalRecordingTimeSec && !finished){ //new
-  if(counter >= totalRecordingTimeSec){ //new
-    // console.log("this should only run once");
-    // onRecordDataChange(false);
+  // calculate total recording time
+  let  totalTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
+  // totalTimeSec = 60;
+  const totalTimeMin = (totalTimeSec / 60);
+  const totalTimeMinStr = totalTimeMin.toFixed(2);
+  const totalTimeFormatted = totalTimeMinStr.replace(".", ":");
+
+  //format timer as mmm:ss
+  console.log(new Date(count.current * 1000).toISOString());
+  const currentTimeFormatted = new Date(count.current * 1000).toISOString().substring(14, 19);
+  console.log("totalTimeFormatted", totalTimeFormatted);
+  console.log("totalTimeMinStr", totalTimeMinStr);
+  if(count.current >= totalTimeSec){
     handleFinished(true);
   }
 
+  /* ==[ Timer - Enable ] == */
+  const startTimer = numNodes > 0 && count.current < totalTimeSec && (programRecordState === 1);
 
   useEffect(()=>{
     const timer = setInterval(() => {
-      startTimer && setCounter(counter + 1);
+      startTimer && (count.current = count.current + 1);
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [counter, startTimer]);
+  }, [count, startTimer]);
+
+  /* ==[ Timer - Reset ] == */
+  if (programRecordState === 0) count.current = 0;
+
 
   const railRef = useRef<HTMLDivElement>(null);
 
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onRateSelectClick(Number(event.target.value));
   };
+
+
   return (
     <>
       <div className="topbar-sampleratetext-or-timeslider">
@@ -170,9 +183,9 @@ const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
           <div className="slider-container">
             <Slider
               min={0}
-              max={totalRecordingTimeSec}
+              max={totalTimeSec}
               step={1}
-              value={counter}
+              value={count.current}
               ref={railRef}
             />
           </div>
@@ -200,7 +213,7 @@ const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
             </select> :
             numNodes > 0 &&
             <div className="countdown-timer">
-             {`${counter}/ ${totalRecordingTimeSec}`}
+             {`${currentTimeFormatted}/ ${totalTimeFormatted}`}
             </div>
           }
 
@@ -230,8 +243,7 @@ interface IRecordStopOrClearProps {
 }
 
 const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
-  //function being passed in is changing the programRecordState
-  //but the click handler should clear data
+  //if mode is in clear, click handler should clear data
   const { buttonClickHandler, programRecordState } = props;
 
   return (
@@ -239,8 +251,6 @@ const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
       <button
         className="record-data-btn"
         onClick={buttonClickHandler}
-        //**if this button is clear at the very end and you click it you'll update programRecord
-        // to false but you also need to update finished */
       >
         <div className="record-data-icon">
           {iconArr[programRecordState]}
@@ -257,11 +267,18 @@ const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
 
 /* ==[ Playback Button ] == */
 
-const PlaybackButton = () => {
+interface IPlaybackProps {
+  programRecordState: number;
+}
+
+const PlaybackButton = (props: IPlaybackProps) => {
+  const {programRecordState} = props;
+
   return (
     <div className="playback-btn-container">
       <button
         className="playback-data-btn"
+        disabled={programRecordState === 1}
       >
       <div className="playback-data-icon">
         <PlayIcon/>
@@ -271,7 +288,6 @@ const PlaybackButton = () => {
     </div>
   );
 };
-
 
 
 

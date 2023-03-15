@@ -107,7 +107,11 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.scale = scale;
     },
     setProgramRecordState(){
-      self.programRecordState = (self.programRecordState + 1) % 3;    }
+      //0 - Record
+      //1 - Stop
+      //2 - Clear
+      self.programRecordState = (self.programRecordState + 1) % 3;
+    }
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;

@@ -134,21 +134,23 @@ $duration-label-back: $gray-mid;
 
   .topbar-center-container{
     display: flex;
-    width: 400px;
+    width: 420px;
+    background-color: red;
     //******* SECTION **********
     .topbar-blank-or-play {
-      width: 95px;
+      width: 100px;
       background-color: $duration-label-back;
+      margin-right: 5px;
       display: flex;
       justify-content: center;
+      background-color: orange;
 
 
       .playback-btn-container{
         margin-top: 2px;
 
-
         .playback-data-btn{
-          width: 70px;
+          width: 90px;
           height: 25px;
           display: flex;
           align-items: center;
