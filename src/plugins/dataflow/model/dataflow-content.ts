@@ -65,6 +65,7 @@ export const DataflowContentModel = TileContentModel
       if (!firstSharedModel || getType(firstSharedModel) !== SharedDataSet) {
         return undefined;
       }
+      console.log("firstSharedModel", firstSharedModel);
       return firstSharedModel as SharedDataSetType;
     },
     programWithoutRecentValues() {

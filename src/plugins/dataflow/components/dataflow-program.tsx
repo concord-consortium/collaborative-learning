@@ -514,11 +514,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    console.log("tick", this);
-    console.log("nodes:", this.programEditor.nodes);
-    // "pg_-fS7THdT12J1B"
+    // console.log("tick", this);
+    // console.log("nodes:", this.programEditor.nodes);
+    const testTileId =  "ZTbkPK-F2o1DFhbz";
+    // console.log(this.props.tileId);
 
-    console.log("tildID:", this.props.tileId);
+    if (this.props.tileId === testTileId){
+      this.programEditor.nodes.forEach(node =>{
+        console.log(`${node.name}: ${node.data.nodeValue}`);
+
+        // if (isFinite(node.data.nodeValue as number)){
+        //   console.log(`${node.name}: ${node.data.nodeValue}`);
+        // }
+      });
+      console.log("----------------");
+      // console.log("nodes in focus:", this.programEditor.nodes[2]);
+    }
+
     // if (this.props.tildId)
     // const filteredNodes = this.programEditor.nodes.
 
