@@ -4,6 +4,7 @@
 $topbar-height: 44px;
 $topbar-color: $gray-light;
 $duration-label-back: $gray-mid;
+$gray-text: #242424;
 
 
 .program-editor-topbar {
@@ -134,20 +135,26 @@ $duration-label-back: $gray-mid;
 
   .topbar-center-container{
     display: flex;
-    width: 420px;
-    background-color: red;
+    min-width: 420px;
+
     //******* SECTION **********
     .topbar-blank-or-play {
       width: 100px;
       background-color: $duration-label-back;
-      margin-right: 5px;
+      // margin-left: 5px;
+
       display: flex;
       justify-content: center;
-      background-color: orange;
+      align-items: center;
 
+      // background-color: orange;
 
       .playback-btn-container{
-        margin-top: 2px;
+        padding-right: 10px;
+        width: 100%;
+        margin-left: 5px;
+        // background-color: blue;
+        // width:
 
         .playback-data-btn{
           width: 90px;
@@ -162,6 +169,20 @@ $duration-label-back: $gray-mid;
             margin-left: -3px;
             height: 100%;
           }
+          .playback-data-txt{
+            width: 100%;
+            font-family: Ubuntu-Regular;
+            font-size: 14px;
+            font-weight: normal;
+            font-stretch: normal;
+            font-style: normal;
+            line-height: normal;
+            letter-spacing: normal;
+            text-align: center;
+            color: var(--gray-text);
+            margin-left: -2px;
+          }
+
         }
       }
 
@@ -172,9 +193,11 @@ $duration-label-back: $gray-mid;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 120px;
+      width: 130px;
       height: 28px;
       background-color: $duration-label-back;
+
+      // margin-left: 5px;
 
       /* ==[ Sample Rate Label ] == */
       .samplerate-label {
@@ -189,11 +212,10 @@ $duration-label-back: $gray-mid;
 
       /* ==[ Time Slider ] == */
       .slider-container {
-        width: 115px;
+        width: 120px;
         height: 28px;
         position: absolute;
-        background-color: $duration-label-back;
-        // margin-left: -2px;
+        // background-color: $duration-label-back;
 
         .rc-slider {
           position: relative;
@@ -302,7 +324,7 @@ $duration-label-back: $gray-mid;
 
     .topbar-datarate-or-timer{
       padding: 2px;
-      width: 90px;
+      width: 96px;
       height: 28px;
       border-radius: 14px;
       border-top-left-radius: 0px;
@@ -310,6 +332,8 @@ $duration-label-back: $gray-mid;
       background-color: $duration-label-back;
 
       .datarate-options select {
+        background-color: orange;
+
         position: relative;
         width: 90px;
         height: 24px;
@@ -317,7 +341,7 @@ $duration-label-back: $gray-mid;
         background-color: #ffffff;
         font-size: 11px;
         outline: 0;
-        margin-left: -5px;
+        // margin-left: 5px;
         &:disabled {
           cursor: default;
         }
@@ -349,7 +373,7 @@ $duration-label-back: $gray-mid;
         background-color: #ffffff;
         font-size: 11px;
         outline: 0;
-        margin-left: -5px;
+        // margin-left: -5px;
         border-left: 4px solid transparent;
         border-right: 4px solid transparent;
         display: flex;
@@ -364,23 +388,40 @@ $duration-label-back: $gray-mid;
 
     .record-btn-container{
       width: 100px;
-      margin-left: 5px;
+      margin-left: 10px;
       margin-top: 2px;
 
       .record-data-btn{
-        width: 100%;
+        width: 100px;
         height: 25px;
         display: flex;
         align-items: center;
         background-color: white;
         margin-top: -1px;
+        border-radius: 3px;
+        border: solid 2px $gray-mid;
 
         .record-data-icon{
           display: flex;
-          width: 30px;
+          width: 20px;
           margin-right: 5px;
-          margin-left: -3px;
+          margin-left: -5px;
           height: 100%;
+        }
+
+        .record-data-txt{
+          width: 100%;
+          font-family: Ubuntu-Regular;
+          font-size: 14px;
+          font-weight: normal;
+          font-stretch: normal;
+          font-style: normal;
+          line-height: normal;
+          letter-spacing: normal;
+          text-align: center;
+          color: var(--gray-text);
+          margin-left: -2px;
+
 
         }
       }

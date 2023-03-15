@@ -145,10 +145,11 @@ const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const totalTimeFormatted = totalTimeMinStr.replace(".", ":");
 
   //format timer as mmm:ss
-  console.log(new Date(count.current * 1000).toISOString());
-  const currentTimeFormatted = new Date(count.current * 1000).toISOString().substring(14, 19);
+  const currentTime = new Date(count.current * 1000).toISOString();
+  const currentTimeFormatted = new Date(count.current * 1000).toISOString().substring(14, 19)
   console.log("totalTimeFormatted", totalTimeFormatted);
   console.log("totalTimeMinStr", totalTimeMinStr);
+
   if(count.current >= totalTimeSec){
     handleFinished(true);
   }
@@ -280,10 +281,12 @@ const PlaybackButton = (props: IPlaybackProps) => {
         className="playback-data-btn"
         disabled={programRecordState === 1}
       >
-      <div className="playback-data-icon">
-        <PlayIcon/>
-      </div>
-      Play
+        <div className="playback-data-icon">
+          <PlayIcon/>
+        </div>
+        <div className="playback-data-txt">
+          Play
+        </div>
       </button>
     </div>
   );
