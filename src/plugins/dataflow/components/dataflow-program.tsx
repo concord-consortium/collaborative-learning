@@ -66,7 +66,7 @@ interface IProps extends SizeMeProps {
   tileHeight?: number;
   tileId: string;
   onRecordDataChange: (program: any) => void;
-  programRecordState: boolean;
+  programRecordState: number;
   numNodes: number;
 }
 

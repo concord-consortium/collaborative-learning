@@ -32,7 +32,7 @@ export const DataflowContentModel = TileContentModel
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programDataRate: DEFAULT_DATA_RATE,
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
-    programRecordState: false,
+    programRecordState: 0,
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel
@@ -107,8 +107,7 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.scale = scale;
     },
     setProgramRecordState(){
-      self.programRecordState = !self.programRecordState;
-    }
+      self.programRecordState = (self.programRecordState + 1) % 3;    }
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;
