@@ -93,7 +93,7 @@ export function getProblemPath(stores: IBaseStores) {
 }
 
 export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
-  const unitJson = await getUnitJson(unitId, stores.appConfig);
+  const unitJson = await getUnitJson(unitId, problemOrdinal, stores.appConfig);
 
   // read the unit content, but don't instantiate section contents (DocumentModels) yet
   const unit = createUnitWithoutContent(unitJson);

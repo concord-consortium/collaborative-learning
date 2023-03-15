@@ -147,6 +147,9 @@ export const UnitModel = types.snapshotProcessor(ModernUnitModel, {
 export interface UnitModelType extends Instance<typeof UnitModel> {}
 
 function getUnitSpec(unitId: string | undefined, appConfig: AppConfigModelType) {
+  if (unitId?.match(/https?:\/\//)) {
+    return {content: unitId, guide: ""};
+  }
   const requestedUnit = unitId ? appConfig.getUnit(unitId) : undefined;
   if (unitId && !requestedUnit) {
     console.warn(`unitId "${unitId}" not found in appConfig.units`);
@@ -154,25 +157,109 @@ function getUnitSpec(unitId: string | undefined, appConfig: AppConfigModelType) 
   return requestedUnit || (appConfig.defaultUnit ? appConfig.getUnit(appConfig.defaultUnit) : undefined);
 }
 
-const populateProblemSections = async (content: Record<string, any>, unitUrl: string) => {
-  for (const investigation of content.investigations) {
-    for (const problem of investigation.problems) {
-      for (let i = 0; i < problem.sections.length; i++) {
+const getExternalProblemSectionData = async (
+  content: Record<string, any>, sectionDataFile: any, unitUrl: any,
+  sectionIdx: number, problemIdx: number, investigationIdx: number
+) => {
+  const sectionDataUrl = new URL(sectionDataFile, unitUrl).href;
+  const sectionData = await fetch(sectionDataUrl).then(res => res.json());
+  const sectionObj = {
+    sectionNumber: sectionIdx,
+    problemNumber: problemIdx,
+    investigationNumber: investigationIdx,
+    sectionData
+  };
+  return sectionObj;
+};
+
+const getFakeProblemSectionData = (
+  content: Record<string, any>, unitUrl: any,
+  sectionIdx: number, problemIdx: number, investigationIdx: number
+) => {
+  const sectionData = {"type": `empty-${problemIdx}`, "content": {"tiles": []}};
+  const sectionObj = {
+    sectionNumber: sectionIdx,
+    problemNumber: problemIdx,
+    investigationNumber: investigationIdx,
+    sectionData
+  };
+  return sectionObj;
+};
+
+const populateProblemSectionsParallel = async (
+  content: Record<string, any>, unitUrl: string, problemOrdinal: string | undefined
+) => {
+  const problemOrdinalPieces = problemOrdinal?.split(".");
+  const newInvestigationOrdinal = problemOrdinalPieces ? problemOrdinalPieces[0] : "0";
+  const newProblemOrdinal = problemOrdinalPieces ? problemOrdinalPieces[1] : "1";
+  const externalSectionsArray = [];
+  for (let i = 0; i < content.investigations.length; i++) {
+    const investigation = content.investigations[i];
+    for (let j = 0; j < investigation.problems.length; j++) {
+      const problem = investigation.problems[j];
+      for (let k = 0; k < problem.sections.length; k++) {
         // Currently, curriculum files can either contain their problem section data inline
         // or in external JSON files. In the latter case, the problem sections arrays will
         // be made up of strings that are paths to the external files. We fetch the data from
         // those files and populate the section with it. Otherwise, we leave the section as
         // is. Eventually, all curriculum files will be updated so their problem section data
         // is in external files.
-        const section = problem.sections[i];
+        const section = problem.sections[k];
         if (typeof section === "string") {
-          const sectionDataFile = section;
-          try {
+          // if (
+          //   investigation.ordinal === parseFloat(newInvestigationOrdinal) &&
+          //   problem.ordinal === parseFloat(newProblemOrdinal)
+          // ) {
+            const sectionDataFile = section;
+            externalSectionsArray.push(getExternalProblemSectionData(content, sectionDataFile, unitUrl, k, j, i));
+          // } else {
+          //   externalSectionsArray.push(getFakeProblemSectionData(content, unitUrl, k, j, i));
+          // }
+        }
+      }
+    }
+  }
+  if (externalSectionsArray.length > 0) {
+    await Promise.all(externalSectionsArray).then((sections: any) => {
+      for (const section of sections) {
+        content.investigations[section.investigationNumber]
+               .problems[section.problemNumber]
+               .sections[section.sectionNumber] = section.sectionData;
+      }
+    });
+  }
+  return content;
+};
+
+const populateProblemSections = async (
+  content: Record<string, any>, unitUrl: string, problemOrdinal: string | undefined
+) => {
+  const problemOrdinalPieces = problemOrdinal?.split(".");
+  const newInvestigationOrdinal = problemOrdinalPieces ? problemOrdinalPieces[0] : "0";
+  const newProblemOrdinal = problemOrdinalPieces ? problemOrdinalPieces[1] : "1";
+  for (let i = 0; i < content.investigations.length; i++) {
+    const investigation = content.investigations[i];
+    for (let j = 0; j < investigation.problems.length; j++) {
+      const problem = investigation.problems[j];
+      for (let k = 0; k < problem.sections.length; k++) {
+        // Currently, curriculum files can either contain their problem section data inline
+        // or in external JSON files. In the latter case, the problem sections arrays will
+        // be made up of strings that are paths to the external files. We fetch the data from
+        // those files and populate the section with it. Otherwise, we leave the section as
+        // is. Eventually, all curriculum files will be updated so their problem section data
+        // is in external files.
+        const section = problem.sections[k];
+        if (typeof section === "string") {
+          // if (
+          //   investigation.ordinal === parseFloat(newInvestigationOrdinal) &&
+          //   problem.ordinal === parseFloat(newProblemOrdinal)
+          // ) {
+            const sectionDataFile = section;
             const sectionDataUrl = new URL(sectionDataFile, unitUrl).href;
-            problem.sections[i] = await fetch(sectionDataUrl).then(res => res.json());
-          } catch (error) {
-            throw Error(`Unable to fetch section problem data. Error: ${error}`);
-          }
+            problem.sections[k] = await fetch(sectionDataUrl).then(res => res.json());
+          // } else {
+          //   problem.sections[k] = {"type": `empty-${k}`, "content": {"tiles": []}};
+          // }
         }
       }
     }
@@ -180,7 +267,9 @@ const populateProblemSections = async (content: Record<string, any>, unitUrl: st
   return content;
 };
 
-export function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType) {
+export function getUnitJson(
+  unitId: string | undefined, problemOrdinal: string | undefined, appConfig: AppConfigModelType
+) {
   const unitSpec = getUnitSpec(unitId, appConfig);
   const unitPath = unitSpec?.content;
   const unitUrl = getAssetUrl(unitPath!);
@@ -188,7 +277,9 @@ export function getUnitJson(unitId: string | undefined, appConfig: AppConfigMode
            .then(async response => {
              if (response.ok) {
                const unitContent = await response.json();
-               const fullUnitContent = unitContent && populateProblemSections(unitContent, unitUrl);
+               // const fullUnitContent = unitContent && populateProblemSections(unitContent, unitUrl, problemOrdinal);
+               const fullUnitContent = unitContent &&
+                 populateProblemSectionsParallel(unitContent, unitUrl, problemOrdinal);
                return fullUnitContent;
              }
              else {
@@ -209,7 +300,7 @@ export function getGuideJson(unitId: string | undefined, appConfig: AppConfigMod
           .then(async response => {
             if (response.ok) {
               const guideContent = await response.json();
-              const fullGuideContent = guideContent && populateProblemSections(guideContent, guideUrl);
+              const fullGuideContent = guideContent && populateProblemSections(guideContent, guideUrl, undefined);
               return fullGuideContent;
             }
             else {
