@@ -1,0 +1,209 @@
+{
+  "code": "seeit",
+  "abbrevTitle": "SI",
+  "title": "See It?",
+  "subtitle": "Sensors and Internet of Things",
+  "config": {
+    "enableHistoryRoles": ["teacher"],
+    "placeholderText": "Document your thoughts",
+    "autoSectionProblemDocuments": true,
+    "defaultDocumentTemplate": {
+      "tiles": [
+      ]
+    },
+    "defaultDocumentType": "problem",
+    "settings": {
+      "table": { "numFormat": ".2~f" }
+    },
+    "learningLog": {
+      "labels": {
+        "1": "Learning Journal",
+        "n": "Learning Journals"
+      }
+    },
+    "toolbar": [
+      {
+        "id": "select",
+        "title": "Select",
+        "iconId": "icon-select-tool",
+        "isTileTool": false,
+        "isDefault": true
+      },
+      {
+        "id": "Text",
+        "title": "Text",
+        "isTileTool": true
+      },
+      {
+        "id": "Dataflow",
+        "title": "Dataflow",
+        "isTileTool": true
+      },
+      {
+        "id": "Table",
+        "title": "Table",
+        "isTileTool": true
+      },
+      {
+        "id": "Image",
+        "title": "Image",
+        "isTileTool": true
+      },
+      {
+        "id": "Drawing",
+        "title": "Drawing",
+        "isTileTool": true
+      },
+      {
+        "id": "Geometry",
+        "title": "Graph",
+        "isTileTool": true
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
+    ],
+    "navTabs": {
+      "showNavPanel": true,
+      "lazyLoadTabContents": true,
+      "tabSpecs": [
+        {
+          "tab": "problems",
+          "label": "Activities",
+          "sections": [
+            {
+              "initials": "TASK",
+              "title": "Task",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "HELP",
+              "title": "Help",
+              "type": "problem-documents"
+            }
+          ]
+        },
+        {
+          "tab": "class-work",
+          "label": "Class-Work",
+          "sections": [
+            {
+              "title": "Teacher Lessons",
+              "type": "teacher-supports",
+              "dataTestHeader": "supports-section-teacher-supports",
+              "dataTestItem": "supports-list-items",
+              "documentTypes": ["publication", "personalPublication"],
+              "properties": ["isTeacherDocument", "!isDeleted"]
+            },
+            {
+              "title": "Class Programs and Data",
+              "type": "published-problem-documents",
+              "dataTestHeader": "class-work-section-published",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["publication"],
+              "showStars": ["teacher"],
+              "properties": ["!isTeacherDocument"]
+            },
+            {
+              "title": "Class Programs and Data",
+              "type": "published-personal-documents",
+              "dataTestHeader": "class-work-section-personal",
+              "dataTestItem": "class-work-list-items",
+              "documentTypes": ["personalPublication"],
+              "properties": ["!isTeacherDocument"]
+            }
+          ]
+        },
+        {
+          "tab": "my-work",
+          "label": "My Work",
+          "sections": [
+            {
+              "title": "Workspaces",
+              "type": "problem-documents",
+              "dataTestHeader": "my-work-section-investigations",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["problem", "planning"],
+              "order": "original",
+              "showStars": []
+            },
+            {
+              "title": "Workspaces",
+              "type": "personal-documents",
+              "dataTestHeader": "my-work-section-workspaces",
+              "dataTestItem": "my-work-list-items",
+              "documentTypes": ["personal"],
+              "properties": ["!isDeleted"],
+              "showStars": [],
+              "addDocument": true
+            }
+          ]
+        },
+        {
+          "tab": "teacher-guide",
+          "label": "Teacher Guide",
+          "teacherOnly": true,
+          "sections": []
+        },
+        {
+          "tab": "student-work",
+          "label": "Student Work",
+          "teacherOnly": true,
+          "sections": []
+        }
+      ]
+    },
+    "stamps": [    ]
+  },
+  "sections": {
+    "task": {
+      "initials": "TASK",
+      "title": "Task",
+      "placeholder": "Work area for\nTask section"
+    },
+    "help": {
+      "initials": "help",
+      "title": "Help",
+      "placeholder": "Work area for\nNow What Do You Know? section"
+    }
+  },
+  "planningDocument": {
+    "enable": "teacher",
+    "default": true,
+    "sectionInfo": {
+      "overview": {
+        "initials": "OV",
+        "title": "Overview",
+        "placeholder": "Work area for\nOverview section"
+      },
+      "summarize": {
+        "initials": "SM",
+        "title": "Summarize",
+        "placeholder": "Work area for\nSummarize section"
+      }
+    },
+    "sections": [
+      { "type": "overview" },
+      { "type": "summarize" }
+    ]
+  },
+  "investigations": [
+    {
+      "description": "Investigation 1",
+      "ordinal": 1,
+      "title": "Sensors",
+      "problems": [
+        {
+          "description": "Problem 1.1",
+          "ordinal": 1,
+          "title": "Temperature and Humidity",
+          "subtitle": "",
+          "sections": ["seeit-investigation-1-problem-1-section-1.json","seeit-investigation-1-problem-1-section-2.json"]
+        }
+      ]
+    }
+  ]
+}

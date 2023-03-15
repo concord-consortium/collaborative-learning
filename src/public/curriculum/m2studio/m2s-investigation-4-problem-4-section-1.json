@@ -1,0 +1,20 @@
+{
+  "type": "task",
+  "content": {
+    "tiles": [
+      {
+        "id": "Ttl0eb3ZgxnuTIaD",
+        "title": "TestModel_FinalProject",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Test your model</strong></p><p>It is time to test your model. Complete at least <u>three</u> tests. Then drag this tile into your workspace and answer the following questions:</p><p></p><p><u>Test 1</u></p><p>How are you testing your model? {Write your answer here}</p><p>What are your test results? {Write your answer here}</p><p>What do these results mean in the problem context? {Write your answer here}</p><p></p><p><u>Test 2</u></p><p>How are you testing your model? {Write your answer here}</p><p>What are your test results? {Write your answer here}</p><p>What do these results mean in the problem context? {Write your answer here}</p><p></p><p><u>Test 3</u></p><p>How are you testing your model? {Write your answer here}</p><p>What are your test results? {Write your answer here}</p><p>What do these results mean in the problem context? {Write your answer here}</p><p></p><p>Feel free to add more tests.</p>"
+          ]
+        }
+      },
+      {"id": "nbTrPHfoC-NSGgBg", "title": "CompareModel_FinalProject", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Compare your model with the initial model</strong></p><p>Explain how your model compares with the initial model. </p><p>{Write your answer here}</p>"]}},
+      {"id": "m5g_CqB8YPf-WF_V", "title": "GeneralizeModel_FinalProject", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Generalize your model</strong></p><p>Explain how your model can be used to solve similar problems. Describe an example.</p><p>{Write your answer here}</p>"]}}
+    ]
+  }
+}

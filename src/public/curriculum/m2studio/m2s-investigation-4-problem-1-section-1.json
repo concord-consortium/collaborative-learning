@@ -1,0 +1,18 @@
+{
+  "type": "welcome",
+  "content": {
+    "tiles": [
+      {
+        "id": "gkdRjlQhXk8uLNaG",
+        "title": "Text 5",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Welcome to your work space! In here, you will find information and questions. You will work both individually and in groups, so be sure to listen to your teacher about what to do when. </strong></p><p><strong></strong></p><p>Some tips for this workspace:</p><ul><li>You can rearrange your spaces by clicking on the top right-hand corner of the tile (where you will see 6 dots). This will allow you drag and move the tiles. </li><li>You can click on the bottom right corner of any tile and then drag it up or down to make it smaller or bigger. </li><li>You can share your work with your group-mates by using the Share slider on the top right corner, or publish your work to the whole class by clicking the button with the up-arrow next to the File menu.</li><li>You can also look at the work of your group-mates by clicking the Group View icon on the top bar (it looks like a window). </li><li>If you click on the X next to the tab called &quot;Class Work&quot;, the Resources side of the screen on the left will collapse to give you more room to work.</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

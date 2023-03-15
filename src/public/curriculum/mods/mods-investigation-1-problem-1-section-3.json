@@ -1,1 +1,16 @@
-{"type": "reflection", "content": {"tiles": []}}
+{
+  "type": "reflection",
+  "content": {
+    "tiles": [
+      {
+        "id": "863xn_F2MC7VyAIR",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": ["<p><strong>Engineer Notebook</strong></p><p>Explain why water conservation is important to me (or my community). Note anything important you learned, any questions you have, any design ideas/sketches or whatever else you want to write about! </p>"]
+        }
+      }
+    ]
+  }
+}

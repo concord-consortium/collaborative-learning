@@ -1,1 +1,1 @@
-{"type": "introduction", "content": {"tiles": []}, "supports": []}
+{"type": "introduction", "content": {"tiles": []}, "config": {"planningTemplate": {"overview": {"tiles": []}, "launch": {"tiles": []}, "explore": {"tiles": []}, "summarize": {"tiles": []}}}}

@@ -1,1 +1,18 @@
-{"type": "reflection", "content": {"tiles": []}}
+{
+  "type": "reflection",
+  "content": {
+    "tiles": [
+      {
+        "id": "luI7hbqHeF_74k80",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Statement Reframe</strong></p><p>Debrief: How does mapping help us understand a problem and create a solution?</p><p>What changes should we make to our problem statement now that we understand stakeholders?</p><p><strong>Engineer Notebook</strong></p><p>Explain how your problem statement changed and why. Explain, note, or sketch anything else related to today’s class.</p><p><strong>Community Connection (Optional)</strong></p><p>Share your stakeholder map with one important person in your home. Note any thoughts they have on your stakeholder map. </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

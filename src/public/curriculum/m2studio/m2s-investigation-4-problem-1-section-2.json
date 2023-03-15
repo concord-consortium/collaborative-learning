@@ -1,0 +1,36 @@
+{
+  "type": "help",
+  "content": {
+    "tiles": [
+      {
+        "id": "gkdRjlQhXk8uLNaG",
+        "title": "Text 5",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Workspace</strong></p>", "<p>Your workspace is on the right. You can create content in it by dragging tiles from any tab on the left, or by using one of the tile tools in the toolbar.</p>"]}
+      },
+      {"id": "njCI4Wmr6eYNc5go", "title": "CLUE Workspace Vertical Toolbar", "content": {"type": "Image", "url": "curriculum/m2studio/images/CLUEToolbar.png", "filename": "curriculum/m2studio/images/CLUEToolbar.png"}},
+      {"id": "TextTile12MAR2023", "title": "Text 5", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Text Tile</strong></p>", "<p>Text tiles can be used to document your ideas, make lists, and to display or define variables.</p>"]}},
+      {"id": "cP2E6t6w3HOYTCUi", "title": "Toolbar buttons for the text tile", "content": {"type": "Image", "url": "curriculum/m2studio/images/Toolbar_Text.png", "filename": "curriculum/m2studio/images/Toolbar_Text.png"}},
+      {"id": "7QvQa97zBd4PZLP6", "title": "Text 10", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Table Tiles</strong></p>", "<p>You can store reference data in tables.</p>"]}},
+      {
+        "id": "FDAYvugP7pz6d3Oh",
+        "title": "Table 1",
+        "content": {
+          "type": "Table",
+          "name": "World Population by Age Range",
+          "columns": [
+            {"name": "Age Group", "width": 120, "values": ["<20 years", "20-39 years", "40-59 years", "60-79 years", "80-99 years", "100+ years"]},
+            {"name": "Number of People", "width": 230, "values": ["2.6 billion", "2.3 billion", "1.8 billion", "918 million", "147 million", "0.6 million"]}
+          ]
+        }
+      },
+      {
+        "id": "DrawTile12MAR2023",
+        "title": "Drawtiledoc",
+        "content": {"type": "Text", "format": "html", "text": ["<p><strong>Drawing Tile</strong></p>", "<p>Drawing tiles can be used to document your ideas as sketches, make annotations on top of embedded images, and to display or define variables.</p>"]}
+      },
+      {"id": "ePTfYCm7Q-oWGR2R", "title": "Toolbar buttons for the drawing tile", "content": {"type": "Image", "url": "curriculum/m2studio/images/Toolbar_Drawing.png", "filename": "curriculum/m2studio/images/Toolbar_Drawing.png"}},
+      {"id": "DiagramTile12MAR2023", "title": "Diagramtiledoc", "content": {"type": "Text", "format": "html", "text": ["<p><strong>Diagram Tile</strong></p>", "<p>Diagram tiles can be used to define and create relationships between variables.</p>"]}},
+      {"id": "r8R3q6_aIIroLzYl", "title": "Toolbar buttons for the diagram tile", "content": {"type": "Image", "url": "curriculum/m2studio/images/Toolbar_Diagram.png", "filename": "curriculum/m2studio/images/Toolbar_Diagram.png"}}
+    ]
+  }
+}
