@@ -514,7 +514,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    console.log("tick", this)
+    console.log("tick", this);
+    console.log("nodes:", this.programEditor.nodes);
+    // "pg_-fS7THdT12J1B"
+
+    console.log("tildID:", this.props.tileId);
+    // if (this.props.tildId)
+    // const filteredNodes = this.programEditor.nodes.
+
     // if recording, if we are not already ticking, if we are on the correct instance
     // since a number of shared madels we can see might look the same
     // assess and scope to the tile we care about
