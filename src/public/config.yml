@@ -5,7 +5,6 @@ backend:
   base_url: https://us-central1-cms-github-auth.cloudfunctions.net
   auth_endpoint: /oauth/auth
 # local_backend: true
-publish_mode: editorial_workflow
 media_folder: "images/uploads"
 collections:
   - name: "blog" # Used in routes, e.g., /admin/collections/blog
