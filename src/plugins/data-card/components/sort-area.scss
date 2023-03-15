@@ -1,0 +1,52 @@
+@import "../../../components/vars.sass";
+
+$sort-view-card-width: 177px;
+$sort-view-column-width: $sort-view-card-width + 10px;
+$sort-view-font-size:10px;
+$cards-per-row: 3; // this may be dynamic in the future
+$sort-view-width: ($sort-view-card-width * $cards-per-row );
+
+.data-card-tool.display-as-sorted {
+  font-size: $sort-view-font-size;
+  .panel {
+    width: ($sort-view-width);
+  }
+
+  .sorting-cards-data-area {
+    width: $sort-view-width;
+    border: solid 1px $charcoal-light-1;
+
+    .sort-area-grid {
+      display: grid;
+      grid-template-columns: $sort-view-card-width $sort-view-card-width $sort-view-card-width;
+
+      .stack {
+        width: $sort-view-card-width;
+        .stack-heading {
+          background-color: $workspace-teal-light-4;
+          font-size: 13px;
+          font-weight: bold;
+          text-align: center;
+          padding-top: 3px;
+          padding-bottom: 3px;
+        }
+      }
+
+      .empty.cell {
+        width: $sort-view-card-width;
+        background-color: $workspace-teal-light-4;
+        height:23px;
+      }
+    }
+
+    .sortable.card {
+      display: grid;
+      // temporary styles for dev
+      margin:3px;
+      padding:3px;
+      font-family: monospace;
+      border: 1px solid $charcoal-light-1;
+      transform: translateX(-1px);
+    }
+  }
+}

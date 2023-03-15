@@ -20,14 +20,28 @@ context('Data Card Tool Tile', function () {
       dc.getTile().contains("Data Card Collection");
     });
     it("can create a new attribute", () => {
-      dc.getNameInputAsInactive().dblclick().type("Hello{enter}");
+      dc.getAttrName().dblclick().type("Attr1 Name{enter}");
+      dc.getAttrName().contains("Attr1 Name");
+    });
+    it("can add a value to an attribute", () => {
+      dc.getAttrValue().click().type("Attr1 Value{enter}");
+      dc.getTile().click();
+      dc.getAttrValueInput().invoke('val').should('eq', 'Attr1 Value');
     });
     it("can toggle between single and sort views", () => {
-      cy.get('.single-card-data-area').should('exist');
-      dc.getSortSelect().select("Hello");
-      cy.get('.sorting-cards-data-area').should('exist');
+      dc.getSingleCardView().should('exist');
+      dc.getSortSelect().select("Attr1 Name");
+      dc.getSortView().should('exist');
       dc.getSortSelect().select("None");
-      cy.get('.single-card-data-area').should('exist');
+      dc.getSingleCardView().should('exist');
+    });
+    it("attribute names stays in sync on menu and card", () => {
+      dc.getAttrName().dblclick().type("Attr1 Renamed{enter}");
+      dc.getAttrName().contains("Attr1 Renamed");
+      dc.getSortSelect().select("Attr1 Renamed");
+      dc.getSortView().should('exist');
+      dc.getSortSelect().select("None");
+      dc.getSingleCardView().should('exist');
     });
   });
 });
