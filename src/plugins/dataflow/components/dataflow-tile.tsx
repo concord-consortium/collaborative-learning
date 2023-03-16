@@ -28,15 +28,11 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   public static tileHandlesSelection = true;
 
   public render() {
-
-    // console.log("⚡ ⚡ ⚡ class <DataflowToolComponent> with props", this.props);
     const { readOnly, height, model } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom, programRecordState } = this.getContent();
     const numNodes = program.nodes.size;
-    // console.log("numBlocks", numBlocks.size);
-    // console.log("⚡ ⚡ ⚡ class <DataflowToolComponent>  this.getContent()", this.getContent());
 
     return (
       <>
@@ -128,18 +124,15 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   };
 
   private handleProgramDataRateChange = (program: any) => {
-    // console.log("handleProgramDataRateChange with program:", program);
     this.getContent().setProgramDataRate(program);
   };
 
   private handleProgramZoomChange = (dx: number, dy: number, scale: number) => {
-    // console.log("handleProgramZoomChange with dx:", dx, "dy:", dy, "scale:", scale);
     this.getContent().setProgramZoom(dx, dy, scale);
   };
   private handleRecordDataChange = () => {
     this.getContent().setProgramRecordState();
   };
-
 
   private getContent() {
     return this.props.model.content as DataflowContentModelType;

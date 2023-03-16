@@ -65,7 +65,7 @@ interface IProps extends SizeMeProps {
   onZoomChange: (dx: number, dy: number, scale: number) => void;
   tileHeight?: number;
   tileId: string;
-  onRecordDataChange: (program: any) => void;
+  onRecordDataChange: () => void;
   programRecordState: number;
   numNodes: number;
 }
@@ -108,7 +108,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    // console.log("dataflow-program > render()");
     const { readOnly, documentProperties, numNodes} = this.props;
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
@@ -131,7 +130,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           onRecordDataChange={this.props.onRecordDataChange}
           programRecordState={this.props.programRecordState}
           numNodes={numNodes}
-          //need to know total # of blocks
         />
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar

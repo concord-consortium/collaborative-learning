@@ -22,7 +22,7 @@ interface TopbarProps {
   showRateUI: boolean;
   lastIntervalDuration: number;
   serialDevice: SerialDevice;
-  onRecordDataChange: (program: any) => void;
+  onRecordDataChange: () => void;
   programRecordState: number;
   numNodes: number;
 }
@@ -122,7 +122,7 @@ interface IRateSelectorProps {
   numNodes: number
   finished: boolean;
   handleFinished: (isFinished: boolean)=> void;
-  onRecordDataChange: (program: any) => void; //when timer reaches end, we set programRecordState = false
+  onRecordDataChange: () => void;
 }
 
 function formatTime(seconds: number) {
@@ -134,8 +134,8 @@ function formatTime(seconds: number) {
 }
 
 const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
-  const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState, numNodes,
-         finished, handleFinished, onRecordDataChange} = props;
+  const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState,
+          numNodes, handleFinished, onRecordDataChange} = props;
 
   /* ==[ Total Recording Time  - Calculate] format as "MMM:SS" */
   const totalTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
@@ -164,11 +164,14 @@ const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   }, [timerSec, startTimer]);
 
   /* ==[ Timer - Reset ] == */
-  if (programRecordState === 0) timerSec.current = 0;
+  if (programRecordState === 0) {
+    timerSec.current = 0;
+    timerMin.current = 0;
+  }
 
   if(timerSec.current >= totalTimeSec){
-    console.log("handleFinished true!");
     handleFinished(true);
+    onRecordDataChange();
   }
 
   const railRef = useRef<HTMLDivElement>(null);
