@@ -2,6 +2,7 @@
 
 .data-card-toolbar {
   position: absolute;
+  display:flex;
   border: $toolbar-border;
   border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
   z-index: $toolbar-z-index;
@@ -11,7 +12,7 @@
     display: none;
   }
 
-  .toolbar-buttons {
+  .value-actions-buttons {
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -19,12 +20,7 @@
     height: $toolbar-button-height;
     background-color: $workspace-teal-light-9;
 
-    &.disabled {
-      opacity: 0.35;
-      pointer-events: none;
-    }
-
-    .toolbar-button {
+    .image-upload {
       position: relative;
       width: $toolbar-button-width;
       height: $toolbar-button-height;
@@ -56,15 +52,40 @@
     }
 
     .delete-value-button {
+      opacity: 1;
+      width: 24px;
+      &:hover svg {
+        background-color:$workspace-teal-light-6;
+      }
+    }
+
+    .delete-value-button {
+      transform: translate(-13px, -4px);
       svg path {
         fill: $charcoal-dark-1;
       }
-      opacity: 1;
-      transform: translate(-12px, -5px);
     }
-
-    .delete-value-button:hover svg {
-      background-color:$workspace-teal-light-6;
+    &.value-actions-disabled {
+      opacity: 0.35;
+      pointer-events: none;
     }
   }
+
+  .card-actions-buttons {
+    .duplicate-card-button {
+      opacity: 1;
+      transform: translate(-12px, 0px);
+      svg {
+        stroke: transparent;
+      }
+      &:hover svg {
+        background-color:$workspace-teal-light-6;
+      }
+    }
+    &.card-actions-disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+  }
+
 }

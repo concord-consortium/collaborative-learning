@@ -4,6 +4,7 @@ import { Tooltip } from "react-tippy";
 import AddIcon from "../../../assets/icons/add/add.nosvgo.svg";
 import RemoveIcon from "../../../assets/icons/remove/remove.nosvgo.svg";
 import DeleteSelectionIcon from "../assets/delete-selection-icon.svg";
+import DuplicateCardIcon from "../assets/duplicate-card-icon.svg";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 
 import "./add-remove-icons.scss";
@@ -26,6 +27,21 @@ export const RemoveIconButton = (props: IconButtonProps) => {
     <IconButtonBack {...props}>
       <RemoveIcon />
     </IconButtonBack>
+  );
+};
+
+export const DuplicateCardIconButton = (props: IconButtonProps) => {
+  const tooltipOptions = useTooltipOptions({
+    distance: 5,
+    offset: 5
+  });
+
+  return (
+    <Tooltip title="Duplicate card" {...tooltipOptions}>
+      <IconButtonBack className="duplicate-card-button" {...props}>
+        <DuplicateCardIcon />
+      </IconButtonBack>
+    </Tooltip>
   );
 };
 
