@@ -35,8 +35,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   const [finished, setFinished] = useState(false);
   const handleFinished = (isFinished: boolean) => isFinished && setFinished(true);
 
-
-
   // Of the boards tested, only authentic Arduinos (usbProductId === 67) raise the browser `connect` event
   // Which we use to track physical connection independently of port state
   // So we only warn of a lack of physical connection when using an known board
@@ -126,48 +124,59 @@ interface IRateSelectorProps {
   finished: boolean;
   handleFinished: (isFinished: boolean)=> void;
   onRecordDataChange: (program: any) => void; //when timer reaches end, we set programRecordState = false
+}
 
+function formatTime(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  const formattedMinutes = minutes.toString().padStart(3, '0');
+  const formattedSeconds = remainingSeconds.toString().padStart(2, '0');
+  return `${formattedMinutes}:${formattedSeconds}`;
 }
 
 const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState, numNodes,
          finished, handleFinished, onRecordDataChange} = props;
-  // console.log("<RateSelectorComponent with props:", props);
 
 
-  const count = useRef(0); //seconds that have passed after hitting Record
+  /* ==[ Total Recording Time  - Calculate] format as "MMM:SS" */
+  const totalTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
+  const totalTimeFormatted = formatTime(totalTimeSec);
 
-  // calculate total recording time
-  let  totalTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
-  // totalTimeSec = 60;
-  const totalTimeMin = (totalTimeSec / 60);
-  const totalTimeMinStr = totalTimeMin.toFixed(2);
-  const totalTimeFormatted = totalTimeMinStr.replace(".", ":");
 
-  //format timer as mmm:ss
-  const currentTime = new Date(count.current * 1000).toISOString();
-  const currentTimeFormatted = new Date(count.current * 1000).toISOString().substring(14, 19)
-  console.log("totalTimeFormatted", totalTimeFormatted);
-  console.log("totalTimeMinStr", totalTimeMinStr);
+  /* ==[ Timer Recording Time  - Calculate] format as "MMM:SS" */
+  const timerMin = useRef(0);
+  const timerSec = useRef(0); //seconds that have passed after hitting Record
+  const formattedMin = timerMin.toString().padStart(3, "0");
+  const formattedSec = timerSec.toString().padStart(2, "0");
+  const formattedTime = `${formattedMin}:${formattedSec}`;
+  console.log("formattedTime:", formattedTime);
 
-  if(count.current >= totalTimeSec){
-    handleFinished(true);
-  }
+
+
 
   /* ==[ Timer - Enable ] == */
-  const startTimer = numNodes > 0 && count.current < totalTimeSec && (programRecordState === 1);
+  const startTimer = numNodes > 0 && timerSec.current < totalTimeSec && (programRecordState === 1);
 
   useEffect(()=>{
     const timer = setInterval(() => {
-      startTimer && (count.current = count.current + 1);
+      startTimer && timerSec.current++;
+      if (timerSec.current === 60){
+        timerMin.current++;
+        timerSec.current = 0;
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [count, startTimer]);
+  }, [timerSec, startTimer]);
 
   /* ==[ Timer - Reset ] == */
-  if (programRecordState === 0) count.current = 0;
+  if (programRecordState === 0) timerSec.current = 0;
 
+  if(timerSec.current >= totalTimeSec){
+    console.log("handleFinished true!");
+    handleFinished(true);
+  }
 
   const railRef = useRef<HTMLDivElement>(null);
 
@@ -186,7 +195,7 @@ const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
               min={0}
               max={totalTimeSec}
               step={1}
-              value={count.current}
+              value={timerSec.current}
               ref={railRef}
             />
           </div>
@@ -214,7 +223,7 @@ const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
             </select> :
             numNodes > 0 &&
             <div className="countdown-timer">
-             {`${currentTimeFormatted}/ ${totalTimeFormatted}`}
+             {`${formattedTime} / ${totalTimeFormatted}`}
             </div>
           }
 

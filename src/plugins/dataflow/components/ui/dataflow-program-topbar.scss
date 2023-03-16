@@ -136,25 +136,21 @@ $gray-text: #242424;
   .topbar-center-container{
     display: flex;
     min-width: 420px;
+    // background-color: yellow;
 
     //******* SECTION **********
     .topbar-blank-or-play {
       width: 100px;
       background-color: $duration-label-back;
-      // margin-left: 5px;
-
+      margin-left: -10px;
       display: flex;
       justify-content: center;
       align-items: center;
-
-      // background-color: orange;
 
       .playback-btn-container{
         padding-right: 10px;
         width: 100%;
         margin-left: 5px;
-        // background-color: blue;
-        // width:
 
         .playback-data-btn{
           width: 90px;
@@ -182,10 +178,8 @@ $gray-text: #242424;
             color: var(--gray-text);
             margin-left: -2px;
           }
-
         }
       }
-
     }
 
     /* ==[ Container for "Sampling Rate" or Time Slider ] == */
@@ -196,8 +190,6 @@ $gray-text: #242424;
       width: 130px;
       height: 28px;
       background-color: $duration-label-back;
-
-      // margin-left: 5px;
 
       /* ==[ Sample Rate Label ] == */
       .samplerate-label {
@@ -215,7 +207,7 @@ $gray-text: #242424;
         width: 120px;
         height: 28px;
         position: absolute;
-        // background-color: $duration-label-back;
+        margin-left: -10px;
 
         .rc-slider {
           position: relative;
@@ -226,7 +218,6 @@ $gray-text: #242424;
           box-sizing: border-box;
           margin-top: 2px;
 
-
           &-rail {
             position: absolute;
             width: 95%;
@@ -236,7 +227,7 @@ $gray-text: #242424;
 
           &-track {
             position: relative;
-            width: 100%;
+            width: 95%;
             height: 4px;
             top: -1px;
             background-color: #545454;
@@ -246,9 +237,9 @@ $gray-text: #242424;
 
           &-handle {
             position: absolute;
-            top: 1.5px;
-            width: 22px;
-            height: 22px;
+            top: 5px;
+            width: 15px;
+            height: 15px;
             border: solid 2px;
             background-color: #fff;
             border-radius: 50%;
