@@ -513,18 +513,49 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
+
+
   private tick = () => {
     // console.log("tick", this);
     // console.log("nodes:", this.programEditor.nodes);
-    const testTileId =  "ZTbkPK-F2o1DFhbz";
     // console.log(this.props.tileId);
 
+    //**** TO DO  ****************
+
+    //when do we add the attribute (a new node) to the dataset
+    //either when we add a new tile to the canvas, or we set record
+
+    //when we run a new recording session the dataset should reflect whats currently on the tile
+    //are we creating a new dataset or are we  overwriting the existing one?
+
+    //joe thinks - when you hit record
+    // #1 empty out the dataset of all its cases and attributes
+    // #2 recreate all the attributes based on all the nodes within the tile in focus
+    // #2.5 look at addNewAttr (in data-card-content.ts)
+    // joe thinks - name will "Sensor 1"
+                  // - id - concatenation of uniqueId() + _nodeId
+    // #3 for each tick, create case (like addNewCaseFromAttrKeys in data-card-content.ts)
+    // where each attribute gets the value of the node value in that tick.
+    // #4
+
+
+    // ### need to add methods addNewAttr to dataflow-content.ts
+
+    // ### - // in this file - we have an exam of accessing the model, that model contains a dataset
+
+
+    //********************
+
+    const testTileId =  "ZTbkPK-F2o1DFhbz";
+
     if (this.props.tileId === testTileId){
-      this.programEditor.nodes.forEach(node =>{
-        console.log(`${node.name}: ${node.data.nodeValue}`);
+      this.programEditor.nodes.forEach((node, idx) =>{
+        // console.log(node);
+
+        console.log(`${node.name} ${idx+1} id:${node.id} val: ${node.data.nodeValue}`);
 
         // if (isFinite(node.data.nodeValue as number)){
-        //   console.log(`${node.name}: ${node.data.nodeValue}`);
+        //   console.log(`${node.name} id:${node.id} val: ${node.data.nodeValue}`);
         // }
       });
       console.log("----------------");
