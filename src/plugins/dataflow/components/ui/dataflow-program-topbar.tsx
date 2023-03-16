@@ -30,7 +30,6 @@ interface TopbarProps {
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates,
     dataRate, onRateSelectClick, onRecordDataChange, programRecordState, numNodes } = props;
-    // console.log("<DataflowProgramToolbar> \n with props", props);
 
   const [finished, setFinished] = useState(false);
   const handleFinished = (isFinished: boolean) => isFinished && setFinished(true);
@@ -138,22 +137,16 @@ const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState, numNodes,
          finished, handleFinished, onRecordDataChange} = props;
 
-
   /* ==[ Total Recording Time  - Calculate] format as "MMM:SS" */
   const totalTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
   const totalTimeFormatted = formatTime(totalTimeSec);
 
-
   /* ==[ Timer Recording Time  - Calculate] format as "MMM:SS" */
   const timerMin = useRef(0);
   const timerSec = useRef(0); //seconds that have passed after hitting Record
-  const formattedMin = timerMin.toString().padStart(3, "0");
-  const formattedSec = timerSec.toString().padStart(2, "0");
+  const formattedMin = timerMin.current.toString().padStart(3, "0");
+  const formattedSec = timerSec.current.toString().padStart(2, "0");
   const formattedTime = `${formattedMin}:${formattedSec}`;
-  console.log("formattedTime:", formattedTime);
-
-
-
 
   /* ==[ Timer - Enable ] == */
   const startTimer = numNodes > 0 && timerSec.current < totalTimeSec && (programRecordState === 1);
@@ -183,7 +176,6 @@ const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     onRateSelectClick(Number(event.target.value));
   };
-
 
   return (
     <>

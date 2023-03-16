@@ -136,7 +136,6 @@ $gray-text: #242424;
   .topbar-center-container{
     display: flex;
     min-width: 420px;
-    // background-color: yellow;
 
     //******* SECTION **********
     .topbar-blank-or-play {
@@ -207,7 +206,6 @@ $gray-text: #242424;
         width: 120px;
         height: 28px;
         position: absolute;
-        margin-left: -10px;
 
         .rc-slider {
           position: relative;
@@ -323,8 +321,6 @@ $gray-text: #242424;
       background-color: $duration-label-back;
 
       .datarate-options select {
-        background-color: orange;
-
         position: relative;
         width: 90px;
         height: 24px;
@@ -332,7 +328,6 @@ $gray-text: #242424;
         background-color: #ffffff;
         font-size: 11px;
         outline: 0;
-        // margin-left: 5px;
         &:disabled {
           cursor: default;
         }
@@ -364,7 +359,6 @@ $gray-text: #242424;
         background-color: #ffffff;
         font-size: 11px;
         outline: 0;
-        // margin-left: -5px;
         border-left: 4px solid transparent;
         border-right: 4px solid transparent;
         display: flex;
