@@ -528,21 +528,32 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     //when we run a new recording session the dataset should reflect whats currently on the tile
     //are we creating a new dataset or are we  overwriting the existing one?
 
-    //joe thinks - when you hit record
-    // #1 empty out the dataset of all its cases and attributes
-    // #2 recreate all the attributes based on all the nodes within the tile in focus
+    //kirk - delete the cases, keep the attributes, when you add new cases reuse existing attributes
+
+    //edge case - lets say insertion order is math, timer, math, names -> name 1, timer 2, math 3.
+    //if student deletes math 3 the puts it back.
+    //possible solution -disable or freeze/lock the tiles
+
+    //problem - scope the recording to its tile,
+    // TO DO - make a  programId for each dataflow tile to make it unique
+    //solution - hit record - sending the programId for the dataflow tile
+
+    //when we hit record-
+    // #1 - we need to compare the old dataset to what our new one will
+    //(instead of overwriting it and creating a new data set) this is because we need to keep the unique Id
+    //create any new attributes, remove any attributes that are not on the tile anymore.
+
+    // #2 create any new attri all the attributes based on all the nodes within the tile in focus
     // #2.5 look at addNewAttr (in data-card-content.ts)
     // joe thinks - name will "Sensor 1"
                   // - id - concatenation of uniqueId() + _nodeId
     // #3 for each tick, create case (like addNewCaseFromAttrKeys in data-card-content.ts)
     // where each attribute gets the value of the node value in that tick.
-    // #4
 
 
     // ### need to add methods addNewAttr to dataflow-content.ts
 
     // ### - // in this file - we have an exam of accessing the model, that model contains a dataset
-
 
     //********************
 
