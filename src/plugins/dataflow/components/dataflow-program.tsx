@@ -36,6 +36,7 @@ import { SerialDevice } from "../../../models/stores/serial";
 import { dataflowLogEvent } from "../dataflow-logger";
 
 import "./dataflow-program.sass";
+import { DataCardContentModelType } from "src/plugins/data-card/data-card-content";
 
 interface NodeNameValuePair {
   name: string;
@@ -68,6 +69,8 @@ interface IProps extends SizeMeProps {
   onRecordDataChange: () => void;
   programRecordState: number;
   numNodes: number;
+  dataSet: any;
+  sharedModel: any;
 }
 
 interface IState {
@@ -97,6 +100,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private disposers: IDisposer[] = [];
   private onSnapshotSetup = false;
   private processing = false;
+
 
   constructor(props: IProps) {
     super(props);
@@ -522,14 +526,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private tick = () => {
 
-    // console.log("tick", this);
+    // console.log("this", this);
     // console.log("nodes:", this.programEditor.nodes);
-    // console.log(this.props.tileId);
+    console.log("this.props", this.props);
+    console.log("this.programEditor", this.programEditor);
+
+    console.log(this.props.tileId);
 
     //**** TO DO  ****************
 
-    //when do we add the attribute (a new node) to the dataset
-    //either when we add a new tile to the canvas, or we set record
 
     //when we run a new recording session the dataset should reflect whats currently on the tile
     //are we creating a new dataset or are we  overwriting the existing one?
@@ -545,7 +550,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     //solution - hit record - sending the programId for the dataflow tile
 
     //when we hit record-
-    // #1 - we need to compare the old dataset to what our new one will
+    // #1 - we need to compare the old dataset to what our new one
     //(instead of overwriting it and creating a new data set) this is because we need to keep the unique Id
     //create any new attributes, remove any attributes that are not on the tile anymore.
 
@@ -563,17 +568,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     //********************
 
-    const testTileId =  "ZTbkPK-F2o1DFhbz";
+    const testTileId =  "loPReeQkVoAgpvPO";
 
-    if (this.props.tileId === testTileId){
+    if (this.props.tileId === testTileId ){
       this.programEditor.nodes.forEach((node, idx) =>{
         // console.log(node);
+        // console.log(`${node.name} #${idx+1} id:${node.id} val: ${node.data.nodeValue}`);
+        const newCase = `${node.name} #${idx+1} id:${node.id} val: ${node.data.nodeValue}`;
+        console.log("test :", this.props.dataSet.cases);
+        // this.props.dataSet.addNewAttr(newCase); //calling within model
 
-        console.log(`${node.name} ${idx+1} id:${node.id} val: ${node.data.nodeValue}`);
+        // first pass at writing to the dataset
 
         // if (isFinite(node.data.nodeValue as number)){
         //   console.log(`${node.name} id:${node.id} val: ${node.data.nodeValue}`);
         // }
+
       });
       console.log("----------------");
       // console.log("nodes in focus:", this.programEditor.nodes[2]);

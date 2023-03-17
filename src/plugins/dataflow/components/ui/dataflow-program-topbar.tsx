@@ -119,7 +119,7 @@ interface IRateSelectorProps {
   onRateSelectClick: (rate: number) => void;
   readOnly: boolean;
   programRecordState: number;
-  numNodes: number
+  numNodes: number;
   finished: boolean;
   handleFinished: (isFinished: boolean)=> void;
   onRecordDataChange: () => void;

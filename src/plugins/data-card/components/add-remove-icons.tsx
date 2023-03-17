@@ -15,6 +15,7 @@ interface IconButtonProps {
 }
 
 export const AddIconButton = (props: IconButtonProps) => {
+  console.log("add-remove-icons.tsx > props:", props);
   return (
     <IconButtonBack {...props}>
       <AddIcon />

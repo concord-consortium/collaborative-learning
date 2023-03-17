@@ -1,6 +1,6 @@
 import { types, Instance, applySnapshot, getSnapshot, addDisposer, getType } from "mobx-state-tree";
 import { reaction } from "mobx";
-import { cloneDeep } from "lodash";
+import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -11,11 +11,9 @@ import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { getTileModel, setTileTitleFromContent } from "../../../models/tiles/tile-model";
 import { SharedModel } from "../../../models/shared/shared-model";
 import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
-
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
-
-
+import { uniqueId, uniqueTitle } from "../../../utilities/js-utils";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -68,7 +66,7 @@ export const DataflowContentModel = TileContentModel
       if (!firstSharedModel || getType(firstSharedModel) !== SharedDataSet) {
         return undefined;
       }
-      console.log("firstSharedModel", firstSharedModel);
+      console.log("DataFlow model > views > get sharedModel() > firstSharedModel\n", firstSharedModel);
       return firstSharedModel as SharedDataSetType;
     },
     programWithoutRecentValues() {
@@ -84,6 +82,11 @@ export const DataflowContentModel = TileContentModel
       return { values: newValues, ...rest };
     }
   }))
+  .views(self => ({ //added
+    get dataSet(){
+      return self.sharedModel?.dataSet || self.emptyDataSet;
+    }
+  }))
   .views(self => ({
     get title() {
       return getTileModel(self)?.title;
@@ -94,7 +97,6 @@ export const DataflowContentModel = TileContentModel
     get dataSet() {
       return self.sharedModel?.dataSet || self.emptyDataSet;
     },
-
     exportJson(options?: ITileExportOptions) {
       const zoom = getSnapshot(self.programZoom);
       return [
@@ -109,7 +111,19 @@ export const DataflowContentModel = TileContentModel
         `  "program": ${stringify(self.programWithoutRecentValues())}`,
         `}`
       ].join("\n");
-    }
+    },
+    //added (not used )
+    // existingAttributesWithNames(){
+    //   return self.dataSet.attributes.map((a) => {
+    //     return { "attrName": a.name, "attrId": a.id };
+    //   });
+    // }
+    existingAttributes(){
+      return self.dataSet.attributes.map((a) => {
+        return a.id;
+      });
+    },
+
   }))
   .actions(self => tileModelHooks({
     doPostCreate(metadata: ITileMetadataModel){
@@ -117,9 +131,7 @@ export const DataflowContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    //added
-    afterAttach() { // built-in hook is called on every model right after added to the tree
-
+    afterAttach() { //     //added built-in hook is called on every model right after added to the tree
       // Monitor our parents and update our shared model when we have a document parent
       addDisposer(self, reaction(() => {
         // disposers call the function passed to it when model is disposed
@@ -197,12 +209,60 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.dy = dy;
       self.programZoom.scale = scale;
     },
+    addNewCaseFromAttrKeys(atts: string[], beforeId?: string ){
+      // const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
+      // if (beforeId){
+      //   addCanonicalCasesToDataSet(self.dataSet, [obj], beforeId);
+      // } else {
+      //   addCanonicalCasesToDataSet(self.dataSet, [obj]);
+      // }
+    },
+    addNewAttr(nodeInfo: any){
+      console.log("dataflow-content.ts > addNewAttr > nodeInfo:", nodeInfo);
+      // self.dataSet.addAttributeWithID({
+      //   id: uniqueId(),
+      //   name: uniqueTitle(kDefaultLabelPrefix, name => !self.dataSet.attrFromName(name))
+      // });
+
+      // const casesArr = self.allCases().map(c => c?.__id__);
+      // const attrsArr = self.existingAttributes();
+
+      // casesArr.forEach((caseId) => {
+      //   if (caseId){
+      //     attrsArr.forEach((attr) => {
+      //       const notSet = self.dataSet.getValue(caseId, attr) === undefined;
+      //       if (notSet){
+      //         this.setAttValue(caseId, attr, "");
+      //       }
+      //     });
+      //   }
+      // });
+    }
+
+
+
+  }))
+  .actions(self => ({
+
     setProgramRecordState(){
       //0 - Record
       //1 - Stop
       //2 - Clear
+      // console.log("dataflow-content.ts > setProgramRecordState() with programRecordState", self.programRecordState);
+      if (self.programRecordState === 0){
+        console.log("we are in recording mode");
+        console.log("self.title", self.title); //when calling on view methods, we do not need to invoke them
+        console.log("self.dataset", self.dataSet); //when calling on view methods, we do not need to invoke them
+
+        //from datacard
+        // self.addNewCaseFromAttrKeys(self.existingAttributes()); //calls to other actions must be above(?), not below
+        // setCaseIndex(content.totalCases - 1);
+      }
       self.programRecordState = (self.programRecordState + 1) % 3;
     }
+
+
+
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;

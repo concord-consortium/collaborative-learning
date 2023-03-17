@@ -66,6 +66,7 @@ export const DataCardContentModel = TileContentModel
       return self.sharedModel?.dataSet || self.emptyDataSet;
     },
   }))
+  //why seperate them into seperate views() - there are three
   .views(self => ({
     get dataSetName(){
       return self.dataSet.name;

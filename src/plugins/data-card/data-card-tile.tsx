@@ -91,8 +91,10 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     setIsEditingTitle(false);
   };
 
+  //*** BUTTON CLICK *****************************************************************
   function addNewCase(){
     console.log("data-card-tile.tsx > addNewCase");
+    console.log("data-card-tile.tsx > content.existingAttributes() ", content.existingAttributes);
     content.addNewCaseFromAttrKeys(content.existingAttributes());
     content.setCaseIndex(content.totalCases - 1);
   }
