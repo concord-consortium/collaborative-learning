@@ -609,7 +609,7 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
   },
 
   async store(
-    url: string, curriculumBaseUrl?: string, options?: IImageHandlerStoreOptions
+    url: string, curriculumBaseUrl?: string, unitCodeMap?: any, options?: IImageHandlerStoreOptions
   ): Promise<IImageHandlerStoreResult> {
     const { db } = options || {};
     const { path, classHash, imageKey, normalized } = parseFauxFirebaseRTDBUrl(url);

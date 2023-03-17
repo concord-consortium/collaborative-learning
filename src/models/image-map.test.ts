@@ -152,7 +152,9 @@ describe("ImageMap", () => {
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() =>
                               Promise.resolve({ imageUrl: placeholderImage, imageData: placeholderImage}));
-      p2 = externalUrlImagesHandler.store(kHttpsImage3, kCurriculumUrl, kUnitCodeMap, { db: createMockDB({ stores: { user: { id: "" }} }) })
+      p2 = externalUrlImagesHandler.store(
+          kHttpsImage3, kCurriculumUrl, kUnitCodeMap, { db: createMockDB({ stores: { user: { id: "" }} }) }
+        )
         .then(storeResult => {
           expect(storeSpy).toHaveBeenCalled();
           expect(storeResult.contentUrl).toBe(kHttpsImage3);
