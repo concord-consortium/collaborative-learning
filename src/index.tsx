@@ -3,7 +3,7 @@ import "ts-polyfill";
 import { Provider } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
-import CMS from "netlify-cms-app";
+import { setLivelinessChecking } from "mobx-state-tree";
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
 import { AppConfigContext } from "./app-config-context";
 import { AppComponent } from "./components/app";
@@ -16,8 +16,8 @@ import { DEBUG_STORES } from "./lib/debug";
 import { Logger } from "./lib/logger";
 import { setPageTitle } from "./lib/misc";
 import { gImageMap } from "./models/image-map";
+import { initCMS } from "./cms/init-cms";
 import PackageJson from "../package.json";
-import { setLivelinessChecking } from "mobx-state-tree";
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
 
@@ -46,7 +46,7 @@ const initializeApp = async () => {
   }
 
   if (urlParams.admin) {
-    CMS.init();
+    initCMS();
   } else {
     if (appMode === "qa" && urlParams.qaClear === "all") {
       ReactDOM.render(
