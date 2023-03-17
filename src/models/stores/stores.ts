@@ -93,7 +93,10 @@ export function getProblemPath(stores: IBaseStores) {
 }
 
 export const setUnitAndProblem = async (stores: IStores, unitId: string | undefined, problemOrdinal?: string) => {
-  const unitJson = await getUnitJson(unitId, problemOrdinal, stores.appConfig);
+  let unitJson = await getUnitJson(unitId, stores.appConfig);
+  if (unitJson.status === 404) {
+    unitJson = await getUnitJson(stores.appConfig.defaultUnit, stores.appConfig);
+  }
 
   // read the unit content, but don't instantiate section contents (DocumentModels) yet
   const unit = createUnitWithoutContent(unitJson);
@@ -135,11 +138,13 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
     async () => {
       // only load the teacher guide content for teachers
       const guideJson = await getGuideJson(unitId, stores.appConfig);
-      const unitGuide = guideJson && UnitModel.create(guideJson);
-      // Not sure if this should be "guide" or "teacher-guide", either ought to work
-      unitGuide?.setFacet("teacher-guide");
-      const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
-      stores.teacherGuide = teacherGuide;
+      if (guideJson.status !== 404) {
+        const unitGuide = guideJson && UnitModel.create(guideJson);
+        // Not sure if this should be "guide" or "teacher-guide", either ought to work
+        unitGuide?.setFacet("teacher-guide");
+        const teacherGuide = unitGuide?.getProblem(problemOrdinal || stores.appConfig.defaultProblemOrdinal)?.problem;
+        stores.teacherGuide = teacherGuide;
+      }
     }
   ));
 };

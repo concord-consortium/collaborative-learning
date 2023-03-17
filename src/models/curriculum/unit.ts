@@ -11,7 +11,6 @@ import {
 import { ProblemModelType } from "./problem";
 import { resumeSupportContentParsing, SupportModel, suspendSupportContentParsing } from "./support";
 import { StampModel } from "../../plugins/drawing/model/stamp";
-import { getAssetUrl } from "../../utilities/asset-utils";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { NavTabsConfigModel } from "../stores/nav-tabs";
 import { SettingsMstType } from "../stores/settings";
@@ -147,9 +146,6 @@ export const UnitModel = types.snapshotProcessor(ModernUnitModel, {
 export interface UnitModelType extends Instance<typeof UnitModel> {}
 
 function getUnitSpec(unitId: string | undefined, appConfig: AppConfigModelType) {
-  if (unitId?.match(/https?:\/\//)) {
-    return {content: unitId, guide: ""};
-  }
   const requestedUnit = unitId ? appConfig.getUnit(unitId) : undefined;
   if (unitId && !requestedUnit) {
     console.warn(`unitId "${unitId}" not found in appConfig.units`);
@@ -195,21 +191,17 @@ const populateProblemSections = async (content: Record<string, any>, unitUrl: st
   return content;
 };
 
-export function getUnitJson(
-  unitId: string | undefined, problemOrdinal: string | undefined, appConfig: AppConfigModelType
-) {
+export function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType) {
   const unitSpec = getUnitSpec(unitId, appConfig);
-  const unitPath = unitSpec?.content;
-  const unitUrl = getAssetUrl(unitPath!);
+  const unitUrl = unitSpec?.content;
   return fetch(unitUrl!)
            .then(async response => {
              if (response.ok) {
                const unitContent = await response.json();
-               const fullUnitContent = unitContent && populateProblemSections(unitContent, unitUrl);
+               const fullUnitContent = unitContent && populateProblemSections(unitContent, unitUrl!);
                return fullUnitContent;
-             }
-             else {
-               throw Error(`Request rejected with status ${response.status}`);
+             } else {
+               return response;
              }
            })
            .catch(error => {
@@ -219,22 +211,19 @@ export function getUnitJson(
 
 export function getGuideJson(unitId: string | undefined, appConfig: AppConfigModelType) {
   const unitSpec = getUnitSpec(unitId, appConfig);
-  const guidePath = unitSpec?.guide;
-  if (!guidePath) return;
-  const guideUrl = getAssetUrl(guidePath!);
-  return fetch(guideUrl)
+  const guideUrl = unitSpec?.guide;
+  return fetch(guideUrl!)
           .then(async response => {
             if (response.ok) {
               const guideContent = await response.json();
-              const fullGuideContent = guideContent && populateProblemSections(guideContent, guideUrl);
+              const fullGuideContent = guideContent && populateProblemSections(guideContent, guideUrl!);
               return fullGuideContent;
-            }
-            else {
-              throw Error(`Request rejected with status ${response.status}`);
+            } else {
+              return response;
             }
           })
           .catch(error => {
-            throw Error(`Request rejected with exception`);
+            throw Error(`Request rejected with exception: ${error}`);
           });
 }
 

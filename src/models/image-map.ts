@@ -7,9 +7,11 @@ import { urlParams } from "../utilities/url-params";
 import { DB } from "../lib/db";
 import { DEBUG_IMAGES } from "../lib/debug";
 import placeholderImage from "../assets/image_placeholder.png";
+import { getCurriculumBranchFromUrl, getUnitCodeFromUrl, isValidHttpUrl } from "../utilities/url-utils";
 
 export const kExternalUrlHandlerName = "externalUrl";
 export const kLocalAssetsHandlerName = "localAssets";
+// export const kRemoteAssetsHandlerName = "remoteAssets";
 export const kFirebaseStorageHandlerName = "firebaseStorage";
 export const kFirebaseRealTimeDBHandlerName = "firebaseRealTimeDB";
 
@@ -38,7 +40,9 @@ export interface IImageContext {
   key?: string;
 }
 export interface IImageBaseOptions {
+  curriculumBaseUrl?: string;
   filename?: string;
+  unitCodeMap?: Record<string, string>;
 }
 export interface IImageHandlerStoreOptions extends IImageBaseOptions{
   db?: DB;
@@ -46,21 +50,27 @@ export interface IImageHandlerStoreOptions extends IImageBaseOptions{
 export interface IImageHandlerStoreResult {
   filename?: string;
   contentUrl?: string;
+  curriculumBaseUrl?: string;
   displayUrl?: string;
   success: boolean;
+  unitCodeMap?: Record<string, string>;
 }
 export interface IImageHandler {
   name: string;
   priority: number;
   match: (url: string) => boolean;
-  store: (url: string, options?: IImageHandlerStoreOptions) => Promise<IImageHandlerStoreResult>;
+  store: (
+    url: string, curriculumBaseUrl?: string, unitCodeMap?: any, options?: IImageHandlerStoreOptions
+  ) => Promise<IImageHandlerStoreResult>;
 }
 // map from image url => component id => listener function
 export type ImageListenerMap = Record<string, Record<string, () => void>>;
 
 export const ImageMapModel = types
   .model("ImageMap", {
-    images: types.map(ImageMapEntry)
+    curriculumBaseUrl: types.maybe(types.string),
+    images: types.map(ImageMapEntry),
+    unitCodeMap: types.maybe(types.map(types.string))
   })
   .volatile(self => ({
     handlers: [] as IImageHandler[],
@@ -129,6 +139,12 @@ export const ImageMapModel = types
         self.images.set(entry.contentUrl, getSnapshot(entry));
       }
     },
+    setCurriculumBaseUrl(url: string) {
+      self.curriculumBaseUrl = url;
+    },
+    setUnitCodeMap(map: any) {
+      self.unitCodeMap = map;
+    }
   }))
   .actions(self => ({
     // Flows are the recommended way to deal with async actions in MobX and MobX State Tree.
@@ -248,12 +264,15 @@ export const ImageMapModel = types
     return {
       afterCreate() {
         // placeholder doesn't have contentUrl
-        self._addImage(placeholderImage, { displayUrl: placeholderImage, success: true });
+        self._addImage(
+          placeholderImage,
+          { curriculumBaseUrl: self.curriculumBaseUrl, displayUrl: placeholderImage, success: true }
+        );
 
         self.registerHandler(firebaseRealTimeDBImagesHandler);
         self.registerHandler(firebaseStorageImagesHandler);
         self.registerHandler(localAssetsImagesHandler);
-        self.registerHandler(remoteAssetsImagesHandler);
+        //self.registerHandler(remoteAssetsImagesHandler);
         self.registerHandler(externalUrlImagesHandler);
       },
 
@@ -273,9 +292,16 @@ export const ImageMapModel = types
         return self._addImage(entry.contentUrl!, entry);
       }),
 
-      _storeAndAddImage: flow(function* (url: string, handler: IImageHandler, options?: IImageBaseOptions)
-                       : Generator<PromiseLike<any>, ImageMapEntryType | Promise<ImageMapEntryType>, unknown> {
-        const storeResult = (yield handler.store(url, { db: _db, ...options })) as IImageHandlerStoreResult;
+      _storeAndAddImage: flow(function* (
+          url: string,
+          handler: IImageHandler,
+          curriculumBaseUrl?: string,
+          unitCodeMap?: any,
+          options?: IImageBaseOptions
+        ): Generator<PromiseLike<any>, ImageMapEntryType | Promise<ImageMapEntryType>, unknown> {
+        const storeResult = (
+          yield handler.store(url, curriculumBaseUrl, unitCodeMap, { db: _db, ...options })
+        ) as IImageHandlerStoreResult;
         return self._addImage(url, storeResult);
       }),
     };
@@ -330,7 +356,7 @@ export const ImageMapModel = types
       self.images.set(url, {status: EntryStatus.PendingStorage, displayUrl: placeholderImage,
         retries});
 
-      const storingPromise = self._storeAndAddImage(url, handler, options);
+      const storingPromise = self._storeAndAddImage(url, handler, self.curriculumBaseUrl, self.unitCodeMap, options);
 
       // keep track of the storingPromise
       self.storingPromises[url] = storingPromise;
@@ -348,7 +374,6 @@ export const ImageMapModel = types
       self.getImage(url, options);
       return self.getCachedImage(url);
     }
-
   }));
 
 export type ImageMapModelType = Instance<typeof ImageMapModel>;
@@ -364,7 +389,9 @@ export const externalUrlImagesHandler: IImageHandler = {
     return url ? /^(https?:\/\/|data:image\/)/.test(url) : false;
   },
 
-  async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
+  async store(
+    url: string, curriculumBaseUrl?: string, unitCodeMap?: any, options?: IImageHandlerStoreOptions
+  ): Promise<IImageHandlerStoreResult> {
     const { db } = options || {};
     // upload images from external urls to our own firebase if possible
     // this may fail depending on CORS settings on target image.
@@ -416,67 +443,71 @@ export const localAssetsImagesHandler: IImageHandler = {
   priority: 2,
 
   match(url: string) {
-    // only match if the unit param is not a URL
-    // FIXME: this approach will cause problems with student or teacher content
-    // that includes relative paths. They might be the legacy style and not be available
-    // relative to the unit param URL.  If I remember right when a user copies an
-    // image from the curriculum to their document it briefly has this relative URL.
-    // then that is replaced with the firebase URL. But I don't know if that was always
-    // the case. Even if not it means if there are bugs or network issues then the relative
-    // URL could have been saved in the student or teacher content.
-    if (urlParams.unit?.match(/https?:\/\//)) {
-      return false;
-    }
     return url ? url.startsWith("assets/") || url.startsWith("curriculum/") : false;
   },
 
-  async store(url: string) {
+  async store(url: string, curriculumBaseUrl?: string, unitCodeMap?: any, options?: IImageHandlerStoreOptions) {
+    const unitCode = urlParams.unit && isValidHttpUrl(urlParams.unit)
+                     ? getUnitCodeFromUrl(urlParams.unit)
+                     : urlParams.unit
+                       ? urlParams.unit
+                       : "sas";
+    const curriculumBranch = urlParams.unit && isValidHttpUrl(urlParams.unit)
+                               ? getCurriculumBranchFromUrl(urlParams.unit)
+                               : undefined;
+    // Legacy curriculum units lived in the defunct "curriculum" directory in subfolders
+    // named after the unit title, e.g. "curriculum/stretching-and-shrinking". References
+    // to files in those directories will need to be converted to use the new file structure
+    // which uses the unit code as the directory name, e.g. "sas".
+    const urlPieces = url.split("curriculum/");
+    const urlUnitDir = urlPieces[1] ? urlPieces[1].replace(/\/.*/, "") : "";
+    const newUnitDir = urlUnitDir !== "" ? unitCodeMap[urlUnitDir] : "";
                     // convert original curriculum image paths
-    const _url = url.replace("assets/curriculum", "curriculum")
+    const _url = url.replace("assets/curriculum/", "")
                     // convert original drawing tool stamp paths
-                    .replace("assets/tools/drawing-tool/stamps",
-                             "curriculum/moving-straight-ahead/stamps");
-    return { contentUrl: _url, displayUrl: getAssetUrl(_url), success: true  };
+                    .replace("assets/tools/drawing-tool/stamps", "msa/stamps")
+                    // remove curriculum/ from path since that directory no longer exists
+                    .replace("curriculum/", "")
+                    // convert legacy directory names to new ones
+                    .replace(urlUnitDir, newUnitDir);
+    const imgUrl = curriculumBaseUrl ? getAssetUrl(_url, unitCode, curriculumBaseUrl, curriculumBranch) : _url;
+    return { contentUrl: _url, displayUrl: imgUrl, success: true  };
   }
 };
 
 /*
  * remoteAssetsImagesHandler
  */
-export const remoteAssetsImagesHandler: IImageHandler = {
-  name: kLocalAssetsHandlerName,
-  priority: 2,
+// export const remoteAssetsImagesHandler: IImageHandler = {
+//   name: kRemoteAssetsHandlerName,
+//   priority: 3,
 
-  match(url: string) {
-    // only match if the unit code/id is a URL
-    // see the FIXME above for problems with this approach
-    const unitCode = urlParams.unit;
+//   match(url: string) {
+//     console.log("called remoteAssetsImagesHandler");
+//     // only match if the unit code/id is a URL
+//     // see the FIXME above for problems with this approach
+//     const unitCode = urlParams.unit;
 
-    // We are only going to match the newer curriculum paths.
-    // The older paths should only exist in student and teacher documents
-    return !!(unitCode?.match(/https?:\/\//) && url.startsWith("curriculum/"));
-  },
+//     // We are only going to match the newer curriculum paths.
+//     // The older paths should only exist in student and teacher documents
+//     return !!(isValidHttpUrl(unitCode) && url.startsWith("curriculum/"));
+//   },
 
-  async store(url: string) {
-    const unitCode = urlParams.unit;
+//   async store(url: string, curriculumBaseUrl?: string, unitCodeMap?: any, options?: IImageHandlerStoreOptions) {
+//     const unitCode = urlParams.unit ? getUnitCodeFromUrl(urlParams.unit) : "sas";
+//     const curriculumBranch = urlParams.unit ? getCurriculumBranchFromUrl(urlParams.unit) : undefined;
+//     const imgUrl = getAssetUrl(url, unitCode, curriculumBaseUrl || "", curriculumBranch);
 
-    // Need to strip off curriculum/unit-name/unit.json from the unit URL
-    // In the future we probably want to migrate the content so the URLs are
-    // relative to the unit json itself which is a more standard way of using
-    // relative URLs.
-    const baseUrl = new URL("../..", unitCode);
-    const absoluteUrl = new URL(url, baseUrl);
-
-    // FIXME: we might want to set the contentUrl to be the absoluteUrl here
-    // I think in this case the cache will add a second entry. One with the
-    // relative url key and one with the absoluteUrl key. This way if the
-    // same image is referenced different ways it won't be downloaded
-    // more than once. However I think that also means the content will be
-    // updated to reference the absolute URL which we might not want to
-    // do.
-    return { contentUrl: url, displayUrl: absoluteUrl.toString(), success: true  };
-  }
-};
+//     // FIXME: we might want to set the contentUrl to be the absoluteUrl here
+//     // I think in this case the cache will add a second entry. One with the
+//     // relative url key and one with the absoluteUrl key. This way if the
+//     // same image is referenced different ways it won't be downloaded
+//     // more than once. However I think that also means the content will be
+//     // updated to reference the absolute URL which we might not want to
+//     // do.
+//     return { contentUrl: url, displayUrl: imgUrl, success: true  };
+//   }
+// };
 
 /*
  * firebaseStorageImagesHandler
@@ -503,7 +534,9 @@ export const firebaseStorageImagesHandler: IImageHandler = {
                           /^\/.+\/portals\/.+$/.test(url);
   },
 
-  async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
+  async store(
+    url: string, curriculumBaseUrl?: string, unitCodeMap?: any, options?: IImageHandlerStoreOptions
+  ): Promise<IImageHandlerStoreResult> {
     const { db } = options || {};
     // All images from firebase storage must be migrated to realtime database
     const isStorageUrl = url.startsWith(kFirebaseStorageUrlPrefix);
@@ -575,7 +608,9 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
           (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
   },
 
-  async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
+  async store(
+    url: string, curriculumBaseUrl?: string, options?: IImageHandlerStoreOptions
+  ): Promise<IImageHandlerStoreResult> {
     const { db } = options || {};
     const { path, classHash, imageKey, normalized } = parseFauxFirebaseRTDBUrl(url);
 

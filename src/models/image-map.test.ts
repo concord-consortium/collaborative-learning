@@ -33,6 +33,8 @@ describe("ImageMap", () => {
   const kCCImgS3Url = "ccimg://s3.concord.org/path/to/image";
   const kBlobUrl = "blob://some-blob-path";
   const kDataUri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAABG2lUWH";
+  const kCurriculumUrl = "http://curriculum.example.com";
+  const kUnitCodeMap = {"foobar": "foo"};
   const kInputs = [
           kLocalImageUrl, kHttpImageUrl, kHttpsImageUrl, kFBStorageUrl, kFBStorageRef,
           kCCImgOriginalUrl, kCCImgFBRTDBUrl, kCCImgClassFBRTDBUrl, kDataUri, kCCImgS3Url, kBlobUrl];
@@ -108,7 +110,7 @@ describe("ImageMap", () => {
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() =>
                               Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl}));
-      p1 = externalUrlImagesHandler.store(kHttpsImageUrl, { db: createMockDB() })
+      p1 = externalUrlImagesHandler.store(kHttpsImageUrl, kCurriculumUrl, kUnitCodeMap, { db: createMockDB() })
         .then(storeResult => {
           expect(storeSpy).toHaveBeenCalled();
           expect(storeResult.contentUrl &&
@@ -119,7 +121,7 @@ describe("ImageMap", () => {
     {
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() => Promise.reject(new Error("Loading error")));
-      p2 = externalUrlImagesHandler.store(kHttpsImageUrl, { db: createMockDB() })
+      p2 = externalUrlImagesHandler.store(kHttpsImageUrl, kCurriculumUrl, kUnitCodeMap, { db: createMockDB() })
         .then(storeResult => {
           expect(storeSpy).toHaveBeenCalled();
           expect(storeResult.contentUrl).toBe(kHttpsImageUrl);
@@ -138,7 +140,7 @@ describe("ImageMap", () => {
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() =>
                               Promise.resolve({ imageUrl: placeholderImage, imageData: placeholderImage}));
-      p1 = externalUrlImagesHandler.store(kHttpsImage2, { db: createMockDB() })
+      p1 = externalUrlImagesHandler.store(kHttpsImage2, kCurriculumUrl, kUnitCodeMap, {db: createMockDB() })
         .then(storeResult => {
           expect(storeSpy).toHaveBeenCalled();
           expect(storeResult.contentUrl).toBe(kHttpsImage2);
@@ -150,7 +152,7 @@ describe("ImageMap", () => {
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() =>
                               Promise.resolve({ imageUrl: placeholderImage, imageData: placeholderImage}));
-      p2 = externalUrlImagesHandler.store(kHttpsImage3, { db: createMockDB({ stores: { user: { id: "" }} }) })
+      p2 = externalUrlImagesHandler.store(kHttpsImage3, kCurriculumUrl, kUnitCodeMap, { db: createMockDB({ stores: { user: { id: "" }} }) })
         .then(storeResult => {
           expect(storeSpy).toHaveBeenCalled();
           expect(storeResult.contentUrl).toBe(kHttpsImage3);
@@ -165,7 +167,7 @@ describe("ImageMap", () => {
 
     const storeSpy = jest.spyOn(ImageUtils, "storeCorsImage")
                           .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl}));
-    return firebaseStorageImagesHandler.store(kFBStorageUrl, { db: createMockDB() })
+    return firebaseStorageImagesHandler.store(kFBStorageUrl, kCurriculumUrl, kUnitCodeMap, { db: createMockDB() })
       .then(storeResult => {
         expect(storeSpy).toHaveBeenCalled();
         expect(storeResult.contentUrl &&
@@ -177,7 +179,7 @@ describe("ImageMap", () => {
   it("test firebaseStorageImagesHandler on firebase storage reference", () => {
     const storeSpy = jest.spyOn(ImageUtils, "storeCorsImage")
                           .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDBUrl, imageData: kBlobUrl}));
-    return firebaseStorageImagesHandler.store(kFBStorageRef, { db: createMockDB() })
+    return firebaseStorageImagesHandler.store(kFBStorageRef, kCurriculumUrl, kUnitCodeMap, { db: createMockDB() })
       .then(storeResult => {
         expect(storeSpy).toHaveBeenCalled();
         expect(storeResult.contentUrl &&
@@ -192,7 +194,7 @@ describe("ImageMap", () => {
           });
     // const storeSpy = jest.spyOn(ImageUtils, "storeImage")
     //                       .mockImplementation(() => Promise.resolve({ imageUrl: kCCImgFBRTDB, imageData: kBlobUrl}));
-    firebaseStorageImagesHandler.store(kCCImgFBRTDBUrl, { db: mockDB })
+    firebaseStorageImagesHandler.store(kCCImgFBRTDBUrl, kCurriculumUrl, kUnitCodeMap, { db: mockDB })
       .then(storeResult => {
         // expect(storeSpy).not.toHaveBeenCalled();
         expect(storeResult.contentUrl).toBeUndefined();
@@ -202,7 +204,7 @@ describe("ImageMap", () => {
 
     // handle invalid user Id
     mockDB.stores.user.id = "";
-    firebaseStorageImagesHandler.store(kCCImgFBRTDBUrl, { db: mockDB })
+    firebaseStorageImagesHandler.store(kCCImgFBRTDBUrl, kCurriculumUrl, kUnitCodeMap, { db: mockDB })
       .then(storeResult => {
         // expect(storeSpy).not.toHaveBeenCalled();
         expect(storeResult.contentUrl).toBeUndefined();
@@ -218,7 +220,7 @@ describe("ImageMap", () => {
           });
     // const storeSpy = jest.spyOn(ImageUtils, "storeImage")
     //                       .mockImplementation(() => Promise.reject(new Error("Conversion error")));
-    return firebaseStorageImagesHandler.store(kCCImgFBRTDBUrl, { db: mockDB })
+    return firebaseStorageImagesHandler.store(kCCImgFBRTDBUrl, kCurriculumUrl, kUnitCodeMap, { db: mockDB })
       .then(storeResult => {
         // expect(storeSpy).not.toHaveBeenCalled();
         expect(storeResult.contentUrl).toBeUndefined();
@@ -229,7 +231,7 @@ describe("ImageMap", () => {
   it("test firebaseStorageImagesHandler error handling", () => {
     const storeSpy = jest.spyOn(ImageUtils, "storeCorsImage")
                           .mockImplementation(() => Promise.reject(new Error("Conversion error")));
-    return firebaseStorageImagesHandler.store(kCCImgFBRTDBUrl, { db: createMockDB() })
+    return firebaseStorageImagesHandler.store(kCCImgFBRTDBUrl, kCurriculumUrl, kUnitCodeMap, { db: createMockDB() })
       .then(storeResult => {
         expect(storeSpy).toHaveBeenCalled();
         expect(storeResult.contentUrl).toBeUndefined();
@@ -247,7 +249,7 @@ describe("ImageMap", () => {
     let p4: any;
     {
       const mockDB = createMockDB();
-      p1 = firebaseRealTimeDBImagesHandler.store(kCCImgOriginalUrl, { db: mockDB })
+      p1 = firebaseRealTimeDBImagesHandler.store(kCCImgOriginalUrl, kCurriculumUrl, kUnitCodeMap, { db: mockDB })
         .then(storeResult => {
           // url doesn't include classHash, so we use the firebase function
           expect(mockDB.getCloudImageBlob).toHaveBeenCalledWith(kCCImgFBRTDBUrl);
@@ -257,7 +259,7 @@ describe("ImageMap", () => {
     }
     {
       const mockDB = createMockDB();
-      p2 = firebaseRealTimeDBImagesHandler.store(kCCImgFBRTDBUrl, { db: mockDB })
+      p2 = firebaseRealTimeDBImagesHandler.store(kCCImgFBRTDBUrl, kCurriculumUrl, kUnitCodeMap, { db: mockDB })
         .then(storeResult => {
           // url doesn't include classHash, so we use the firebase function
           expect(mockDB.getCloudImageBlob).toHaveBeenCalledWith(kCCImgFBRTDBUrl);
@@ -267,7 +269,7 @@ describe("ImageMap", () => {
     }
     {
       const mockDB = createMockDB();
-      p3 = firebaseRealTimeDBImagesHandler.store(kCCImgClassFBRTDBUrl, { db: mockDB })
+      p3 = firebaseRealTimeDBImagesHandler.store(kCCImgClassFBRTDBUrl, kCurriculumUrl, kUnitCodeMap, { db: mockDB })
         .then(storeResult => {
           // url does include classHash, so we can retrieve it locally
           expect(mockDB.getImageBlob).toHaveBeenCalledWith(imageKey);
@@ -276,7 +278,7 @@ describe("ImageMap", () => {
         });
     }
     {
-      p4 = firebaseRealTimeDBImagesHandler.store("", { db: createMockDB() })
+      p4 = firebaseRealTimeDBImagesHandler.store("", kCurriculumUrl, kUnitCodeMap, { db: createMockDB() })
         .then(storeResult => {
           expect(storeResult.contentUrl).toBeUndefined();
           expect(storeResult.displayUrl).toBe(placeholderImage);

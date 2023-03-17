@@ -38,7 +38,10 @@ describe('defaultDrawingContent', () => {
   });
   it('should return content with optional stamps', () => {
     const stamps = [{ url: "my/stamp/url", width: 10, height: 10 }];
-    const appConfig = AppConfigModel.create({ config: { stamps } as any });
+    const appConfig = AppConfigModel.create({
+      config: { stamps } as any,
+      "curriculumBaseUrl": "http://localhost:8080",
+    });
     const content = defaultDrawingContent({ appConfig });
     expect(content.type).toBe(kDrawingTileType);
     expect(content.stamps).toEqual(stamps);
