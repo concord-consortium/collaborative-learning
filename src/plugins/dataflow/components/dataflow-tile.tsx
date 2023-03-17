@@ -21,18 +21,30 @@ interface IProps extends ITileProps{
   height?: number;
 }
 
+interface IDataflowTileState {
+  programRecordingMode: number // TO DO: convert to enum;
+}
+
 @inject("stores")
 @observer
-export default class DataflowToolComponent extends BaseComponent<IProps> {
+export default class DataflowToolComponent extends BaseComponent<IProps, IDataflowTileState> {
 
   public static tileHandlesSelection = true;
+
+  constructor(props: IProps) {
+    super(props);
+    this.state = {
+      programRecordingMode: 0
+    };
+  }
 
   public render() {
     const { readOnly, height, model } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
-    const { program, programDataRate, programZoom, programRecordState } = this.getContent();
+    const { program, programDataRate, programZoom } = this.getContent();
     const numNodes = program.nodes.size;
+    const tileModel = this.getContent();
 
     return (
       <>
@@ -53,9 +65,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
                   size={size}
                   tileHeight={height}
                   tileId={model.id}
-                  onRecordDataChange={this.handleRecordDataChange}
-                  programRecordState={programRecordState}
+                  onRecordDataChange={this.handleChangeOfRecordingMode}
+                  programRecordState={this.state.programRecordingMode}
                   numNodes={numNodes}
+                  tileModel={tileModel}
                 />
               );
             }}
@@ -130,8 +143,47 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   private handleProgramZoomChange = (dx: number, dy: number, scale: number) => {
     this.getContent().setProgramZoom(dx, dy, scale);
   };
-  private handleRecordDataChange = () => {
-    this.getContent().setProgramRecordState();
+
+  private pairNodesToAttributes = () => {
+    const model = this.getContent();
+
+    //#1 check nodes on tile against dataset attributes, if already there do nothing, otherwise write.
+    model.program.nodes.forEach((n) => {
+      model.addNewAttrFromNode(n.id, n.name);
+    });
+
+    //#2 check dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
+    const dataSet = model.dataSet;
+    const dataSetAttributes = dataSet.attributes;
+    dataSetAttributes.forEach((attribute, idx) => {
+      model.removeAttributesInDatasetMissingInTile(attribute.id);
+    });
+  };
+
+  private handleChangeOfRecordingMode = () => {
+    // 0 - cleared, ready to record
+    // 1 - recording in progress
+    // 2 - stopped, ready to clear
+    const mode = this.state.programRecordingMode;
+    const model = this.getContent();
+
+    if (mode === 0){
+      this.pairNodesToAttributes();
+    }
+
+    if (mode === 2){
+      const allAttributes = model.dataSet.attributes;
+      const ids = model.dataSet.cases.map(({__id__}) => ( __id__));
+      model.dataSet.removeCases(ids);
+
+      allAttributes.forEach((attr)=>{
+        model.dataSet.removeAttribute(attr.id);
+      });
+    }
+
+    this.setState({
+      programRecordingMode:  (mode + 1) % 3
+    });
   };
 
   private getContent() {

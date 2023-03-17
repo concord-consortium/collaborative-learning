@@ -1,6 +1,6 @@
 import { types, Instance, applySnapshot, getSnapshot, addDisposer, getType } from "mobx-state-tree";
 import { reaction } from "mobx";
-import { cloneDeep } from "lodash";
+import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
 import { DataflowProgramModel } from "./dataflow-program-model";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -9,13 +9,11 @@ import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { getTileModel, setTileTitleFromContent } from "../../../models/tiles/tile-model";
-import { SharedModel } from "../../../models/shared/shared-model";
 import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
-
-import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
+import { addAttributeToDataSet, addCasesToDataSet, DataSet, ICase } from "../../../models/data/data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
-
-
+import { uniqueId } from "../../../utilities/js-utils";
+import { SharedModelType } from "src/models/shared/shared-model";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -26,9 +24,7 @@ export function defaultDataflowContent(): DataflowContentModelType {
 export const kDataflowDefaultHeight = 480;
 export const kDefaultLabel = "Dataflow Node";
 
-
-export function defaultDataSet() { //added
-  // as per slack discussion, default attribute is added automatically
+export function defaultDataSet() {
   const dataSet = DataSet.create();
   addAttributeToDataSet(dataSet, { name: kDefaultLabel });
   addCasesToDataSet(dataSet, [{ [kDefaultLabel]: "" }]);
@@ -50,25 +46,18 @@ export const DataflowContentModel = TileContentModel
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programDataRate: DEFAULT_DATA_RATE,
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
-    programRecordState: 0,
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
-    emptyDataSet: DataSet.create() //added
+    emptyDataSet: DataSet.create()
   }))
   .views(self => ({
     get sharedModel() {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
-      // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
-      // just like findFirstSharedModelByType does
-      //
-      // For now we are checking the type ourselves, and we are assuming the shared model we want
-      // is the first one.
       const firstSharedModel = sharedModelManager?.getTileSharedModels(self)?.[0];
       if (!firstSharedModel || getType(firstSharedModel) !== SharedDataSet) {
         return undefined;
       }
-      console.log("firstSharedModel", firstSharedModel);
       return firstSharedModel as SharedDataSetType;
     },
     programWithoutRecentValues() {
@@ -85,16 +74,17 @@ export const DataflowContentModel = TileContentModel
     }
   }))
   .views(self => ({
+    get dataSet(){
+      return self.sharedModel?.dataSet || self.emptyDataSet;
+    }
+  }))
+  .views(self => ({
     get title() {
       return getTileModel(self)?.title;
     },
     get isUserResizable() {
       return true;
     },
-    get dataSet() {
-      return self.sharedModel?.dataSet || self.emptyDataSet;
-    },
-
     exportJson(options?: ITileExportOptions) {
       const zoom = getSnapshot(self.programZoom);
       return [
@@ -109,7 +99,8 @@ export const DataflowContentModel = TileContentModel
         `  "program": ${stringify(self.programWithoutRecentValues())}`,
         `}`
       ].join("\n");
-    }
+    },
+
   }))
   .actions(self => tileModelHooks({
     doPostCreate(metadata: ITileMetadataModel){
@@ -117,23 +108,10 @@ export const DataflowContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    //added
-    afterAttach() { // built-in hook is called on every model right after added to the tree
-
-      // Monitor our parents and update our shared model when we have a document parent
+    afterAttach() { //
       addDisposer(self, reaction(() => {
-        // disposers call the function passed to it when model is disposed
-        // and here we pass a reaction, which is a mobx thing that watches the stuff in the first argument
-        // it calls second argument when first is done
-
-        // looking in the tileEnv for the shared modelManager - "environment" is a mobx context,
-        // but must be set at root of tree
-        // tile env proxies the actual mechanism
         const sharedModelManager = self.tileEnv?.sharedModelManager;
-
-        // collecting the stats on current sharedModels here so we can pass on to reaction on 119
         const sharedDataSet = sharedModelManager?.isReady
-          // TODO, where is this coming from, might not want it id by any "metadata"
           ? sharedModelManager?.findFirstSharedModelByType(SharedDataSet, self.metadata.id)
           : undefined;
 
@@ -143,22 +121,14 @@ export const DataflowContentModel = TileContentModel
 
         return { sharedModelManager, sharedDataSet, tileSharedModels };
       },
-      // reaction/effect ("second argument" above), a mobx reaction watches the model
-      // and "reacts" there are various flavors, e.g.
-      // autorun, when, (what we are watching, what we do if what watching changes)
       ({sharedModelManager, sharedDataSet, tileSharedModels}) => {
         if (!sharedModelManager?.isReady) {
-          // We aren't added to a document yet so we can't do anything yet
           return;
         }
 
         if (sharedDataSet && tileSharedModels?.includes(sharedDataSet)) {
           // The shared model has already been registered by a client, but as the
           // "owner" of the data, we synchronize it with our local content.
-          // if (!self.importedDataSet.isEmpty) {
-          //   sharedDataSet.dataSet = DataSet.create(getSnapshot(self.importedDataSet));
-          //   self.clearImportedDataSet();
-          // }
         }
         else {
           if (!sharedDataSet) {
@@ -167,13 +137,9 @@ export const DataflowContentModel = TileContentModel
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
           }
 
-         // SharedDataSet.providerId (might be a table, in the case of a new table)
-              // DataSet
-
           // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, sharedDataSet);
         }
-
         // update the colors
         const dataSets = sharedModelManager.getSharedModelsByType(kSharedDataSetType) as SharedDataSetType[];
         updateSharedDataSetColors(dataSets);
@@ -197,11 +163,45 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.dy = dy;
       self.programZoom.scale = scale;
     },
-    setProgramRecordState(){
-      //0 - Record
-      //1 - Stop
-      //2 - Clear
-      self.programRecordState = (self.programRecordState + 1) % 3;
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType){
+      //do nothing
+    },
+
+    addNewAttrFromNode(nodeId: number, nodeName: string){ //if already an attribute with the same nodeId,else write
+      const dataSetAttributes = self.dataSet.attributes;
+      let foundFlag = false;
+
+      for (let i = 0; i < Object.keys(dataSetAttributes).length ; i++){ //look in dataSet.attributes for each Id
+        const idInDataSet = dataSetAttributes[i].id;
+        const index = idInDataSet.indexOf("*");
+        const stringAfterIndex = idInDataSet.substring(index+1);
+        if (nodeId.toString() === stringAfterIndex)foundFlag = true;
+      }
+
+      if (!foundFlag) {
+        const newAttributeId = uniqueId() + "*" + nodeId;
+        self.dataSet.addAttributeWithID({
+          id: newAttributeId,
+          name: `Dataflow-${nodeName}_${nodeId}`
+        });
+      }
+    },
+
+    // this may be implemented if we change to preserve attributes accross runs
+    removeAttributesInDatasetMissingInTile(attribute: string){
+      const index = attribute.indexOf("*");
+      const stringAfterIndex = attribute.substring(index + 1);
+      let foundFlag = false;
+      const { nodes } = getSnapshot(self.program);
+      const castedNodes = nodes as Record<string, any>;
+      const castedNodesIdArr = Object.keys(castedNodes);
+      for (let i = 0; i < castedNodesIdArr.length; i++){
+        const idInTile = castedNodesIdArr[i];
+        if (idInTile === stringAfterIndex) foundFlag = true;
+      }
+      if (!foundFlag){
+        self.dataSet.removeAttribute(attribute);
+      }
     }
   }));
 

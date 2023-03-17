@@ -131,9 +131,6 @@ export const DataCardContentModel = TileContentModel
   .actions(self => ({
     afterAttach() {
       // Monitor our parents and update our shared model when we have a document parent
-      // ** after this tile gets added to the document, then wait for sharedModelManager to become available
-      // after its available, create a dataset, add it to sharedModelManager, then says this tile is using it
-
       addDisposer(self, reaction(() => {
         const sharedModelManager = self.tileEnv?.sharedModelManager;
 
