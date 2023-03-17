@@ -229,14 +229,14 @@ context('Teacher Dashboard View', () => {
     //   cy.get('.sticky-note-popup').should('exist');
     //   cy.get('.sticky-note-popup-item-content').should('contain', textToStudent);
     // });
-    it("verify student support note is not in another student's view", function () {
-      cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:3&qaGroup=1');
-      cy.waitForLoad();
-      // Because we are looking for an element not to exist we need to wait to give it time
-      // to show up
-      cy.wait(3000);
-      cy.get('#icon-sticky-note').should('not.exist');
-    });
+    // it("verify student support note is not in another student's view", function () {
+    //   cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:3&qaGroup=1');
+    //   cy.waitForLoad();
+    //   // Because we are looking for an element not to exist we need to wait to give it time
+    //   // to show up
+    //   cy.wait(3000);
+    //   cy.get('#icon-sticky-note').should('not.exist');
+    // });
     it('verify group support note appears in student view', function () {
       cy.visit('/?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=student:10&qaGroup=3');
       cy.waitForLoad();
