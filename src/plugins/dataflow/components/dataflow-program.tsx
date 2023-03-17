@@ -69,8 +69,7 @@ interface IProps extends SizeMeProps {
   onRecordDataChange: () => void;
   programRecordState: number;
   numNodes: number;
-  dataSet: any;
-  sharedModel: any;
+  tileModel: any
 }
 
 interface IState {
@@ -533,6 +532,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     console.log(this.props.tileId);
 
+    const tileModel = this.props.tileModel // we can access methods to write to dataSet as model.whatever()
+
     //**** TO DO  ****************
 
 
@@ -574,8 +575,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.programEditor.nodes.forEach((node, idx) =>{
         // console.log(node);
         // console.log(`${node.name} #${idx+1} id:${node.id} val: ${node.data.nodeValue}`);
-        const newCase = `${node.name} #${idx+1} id:${node.id} val: ${node.data.nodeValue}`;
-        console.log("test :", this.props.dataSet.cases);
+       // const newCase = `${node.name} #${idx+1} id:${node.id} val: ${node.data.nodeValue}`;
+        //console.log("test :", this.props.dataSet.cases);
         // this.props.dataSet.addNewAttr(newCase); //calling within model
 
         // first pass at writing to the dataset
@@ -584,8 +585,20 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         //   console.log(`${node.name} id:${node.id} val: ${node.data.nodeValue}`);
         // }
 
+
+       /** TICK (STEP 2/2)
+        * for each node(this node) write a case putting data to the correct existing attribute for each point in * the case
+        *
+        */
+
+
+
+
       });
       console.log("----------------");
+
+      // [2] add data
+
       // console.log("nodes in focus:", this.programEditor.nodes[2]);
     }
 

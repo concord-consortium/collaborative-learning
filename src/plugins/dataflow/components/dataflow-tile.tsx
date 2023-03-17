@@ -33,8 +33,11 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom, programRecordState } = this.getContent();
     const numNodes = program.nodes.size;
-    const dataSet = this.getContent().dataSet;
-    const sharedModel = this.getContent().sharedModel;
+
+    // TEMPORARY
+    // for now just pass second copy of whole model for proof of ability to write data to dataset
+    // will deconstruct out the right part later on
+    const tileModel = this.getContent();
 
     return (
       <>
@@ -58,8 +61,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
                   onRecordDataChange={this.handleRecordDataChange}
                   programRecordState={programRecordState}
                   numNodes={numNodes}
-                  dataSet={dataSet}
-                  sharedModel={sharedModel}
+                  tileModel={tileModel}
                 />
               );
             }}

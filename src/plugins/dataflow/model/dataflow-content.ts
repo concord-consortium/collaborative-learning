@@ -9,7 +9,6 @@ import { tileModelHooks } from "../../../models/tiles/tile-model-hooks";
 import { TileContentModel } from "../../../models/tiles/tile-content";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { getTileModel, setTileTitleFromContent } from "../../../models/tiles/tile-model";
-import { SharedModel } from "../../../models/shared/shared-model";
 import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
 import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
@@ -219,10 +218,10 @@ export const DataflowContentModel = TileContentModel
     },
     addNewAttr(nodeInfo: any){
       console.log("dataflow-content.ts > addNewAttr > nodeInfo:", nodeInfo);
-      // self.dataSet.addAttributeWithID({
-      //   id: uniqueId(),
-      //   name: uniqueTitle(kDefaultLabelPrefix, name => !self.dataSet.attrFromName(name))
-      // });
+      self.dataSet.addAttributeWithID({
+        id: uniqueId(),
+        name: uniqueTitle(kDefaultLabelPrefix, name => !self.dataSet.attrFromName(name))
+      });
 
       // const casesArr = self.allCases().map(c => c?.__id__);
       // const attrsArr = self.existingAttributes();
@@ -238,9 +237,6 @@ export const DataflowContentModel = TileContentModel
       //   }
       // });
     }
-
-
-
   }))
   .actions(self => ({
 
