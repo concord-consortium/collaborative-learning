@@ -1,8 +1,10 @@
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import TextToolTile from '../../../../support/elements/clue/TextToolTile';
+import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
 
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
+let dashboard = new TeacherDashboard();
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
 context('Test group functionalities', function(){
@@ -20,11 +22,13 @@ context('Test group functionalities', function(){
                 cy.setupGroup(studentArr, qaGroup);
             });
             //Skipping this test as this is very inconsistent.
-            it.skip('will add content to each student canvas', function(){
+            it('will add content to each student canvas', function(){
                 let i=0;
                 for (i=0; i<studentArr.length; i++){
                     cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr[i]+'&problem='+problem);
                     // cy.log(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr[i]+'&problem='+problem);
+                    cy.waitForLoad();
+                    cy.wait(5000);
                     clueCanvas.addTile('text');
                     textToolTile.enterText('This is to test the 4-up view of S'+studentArr[i]);
                     textToolTile.getTextTile().last().should('contain', '4-up').and('contain','S'+studentArr[i]);
@@ -36,14 +40,15 @@ context('Test group functionalities', function(){
                     clueCanvas.shareCanvas();//all students will share their canvas
                     cy.wait(1000);
                 }
+
             });
             it('verify 4-up view comes up correctly with students', function(){
-                // clueCanvas.openFourUpView();
-                // clueCanvas.getFourToOneUpViewToggle().should('be.visible');
-                // clueCanvas.getNorthEastCanvas().should('be.visible').and('contain','S'+studentArr[0]);
-                // clueCanvas.getSouthEastCanvas().should('be.visible').and('contain','S'+studentArr[1]);
-                // clueCanvas.getSouthWestCanvas().should('be.visible').and('contain','S'+studentArr[2]);
-                // clueCanvas.getNorthWestCanvas().should('be.visible').and('contain','S'+studentArr[3]);
+                clueCanvas.openFourUpView();
+                clueCanvas.getFourToOneUpViewToggle().should('be.visible');
+                clueCanvas.getNorthEastCanvas().should('be.visible').and('contain','S'+studentArr[0]);
+                clueCanvas.getSouthEastCanvas().should('be.visible').and('contain','S'+studentArr[1]);
+                clueCanvas.getSouthWestCanvas().should('be.visible').and('contain','S'+studentArr[2]);
+                clueCanvas.getNorthWestCanvas().should('be.visible').and('contain','S'+studentArr[3]);
             });
         });
         // describe('test the 4-up view', function(){
@@ -100,31 +105,60 @@ context('Test group functionalities', function(){
         //     });
         // });
 
-        // // TODO: Need to write tests
-        // describe('test sharing and unsharing canvases', function(){
-        //     it('verify share icon toggles correctly',()=>{
-        //         clueCanvas.getShareButton().should('have.class', 'public');
-        //         clueCanvas.shareCanvas();
-        //         clueCanvas.getShareButton().should('have.class', 'private');
-        //         clueCanvas.unshareCanvas();
-        //         clueCanvas.getShareButton().should('have.class', 'public');
-        //     });
-        //     it('will verify canvas is visible in groupmates 4-up view', function(){ //canvas is shared during set up
-        //         cy.log('need to write this test');
-        //     });
-        //     it('will unshare canvas and verify canvas is not visible in groupmates 4-up view', function(){
-        //         cy.log('need to write this test');
-        //     });
-        //     it('restore a 4-up canvas where a groupmate has shared a canvas while it was not open', function(){
-        //         cy.log('need to write this test');
-        //     });
-        //     it('restore a 4-up canvas where a groupmate has unshared a canvas while it was not open', function(){
-        //         cy.log('need to write this test');
-        //     });
-        //     it('will open a new 4-up canvas with shared canvas from other students updated', function(){
-        //         cy.log('need to write this test');
-        //     });
-        // });
+        // TODO: Need to write tests
+        describe('test sharing and unsharing canvases', function(){
+            it('verify share icon toggles correctly',()=>{
+                clueCanvas.getShareButton().should('have.class', 'public');
+                clueCanvas.shareCanvas();
+                clueCanvas.getShareButton().should('have.class', 'private');
+                clueCanvas.unshareCanvas();
+                clueCanvas.getShareButton().should('have.class', 'public');
+            });
+            // it('will verify canvas is visible in groupmates 4-up view', function(){ //canvas is shared during set up
+            //     cy.log('need to write this test');
+            // });
+            // it('will unshare canvas and verify canvas is not visible in groupmates 4-up view', function(){
+            //     cy.log('need to write this test');
+            // });
+            // it('restore a 4-up canvas where a groupmate has shared a canvas while it was not open', function(){
+            //     cy.log('need to write this test');
+            // });
+            // it('restore a 4-up canvas where a groupmate has unshared a canvas while it was not open', function(){
+            //     cy.log('need to write this test');
+            // });
+            // it('will open a new 4-up canvas with shared canvas from other students updated', function(){
+            //     cy.log('need to write this test');
+            // });
+        });
+        describe('4-up view read-only', function(){
+            it('students to check each others tiles in 4-up view read-only', function(){
+                let i=0;
+                for (i=0; i<studentArr.length; i++){
+                    cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:'+studentArr[i]+'&problem='+problem);
+                    cy.waitForLoad();
+                    cy.wait(5000);
+                    clueCanvas.addTile('text');
+                    textToolTile.enterText('This is to test the 4-up view of S'+studentArr[i]);
+                    textToolTile.getTextTile().last().should('contain', '4-up').and('contain','S'+studentArr[i]);
+                    cy.wait(500);
+                    clueCanvas.shareCanvas();//all students will share their canvas
+                    cy.wait(1000);
+                }
+                clueCanvas.openFourUpView();
+                clueCanvas.getSingleWorkspace().find('.member').eq(0).click();
+                clueCanvas.getSingleWorkspace().find('.text-tool').should('not.have.class', 'read-only');
+                dashboard.getZoomedStudentID().click();
+                clueCanvas.getSingleWorkspace().find('.member').eq(1).click();
+                clueCanvas.getSingleWorkspace().find('.text-tool').should('have.class', 'read-only');
+                dashboard.getZoomedStudentID().click();
+                clueCanvas.getSingleWorkspace().find('.member').eq(2).click();
+                clueCanvas.getSingleWorkspace().find('.text-tool').should('have.class', 'read-only');
+                dashboard.getZoomedStudentID().click();
+                clueCanvas.getSingleWorkspace().find('.member').eq(3).click();
+                clueCanvas.getSingleWorkspace().find('.text-tool').should('have.class', 'read-only');
+
+            });
+        });
         // describe.skip('test copy and paste from another canvas to another canvas', function(){
         //     it('verify that student can copy text field from another student canvas into own', function(){
         //         cy.log('need to write this test');
