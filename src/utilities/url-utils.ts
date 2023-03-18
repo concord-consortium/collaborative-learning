@@ -10,8 +10,7 @@ export const isValidHttpUrl = (possibleUrl: string | undefined) => {
 
 export const getUnitCodeFromUrl = (url: string) => {
   const urlParts = url.split("/");
-  const unitFileName = urlParts[urlParts.length-1];
-  const unitCode = unitFileName.replace(/-unit\.json$/, "");
+  const unitCode = urlParts[urlParts.length-2];
   return unitCode;
 };
 

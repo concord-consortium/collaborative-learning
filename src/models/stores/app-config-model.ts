@@ -48,15 +48,15 @@ export const AppConfigModel = types
       gImageMap.setCurriculumBaseUrl(self.curriculumBaseUrl);
       gImageMap.setUnitCodeMap(getSnapshot(self.unitCodeMap));
       if (unitCodeIsUrl) {
-        const teacherGuideUrl = unitCode.replace(/-unit\.json$/, "-teacher-guide.json");
+        const teacherGuideUrl = unitCode.replace(/content\.json$/, "teacher-guide/content.json");
         return {
           "content": unitCode,
           "guide": teacherGuideUrl
         };
       } else {
         return {
-          "content": `${self.curriculumBaseUrl}/main/${unitCode}/${unitCode}-unit.json`,
-          "guide": `${self.curriculumBaseUrl}/main/${unitCode}/${unitCode}-teacher-guide.json`
+          "content": `${self.curriculumBaseUrl}/main/${unitCode}/content.json`,
+          "guide": `${self.curriculumBaseUrl}/main/${unitCode}/teacher-guide/content.json`
         };
       }
     }
