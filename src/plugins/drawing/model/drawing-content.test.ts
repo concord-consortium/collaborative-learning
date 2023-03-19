@@ -40,7 +40,7 @@ describe('defaultDrawingContent', () => {
     const stamps = [{ url: "my/stamp/url", width: 10, height: 10 }];
     const appConfig = AppConfigModel.create({
       config: { stamps } as any,
-      "curriculumBaseUrl": "http://localhost:8080",
+      "curriculumBaseUrl": "https://curriculum.example.com",
     });
     const content = defaultDrawingContent({ appConfig });
     expect(content.type).toBe(kDrawingTileType);

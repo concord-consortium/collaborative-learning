@@ -201,7 +201,13 @@ export function getUnitJson(unitId: string | undefined, appConfig: AppConfigMode
                const fullUnitContent = unitContent && populateProblemSections(unitContent, unitUrl!);
                return fullUnitContent;
              } else {
-               return response;
+               // If the unit content is not found, return the response so that the caller can
+               // handle it appropriately.
+               if (response.status === 404) {
+                 return response;
+               } else {
+                 throw Error(`Request rejected with status ${response.status}`);
+               }
              }
            })
            .catch(error => {
@@ -219,7 +225,13 @@ export function getGuideJson(unitId: string | undefined, appConfig: AppConfigMod
               const fullGuideContent = guideContent && populateProblemSections(guideContent, guideUrl!);
               return fullGuideContent;
             } else {
-              return response;
+              // If the guide content is not found, return the response so that the caller can
+              // handle it appropriately.
+              if (response.status === 404) {
+                return response;
+              } else {
+                throw Error(`Request rejected with status ${response.status}`);
+              }
             }
           })
           .catch(error => {

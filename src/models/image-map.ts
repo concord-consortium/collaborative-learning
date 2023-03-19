@@ -11,7 +11,6 @@ import { getCurriculumBranchFromUrl, getUnitCodeFromUrl, isValidHttpUrl } from "
 
 export const kExternalUrlHandlerName = "externalUrl";
 export const kLocalAssetsHandlerName = "localAssets";
-// export const kRemoteAssetsHandlerName = "remoteAssets";
 export const kFirebaseStorageHandlerName = "firebaseStorage";
 export const kFirebaseRealTimeDBHandlerName = "firebaseRealTimeDB";
 
@@ -50,18 +49,15 @@ export interface IImageHandlerStoreOptions extends IImageBaseOptions{
 export interface IImageHandlerStoreResult {
   filename?: string;
   contentUrl?: string;
-  curriculumBaseUrl?: string;
   displayUrl?: string;
   success: boolean;
-  unitCodeMap?: Record<string, string>;
 }
 export interface IImageHandler {
+  imageMap: any;
   name: string;
   priority: number;
   match: (url: string) => boolean;
-  store: (
-    url: string, curriculumBaseUrl?: string, unitCodeMap?: any, options?: IImageHandlerStoreOptions
-  ) => Promise<IImageHandlerStoreResult>;
+  store: (url: string, options?: IImageHandlerStoreOptions) => Promise<IImageHandlerStoreResult>;
 }
 // map from image url => component id => listener function
 export type ImageListenerMap = Record<string, Record<string, () => void>>;
@@ -101,6 +97,7 @@ export const ImageMapModel = types
   }))
   .actions(self => ({
     registerHandler(handler: IImageHandler) {
+      handler.imageMap = self;
       self.handlers.push(handler);
       self.handlers.sort((a, b) => {
         return (b.priority || 0) - (a.priority || 0);
@@ -266,13 +263,12 @@ export const ImageMapModel = types
         // placeholder doesn't have contentUrl
         self._addImage(
           placeholderImage,
-          { curriculumBaseUrl: self.curriculumBaseUrl, displayUrl: placeholderImage, success: true }
+          { displayUrl: placeholderImage, success: true }
         );
 
         self.registerHandler(firebaseRealTimeDBImagesHandler);
         self.registerHandler(firebaseStorageImagesHandler);
         self.registerHandler(localAssetsImagesHandler);
-        //self.registerHandler(remoteAssetsImagesHandler);
         self.registerHandler(externalUrlImagesHandler);
       },
 
@@ -299,9 +295,7 @@ export const ImageMapModel = types
           unitCodeMap?: any,
           options?: IImageBaseOptions
         ): Generator<PromiseLike<any>, ImageMapEntryType | Promise<ImageMapEntryType>, unknown> {
-        const storeResult = (
-          yield handler.store(url, curriculumBaseUrl, unitCodeMap, { db: _db, ...options })
-        ) as IImageHandlerStoreResult;
+        const storeResult = (yield handler.store(url, { db: _db, ...options })) as IImageHandlerStoreResult;
         return self._addImage(url, storeResult);
       }),
     };
@@ -389,9 +383,7 @@ export const externalUrlImagesHandler: IImageHandler = {
     return url ? /^(https?:\/\/|data:image\/)/.test(url) : false;
   },
 
-  async store(
-    url: string, curriculumBaseUrl?: string, unitCodeMap?: any, options?: IImageHandlerStoreOptions
-  ): Promise<IImageHandlerStoreResult> {
+  async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
     const { db } = options || {};
     // upload images from external urls to our own firebase if possible
     // this may fail depending on CORS settings on target image.
@@ -422,17 +414,18 @@ export const externalUrlImagesHandler: IImageHandler = {
             success: true  };
         }
       } catch (error) {
-          // If the silent upload has failed, do we retain the full url or
-          // encourage the user to download a copy and re-upload?
-          // For now, return the original image url.
-          return { contentUrl: url, displayUrl: url, success: true  };
+        // If the silent upload has failed, do we retain the full url or
+        // encourage the user to download a copy and re-upload?
+        // For now, return the original image url.
+        return { contentUrl: url, displayUrl: url, success: true };
       }
     }
     else {
       // For now, return the original image url.
-      return { contentUrl: url, displayUrl: url, success: true  };
+      return { contentUrl: url, displayUrl: url, success: true };
     }
-  }
+  },
+  imageMap: undefined
 };
 
 /*
@@ -443,71 +436,39 @@ export const localAssetsImagesHandler: IImageHandler = {
   priority: 2,
 
   match(url: string) {
-    return url ? url.startsWith("assets/") || url.startsWith("curriculum/") : false;
+    return !(url.match(":") || url.match(/^\/dev\/.*?\/portals/));
   },
 
-  async store(url: string, curriculumBaseUrl?: string, unitCodeMap?: any, options?: IImageHandlerStoreOptions) {
+  async store(url: string) {
     const unitCode = urlParams.unit && isValidHttpUrl(urlParams.unit)
-                     ? getUnitCodeFromUrl(urlParams.unit)
-                     : urlParams.unit
-                       ? urlParams.unit
-                       : "sas";
+      ? getUnitCodeFromUrl(urlParams.unit)
+      : urlParams.unit
+        ? urlParams.unit
+        : "sas";
     const curriculumBranch = urlParams.unit && isValidHttpUrl(urlParams.unit)
-                               ? getCurriculumBranchFromUrl(urlParams.unit)
-                               : undefined;
+      ? getCurriculumBranchFromUrl(urlParams.unit)
+      : undefined;
+
     // Legacy curriculum units lived in the defunct "curriculum" directory in subfolders
     // named after the unit title, e.g. "curriculum/stretching-and-shrinking". References
-    // to files in those directories will need to be converted to use the new file structure
-    // which uses the unit code as the directory name, e.g. "sas".
-    const urlPieces = url.split("curriculum/");
-    const urlUnitDir = urlPieces[1] ? urlPieces[1].replace(/\/.*/, "") : "";
-    const newUnitDir = urlUnitDir !== "" ? unitCodeMap[urlUnitDir] : "";
-                    // convert original curriculum image paths
-    const _url = url.replace("assets/curriculum/", "")
-                    // convert original drawing tool stamp paths
-                    .replace("assets/tools/drawing-tool/stamps", "msa/stamps")
-                    // remove curriculum/ from path since that directory no longer exists
-                    .replace("curriculum/", "")
-                    // convert legacy directory names to new ones
-                    .replace(urlUnitDir, newUnitDir);
-    const imgUrl = curriculumBaseUrl ? getAssetUrl(_url, unitCode, curriculumBaseUrl, curriculumBranch) : _url;
-    return { contentUrl: _url, displayUrl: imgUrl, success: true  };
-  }
+    // to files in those directories need to be converted to use the new file structure
+    // where the unit code is the directory name, e.g. "sas".
+    const urlPieces = url.match(/curriculum\/([^/]+)\/(.*)/);
+    let newUrl = undefined;
+    if (urlPieces) {
+      const urlUnitDir = urlPieces[1];
+      const newUnitDir = this.imageMap.unitCodeMap.get(urlUnitDir);
+      newUrl = `${newUnitDir}/${urlPieces[2]}`;
+    }
+    // We also need to convert legacy drawing tool stamp paths
+    const _url = newUrl ? newUrl.replace("assets/tools/drawing-tool/stamps", "msa/stamps") : url;
+    const imgUrl = this.imageMap.curriculumBaseUrl
+                     ? getAssetUrl(_url, unitCode, this.imageMap.curriculumBaseUrl, curriculumBranch)
+                     : _url;
+    return { contentUrl: _url, displayUrl: imgUrl, success: true };
+  },
+  imageMap: undefined
 };
-
-/*
- * remoteAssetsImagesHandler
- */
-// export const remoteAssetsImagesHandler: IImageHandler = {
-//   name: kRemoteAssetsHandlerName,
-//   priority: 3,
-
-//   match(url: string) {
-//     console.log("called remoteAssetsImagesHandler");
-//     // only match if the unit code/id is a URL
-//     // see the FIXME above for problems with this approach
-//     const unitCode = urlParams.unit;
-
-//     // We are only going to match the newer curriculum paths.
-//     // The older paths should only exist in student and teacher documents
-//     return !!(isValidHttpUrl(unitCode) && url.startsWith("curriculum/"));
-//   },
-
-//   async store(url: string, curriculumBaseUrl?: string, unitCodeMap?: any, options?: IImageHandlerStoreOptions) {
-//     const unitCode = urlParams.unit ? getUnitCodeFromUrl(urlParams.unit) : "sas";
-//     const curriculumBranch = urlParams.unit ? getCurriculumBranchFromUrl(urlParams.unit) : undefined;
-//     const imgUrl = getAssetUrl(url, unitCode, curriculumBaseUrl || "", curriculumBranch);
-
-//     // FIXME: we might want to set the contentUrl to be the absoluteUrl here
-//     // I think in this case the cache will add a second entry. One with the
-//     // relative url key and one with the absoluteUrl key. This way if the
-//     // same image is referenced different ways it won't be downloaded
-//     // more than once. However I think that also means the content will be
-//     // updated to reference the absolute URL which we might not want to
-//     // do.
-//     return { contentUrl: url, displayUrl: imgUrl, success: true  };
-//   }
-// };
 
 /*
  * firebaseStorageImagesHandler
@@ -530,13 +491,11 @@ export const firebaseStorageImagesHandler: IImageHandler = {
 
   match(url: string) {
     return url.startsWith(kFirebaseStorageUrlPrefix) ||
-                          // original firebase storage path reference
-                          /^\/.+\/portals\/.+$/.test(url);
+      // original firebase storage path reference
+      /^\/.+\/portals\/.+$/.test(url);
   },
 
-  async store(
-    url: string, curriculumBaseUrl?: string, unitCodeMap?: any, options?: IImageHandlerStoreOptions
-  ): Promise<IImageHandlerStoreResult> {
+  async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
     const { db } = options || {};
     // All images from firebase storage must be migrated to realtime database
     const isStorageUrl = url.startsWith(kFirebaseStorageUrlPrefix);
@@ -567,7 +526,8 @@ export const firebaseStorageImagesHandler: IImageHandler = {
     else {
       return kErrorStorageResult;
     }
-  }
+  },
+  imageMap: undefined
 };
 
 /*
@@ -605,12 +565,10 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
 
   match(url: string) {
     return url.startsWith(kFirebaseRTDBFauxUrlPrefix) ||
-          (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
+      (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
   },
 
-  async store(
-    url: string, curriculumBaseUrl?: string, unitCodeMap?: any, options?: IImageHandlerStoreOptions
-  ): Promise<IImageHandlerStoreResult> {
+  async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
     const { db } = options || {};
     const { path, classHash, imageKey, normalized } = parseFauxFirebaseRTDBUrl(url);
 
@@ -618,23 +576,26 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
       // In theory we could direct all firebase image requests to the cloud function,
       // but only cross-class supports require the use of the cloud function.
       const blobUrl = classHash !== db.stores.user.classHash
-                            ? await db.getCloudImageBlob(normalized)
-                            : await db.getImageBlob(imageKey);
+        ? await db.getCloudImageBlob(normalized)
+        : await db.getImageBlob(imageKey);
       return blobUrl
-             ? { filename: options?.filename, contentUrl: normalized, displayUrl: blobUrl,
-                 success: true }
-             // Note: we used to return an empty image entry here. This used to cause
-             // problems with some code that would then try to load the original url which
-             // might be a ccimg: url.
-             // This empty entry seems to also be expected by jxg-image which was testing
-             // for falsey displayUrl. It has been updated to also check the status of the
-             // entry
-             : kErrorStorageResult;
+        ? {
+          filename: options?.filename, contentUrl: normalized, displayUrl: blobUrl,
+          success: true
+        }
+        // Note: we used to return an empty image entry here. This used to cause
+        // problems with some code that would then try to load the original url which
+        // might be a ccimg: url.
+        // This empty entry seems to also be expected by jxg-image which was testing
+        // for falsey displayUrl. It has been updated to also check the status of the
+        // entry
+        : kErrorStorageResult;
     }
     else {
       return kErrorStorageResult;
     }
-  }
+  },
+  imageMap: undefined
 };
 
 export const gImageMap = ImageMapModel.create();
