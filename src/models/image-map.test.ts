@@ -21,6 +21,7 @@ function unsafeUpdate(func: () => void) {
 }
 
 describe("ImageMap", () => {
+  const kCurriculumBaseUrl = "https://example.com/clue-curriculum/branch/main";
   const kLocalImageUrl = "assets/logo_tw.png";
   const kHttpImageUrl = "http://icon.cat/img/icon_loop.png";
   const kHttpsImageUrl = "https://icon.cat/img/icon_loop.png";
@@ -49,6 +50,8 @@ describe("ImageMap", () => {
           Promise.resolve({ src: placeholderImage, width: 200, height: 150 }));
     if (sImageMap) { destroy(sImageMap); }
     sImageMap = ImageMapModel.create();
+    sImageMap.setCurriculumBaseUrl(kCurriculumBaseUrl);
+    sImageMap.setUnitCodeMap({"stretching-and-shrinking": "sas"});
   });
           
   function createMockDB(overrides?: Record<string, any>) {
@@ -94,7 +97,7 @@ describe("ImageMap", () => {
     return localAssetsImagesHandler.store(kLocalImageUrl)
             .then(storeResult => {
               expect(storeResult.contentUrl).toBe(kLocalImageUrl);
-              expect(storeResult.displayUrl).toBe(kLocalImageUrl);
+              expect(storeResult.displayUrl).toBe(`${kCurriculumBaseUrl}/${kLocalImageUrl}`);
             });
   });
 
@@ -298,7 +301,6 @@ describe("ImageMap", () => {
     expect(kInputs.every((url, index) => {
       const expected = kHandlers[index];
       const handler = sImageMap.getHandler(url);
-      console.log("LLL", handler?.name, expected?.name);
       expect(handler && handler.name).toBe(expected && expected.name);
       return (handler && handler.name) === (expected && expected.name);
     }));
@@ -377,7 +379,7 @@ describe("ImageMap", () => {
   
       const image = await firstGetImagePromise;
       expect(image.contentUrl).toBe(kLocalImageUrl);
-      expect(image.displayUrl).toBe(kLocalImageUrl);
+      expect(image.displayUrl).toBe(`${kCurriculumBaseUrl}/${kLocalImageUrl}`);
       expect(image.width).toBe(200);
       expect(image.height).toBe(150);
       expect(image.status).toBe(EntryStatus.Ready);
@@ -496,7 +498,7 @@ describe("ImageMap", () => {
       expect(returnedEntry).toEqual({
         status: EntryStatus.Ready,
         contentUrl: kLocalImageUrl,
-        displayUrl: kLocalImageUrl,
+        displayUrl: `${kCurriculumBaseUrl}/${kLocalImageUrl}`,
         height: 150,
         width: 200,
         retries: 1

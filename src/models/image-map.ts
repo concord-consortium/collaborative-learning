@@ -2,12 +2,11 @@ import { types, Instance, SnapshotIn, clone, getSnapshot, flow } from "mobx-stat
 import {
   getImageDimensions, IImageDimensions, ISimpleImage, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
 } from "../utilities/image-utils";
-import { getAssetUrl } from "../utilities/asset-utils";
 import { urlParams } from "../utilities/url-params";
 import { DB } from "../lib/db";
 import { DEBUG_IMAGES } from "../lib/debug";
 import placeholderImage from "../assets/image_placeholder.png";
-import { getCurriculumBranchFromUrl, getUnitCodeFromUrl, isValidHttpUrl } from "../utilities/url-utils";
+import { getCurriculumBranchFromUrl, isValidHttpUrl } from "../utilities/url-utils";
 
 export const kExternalUrlHandlerName = "externalUrl";
 export const kLocalAssetsHandlerName = "localAssets";
@@ -291,8 +290,6 @@ export const ImageMapModel = types
       _storeAndAddImage: flow(function* (
           url: string,
           handler: IImageHandler,
-          curriculumBaseUrl?: string,
-          unitCodeMap?: any,
           options?: IImageBaseOptions
         ): Generator<PromiseLike<any>, ImageMapEntryType | Promise<ImageMapEntryType>, unknown> {
         const storeResult = (yield handler.store(url, { db: _db, ...options })) as IImageHandlerStoreResult;
@@ -350,7 +347,7 @@ export const ImageMapModel = types
       self.images.set(url, {status: EntryStatus.PendingStorage, displayUrl: placeholderImage,
         retries});
 
-      const storingPromise = self._storeAndAddImage(url, handler, self.curriculumBaseUrl, self.unitCodeMap, options);
+      const storingPromise = self._storeAndAddImage(url, handler, options);
 
       // keep track of the storingPromise
       self.storingPromises[url] = storingPromise;
@@ -440,14 +437,9 @@ export const localAssetsImagesHandler: IImageHandler = {
   },
 
   async store(url: string) {
-    const unitCode = urlParams.unit && isValidHttpUrl(urlParams.unit)
-      ? getUnitCodeFromUrl(urlParams.unit)
-      : urlParams.unit
-        ? urlParams.unit
-        : "sas";
     const curriculumBranch = urlParams.unit && isValidHttpUrl(urlParams.unit)
       ? getCurriculumBranchFromUrl(urlParams.unit)
-      : undefined;
+      : "main";
 
     // Legacy curriculum units lived in the defunct "curriculum" directory in subfolders
     // named after the unit title, e.g. "curriculum/stretching-and-shrinking". References
@@ -460,12 +452,11 @@ export const localAssetsImagesHandler: IImageHandler = {
       const newUnitDir = this.imageMap.unitCodeMap.get(urlUnitDir);
       newUrl = `${newUnitDir}/${urlPieces[2]}`;
     }
+    let _url = newUrl ? newUrl : url;
     // We also need to convert legacy drawing tool stamp paths
-    const _url = newUrl ? newUrl.replace("assets/tools/drawing-tool/stamps", "msa/stamps") : url;
-    const imgUrl = this.imageMap.curriculumBaseUrl
-                     ? getAssetUrl(_url, unitCode, this.imageMap.curriculumBaseUrl, curriculumBranch)
-                     : _url;
-    return { contentUrl: _url, displayUrl: imgUrl, success: true };
+    _url = _url.replace("assets/tools/drawing-tool/stamps", "msa/stamps");
+    const imgUrl = new URL(`/clue-curriculum/branch/${curriculumBranch}/${_url}`, this.imageMap.curriculumBaseUrl);
+    return { contentUrl: _url, displayUrl: imgUrl.href, success: true };
   },
   imageMap: undefined
 };
