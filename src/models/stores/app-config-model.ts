@@ -55,8 +55,8 @@ export const AppConfigModel = types
         };
       } else {
         return {
-          "content": `${self.curriculumBaseUrl}/main/${unitCode}/content.json`,
-          "guide": `${self.curriculumBaseUrl}/main/${unitCode}/teacher-guide/content.json`
+          "content": `${self.curriculumBaseUrl}branch/main/${unitCode}/content.json`,
+          "guide": `${self.curriculumBaseUrl}branch/main/${unitCode}/teacher-guide/content.json`
         };
       }
     }

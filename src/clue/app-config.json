@@ -233,7 +233,7 @@
     "stamps": [],
     "settings": {}
   },
-  "curriculumBaseUrl": "https://models-resources.concord.org/clue-curriculum/branch",
+  "curriculumBaseUrl": "https://models-resources.concord.org/clue-curriculum/",
   "unitCodeMap": {
     "bio4community": "bio",
     "completely-rational": "cr",

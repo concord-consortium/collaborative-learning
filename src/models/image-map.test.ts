@@ -21,7 +21,7 @@ function unsafeUpdate(func: () => void) {
 }
 
 describe("ImageMap", () => {
-  const kCurriculumBaseUrl = "https://example.com/clue-curriculum/branch/main";
+  const kCurriculumBaseUrl = "https://example.com/clue-curriculum/";
   const kLocalImageUrl = "assets/logo_tw.png";
   const kHttpImageUrl = "http://icon.cat/img/icon_loop.png";
   const kHttpsImageUrl = "https://icon.cat/img/icon_loop.png";
@@ -97,7 +97,7 @@ describe("ImageMap", () => {
     return localAssetsImagesHandler.store(kLocalImageUrl)
             .then(storeResult => {
               expect(storeResult.contentUrl).toBe(kLocalImageUrl);
-              expect(storeResult.displayUrl).toBe(`${kCurriculumBaseUrl}/${kLocalImageUrl}`);
+              expect(storeResult.displayUrl).toBe(`${kCurriculumBaseUrl}branch/main/${kLocalImageUrl}`);
             });
   });
 
@@ -379,7 +379,7 @@ describe("ImageMap", () => {
   
       const image = await firstGetImagePromise;
       expect(image.contentUrl).toBe(kLocalImageUrl);
-      expect(image.displayUrl).toBe(`${kCurriculumBaseUrl}/${kLocalImageUrl}`);
+      expect(image.displayUrl).toBe(`${kCurriculumBaseUrl}branch/main/${kLocalImageUrl}`);
       expect(image.width).toBe(200);
       expect(image.height).toBe(150);
       expect(image.status).toBe(EntryStatus.Ready);
@@ -498,7 +498,7 @@ describe("ImageMap", () => {
       expect(returnedEntry).toEqual({
         status: EntryStatus.Ready,
         contentUrl: kLocalImageUrl,
-        displayUrl: `${kCurriculumBaseUrl}/${kLocalImageUrl}`,
+        displayUrl: `${kCurriculumBaseUrl}branch/main/${kLocalImageUrl}`,
         height: 150,
         width: 200,
         retries: 1

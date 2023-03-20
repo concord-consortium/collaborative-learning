@@ -1,4 +1,4 @@
-import { types, Instance, SnapshotIn, clone, getSnapshot, flow } from "mobx-state-tree";
+import { types, Instance, SnapshotIn, clone, getSnapshot, flow, IMSTMap, ISimpleType } from "mobx-state-tree";
 import {
   getImageDimensions, IImageDimensions, ISimpleImage, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
 } from "../utilities/image-utils";
@@ -42,7 +42,7 @@ export interface IImageBaseOptions {
   filename?: string;
   unitCodeMap?: Record<string, string>;
 }
-export interface IImageHandlerStoreOptions extends IImageBaseOptions{
+export interface IImageHandlerStoreOptions extends IImageBaseOptions {
   db?: DB;
 }
 export interface IImageHandlerStoreResult {
@@ -51,8 +51,13 @@ export interface IImageHandlerStoreResult {
   displayUrl?: string;
   success: boolean;
 }
+interface IImageMap {
+  curriculumBaseUrl?: string;
+  unitCodeMap?: IMSTMap<ISimpleType<string>>;
+  getCurriculumUrl?: () => string;
+}
 export interface IImageHandler {
-  imageMap: any;
+  imageMap: IImageMap;
   name: string;
   priority: number;
   match: (url: string) => boolean;
@@ -92,6 +97,12 @@ export const ImageMapModel = types
     },
     getCachedImage(url?: string) {
       return url ? self.images.get(url) : undefined;
+    },
+    getCurriculumUrl() {
+      const curriculumBranch = urlParams.unit && isValidHttpUrl(urlParams.unit)
+                                 ? getCurriculumBranchFromUrl(urlParams.unit)
+                                 : "main";
+      return `${self.curriculumBaseUrl}branch/${curriculumBranch}/`;
     }
   }))
   .actions(self => ({
@@ -422,7 +433,7 @@ export const externalUrlImagesHandler: IImageHandler = {
       return { contentUrl: url, displayUrl: url, success: true };
     }
   },
-  imageMap: undefined
+  imageMap: {}
 };
 
 /*
@@ -433,32 +444,35 @@ export const localAssetsImagesHandler: IImageHandler = {
   priority: 2,
 
   match(url: string) {
-    return !(url.match(":") || url.match(/^\/dev\/.*?\/portals/));
+           // don't match values with a protocol
+    return !url.match(":") &&
+           // or original firebase storage path reference
+           !/^\/.+\/portals\/.+$/.test(url);
   },
 
   async store(url: string) {
-    const curriculumBranch = urlParams.unit && isValidHttpUrl(urlParams.unit)
-      ? getCurriculumBranchFromUrl(urlParams.unit)
-      : "main";
-
     // Legacy curriculum units lived in the defunct "curriculum" directory in subfolders
     // named after the unit title, e.g. "curriculum/stretching-and-shrinking". References
     // to files in those directories need to be converted to use the new file structure
     // where the unit code is the directory name, e.g. "sas".
     const urlPieces = url.match(/curriculum\/([^/]+)\/(.*)/);
-    let newUrl = undefined;
-    if (urlPieces) {
+    let _url = url;
+    if (urlPieces && this.imageMap.unitCodeMap) {
       const urlUnitDir = urlPieces[1];
       const newUnitDir = this.imageMap.unitCodeMap.get(urlUnitDir);
-      newUrl = `${newUnitDir}/${urlPieces[2]}`;
+      _url = `${newUnitDir}/${urlPieces[2]}`;
     }
-    let _url = newUrl ? newUrl : url;
     // We also need to convert legacy drawing tool stamp paths
     _url = _url.replace("assets/tools/drawing-tool/stamps", "msa/stamps");
-    const imgUrl = new URL(`/clue-curriculum/branch/${curriculumBranch}/${_url}`, this.imageMap.curriculumBaseUrl);
-    return { contentUrl: _url, displayUrl: imgUrl.href, success: true };
+
+    if (this.imageMap.getCurriculumUrl) {
+      const imgUrl = new URL(_url, this.imageMap.getCurriculumUrl());
+      return { contentUrl: _url, displayUrl: imgUrl.href, success: true };
+    } else {
+      return { contentUrl: _url, displayUrl: _url, success: false };
+    }
   },
-  imageMap: undefined
+  imageMap: {}
 };
 
 /*
@@ -518,7 +532,7 @@ export const firebaseStorageImagesHandler: IImageHandler = {
       return kErrorStorageResult;
     }
   },
-  imageMap: undefined
+  imageMap: {}
 };
 
 /*
@@ -586,7 +600,7 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
       return kErrorStorageResult;
     }
   },
-  imageMap: undefined
+  imageMap: {}
 };
 
 export const gImageMap = ImageMapModel.create();
