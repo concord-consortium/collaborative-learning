@@ -21,23 +21,37 @@ interface IProps extends ITileProps{
   height?: number;
 }
 
+interface IDataflowTileState {
+  programRecordingState: number // shoud be enumerated
+}
+
 @inject("stores")
 @observer
-export default class DataflowToolComponent extends BaseComponent<IProps> {
+export default class DataflowToolComponent extends BaseComponent<IProps, IDataflowTileState> {
 
   public static tileHandlesSelection = true;
+
+  // [RECORDING temporary state]
+  constructor(props: IProps) {
+    super(props);
+    this.state = {
+      programRecordingState: 0
+    };
+  }
 
   public render() {
     const { readOnly, height, model } = this.props;
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
-    const { program, programDataRate, programZoom, programRecordState } = this.getContent();
+    const { program, programDataRate, programZoom } = this.getContent();
     const numNodes = program.nodes.size;
-
-    // TEMPORARY
-    // for now just pass second copy of whole model for proof of ability to write data to dataset
-    // will deconstruct out the right part later on
     const tileModel = this.getContent();
+    //const { programRecordState } = this.state ? this.state.programRecordState
+
+    // 1 Move programRecordState and methods to this component or to a hook
+    // 2 QUESTION: consolidate the passed props that now come through with whole model? (see below)
+    // 3 implement the before the start assessment and setup
+    // 4 implement the record on tick
 
     return (
       <>
@@ -49,17 +63,17 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
                 <DataflowProgram
                   readOnly={readOnly}
                   documentProperties={this.getDocumentProperties()}
-                  program={program}
+                  program={program} // 1/3 now passing whole tileModel, so destruct this on other side?
                   onProgramChange={this.handleProgramChange}
-                  programDataRate={programDataRate}
+                  programDataRate={programDataRate}  // 2/3 now passing whole tileModel, so destruct this on other side?
                   onProgramDataRateChange={this.handleProgramDataRateChange}
-                  programZoom={programZoom}
+                  programZoom={programZoom} // 3/3 now passing whole tileModel, so destruct this on other side?
                   onZoomChange={this.handleProgramZoomChange}
                   size={size}
                   tileHeight={height}
                   tileId={model.id}
                   onRecordDataChange={this.handleRecordDataChange}
-                  programRecordState={programRecordState}
+                  programRecordState={this.state.programRecordingState}
                   numNodes={numNodes}
                   tileModel={tileModel}
                 />
@@ -136,8 +150,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps> {
   private handleProgramZoomChange = (dx: number, dy: number, scale: number) => {
     this.getContent().setProgramZoom(dx, dy, scale);
   };
+
   private handleRecordDataChange = () => {
-    this.getContent().setProgramRecordState();
+    const thisMode = this.state.programRecordingState;
+    this.setState({
+      programRecordingState:  (thisMode + 1) % 3
+    })
   };
 
   private getContent() {

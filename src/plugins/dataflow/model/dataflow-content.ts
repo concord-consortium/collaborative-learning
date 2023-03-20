@@ -10,7 +10,7 @@ import { TileContentModel } from "../../../models/tiles/tile-content";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { getTileModel, setTileTitleFromContent } from "../../../models/tiles/tile-model";
 import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
-import { addAttributeToDataSet, addCasesToDataSet, DataSet } from "../../../models/data/data-set";
+import { addAttributeToDataSet, addCasesToDataSet, addCanonicalCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { uniqueId, uniqueTitle } from "../../../utilities/js-utils";
 
@@ -112,11 +112,11 @@ export const DataflowContentModel = TileContentModel
       ].join("\n");
     },
     //added (not used )
-    // existingAttributesWithNames(){
-    //   return self.dataSet.attributes.map((a) => {
-    //     return { "attrName": a.name, "attrId": a.id };
-    //   });
-    // }
+    existingAttributesWithNames(){
+      return self.dataSet.attributes.map((a) => {
+        return { "attrName": a.name, "attrId": a.id };
+      });
+    },
     existingAttributes(){
       return self.dataSet.attributes.map((a) => {
         return a.id;
@@ -209,53 +209,42 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.scale = scale;
     },
     addNewCaseFromAttrKeys(atts: string[], beforeId?: string ){
-      // const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
-      // if (beforeId){
-      //   addCanonicalCasesToDataSet(self.dataSet, [obj], beforeId);
-      // } else {
-      //   addCanonicalCasesToDataSet(self.dataSet, [obj]);
-      // }
+      const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
+      if (beforeId){
+        addCanonicalCasesToDataSet(self.dataSet, [obj], beforeId);
+      } else {
+        addCanonicalCasesToDataSet(self.dataSet, [obj]);
+      }
     },
     addNewAttr(nodeInfo: any){
       console.log("dataflow-content.ts > addNewAttr > nodeInfo:", nodeInfo);
       self.dataSet.addAttributeWithID({
         id: uniqueId(),
-        name: uniqueTitle(kDefaultLabelPrefix, name => !self.dataSet.attrFromName(name))
+        name: uniqueTitle("Dataflow-", name => !self.dataSet.attrFromName(name))
       });
-
-      // const casesArr = self.allCases().map(c => c?.__id__);
-      // const attrsArr = self.existingAttributes();
-
-      // casesArr.forEach((caseId) => {
-      //   if (caseId){
-      //     attrsArr.forEach((attr) => {
-      //       const notSet = self.dataSet.getValue(caseId, attr) === undefined;
-      //       if (notSet){
-      //         this.setAttValue(caseId, attr, "");
-      //       }
-      //     });
-      //   }
-      // });
     }
   }))
   .actions(self => ({
+    // [RECORDING manage recording state]
+    // TODO I moved this functionality to the tile's react state
+    // It should not be in the MST model because it will not be serialized
+    // It will need to be more fully integrated with the UI built in #182326333
+    // setProgramRecordState(){
+    //   //0 - Record
+    //   //1 - Stop
+    //   //2 - Clear
+    //   // console.log("dataflow-content.ts > setProgramRecordState() with programRecordState", self.programRecordState);
+    //   if (self.programRecordState === 0){
+    //     console.log("we are in recording mode");
+    //     console.log("self.title", self.title); //when calling on view methods, we do not need to invoke them
+    //     console.log("self.dataset", self.dataSet); //when calling on view methods, we do not need to invoke them
 
-    setProgramRecordState(){
-      //0 - Record
-      //1 - Stop
-      //2 - Clear
-      // console.log("dataflow-content.ts > setProgramRecordState() with programRecordState", self.programRecordState);
-      if (self.programRecordState === 0){
-        console.log("we are in recording mode");
-        console.log("self.title", self.title); //when calling on view methods, we do not need to invoke them
-        console.log("self.dataset", self.dataSet); //when calling on view methods, we do not need to invoke them
-
-        //from datacard
-        // self.addNewCaseFromAttrKeys(self.existingAttributes()); //calls to other actions must be above(?), not below
-        // setCaseIndex(content.totalCases - 1);
-      }
-      self.programRecordState = (self.programRecordState + 1) % 3;
-    }
+    //     //from datacard
+    //     // self.addNewCaseFromAttrKeys(self.existingAttributes()); //calls to other actions must be above(?), not below
+    //     // setCaseIndex(content.totalCases - 1);
+    //   }
+    //   self.programRecordState = (self.programRecordState + 1) % 3;
+    // }
 
 
 
