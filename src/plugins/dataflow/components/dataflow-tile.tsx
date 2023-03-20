@@ -22,7 +22,7 @@ interface IProps extends ITileProps{
 }
 
 interface IDataflowTileState {
-  programRecordingState: number // shoud be enumerated
+  programRecordingMode: number // shoud be enumerated
 }
 
 @inject("stores")
@@ -35,7 +35,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   constructor(props: IProps) {
     super(props);
     this.state = {
-      programRecordingState: 0
+      programRecordingMode: 0
     };
   }
 
@@ -72,8 +72,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   size={size}
                   tileHeight={height}
                   tileId={model.id}
-                  onRecordDataChange={this.handleRecordDataChange}
-                  programRecordState={this.state.programRecordingState}
+                  onRecordDataChange={this.handleChangeOfRecordingMode}
+                  programRecordState={this.state.programRecordingMode}
                   numNodes={numNodes}
                   tileModel={tileModel}
                 />
@@ -151,11 +151,45 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     this.getContent().setProgramZoom(dx, dy, scale);
   };
 
-  private handleRecordDataChange = () => {
-    const thisMode = this.state.programRecordingState;
+  // [RECORDING: this will be called when the recording is about to begin (1/2)]
+  private pairNodesToAttributes = () => {
+    console.log("pairNodesToAttributes")
+    // for each node: is there already an attribute?
+
+    // if yes return
+
+    // if not, create the attribute
+
+  }
+
+    // [RECORDING: this will be called when the recording is about to begin (2/2)]
+  private cleanupAttributes = () => {
+    console.log("cleanupAttributes")
+    // for each attribute: is it associated with a node?
+
+    // if yes, return
+
+    // if not, remove it
+
+  }
+
+  private handleChangeOfRecordingMode = () => {
+    /* this should be enumerated somehow, but
+      0 - cleared, ready to record
+      1 - recording in progress
+      2 - stopped, ready to clear
+    */
+    const mode = this.state.programRecordingMode;
+
+    if (mode === 0){
+      this.pairNodesToAttributes();
+      this.cleanupAttributes();
+    }
+
     this.setState({
-      programRecordingState:  (thisMode + 1) % 3
+      programRecordingMode:  (mode + 1) % 3
     })
+
   };
 
   private getContent() {

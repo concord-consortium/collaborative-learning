@@ -69,7 +69,7 @@ interface IProps extends SizeMeProps {
   onRecordDataChange: () => void;
   programRecordState: number;
   numNodes: number;
-  tileModel: any
+  tileModel: any; // FIXME
 }
 
 interface IState {
@@ -135,6 +135,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           numNodes={numNodes}
         />
         <div className={toolbarEditorContainerClass}>
+          <pre style={{ color: "red", padding: "20px", backgroundColor: "blue"}}>{ this.props.programRecordState }</pre>
           { showProgramToolbar && <DataflowProgramToolbar
             onNodeCreateClick={this.addNode}
             onClearClick={this.clearProgram}
@@ -523,30 +524,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  // [RECORDING: this will be called when the recording is about to begin (1/2)]
-  private pairNodesToAttributes = (nodes: Node[]) => {
-    // for each node: is there already an attribute?
-
-    // if yes return
-
-    // if not, create the attribute
-
-  }
-
-   // [RECORDING: this will be called when the recording is about to begin (2/2)]
-  private cleanupAttributes = () => {
-    // for each attribute: is it associated with a node?
-
-    // if yes, return
-
-    // if not, remove it
-
-  }
-
-
   // [RECORDING: this will be called at the start of each tick]
   private createCaseForTick = (collectedTime: number) => {
+    console.log("createCaseForTick")
     const newCaseId = collectedTime + "_" + this.props.tileId;
+    console.log("tick, write to caseId: ", newCaseId)
+    // createCase(caseId)
+    // for each attribute, recordPoint(node)
   }
 
   // [RECORDING: within the tick, this will be called for each node in the program]
