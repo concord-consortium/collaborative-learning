@@ -54,7 +54,7 @@ export interface IImageHandlerStoreResult {
 interface IImageMap {
   curriculumBaseUrl?: string;
   unitCodeMap?: IMSTMap<ISimpleType<string>>;
-  getCurriculumUrl?: () => string;
+  getCurriculumUrl?: () => string | undefined;
 }
 export interface IImageHandler {
   imageMap: IImageMap;
@@ -99,6 +99,7 @@ export const ImageMapModel = types
       return url ? self.images.get(url) : undefined;
     },
     getCurriculumUrl() {
+      if (!self.curriculumBaseUrl) return;
       const curriculumBranch = urlParams.unit && isValidHttpUrl(urlParams.unit)
                                  ? getCurriculumBranchFromUrl(urlParams.unit)
                                  : "main";
@@ -469,11 +470,11 @@ export const localAssetsImagesHandler: IImageHandler = {
     // We also need to convert legacy drawing tool stamp paths
     _url = _url.replace("assets/tools/drawing-tool/stamps", "msa/stamps");
 
-    if (this.imageMap.getCurriculumUrl) {
+    if (this.imageMap.getCurriculumUrl && this.imageMap.getCurriculumUrl()) {
       const imgUrl = new URL(_url, this.imageMap.getCurriculumUrl());
       return { contentUrl: _url, displayUrl: imgUrl.href, success: true };
     } else {
-      return { contentUrl: _url, displayUrl: _url, success: false };
+      return { contentUrl: _url, displayUrl: _url, success: true };
     }
   },
   imageMap: {}
