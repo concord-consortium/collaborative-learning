@@ -77,7 +77,7 @@ collections:
     format: json
     folder: src/public/units
     # folder: units
-    create: true
+    # create: true
     # adding a nested object will show the collection folder structure
     nested:
       depth: 6 # max depth to show in the collection tree
