@@ -16,7 +16,7 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row );
 
   .sorting-cards-data-area {
     width: $sort-view-width;
-    border: solid 1px $charcoal-light-1;
+    border: $card-border;
 
     .sort-area-grid {
       display: grid;
@@ -38,7 +38,7 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row );
         width: $sort-view-card-width;
         background-color: $workspace-teal-light-4;
         height:26px;
-        border-bottom: 1px $charcoal-light-1;
+        border-bottom: $card-border;
       }
     }
 
@@ -46,33 +46,23 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row );
       display: grid;
       border-radius:$card-space-factor;
       margin:3px;
-      transition: all .4s ease-in-out;
-      //transform: translateX(1px);
 
       .heading {
-        padding:4px;
+        border: $card-border;
+        padding:$card-space-factor;
         color: tungsten;
         font-style: italic;
         text-align: right;
         border-radius: 5px 5px 0px 0px;
-        border: 1px solid $charcoal-light-1;
-        //border-bottom: 0px;
         display:flex;
         align-items: flex-end;
 
         .card-count-info {
           width:90%;
-          text-align: right;
-          justify-self: end;
         }
       }
 
-      .no-content {
-         border-bottom: $card-border;
-      }
-
       .content > div {
-        //padding: $card-space-factor;
         background-color: white;
         border-left: $card-border;
         border-right: $card-border;
@@ -83,39 +73,42 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row );
         border-left: $card-border;
         border-right: $card-border;
         border-bottom: $card-border;
-        height:5px;
+        height:$card-space-factor;
         border-radius: 0px 0px 5px 5px;
       }
 
       .attribute-value-row {
+        display:flex;
         .attribute {
-          border-right:1px solid $charcoal-light-1;
+          border-right:$card-border;
           width:60px;
-          padding:5px;
+          padding:$card-space-factor;
+          background-color: $workspace-teal-light-4;
+          font-weight: bold;
         }
         .value {
           width:106px;
-          padding:5px;
+          padding:$card-space-factor;
         }
         .image-value {
           width: 100%;
         }
       }
-
-    }
-
-    .collapsed .heading {
-      border-bottom: 0px !important;
-    }
-
-    .expand-toggle {
-      cursor:pointer;
-      background-color: transparent;
-      border:0px;
-      padding: 0px;
-      margin-right:2px;
-      font-size: 10px;
-      text-align: left;
+      .expand-toggle {
+        cursor:pointer;
+        border:0px;
+        padding: 0px;
+        margin-right:2px;
+        font-size: 10px;
+        text-align: left;
+        transition: all .4s;
+        color:$charcoal-dark-2;
+        background-color: transparent;
+        translate: 0px 1px;
+      }
+      &.expanded .expand-toggle {
+        transform: rotate(90deg);
+      }
     }
   }
 }

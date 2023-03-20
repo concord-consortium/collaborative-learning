@@ -35,7 +35,7 @@ context('Data Card Tool Tile', function () {
       dc.getSortSelect().select("None");
       dc.getSingleCardView().should('exist');
     });
-    it("attribute names stays in sync on menu and card", () => {
+    it("has attribute names that stay in sync on menu and card", () => {
       dc.getAttrName().dblclick().type("Attr1 Renamed{enter}");
       dc.getAttrName().contains("Attr1 Renamed");
       dc.getSortSelect().select("Attr1 Renamed");

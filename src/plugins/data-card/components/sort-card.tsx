@@ -11,7 +11,7 @@ interface IProps {
   totalInStack: number;
 }
 
-const getShade = (index: number) => {
+const getShadeRGB = (index: number) => {
   const fadeBy = 12;
   const base =  { r: 111, g: 198, b: 218 }; // $workspace-teal-light-2
   return {
@@ -25,28 +25,20 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
   const content = model.content as DataCardContentModelType;
   const deckCardNumberDisplay = content.dataSet.caseIndexFromID(caseId) + 1;
   const stackCardNumberDisplay = indexInStack + 1;
-  const { r, g, b } = getShade(indexInStack);
-  const shade = `rgb(${r},${g},${b})`;
+  const { r, g, b } = getShadeRGB(indexInStack);
+  const shadeStr = `rgb(${r},${g},${b})`;
   const atStackTop = stackCardNumberDisplay === totalInStack;
 
   const [expanded, setExpanded] = useState(false);
-
-  useEffect(()=>{
-    if (atStackTop) setExpanded(true);
-  },[atStackTop]);
-
+  useEffect(()=> setExpanded(atStackTop), [atStackTop]); // "top" card loads expanded
   const toggleExpanded = () => setExpanded(!expanded);
-
   const cardClasses = classNames("sortable", "card", { collapsed: !expanded }, { expanded });
 
   return (
     <div className={cardClasses} id={caseId}>
-      <div className="heading" style={{ backgroundColor: shade }}>
+      <div className="heading" style={{ backgroundColor: shadeStr }}>
         <div className="expand-toggle-area">
-          <button className="expand-toggle" onClick={toggleExpanded}>
-            { expanded && <span>🔽</span>}
-            { !expanded && <span>▶️</span>}
-          </button>
+          <button className="expand-toggle" onClick={toggleExpanded}>▶</button>
         </div>
         <div className="card-count-info">
           { `Card ${ deckCardNumberDisplay } of ${ content.totalCases } `}
@@ -68,9 +60,7 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
         </div>
       }
 
-      { !expanded && <div className="no-content"></div> }
-
-      <div className="footer" style={{ backgroundColor: shade }}></div>
+      <div className="footer" style={{ backgroundColor: shadeStr }}></div>
 
     </div>
   );

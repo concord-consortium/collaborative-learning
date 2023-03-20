@@ -9,11 +9,14 @@ interface IProps {
   attr: any
 }
 
-// TODO improve this to break on nearest word ending
 const getTruncated = (val:string) => {
   if (!val) return;
-  if (val.length > 50) return val.slice(0, 48) + "...";
-  return val;
+
+  const charTarget = 48;
+  if (val.length < charTarget + 1) return val;
+
+  const firstRelevantSpace = val.indexOf(" ", charTarget) + 1;
+  return val.slice(0, firstRelevantSpace) + "...";
 };
 
 export const SortCardAttribute: React.FC<IProps> = ({ model, caseId, attr }) => {
@@ -28,8 +31,8 @@ export const SortCardAttribute: React.FC<IProps> = ({ model, caseId, attr }) => 
   });
 
   return (
-    <div className="attribute-value-row" style={{ display: "flex"}}>
-      <div className="attribute" style={{ width: "60px"}}>{attrName}</div>
+    <div className="attribute-value-row">
+      <div className="attribute">{attrName}</div>
       <div className="value">
         { !isImage && getTruncated(value as string) }
         { isImage && <img src={imageUrl} className="image-value" /> }
