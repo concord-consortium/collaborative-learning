@@ -234,6 +234,12 @@ module.exports = (env, argv) => {
         filename: 'index.html',
         publicPath: '.',
       }),
+      new HtmlWebpackPlugin({
+        ...baseHtmlPluginConfig,
+        filename: 'admin.html',
+        publicPath: '.',
+        template: 'src/admin.html'
+      }),
       ...(DEPLOY_PATH ? [new HtmlWebpackPlugin({
         ...baseHtmlPluginConfig,
         filename: 'index-top.html',

@@ -1,4 +1,10 @@
 {
   "title": "Rakesh Chapter 1",
-  "content": "{\n  \"tiles\": []\n}"
+  "content": {
+    "tiles": [
+      "one",
+      "two",
+      "three"
+    ]
+  }
 }

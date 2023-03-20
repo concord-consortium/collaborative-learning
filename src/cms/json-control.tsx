@@ -25,7 +25,7 @@ export class JsonControl extends React.Component<IProps, IState>  {
   constructor(props: IProps) {
     super(props);
     console.log("init value:", props.value);
-    const valueString = props.value?.toJS ? JSON.stringify(props.value.toJS()) : "";
+    const valueString = props.value?.toJS ? JSON.stringify(props.value.toJS(), null, 2) : "";
     this.state = {valueString};
   }
 
