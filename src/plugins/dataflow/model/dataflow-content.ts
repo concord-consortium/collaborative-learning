@@ -216,11 +216,11 @@ export const DataflowContentModel = TileContentModel
         addCanonicalCasesToDataSet(self.dataSet, [obj]);
       }
     },
-    addNewAttr(nodeInfo: any){
-      console.log("dataflow-content.ts > addNewAttr > nodeInfo:", nodeInfo);
+    addNewAttr(nodeId: number, nodeName: string){
+      const newAttributeId = uniqueId() + "_" + nodeId;
       self.dataSet.addAttributeWithID({
-        id: uniqueId(),
-        name: uniqueTitle("Dataflow-", name => !self.dataSet.attrFromName(name))
+        id: newAttributeId,
+        name: uniqueTitle(`Dataflow-${nodeName}`, name => !self.dataSet.attrFromName(name))
       });
     }
   }))
