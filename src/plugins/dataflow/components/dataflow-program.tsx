@@ -526,9 +526,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   // [RECORDING: this will be called at the start of each tick]
   private createCaseForTick = (collectedTime: number) => {
+    console.log(this.props.tileModel) // has access to stuff like addNewCaseFromAttrKeys
     console.log("createCaseForTick")
     const newCaseId = collectedTime + "_" + this.props.tileId;
     console.log("tick, write to caseId: ", newCaseId)
+
     // createCase(caseId)
     // for each attribute, recordPoint(node)
   }

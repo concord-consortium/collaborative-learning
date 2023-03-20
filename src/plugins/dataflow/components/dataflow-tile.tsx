@@ -154,7 +154,16 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   // [RECORDING: this will be called when the recording is about to begin (1/2)]
   private pairNodesToAttributes = () => {
     console.log("pairNodesToAttributes")
-    // for each node: is there already an attribute?
+    const model = this.getContent();
+
+    model.program.nodes.forEach((n) => {
+      const substringOfId = `_${n.id}`
+
+      model.addNewAttr(n.id, n.name)
+    })
+
+
+    // for each node: is there already an attribute that ends with _{this_nodes_id}?
 
     // if yes return
 
