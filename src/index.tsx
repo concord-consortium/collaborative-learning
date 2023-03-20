@@ -45,7 +45,7 @@ const initializeApp = async () => {
     (window as any).stores = stores;
   }
 
-  if (urlParams.admin) {
+  if ((window as any).admin) {
     initCMS();
   } else {
     if (appMode === "qa" && urlParams.qaClear === "all") {
