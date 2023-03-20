@@ -65,7 +65,7 @@ export const DataflowContentModel = TileContentModel
       if (!firstSharedModel || getType(firstSharedModel) !== SharedDataSet) {
         return undefined;
       }
-      console.log("DataFlow model > views > get sharedModel() > firstSharedModel\n", firstSharedModel);
+      // console.log("dataflow-content.ts > views > get sharedModel() > firstSharedModel\n", firstSharedModel);
       return firstSharedModel as SharedDataSetType;
     },
     programWithoutRecentValues() {
@@ -216,38 +216,44 @@ export const DataflowContentModel = TileContentModel
         addCanonicalCasesToDataSet(self.dataSet, [obj]);
       }
     },
-    addNewAttr(nodeId: number, nodeName: string){
-      const newAttributeId = uniqueId() + "_" + nodeId;
-      self.dataSet.addAttributeWithID({
-        id: newAttributeId,
-        name: uniqueTitle(`Dataflow-${nodeName}`, name => !self.dataSet.attrFromName(name))
-      });
+    addNewAttr(nodeId: number, nodeName: string){ //if there is already an attribute with the same nodeId, do not write
+      console.log("addNewAttr with nodeId", nodeId, "nodeName:", nodeName);
+      const dataSet = self.dataSet;
+      const dataSetAttributes = dataSet.attributes;
+      let foundFlag = false;
+
+      for (let i = 0; i < Object.keys(dataSetAttributes).length ; i++){ //look in dataSet.attributes for each Id
+        const idInDataSet = dataSetAttributes[i].id;
+        const index = idInDataSet.indexOf("*");
+        const stringAfterIndex = idInDataSet.substring(index+1);
+        if (nodeId.toString() === stringAfterIndex)foundFlag = true;
+      }
+
+      if (!foundFlag) {
+        const newAttributeId = uniqueId() + "*" + nodeId;
+        self.dataSet.addAttributeWithID({
+          id: newAttributeId,
+          name: `Dataflow-${nodeName}_${nodeId}`
+        });
+      }
+      console.log("dataSetAttributes:", dataSetAttributes);
+    },
+    removeAttributesInDatasetMissingInTile(attribute: string){
+      const index = attribute.indexOf("*");
+      const stringAfterIndex = attribute.substring(index + 1);
+      let foundFlag = false;
+      const { nodes } = getSnapshot(self.program);
+      const castedNodes = nodes as Record<string, any>;
+      const castedNodesIdArr = Object.keys(castedNodes);
+
+      for (let i = 0; i < castedNodesIdArr.length; i++){
+        const idInTile = castedNodesIdArr[i];
+        if (idInTile === stringAfterIndex) foundFlag = true;
+      }
+      if (!foundFlag){
+        self.dataSet.removeAttribute(attribute);
+      }
     }
-  }))
-  .actions(self => ({
-    // [RECORDING manage recording state]
-    // TODO I moved this functionality to the tile's react state
-    // It should not be in the MST model because it will not be serialized
-    // It will need to be more fully integrated with the UI built in #182326333
-    // setProgramRecordState(){
-    //   //0 - Record
-    //   //1 - Stop
-    //   //2 - Clear
-    //   // console.log("dataflow-content.ts > setProgramRecordState() with programRecordState", self.programRecordState);
-    //   if (self.programRecordState === 0){
-    //     console.log("we are in recording mode");
-    //     console.log("self.title", self.title); //when calling on view methods, we do not need to invoke them
-    //     console.log("self.dataset", self.dataSet); //when calling on view methods, we do not need to invoke them
-
-    //     //from datacard
-    //     // self.addNewCaseFromAttrKeys(self.existingAttributes()); //calls to other actions must be above(?), not below
-    //     // setCaseIndex(content.totalCases - 1);
-    //   }
-    //   self.programRecordState = (self.programRecordState + 1) % 3;
-    // }
-
-
-
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;

@@ -526,28 +526,53 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   // [RECORDING: this will be called at the start of each tick]
   private createCaseForTick = (collectedTime: number) => {
-    console.log(this.props.tileModel) // has access to stuff like addNewCaseFromAttrKeys
-    console.log("createCaseForTick")
+    // console.log("dataflow-program.tsx >createCaseForTick >this.props.tileModel:", this.props.tileModel);
+    // has access to stuff like addNewCaseFromAttrKeys
+
+    // console.log("dataflow-program.tsx > createCaseForTick");
     const newCaseId = collectedTime + "_" + this.props.tileId;
-    console.log("tick, write to caseId: ", newCaseId)
 
     // createCase(caseId)
     // for each attribute, recordPoint(node)
-  }
+  };
 
   // [RECORDING: within the tick, this will be called for each node in the program]
   private recordPoint = (nodeId: number, val: number, caseId: number) => {
-
-  }
+    // console.log("dataflow-program.tsx > recordPoint");
+  };
 
   private tick = () => {
     // Update the sampling rate
+
+    // console.log("--> tick, dataset looks like:", this.programEditor)
+    console.log("dataflow-program.tsx > tick > this.props.tileId", this.props.tileId);
+    const testTileId =  "CFEiUngXdjxcqTR-";
+
+
+    if (this.props.tileId === testTileId ){
+      this.programEditor.nodes.forEach((node, idx) =>{
+        // console.log(node);
+        // console.log(`${node.name} #${idx+1} id:${node.id} val: ${node.data.nodeValue}`);
+        const newCase = `${node.name} #${idx+1} id:${node.id} val: ${node.data.nodeValue}`;
+        console.log("newCase:", newCase);
+
+        // first pass at writing to the dataset
+
+        // if (isFinite(node.data.nodeValue as number)){
+        //   console.log(`${node.name} id:${node.id} val: ${node.data.nodeValue}`);
+        // }
+
+      });
+      console.log("-------tick! ---------");
+      // console.log("nodes in focus:", this.programEditor.nodes[2]);
+    }
+
     const now = Date.now();
 
      // [RECORDING] if recording, create a case for this tick
     const recordingToCaseId = this.props.programRecordState === 1
       ? this.createCaseForTick(now)
-      : null
+      : null;
 
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;

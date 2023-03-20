@@ -153,34 +153,23 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   // [RECORDING: this will be called when the recording is about to begin (1/2)]
   private pairNodesToAttributes = () => {
-    console.log("pairNodesToAttributes")
+    console.log("-----Recording BEGIN-----------");
     const model = this.getContent();
 
+    //#1 check nodes on tile against dataset attributes, if already there do nothing, otherwise write.
     model.program.nodes.forEach((n) => {
-      const substringOfId = `_${n.id}`
+      model.addNewAttr(n.id, n.name);
+    });
 
-      model.addNewAttr(n.id, n.name)
-    })
+    //#2 check dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
+    const dataSet = model.dataSet;
+    const dataSetAttributes = dataSet.attributes;
 
-
-    // for each node: is there already an attribute that ends with _{this_nodes_id}?
-
-    // if yes return
-
-    // if not, create the attribute
-
-  }
-
-    // [RECORDING: this will be called when the recording is about to begin (2/2)]
-  private cleanupAttributes = () => {
-    console.log("cleanupAttributes")
-    // for each attribute: is it associated with a node?
-
-    // if yes, return
-
-    // if not, remove it
-
-  }
+    dataSetAttributes.forEach((attribute, idx) => {
+      console.log("attribute in dataSet:", attribute);
+      model.removeAttributesInDatasetMissingInTile(attribute.id);
+    });
+  };
 
   private handleChangeOfRecordingMode = () => {
     /* this should be enumerated somehow, but
@@ -189,16 +178,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       2 - stopped, ready to clear
     */
     const mode = this.state.programRecordingMode;
-
     if (mode === 0){
       this.pairNodesToAttributes();
-      this.cleanupAttributes();
     }
-
     this.setState({
       programRecordingMode:  (mode + 1) % 3
-    })
-
+    });
   };
 
   private getContent() {

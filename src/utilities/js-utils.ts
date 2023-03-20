@@ -70,10 +70,13 @@ export function uniqueSortableId(): string {
  * returns a unique title from a given base name, adding a unique numeric suffix
  */
 export function uniqueTitle(base: string, isValid: (name: string) => boolean) {
+  console.log("js-utils.ts > uniqueTitle called with base:", base, "isValid:", isValid);
+
   let name: string;
   for (let i = 1; !isValid(name = `${base} ${i}`); ++i) {
     // nothing to do
   }
+  console.log("js-utils.ts > uniqueTitle returns name:\n", name);
   return name;
 }
 
