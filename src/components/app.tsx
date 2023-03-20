@@ -18,7 +18,7 @@ import ErrorAlert from "./utilities/error-alert";
 
 // used for tooltips in various parts of the application
 import "react-tippy/dist/tippy.css";
-import "./app.sass";
+import "./app.scss";
 
 interface IProps extends IBaseProps {}
 interface IState {

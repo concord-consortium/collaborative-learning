@@ -1,44 +1,67 @@
-import React, { useCallback, /*useEffect,*/ useRef } from "react";
+import React from "react";
 
 import "./json-control.scss";
 
-export const JsonControl = (props: any) => {
-  const { label, /*value,*/ onChange } = props;
+// There is a CmsWidgetControlProps type, but it doesn't seem to be
+// exported by DecapCMS
+interface IProps {
+  field: any,
+  onChange: (value: any) => void,
+  forID: string,
+  value: any,
+  classNameWrapper: string,
+  label?: string
+}
 
-  const valueString = useRef<string>("");
+interface IState {
+  valueString: string
+}
 
-  // const initialized = useRef<boolean>(false);
-  // useEffect(() => {
-  //   if (!initialized.current) {
-  //     console.log(`initing value`, value);
-  //     valueString.current = JSON.stringify(value, null, 2);
-  //     initialized.current = true;
-  //   }
-  // }, [value]);
+export class JsonControl extends React.Component<IProps, IState>  {
+  static defaultProps = {
+    value: '',
+  };
 
-  const handleChange = useCallback(
-    (e: any) => {
-      valueString.current = e.target.value;
-      try {
-        const json = JSON.parse(valueString.current);
-        onChange(json);
-        console.log(`SUCCESS`, json);
-      } catch (error) {
-        console.log(`illegal json`, valueString.current);
-        onChange(valueString.current);
-      }
-    },
-    [onChange]
-  );
+  constructor(props: IProps) {
+    super(props);
+    console.log("init value:", props.value);
+    const valueString = props.value?.toJS ? JSON.stringify(props.value.toJS(), null, 2) : "";
+    this.state = {valueString};
+  }
 
-  return (
-    <div className="json-control">
-      <label htmlFor="jsonControl">{label}</label>
-      <textarea
-        id="jsonControl"
-        value={valueString.current}
-        onChange={handleChange}
-      />
-    </div>
-  );
-};
+  handleChange(e: any) {
+    console.log("Handling change: ", e.target.value);
+    this.setState({valueString: e.target.value});
+    try {
+      const json = JSON.parse(e.target.value);
+      console.log(`parsed json`, json);
+      this.props.onChange(json);
+      console.log(`SUCCESS`, json);
+    } catch (error) {
+      console.log(`illegal json`, e.target.value);
+      // this.props.onChange(this.state.valueString);
+    }
+  }
+
+  render() {
+    // `label` is not documented in the Decap docs and it is also not
+    // listed in the CmsWidgetControlProps provided by Decap
+    // but it does seem to provide the label of the field
+    const {
+      label,
+    } = this.props;
+
+    return (
+      <div className="json-control">
+        <label htmlFor="jsonControl">{label}</label>
+        <textarea
+          id="jsonControl"
+          value={this.state.valueString}
+          onChange={this.handleChange.bind(this)}
+        />
+      </div>
+    );
+
+  }
+}
+
