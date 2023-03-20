@@ -24,7 +24,7 @@ describe("stores object", () => {
     const appConfig = AppConfigModel.create({
       defaultUnit: "foo",
       config: {} as any,
-      "curriculumBaseUrl": "http://localhost:8080",
+      "curriculumBaseUrl": "https://curriculum.example.com",
     });
     const appMode: AppMode = "dev";
     const id = "1";
