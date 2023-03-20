@@ -444,10 +444,14 @@ export const localAssetsImagesHandler: IImageHandler = {
   priority: 2,
 
   match(url: string) {
-           // don't match values with a protocol
-    return !url.match(":") &&
-           // or original firebase storage path reference
-           !/^\/.+\/portals\/.+$/.test(url);
+           // don't match values with a protocol or port specified
+    return !/:/.test(url) &&
+           // or original firebase storage path references
+           !/^\/.+\/portals\/.+$/.test(url) &&
+           // make sure there's at least one slash
+           /\//.test(url) &&
+           // make sure value ends with a file extension
+           /\.[a-z0-9]+$/i.test(url);
   },
 
   async store(url: string) {
