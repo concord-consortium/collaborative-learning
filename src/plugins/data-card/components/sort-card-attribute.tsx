@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { gImageMap } from "../../../models/image-map";
+import { IAttribute } from "../../../models/data/attribute";
 
 interface IProps {
   caseId: string;
   model: ITileModel;
-  attr: any
+  attr: IAttribute;
 }
 
 const getTruncated = (val:string) => {

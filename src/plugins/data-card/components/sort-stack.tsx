@@ -11,7 +11,6 @@ interface IProps {
   model: ITileModel;
 }
 
-// TODO improve this to break on nearest word ending
 const getStackValueDisplay = (value: string) => {
   if(value === "") return "(no value)";
   if(gImageMap.isImageUrl(value)) return "(image)";
@@ -27,7 +26,7 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId }
   const stackClasses = classNames("stack-cards", inAttributeId);
 
   return (
-    <div className="stack cell" /*style={{ height: "290px"}}*/>
+    <div className="stack cell">
       <div className="stack-heading">
          {stackValueDisplay}: {caseIds.length} {units}
       </div>
