@@ -16,6 +16,5 @@ export const getUnitCodeFromUrl = (url: string) => {
 
 export const getCurriculumBranchFromUrl = (url: string) => {
   const urlPieces = url.match(/branch\/([^/]+)\/(.*)/);
-  const branch = urlPieces && urlPieces[1] ? urlPieces[1] : undefined;
-  return branch;
+  return urlPieces?.[1];
 };
