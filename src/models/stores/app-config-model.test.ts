@@ -39,16 +39,17 @@ describe("ConfigurationManager", () => {
     expect(appConfig.isFeatureSupported("baz")).toBe(true);
   });
 
-  // TODO: Rewrite these tests.
-  // it("can look up a unit by id", () => {
-  //   const appConfig = AppConfigModel.create({
-  //     config: unitConfigDefaults,
-  //     units: { example: { content: "curriculum/example-curriculum/example-curriculum.json" } },
-  //     defaultUnit: "example"
-  //   });
-  //   expect(appConfig.getUnit("foo")).toBeUndefined();
-  //   expect(appConfig.getUnitBasePath("foo")).toBe("");
-  //   expect(appConfig.getUnit("example")).toBeDefined();
-  //   expect(appConfig.getUnitBasePath("example")).toBe("curriculum/example-curriculum");
-  // });
+  it("can get URLs for remote curriculum content from a unit code", () => {
+    const appConfig = AppConfigModel.create({
+      curriculumBaseUrl: "https://curriculum.example.com/",
+      config: unitConfigDefaults
+    });
+    const exampleUnitCode = "example-unit-code";
+    const exampleUnit = {
+      "content": `https://curriculum.example.com/branch/main/${exampleUnitCode}/content.json`,
+      "guide": `https://curriculum.example.com/branch/main/${exampleUnitCode}/teacher-guide/content.json`
+    };
+    expect(appConfig.getUnit(exampleUnitCode)).toStrictEqual(exampleUnit);
+    expect(appConfig.getUnitBasePath(exampleUnitCode)).toBe(`https://curriculum.example.com/branch/main/${exampleUnitCode}`);
+  });
 });
