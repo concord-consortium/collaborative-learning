@@ -412,6 +412,54 @@ export const DocumentContentModel = types
       builder.pushLine("]", 2);
       builder.pushLine("}");
       return builder.build();
+    },
+    exportSectionsAsJson(options?: IDocumentExportOptions) {
+      const builder = new StringBuilder();
+      builder.pushLine("{");
+
+      const sharedModelsArray = Array.from(self.sharedModelMap.values());
+      if (sharedModelsArray.length > 0){
+        builder.pushLine(`"sharedModels":${stringify(sharedModelsArray)},`, 2);
+      }
+
+      builder.pushLine(`"tiles": [`, 2);
+
+      // identify rows with exportable tiles
+      const rowsToExport = self.rowOrder.map(rowId => {
+        const row = self.getRow(rowId);
+        return row && !row.isSectionHeader && !row.isEmpty && !self.isPlaceholderRow(row) ? row : undefined;
+      }).filter(row => !!row);
+
+      const exportRowCount = rowsToExport.length;
+      rowsToExport.forEach((row, rowIndex) => {
+        const isLastRow = rowIndex === exportRowCount - 1;
+        // export each exportable tile
+        const tileExports = row?.tiles.map((tileInfo, tileIndex) => {
+          const isLastTile = tileIndex === row.tiles.length - 1;
+          const showComma = row.tiles.length > 1 ? !isLastTile : !isLastRow;
+          const rowHeight = self.rowHeightToExport(row, tileInfo.tileId);
+          const rowHeightOption = rowHeight ? { rowHeight } : undefined;
+          return self.exportTileAsJson(tileInfo, { ...options, appendComma: showComma, ...rowHeightOption });
+        }).filter(json => !!json);
+        if (tileExports?.length) {
+          // multiple tiles in a row are exported in an array
+          if (tileExports.length > 1) {
+            builder.pushLine("[", 4);
+            tileExports.forEach(tileExport => {
+              tileExport && builder.pushBlock(tileExport, 6);
+            });
+            builder.pushLine(`]${comma(!isLastRow)}`, 4);
+          }
+          // single tile rows are exported directly
+          else if (tileExports[0]) {
+            builder.pushBlock(tileExports[0], 4);
+          }
+        }
+      });
+
+      builder.pushLine("]", 2);
+      builder.pushLine("}");
+      return builder.build();
     }
   }))
   .views(self => ({

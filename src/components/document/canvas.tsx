@@ -72,6 +72,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
 
     this.hotKeys.register({
       "cmd-shift-s": this.handleCopyDocumentJson,
+      "cmd-option-shift-s": this.handleExportSectionJson,
       "cmd-z": this.handleDocumentUndo,
       "cmd-shift-z": this.handleDocumentRedo
     });
@@ -153,17 +154,32 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     this.hotKeys.dispatch(e);
   };
+  
+  private getDocumentContent = () => {
+    const { content, document } = this.props;
+    return document?.content ?? content;
+  };
 
-  private handleCopyDocumentJson = () => {
-    const {content, document } = this.props;
+  private getTransformImageUrl = () => {
     const { appConfig, unit } = this.stores;
     const unitBasePath = appConfig.getUnitBasePath(unit.code);
-    const documentContent = document?.content ?? content;
-    const transformImageUrl = (url?: string, filename?: string) => {
+    return (url?: string, filename?: string) => {
       return transformCurriculumImageUrl(url, unitBasePath, filename);
     };
+  };
+
+  private handleCopyDocumentJson = () => {
+    const documentContent = this.getDocumentContent();
+    const transformImageUrl = this.getTransformImageUrl();
     const json = documentContent?.exportAsJson({ includeTileIds: true, transformImageUrl });
     json && navigator.clipboard.writeText(json);
+  };
+
+  private handleExportSectionJson = () => {
+    const documentContent = this.getDocumentContent();
+    const transformImageUrl = this.getTransformImageUrl();
+    const json = documentContent?.exportSectionsAsJson({ includeTileIds: true, transformImageUrl });
+    console.log(`section json`, json);
   };
 
   private handleDocumentUndo = () => {
