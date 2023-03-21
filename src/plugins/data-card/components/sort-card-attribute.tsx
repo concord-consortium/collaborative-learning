@@ -10,16 +10,6 @@ interface IProps {
   attr: IAttribute;
 }
 
-const getTruncated = (val:string) => {
-  if (!val) return;
-
-  const charTarget = 48;
-  if (val.length < charTarget + 1) return val;
-
-  const firstRelevantSpace = val.indexOf(" ", charTarget) + 1;
-  return val.slice(0, firstRelevantSpace) + "...";
-};
-
 export const SortCardAttribute: React.FC<IProps> = ({ model, caseId, attr }) => {
   const content = model.content as DataCardContentModelType;
   const attrName = content.dataSet.attrFromID(attr.id).name;
@@ -35,7 +25,7 @@ export const SortCardAttribute: React.FC<IProps> = ({ model, caseId, attr }) => 
     <div className="attribute-value-row">
       <div className="attribute">{attrName}</div>
       <div className="value">
-        { !isImage && getTruncated(value as string) }
+        { !isImage && value }
         { isImage && <img src={imageUrl} className="image-value" /> }
       </div>
     </div>

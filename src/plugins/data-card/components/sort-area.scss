@@ -6,7 +6,7 @@ $card-border: 1px solid $charcoal-light-1;
 $sort-view-column-width: $sort-view-card-width + 10px;
 $sort-view-font-size:10px;
 $cards-per-row: 3; // this may be dynamic in the future
-$sort-view-width: ($sort-view-card-width * $cards-per-row );
+$sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
 
 .data-card-tool.display-as-sorted {
   font-size: $sort-view-font-size;
@@ -16,11 +16,12 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row );
 
   .sorting-cards-data-area {
     width: $sort-view-width;
-    border: $card-border;
 
     .sort-area-grid {
       display: grid;
       grid-template-columns: $sort-view-card-width $sort-view-card-width $sort-view-card-width;
+      border-left: $card-border;
+      border-right: $card-border;
 
       .stack {
         width: $sort-view-card-width;
@@ -31,14 +32,16 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row );
           text-align: center;
           padding-top: $card-space-factor;
           padding-bottom: $card-space-factor;
+          border-top: $card-border;
+          height: 27px;
         }
       }
 
       .empty.cell {
         width: $sort-view-card-width;
         background-color: $workspace-teal-light-4;
-        height:26px;
-        border-bottom: $card-border;
+        height:27px;
+        border-top: $card-border;
       }
     }
 
@@ -99,15 +102,18 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row );
         border:0px;
         padding: 0px;
         margin-right:2px;
-        font-size: 10px;
+        font-size: 12px;
         text-align: left;
         transition: all .4s;
         color:$charcoal-dark-2;
         background-color: transparent;
         translate: 0px 1px;
+        height:13px;
+        width:13px;
       }
       &.expanded .expand-toggle {
         transform: rotate(90deg);
+        translate: -1px 3px;
       }
     }
   }

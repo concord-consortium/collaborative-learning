@@ -12,9 +12,9 @@ interface IProps {
 }
 
 const getStackValueDisplay = (value: string) => {
-  if(value === "") return "(no value)";
-  if(gImageMap.isImageUrl(value)) return "(image)";
-  if(value.length < 14) return value;
+  if (value === "") return "(no value)";
+  if (gImageMap.isImageUrl(value)) return "(image)";
+  if (value.length < 14) return value;
   return value.slice(0, 13) + '... ';
 };
 
@@ -28,7 +28,7 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId }
   return (
     <div className="stack cell">
       <div className="stack-heading">
-         {stackValueDisplay}: {caseIds.length} {units}
+        {stackValueDisplay}: {caseIds.length} {units}
       </div>
       <div className={stackClasses}>
         {
