@@ -45,5 +45,12 @@ class DataCardToolTile {
   getPreviousCardButton(workspaceClass){
     return cy.get(`${workspaceClass || ".primary-workspace"} .card-nav.previous`);
   }
+  getSortCardHeading(workspaceClass){
+    return cy.get(`${workspaceClass || ".primary-workspace"} .sortable .heading`);
+  }
+  getSortCardData(workspaceClass){
+    const selector = ".sortable.expanded .attribute-value-row";
+    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+  }
 }
 export default DataCardToolTile;

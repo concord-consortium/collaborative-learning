@@ -34,8 +34,13 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
   const toggleExpanded = () => setExpanded(!expanded);
   const cardClasses = classNames("sortable", "card", { collapsed: !expanded }, { expanded });
 
+  const loadAsSingle = () => {
+    content.setSelectedSortAttributeId("");
+    content.setCaseIndex(content.dataSet.caseIndexFromID(caseId));
+  };
+
   return (
-    <div className={cardClasses} id={caseId}>
+    <div className={cardClasses} id={caseId} onDoubleClick={loadAsSingle}>
       <div className="heading" style={{ backgroundColor: shadeStr }}>
         <div className="expand-toggle-area">
           <button className="expand-toggle" onClick={toggleExpanded}>▶</button>
