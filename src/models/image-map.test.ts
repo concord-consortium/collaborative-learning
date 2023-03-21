@@ -92,14 +92,14 @@ describe("ImageMap", () => {
     expect(sImageMap.isPlaceholder(kDataUri)).toBe(false);
   });
 
-  it("test localAssetsImagesHandler", () => {
+  it("test localAssetsImagesHandler", async () => {
     expectToMatch(localAssetsImagesHandler, [kLocalImageUrl]);
-    localAssetsImagesHandler.store(kLocalImageUrl)
+    await localAssetsImagesHandler.store(kLocalImageUrl)
             .then(storeResult => {
               expect(storeResult.contentUrl).toBe(kLocalImageUrl);
               expect(storeResult.displayUrl).toBe(`${kCurriculumBaseUrl}branch/main/${kLocalImageUrl}`);
             });
-    localAssetsImagesHandler.store("curriculum/stretching-and-shrinking/images/image.png")
+    await localAssetsImagesHandler.store("curriculum/stretching-and-shrinking/images/image.png")
              .then(storeResult => {
                expect(storeResult.displayUrl).toBe(`${kCurriculumBaseUrl}branch/main/sas/images/image.png`);
              });
