@@ -53,7 +53,7 @@ export const DataSet = types.model("DataSet", {
     self.attributes.forEach(attr => {
       attrIDMap[attr.id] = attr;
     });
-    console.log("dataset-ts  > get attrIDMap returns attrIdMap:", attrIDMap);
+    // console.log("dataset-ts  > get attrIDMap returns attrIdMap:", attrIDMap);
     return attrIDMap;
   },
   get attrNameMap() {
@@ -457,9 +457,9 @@ export const DataSet = types.model("DataSet", {
       },
 
       removeAttribute(attributeID: string) {
-        console.log("data-set.ts > removeAttribute with attributeId:", attributeID);
+        // console.log("data-set.ts > removeAttribute with attributeId:", attributeID);
         const attrIndex = attrIndexFromID(attributeID);
-        console.log("data-set.ts > removeAttribute > attrIndex:", attrIndex);
+        // console.log("data-set.ts > removeAttribute > attrIndex:", attrIndex);
 
 
         if (attrIndex != null) {

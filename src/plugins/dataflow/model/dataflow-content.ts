@@ -210,14 +210,16 @@ export const DataflowContentModel = TileContentModel
     },
     addNewCaseFromAttrKeys(atts: string[], beforeId?: string ){
       const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
+      console.log("dataflow-content.ts > addNewCaseFromAttrKeys > obj:", obj);
       if (beforeId){
         addCanonicalCasesToDataSet(self.dataSet, [obj], beforeId);
       } else {
         addCanonicalCasesToDataSet(self.dataSet, [obj]);
       }
     },
-    addNewAttr(nodeId: number, nodeName: string){ //if there is already an attribute with the same nodeId, do not write
-      console.log("addNewAttr with nodeId", nodeId, "nodeName:", nodeName);
+    //TO DO - clean up and use existing methods in views above or data-set.ts that simplify the code
+
+    addNewAttrFromNode(nodeId: number, nodeName: string){ //if already an attribute with the same nodeId,else write
       const dataSet = self.dataSet;
       const dataSetAttributes = dataSet.attributes;
       let foundFlag = false;
@@ -236,8 +238,8 @@ export const DataflowContentModel = TileContentModel
           name: `Dataflow-${nodeName}_${nodeId}`
         });
       }
-      console.log("dataSetAttributes:", dataSetAttributes);
     },
+
     removeAttributesInDatasetMissingInTile(attribute: string){
       const index = attribute.indexOf("*");
       const stringAfterIndex = attribute.substring(index + 1);
@@ -245,7 +247,6 @@ export const DataflowContentModel = TileContentModel
       const { nodes } = getSnapshot(self.program);
       const castedNodes = nodes as Record<string, any>;
       const castedNodesIdArr = Object.keys(castedNodes);
-
       for (let i = 0; i < castedNodesIdArr.length; i++){
         const idInTile = castedNodesIdArr[i];
         if (idInTile === stringAfterIndex) foundFlag = true;

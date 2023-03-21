@@ -151,25 +151,31 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     this.getContent().setProgramZoom(dx, dy, scale);
   };
 
-  // [RECORDING: this will be called when the recording is about to begin (1/2)]
+  // [RECORDING: this will be called when the recording is about to begin
   private pairNodesToAttributes = () => {
     console.log("-----Recording BEGIN-----------");
     const model = this.getContent();
 
     //#1 check nodes on tile against dataset attributes, if already there do nothing, otherwise write.
     model.program.nodes.forEach((n) => {
-      model.addNewAttr(n.id, n.name);
+      model.addNewAttrFromNode(n.id, n.name);
     });
 
     //#2 check dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
     const dataSet = model.dataSet;
     const dataSetAttributes = dataSet.attributes;
-
     dataSetAttributes.forEach((attribute, idx) => {
-      console.log("attribute in dataSet:", attribute);
       model.removeAttributesInDatasetMissingInTile(attribute.id);
     });
   };
+
+  private writeCase = () => {
+    const model = this.getContent();
+    model.addNewCaseFromAttrKeys(model.existingAttributes());
+    console.log("dataflow-tile.tsx > model.existingAttributes() ", model.existingAttributes());
+
+  };
+
 
   private handleChangeOfRecordingMode = () => {
     /* this should be enumerated somehow, but
@@ -180,7 +186,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const mode = this.state.programRecordingMode;
     if (mode === 0){
       this.pairNodesToAttributes();
+      //clear all the cases?
+      this.writeCase();
     }
+
     this.setState({
       programRecordingMode:  (mode + 1) % 3
     });
