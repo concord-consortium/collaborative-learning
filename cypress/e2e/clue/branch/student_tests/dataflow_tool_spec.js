@@ -162,7 +162,7 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify node inputs outputs", () => {
         dataflowToolTile.getNodeInput().should("exist");
-        dataflowToolTile.getNodeInput().should('have.length', 2)
+        dataflowToolTile.getNodeInput().should('have.length', 2);
         dataflowToolTile.getNodeOutput().should("exist");
       });
       it("can delete math node", () => {
@@ -197,7 +197,7 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify node inputs outputs", () => {
         dataflowToolTile.getNodeInput().should("exist");
-        dataflowToolTile.getNodeInput().should('have.length', 2)
+        dataflowToolTile.getNodeInput().should('have.length', 2);
         dataflowToolTile.getNodeOutput().should("exist");
       });
       it("can delete logic node", () => {
@@ -232,7 +232,7 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify node inputs outputs", () => {
         dataflowToolTile.getNodeInput().should("exist");
-        dataflowToolTile.getNodeInput().should('have.length', 1)
+        dataflowToolTile.getNodeInput().should('have.length', 1);
         dataflowToolTile.getNodeOutput().should("exist");
       });
       it("can delete transform node", () => {
@@ -295,7 +295,7 @@ context('Dataflow Tool Tile', function () {
 
         dataflowToolTile.getOutputNodeValueText().should("contain", "0% closed");
 
-        // verify light bulb 
+        // verify light bulb
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).first().click();
         dataflowToolTile.getLightBulbImage();
@@ -344,7 +344,7 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify node inputs outputs", () => {
         dataflowToolTile.getNodeInput().should("exist");
-        dataflowToolTile.getNodeInput().should('have.length', 1)
+        dataflowToolTile.getNodeInput().should('have.length', 1);
         dataflowToolTile.getNodeOutput().should("not.exist");
       });
       it("can delete live output node", () => {
@@ -379,7 +379,7 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify node inputs outputs", () => {
         dataflowToolTile.getNodeInput().should("exist");
-        dataflowToolTile.getNodeInput().should('have.length', 2)
+        dataflowToolTile.getNodeInput().should('have.length', 2);
         dataflowToolTile.getNodeOutput().should("exist");
       });
       it("can delete control node", () => {

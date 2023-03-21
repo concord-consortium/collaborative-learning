@@ -116,7 +116,7 @@ export const DataCardContentModel = TileContentModel
       });
       return attributesWithValues === 0;
     },
-    caseIdsWithAttributeValue(attrId: string, value: string){
+    caseIdsFromAttributeValue(attrId: string, value: string){
       const allCases = this.allCases();
       const foundCases: string[] = [];
       allCases.forEach((c) => c && c[attrId] === value && foundCases.push(c.__id__));

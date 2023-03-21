@@ -152,7 +152,7 @@ context('Table Tool Tile', function () {
     it('verify clear button functionality', function(){
       cy.get('.modal-button').contains('Clear').click();
       cy.get('#expression-input').should('not.contain', formula);
-    })
+    });
     it('verify cancel does not enter in a formula', function(){
       cy.get('#expression-input').click().type(formula );
       cy.get('.modal-button').contains('Cancel').click();
@@ -162,14 +162,14 @@ context('Table Tool Tile', function () {
         .siblings('.expression-cell.has-expression')
         .should('not.exist');
     });
-    it('verify selection of y2 axis and will enter a formula',function(){     
+    it('verify selection of y2 axis and will enter a formula',function(){
       cy.get(".primary-workspace").within((workspace) => {
         tableToolTile.getTableToolbarButton('set-expression').click();
       });
       cy.get('.modal-title').should('contain', "Set Expression");
       cy.get('.modal-content .prompt select').should('exist');
       cy.get('.modal-content .prompt select').select('y2');
-      cy.get('.modal-content .prompt').should('contain', "y2");
+      cy.get('.modal-content .prompt').should('contain', 'y2');
       cy.get('#expression-input').click().type(`${headerX}+2` + '{enter}');
     });
     it('verify value caluculated based on formula correctly', function () {
@@ -236,7 +236,7 @@ context('Table Tool Tile Undo Redo', function () {
       tableToolTile.getTableTile().should("exist");
       clueCanvas.getRedoTool().click();
       tableToolTile.getTableTile().should('not.exist');
-    });       
+    });
     it('will undo redo table field content', function () {
       clueCanvas.addTile('table');
       tableToolTile.getAddColumnButton().click();
@@ -252,6 +252,6 @@ context('Table Tool Tile Undo Redo', function () {
       cy.get('.primary-workspace').within(function () {
         tableToolTile.getColumnHeader().should('have.length', 3);
       });
-    }); 
+    });
   });
 });

@@ -32,5 +32,25 @@ class DataCardToolTile {
     const itemsSelector = ".sort-select-input > option";
     return cy.get(`${workspaceClass || ".primary-workspace"} ${itemsSelector}`);
   }
+  getAddCardButton(workspaceClass){
+    const selector = ".add-remove-card-buttons .add-card";
+    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+  }
+  getCardNofTotalListing(workspaceClass){
+    return cy.get(`${workspaceClass || ".primary-workspace"} .card-number-of-listing`);
+  }
+  getNextCardButton(workspaceClass){
+    return cy.get(`${workspaceClass || ".primary-workspace"} .card-nav.next`);
+  }
+  getPreviousCardButton(workspaceClass){
+    return cy.get(`${workspaceClass || ".primary-workspace"} .card-nav.previous`);
+  }
+  getSortCardHeading(workspaceClass){
+    return cy.get(`${workspaceClass || ".primary-workspace"} .sortable .heading`);
+  }
+  getSortCardData(workspaceClass){
+    const selector = ".sortable.expanded .attribute-value-row";
+    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+  }
 }
 export default DataCardToolTile;

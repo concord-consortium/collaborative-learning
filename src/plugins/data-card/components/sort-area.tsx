@@ -39,8 +39,8 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
             <SortStack
               key={i}
               model={model}
-              stackValue={v as any}
-              inAttributeId={ sortById }
+              stackValue={v as string}
+              inAttributeId={sortById}
             />
           );
         })
