@@ -217,6 +217,14 @@ export const DataflowContentModel = TileContentModel
         addCanonicalCasesToDataSet(self.dataSet, [obj]);
       }
     },
+    setAttrName(attrId: string, name: string){
+      self.dataSet.setAttributeName(attrId, name);
+     },
+    setAttrValue(caseId: string, attrId: string, val: string){
+       self.dataSet.setCanonicalCaseValues([
+         { __id__: caseId, [attrId]: val }
+       ]);
+     },
     //TO DO - clean up and use existing methods in views above or data-set.ts that simplify the code
 
     addNewAttrFromNode(nodeId: number, nodeName: string){ //if already an attribute with the same nodeId,else write

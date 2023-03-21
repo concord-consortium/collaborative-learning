@@ -529,7 +529,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     console.log("dataflow-program.tsx >createCaseForTick > with collectedTime:", collectedTime);
     // has access to stuff like addNewCaseFromAttrKeys
     // console.log("dataflow-program.tsx > createCaseForTick");
-    const newCaseId = collectedTime + "_" + this.props.tileId;
+    const newCaseId = collectedTime + "*" + this.props.tileId;
     console.log("dataflow-program.tsx >createCaseForTick > newCaseID:", newCaseId);
 
     return newCaseId; // or do we need to call on something in dataflow-content?
@@ -539,6 +539,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   // [RECORDING: within the tick, this will be called for each node in the program]
   private recordPoint = (nodeId: number, val: number, caseId: string) => {
     console.log("dataflow-program.tsx > recordPoint");
+    this.props.tileModel.setAttrValue(caseId, /*willneedattributeid */ val)
   };
 
 
@@ -599,6 +600,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.nodes.forEach((n: Node) => {
       if (this.props.tileId === testTileId && recordingToCaseId ){
         console.log("n.data.nodeValue", n.data.nodeValue);
+        // figure out the attribute id that we are targeting when we are on this node
+        // then pass that instead of node.id, and adjust recordPoint (or calc in record point)
         this.recordPoint(n.id, n.data.nodeValue as number, recordingToCaseId as string)
         // console.log(`${node.name} #${idx+1} id:${node.id} val: ${node.data.nodeValue}`);
       }
