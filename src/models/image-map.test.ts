@@ -94,11 +94,15 @@ describe("ImageMap", () => {
 
   it("test localAssetsImagesHandler", () => {
     expectToMatch(localAssetsImagesHandler, [kLocalImageUrl]);
-    return localAssetsImagesHandler.store(kLocalImageUrl)
+    localAssetsImagesHandler.store(kLocalImageUrl)
             .then(storeResult => {
               expect(storeResult.contentUrl).toBe(kLocalImageUrl);
               expect(storeResult.displayUrl).toBe(`${kCurriculumBaseUrl}branch/main/${kLocalImageUrl}`);
             });
+    localAssetsImagesHandler.store("curriculum/stretching-and-shrinking/images/image.png")
+             .then(storeResult => {
+               expect(storeResult.displayUrl).toBe(`${kCurriculumBaseUrl}branch/main/sas/images/image.png`);
+             });
   });
 
   it("test externalUrlImagesHandler", () => {
@@ -304,6 +308,18 @@ describe("ImageMap", () => {
       expect(handler && handler.name).toBe(expected && expected.name);
       return (handler && handler.name) === (expected && expected.name);
     }));
+  });
+
+  describe("isImageUrl", () => {
+    it("returns true for valid image URLs and paths", () => {
+      expect(kInputs.every((url) => {
+        expect(sImageMap.isImageUrl(url)).toBe(true);
+      }));
+    });
+    it("returns false for an invalid image URL or path", () => {
+      const invalidImageUrl = "hi";
+      expect(sImageMap.isImageUrl(invalidImageUrl)).toBe(false);
+    });
   });
 
   describe("getImage", () => {
@@ -573,6 +589,9 @@ describe("ImageMap", () => {
   });
 
   describe("getImageEntry", () => {
+    it("returns undefined when no URL is passed to it", () => {
+      expect(sImageMap.getImageEntry("")).toBeUndefined();
+    });
     it("limits the number times it retries entries that have failed", () => {
       const mockHandler: any = {
         async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
