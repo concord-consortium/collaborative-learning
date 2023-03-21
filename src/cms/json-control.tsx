@@ -24,22 +24,17 @@ export class JsonControl extends React.Component<IProps, IState>  {
 
   constructor(props: IProps) {
     super(props);
-    console.log("init value:", props.value);
     const valueString = props.value?.toJS ? JSON.stringify(props.value.toJS(), null, 2) : "";
     this.state = {valueString};
   }
 
   handleChange(e: any) {
-    console.log("Handling change: ", e.target.value);
     this.setState({valueString: e.target.value});
     try {
       const json = JSON.parse(e.target.value);
-      console.log(`parsed json`, json);
       this.props.onChange(json);
-      console.log(`SUCCESS`, json);
     } catch (error) {
-      console.log(`illegal json`, e.target.value);
-      // this.props.onChange(this.state.valueString);
+      // console.log(`illegal json`, e.target.value);
     }
   }
 
@@ -47,9 +42,7 @@ export class JsonControl extends React.Component<IProps, IState>  {
     // `label` is not documented in the Decap docs and it is also not
     // listed in the CmsWidgetControlProps provided by Decap
     // but it does seem to provide the label of the field
-    const {
-      label,
-    } = this.props;
+    const { label } = this.props;
 
     return (
       <div className="json-control">

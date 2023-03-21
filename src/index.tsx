@@ -16,7 +16,6 @@ import { DEBUG_STORES } from "./lib/debug";
 import { Logger } from "./lib/logger";
 import { setPageTitle } from "./lib/misc";
 import { gImageMap } from "./models/image-map";
-import { initCMS } from "./cms/init-cms";
 import PackageJson from "../package.json";
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
@@ -45,46 +44,42 @@ const initializeApp = async () => {
     (window as any).stores = stores;
   }
 
-  if ((window as any).admin) {
-    initCMS();
-  } else {
-    if (appMode === "qa" && urlParams.qaClear === "all") {
-      ReactDOM.render(
-        <QAClear />,
-        document.getElementById("app")
-      );
-      return;
-    }
-
-    await setUnitAndProblem(stores, unitId, problemOrdinal);
-
-    gImageMap.initialize(stores.db);
-
-    Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
-
-    if (kEnableLivelinessChecking) {
-      setLivelinessChecking("error");
-    }
-
-    setPageTitle(stores);
-    stores.ui.setShowDemoCreator(!!showDemoCreator);
-    stores.supports.createFromUnit({
-      unit: stores.unit,
-      investigation: stores.investigation,
-      problem: stores.problem,
-      documents: stores.documents,
-      db: stores.db
-    });
-
+  if (appMode === "qa" && urlParams.qaClear === "all") {
     ReactDOM.render(
-      <AppConfigContext.Provider value={{ appIcons }} >
-        <Provider stores={stores}>
-          <AppComponent />
-        </Provider>
-      </AppConfigContext.Provider>,
+      <QAClear />,
       document.getElementById("app")
     );
+    return;
   }
+
+  await setUnitAndProblem(stores, unitId, problemOrdinal);
+
+  gImageMap.initialize(stores.db);
+
+  Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
+
+  if (kEnableLivelinessChecking) {
+    setLivelinessChecking("error");
+  }
+
+  setPageTitle(stores);
+  stores.ui.setShowDemoCreator(!!showDemoCreator);
+  stores.supports.createFromUnit({
+    unit: stores.unit,
+    investigation: stores.investigation,
+    problem: stores.problem,
+    documents: stores.documents,
+    db: stores.db
+  });
+
+  ReactDOM.render(
+    <AppConfigContext.Provider value={{ appIcons }} >
+      <Provider stores={stores}>
+        <AppComponent />
+      </Provider>
+    </AppConfigContext.Provider>,
+    document.getElementById("app")
+  );
 };
 
 initializeApp();
