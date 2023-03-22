@@ -50,7 +50,7 @@ function keyCodeToString(keyCode: number) {
   }
 }
 
-export type HotKeyHandler = (e: React.KeyboardEvent, keys: string) => boolean | void;
+export type HotKeyHandler = (e: React.KeyboardEvent, keys: string) => boolean | void | Promise<void>;
 
 export interface IHotKeyMap {
   [keys: string]: HotKeyHandler;

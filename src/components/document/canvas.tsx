@@ -175,11 +175,32 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     json && navigator.clipboard.writeText(json);
   };
 
-  private handleExportSectionJson = () => {
+  // Saves the currect document as separate section files on the user's hard drive.
+  // Saved in [user selected folder]/CLUE Sections/[section type]/content.json
+  private handleExportSectionJson = async () => {
     const documentContent = this.getDocumentContent();
     const transformImageUrl = this.getTransformImageUrl();
-    const json = documentContent?.exportSectionsAsJson({ includeTileIds: true, transformImageUrl });
-    console.log(`section json`, json);
+    const sections = documentContent?.exportSectionsAsJson({ includeTileIds: true, transformImageUrl });
+
+    if (sections) {
+      try {
+        const rootHandle = await (window as any).showDirectoryPicker({ mode: "readwrite", startIn: "desktop" });
+        if (rootHandle) {
+          const sectionDir = await rootHandle.getDirectoryHandle("CLUE Sections", { create: true });
+          Object.keys(sections).forEach(async type => {
+            const json = sections[type];
+            const typeDir = await sectionDir.getDirectoryHandle(type, { create: true });
+            const typeFile = await typeDir.getFileHandle("content.json", { create: true });
+            const writableStream = await typeFile.createWritable();
+            await writableStream.write(json);
+            await writableStream.close();
+          });
+        }
+        console.log(`Sections saved to CLUE Sections in selected folder.`);
+      } catch (error) {
+        console.log(`Unable to export section json`, error);
+      }
+    }
   };
 
   private handleDocumentUndo = () => {
