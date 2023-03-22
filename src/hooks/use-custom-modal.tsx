@@ -33,11 +33,10 @@ interface IProps<IContentProps> {
   // defined left-to-right, e.g. Extra Button, Cancel, OK
   buttons: IModalButton[];
   onClose?: () => void;
-  setDialogPresent?: (present: boolean) => void;
 }
 export const useCustomModal = <IContentProps,>({
   className, Icon, title, Content, contentProps, focusElement, canCancel, buttons,
-  onClose, setDialogPresent
+  onClose
 }: IProps<IContentProps>, dependencies?: any[]) => {
 
   const [contentElt, setContentElt] = useState<HTMLDivElement>();
@@ -69,7 +68,6 @@ export const useCustomModal = <IContentProps,>({
 
   const handleAfterOpen = ({overlayEl, contentEl}: { overlayEl: Element, contentEl: HTMLDivElement }) => {
     setContentElt(contentEl);
-    setDialogPresent?.(true);
 
     const element = focusElement && contentEl.querySelector(focusElement) as HTMLElement || contentEl;
     element && setTimeout(() => {
@@ -80,8 +78,7 @@ export const useCustomModal = <IContentProps,>({
 
   const handleClose = useCallback(() => {
     hideModalRef.current?.();
-    setDialogPresent?.(false);
-  }, [setDialogPresent]);
+  }, []);
   handleCloseRef.current = handleClose;
 
   const [showModal, hideModal] = useModal(() => {

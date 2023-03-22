@@ -10,9 +10,8 @@ import './variable-dialog.scss';
 interface IProps {
   variable?: VariableType;
   onClose?: () => void;
-  setDialogPresent?: (present: boolean) => void;
 }
-export const useEditVariableDialog = ({ variable, onClose, setDialogPresent }: IProps) => {
+export const useEditVariableDialog = ({ variable, onClose }: IProps) => {
   // We use a clone of the variable for the edit dialog so the user can modify its properties, but those
   // changes won't be saved unless the Save button is pushed. We also cache variableClone with useMemo to
   // minimize the number of times it's recreated. These two things cause two side effects:
@@ -47,8 +46,7 @@ export const useEditVariableDialog = ({ variable, onClose, setDialogPresent }: I
         onClick: handleClick
       }
     ],
-    onClose,
-    setDialogPresent
+    onClose
   }, [variable, variableClone, count]);
 
   const _showModal = () => {

@@ -13,10 +13,9 @@ interface IUseNewVariableDialog {
   descriptionPrefill?: string;
   noUndo?: boolean;
   onClose?: () => void;
-  setDialogPresent?: (present: boolean) => void;
 }
 export const useNewVariableDialog = ({
-  addVariable, sharedModel, descriptionPrefill, noUndo = false, onClose, setDialogPresent
+  addVariable, sharedModel, descriptionPrefill, noUndo = false, onClose
 }: IUseNewVariableDialog) => {
   const [newVariable, setNewVariable] = useState(Variable.create({description: descriptionPrefill || undefined}));
 
@@ -43,7 +42,6 @@ export const useNewVariableDialog = ({
       }
     ],
     onClose,
-    setDialogPresent
   }, [addVariable, newVariable]);
 
   // Wrap useCustomModal's show so we can prefill with variable description
