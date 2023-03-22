@@ -175,7 +175,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
     json && navigator.clipboard.writeText(json);
   };
 
-  // Saves the currect document as separate section files on the user's hard drive.
+  // Saves the current document as separate section files on the user's hard drive.
   // Saved in [user selected folder]/CLUE Sections/[section type]/content.json
   private handleExportSectionJson = async () => {
     const documentContent = this.getDocumentContent();
@@ -196,9 +196,8 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
             await writableStream.close();
           });
         }
-        console.log(`Sections saved to CLUE Sections in selected folder.`);
       } catch (error) {
-        console.log(`Unable to export section json`, error);
+        console.error(`Unable to export section json`, error);
       }
     }
   };
