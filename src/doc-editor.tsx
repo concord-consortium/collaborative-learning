@@ -20,6 +20,8 @@ import { setLivelinessChecking } from "mobx-state-tree";
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
 
+(window as any).DISABLE_FIREBASE_SYNC = true;
+
 import "./index.scss";
 import { EditableDocumentContent } from "./components/document/editable-document-content";
 import { createDocumentModel, DocumentModel } from "./models/document/document";

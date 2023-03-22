@@ -29,12 +29,13 @@ export function useDocumentSyncToFirebase(
   const { key, type, uid, contentStatus } = document;
   const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
 
-  // FIXME: when running in doc-editor this warning is printed constantly
+  // TODO: when running in doc-editor this warning was printed constantly
   // Ideally we'd figure out how to separate the syncing from the document stuff so the doc-editor can use
   // documents without also bringing in the syncing.
-  // If that isn't easy, then we could add a new context or a new property on an existing context which would
-  // disable this message and also disable all of the `useSyncMstNodeToFirebase` calls.
-  // !readOnly && (user.id !== uid) && console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
+  // The current hacky approach is to use a window level property to disable the firebase syncing
+  const disableFirebaseSync = (window as any).DISABLE_FIREBASE_SYNC;
+  !disableFirebaseSync && !readOnly &&
+  (user.id !== uid) && console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
   useEffect(() => {
     // To handle errors this should be disabled if the document status is error
@@ -65,7 +66,7 @@ export function useDocumentSyncToFirebase(
   // sync visibility (public/private) for problem documents
   useSyncMstPropToFirebase<typeof document.visibility>({
     firebase, model: document, prop: "visibility", path: typedMetadata,
-    enabled: !readOnly && (type === ProblemDocument) && contentStatus === ContentStatus.Valid,
+    enabled: !disableFirebaseSync && !readOnly && (type === ProblemDocument) && contentStatus === ContentStatus.Valid,
     options: {
       onSuccess: (data, visibility) => {
         debugLog(`DEBUG: Updated document visibility for ${type} document ${key}:`, visibility);
@@ -79,7 +80,7 @@ export function useDocumentSyncToFirebase(
   // sync title for personal and learning log documents
   useSyncMstPropToFirebase<typeof document.title>({
     firebase, model: document, prop: "title", path: typedMetadata,
-    enabled: !readOnly && [PersonalDocument, LearningLogDocument].includes(type) &&
+    enabled: !disableFirebaseSync && !readOnly && [PersonalDocument, LearningLogDocument].includes(type) &&
       contentStatus === ContentStatus.Valid,
     options: {
       onSuccess: (data, title) => {
@@ -94,7 +95,7 @@ export function useDocumentSyncToFirebase(
   // sync properties for problem, personal, and learning log documents
   useSyncMstNodeToFirebase({
     firebase, model: document.properties, path: `${metadata}/properties`,
-    enabled: !readOnly && [ProblemDocument, PersonalDocument, LearningLogDocument].includes(type) &&
+    enabled: !disableFirebaseSync && !readOnly && [ProblemDocument, PersonalDocument, LearningLogDocument].includes(type) &&
       contentStatus === ContentStatus.Valid,
     options: {
       onSuccess: (data, properties) => {
@@ -110,7 +111,7 @@ export function useDocumentSyncToFirebase(
     // sync properties for published documents
     useSyncMstNodeToFirebase({
       firebase, model: document.properties, path: `${metadata}/properties`,
-      enabled: readOnly && (user.id === uid) && document.supportContentType !== "multiclass" &&
+      enabled: !disableFirebaseSync && readOnly && (user.id === uid) && document.supportContentType !== "multiclass" &&
         [ProblemPublication, PersonalPublication, LearningLogPublication, SupportPublication ].includes(type) &&
         contentStatus === ContentStatus.Valid,
       options: {
@@ -127,7 +128,7 @@ export function useDocumentSyncToFirebase(
   // sync content for editable document types
   useSyncMstNodeToFirebase({
     firebase, model: document.content, path: contentPath,
-    enabled: !readOnly && !!document.content && !isPublishedType(type) &&
+    enabled: !disableFirebaseSync && !readOnly && !!document.content && !isPublishedType(type) &&
       contentStatus === ContentStatus.Valid,
     transform: snapshot => ({ changeCount: document.incChangeCount(), content: JSON.stringify(snapshot) }),
     options: {
