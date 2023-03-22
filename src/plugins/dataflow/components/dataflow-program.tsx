@@ -134,7 +134,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           numNodes={numNodes}
         />
         <div className={toolbarEditorContainerClass}>
-          <pre style={{ color: "red", padding: "20px", backgroundColor: "blue"}}>{ this.props.programRecordState }</pre>
           { showProgramToolbar && <DataflowProgramToolbar
             onNodeCreateClick={this.addNode}
             onClearClick={this.clearProgram}
@@ -289,7 +288,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       });
 
       this.programEditor.on("nodecreated", node => {
-        console.log("dataflow-program > nodecreated");
         this.processAndSave();
         this.moveNodeToFront(node, true);
         node.meta.inTileWithId = this.props.tileId;

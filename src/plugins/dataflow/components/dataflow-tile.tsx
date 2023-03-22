@@ -164,6 +164,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     //#2 check dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
     const dataSet = model.dataSet;
     const dataSetAttributes = dataSet.attributes;
+
+    console.log("📁dataflow-tile > pairNodesToAttributes > dataSetAttributes: ", dataSetAttributes);
     dataSetAttributes.forEach((attribute, idx) => {
       model.removeAttributesInDatasetMissingInTile(attribute.id);
     });
