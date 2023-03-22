@@ -330,7 +330,7 @@ export const DocumentContentModel = types
       const tile = self.getTile(tileInfo.tileId);
       const json = tile?.exportJson(tileOptions);
       if (json) {
-        return json.concat(comma(!!options?.appendComma));
+        return json;
       }
     }
   }))
