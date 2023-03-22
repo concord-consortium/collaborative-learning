@@ -29,7 +29,8 @@ export const exportTableContentAsJson = (
 
   const builder = new StringBuilder();
   builder.pushLine("{");
-  builder.pushLine(`"type": "Table"`, 2);
+  const typeComma = dataSet.name ? "," : "";
+  builder.pushLine(`"type": "Table"${typeComma}`, 2);
   dataSet.name && builder.pushLine(`"name": "${dataSet.name}"`, 2);
   builder.pushLine("}");
   return builder.build();
