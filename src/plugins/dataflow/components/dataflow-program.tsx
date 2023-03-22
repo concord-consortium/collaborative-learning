@@ -538,7 +538,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   // [RECORDING: within the tick, this will be called for each node in the program]
   private recordPoint = (nodeId: number, val: number, caseId: string) => {
-    console.log("dataflow-program.tsx > recordPoint");
+
+    console.log("HELLO dataflow-program.tsx > recordPoint");
     this.props.tileModel.setAttrValue(caseId, /*willneedattributeid */ val)
   };
 
@@ -596,6 +597,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     //[RECORDING] if we are recording and there is not already
     // point data for this case id and node, write the data to the dataset
+
+    const model = this.props.tileModel
+    model.addNewCaseFromAttrKeys(model.existingAttributes());
 
     this.programEditor.nodes.forEach((n: Node) => {
       if (this.props.tileId === testTileId && recordingToCaseId ){
