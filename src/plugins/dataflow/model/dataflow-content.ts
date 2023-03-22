@@ -234,9 +234,14 @@ export const DataflowContentModel = TileContentModel
       self.dataSet.setAttributeName(attrId, name);
      },
     setAttrValue(caseId: string, attrId: string, val: string){
+      console.log("dataflow-content.ts > setAttrValue >\n \t with inputs: caseId:", caseId, "attrId:",
+      attrId, "val:", val);
+
        self.dataSet.setCanonicalCaseValues([
          { __id__: caseId, [attrId]: val }
        ]);
+
+       console.log("dataflow-content.ts > setAttrValue > self.dataSet:", self.dataSet);
      },
     //TO DO - clean up and use existing methods in views above or data-set.ts that simplify the code
 
