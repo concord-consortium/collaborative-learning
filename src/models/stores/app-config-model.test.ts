@@ -1,99 +1,33 @@
 import { SectionModel } from "../curriculum/section";
 import { AppConfigModel } from "./app-config-model";
-import { UnitConfiguration } from "./unit-configuration";
+import { unitConfigDefaults, unitConfigOverrides } from "../../test-fixtures/sample-unit-configurations";
 
 describe("ConfigurationManager", () => {
 
-  const defaults: UnitConfiguration = {
-    appName: "Test",
-    pageTitle: "Test Page Title",
-    demoProblemTitle: "Demo Problem Title",
-    defaultProblemOrdinal: "1.1",
-    autoAssignStudentsToIndividualGroups: false,
-    defaultDocumentType: "personal",
-    defaultDocumentTitle: "Untitled Document",
-    docTimeStampPropertyName: "timeStamp",
-    docDisplayIdPropertyName: "displayId",
-    defaultDocumentTemplate: undefined,
-    planningTemplate: undefined,
-    defaultLearningLogTitle: "Default LL Title",
-    initialLearningLogTitle: "Initial LL Title",
-    defaultLearningLogDocument: false,
-    autoSectionProblemDocuments: false,
-    documentLabelProperties: [] as any,
-    documentLabels: {},
-    disablePublish: [] as any,
-    copyPreferOriginTitle: true,
-    disableTileDrags: true,
-    showClassSwitcher: false,
-    supportStackedTwoUpView: false,
-    showPublishedDocsInPrimaryWorkspace: false,
-    comparisonPlaceholderContent: "foo",
-    navTabs: {} as any,
-    disabledFeatures: ["foo"],
-    toolbar: [] as any,
-    placeholderText: "Placeholder Text",
-    stamps: [] as any,
-    settings: {}
-  } as UnitConfiguration;
-
-  const overrides: UnitConfiguration = {
-    appName: "New Test",
-    pageTitle: "New Test Page Title",
-    demoProblemTitle: "New Demo Problem Title",
-    defaultProblemOrdinal: "9.9",
-    autoAssignStudentsToIndividualGroups: true,
-    defaultDocumentType: "problem",
-    defaultDocumentTitle: "Untitled Problem",
-    docTimeStampPropertyName: "dateStamp",
-    docDisplayIdPropertyName: "displayIdName",
-    defaultDocumentTemplate: undefined,
-    planningTemplate: undefined,
-    defaultLearningLogTitle: "New Default LL Title",
-    initialLearningLogTitle: "New Initial LL Title",
-    defaultLearningLogDocument: true,
-    autoSectionProblemDocuments: true,
-    documentLabelProperties: [] as any,
-    documentLabels: {},
-    disablePublish: [] as any,
-    copyPreferOriginTitle: false,
-    disableTileDrags: false,
-    showClassSwitcher: true,
-    supportStackedTwoUpView: true,
-    showPublishedDocsInPrimaryWorkspace: true,
-    comparisonPlaceholderContent: "bar",
-    navTabs: {} as any,
-    disabledFeatures: ["bar"],
-    toolbar: [] as any,
-    placeholderText: "New Placeholder Text",
-    stamps: [] as any,
-    settings: {}
-  } as UnitConfiguration;
-
   const excludeProps = ["defaultDocumentTemplate", "navTabs", "planningTemplate"];
-  type SimpleProps = Exclude<keyof typeof defaults, typeof excludeProps[number]>;
-  const keys = Object.keys(defaults).filter(prop => !excludeProps.includes(prop)) as SimpleProps[];
+  type SimpleProps = Exclude<keyof typeof unitConfigDefaults, typeof excludeProps[number]>;
+  const keys = Object.keys(unitConfigDefaults).filter(prop => !excludeProps.includes(prop)) as SimpleProps[];
 
-  it("can be constructed with just defaults and return those defaults", () => {
-    const appConfig = AppConfigModel.create({ config: defaults });
+  it("can be constructed with just unitConfigDefaults and return those unitConfigDefaults", () => {
+    const appConfig = AppConfigModel.create({ curriculumBaseUrl: "https://curriculum.example.com", config: unitConfigDefaults });
     keys.forEach((prop: SimpleProps) => {
-      expect(appConfig[prop]).toEqual(defaults[prop]);
+      expect(appConfig[prop]).toEqual(unitConfigDefaults[prop]);
     });
     expect(appConfig.defaultDocumentTemplate).toBeUndefined();
     expect(appConfig.getSetting("foo")).toBeUndefined();
     expect(appConfig.getSetting("foo", "bar")).toBeUndefined();
   });
 
-  it("can be constructed with defaults and overrides and return the overrides", () => {
-    const appConfig = AppConfigModel.create({ config: defaults });
-    appConfig.setConfigs([overrides]);
+  it("can be constructed with unitConfigDefaults and unitConfigOverrides and return the unitConfigOverrides", () => {
+    const appConfig = AppConfigModel.create({ curriculumBaseUrl: "https://curriculum.example.com", config: unitConfigDefaults });
+    appConfig.setConfigs([unitConfigOverrides]);
     keys.forEach((prop: SimpleProps) => {
       if (prop === "disabledFeatures") {
         // disabledFeatures are merged
         expect(appConfig[prop]).toEqual(["foo", "bar"]);
       }
       else {
-        expect(appConfig[prop]).toEqual(overrides[prop]);
+        expect(appConfig[prop]).toEqual(unitConfigOverrides[prop]);
       }
     });
     expect(appConfig.defaultDocumentTemplate).toBeUndefined();
@@ -105,15 +39,17 @@ describe("ConfigurationManager", () => {
     expect(appConfig.isFeatureSupported("baz")).toBe(true);
   });
 
-  it("can look up a unit by id", () => {
+  it("can get URLs for remote curriculum content from a unit code", () => {
     const appConfig = AppConfigModel.create({
-      config: defaults,
-      units: { example: { content: "curriculum/example-curriculum/example-curriculum.json" } },
-      defaultUnit: "example"
+      curriculumBaseUrl: "https://curriculum.example.com/",
+      config: unitConfigDefaults
     });
-    expect(appConfig.getUnit("foo")).toBeUndefined();
-    expect(appConfig.getUnitBasePath("foo")).toBe("");
-    expect(appConfig.getUnit("example")).toBeDefined();
-    expect(appConfig.getUnitBasePath("example")).toBe("curriculum/example-curriculum");
+    const exampleUnitCode = "example-unit-code";
+    const exampleUnit = {
+      "content": `https://curriculum.example.com/branch/main/${exampleUnitCode}/content.json`,
+      "guide": `https://curriculum.example.com/branch/main/${exampleUnitCode}/teacher-guide/content.json`
+    };
+    expect(appConfig.getUnit(exampleUnitCode)).toStrictEqual(exampleUnit);
+    expect(appConfig.getUnitBasePath(exampleUnitCode)).toBe(`https://curriculum.example.com/branch/main/${exampleUnitCode}`);
   });
 });

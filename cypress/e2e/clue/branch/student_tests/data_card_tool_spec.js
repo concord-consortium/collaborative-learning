@@ -35,7 +35,7 @@ context('Data Card Tool Tile', function () {
       dc.getSortSelect().select("None");
       dc.getSingleCardView().should('exist');
     });
-    it("attribute names stays in sync on menu and card", () => {
+    it("has attribute names that stay in sync on sort menu and card", () => {
       dc.getAttrName().dblclick().type("Attr1 Renamed{enter}");
       dc.getAttrName().contains("Attr1 Renamed");
       dc.getSortSelect().select("Attr1 Renamed");
@@ -43,6 +43,18 @@ context('Data Card Tool Tile', function () {
       dc.getSortSelect().select("None");
       dc.getSingleCardView().should('exist');
     });
+    it("can add new cards", () =>{
+      dc.getSortSelect().select("None");
+      dc.getAddCardButton().click();
+      dc.getCardNofTotalListing().contains("Card 2 of 2");
+      dc.getAddCardButton().click();
+      dc.getCardNofTotalListing().contains("Card 3 of 3");
+    });
+    it("can advance from card to card in both directions", () =>{
+      dc.getPreviousCardButton().click();
+      dc.getCardNofTotalListing().contains("Card 2 of 3");
+      dc.getNextCardButton().click();
+      dc.getCardNofTotalListing().contains("Card 3 of 3");
+    });
   });
 });
-

@@ -21,7 +21,11 @@ describe("stores object", () => {
   });
 
   it("supports passing in stores for testing", () => {
-    const appConfig = AppConfigModel.create({ defaultUnit: "foo", config: {} as any });
+    const appConfig = AppConfigModel.create({
+      defaultUnit: "foo",
+      config: {} as any,
+      "curriculumBaseUrl": "https://curriculum.example.com",
+    });
     const appMode: AppMode = "dev";
     const id = "1";
     const name = "Colonel Mustard";

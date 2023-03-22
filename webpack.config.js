@@ -33,11 +33,14 @@ module.exports = (env, argv) => {
     context: __dirname, // to automatically find tsconfig.json
     // https://survivejs.com/webpack/building/source-maps/
     devtool: devMode ? 'eval-cheap-module-source-map' : 'source-map',
-    entry: ['whatwg-fetch', './src/index.tsx'],
+    entry: {
+      index: './src/index.tsx',
+      admin: './src/admin.tsx'
+    },
     mode: devMode ? 'development' : 'production',
     output: {
       clean: true,
-      filename: 'index.[contenthash].js',
+      filename: '[name].[contenthash].js',
       chunkFilename: '[name].[contenthash:8].js'
     },
     performance: { hints: false },
@@ -231,11 +234,20 @@ module.exports = (env, argv) => {
       }),
       new HtmlWebpackPlugin({
         ...baseHtmlPluginConfig,
+        chunks: ['index'],
         filename: 'index.html',
         publicPath: '.',
       }),
+      new HtmlWebpackPlugin({
+        ...baseHtmlPluginConfig,
+        chunks: ['admin'],
+        filename: 'admin.html',
+        publicPath: '.',
+        template: 'src/admin.html'
+      }),
       ...(DEPLOY_PATH ? [new HtmlWebpackPlugin({
         ...baseHtmlPluginConfig,
+        chunks: ['index'],
         filename: 'index-top.html',
         publicPath: DEPLOY_PATH,
       })] : []),
