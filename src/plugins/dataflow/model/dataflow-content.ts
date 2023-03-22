@@ -1,4 +1,5 @@
-import { types, Instance, applySnapshot, getSnapshot, addDisposer, getType } from "mobx-state-tree";
+import { types, Instance, applySnapshot, getSnapshot, addDisposer, getType,
+         destroy, isValidReference } from "mobx-state-tree";
 import { reaction } from "mobx";
 import { cloneDeep} from "lodash";
 import stringify from "json-stringify-pretty-compact";
@@ -14,6 +15,7 @@ import { addAttributeToDataSet, addCasesToDataSet, addCanonicalCasesToDataSet, D
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { uniqueId, uniqueTitle } from "../../../utilities/js-utils";
 import { withoutUndo } from "../../../../src/models/history/without-undo";
+import { SharedModelType } from "src/models/shared/shared-model";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -211,6 +213,36 @@ export const DataflowContentModel = TileContentModel
       withoutUndo();
       self.caseIndex = caseIndex;
     },
+    //copy over data-card-contentChanges
+    // updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
+    //   console.log("📁dataflow-content.ts > 🔨 updateAfterSharedModelChanges >  🍔sharedModel");
+    //   console.log("📁dataflow-content.ts > 🔨 updateAfterSharedModelChanges > \n🍳self.caseIndex:",
+    //   self.caseIndex, "\nself.totalCases:", self.totalCases);
+
+
+    //   if (self.caseIndex >= self.totalCases) {
+    //     this.setCaseIndex(self.totalCases - 1);
+    //   }
+    // },
+
+    updateAfterSharedModelChanges(){
+      console.log("📁dataflow-content.ts > 🔨 updateAfterSharedModelChanges");
+      console.log("self.program.nodes", self.program.nodes);
+      // check nodes on tile, if there are
+
+      self.program.nodes.forEach(node =>{
+        console.log("node Name", node.name);
+
+        destroy(node);//temporary;
+      });
+        if(!self.sharedModel){
+          console.warn("updateAfterSharedModelChanges was called with no shared model present");
+        }
+
+
+    },
+
+
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;
     },
@@ -245,6 +277,7 @@ export const DataflowContentModel = TileContentModel
      },
     //TO DO - clean up and use existing methods in views above or data-set.ts that simplify the code
 
+
     addNewAttrFromNode(nodeId: number, nodeName: string){ //if already an attribute with the same nodeId,else write
       const dataSet = self.dataSet;
       const dataSetAttributes = dataSet.attributes;
@@ -265,6 +298,11 @@ export const DataflowContentModel = TileContentModel
         });
       }
     },
+
+    //if attribute on a dataset is missing from the tile, remove it.
+
+    // use the updateAfterSharedModelChanges action
+    //to clean up anything in your tile that was pointing at that atribute.
 
     removeAttributesInDatasetMissingInTile(attribute: string){
       const index = attribute.indexOf("*");

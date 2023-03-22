@@ -93,7 +93,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
 
   //*** BUTTON CLICK *****************************************************************
   function addNewCase(){
-    console.log("--------Button Click ---------")
+    console.log("--------Button Click ---------");
     // console.log("data-card-tile.tsx > addNewCase");
     // console.log("data-card-tile.tsx > content.existingAttributes() ", content.existingAttributes());
 

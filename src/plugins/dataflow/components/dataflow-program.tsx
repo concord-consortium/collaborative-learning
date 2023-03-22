@@ -555,9 +555,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   //********************
 
   private tick = () => {
-    console.log("dataflow-program.tsx > tick > this.props", this.props);
+    // console.log("dataflow-program.tsx > tick  > this.props", this.props);
 
-    console.log("dataflow-program.tsx > tick > this.props.tileId", this.props.tileId);
+    // console.log("dataflow-program.tsx > tick > this.props.tileId", this.props.tileId);
 
     //Attributes of the dataset have been setup before the tick runs in dataflow-tile.tsx > handleChangeOfRecordingMode
     const testTileId =  "JsJ2cZ8Rpr9SQCcG";
@@ -607,7 +607,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       console.log("------finished recording forEach------------");
 
       //update case Index
-      this.props.tileModel.setCaseIndex(this.props.tileModel.totalCases - 1);
+      // this.props.tileModel.setCaseIndex(this.props.tileModel.totalCases - 1);
 
     }
 

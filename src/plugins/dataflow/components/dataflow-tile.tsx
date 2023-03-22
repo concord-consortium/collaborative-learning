@@ -161,7 +161,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       model.addNewAttrFromNode(n.id, n.name);
     });
 
-    //#2 check dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
+    //#2 check dataset attributes against nodes on tile, if an attribute is not on the tile - remove it from the dataset
+
     const dataSet = model.dataSet;
     const dataSetAttributes = dataSet.attributes;
 
@@ -169,6 +170,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     dataSetAttributes.forEach((attribute, idx) => {
       model.removeAttributesInDatasetMissingInTile(attribute.id);
     });
+    //per Scott
+    //if an attribute on a dataset is deleted you should use this
+    //method to clean up anything in your tile that was pointing at that attribute.
+
+    //or if you want your tile to automatically add a reference to a new attribute in the dataset
+    //then this would be the place to put that code.
 
     console.log("dataflow-tile.tsx > pairNodesToAttributes is finished");
   };
