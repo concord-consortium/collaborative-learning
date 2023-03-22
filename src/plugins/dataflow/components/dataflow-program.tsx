@@ -525,62 +525,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   // [RECORDING: this will be called at the start of each tick]
-  private createCaseForTick = (collectedTime: number) => {
-    console.log("dataflow-program.tsx >createCaseForTick > with collectedTime:", collectedTime);
-    // has access to stuff like addNewCaseFromAttrKeys
-    // console.log("dataflow-program.tsx > createCaseForTick");
+  private createCaseIdForTick = (collectedTime: number) => {
     const newCaseId = collectedTime + "*" + this.props.tileId;
-    console.log("dataflow-program.tsx >createCaseForTick > newCaseID:", newCaseId);
 
     return newCaseId; // or do we need to call on something in dataflow-content?
     // for each attribute, recordPoint(node)
   };
 
-  // [RECORDING: within the tick, this will be called for each node in the program]
-  private recordPoint = (nodeId: number, val: number, caseId: string) => {
-
-    console.log("HELLO dataflow-program.tsx > recordPoint");
-    // I THINK THIS WILL WORK ONCE WE HAVE CORRECT ATTRIBUTE ID BELOW
-    this.props.tileModel.setAttrValue(caseId, /*willneedattributeid */ val)
-  };
-
-
-  //**** TO DO  ****************
-
-  //when we run a new recording session the dataset should reflect whats currently on the tile
-  //are we creating a new dataset or are we  overwriting the existing one?
-
-  //kirk - delete the cases, keep the attributes, when you add new cases reuse existing attributes
-
-  //edge case - lets say insertion order is math, timer, math, names -> name 1, timer 2, math 3.
-  //if student deletes math 3 the puts it back.
-  //possible solution -disable or freeze/lock the tiles
-
-  //problem - scope the recording to its tile,
-  // TO DO - make a  programId for each dataflow tile to make it unique
-  //solution - hit record - sending the programId for the dataflow tile
-
-  //when we hit record-
-  // #1 - we need to compare the old dataset to what our new one
-  //(instead of overwriting it and creating a new data set) this is because we need to keep the unique Id
-  //create any new attributes, remove any attributes that are not on the tile anymore.
-
-  // #2 create any new attri all the attributes based on all the nodes within the tile in focus
-  // #2.5 look at addNewAttr (in data-card-content.ts)
-  // joe thinks - name will "Sensor 1"
-                // - id - concatenation of uniqueId() + _nodeId
-  // #3 for each tick, create case (like addNewCaseFromAttrKeys in data-card-content.ts)
-  // where each attribute gets the value of the node value in that tick.
-  //********************
 
   private tick = () => {
     console.log("dataflow-program.tsx > tick > this.props.tileId", this.props.tileId);
-    const testTileId =  "lMEuVmwbcAjtndPb";
+    const testTileId =  "fEUOuXi40DzSiQpB";
     const isRecording = this.props.programRecordState === 1;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
-    const recordingToCaseId = isRecording ? this.createCaseForTick(now) : null;
+    const recordingToCaseId = isRecording ? this.createCaseIdForTick(now) : null;
 
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
       Generator: this.updateGeneratorNode,
@@ -599,16 +559,18 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     //[RECORDING] if we are recording and there is not already
     // point data for this case id and node, write the data to the dataset
 
-    const model = this.props.tileModel
+    const model = this.props.tileModel;
     model.addNewCaseFromAttrKeys(model.existingAttributes());
 
-    this.programEditor.nodes.forEach((n: Node) => {
-      if (this.props.tileId === testTileId && recordingToCaseId ){
-        console.log("n.data.nodeValue", n.data.nodeValue);
-        // figure out the attribute id that we are targeting when we are on this node
-        // then pass that instead of node.id, and adjust recordPoint (or calc in record point)
-        this.recordPoint(n.id, n.data.nodeValue as number, recordingToCaseId as string)
-        // console.log(`${node.name} #${idx+1} id:${node.id} val: ${node.data.nodeValue}`);
+    const existingAttributes = this.props.tileModel.existingAttributes();
+    this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes);
+
+    this.programEditor.nodes.forEach((n: Node, idx) => {
+      if (this.props.tileId === testTileId && recordingToCaseId && isRecording){
+        // console.log("*****", this.props.tileModel.existingAttributesWithNames());
+        // console.log("*****", n.id);
+        const attributeIdArr = this.props.tileModel.existingAttributesWithNames();
+        this.props.tileModel.setAttrValue(recordingToCaseId, attributeIdArr[idx].attrId, n.data.nodeValue);
       }
       const nodeProcess = nodeProcessMap[n.name];
       if (nodeProcess) {
@@ -629,6 +591,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         await this.programEngine.process(this.programEditor.toJSON());
       })();
     }
+    // console.log("model after every tick:", model);
+    console.log("data set after every tick is ", model.dataSet);
+
   };
 
   private passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo){

@@ -13,6 +13,7 @@ import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../
 import { addAttributeToDataSet, addCasesToDataSet, addCanonicalCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { uniqueId, uniqueTitle } from "../../../utilities/js-utils";
+import { SharedModelType } from "src/models/shared/shared-model";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -210,7 +211,7 @@ export const DataflowContentModel = TileContentModel
     },
     addNewCaseFromAttrKeys(atts: string[], beforeId?: string ){
       const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
-      console.log("dataflow-content.ts > addNewCaseFromAttrKeys > obj:", obj);
+      // console.log("dataflow-content.ts > addNewCaseFromAttrKeys > obj:", obj);
       if (beforeId){
         addCanonicalCasesToDataSet(self.dataSet, [obj], beforeId);
       } else {
@@ -224,6 +225,9 @@ export const DataflowContentModel = TileContentModel
        self.dataSet.setCanonicalCaseValues([
          { __id__: caseId, [attrId]: val }
        ]);
+     },
+     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
+      // console.log("do nothing");
      },
     //TO DO - clean up and use existing methods in views above or data-set.ts that simplify the code
 
