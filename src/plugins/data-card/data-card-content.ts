@@ -190,6 +190,7 @@ export const DataCardContentModel = TileContentModel
     },
     setCaseIndex(caseIndex: number) {
       // current case is serialized, but navigation is not undoable
+      console.log("data-card-content.ts > setCaseIndex with caseIndex:", caseIndex);
       withoutUndo();
       self.caseIndex = caseIndex;
     },
@@ -197,6 +198,7 @@ export const DataCardContentModel = TileContentModel
      self.dataSet.setAttributeName(attrId, name);
     },
     setAttValue(caseId: string, attrId: string, val: string){
+      console.log("data-card-content.ts > \n\t with caseId:", caseId, "attrId:", attrId, "val:", val);
       self.dataSet.setCanonicalCaseValues([
         { __id__: caseId, [attrId]: val }
       ]);

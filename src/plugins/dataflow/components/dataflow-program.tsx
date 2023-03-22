@@ -525,23 +525,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   // [RECORDING: this will be called at the start of each tick]
-  private createCaseForTick = (collectedTime: number) => {
-    console.log("dataflow-program.tsx >createCaseForTick > with collectedTime:", collectedTime);
-    // has access to stuff like addNewCaseFromAttrKeys
-    // console.log("dataflow-program.tsx > createCaseForTick");
-    const newCaseId = collectedTime + "*" + this.props.tileId;
-    console.log("dataflow-program.tsx >createCaseForTick > newCaseID:", newCaseId);
-
-    return newCaseId; // or do we need to call on something in dataflow-content?
-    // for each attribute, recordPoint(node)
+  private createCaseIdForTick = (collectedTime: number) => {
+    return collectedTime + "*" + this.props.tileId;
   };
-
-  // [RECORDING: within the tick, this will be called for each node in the program]
-  private recordPoint = (nodeId: number, val: number, caseId: string) => {
-    console.log("dataflow-program.tsx > recordPoint");
-    this.props.tileModel.setAttrValue(caseId, /*willneedattributeid */ val)
-  };
-
 
   //**** TO DO  ****************
 
@@ -572,13 +558,17 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   //********************
 
   private tick = () => {
+    console.log("dataflow-program.tsx > tick > this.props", this.props);
+
     console.log("dataflow-program.tsx > tick > this.props.tileId", this.props.tileId);
-    const testTileId =  "lMEuVmwbcAjtndPb";
+
+    //Attributes of the dataset have been setup before the tick runs in dataflow-tile.tsx > handleChangeOfRecordingMode
+    const testTileId =  "JsJ2cZ8Rpr9SQCcG";
     const isRecording = this.props.programRecordState === 1;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
-    const recordingToCaseId = isRecording ? this.createCaseForTick(now) : null;
+    const recordingToCaseId = isRecording ? this.createCaseIdForTick(now) : null;
 
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
       Generator: this.updateGeneratorNode,
@@ -594,27 +584,34 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     let processNeeded = false;
 
-    //[RECORDING] if we are recording and there is not already
-    // point data for this case id and node, write the data to the dataset
+    if (this.props.tileId === testTileId && recordingToCaseId ){
+      //prepare 1 case per tick
+      const existingAttributes = this.props.tileModel.existingAttributes();
+      this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes);
 
-    this.programEditor.nodes.forEach((n: Node) => {
-      if (this.props.tileId === testTileId && recordingToCaseId ){
-        console.log("n.data.nodeValue", n.data.nodeValue);
-        // figure out the attribute id that we are targeting when we are on this node
-        // then pass that instead of node.id, and adjust recordPoint (or calc in record point)
-        this.recordPoint(n.id, n.data.nodeValue as number, recordingToCaseId as string)
-        // console.log(`${node.name} #${idx+1} id:${node.id} val: ${node.data.nodeValue}`);
-      }
-      const nodeProcess = nodeProcessMap[n.name];
-      if (nodeProcess) {
-        processNeeded = true;
-        nodeProcess(n);
-      }
-      // TODO: We probably need a better way to determine if recentValues should be updated
-      if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
-        this.updateNodeRecentValues(n);
-      }
-    });
+      this.programEditor.nodes.forEach((n: Node) => {
+        this.props.tileModel.setAttrValue(recordingToCaseId, n.id, n.data.nodeValue);
+
+        // ^ this calls on data-set.ts > setCanonicalCaseValues which given an attribute id, inserts a value into a case
+        // this writes each tick measurement of the node into a single case
+        const nodeProcess = nodeProcessMap[n.name];
+        if (nodeProcess) {
+          processNeeded = true;
+          nodeProcess(n);
+        }
+        // TODO: We probably need a better way to determine if recentValues should be updated
+        if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
+          this.updateNodeRecentValues(n);
+        }
+      });
+
+      console.log("------finished recording forEach------------");
+
+      //update case Index
+      this.props.tileModel.setCaseIndex(this.props.tileModel.totalCases - 1);
+
+    }
+
     if (processNeeded) {
         // if we've updated values on 1 or more nodes (such as a generator),
         // we need to abort any current processing and reprocess all

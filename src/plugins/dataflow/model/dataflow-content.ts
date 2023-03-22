@@ -13,6 +13,7 @@ import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../
 import { addAttributeToDataSet, addCasesToDataSet, addCanonicalCasesToDataSet, DataSet } from "../../../models/data/data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { uniqueId, uniqueTitle } from "../../../utilities/js-utils";
+import { withoutUndo } from "../../../../src/models/history/without-undo";
 
 export const kDataflowTileType = "Dataflow";
 
@@ -48,6 +49,7 @@ export const DataflowContentModel = TileContentModel
     programDataRate: DEFAULT_DATA_RATE,
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
     programRecordState: 0,
+    caseIndex: 0,
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
@@ -84,7 +86,8 @@ export const DataflowContentModel = TileContentModel
   .views(self => ({ //added
     get dataSet(){
       return self.sharedModel?.dataSet || self.emptyDataSet;
-    }
+    },
+
   }))
   .views(self => ({
     get title() {
@@ -121,6 +124,9 @@ export const DataflowContentModel = TileContentModel
       return self.dataSet.attributes.map((a) => {
         return a.id;
       });
+    },
+    get totalCases(){
+      return self.dataSet.cases.length;
     },
 
   }))
@@ -191,7 +197,6 @@ export const DataflowContentModel = TileContentModel
       },
       {name: "sharedModelSetup", fireImmediately: true}));
     },
-
     setProgram(program: any) {
       if (program) {
         applySnapshot(self.program, cloneDeep(program));
@@ -199,6 +204,12 @@ export const DataflowContentModel = TileContentModel
     },
     setTitle(title: string) {
       setTileTitleFromContent(self, title);
+    },
+    setCaseIndex(caseIndex: number) {
+      // current case is serialized, but navigation is not undoable
+      console.log("data-card-content.ts > setCaseIndex with caseIndex:", caseIndex);
+      withoutUndo();
+      self.caseIndex = caseIndex;
     },
     setProgramDataRate(dataRate: number) {
       self.programDataRate = dataRate;
@@ -209,6 +220,8 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.scale = scale;
     },
     addNewCaseFromAttrKeys(atts: string[], beforeId?: string ){
+      console.log("dataflow-content.ts > addNewCaseFromAttrKeys with atts:", atts);
+
       const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
       console.log("dataflow-content.ts > addNewCaseFromAttrKeys > obj:", obj);
       if (beforeId){

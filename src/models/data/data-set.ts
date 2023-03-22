@@ -513,6 +513,7 @@ export const DataSet = types.model("DataSet", {
       },
 
       setCanonicalCaseValues(cases: ICase[]) {
+        console.log("setCanonicalCaseValues: with cases:", cases);
         cases.forEach((caseValues) => {
           setCanonicalCaseValues(caseValues);
         });
@@ -574,6 +575,7 @@ export interface IDataSetCreation {
 export type IDataSetSnapshot = SnapshotOut<typeof DataSet>;
 
 export function addAttributeToDataSet(dataset: IDataSet, snapshot: IAttributeCreation, beforeID?: string) {
+  // console.log("data-set.ts > addAttributeToDataSet > snapshot:", snapshot);
   if (!snapshot.id) {
     snapshot.id = uniqueId();
   }
@@ -581,6 +583,8 @@ export function addAttributeToDataSet(dataset: IDataSet, snapshot: IAttributeCre
 }
 
 export function addCasesToDataSet(dataset: IDataSet, cases: ICaseCreation[], beforeID?: string | string[]) {
+  // console.log("data-set.ts > addCasesToDataSet > cases:", cases);
+
   const newCases = cloneDeep(cases) as ICase[];
   newCases.forEach((aCase) => {
     if (!aCase.__id__) {
@@ -592,12 +596,17 @@ export function addCasesToDataSet(dataset: IDataSet, cases: ICaseCreation[], bef
 
 // canonical cases are keyed by attribute ID rather than attribute name
 export function addCanonicalCasesToDataSet(dataset: IDataSet, cases: ICaseCreation[], beforeID?: string | string[]) {
+  console.log("data-set-.ts > addCanonicalCasestoDataSet > params: \n dataset:", dataset, "cases:", cases);
+  console.log("data-set.ts > lets see if we can extract the value...", dataset.getValueAtIndex(0,"YFLFBZruYJowrQLJ"));
   const newCases = cloneDeep(cases) as ICase[];
+  console.log("data-set-.ts > addCanonicalCasestoDataSet > newCases:", newCases);
+
   newCases.forEach((aCase) => {
     if (!aCase.__id__) {
       aCase.__id__ = newCaseId();
     }
   });
+  console.log("data-set-.ts > addCanonicalCasestoDataSet > action > addCanonicalCasesWithIds (newCases): ", newCases);
   dataset.addCanonicalCasesWithIDs(newCases, beforeID);
 }
 

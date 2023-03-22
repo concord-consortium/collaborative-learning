@@ -167,6 +167,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     dataSetAttributes.forEach((attribute, idx) => {
       model.removeAttributesInDatasetMissingInTile(attribute.id);
     });
+
+    console.log("dataflow-tile.tsx > pairNodesToAttributes is finished");
   };
 
   private writeCase = () => {
@@ -184,10 +186,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       2 - stopped, ready to clear
     */
     const mode = this.state.programRecordingMode;
+
+    //set up attributes first, writing of cases to dataset happens in dataflow-program.tsx > tick function
     if (mode === 0){
       this.pairNodesToAttributes();
-      //clear all the cases?
-      this.writeCase();
     }
 
     this.setState({
