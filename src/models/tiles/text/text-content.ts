@@ -6,7 +6,7 @@ import { ITileExportOptions } from "../tile-content-info";
 import { TileContentModel } from "../tile-content";
 import { SharedModelType } from "../../shared/shared-model";
 import { getAllTextPluginInfos } from "./text-plugin-info";
-import { escapeBackslashes, escapeDoubleQuotes } from "../../../utilities/string-utils";
+import { escapeBackslashes, escapeDoubleQuotes, removeNewlines } from "../../../utilities/string-utils";
 
 export const kTextTileType = "Text";
 
@@ -81,7 +81,8 @@ export const TextContentModel = TileContentModel
       const html = value ? slateToHtml(value) : "";
       // We need to escape both double quotes and backslashes, otherwise the curriculum json will break.
       const exportHtml = html.split("\n")
-        .map((line, i, arr) => `    "${escapeDoubleQuotes(escapeBackslashes(line))}"${i < arr.length - 1 ? "," : ""}`);
+        .map((line, i, arr) =>
+          `    "${removeNewlines(escapeDoubleQuotes(escapeBackslashes(line)))}"${i < arr.length - 1 ? "," : ""}`);
       return [
         `{`,
         `  "type": "Text",`,
