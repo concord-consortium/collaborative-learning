@@ -36,7 +36,6 @@ import { SerialDevice } from "../../../models/stores/serial";
 import { dataflowLogEvent } from "../dataflow-logger";
 
 import "./dataflow-program.sass";
-import { DataCardContentModelType } from "src/plugins/data-card/data-card-content";
 
 interface NodeNameValuePair {
   name: string;
@@ -590,6 +589,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes);
 
       this.programEditor.nodes.forEach((n: Node) => {
+        console.log(`${n.name} id:${n.id} val: ${n.data.nodeValue}`);
+
         this.props.tileModel.setAttrValue(recordingToCaseId, n.id, n.data.nodeValue);
 
         // ^ this calls on data-set.ts > setCanonicalCaseValues which given an attribute id, inserts a value into a case

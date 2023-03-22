@@ -175,7 +175,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const model = this.getContent();
     model.addNewCaseFromAttrKeys(model.existingAttributes());
     console.log("dataflow-tile.tsx > model.existingAttributes() ", model.existingAttributes());
-
   };
 
 
@@ -189,6 +188,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
     //set up attributes first, writing of cases to dataset happens in dataflow-program.tsx > tick function
     if (mode === 0){
+      console.log("cleared ready to record!");
       this.pairNodesToAttributes();
     }
 
