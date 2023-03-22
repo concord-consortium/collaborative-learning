@@ -28,7 +28,13 @@ export function useDocumentSyncToFirebase(
                   user: UserModelType, firebase: Firebase, document: DocumentModelType, readOnly = false) {
   const { key, type, uid, contentStatus } = document;
   const { content: contentPath, metadata, typedMetadata } = firebase.getUserDocumentPaths(user, type, key, uid);
-  !readOnly && (user.id !== uid) && console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
+
+  // FIXME: when running in doc-editor this warning is printed constantly
+  // Ideally we'd figure out how to separate the syncing from the document stuff so the doc-editor can use
+  // documents without also bringing in the syncing.
+  // If that isn't easy, then we could add a new context or a new property on an existing context which would
+  // disable this message and also disable all of the `useSyncMstNodeToFirebase` calls.
+  // !readOnly && (user.id !== uid) && console.warn("useDocumentSyncToFirebase monitoring another user's document?!?");
 
   useEffect(() => {
     // To handle errors this should be disabled if the document status is error
@@ -53,7 +59,7 @@ export function useDocumentSyncToFirebase(
     // useDocumentSyncToFirebase is called with readOnly documents too
     (window as any).currentDocument = document;
   }
-  
+
 
 
   // sync visibility (public/private) for problem documents

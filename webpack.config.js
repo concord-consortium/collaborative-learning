@@ -35,7 +35,8 @@ module.exports = (env, argv) => {
     devtool: devMode ? 'eval-cheap-module-source-map' : 'source-map',
     entry: {
       index: './src/index.tsx',
-      admin: './src/admin.tsx'
+      admin: './src/admin.tsx',
+      'doc-editor': './src/doc-editor.tsx'
     },
     mode: devMode ? 'development' : 'production',
     output: {
@@ -209,6 +210,9 @@ module.exports = (env, argv) => {
             test: /[\\/]node_modules[\\/]/,
             minChunks: 1,
             reuseExistingChunk: true,
+            // TODO: need to improve the file naming here so the
+            // "main" is acutally the name of the entry point and if the chunk is
+            // used by multiple entry points it is called common
             filename: 'vendor-main.[chunkhash:8].js',
           },
         }
@@ -251,6 +255,12 @@ module.exports = (env, argv) => {
         filename: 'index-top.html',
         publicPath: DEPLOY_PATH,
       })] : []),
+      new HtmlWebpackPlugin({
+        ...baseHtmlPluginConfig,
+        chunks: ['doc-editor'],
+        filename: 'doc-editor.html',
+        publicPath: '.',
+      }),
       new CopyWebpackPlugin({
         patterns: [
           {from: 'src/public'}
