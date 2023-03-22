@@ -540,6 +540,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private recordPoint = (nodeId: number, val: number, caseId: string) => {
 
     console.log("HELLO dataflow-program.tsx > recordPoint");
+    // I THINK THIS WILL WORK ONCE WE HAVE CORRECT ATTRIBUTE ID BELOW
     this.props.tileModel.setAttrValue(caseId, /*willneedattributeid */ val)
   };
 
