@@ -169,12 +169,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     });
   };
 
-  private createNewEmptyCase = () => {
-    const model = this.getContent();
-    model.addNewCaseFromAttrKeys(model.existingAttributes());
-    //console.log("dataflow-tile.tsx > model.existingAttributes() ", model.existingAttributes());
-
-  };
 
 
   private handleChangeOfRecordingMode = () => {

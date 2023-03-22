@@ -526,21 +526,19 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   // [RECORDING: this will be called at the start of each tick]
   private createCaseIdForTick = (collectedTime: number) => {
-    const newCaseId = collectedTime + "*" + this.props.tileId;
-
-    return newCaseId; // or do we need to call on something in dataflow-content?
+    return collectedTime + "*" + this.props.tileId;
+    // or do we need to call on something in dataflow-content?
     // for each attribute, recordPoint(node)
   };
 
-
   private tick = () => {
-    console.log("dataflow-program.tsx > tick > this.props.tileId", this.props.tileId);
-    const testTileId =  "fEUOuXi40DzSiQpB";
+    console.log("----------------- tick----------", this.props.tileId);
+    const testTileId =  "2K-O3VT-IJn5-0Dm";
     const isRecording = this.props.programRecordState === 1;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
-    const recordingToCaseId = isRecording ? this.createCaseIdForTick(now) : null;
+    const caseId = isRecording ? this.createCaseIdForTick(now) : null;
 
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
       Generator: this.updateGeneratorNode,
@@ -563,14 +561,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     model.addNewCaseFromAttrKeys(model.existingAttributes());
 
     const existingAttributes = this.props.tileModel.existingAttributes();
-    this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes);
+    this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes, caseId, );
 
     this.programEditor.nodes.forEach((n: Node, idx) => {
-      if (this.props.tileId === testTileId && recordingToCaseId && isRecording){
+      // console.log("for each idx:", idx)
+      if (this.props.tileId === testTileId && isRecording){
+
         // console.log("*****", this.props.tileModel.existingAttributesWithNames());
         // console.log("*****", n.id);
         const attributeIdArr = this.props.tileModel.existingAttributesWithNames();
-        this.props.tileModel.setAttrValue(recordingToCaseId, attributeIdArr[idx].attrId, n.data.nodeValue);
+        this.props.tileModel.setAttrValue(caseId, attributeIdArr[idx].attrId, n.data.nodeValue);
       }
       const nodeProcess = nodeProcessMap[n.name];
       if (nodeProcess) {

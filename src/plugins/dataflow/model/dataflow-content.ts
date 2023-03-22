@@ -10,7 +10,7 @@ import { TileContentModel } from "../../../models/tiles/tile-content";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { getTileModel, setTileTitleFromContent } from "../../../models/tiles/tile-model";
 import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
-import { addAttributeToDataSet, addCasesToDataSet, addCanonicalCasesToDataSet, DataSet } from "../../../models/data/data-set";
+import { addAttributeToDataSet, addCasesToDataSet, addCanonicalCasesToDataSet, DataSet, ICase } from "../../../models/data/data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
 import { uniqueId, uniqueTitle } from "../../../utilities/js-utils";
 import { SharedModelType } from "src/models/shared/shared-model";
@@ -209,26 +209,41 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.dy = dy;
       self.programZoom.scale = scale;
     },
-    addNewCaseFromAttrKeys(atts: string[], beforeId?: string ){
-      const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
-      // console.log("dataflow-content.ts > addNewCaseFromAttrKeys > obj:", obj);
-      if (beforeId){
-        addCanonicalCasesToDataSet(self.dataSet, [obj], beforeId);
-      } else {
-        addCanonicalCasesToDataSet(self.dataSet, [obj]);
+    addNewCaseFromAttrKeys(atts: string[], caseId: string, beforeId?: string){
+      console.log("invoked BUT no", atts, caseId, beforeId);
+
+      if (caseId){
+        console.log("writing Case");
+        const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
+        console.log("dataflow-content.ts > addNewCaseFromAttrKeys > obj:", obj);
+
+        //start
+        //similar functionality to addCanonicalCasesToDataSet but we can't modify
+        //because there'd need to be condition to write it with our unique Case ID
+        const newCases = cloneDeep([obj]) as ICase[];
+        newCases.forEach((aCase) => {
+          if (!aCase.__id__) {
+            aCase.__id__ = caseId;
+          }
+        });
+        self.dataSet.addCanonicalCasesWithIDs(newCases);
+        console.log("finished writing Case");
+        //end
+
       }
+
     },
     setAttrName(attrId: string, name: string){
       self.dataSet.setAttributeName(attrId, name);
-     },
+    },
     setAttrValue(caseId: string, attrId: string, val: string){
        self.dataSet.setCanonicalCaseValues([
          { __id__: caseId, [attrId]: val }
        ]);
-     },
-     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
+    },
+    updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       // console.log("do nothing");
-     },
+    },
     //TO DO - clean up and use existing methods in views above or data-set.ts that simplify the code
 
     addNewAttrFromNode(nodeId: number, nodeName: string){ //if already an attribute with the same nodeId,else write

@@ -593,12 +593,14 @@ export function addCasesToDataSet(dataset: IDataSet, cases: ICaseCreation[], bef
 // canonical cases are keyed by attribute ID rather than attribute name
 export function addCanonicalCasesToDataSet(dataset: IDataSet, cases: ICaseCreation[], beforeID?: string | string[]) {
   const newCases = cloneDeep(cases) as ICase[];
+
   newCases.forEach((aCase) => {
     if (!aCase.__id__) {
       aCase.__id__ = newCaseId();
     }
   });
   dataset.addCanonicalCasesWithIDs(newCases, beforeID);
+
 }
 
 export function getDataSetBounds(dataSet: IDataSet) {
