@@ -87,6 +87,13 @@ If the existing entry is
 - `Error` do nothing, no point in replacing an error with an error.
 - `undefined` do nothing, no point is adding a error entry where one didn't exist before.
 
+### Notes on conversion of local/relative asset URLs
+Authored curriculum content was originally located at src/public/curriculum in the CLUE code repository. In 2023, the curriculum content was split off into its own repository named clue-curriculum. That separate repository includes many asset files used within the authored content. CLUE now imports most authored content from this external repository, the deployed version of which is currently located at https://models-resources.concord.org/clue-curriculum.
+
+ImageMap's `localAssetsImagesHandler` converts relative asset URLs that appear in content (e.g., sas/images/image.png) to full URLs (e.g. https://models-resources.concord.org/clue-curriculum/branch/main/sas/images/image.png) so the images properly load within CLUE.
+
+`localAssetsImageHandler` also includes special handling of legacy relative URLs. When authored content was part of the CLUE code repository, relative asset URLs in the authored content started with `curriculum/[full-name-of-unit]`. For example:`curriculum/stretching-and-shrinking/images/1.png`. `localAssetsImageHandler` makes sure to convert any URLs that start with `curriculum/` so they resolve to full URLs that will work within CLUE. That means removing `curriculum/`, converting the `[full-name-of-unit]` value to its corresponding unit code value (e.g. `stretching-and-shrinking` becomes `sas`), and then prepending the deployed curriculum repository's base URL plus branch (`branch/main/` is the default).
+
 ## Placeholder image
 
 Currently there is a special placeholder image used by the Image Map and some of the lower level image loading code. The Image Map will set it as the displayUrl if there is an error during storing. If there is an error during computing the dimensions the displayUrl should be a URL that should represent the actual image content.
