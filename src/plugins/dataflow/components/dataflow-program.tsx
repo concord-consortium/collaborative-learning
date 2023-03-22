@@ -585,7 +585,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       //prepare 1 case per tick
       const existingAttributes = this.props.tileModel.existingAttributes();
       this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes);
-
       this.programEditor.nodes.forEach((n: Node) => {
         console.log(`${n.name} id:${n.id} val: ${n.data.nodeValue}`);
 
@@ -603,12 +602,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           this.updateNodeRecentValues(n);
         }
       });
-
       console.log("------finished recording forEach------------");
-
       //update case Index
       // this.props.tileModel.setCaseIndex(this.props.tileModel.totalCases - 1);
-
     }
 
     if (processNeeded) {

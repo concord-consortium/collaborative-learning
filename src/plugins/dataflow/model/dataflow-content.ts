@@ -51,7 +51,7 @@ export const DataflowContentModel = TileContentModel
     programDataRate: DEFAULT_DATA_RATE,
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
     programRecordState: 0,
-    caseIndex: 0,
+    // caseIndex: 0,
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
@@ -207,12 +207,12 @@ export const DataflowContentModel = TileContentModel
     setTitle(title: string) {
       setTileTitleFromContent(self, title);
     },
-    setCaseIndex(caseIndex: number) {
-      // current case is serialized, but navigation is not undoable
-      console.log("data-card-content.ts > setCaseIndex with caseIndex:", caseIndex);
-      withoutUndo();
-      self.caseIndex = caseIndex;
-    },
+    // setCaseIndex(caseIndex: number) {
+    //   // current case is serialized, but navigation is not undoable
+    //   console.log("data-card-content.ts > setCaseIndex with caseIndex:", caseIndex);
+    //   withoutUndo();
+    //   self.caseIndex = caseIndex;
+    // },
     //copy over data-card-contentChanges
     // updateAfterSharedModelChanges(sharedModel?: SharedModelType) {
     //   console.log("📁dataflow-content.ts > 🔨 updateAfterSharedModelChanges >  🍔sharedModel");
@@ -233,7 +233,7 @@ export const DataflowContentModel = TileContentModel
       self.program.nodes.forEach(node =>{
         console.log("node Name", node.name);
 
-        destroy(node);//temporary;
+        // destroy(node);//temporary;
       });
         if(!self.sharedModel){
           console.warn("updateAfterSharedModelChanges was called with no shared model present");
