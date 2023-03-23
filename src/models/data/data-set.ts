@@ -53,7 +53,6 @@ export const DataSet = types.model("DataSet", {
     self.attributes.forEach(attr => {
       attrIDMap[attr.id] = attr;
     });
-    // console.log("dataset-ts  > get attrIDMap returns attrIdMap:", attrIDMap);
     return attrIDMap;
   },
   get attrNameMap() {
@@ -457,11 +456,7 @@ export const DataSet = types.model("DataSet", {
       },
 
       removeAttribute(attributeID: string) {
-        // console.log("data-set.ts > removeAttribute with attributeId:", attributeID);
         const attrIndex = attrIndexFromID(attributeID);
-        // console.log("data-set.ts > removeAttribute > attrIndex:", attrIndex);
-
-
         if (attrIndex != null) {
           self.attributes.splice(attrIndex, 1);
         }
@@ -593,14 +588,12 @@ export function addCasesToDataSet(dataset: IDataSet, cases: ICaseCreation[], bef
 // canonical cases are keyed by attribute ID rather than attribute name
 export function addCanonicalCasesToDataSet(dataset: IDataSet, cases: ICaseCreation[], beforeID?: string | string[]) {
   const newCases = cloneDeep(cases) as ICase[];
-
   newCases.forEach((aCase) => {
     if (!aCase.__id__) {
       aCase.__id__ = newCaseId();
     }
   });
   dataset.addCanonicalCasesWithIDs(newCases, beforeID);
-
 }
 
 export function getDataSetBounds(dataSet: IDataSet) {

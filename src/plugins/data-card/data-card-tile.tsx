@@ -91,7 +91,6 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     setIsEditingTitle(false);
   };
 
-  //*** BUTTON CLICK *****************************************************************
   function addNewCase(){
     content.addNewCaseFromAttrKeys(content.existingAttributes());
     content.setCaseIndex(content.totalCases - 1);

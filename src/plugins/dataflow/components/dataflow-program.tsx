@@ -6,7 +6,7 @@ import Rete, { NodeEditor, Engine, Node } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
 import { autorun } from "mobx";
-import { getParent, IDisposer, onSnapshot } from "mobx-state-tree";
+import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
 import { forEach } from "lodash";
 import { ProgramZoomType } from "../model/dataflow-content";
@@ -36,7 +36,6 @@ import { SerialDevice } from "../../../models/stores/serial";
 import { dataflowLogEvent } from "../dataflow-logger";
 
 import "./dataflow-program.sass";
-import { DataCardContentModelType } from "src/plugins/data-card/data-card-content";
 
 interface NodeNameValuePair {
   name: string;
@@ -69,7 +68,7 @@ interface IProps extends SizeMeProps {
   onRecordDataChange: () => void;
   programRecordState: number;
   numNodes: number;
-  tileModel: any; // FIXME
+  tileModel: any;
 }
 
 interface IState {
@@ -554,7 +553,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
 
     const model = this.props.tileModel;
-    model.addNewCaseFromAttrKeys(model.existingAttributes());
     const existingAttributes = this.props.tileModel.existingAttributes();
     this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes, caseId, );
 
@@ -583,8 +581,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         await this.programEngine.process(this.programEditor.toJSON());
       })();
     }
-    console.log("--------data set after every tick is --------", model.dataSet);
-
   };
 
   private passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo){
