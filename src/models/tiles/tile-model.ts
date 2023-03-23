@@ -100,7 +100,8 @@ export const TileModel = types
       }
       builder.pushBlock(`"content": ${contentJson}`, 2);
       options?.rowHeight && builder.pushLine(`"layout": { "height": ${options.rowHeight} }`, 2);
-      builder.pushLine(`}`);
+      const comma = options?.appendComma ? ',' : '';
+      builder.pushLine(`}${comma}`);
       return builder.build();
     }
   }))

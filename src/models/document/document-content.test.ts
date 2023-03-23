@@ -40,8 +40,7 @@ jest.mock("../tiles/log/log-tile-document-event", () => ({
   logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent()
 }));
 
-function parsedExport(content: DocumentContentModelType, options?: IDocumentExportOptions) {
-  const json = content.exportAsJson(options);
+function parseJson(json: string) {
   const parsed = safeJsonParse(json);
   if (parsed) {
     // console.log("Parsed Content\n--------------\n", json);
@@ -71,6 +70,20 @@ function parsedExport(content: DocumentContentModelType, options?: IDocumentExpo
     console.warn("PARSE ERROR\n-----------\n", json);
   }
   return parsed;
+}
+
+function parsedExport(content: DocumentContentModelType, options?: IDocumentExportOptions) {
+  const json = content.exportAsJson(options);
+  return parseJson(json);
+}
+
+function parsedSections(content: DocumentContentModelType, options?: IDocumentExportOptions) {
+  const jsonSections = content.exportSectionsAsJson(options);
+  const sections: Record<string, any> = {};
+  for (const [section, json] of Object.entries(jsonSections)) {
+    sections[section] = parseJson(json);
+  }
+  return sections;
 }
 
 describe("DocumentContentModel", () => {
@@ -1040,6 +1053,34 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
           { content: { type: "Drawing", objects: [] }, layout: { height: 320 } }
         ]
       ]
+    });
+  });
+
+  it("can parse content into sections", () => {
+    expect(parsedSections(documentContent)).toEqual({
+      "introduction": { tiles: [
+        { content: { type: "Text", format: "html", text: ["<p>Some text</p>"] } },
+        // explicit row height exported since it differs from drawing tool default
+        { content: { type: "Drawing", objects: [] }, layout: { height: 320 } }
+      ]},
+      "initialChallenge": { tiles: [
+        [
+          {
+            content: {
+              type: "Table",
+            }
+          },
+          { content: { type: "Image", url: "image/url" } }
+        ],
+        [
+          { content: { type: "Geometry", objects: [] } },
+          { content: { type: "Text", format: "html", text: ["<p>More text</p>"] } },
+          // explicit row height exported since it differs from drawing tool default
+          { content: { type: "Drawing", objects: [] }, layout: { height: 320 } }
+        ]
+      ]},
+      "whatIf": { tiles: [] },
+      "nowWhatDoYouKnow": { tiles: [] }
     });
   });
 
