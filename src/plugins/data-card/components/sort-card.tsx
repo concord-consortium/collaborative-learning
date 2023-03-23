@@ -46,7 +46,7 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
 
   const {attributes, listeners, setNodeRef, transform} = useDraggable({
     id: `draggable-sort-card-${caseId}`,
-    data: { caseId, sortedByAttrId: content.selectedSortAttributeId }
+    data: { caseId, sortedByAttrId: content.selectedSortAttributeId, sortDrag: true }
   });
 
   const style = transform ? {

@@ -22,7 +22,7 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
    // if one of the categories is a category for no value, put this stack last
   uniqueOrderedValues.includes("") && uniqueOrderedValues.push(uniqueOrderedValues.shift());
 
-  const [draggingActive, setDraggingActive] = useState(false);
+  const [sortDragActive, setSortDragActive] = useState(false);
 
   const renderPlaceholderCells = () => {
     const columnsCount = 3; // local constant now, but may be dynamic in future
@@ -35,16 +35,16 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
   };
 
   useDndMonitor({
-    onDragStart: (event) => {
-      setDraggingActive(true);
+    onDragStart: (e) => {
+      e.active.data.current?.sortDrag && setSortDragActive(true);
     },
-    onDragEnd: (event) => {
+    onDragEnd: (e) => {
       // set the value of the attribute to the value in the stack we landed on
-      const draggingId = event.active?.data?.current?.caseId;
-      const attrId = event.active?.data?.current?.sortedByAttrId;
-      const draggedToValue = event.over?.data?.current?.stackValue;
+      const draggingId = e.active?.data?.current?.caseId;
+      const attrId = e.active?.data?.current?.sortedByAttrId;
+      const draggedToValue = e.over?.data?.current?.stackValue;
       draggedToValue && content.setAttValue(draggingId, attrId, draggedToValue);
-      setDraggingActive(false);
+      e.active.data.current?.sortDrag && setSortDragActive(false);
     }
   });
 
@@ -59,7 +59,7 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
               model={model}
               stackValue={value as string}
               inAttributeId={sortById}
-              draggingActive={draggingActive}
+              draggingActive={sortDragActive}
             />
           );
         })
