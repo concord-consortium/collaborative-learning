@@ -203,17 +203,22 @@ module.exports = (env, argv) => {
         },
         cacheGroups: {
           // For the initial chunk, split modules from node_modules out even if
-          // they are only used by the 1 initial chunk. This results in a single
-          // extra chunk that contains all of the 3rd party dependencies.
+          // they are only used by one initial chunk. Because we have multiple
+          // entry points this will result in a few different vendor files.
+          // The entry points share code, so some of the vendor files are used by
+          // multiple entry points.
           initialVendors: {
             chunks: 'initial',
             test: /[\\/]node_modules[\\/]/,
             minChunks: 1,
             reuseExistingChunk: true,
-            // TODO: need to improve the file naming here so the
-            // "main" is acutally the name of the entry point and if the chunk is
-            // used by multiple entry points it is called common
-            filename: 'vendor-main.[chunkhash:8].js',
+            filename: (pathData) => {
+              // console.log("vendor filename", pathData.chunk.id,
+              //   [...pathData.chunk._groups].map(group => group.options?.name),
+              //   [...pathData.chunk._groups].map(group => group.chunks));
+              const groupsNames = [...pathData.chunk._groups].map(group => group.options?.name);
+              return `vendor-${groupsNames.join('-')}.[chunkhash:8].js`;
+            },
           },
         }
       }
