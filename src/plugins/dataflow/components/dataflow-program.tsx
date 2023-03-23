@@ -28,8 +28,9 @@ import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
-import { NodeChannelInfo, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
-         virtualSensorChannels, serialSensorChannels} from "../model/utilities/node";
+import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
+import { NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo } from "../model/utilities/node";
+import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { SerialDevice } from "../../../models/stores/serial";

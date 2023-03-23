@@ -2,8 +2,8 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import React, { useRef }  from "react";
 import Rete, { NodeEditor, Node } from "rete";
-import { NodeSensorTypes, NodeChannelInfo,
-         kSensorSelectMessage, kSensorMissingMessage } from "../../model/utilities/node";
+import { NodeSensorTypes, kSensorSelectMessage, kSensorMissingMessage } from "../../model/utilities/node";
+import { NodeChannelInfo } from "../../model/utilities/channel";
 import { useStopEventPropagation, useCloseDropdownOnOutsideEvent } from "./custom-hooks";
 import DropdownCaretIcon from "../../assets/icons/dropdown-caret.svg";
 import { dataflowLogEvent } from "../../dataflow-logger";
