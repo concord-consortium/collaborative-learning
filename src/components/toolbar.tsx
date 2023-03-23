@@ -57,6 +57,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "delete":
           this.handleDelete();
           break;
+        case "solution":
+          this.handleToggleSelectedTilesSolution();
+          break;
         default:
           this.handleAddTile(tool);
           break;
@@ -203,6 +206,25 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       ui.removeTileIdFromSelection(tileId);
       document.deleteTile(tileId);
     });
+  };
+
+  private handleToggleSelectedTilesSolution = () => {
+    const { ui } = this.stores;
+    const { document } = this.props;
+    const documentContent = document.content;
+    let setSolution = true;
+    if (documentContent) {
+      ui.selectedTileIds.forEach(tileId => {
+        const tile = documentContent.getTile(tileId);
+        if (tile?.display === "teacher") {
+          // If there are any solution tiles selected, make them all not solutions
+          setSolution = false;
+        }
+      });
+      ui.selectedTileIds.forEach(tileId => {
+        documentContent.getTile(tileId)?.setDisplay(setSolution ? "teacher" : undefined);
+      });
+    }
   };
 
   private handleDragNewTile = (tool: IToolbarButtonModel, e: React.DragEvent<HTMLDivElement>) => {
