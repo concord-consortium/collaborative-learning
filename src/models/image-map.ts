@@ -2,11 +2,10 @@ import { types, Instance, SnapshotIn, clone, getSnapshot, flow, IMSTMap, ISimple
 import {
   getImageDimensions, IImageDimensions, ISimpleImage, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
 } from "../utilities/image-utils";
-import { urlParams } from "../utilities/url-params";
 import { DB } from "../lib/db";
 import { DEBUG_IMAGES } from "../lib/debug";
 import placeholderImage from "../assets/image_placeholder.png";
-import { getCurriculumBranchFromUrl, isValidHttpUrl } from "../utilities/url-utils";
+import { getAssetUrl } from "../utilities/asset-utils";
 
 export const kExternalUrlHandlerName = "externalUrl";
 export const kLocalAssetsHandlerName = "localAssets";
@@ -38,9 +37,9 @@ export interface IImageContext {
   key?: string;
 }
 export interface IImageBaseOptions {
-  curriculumBaseUrl?: string;
   filename?: string;
   unitCodeMap?: Record<string, string>;
+  uniturl?: string;
 }
 export interface IImageHandlerStoreOptions extends IImageBaseOptions {
   db?: DB;
@@ -53,6 +52,7 @@ export interface IImageHandlerStoreResult {
 }
 interface IImageMap {
   unitCodeMap?: IMSTMap<ISimpleType<string>>;
+  unitUrl?: string;
   curriculumUrl?: string;
 }
 export interface IImageHandler {
@@ -67,9 +67,9 @@ export type ImageListenerMap = Record<string, Record<string, () => void>>;
 
 export const ImageMapModel = types
   .model("ImageMap", {
-    curriculumBaseUrl: types.maybe(types.string),
     images: types.map(ImageMapEntry),
-    unitCodeMap: types.maybe(types.map(types.string))
+    unitCodeMap: types.maybe(types.map(types.string)),
+    unitUrl: types.maybe(types.string)
   })
   .volatile(self => ({
     handlers: [] as IImageHandler[],
@@ -98,11 +98,8 @@ export const ImageMapModel = types
       return url ? self.images.get(url) : undefined;
     },
     get curriculumUrl() {
-      if (!self.curriculumBaseUrl) return;
-      const curriculumBranch = urlParams.unit && isValidHttpUrl(urlParams.unit)
-                                 ? getCurriculumBranchFromUrl(urlParams.unit)
-                                 : "main";
-      return `${self.curriculumBaseUrl}branch/${curriculumBranch}/`;
+      if (!self.unitUrl) return;
+      return (new URL("../", self.unitUrl)).href;
     }
   }))
   .actions(self => ({
@@ -146,8 +143,8 @@ export const ImageMapModel = types
         self.images.set(entry.contentUrl, getSnapshot(entry));
       }
     },
-    setCurriculumBaseUrl(url: string) {
-      self.curriculumBaseUrl = url;
+    setUnitUrl(url: string) {
+      self.unitUrl = url;
     },
     setUnitCodeMap(map: any) {
       self.unitCodeMap = map;
@@ -446,7 +443,7 @@ export const localAssetsImagesHandler: IImageHandler = {
   match(url: string) {
            // don't match values with a protocol or port specified
     return !/:/.test(url) &&
-           // or original firebase storage path references
+           // or legacy firebase storage references
            !/^\/.+\/portals\/.+$/.test(url) &&
            // make sure there's at least one slash
            /\//.test(url) &&
@@ -469,12 +466,12 @@ export const localAssetsImagesHandler: IImageHandler = {
     // We also need to convert legacy drawing tool stamp paths
     _url = _url.replace("assets/tools/drawing-tool/stamps", "msa/stamps");
 
-    if (this.imageMap.curriculumUrl) {
-      const imgUrl = new URL(_url, this.imageMap.curriculumUrl);
-      return { contentUrl: _url, displayUrl: imgUrl.href, success: true };
-    } else {
-      return { contentUrl: _url, displayUrl: _url, success: true };
-    }
+    // If curriculumUrl is defined and the image isn't in CLUE's own assets directory,
+    // build an absolute URL for the displayUrl.
+    const displayUrl = this.imageMap.curriculumUrl && !/^assets\//.test(_url)
+                         ? new URL(`../${_url}`, this.imageMap.unitUrl).href
+                         : getAssetUrl(_url);
+    return { contentUrl: _url, displayUrl, success: true };
   },
   imageMap: {}
 };
