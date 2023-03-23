@@ -34,7 +34,6 @@ export const convertChangesToModel = (changes: JXGChange[]) => {
 export const convertModelToChanges = (
   model: GeometryBaseContentModelType, boardOptions?: IGeometryBoardChangeOptions
 ): JXGChange[] => {
-  // console.log(`ooo convertModelToChanges`);
   const { board, bgImage, objects } = model;
   const changes: JXGChange[] = [];
   // convert the board

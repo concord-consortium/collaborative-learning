@@ -169,21 +169,16 @@ function getCanvasScale(eltOrId: string | HTMLElement | null) {
 }
 
 function scaleBoundingBoxToElement(domElementID: string, changeProps: any) {
-  // console.log(`xxx scaleBoundingBoxToElement`);
-  // console.log(`  x changeProps`, JSON.stringify(changeProps, null, 2));
   const elt = document.getElementById(domElementID);
   const eltBounds = elt?.getBoundingClientRect();
-  // console.log(`  x eltBounds`, JSON.stringify(eltBounds, null, 2));
   const eltWidth = eltBounds?.width || kGeometryDefaultWidth;
   const eltHeight = eltBounds?.height || kGeometryDefaultHeight;
   const { boundingBox }: { boundingBox: JXG.BoundingBox } = changeProps;
   const [unitX, unitY] = getAxisUnitsFromProps(changeProps, getCanvasScale(elt));
-  // console.log(`  x units`, JSON.stringify({ unitX, unitY }, null, 2));
   // eslint-disable-next-line no-sparse-arrays
   const [xMin, , , yMin] = boundingBox || [kGeometryDefaultXAxisMin, , , kGeometryDefaultYAxisMin];
   const xMax = xMin + eltWidth / unitX;
   const yMax = yMin + eltHeight / unitY;
-  // console.log(`  x bb`, JSON.stringify({ xMin, yMax, xMax, yMin }, null, 2));
   return [xMin, yMax, xMax, yMin] as JXG.BoundingBox;
 }
 
@@ -198,11 +193,8 @@ export function getBoardUnitsAndBuffers(board: JXG.Board) {
 }
 
 export function guessUserDesiredBoundingBox(board: JXG.Board) {
-  // console.log(`+++ guessUserDesiredBoundingBox`);
   const [xMin, yMax, xMax, yMin] = board.getBoundingBox();
-  // console.log(`  + bb`, JSON.stringify({ xMin, yMax, xMax, yMin }, null, 2));
   const { xMinBufferRange, xMaxBufferRange, yBufferRange } = getBoardUnitsAndBuffers(board);
-  // console.log(`  + units and buffers`, JSON.stringify({ xMinBufferRange, xMaxBufferRange, yBufferRange }, null, 2));
 
   return [xMin + xMinBufferRange, yMax - yBufferRange, xMax - xMaxBufferRange, yMin + yBufferRange];
 }

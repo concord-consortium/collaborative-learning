@@ -421,19 +421,15 @@ export const GeometryContentModel = GeometryBaseContentModel
     }
 
     function resizeBoard(board: JXG.Board, width: number, height: number, scale?: number) {
-      // console.log(`--- resizeBoard`, JSON.stringify({width, height, scale}, null, 2));
       // JSX Graph canvasWidth and canvasHeight are truncated to integers,
       // so we need to do the same to get the new canvasWidth and canvasHeight values
       const scaledWidth = Math.trunc(width) / (scale || 1);
       const scaledHeight = Math.trunc(height) / (scale || 1);
       const widthMultiplier = (scaledWidth - kXAxisTotalBuffer) / (board.canvasWidth - kXAxisTotalBuffer);
       const heightMultiplier = (scaledHeight - kYAxisTotalBuffer) / (board.canvasHeight - kYAxisTotalBuffer);
-      // console.log(`  - multipliers`, JSON.stringify({ widthMultiplier, heightMultiplier}, null, 2));
       // Remove the buffers to correct the graph proportions
       const [xMin, yMax, xMax, yMin] = guessUserDesiredBoundingBox(board);
-      // console.log(`  - guessed bb`, JSON.stringify({xMin, yMax, xMax, yMin}, null, 2));
       const { xMinBufferRange, xMaxBufferRange, yBufferRange } = getBoardUnitsAndBuffers(board);
-      // console.log(`  - units and buffers`, JSON.stringify({ xMinBufferRange, xMaxBufferRange, yBufferRange }, null, 2));
       // Add the buffers back post-scaling
       const newBoundingBox: JXG.BoundingBox = [
         xMin * widthMultiplier - xMinBufferRange,
@@ -441,14 +437,12 @@ export const GeometryContentModel = GeometryBaseContentModel
         xMax * widthMultiplier + xMaxBufferRange,
         yMin * heightMultiplier - yBufferRange
       ];
-      // console.log(`  - newBoundingBox`, JSON.stringify(newBoundingBox, null, 2));
       board.resizeContainer(scaledWidth, scaledHeight, false, true);
       board.setBoundingBox(newBoundingBox, false);
       board.update();
     }
 
     function rescaleBoard(board: JXG.Board, params: IAxesParams) {
-      // console.log(`ooo rescaleBoard`);
       const { canvasWidth, canvasHeight } = board;
       const { xName, xAnnotation, xMin, xMax, yName, yAnnotation, yMin, yMax } = params;
       const width = canvasWidth - kXAxisTotalBuffer;
