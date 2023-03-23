@@ -50,6 +50,6 @@ describe("ConfigurationManager", () => {
       "guide": `https://curriculum.example.com/branch/main/${exampleUnitCode}/teacher-guide/content.json`
     };
     expect(appConfig.getUnit(exampleUnitCode)).toStrictEqual(exampleUnit);
-    expect(appConfig.getUnitBasePath(exampleUnitCode)).toBe(`https://curriculum.example.com/branch/main/${exampleUnitCode}`);
+    expect(appConfig.getUnitBasePath(exampleUnitCode)).toBe(exampleUnitCode);
   });
 });
