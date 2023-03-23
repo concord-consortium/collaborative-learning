@@ -1,4 +1,4 @@
-import React, { useState} from "react";
+import React, { useState } from "react";
 import { getSnapshot } from "@concord-consortium/mobx-state-tree";
 import { uniq, orderBy } from "lodash";
 import { ITileModel } from "../../../models/tiles/tile-model";
@@ -19,7 +19,7 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
   const attrsSnap = getSnapshot(content.attributes);
   const allAttrValues = attrsSnap.filter((a) => a.id === sortById)[0].values;
   const uniqueOrderedValues = orderBy(uniq(allAttrValues));
-   // if one of the categories is a category for no value, put this stack last
+  // if one of the categories is a category for no value, put this stack last
   uniqueOrderedValues.includes("") && uniqueOrderedValues.push(uniqueOrderedValues.shift());
 
   const [sortDragActive, setSortDragActive] = useState(false);
@@ -39,18 +39,19 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
       e.active.data.current?.sortDrag && setSortDragActive(true);
     },
     onDragEnd: (e) => {
-      // set the value of the attribute to the value in the stack we landed on
-      const draggingId = e.active?.data?.current?.caseId;
-      const attrId = e.active?.data?.current?.sortedByAttrId;
-      const draggedToValue = e.over?.data?.current?.stackValue;
-      draggedToValue && content.setAttValue(draggingId, attrId, draggedToValue);
-      e.active.data.current?.sortDrag && setSortDragActive(false);
+      if (e.active.data.current?.sortDrag) {
+        const draggingId = e.active?.data?.current?.caseId;
+        const attrId = e.active?.data?.current?.sortedByAttrId;
+        const draggedToValue = e.over?.data?.current?.stackValue;
+        draggedToValue && content.setAttValue(draggingId, attrId, draggedToValue);
+        setSortDragActive(false);
+      }
     }
   });
 
   return (
     <div className="sort-area-grid">
-      { uniqueOrderedValues.length > 0 && sortById &&
+      {uniqueOrderedValues.length > 0 && sortById &&
         uniqueOrderedValues.map((value, i) => {
           return (
             <SortStack
@@ -64,7 +65,7 @@ export const DataCardSortArea: React.FC<IProps> = ({ model }) => {
           );
         })
       }
-      { renderPlaceholderCells() }
+      {renderPlaceholderCells()}
     </div>
   );
 };
