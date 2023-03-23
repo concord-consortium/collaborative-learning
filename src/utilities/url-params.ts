@@ -72,6 +72,9 @@ export interface QueryParams {
   firestore?: string; // "emulator" or host:port url
   // direct firebase function calls to the emulator
   functions?: string; // "emulator" or host:port url
+
+  // admin CMS params
+  contentBranch?: string;
 }
 
 export const processUrlParams = (): QueryParams => {
