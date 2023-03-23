@@ -98,6 +98,9 @@ export const TileModel = types
       if (!excludeTitle && self.title) {
         builder.pushLine(`"title": "${self.title}",`, 2);
       }
+      if (self.display) {
+        builder.pushLine(`"display": "${self.display}",`, 2);
+      }
       builder.pushBlock(`"content": ${contentJson}`, 2);
       options?.rowHeight && builder.pushLine(`"layout": { "height": ${options.rowHeight} }`, 2);
       const comma = options?.appendComma ? ',' : '';
