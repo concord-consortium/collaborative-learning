@@ -22,6 +22,7 @@ $sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
       grid-template-columns: $sort-view-card-width $sort-view-card-width $sort-view-card-width;
       border-left: $card-border;
       border-right: $card-border;
+      border-bottom: $card-border;
 
       .stack {
         width: $sort-view-card-width;
