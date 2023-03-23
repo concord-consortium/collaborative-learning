@@ -32,7 +32,7 @@ If the import statement is not used and instead the src of the image was hard co
 ```
 Webpack has no control of this, so at runtime this will be loaded relative to the html file.  So when the `index.html` is at the top level, the browser will look for `https://collaborative-learning.concord.org/assets/concord.png` and not find it. So hard coded paths like this should be converted to using import statements.
 
-In some cases we dynamically compute a path to load an asset from. In most of these places webpack imports can still be used. Webpack supports this by static analysis of the import function, so we just need to change those places in the code slightly. Here is the documentation about this:
+In some cases we dynamically compute a path from which to load an asset. In most of these places webpack imports can still be used. Webpack supports this by static analysis of the import function, so we just need to change those places in the code slightly. Here is the documentation about this:
 https://webpack.js.org/api/module-methods/#dynamic-expressions-in-import
 
 If using import is too difficult you can work around this by using the special `__webpack_public_path__` variable. In CLUE there is a `getAssetUrl` function to make this easy. Like this:
