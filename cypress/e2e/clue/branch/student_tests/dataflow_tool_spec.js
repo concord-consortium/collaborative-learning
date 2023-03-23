@@ -330,17 +330,17 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify live output types", () => {
         const dropdown = "liveOutputType";
-        const outputTypes = ["Light Bulb", "Grabber"];
+        const outputTypes = ["Light Bulb", "Grabber", "Sprinkler", "Fan", "Heat Lamp"];
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 2);
+        dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 5);
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).each(($tab, index, $typeList) => {
           expect($tab.text()).to.contain(outputTypes[index]);
         });
         dataflowToolTile.getOutputNodeValueText().should("contain", "off");
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).last().click();
         dataflowToolTile.getDropdownOptions(nodeType, dropdown).should("have.length", 0);
-        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Grabber").should("exist");
-        dataflowToolTile.getOutputNodeValueText().should("contain", "0% closed");
+        dataflowToolTile.getDropdown(nodeType, dropdown).contains("Heat Lamp").should("exist");
+        dataflowToolTile.getOutputNodeValueText().should("contain", "off");
       });
       it("verify node inputs outputs", () => {
         dataflowToolTile.getNodeInput().should("exist");
@@ -415,11 +415,23 @@ context('Dataflow Tool Tile', function () {
       });
       it("verify sensor select", () => {
         const dropdown = "sensor-select";
-        const sensorSelect = ["Temperature Demo Data", "Humidity Demo Data", "CO2 Demo Data", "O2 Demo Data", "Light Demo Data", "Particulates Demo Data",
-         "EMG - Varied Clenches Demo Data", "EMG - Long Clench and Hold Demo Data", "EMG - Short Clench and Hold Demo Data", "FSR Demo Data", "⚠️ connect for live emg", "⚠️ connect for live fsr"];
+        const sensorSelect = [
+          "Temperature Demo Data", "Humidity Demo Data", "CO2 Demo Data", "O2 Demo Data", "Light Demo Data", "Particulates Demo Data",
+         "EMG - Varied Clenches Demo Data", "EMG - Long Clench and Hold Demo Data", "EMG - Short Clench and Hold Demo Data", "FSR Demo Data",
+         "⚠️ connect arduino for emg",
+         "⚠️ connect arduino for fsr",
+         "⚠️ connect microbit for temperature-microbit-a",
+         "⚠️ connect microbit for humidity-microbit-a",
+         "⚠️ connect microbit for temperature-microbit-b",
+         "⚠️ connect microbit for humidity-microbit-b",
+         "⚠️ connect microbit for temperature-microbit-c",
+         "⚠️ connect microbit for humidity-microbit-c",
+         "⚠️ connect microbit for temperature-microbit-d",
+         "⚠️ connect microbit for humidity-microbit-d",
+        ];
         dataflowToolTile.getCreateNodeButton(nodeType).click();
         dataflowToolTile.getDropdown(nodeType, dropdown).click();
-        dataflowToolTile.getSensorDropdownOptions(nodeType).should("have.length", 12);
+        dataflowToolTile.getSensorDropdownOptions(nodeType).should("have.length", 20);
         dataflowToolTile.getSensorDropdownOptions(nodeType).each(($tab, index, $typeList) => {
           expect($tab.text()).to.contain(sensorSelect[index]);
         });
