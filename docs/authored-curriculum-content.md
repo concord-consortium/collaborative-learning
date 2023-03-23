@@ -1,17 +1,19 @@
 # Authored Curriculumn Content
-Authored curriculum content was originally part of the CLUE code repository. The curriculum content files were located at src/public/curriculum.
+Authored curriculum content was originally part of the CLUE code repository. The curriculum content files were formerly located at src/public/curriculum.
 
 In 2023, curriculum content was split off into its own repository named clue-curriculum. CLUE now imports most authored content from this external repository, the deployed version of which is located at https://models-resources.concord.org/clue-curriculum.
 
 ## File structure of authored curriculum content
-In the clue-curriculum repository, each unit's files are located in a subdirectory whose name matches the unit's unit code. For example, the Stretching and Shrinking unit's code is `sas`, and its subdirectory is named `sas`. The unit code value is defined in the root content.json file in each unit subdirectory.
+In the clue-curriculum repository, each unit's files are located in a subdirectory whose name matches the unit's unit code. For example, the _Stretching and Shrinking_ unit's code is `sas`, and its subdirectory is therefore named `sas`. The unit code value is defined in the root content.json file in each unit subdirectory.
 
-Each unit is made up of a number of investigations that each have a number of problems, and each problem has a number of sections. The content for these problem sections is located in separate files in the unit's subdirectory. The root content.json file contains information about these separate problem section files which CLUE uses to import the content when loading a curriculum unit.
+Each unit is made up of a number of investigations. Each investigation has a number of problems, and each problem has a number of sections. The content for these problem sections is located in separate files. The unit's root content.json file contains references to these separate problem section files which CLUE uses to import all the content when loading a curriculum unit.
+
+See clue-curriculum documentation for more information on the unit content file structure.
 
 ## Loading curriculum content in CLUE
-To load a specific curriculum unit's content into CLUE, we set the `unit` URL param value to that unit's unit code. For example, to load the Stretching and Shrinking unit, whose code is `sas`, append `?unit=sas` to the CLUE URL.
+To load a specific curriculum unit into CLUE, we set the `unit` URL param value to that unit's unit code. For example, to load the _Stretching and Shrinking_ unit, whose code is `sas`, append `?unit=sas` to the CLUE URL.
 
-In addition to unit codes, you can also use full URLs as the `unit` param's value. For example, appending `?unit=https://models-resources.concord.org/clue-curriculum/branch/my-changes/sas/content.json` to a CLUE URL would load the version of Stretching and Shrinking that exists in a clue-curriculum branch named `my-changes`.
+In addition to unit codes, you can also use full URLs as the `unit` param's value. For example, appending `?unit=https://models-resources.concord.org/clue-curriculum/branch/my-changes/sas/content.json` to a CLUE URL would load the version of _Stretching and Shrinking_ that exists in a clue-curriculum branch named `my-changes`.
 
 Fetching of curriculum unit content data from the external repository is done by the `getUnitJson` function defined in src/models/curriculum/unit.ts and called from src/models/stores/stores.ts.
 
