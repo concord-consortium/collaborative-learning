@@ -60,7 +60,7 @@ export const SortStack: React.FC<IProps> = ({ model, stackValue, inAttributeId, 
         }
       </div>
     </div>
-);
+  );
 };
 
 export const SortStackPlaceholder: React.FC = () => {
