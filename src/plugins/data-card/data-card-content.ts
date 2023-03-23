@@ -202,9 +202,7 @@ export const DataCardContentModel = TileContentModel
       ]);
     },
     addNewCaseFromAttrKeys(atts: string[], beforeId?: string ){
-      console.log("data-card-content.ts > addNewCaseFromAttrKeys with atts:", atts);
       const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
-      console.log("data-card-content.ts > obj: ", obj);
       if (beforeId){
         addCanonicalCasesToDataSet(self.dataSet, [obj], beforeId);
       } else {

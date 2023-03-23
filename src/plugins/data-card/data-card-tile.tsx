@@ -93,16 +93,11 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
 
   //*** BUTTON CLICK *****************************************************************
   function addNewCase(){
-    console.log("data-card-tile.tsx > addNewCase");
-    console.log("data-card-tile.tsx > content.existingAttributes() ", content.existingAttributes());
-
     content.addNewCaseFromAttrKeys(content.existingAttributes());
-    console.log('content.totalCases- 1 ', content.totalCases - 1);
     content.setCaseIndex(content.totalCases - 1);
   }
 
   function deleteCase(){
-    console.log("data-card-tile.tsx > deleteCase");
     const thisCaseId = content.dataSet.caseIDFromIndex(content.caseIndex);
     if (thisCaseId) {
       content.dataSet.removeCases([thisCaseId]);

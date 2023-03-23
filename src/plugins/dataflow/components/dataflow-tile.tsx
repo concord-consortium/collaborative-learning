@@ -46,12 +46,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const { program, programDataRate, programZoom } = this.getContent();
     const numNodes = program.nodes.size;
     const tileModel = this.getContent();
-    //const { programRecordState } = this.state ? this.state.programRecordState
-
-    // 1 Move programRecordState and methods to this component or to a hook
-    // 2 QUESTION: consolidate the passed props that now come through with whole model? (see below)
-    // 3 implement the before the start assessment and setup
-    // 4 implement the record on tick
 
     return (
       <>
@@ -178,10 +172,17 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       2 - stopped, ready to clear
     */
     const mode = this.state.programRecordingMode;
+    const model = this.getContent();
+
     if (mode === 0){
-      this.pairNodesToAttributes();
-      //clear all the cases?
-      // this.writeCase();
+      this.pairNodesToAttributes(); //prepare all attributes (nodes) in dataset
+    }
+
+    if (mode === 2){
+      const dataSet = model.dataSet;
+      const allCases = model.dataSet.cases;
+      const allIdsToRemove = allCases.map(({__id__}) =>( __id__));
+      dataSet.removeCases(allIdsToRemove);
     }
 
     this.setState({

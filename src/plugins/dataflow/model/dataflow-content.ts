@@ -66,7 +66,6 @@ export const DataflowContentModel = TileContentModel
       if (!firstSharedModel || getType(firstSharedModel) !== SharedDataSet) {
         return undefined;
       }
-      // console.log("dataflow-content.ts > views > get sharedModel() > firstSharedModel\n", firstSharedModel);
       return firstSharedModel as SharedDataSetType;
     },
     programWithoutRecentValues() {
@@ -123,7 +122,6 @@ export const DataflowContentModel = TileContentModel
         return a.id;
       });
     },
-
   }))
   .actions(self => tileModelHooks({
     doPostCreate(metadata: ITileMetadataModel){
@@ -210,13 +208,9 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.scale = scale;
     },
     addNewCaseFromAttrKeys(atts: string[], caseId: string, beforeId?: string){
-      console.log("invoked BUT no", atts, caseId, beforeId);
-
       if (caseId){
-        console.log("writing Case");
         const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
         console.log("dataflow-content.ts > addNewCaseFromAttrKeys > obj:", obj);
-
         //start
         //similar functionality to addCanonicalCasesToDataSet but we can't modify
         //because there'd need to be condition to write it with our unique Case ID
@@ -227,7 +221,6 @@ export const DataflowContentModel = TileContentModel
           }
         });
         self.dataSet.addCanonicalCasesWithIDs(newCases);
-        console.log("finished writing Case");
         //end
 
       }
@@ -242,9 +235,8 @@ export const DataflowContentModel = TileContentModel
        ]);
     },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
-      // console.log("do nothing");
+      //do nothing
     },
-    //TO DO - clean up and use existing methods in views above or data-set.ts that simplify the code
 
     addNewAttrFromNode(nodeId: number, nodeName: string){ //if already an attribute with the same nodeId,else write
       const dataSet = self.dataSet;

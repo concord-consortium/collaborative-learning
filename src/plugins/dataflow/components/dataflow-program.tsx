@@ -532,8 +532,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    console.log("----------------- tick----------", this.props.tileId);
-    const testTileId =  "2K-O3VT-IJn5-0Dm";
     const isRecording = this.props.programRecordState === 1;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
@@ -554,30 +552,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     let processNeeded = false;
 
-    //[RECORDING] if we are recording and there is not already
-    // point data for this case id and node, write the data to the dataset
 
     const model = this.props.tileModel;
     model.addNewCaseFromAttrKeys(model.existingAttributes());
-
     const existingAttributes = this.props.tileModel.existingAttributes();
     this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes, caseId, );
 
     this.programEditor.nodes.forEach((n: Node, idx) => {
-      // console.log("for each idx:", idx)
-      if (this.props.tileId === testTileId && isRecording){
-
-        // console.log("*****", this.props.tileModel.existingAttributesWithNames());
-        // console.log("*****", n.id);
+      //write each node value to attribute
+      if (isRecording){
         const attributeIdArr = this.props.tileModel.existingAttributesWithNames();
         this.props.tileModel.setAttrValue(caseId, attributeIdArr[idx].attrId, n.data.nodeValue);
       }
+
       const nodeProcess = nodeProcessMap[n.name];
       if (nodeProcess) {
         processNeeded = true;
         nodeProcess(n);
       }
-      // TODO: We probably need a better way to determine if recentValues should be updated
       if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
         this.updateNodeRecentValues(n);
       }
@@ -591,8 +583,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         await this.programEngine.process(this.programEditor.toJSON());
       })();
     }
-    // console.log("model after every tick:", model);
-    console.log("data set after every tick is ", model.dataSet);
+    console.log("--------data set after every tick is --------", model.dataSet);
 
   };
 
