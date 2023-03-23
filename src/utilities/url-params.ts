@@ -73,8 +73,14 @@ export interface QueryParams {
   // direct firebase function calls to the emulator
   functions?: string; // "emulator" or host:port url
 
-  // admin CMS params
-  contentBranch?: string;
+  //
+  // CMS options (admin.html)
+  //
+
+  // change the branch used in clue-curriculum repository default is author
+  curriculumBranch?: string;
+  // work with a local checkout of the curriculum instead of github
+  localCMSBackend?: boolean;
 }
 
 export const processUrlParams = (): QueryParams => {
@@ -86,7 +92,9 @@ export const processUrlParams = (): QueryParams => {
                   ? params.appMode as AppMode
                   : undefined,  // appMode will be determined internally
     // allows use of ?demo without a value for demo mode
-    demo: (params.demo !== undefined)
+    demo: (params.demo !== undefined),
+    // allows use of localCMSBackend without a value
+    localCMSBackend: (params.localCMSBackend !== undefined)
   };
 };
 

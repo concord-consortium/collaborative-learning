@@ -1,25 +1,40 @@
 (window as any).CMS_MANUAL_INIT = true;
 
 import CMS from "netlify-cms-app";
-import { CmsConfig } from "netlify-cms-core";
+import { CmsBackendType, CmsConfig } from "netlify-cms-core";
 import { urlParams } from "../utilities/url-params";
 
 import { JsonControl } from "./json-control";
 
-// Test URL:
-// http://localhost:8080/admin.html?contentBranch=author&unit=sas#/collections/sections
+// Local testing of the CMS without working with github directly:
+// - Add the localCMSBacked parameter to the URL
+// - start a proxy in a checkout of the clue-curriculum repository with:
+//     cd ../clue-curriculum; npx netlify-cms-proxy-server
+function cmsBackend() {
+  if (urlParams.localCMSBackend) {
+    return {
+      backend: {
+        name: "git-gateway" as CmsBackendType
+      },
+      local_backend: true,
+    };
+  } else {
+    return {
+      backend: {
+        name: "github" as CmsBackendType,
+        repo: "concord-consortium/clue-curriculum",
+        branch: urlParams.curriculumBranch || "author",
+        base_url: "https://us-central1-cms-github-auth.cloudfunctions.net",
+        auth_endpoint: "/oauth/auth"
+      }
+    };
+  }
+}
 
 // Config or Decap CMS
 const cmsConfig: CmsConfig = {
   load_config_file: false,
-  backend: {
-    name: "github",
-    repo: "concord-consortium/clue-curriculum",
-    branch: urlParams.contentBranch || "author", // Branch to update (optional; defaults to master)
-    base_url: "https://us-central1-cms-github-auth.cloudfunctions.net",
-    auth_endpoint: "/oauth/auth"
-  },
-  // local_backend: true,
+  ...cmsBackend(),
   media_folder: urlParams.unit ? `curriculum/${urlParams.unit}/images` : `curriculum/images`,
   // public_folder: urlParams.unit ? `/${urlParams.unit}/images` : `curriculum/images`,
   public_folder: `${urlParams.unit}/images`,
