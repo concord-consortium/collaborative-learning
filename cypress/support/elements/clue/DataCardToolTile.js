@@ -36,6 +36,10 @@ class DataCardToolTile {
     const selector = ".add-remove-card-buttons .add-card";
     return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
   }
+  getDeleteCardButton(workspaceClass){
+    const selector = ".add-remove-card-buttons .remove-card";
+    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+  }
   getCardNofTotalListing(workspaceClass){
     return cy.get(`${workspaceClass || ".primary-workspace"} .card-number-of-listing`);
   }
@@ -48,8 +52,16 @@ class DataCardToolTile {
   getSortCardHeading(workspaceClass){
     return cy.get(`${workspaceClass || ".primary-workspace"} .sortable .heading`);
   }
+  getSortCardCollapseToggle(workspaceClass){
+    const selector = ".expand-toggle-area button.expand-toggle";
+    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+  }
   getSortCardData(workspaceClass){
     const selector = ".sortable.expanded .attribute-value-row";
+    return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
+  }
+  getConfirmDeleteButton(workspaceClass){
+    const selector = ".button.modal-button.default";
     return cy.get(`${workspaceClass || ".primary-workspace"} ${selector}`);
   }
 }
