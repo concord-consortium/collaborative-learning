@@ -13,7 +13,7 @@ import {
 } from "./jxg-changes";
 import { getMovableLinePointIds, kGeometryDefaultHeight, kGeometryDefaultWidth } from "./jxg-types";
 import { kDefaultBoardModelOutputProps, kGeometryTileType } from "./geometry-types";
-import { defaultGeometryBoardChange } from "./geometry-import";
+import { defaultGeometryBoardChange, IGeometryBoardChangeOptions } from "./geometry-import";
 
 export const isGeometryChangesContent = (snap: any) => {
   return (snap?.type === kGeometryTileType) && Array.isArray(snap.changes);
@@ -32,7 +32,7 @@ export const convertChangesToModel = (changes: JXGChange[]) => {
 };
 
 export const convertModelToChanges = (
-  model: GeometryBaseContentModelType, addBuffers?: boolean, includeUnits?: boolean
+  model: GeometryBaseContentModelType, boardOptions?: IGeometryBoardChangeOptions
 ): JXGChange[] => {
   // console.log(`ooo convertModelToChanges`);
   const { board, bgImage, objects } = model;
@@ -42,7 +42,7 @@ export const convertModelToChanges = (
   const { name: xName, label: xAnnotation } = xAxis;
   const { name: yName, label: yAnnotation } = yAxis;
   changes.push(
-    defaultGeometryBoardChange(xAxis, yAxis, { xName, yName, xAnnotation, yAnnotation }, addBuffers, includeUnits )
+    defaultGeometryBoardChange(xAxis, yAxis, { xName, yName, xAnnotation, yAnnotation }, boardOptions )
   );
   // convert the background image (if any)
   if (bgImage) {

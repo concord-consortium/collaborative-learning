@@ -258,7 +258,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       return board.objectsList.filter(obj => self.isSelected(obj.id));
     },
     exportJson(options?: ITileExportOptions) {
-      const changes = convertModelToChanges(self, false, false);
+      const changes = convertModelToChanges(self, { addBuffers: false, includeUnits: false});
       const jsonChanges = changes.map(change => JSON.stringify(change));
       return exportGeometryJson(jsonChanges, options);
     }
@@ -395,7 +395,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     // actions
     function initializeBoard(domElementID: string, onCreate?: onCreateCallback): JXG.Board | undefined {
       let board: JXG.Board | undefined;
-      const changes = convertModelToChanges(self, true, true);
+      const changes = convertModelToChanges(self, { addBuffers: true, includeUnits: true});
       applyChanges(domElementID, changes, getDispatcherContext())
         .filter(result => result != null)
         .forEach(changeResult => {

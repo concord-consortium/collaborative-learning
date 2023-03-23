@@ -182,12 +182,17 @@ function getBoardBounds(axisMin?: JXGCoordPair, protoRange?: JXGCoordPair) {
   return [xAxis.min, yAxisMax, xAxisMax, yAxis.min];
 }
 
+export interface IGeometryBoardChangeOptions {
+  addBuffers?: boolean;
+  includeUnits?: boolean;
+}
 export function defaultGeometryBoardChange(
-  xAxis: AxisModelType, yAxis: AxisModelType, overrides?: JXGProperties, addBuffers?: boolean, includeUnits?: boolean
+  xAxis: AxisModelType, yAxis: AxisModelType, overrides?: JXGProperties, options?: IGeometryBoardChangeOptions
 ) {
   // console.log(`--- defaultGeometryBoardChange`);
   // console.log(`  - xAxis`, JSON.stringify(xAxis, null, 2));
   // console.log(`  - yAxis`, JSON.stringify(yAxis, null, 2));
+  const { addBuffers, includeUnits } = options ?? {};
   const axisMin: JXGCoordPair = [xAxis.min, yAxis.min];
   const axisRange: JXGCoordPair = [xAxis.range ?? kGeometryDefaultWidth / xAxis.unit,
                                    yAxis.range ?? kGeometryDefaultHeight / yAxis.unit];
