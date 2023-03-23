@@ -210,10 +210,6 @@ export const DataflowContentModel = TileContentModel
     addNewCaseFromAttrKeys(atts: string[], caseId: string, beforeId?: string){
       if (caseId){
         const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
-        console.log("dataflow-content.ts > addNewCaseFromAttrKeys > obj:", obj);
-        //start
-        //similar functionality to addCanonicalCasesToDataSet but we can't modify
-        //because there'd need to be condition to write it with our unique Case ID
         const newCases = cloneDeep([obj]) as ICase[];
         newCases.forEach((aCase) => {
           if (!aCase.__id__) {

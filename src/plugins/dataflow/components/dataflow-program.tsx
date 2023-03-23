@@ -134,7 +134,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           numNodes={numNodes}
         />
         <div className={toolbarEditorContainerClass}>
-          <pre style={{ color: "red", padding: "20px", backgroundColor: "blue"}}>{ this.props.programRecordState }</pre>
           { showProgramToolbar && <DataflowProgramToolbar
             onNodeCreateClick={this.addNode}
             onClearClick={this.clearProgram}

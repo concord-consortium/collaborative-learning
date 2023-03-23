@@ -57,11 +57,11 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                 <DataflowProgram
                   readOnly={readOnly}
                   documentProperties={this.getDocumentProperties()}
-                  program={program} // 1/3 now passing whole tileModel, so destruct this on other side?
+                  program={program}
                   onProgramChange={this.handleProgramChange}
-                  programDataRate={programDataRate}  // 2/3 now passing whole tileModel, so destruct this on other side?
+                  programDataRate={programDataRate}
                   onProgramDataRateChange={this.handleProgramDataRateChange}
-                  programZoom={programZoom} // 3/3 now passing whole tileModel, so destruct this on other side?
+                  programZoom={programZoom}
                   onZoomChange={this.handleProgramZoomChange}
                   size={size}
                   tileHeight={height}
@@ -147,7 +147,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   // [RECORDING: this will be called when the recording is about to begin
   private pairNodesToAttributes = () => {
-    console.log("-----Recording BEGIN-----------");
     const model = this.getContent();
 
     //#1 check nodes on tile against dataset attributes, if already there do nothing, otherwise write.
@@ -178,7 +177,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       this.pairNodesToAttributes(); //prepare all attributes (nodes) in dataset
     }
 
-    if (mode === 2){
+    if (mode === 2){ //clear dataset
       const dataSet = model.dataSet;
       const allCases = model.dataSet.cases;
       const allIdsToRemove = allCases.map(({__id__}) =>( __id__));
