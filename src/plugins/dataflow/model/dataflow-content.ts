@@ -48,7 +48,6 @@ export const DataflowContentModel = TileContentModel
     program: types.optional(DataflowProgramModel, getSnapshot(DataflowProgramModel.create())),
     programDataRate: DEFAULT_DATA_RATE,
     programZoom: types.optional(ProgramZoom, DEFAULT_PROGRAM_ZOOM),
-    programRecordState: 0,
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
