@@ -154,7 +154,7 @@ export class ClueControl extends React.Component<IProps, IState>  {
                 <DocEditorApp
                   appConfig={appConfig}
                   contained={true}
-                  editorMode="json"
+                  editorMode="cmsWidget"
                   initialValue={this.props.value.toJS?.()}
                 />
               </QueryClientProvider>

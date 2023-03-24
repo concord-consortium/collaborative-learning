@@ -5,7 +5,7 @@ import { ProblemDocument } from "../models/document/document-types";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { EditableDocumentContent } from "./document/editable-document-content";
 
-type editorModes = "file" | "json";
+type editorModes = "file" | "cmsWidget";
 interface IProps {
   appConfig: AppConfigModelType;
   contained?: boolean;
@@ -66,9 +66,8 @@ export const DocEditorApp = ({ appConfig, contained, editorMode, initialValue }:
   };
 
   useEffect(() => {
-    if (_editorMode === "json" && !loadedInitialValue && initialValue) {
-      console.log(`setting initial value`, initialValue);
-      updateSectionSnapshot(initialValue);
+    if (_editorMode === "cmsWidget" && !loadedInitialValue && initialValue) {
+      updateSectionSnapshot({ content: initialValue });
       setLoadedInitialValue(true);
     }
   }, [_editorMode, loadedInitialValue, initialValue]);
