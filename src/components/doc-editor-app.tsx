@@ -7,8 +7,9 @@ import { EditableDocumentContent } from "./document/editable-document-content";
 
 interface IProps {
   appConfig: AppConfigModelType;
+  contained?: boolean;
 }
-export const DocEditorApp = ({ appConfig }: IProps) => {
+export const DocEditorApp = ({ appConfig, contained }: IProps) => {
   const [document, setDocument] = useState(() => {
     const rowId = "row1";
     const tileId = "tile1";
@@ -94,6 +95,7 @@ export const DocEditorApp = ({ appConfig }: IProps) => {
       <button onClick={handleOpen}>open</button>
       <button onClick={handleSave}>save</button>
       <EditableDocumentContent
+        contained={contained}
         mode="1-up"
         isPrimary={true}
         readOnly={false}

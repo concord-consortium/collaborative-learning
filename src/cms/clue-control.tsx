@@ -153,7 +153,7 @@ export class ClueControl extends React.Component<IProps, IState>  {
           <Provider stores={this.state.stores}>
             <ModalProvider>
               <QueryClientProvider client={this.state.queryClient}>
-                <DocEditorApp appConfig={appConfig} />
+                <DocEditorApp appConfig={appConfig} contained={true} />
               </QueryClientProvider>
             </ModalProvider>
           </Provider>
