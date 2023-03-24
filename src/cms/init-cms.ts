@@ -36,8 +36,10 @@ const cmsConfig: CmsConfig = {
   load_config_file: false,
   ...cmsBackend(),
   media_folder: urlParams.unit ? `curriculum/${urlParams.unit}/images` : `curriculum/images`,
-  // public_folder: urlParams.unit ? `/${urlParams.unit}/images` : `curriculum/images`,
-  public_folder: `${urlParams.unit}/images`,
+  // The public_folder setting doesn't apply to the top level "Media" dialog.
+  // It is configured here for documentation, and in case we start using
+  // the media api within out CLUE editor
+  public_folder: urlParams.unit ? `${urlParams.unit}/images` : `images`,
   collections: [
     {
       name: "sections",
@@ -46,12 +48,10 @@ const cmsConfig: CmsConfig = {
       identifier_field: "type",
       format: "json",
       folder: urlParams.unit ? `curriculum/${urlParams.unit}` : `curriculum`,
-      public_folder: `${urlParams.unit}/images`,
       // create: true
       // adding a nested object will show the collection folder structure
       nested: {
         depth: 6, // max depth to show in the collection tree
-        // summary: "{{title}}" // optional summary for a tree node, defaults to the inferred title field
       },
       fields: [
         {
