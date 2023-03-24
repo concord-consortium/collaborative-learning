@@ -38,8 +38,6 @@ export interface IImageContext {
 }
 export interface IImageBaseOptions {
   filename?: string;
-  unitCodeMap?: Record<string, string>;
-  uniturl?: string;
 }
 export interface IImageHandlerStoreOptions extends IImageBaseOptions {
   db?: DB;
@@ -52,7 +50,6 @@ export interface IImageHandlerStoreResult {
 }
 interface IImageMap {
   unitCodeMap?: IMSTMap<ISimpleType<string>>;
-  unitUrl?: string;
   curriculumUrl?: string;
 }
 export interface IImageHandler {
@@ -469,7 +466,7 @@ export const localAssetsImagesHandler: IImageHandler = {
     // If curriculumUrl is defined and the image isn't in CLUE's own assets directory,
     // build an absolute URL for the displayUrl.
     const displayUrl = this.imageMap.curriculumUrl && !/^assets\//.test(_url)
-                         ? new URL(`../${_url}`, this.imageMap.unitUrl).href
+                         ? new URL(_url, this.imageMap.curriculumUrl).href
                          : getAssetUrl(_url);
     return { contentUrl: _url, displayUrl, success: true };
   },
