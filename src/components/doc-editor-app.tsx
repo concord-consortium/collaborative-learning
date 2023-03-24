@@ -7,15 +7,15 @@ import { createDocumentModel } from "../models/document/document";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { DocumentContentSnapshotType } from "../models/document/document-content";
 
-type editorModes = "file" | "cmsWidget";
-interface IProps {
+export type editorModes = "file" | "cmsWidget";
+export interface IDocEditorAppProps {
   appConfig: AppConfigModelType;
   contained?: boolean;
   editorMode?: editorModes;
   initialValue?: any;
   onChange?: (value: any) => void;
 }
-export const DocEditorApp = ({ appConfig, contained, editorMode, initialValue, onChange }: IProps) => {
+export const DocEditorApp = ({ appConfig, contained, editorMode, initialValue, onChange }: IDocEditorAppProps) => {
   const _editorMode = editorMode ?? "file";
   const [document, setDocument] = useState(() => {
     return createDocumentModel(defaultDocumentModel);
