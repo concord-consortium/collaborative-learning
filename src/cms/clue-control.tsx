@@ -114,10 +114,8 @@ export class ClueControl extends React.Component<IProps, IState>  {
     // this.state = {valueString};
     this.state = {};
 
-    console.log(`initializing app`);
     initializeApp().then((appProperties: IAppProperties) => {
       this.setState(appProperties);
-      console.log(`app initialized`);
     });
   }
 
@@ -153,7 +151,12 @@ export class ClueControl extends React.Component<IProps, IState>  {
           <Provider stores={this.state.stores}>
             <ModalProvider>
               <QueryClientProvider client={this.state.queryClient}>
-                <DocEditorApp appConfig={appConfig} contained={true} editorMode="json" />
+                <DocEditorApp
+                  appConfig={appConfig}
+                  contained={true}
+                  editorMode="json"
+                  initialValue={this.props.value.toJS?.()}
+                />
               </QueryClientProvider>
             </ModalProvider>
           </Provider>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SectionModel } from "../models/curriculum/section";
 import { createDocumentModel } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
@@ -10,8 +10,9 @@ interface IProps {
   appConfig: AppConfigModelType;
   contained?: boolean;
   editorMode?: editorModes;
+  initialValue?: any;
 }
-export const DocEditorApp = ({ appConfig, contained, editorMode }: IProps) => {
+export const DocEditorApp = ({ appConfig, contained, editorMode, initialValue }: IProps) => {
   const _editorMode = editorMode ?? "file";
   const [document, setDocument] = useState(() => {
     const rowId = "row1";
@@ -48,14 +49,9 @@ export const DocEditorApp = ({ appConfig, contained, editorMode }: IProps) => {
   const [fileHandle, setFileHandle] = useState<FileSystemHandle|undefined>();
   const [sectionSnapshot, setSectionSnapshot] = useState<any>();
 
-  // The most useful files to edit like this are currently sections
-  // so lets work with those
-  async function handleOpen() {
-    const [_fileHandle] = await (window as any).showOpenFilePicker();
-    setFileHandle(_fileHandle);
-    const file = await _fileHandle.getFile();
-    const text = await file.text();
-    const _sectionSnapshot = JSON.parse(text);
+  const [loadedInitialValue, setLoadedInitialValue] = useState(false);
+
+  const updateSectionSnapshot = (_sectionSnapshot: any) => {
     setSectionSnapshot(_sectionSnapshot);
     const documentContentSnapshot = _sectionSnapshot.content;
     setDocument(createDocumentModel({
@@ -67,6 +63,25 @@ export const DocEditorApp = ({ appConfig, contained, editorMode }: IProps) => {
       visibility: "public",
       content: documentContentSnapshot
     }));
+  };
+
+  useEffect(() => {
+    if (_editorMode === "json" && !loadedInitialValue && initialValue) {
+      console.log(`setting initial value`, initialValue);
+      updateSectionSnapshot(initialValue);
+      setLoadedInitialValue(true);
+    }
+  }, [_editorMode, loadedInitialValue, initialValue]);
+
+  // The most useful files to edit like this are currently sections
+  // so lets work with those
+  async function handleOpen() {
+    const [_fileHandle] = await (window as any).showOpenFilePicker();
+    setFileHandle(_fileHandle);
+    const file = await _fileHandle.getFile();
+    const text = await file.text();
+    const _sectionSnapshot = JSON.parse(text);
+    updateSectionSnapshot(_sectionSnapshot);
   }
 
   async function handleSave() {
