@@ -180,8 +180,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     if (mode === 2){ //clear dataset
       const dataSet = model.dataSet;
       const allCases = model.dataSet.cases;
+      const allAttributes = model.dataSet.attributes;
       const allIdsToRemove = allCases.map(({__id__}) =>( __id__));
-      dataSet.removeCases(allIdsToRemove);
+      dataSet.removeCases(allIdsToRemove); //remove all cases
+
+      allAttributes.forEach((attr)=>{
+        dataSet.removeAttribute(attr.id); //remove all attributes
+      });
+
     }
 
     this.setState({

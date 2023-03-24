@@ -550,8 +550,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     let processNeeded = false;
 
-
-    const model = this.props.tileModel;
     const existingAttributes = this.props.tileModel.existingAttributes();
     this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes, caseId, );
 

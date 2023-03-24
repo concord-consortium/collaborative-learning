@@ -10,9 +10,9 @@ import { TileContentModel } from "../../../models/tiles/tile-content";
 import { DEFAULT_DATA_RATE } from "./utilities/node";
 import { getTileModel, setTileTitleFromContent } from "../../../models/tiles/tile-model";
 import { SharedDataSet, kSharedDataSetType, SharedDataSetType  } from "../../../models/shared/shared-data-set";
-import { addAttributeToDataSet, addCasesToDataSet, addCanonicalCasesToDataSet, DataSet, ICase } from "../../../models/data/data-set";
+import { addAttributeToDataSet, addCasesToDataSet, DataSet, ICase } from "../../../models/data/data-set";
 import { updateSharedDataSetColors } from "../../../models/shared/shared-data-set-colors";
-import { uniqueId, uniqueTitle } from "../../../utilities/js-utils";
+import { uniqueId } from "../../../utilities/js-utils";
 import { SharedModelType } from "src/models/shared/shared-model";
 
 export const kDataflowTileType = "Dataflow";
@@ -25,8 +25,7 @@ export const kDataflowDefaultHeight = 480;
 export const kDefaultLabel = "Dataflow Node";
 
 
-export function defaultDataSet() { //added
-  // as per slack discussion, default attribute is added automatically
+export function defaultDataSet() {
   const dataSet = DataSet.create();
   addAttributeToDataSet(dataSet, { name: kDefaultLabel });
   addCasesToDataSet(dataSet, [{ [kDefaultLabel]: "" }]);
@@ -51,7 +50,7 @@ export const DataflowContentModel = TileContentModel
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
-    emptyDataSet: DataSet.create() //added
+    emptyDataSet: DataSet.create()
   }))
   .views(self => ({
     get sharedModel() {
@@ -80,7 +79,7 @@ export const DataflowContentModel = TileContentModel
       return { values: newValues, ...rest };
     }
   }))
-  .views(self => ({ //added
+  .views(self => ({
     get dataSet(){
       return self.sharedModel?.dataSet || self.emptyDataSet;
     }
@@ -110,7 +109,6 @@ export const DataflowContentModel = TileContentModel
         `}`
       ].join("\n");
     },
-    //added (not used )
     existingAttributesWithNames(){
       return self.dataSet.attributes.map((a) => {
         return { "attrName": a.name, "attrId": a.id };
@@ -128,13 +126,12 @@ export const DataflowContentModel = TileContentModel
     }
   }))
   .actions(self => ({
-    afterAttach() { //     //added built-in hook is called on every model right after added to the tree
+    afterAttach() { //
       // Monitor our parents and update our shared model when we have a document parent
       addDisposer(self, reaction(() => {
         // disposers call the function passed to it when model is disposed
         // and here we pass a reaction, which is a mobx thing that watches the stuff in the first argument
         // it calls second argument when first is done
-
         // looking in the tileEnv for the shared modelManager - "environment" is a mobx context,
         // but must be set at root of tree
         // tile env proxies the actual mechanism
@@ -164,10 +161,6 @@ export const DataflowContentModel = TileContentModel
         if (sharedDataSet && tileSharedModels?.includes(sharedDataSet)) {
           // The shared model has already been registered by a client, but as the
           // "owner" of the data, we synchronize it with our local content.
-          // if (!self.importedDataSet.isEmpty) {
-          //   sharedDataSet.dataSet = DataSet.create(getSnapshot(self.importedDataSet));
-          //   self.clearImportedDataSet();
-          // }
         }
         else {
           if (!sharedDataSet) {

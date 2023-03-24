@@ -49,8 +49,6 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
       const timer = setInterval(() => {
         startTimer && timerSec.current++;
         startTimer && sliderSec.current++;
-        console.log("timerSec:", timerSec.current);
-        console.log("sliderSec:", sliderSec.current);
         if (timerSec.current === 60){
           timerMin.current++;
           timerSec.current = 0;
