@@ -41,7 +41,7 @@ describe("ConfigurationManager", () => {
 
   it("can get URLs for remote curriculum content from a unit code", () => {
     const appConfig = AppConfigModel.create({
-      curriculumBaseUrl: "https://curriculum.example.com/",
+      curriculumBaseUrl: "https://curriculum.example.com",
       config: unitConfigDefaults
     });
     const exampleUnitCode = "example-unit-code";
