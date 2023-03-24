@@ -31,8 +31,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates,
     dataRate, onRateSelectClick, onRecordDataChange, programRecordState, numNodes } = props;
 
-  const [finished, setFinished] = useState(false);
-  const handleFinished = (isFinished: boolean) => isFinished && setFinished(true);
 
   // Of the boards tested, only authentic Arduinos (usbProductId === 67) raise the browser `connect` event
   // Which we use to track physical connection independently of port state
@@ -95,8 +93,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
             programRecordState={programRecordState}
             numNodes={numNodes}
             onRecordDataChange={onRecordDataChange}
-            finished={finished}
-            handleFinished={handleFinished}
           />
           <RecordStopOrClearButton
             programRecordState={programRecordState}
@@ -120,8 +116,6 @@ interface IRateSelectorProps {
   readOnly: boolean;
   programRecordState: number;
   numNodes: number;
-  finished: boolean;
-  handleFinished: (isFinished: boolean)=> void;
   onRecordDataChange: () => void;
 }
 
@@ -135,7 +129,7 @@ function formatTime(seconds: number) {
 
 const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState,
-          numNodes, handleFinished, onRecordDataChange} = props;
+          numNodes, onRecordDataChange} = props;
 
   /* ==[ Total Recording Time  - Calculate] format as "MMM:SS" */
   const totalTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
@@ -143,34 +137,39 @@ const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
 
   /* ==[ Timer Recording Time  - Calculate] format as "MMM:SS" */
   const timerMin = useRef(0);
+  const sliderSec = useRef(0); //this does not wrap around 60 and is used for the slider/total seconds
   const timerSec = useRef(0); //seconds that have passed after hitting Record
   const formattedMin = timerMin.current.toString().padStart(3, "0");
   const formattedSec = timerSec.current.toString().padStart(2, "0");
   const formattedTime = `${formattedMin}:${formattedSec}`;
 
   /* ==[ Timer - Enable ] == */
-  const startTimer = numNodes > 0 && timerSec.current < totalTimeSec && (programRecordState === 1);
+  const startTimer = numNodes > 0 && sliderSec.current < totalTimeSec && (programRecordState === 1);
 
   useEffect(()=>{
-    const timer = setInterval(() => {
-      startTimer && timerSec.current++;
-      if (timerSec.current === 60){
-        timerMin.current++;
-        timerSec.current = 0;
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timerSec, startTimer]);
+    if (startTimer){
+      const timer = setInterval(() => {
+        startTimer && timerSec.current++;
+        startTimer && sliderSec.current++;
+        console.log("timerSec:", timerSec.current);
+        console.log("sliderSec:", sliderSec.current);
+        if (timerSec.current === 60){
+          timerMin.current++;
+          timerSec.current = 0;
+        }
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [timerSec, startTimer, sliderSec]);
 
   /* ==[ Timer - Reset ] == */
   if (programRecordState === 0) {
     timerSec.current = 0;
     timerMin.current = 0;
+    sliderSec.current = 0;
   }
 
-  if(timerSec.current >= totalTimeSec){
-    handleFinished(true);
+  if(sliderSec.current === totalTimeSec && programRecordState === 1){
     onRecordDataChange();
   }
 
@@ -186,11 +185,12 @@ const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
         {
           programRecordState ?
           <div className="slider-container">
+
             <Slider
               min={0}
               max={totalTimeSec}
               step={1}
-              value={timerSec.current}
+              value={sliderSec.current}
               ref={railRef}
             />
           </div>

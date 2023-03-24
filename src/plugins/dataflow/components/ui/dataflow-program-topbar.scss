@@ -1,7 +1,7 @@
 @import "../../../../components/vars";
 @import "../dataflow-vars";
 
-$topbar-height: 44px;
+$topbar-height: 44px; //used to be 44
 $topbar-color: $gray-light;
 $duration-label-back: $gray-mid;
 $gray-text: #242424;
@@ -14,8 +14,7 @@ $gray-text: #242424;
   flex: 0 0 $topbar-height;
   background-color: $topbar-color;
   border: solid 2px #ffffff;
-
-
+  height: 60px;
 
   .topbar-icon {
     display: flex;
@@ -396,7 +395,6 @@ $gray-text: #242424;
 
         .record-data-txt{
           width: 100%;
-          font-family: Ubuntu-Regular;
           font-size: 14px;
           font-weight: normal;
           font-stretch: normal;
