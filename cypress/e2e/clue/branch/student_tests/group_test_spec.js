@@ -1,10 +1,16 @@
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import TextToolTile from '../../../../support/elements/clue/TextToolTile';
 import TeacherDashboard from "../../../../support/elements/clue/TeacherDashboard";
+import Canvas from '../../../../support/elements/common/Canvas';
+import ResourcesPanel from '../../../../support/elements/clue/ResourcesPanel';
+import ClueHeader from '../../../../support/elements/clue/cHeader';
 
 const clueCanvas = new ClueCanvas;
 const textToolTile = new TextToolTile;
 let dashboard = new TeacherDashboard();
+let canvas = new Canvas;
+let resourcesPanel = new ResourcesPanel;
+let header = new ClueHeader;
 
 const baseUrl = `${Cypress.config("baseUrl")}`;
 context('Test group functionalities', function(){
@@ -21,7 +27,6 @@ context('Test group functionalities', function(){
             it('will set up groups', function(){
                 cy.setupGroup(studentArr, qaGroup);
             });
-            //Skipping this test as this is very inconsistent.
             it('will add content to each student canvas', function(){
                 let i=0;
                 for (i=0; i<studentArr.length; i++){
@@ -40,7 +45,6 @@ context('Test group functionalities', function(){
                     clueCanvas.shareCanvas();//all students will share their canvas
                     cy.wait(1000);
                 }
-
             });
             it('verify 4-up view comes up correctly with students', function(){
                 clueCanvas.openFourUpView();
@@ -114,22 +118,94 @@ context('Test group functionalities', function(){
                 clueCanvas.unshareCanvas();
                 clueCanvas.getShareButton().should('have.class', 'public');
             });
-            // it('will verify canvas is visible in groupmates 4-up view', function(){ //canvas is shared during set up
-            //     cy.log('need to write this test');
-            // });
-            // it('will unshare canvas and verify canvas is not visible in groupmates 4-up view', function(){
-            //     cy.log('need to write this test');
-            // });
-            // it('restore a 4-up canvas where a groupmate has shared a canvas while it was not open', function(){
-            //     cy.log('need to write this test');
-            // });
-            // it('restore a 4-up canvas where a groupmate has unshared a canvas while it was not open', function(){
-            //     cy.log('need to write this test');
-            // });
-            // it('will open a new 4-up canvas with shared canvas from other students updated', function(){
-            //     cy.log('need to write this test');
-            // });
+            it('will verify canvas is visible in groupmates 4-up view', function(){ //canvas is shared during set up
+                cy.log('need to write this test');
+                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:18&problem=2.3');
+                cy.waitForLoad();
+                cy.wait(5000);
+                clueCanvas.openFourUpView();
+                clueCanvas.getFourToOneUpViewToggle().should('be.visible');
+                cy.get('.canvas-area .four-up .canvas-container.north-west').should('be.visible').and('not.contain','not shared their workspace');
+                clueCanvas.getNorthEastCanvas().should('be.visible').and('not.contain','not shared their workspace');
+                clueCanvas.getSouthEastCanvas().should('be.visible').and('not.contain','not shared their workspace');
+                clueCanvas.getSouthWestCanvas().should('be.visible').and('not.contain','not shared their workspace');
+            });
+            it('will unshare canvas and verify canvas is not visible in groupmates 4-up view', function(){
+                cy.log('need to write this test');
+                clueCanvas.shareCanvas();
+                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:15&problem=2.3');
+                cy.waitForLoad();
+                cy.wait(5000);
+                clueCanvas.openFourUpView();
+                clueCanvas.getFourToOneUpViewToggle().should('be.visible');
+                clueCanvas.getSouthWestCanvas().should('be.visible').and('contain','Student 18 has not shared their workspace.');
+            });
+            it('restore a 4-up canvas where a groupmate has shared a canvas while it was not open', function(){
+                let copyTitle = 'Workspace Copy Document';
+                canvas.copyDocument(copyTitle);
+                canvas.getPersonalDocTitle().should('contain', copyTitle);
+                cy.openTopTab("my-work");
+                cy.openSection("my-work", "workspaces");
+                resourcesPanel.getCanvasItemTitle('my-work', 'workspaces').should('contain', copyTitle);
+                cy.openDocumentWithTitle('my-work', 'workspaces', copyTitle);
+                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:18&problem=2.3');
+                cy.waitForLoad();
+                cy.wait(5000);
+                clueCanvas.openFourUpView();
+                clueCanvas.getFourToOneUpViewToggle().should('be.visible');
+                clueCanvas.getNorthEastCanvas().should('contain', 'S15');
+                clueCanvas.getNorthEastCanvas().should('be.visible').and('not.contain','not shared their workspace');        
+                clueCanvas.shareCanvas();
+                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:15&problem=2.3');
+                cy.waitForLoad();
+                cy.wait(5000);
+                clueCanvas.openFourUpView();
+                clueCanvas.getFourToOneUpViewToggle().should('be.visible');
+                clueCanvas.getSouthWestCanvas().should('contain', 'S18');
+                clueCanvas.getSouthWestCanvas().should('be.visible').and('not.contain','not shared their workspace');
+            });
+            it('restore a 4-up canvas where a groupmate has unshared a canvas while it was not open', function(){
+                cy.log('need to write this test');
+                let copyTitle = 'Workspace Copy Document';
+                cy.openTopTab("my-work");
+                cy.openSection("my-work", "workspaces");
+                resourcesPanel.getCanvasItemTitle('my-work', 'workspaces').should('contain', copyTitle);
+                cy.openDocumentWithTitle('my-work', 'workspaces', copyTitle);
+                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:18&problem=2.3');
+                cy.waitForLoad();
+                cy.wait(5000);
+                clueCanvas.openFourUpView();
+                clueCanvas.getFourToOneUpViewToggle().should('be.visible');
+                clueCanvas.getNorthEastCanvas().should('contain', 'S15');
+                clueCanvas.getNorthEastCanvas().should('be.visible').and('not.contain','not shared their workspace');        
+                clueCanvas.shareCanvas();
+                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:15&problem=2.3');
+                cy.waitForLoad();
+                cy.wait(5000);
+                clueCanvas.openFourUpView();
+                clueCanvas.getFourToOneUpViewToggle().should('be.visible');
+                clueCanvas.getSouthWestCanvas().should('contain', 'S18');
+                clueCanvas.getSouthWestCanvas().should('be.visible').and('contain','Student 18 has not shared their workspace.');
+                header.leaveGroup();
+
+            });
+            it('will open a new 4-up canvas with shared canvas from other students updated', function(){
+                cy.log('need to write this test');
+                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:18&problem=2.3');
+                cy.waitForLoad();
+                cy.wait(5000);
+                clueCanvas.shareCanvas();
+                //add new student to the group
+                cy.visit(baseUrl+'?appMode=qa&qaGroup='+qaGroup+'&fakeClass='+qaClass+'&fakeUser=student:19&problem=2.3');
+                cy.waitForLoad();
+                cy.wait(5000);
+                clueCanvas.openFourUpView();
+                clueCanvas.getFourToOneUpViewToggle().should('be.visible');
+                clueCanvas.getSouthWestCanvas().should('contain', 'S18');
+                clueCanvas.getSouthWestCanvas().should('be.visible').and('not.contain','not shared their workspace');
+            });
         });
+
         describe('4-up view read-only', function(){
             it('students to check each others tiles in 4-up view read-only', function(){
                 let i=0;
@@ -159,6 +235,7 @@ context('Test group functionalities', function(){
 
             });
         });
+
         // describe.skip('test copy and paste from another canvas to another canvas', function(){
         //     it('verify that student can copy text field from another student canvas into own', function(){
         //         cy.log('need to write this test');

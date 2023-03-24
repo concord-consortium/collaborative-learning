@@ -24,7 +24,6 @@ describe('verify document curation', function() {//adding a star to a student do
     let studentDoc = "Student 5: SAS 2.1 Drawing Wumps";
 
     it('verify starring a student published investigation',function(){
-        // cy.openResourceTab();
         cy.openTopTab('class-work');
         cy.openSection('class-work','workspaces');
         resourcesPanel.starCanvasItem('class-work','workspaces',studentDoc);

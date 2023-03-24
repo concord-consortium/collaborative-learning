@@ -47,7 +47,6 @@ context('Graph Table Integration', function () {
         tableToolTile.getTableCell().eq(17).click();
       });
       clueCanvas.addTile('geometry');
-      // clueCanvas.deleteTile('text');
       textToolTile.deleteTextTile();
     });
     describe('Link graph dialog', () => {

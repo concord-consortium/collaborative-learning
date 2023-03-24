@@ -19,14 +19,12 @@ context('Teacher Support', function() {
         cy.waitForLoad();
         dashboard.switchView("Workspace & Resources");
         cy.wait(2000);
-        // cy.closeResourceTabs();
     });
 
     describe('verify supports functionality', function() {
         it('will verify publish of support appears in Class Work>Workspaces',function(){
             clueCanvas.addTile('table');
             clueCanvas.publishDoc("This Class");
-            // cy.get(".collapsed-resources-tab.my-work").click();
             cy.openTopTab("class-work");
             cy.openSection('class-work','workspaces');
             resourcesPanel.getCanvasItemTitle('class-work','workspaces').should('contain',title);
@@ -39,7 +37,6 @@ context('Teacher Support', function() {
 
               cy.visit(queryParams);
               cy.waitForLoad();
-            //   cy.openResourceTabs();
               cy.openTopTab("class-work");
               cy.openSection('class-work', 'workspaces');
               cy.getCanvasItemTitle('workspaces', title).should('be.visible');

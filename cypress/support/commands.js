@@ -31,6 +31,9 @@ import TeacherDashboard from "./elements/clue/TeacherDashboard";
 import 'cypress-file-upload';
 import 'cypress-commands';
 import ResourcesPanel from "./elements/clue/ResourcesPanel";
+import ClueCanvas from './elements/clue/cCanvas';
+
+const clueCanvas = new ClueCanvas;
 
 Cypress.Commands.add("setupGroup", (students, group) => {
     let qaClass = 10,
@@ -46,6 +49,7 @@ Cypress.Commands.add("setupGroup", (students, group) => {
         cy.waitForLoad();
         header.getGroupName().should('contain','Group '+group);
         header.getGroupMembers().find('div.member').should('contain','S'+students[i]);
+        clueCanvas.shareCanvas();
     }
     // Verify Group num and the correct 4 students are listed, now that all 4 are loaded
     header.getGroupName().should('contain','Group '+group);
