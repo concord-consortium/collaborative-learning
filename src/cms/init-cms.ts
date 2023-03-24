@@ -63,7 +63,7 @@ const cmsConfig: CmsConfig = {
         {
           label: "Content",
           name: "content",
-          widget: "json" as any
+          widget: "clue" as any
         }
       ],
       // adding a meta object with a path property allows editing the path of entries
