@@ -1,6 +1,7 @@
 import "ts-polyfill";
 
 import React from "react";
+import ReactDOM from "react-dom";
 import { Provider } from "mobx-react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { setLivelinessChecking } from "mobx-state-tree";
@@ -8,6 +9,7 @@ import { ModalProvider } from "@concord-consortium/react-modal-hook";
 
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
 import { AppConfigContext } from "./app-config-context";
+import { QAClear } from "./components/qa-clear";
 import { DocEditorApp, IDocEditorAppProps } from "./components/doc-editor-app";
 import { AppConfigModel } from "./models/stores/app-config-model";
 import { IStores, setUnitAndProblem } from "./models/stores/stores";
@@ -24,8 +26,6 @@ import "./index.scss";
 
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
-
-(window as any).DISABLE_FIREBASE_SYNC = true;
 
 const appConfig = AppConfigModel.create(appConfigSnapshot);
 
@@ -52,9 +52,13 @@ export const initializeApp = async () => {
     (window as any).stores = stores;
   }
 
-  // TODO: It'd be better to have another way to do this since we are just editing a document.
-  // However we do want to support configuring which tools to use based on a unit and problem.
-  // So for the time being this approach lets us do that via url parameters.
+  if (appMode === "qa" && urlParams.qaClear === "all") {
+    ReactDOM.render(
+      <QAClear />,
+      document.getElementById("app")
+    );
+  }
+
   await setUnitAndProblem(stores, unitId, problemOrdinal);
 
   gImageMap.initialize(stores.db);

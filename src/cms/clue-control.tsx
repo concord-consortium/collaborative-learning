@@ -7,6 +7,8 @@ import { IStores } from "../models/stores/stores";
 
 import "./clue-control.scss";
 
+(window as any).DISABLE_FIREBASE_SYNC = true;
+
 // There is a CmsWidgetControlProps type, but it doesn't seem to be
 // exported by DecapCMS
 interface IProps {
