@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { SectionModel } from "../models/curriculum/section";
+import { onSnapshot } from "mobx-state-tree";
 import { createDocumentModel } from "../models/document/document";
 import { ProblemDocument } from "../models/document/document-types";
 import { AppConfigModelType } from "../models/stores/app-config-model";
@@ -11,8 +11,9 @@ interface IProps {
   contained?: boolean;
   editorMode?: editorModes;
   initialValue?: any;
+  onChange?: (value: any) => void;
 }
-export const DocEditorApp = ({ appConfig, contained, editorMode, initialValue }: IProps) => {
+export const DocEditorApp = ({ appConfig, contained, editorMode, initialValue, onChange }: IProps) => {
   const _editorMode = editorMode ?? "file";
   const [document, setDocument] = useState(() => {
     const rowId = "row1";
@@ -65,12 +66,26 @@ export const DocEditorApp = ({ appConfig, contained, editorMode, initialValue }:
     }));
   };
 
+  // Load the initial value once
   useEffect(() => {
     if (_editorMode === "cmsWidget" && !loadedInitialValue && initialValue) {
       updateSectionSnapshot({ content: initialValue });
       setLoadedInitialValue(true);
     }
   }, [_editorMode, loadedInitialValue, initialValue]);
+
+  // Update the widget's value whenever a change is made to the document's content
+  useEffect(() => {
+    const cleanup = _editorMode === "cmsWidget" && onChange && document.content
+      ? onSnapshot(document.content, snapshot => {
+          const json = document.content?.exportAsJson();
+          if (json) {
+            onChange(JSON.parse(json));
+          }
+        })
+      : undefined;
+    return () => cleanup?.();
+  }, [document.content, _editorMode, onChange]);
 
   // The most useful files to edit like this are currently sections
   // so lets work with those

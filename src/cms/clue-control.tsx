@@ -156,6 +156,7 @@ export class ClueControl extends React.Component<IProps, IState>  {
                   contained={true}
                   editorMode="cmsWidget"
                   initialValue={this.props.value.toJS?.()}
+                  onChange={this.props.onChange}
                 />
               </QueryClientProvider>
             </ModalProvider>
