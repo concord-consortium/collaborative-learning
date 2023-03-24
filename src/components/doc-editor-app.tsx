@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { onSnapshot } from "mobx-state-tree";
-import { createDocumentModel } from "../models/document/document";
-import { ProblemDocument } from "../models/document/document-types";
-import { AppConfigModelType } from "../models/stores/app-config-model";
+
+import { defaultDocumentModel, defaultDocumentModelParts } from "./doc-editor-app-defaults";
 import { EditableDocumentContent } from "./document/editable-document-content";
+import { createDocumentModel } from "../models/document/document";
+import { AppConfigModelType } from "../models/stores/app-config-model";
+import { DocumentContentSnapshotType } from "../models/document/document-content";
 
 type editorModes = "file" | "cmsWidget";
 interface IProps {
@@ -16,36 +18,7 @@ interface IProps {
 export const DocEditorApp = ({ appConfig, contained, editorMode, initialValue, onChange }: IProps) => {
   const _editorMode = editorMode ?? "file";
   const [document, setDocument] = useState(() => {
-    const rowId = "row1";
-    const tileId = "tile1";
-    return createDocumentModel({
-      type: ProblemDocument,
-      title: "test",
-      uid: "1",
-      key: "test",
-      createdAt: 1,
-      visibility: "public",
-      content: {
-        rowMap: {
-          [rowId]: {
-            id: rowId,
-            tiles: [{ tileId }]
-          }
-        },
-        rowOrder: [
-          rowId
-        ],
-        tileMap: {
-          [tileId]: {
-            id: tileId,
-            content: {
-              type: "Text",
-              text: "Welcome to the standalone document editor"
-            }
-          }
-        }
-      }
-    });
+    return createDocumentModel(defaultDocumentModel);
   });
   const [fileHandle, setFileHandle] = useState<FileSystemHandle|undefined>();
   const [sectionSnapshot, setSectionSnapshot] = useState<any>();
@@ -54,19 +27,14 @@ export const DocEditorApp = ({ appConfig, contained, editorMode, initialValue, o
 
   const updateSectionSnapshot = (_sectionSnapshot: any) => {
     setSectionSnapshot(_sectionSnapshot);
-    const documentContentSnapshot = _sectionSnapshot.content;
+    const documentContentSnapshot = _sectionSnapshot.content as DocumentContentSnapshotType;
     setDocument(createDocumentModel({
-      type: ProblemDocument,
-      title: "test",
-      uid: "1",
-      key: "test",
-      createdAt: 1,
-      visibility: "public",
+      ...defaultDocumentModelParts,
       content: documentContentSnapshot
     }));
   };
 
-  // Load the initial value once
+  // Load the initial value for widget once
   useEffect(() => {
     if (_editorMode === "cmsWidget" && !loadedInitialValue && initialValue) {
       updateSectionSnapshot({ content: initialValue });

@@ -82,10 +82,6 @@ const initializeApp = async () => {
   return { queryClient, stores };
 };
 
-initializeApp();
-
-/****** */
-
 // There is a CmsWidgetControlProps type, but it doesn't seem to be
 // exported by DecapCMS
 interface IProps {
