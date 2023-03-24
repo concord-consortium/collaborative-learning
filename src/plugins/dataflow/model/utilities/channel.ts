@@ -80,8 +80,8 @@ function createMicroBitChannels(sensors: MicroBitSensorChannelInfo[] ){
     return {
       ...basis,
       hubId: `MICROBIT-RADIO-${s.microBitId}`,
-      hubName: `micro:bit ${s.microBitId} ${s.type}`,
-      name: `${s.type}-${s.microBitId}`,
+      hubName: `micro:bit ${s.microBitId}`,
+      name: `${s.type}-micro:bit-${s.microBitId}`,
       channelId: `${s.type}-${s.microBitId}`,
       type: `${s.type}`,
       units: `${s.units}`,
