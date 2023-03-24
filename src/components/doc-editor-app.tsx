@@ -5,11 +5,14 @@ import { ProblemDocument } from "../models/document/document-types";
 import { AppConfigModelType } from "../models/stores/app-config-model";
 import { EditableDocumentContent } from "./document/editable-document-content";
 
+type editorModes = "file" | "json";
 interface IProps {
   appConfig: AppConfigModelType;
   contained?: boolean;
+  editorMode?: editorModes;
 }
-export const DocEditorApp = ({ appConfig, contained }: IProps) => {
+export const DocEditorApp = ({ appConfig, contained, editorMode }: IProps) => {
+  const _editorMode = editorMode ?? "file";
   const [document, setDocument] = useState(() => {
     const rowId = "row1";
     const tileId = "tile1";
@@ -92,8 +95,12 @@ export const DocEditorApp = ({ appConfig, contained }: IProps) => {
 
   return (
     <>
-      <button onClick={handleOpen}>open</button>
-      <button onClick={handleSave}>save</button>
+      { _editorMode === "file" && (
+        <>
+          <button onClick={handleOpen}>open</button>
+          <button onClick={handleSave}>save</button>
+        </>
+      ) }
       <EditableDocumentContent
         contained={contained}
         mode="1-up"

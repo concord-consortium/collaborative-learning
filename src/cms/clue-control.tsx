@@ -21,7 +21,7 @@ import { gImageMap } from "../models/image-map";
 import PackageJson from "../../package.json";
 import { DocEditorApp } from "../components/doc-editor-app";
 
-import "./json-control.scss";
+import "./clue-control.scss";
 import "../index.scss";
 
 // set to true to enable MST liveliness checking
@@ -153,7 +153,7 @@ export class ClueControl extends React.Component<IProps, IState>  {
           <Provider stores={this.state.stores}>
             <ModalProvider>
               <QueryClientProvider client={this.state.queryClient}>
-                <DocEditorApp appConfig={appConfig} contained={true} />
+                <DocEditorApp appConfig={appConfig} contained={true} editorMode="json" />
               </QueryClientProvider>
             </ModalProvider>
           </Provider>
@@ -161,7 +161,7 @@ export class ClueControl extends React.Component<IProps, IState>  {
       );
     }
 
-    return null;
+    return <div className="loading-box">Loading editor...</div>;
   }
 }
 
