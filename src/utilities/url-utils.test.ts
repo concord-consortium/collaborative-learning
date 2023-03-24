@@ -1,4 +1,4 @@
-import { isValidHttpUrl, getUnitCodeFromUrl, getCurriculumBranchFromUrl } from './url-utils';
+import { isValidHttpUrl, getUnitCodeFromUrl } from './url-utils';
 
 describe("isValidHttpUrl", () => {
   const validUrl = "https://concord.org";
@@ -18,10 +18,4 @@ describe("getUnitCodeFromUrl", () => {
   const urlWithUnitCode = "https://concord.org/curriculum/unitcode/content.json";
   const unitCode = getUnitCodeFromUrl(urlWithUnitCode);
   expect(unitCode).toBe("unitcode");
-});
-
-describe("getCurriculumBranchFromUrl", () => {
-  const urlWithBranch = "https://concord.org/curriculum/branch/branch-name/unitcode/content.json";
-  const branch = getCurriculumBranchFromUrl(urlWithBranch);
-  expect(branch).toBe("branch-name");
 });

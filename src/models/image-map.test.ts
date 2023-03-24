@@ -21,7 +21,8 @@ function unsafeUpdate(func: () => void) {
 }
 
 describe("ImageMap", () => {
-  const kCurriculumBaseUrl = "https://example.com/clue-curriculum/";
+  const kCurriculumUnitBaseUrl = "https://example.com/clue-curriculum/branch/main/sas";
+  const kCurriculumUnitUrl = `${kCurriculumUnitBaseUrl}/config.json`;
   const kLocalImageUrl = "assets/logo_tw.png";
   const kHttpImageUrl = "http://icon.cat/img/icon_loop.png";
   const kHttpsImageUrl = "https://icon.cat/img/icon_loop.png";
@@ -50,7 +51,7 @@ describe("ImageMap", () => {
           Promise.resolve({ src: placeholderImage, width: 200, height: 150 }));
     if (sImageMap) { destroy(sImageMap); }
     sImageMap = ImageMapModel.create();
-    sImageMap.setCurriculumBaseUrl(kCurriculumBaseUrl);
+    sImageMap.setUnitUrl(kCurriculumUnitUrl);
     sImageMap.setUnitCodeMap({"stretching-and-shrinking": "sas"});
   });
           
@@ -97,11 +98,11 @@ describe("ImageMap", () => {
     await localAssetsImagesHandler.store(kLocalImageUrl)
             .then(storeResult => {
               expect(storeResult.contentUrl).toBe(kLocalImageUrl);
-              expect(storeResult.displayUrl).toBe(`${kCurriculumBaseUrl}branch/main/${kLocalImageUrl}`);
+              expect(storeResult.displayUrl).toBe(`${kLocalImageUrl}`);
             });
     await localAssetsImagesHandler.store("curriculum/stretching-and-shrinking/images/image.png")
              .then(storeResult => {
-               expect(storeResult.displayUrl).toBe(`${kCurriculumBaseUrl}branch/main/sas/images/image.png`);
+               expect(storeResult.displayUrl).toBe(`${kCurriculumUnitBaseUrl}/images/image.png`);
              });
   });
 
@@ -395,7 +396,7 @@ describe("ImageMap", () => {
   
       const image = await firstGetImagePromise;
       expect(image.contentUrl).toBe(kLocalImageUrl);
-      expect(image.displayUrl).toBe(`${kCurriculumBaseUrl}branch/main/${kLocalImageUrl}`);
+      expect(image.displayUrl).toBe(`${kLocalImageUrl}`);
       expect(image.width).toBe(200);
       expect(image.height).toBe(150);
       expect(image.status).toBe(EntryStatus.Ready);
@@ -514,7 +515,7 @@ describe("ImageMap", () => {
       expect(returnedEntry).toEqual({
         status: EntryStatus.Ready,
         contentUrl: kLocalImageUrl,
-        displayUrl: `${kCurriculumBaseUrl}branch/main/${kLocalImageUrl}`,
+        displayUrl: `${kLocalImageUrl}`,
         height: 150,
         width: 200,
         retries: 1

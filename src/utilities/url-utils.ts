@@ -13,8 +13,3 @@ export const getUnitCodeFromUrl = (url: string) => {
   const unitCode = urlParts[urlParts.length-2];
   return unitCode;
 };
-
-export const getCurriculumBranchFromUrl = (url: string) => {
-  const urlPieces = url.match(/branch\/([^/]+)\/(.*)/);
-  return urlPieces?.[1];
-};
