@@ -45,7 +45,7 @@ export const AppConfigModel = types
     getUnit(unitId: string) {
       const unitCode = self.unitCodeMap.get(unitId) || unitId;
       const unitCodeIsUrl = isValidHttpUrl(unitCode);
-      const unitUrl = unitCodeIsUrl ? unitCode : `${self.curriculumBaseUrl}branch/main/${unitCode}/content.json`;
+      const unitUrl = unitCodeIsUrl ? unitCode : `${self.curriculumBaseUrl}/branch/main/${unitCode}/content.json`;
       const teacherGuideUrl = unitUrl.replace(/content\.json$/, "teacher-guide/content.json");
       gImageMap.setUnitUrl(unitUrl);
       gImageMap.setUnitCodeMap(getSnapshot(self.unitCodeMap));

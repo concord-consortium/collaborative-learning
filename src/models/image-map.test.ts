@@ -21,8 +21,8 @@ function unsafeUpdate(func: () => void) {
 }
 
 describe("ImageMap", () => {
-  const kCurriculumUnitBaseUrl = "https://example.com/clue-curriculum/branch/main/sas/";
-  const kCurriculumUnitUrl = `${kCurriculumUnitBaseUrl}config.json`;
+  const kCurriculumUnitBaseUrl = "https://example.com/clue-curriculum/branch/main/sas";
+  const kCurriculumUnitUrl = `${kCurriculumUnitBaseUrl}/config.json`;
   const kLocalImageUrl = "assets/logo_tw.png";
   const kHttpImageUrl = "http://icon.cat/img/icon_loop.png";
   const kHttpsImageUrl = "https://icon.cat/img/icon_loop.png";
@@ -102,7 +102,7 @@ describe("ImageMap", () => {
             });
     await localAssetsImagesHandler.store("curriculum/stretching-and-shrinking/images/image.png")
              .then(storeResult => {
-               expect(storeResult.displayUrl).toBe(`${kCurriculumUnitBaseUrl}images/image.png`);
+               expect(storeResult.displayUrl).toBe(`${kCurriculumUnitBaseUrl}/images/image.png`);
              });
   });
 
