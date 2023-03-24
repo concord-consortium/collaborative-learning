@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { onSnapshot } from "mobx-state-tree";
 
 import { defaultDocumentModel, defaultDocumentModelParts } from "./doc-editor-app-defaults";
@@ -23,6 +23,7 @@ export const DocEditorApp = ({ appConfig, contained, editorMode, initialValue, o
   const [fileHandle, setFileHandle] = useState<FileSystemHandle|undefined>();
   const [sectionSnapshot, setSectionSnapshot] = useState<any>();
 
+  const value = useRef("");
   const [loadedInitialValue, setLoadedInitialValue] = useState(false);
 
   const updateSectionSnapshot = (_sectionSnapshot: any) => {
@@ -38,6 +39,7 @@ export const DocEditorApp = ({ appConfig, contained, editorMode, initialValue, o
   useEffect(() => {
     if (_editorMode === "cmsWidget" && !loadedInitialValue && initialValue) {
       updateSectionSnapshot({ content: initialValue });
+      value.current = JSON.stringify(initialValue);
       setLoadedInitialValue(true);
     }
   }, [_editorMode, loadedInitialValue, initialValue]);
@@ -48,7 +50,14 @@ export const DocEditorApp = ({ appConfig, contained, editorMode, initialValue, o
       ? onSnapshot(document.content, snapshot => {
           const json = document.content?.exportAsJson();
           if (json) {
-            onChange(JSON.parse(json));
+            const parsedJson = JSON.parse(json);
+            const stringifiedJson = JSON.stringify(parsedJson);
+            // Only update when actual changes have been made.
+            // This is necessary to avoid fake changes on load.
+            if (stringifiedJson !== value.current) {
+              onChange(parsedJson);
+              value.current = stringifiedJson;
+            }
           }
         })
       : undefined;
