@@ -1,4 +1,68 @@
 # Changelog
+## Version 3.8.0 - Mar 23, 2023
+
+Version 3.8.0 features to separate clue curriculum into a separate repo, sort deck layout for data cards, m2studio curriculum changes and some bug fixes with 4-up views, variable expression behaviour, text tile jsons and geometry tiles showing incorrect areas..
+
+### Features/Improvements
+- Sort Deck control [#184552058](https://www.pivotaltracker.com/story/show/184552058)
+- Sort Deck layout [#184409509](https://www.pivotaltracker.com/story/show/184409509)
+- Add support for problem sections as separate files [#184501394](https://www.pivotaltracker.com/story/show/184501394)
+- Sort Deck Card Display [#184524377](https://www.pivotaltracker.com/story/show/184524377)
+- Select Card in Sort [#184489950](https://www.pivotaltracker.com/story/show/184489950)
+- Separate Content Repo/App Integration [#184598618](https://www.pivotaltracker.com/story/show/184598618)
+- Drag Card to fill  attribute [#184717210](https://www.pivotaltracker.com/story/show/184717210)
+- M2Studio Curriculum Changes [#184716417](https://www.pivotaltracker.com/story/show/184716417)
+- Expression toolbar on Table configurable [#183570161](https://www.pivotaltracker.com/story/show/183570161)
+
+### Bug Fixes
+- JSON without <p> tags produces uneditable copied tiles [#184491280](https://www.pivotaltracker.com/story/show/184491280)
+- Expression Variable behaviour [#184616625](https://www.pivotaltracker.com/story/show/184616625)
+- Clue geometry tiles displaying incorrect area [#184774411](https://www.pivotaltracker.com/story/show/184774411)
+- Synchronisation issue with student work in 4-up view [#180073119](https://www.pivotaltracker.com/story/show/180073119)
+
+### Asset Sizes
+| File                                                                                  | Size | % Change from Previous Release |
+| ------------------------------------------------------------------------------------- | ---- | ------------------------------ |
+| DataCard.aca7468b.js                                                                  | 25K  |                            25% |
+| Dataflow.166c697d.js                                                                  | 751K |                             0% |
+| Diagram.38b16bed.js                                                                   | 23K  |                             0% |
+| Drawing.0e84de5e.js                                                                   | 33K  |                             0% |
+| Geometry.50481d14.js                                                                  | 883K |                          0.11% |
+| Image.90b1778f.js                                                                     | 16K  |                             0% |
+| SharedDataSet.a14fff08.js                                                             | 253B |                             0% |
+| SharedVariables.97f87cb8.js                                                           | 3.7K |                             0% |
+| Starter.f2715137.js                                                                   | 1.2K |                             0% |
+| Table.c713d414.js                                                                     | 80K  |                             0% |
+| Text.3ae18473.js                                                                      | 17K  |                             0% |
+| admin.28d6b62932fe3e71ae74.js                                                         | 2.1K |                           100% |
+| common-DataCard-Diagram-SharedVariables-Drawing-Geometry-Image-Table-Text.09bbc7d4.js | 51K  |                             0% |
+| common-DataCard-Geometry-SharedDataSet-Table.bd749b9c.js                              | 9.5K |                             0% |
+| common-DataCard-Geometry-SharedDataSet-Table.c297120d.js                              | 25K  |                             0% |
+| common-Dataflow-Geometry.776cddf3.js                                                  | 26K  |                             0% |
+| common-Diagram-SharedVariables-Drawing.94ad5ce8.js                                    | 26K  |                             0% |
+| common-Diagram-SharedVariables.2a01e237.js                                            | 929K |                             0% |
+| common-Diagram-SharedVariables.a3f6982a.js                                            | 15K  |                             0% |
+| common-Geometry-Table.0292ea9f.js                                                     | 19K  |                             0% |
+| index.907efbb11b5cd0136ba3.js                                                         | 391K |                          0.51% |
+| vendor-main.6a233a54.js                                                               | 1.7M |                          5.56% |
+| vendor-main.979eaee5.js                                                               | 4.5M |                           100% |
+| vendor-main.aa25b857.js                                                               | 126K |                           100% |
+
+| File                         | Size | % Change from Previous Release |
+| ---------------------------- | ---- | ------------------------------ |
+| DataCard.1685e968.css        | 12K  |                          34.8% |
+| Dataflow.c917c0b7.css        | 36K  |                             0% |
+| Diagram.bf5cbb96.css         | 25K  |                             0% |
+| Drawing.f2022d22.css         | 5.2K |                             0% |
+| Geometry.c3149377.css        | 10K  |                             0% |
+| Image.8824771f.css           | 6.3K |                             0% |
+| SharedVariables.7e91ff38.css | 433B |                             0% |
+| Starter.08d9c960.css         | 207B |                             0% |
+| Table.b49da2f8.css           | 10K  |                             0% |
+| Text.c43cee42.css            | 1.3K |                             0% |
+| admin.8e54595b.css           | 94B  |                           100% |
+| index.ec149655.css           | 162K |                             0% |
+
 ## Version 3.7.0 - Mar 6, 2023
 
 Version 3.7.0 has bug fixes related to m2studio variable cards, updating to the latest slate editor, restricting to one diagram tile per document, shared models in curriculum sections among other features.

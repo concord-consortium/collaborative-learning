@@ -73,7 +73,7 @@ test("Pass-Through Parameters NOT being in the exclude list yields a (pre-pended
 });
 
 test("Mix of excluded/OK params yields a (pre-pended) query string with only OK ones", () => {
-  const href = "http://b.cc:8080/?passKeyPlusValue=fred&unit";
+  const href = "http://b.cc:8080/?passKeyPlusValue=fred&demoName=my-demo";
   expect(passThroughQueryItemsFromUrl(href)).toEqual("&passKeyPlusValue=fred");
 });
 
@@ -104,18 +104,18 @@ describe("DemoCreator Component", () => {
 
     // test changing classes
     expect(screen.getAllByRole("link")[0])
-      .toHaveAttribute("href", "?appMode=demo&fakeClass=1&fakeUser=student:1&unit=test&problem=1.1");
+      .toHaveAttribute("href", "?appMode=demo&fakeClass=1&fakeUser=student:1&problem=1.1");
     act(() => {
       userEvent.selectOptions(screen.getByTestId("class-select"), "2");
     });
     expect(screen.getAllByRole("link")[0])
-      .toHaveAttribute("href", "?appMode=demo&fakeClass=2&fakeUser=student:1&unit=test&problem=1.1");
+      .toHaveAttribute("href", "?appMode=demo&fakeClass=2&fakeUser=student:1&problem=1.1");
 
     // test changing problems
     act(() => {
       userEvent.selectOptions(screen.getByTestId("problem-select"), "1.2");
     });
     expect(screen.getAllByRole("link")[0])
-      .toHaveAttribute("href", "?appMode=demo&fakeClass=2&fakeUser=student:1&unit=test&problem=1.2");
+      .toHaveAttribute("href", "?appMode=demo&fakeClass=2&fakeUser=student:1&problem=1.2");
   });
 });

@@ -178,9 +178,14 @@ function getBoardBounds(axisMin?: JXGCoordPair, protoRange?: JXGCoordPair) {
   return [xAxis.min, yAxisMax, xAxisMax, yAxis.min];
 }
 
+export interface IGeometryBoardChangeOptions {
+  addBuffers?: boolean;
+  includeUnits?: boolean;
+}
 export function defaultGeometryBoardChange(
-  xAxis: AxisModelType, yAxis: AxisModelType, overrides?: JXGProperties, addBuffers?: boolean
+  xAxis: AxisModelType, yAxis: AxisModelType, overrides?: JXGProperties, options?: IGeometryBoardChangeOptions
 ) {
+  const { addBuffers, includeUnits } = options ?? {};
   const axisMin: JXGCoordPair = [xAxis.min, yAxis.min];
   const axisRange: JXGCoordPair = [xAxis.range ?? kGeometryDefaultWidth / xAxis.unit,
                                    yAxis.range ?? kGeometryDefaultHeight / yAxis.unit];
@@ -191,12 +196,14 @@ export function defaultGeometryBoardChange(
   const xMaxBufferRange = addBuffers ? kAxisBuffer / unitX : 0;
   const yBufferRange = addBuffers ? kAxisBuffer / unitY : 0;
   const boundingBox = [xMin - xMinBufferRange, yMax + yBufferRange, xMax + xMaxBufferRange, yMin - yBufferRange];
+  const units = includeUnits ? { unitX, unitY } : {};
   const change: JXGChange = {
     operation: "create",
     target: "board",
     properties: {
       axis: true,
       boundingBox,
+      ...units,
       ...overrides
     }
   };
