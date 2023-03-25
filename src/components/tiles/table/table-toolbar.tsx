@@ -3,6 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Tooltip } from "react-tippy";
 import SetExpressionIconSvg from "../../../clue/assets/icons/table/set-expression-icon.svg";
+import { useSettingFromStores } from "../../../hooks/use-stores";
 import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 
@@ -22,6 +23,8 @@ const SetExpressionButton: React.FC<ISetExpressionButtonProps> = ({ onClick }) =
   );
 };
 
+const defaultButtons = ["set-expression"];
+
 interface IProps extends IFloatingToolbarProps {
   onSetExpression: () => void;
 }
@@ -36,11 +39,24 @@ export const TableToolbar: React.FC<IProps> = observer(({
                     enabled,
                     ...others
                   });
+
+  const buttonSettings = useSettingFromStores("tools", "table") as unknown as string[] | undefined;
+  const buttons = buttonSettings || defaultButtons;
+
+  const getToolbarButton = (toolName: string) => {
+    switch (toolName) {
+      case "set-expression":
+        return <SetExpressionButton onClick={onSetExpression} />;
+    }
+  };
+
   return documentContent
     ? ReactDOM.createPortal(
         <div className={`table-toolbar ${enabled && location ? "enabled" : "disabled"}`}
             style={location} onMouseDown={e => e.stopPropagation()}>
-          <SetExpressionButton onClick={onSetExpression} />
+          {buttons.map(button => {
+            return getToolbarButton(button);
+          })}
         </div>, documentContent)
     : null;
 });
