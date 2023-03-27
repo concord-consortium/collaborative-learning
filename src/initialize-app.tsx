@@ -1,41 +1,49 @@
 import "ts-polyfill";
 
 import React from "react";
-import ReactDOM from "react-dom";
 import { Provider } from "mobx-react";
-import { QueryClient, QueryClientProvider } from "react-query";
 import { setLivelinessChecking } from "mobx-state-tree";
-import { ModalProvider } from "@concord-consortium/react-modal-hook";
 
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
 import { AppConfigContext } from "./app-config-context";
-import { QAClear } from "./components/qa-clear";
-import { DocEditorApp, IDocEditorAppProps } from "./components/doc-editor-app";
 import { AppConfigModel } from "./models/stores/app-config-model";
 import { IStores, setUnitAndProblem } from "./models/stores/stores";
 import { UserModel } from "./models/stores/user";
 import { urlParams } from "./utilities/url-params";
-import { getAppMode } from "./lib/auth";
 import { DEBUG_STORES } from "./lib/debug";
-import { Logger } from "./lib/logger";
-import { setPageTitle } from "./lib/misc";
 import { gImageMap } from "./models/image-map";
 import PackageJson from "./../package.json";
 
 import "./index.scss";
+import { AppMode } from "./models/stores/store-types";
+import { ModalProvider } from "@concord-consortium/react-modal-hook";
+import { QueryClient, QueryClientProvider } from "react-query";
 
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
 
-const appConfig = AppConfigModel.create(appConfigSnapshot);
+export const appConfig = AppConfigModel.create(appConfigSnapshot);
 
+// TODO: we might as well just return
+// stores instead of an object container stores
 export interface IAppProperties {
-  queryClient: QueryClient;
   stores: IStores;
 }
-export const initializeApp = async () => {
-  const host = window.location.host.split(":")[0];
-  const appMode = getAppMode(urlParams.appMode, urlParams.token, host);
+
+/**
+ * This function is used by the 3 different entry points supported
+ * by CLUE:
+ * - runtime (index.tsx)
+ * - authoring (CMS clue-control.tsx)
+ * - standalone doc editor (doc-editor.tsx)
+ *
+ * It is intended to only be run one time.
+ * It is basically an async wrapper around createStores
+ *
+ * @param appMode
+ * @returns
+ */
+export const initializeApp = async (appMode: AppMode) => {
   const appVersion = PackageJson.version;
 
   const user = UserModel.create();
@@ -52,68 +60,41 @@ export const initializeApp = async () => {
     (window as any).stores = stores;
   }
 
-  if (appMode === "qa" && urlParams.qaClear === "all") {
-    ReactDOM.render(
-      <QAClear />,
-      document.getElementById("app")
-    );
-  }
-
   await setUnitAndProblem(stores, unitId, problemOrdinal);
 
   gImageMap.initialize(stores.db);
-
-  Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
 
   if (kEnableLivelinessChecking) {
     setLivelinessChecking("error");
   }
 
-  setPageTitle(stores);
-  stores.ui.setShowDemoCreator(!!showDemoCreator);
-  stores.supports.createFromUnit({
-    unit: stores.unit,
-    investigation: stores.investigation,
-    problem: stores.problem,
-    documents: stores.documents,
-    db: stores.db
-  });
-
-  const queryClient = new QueryClient();
-
-  return { queryClient, stores };
+  return { stores };
 };
+
+const queryClient = new QueryClient();
 
 interface IAppProviderProps {
   children: any;
   stores: IStores;
 }
-export const AppProvider = ({ children, stores }: IAppProviderProps) => {
-  return (
-    <AppConfigContext.Provider value={{ appIcons }} >
-      <Provider stores={stores}>
-        {children}
-      </Provider>
-    </AppConfigContext.Provider>
-  );
-};
 
-interface IEditorAppProps {
-  docEditorAppProps?: Partial<IDocEditorAppProps>;
-  queryClient: QueryClient;
-  stores: IStores;
-}
-export const EditorApp = ({ docEditorAppProps, queryClient, stores }: IEditorAppProps) => {
+// FIXME: in some cases a warning is printed that the ModalProvider cannot find the
+// app in order to disable it and prevent input.
+// FIXME: perhaps related is that tiles cannot be deleted in the CMS
+export const AppProvider = ({ children, stores }: IAppProviderProps) => {
+  // We use the ModalProvider from react-modal-hook to place modals at the top of
+  // the React component tree to minimize the potential that events propagating
+  // up the tree from modal dialogs will interact adversely with other content.
+  // cf. https://github.com/reactjs/react-modal/issues/699#issuecomment-496685847
   return (
-    <AppProvider stores={stores}>
-      <ModalProvider>
-        <QueryClientProvider client={queryClient}>
-          <DocEditorApp
-            { ...docEditorAppProps }
-            appConfig={appConfig}
-          />
-        </QueryClientProvider>
-      </ModalProvider>
-    </AppProvider>
+    <ModalProvider>
+      <QueryClientProvider client={queryClient}>
+        <AppConfigContext.Provider value={{ appIcons }} >
+          <Provider stores={stores}>
+            {children}
+          </Provider>
+        </AppConfigContext.Provider>
+      </QueryClientProvider>
+    </ModalProvider>
   );
 };
