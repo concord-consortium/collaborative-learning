@@ -6,7 +6,6 @@ import { AppComponent } from "./components/app";
 import { getAppMode } from "./lib/auth";
 import { urlParams } from "./utilities/url-params";
 import { QAClear } from "./components/qa-clear";
-import { Logger } from "./lib/logger";
 import { setPageTitle } from "./lib/misc";
 
 const host = window.location.host.split(":")[0];
@@ -19,8 +18,6 @@ if (appMode === "qa" && urlParams.qaClear === "all") {
   );
 } else {
   initializeApp(appMode).then(({ stores }: IAppProperties) => {
-    Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
-
     setPageTitle(stores);
     stores.ui.setShowDemoCreator(!!stores.showDemoCreator);
     stores.supports.createFromUnit({

@@ -18,6 +18,7 @@ import "./index.scss";
 import { AppMode } from "./models/stores/store-types";
 import { ModalProvider } from "@concord-consortium/react-modal-hook";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { Logger } from "./lib/logger";
 
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
@@ -68,6 +69,9 @@ export const initializeApp = async (appMode: AppMode) => {
     setLivelinessChecking("error");
   }
 
+  // The logger will only be enabled if the appMode is "authed", or DEBUG_LOGGER is true
+  Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
+
   return { stores };
 };
 
@@ -80,7 +84,6 @@ interface IAppProviderProps {
 
 // FIXME: in some cases a warning is printed that the ModalProvider cannot find the
 // app in order to disable it and prevent input.
-// FIXME: perhaps related is that tiles cannot be deleted in the CMS
 export const AppProvider = ({ children, stores }: IAppProviderProps) => {
   // We use the ModalProvider from react-modal-hook to place modals at the top of
   // the React component tree to minimize the potential that events propagating
