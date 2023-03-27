@@ -541,6 +541,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         nodeProcess(n);
       }
       // TODO: We probably need a better way to determine if recentValues should be updated
+      // TODO: we may be slowing down the ticks here, so we need to split out for various settings and scenarios
+      // particularly when case-writing functionality is merged
       if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
         this.updateNodeRecentValues(n);
       }
@@ -599,7 +601,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private sendDataToSerialDevice(n: Node){
     if (isFinite(n.data.nodeValue as number)){
-      this.stores.serialDevice.writeToOut(n.data.nodeValue as number);
+      this.stores.serialDevice.writeToOut(n.data.nodeValue as number); // micro:bit
     }
   }
 

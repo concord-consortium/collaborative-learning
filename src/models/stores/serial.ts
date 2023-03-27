@@ -11,6 +11,7 @@ export class SerialDevice {
   serialNodesCount: number;
   writer: WritableStreamDefaultWriter;
   serialModalShown: boolean | null;
+  deviceFamily: string | null;
 
   constructor() {
     this.value = "0";
@@ -49,16 +50,24 @@ export class SerialDevice {
     Arduino clones that do not match these filters, one of which is being shipped with the latest generation
     of BB hardware. Rather than attempt to match every non-standard board, we are removing the filters
     for now and adding a message to the dialog that should help users make the right selection. A TODO item
-    would be to import an updatable and comprehensive list and use it to dynamically create filters. */
+    would be to import an updatable and comprehensive list and use it to dynamically create filters.
 
     // const filters = [
     //   { usbVendorId: 0x2341, usbProductId: 0x0043 },
     //   { usbVendorId: 0x2341, usbProductId: 0x0001 }
     // ];
 
+    Additionally, we now work with a set of programs designed to be used with specific micro:bit programs.
+    micro:bits have reliable deviceInfo.  Therefore, we can assume that if we are connected to something
+    other than a micro:bit, we can treat it as an arduino.
+
+    */
+
     try {
       this.port = await navigator.serial.requestPort();
       this.deviceInfo = await this.port.getInfo();
+      const isMicrobit = this.deviceInfo.usbProductId === 516 && this.deviceInfo.usbVendorId === 3368;
+      this.deviceFamily = isMicrobit ? "microbit" : "arduino";
     }
     catch (error) {
       console.error("error requesting port: ", error);
