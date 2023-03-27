@@ -42,13 +42,13 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const formattedTime = `${formattedMin}:${formattedSec}`;
 
   /* ==[ Timer - Enable ] == */
-  const startTimer = numNodes > 0 && sliderSec.current < totalTimeSec && (programRecordState === 1);
+  const timerRunning = numNodes > 0 && sliderSec.current < totalTimeSec && (programRecordState === 1);
 
   useEffect(()=>{
-    if (startTimer){
+    if (timerRunning){
       const timer = setInterval(() => {
-        startTimer && timerSec.current++;
-        startTimer && sliderSec.current++;
+        timerRunning && timerSec.current++;
+        timerRunning && sliderSec.current++;
         if (timerSec.current === 60){
           timerMin.current++;
           timerSec.current = 0;
@@ -56,7 +56,7 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [timerSec, startTimer, sliderSec]);
+  }, [timerSec, timerRunning, sliderSec]);
 
   /* ==[ Timer - Reset ] == */
   if (programRecordState === 0) {

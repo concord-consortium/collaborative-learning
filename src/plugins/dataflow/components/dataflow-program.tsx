@@ -521,11 +521,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  // [RECORDING: this will be called at the start of each tick]
+  // [RECORDING: this will be called at the start of each tick
   private createCaseIdForTick = (collectedTime: number) => {
     return collectedTime + "*" + this.props.tileId;
-    // or do we need to call on something in dataflow-content?
-    // for each attribute, recordPoint(node)
   };
 
   private tick = () => {
@@ -553,8 +551,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes, caseId, );
 
     this.programEditor.nodes.forEach((n: Node, idx) => {
-      //write each node value to attribute
-      if (isRecording){
+      if (isRecording){//write each node value to attribute
         const attributeIdArr = this.props.tileModel.existingAttributesWithNames();
         this.props.tileModel.setAttrValue(caseId, attributeIdArr[idx].attrId, n.data.nodeValue);
       }
