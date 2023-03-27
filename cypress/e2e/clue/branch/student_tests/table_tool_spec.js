@@ -104,6 +104,13 @@ context('Table Tool Tile', function () {
         tableToolTile.getTableRow().should('have.length', 2);
       });
     });
+    it('delete button works', function () {
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.getTableCell().eq(1).should('contain', '5');
+        tableToolTile.getTableToolbarButton('delete').click();
+        tableToolTile.getTableCell().eq(1).should('contain', '');
+      });
+    });
     it('will toggle index numbers', function () {
       tableToolTile.getIndexNumberToggle().click();
       cy.get(".primary-workspace").within(() => {
