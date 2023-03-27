@@ -52,6 +52,7 @@ import placeholderImage from "../../../assets/image_placeholder.png";
 import { LinkTableButton } from "./link-table-button";
 import ErrorAlert from "../../utilities/error-alert";
 import SingleStringDialog from "../../utilities/single-string-dialog";
+import { pasteClipboardImage } from "../../../utilities/clipboard-utils";
 
 import "./geometry-tile.sass";
 
@@ -859,6 +860,20 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const clipObjects = objects.map(obj => getSnapshot(obj));
       clipboard.clear();
       clipboard.addTileContent(content.metadata.id, content.type, clipObjects, this.stores);
+
+      // While the above code adds the content to the CLUE clipboard store, it doesn't copy it to
+      // the system clipboard. That's perfectly fine for typical CLUE usage, but for authoring,
+      // we also add the content to the system clipboard. We do so to better keep track of what the
+      // author intends to paste in. For example, an author may have copied an image URL from the
+      // CMS that they want to paste into the geometry tile for a background image. We use a custom
+      // MIME type for easier identification of geometry tile content in the handlePaste function.
+      if (navigator.clipboard.write) {
+        const type = "web text/clue-geometry-tile-content";
+        const blob = new Blob([JSON.stringify(content)], { type });
+        const data = [new ClipboardItem({ [type]: blob })];
+        navigator.clipboard.write(data);
+      }
+
       return true;
     }
   };
@@ -869,8 +884,39 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     return this.handleDelete();
   };
 
+  private handleNewImage = (image: ImageMapEntryType) => {
+    if (this._isMounted) {
+      const content = this.getContent();
+      this.setState({ isLoading: false, imageEntry: image });
+      if (image.contentUrl && (image.contentUrl !== content.bgImage?.url)) {
+        this.updateImage(image.contentUrl, image.filename);
+      }
+    }
+  };
+
   // paste from clipboard
-  private handlePaste = () => {
+  private handlePaste = async () => {
+    // For authoring, we support the pasting of an image URL to set the background image of
+    // the geometry tile. So before pasting in the CLUE clipboard contents, we check if the
+    // system clipboard contains a text/plain value matching the expected pattern for an
+    // image URL in the CMS. If so, we paste that image URL into the geometry tile. See
+    // comment about system clipboard in the handleCopy function for more details.
+    if (navigator.clipboard.read) {
+      const osClipboardContents = await navigator.clipboard.read();
+      const osClipboardIsPlainText = !!(osClipboardContents[0].types[0] === "text/plain");
+      if (osClipboardIsPlainText) {
+        const clipboardContent = await osClipboardContents[0].getType("text/plain");
+        const clipboardContentText = await clipboardContent.text();
+        const url = clipboardContentText.match(/curriculum\/([^/]+\/images\/.*)/);
+        if (url) {
+          pasteClipboardImage(({ image }) => this.handleNewImage(image));
+        } else {
+          console.log("ERROR: invalid image URL");
+        }
+        return;
+      }
+    }
+
     const content = this.getContent();
     const { clipboard } = this.stores;
     const objects = clipboard.getTileContent(content.type);
