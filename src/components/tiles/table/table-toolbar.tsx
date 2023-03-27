@@ -32,9 +32,9 @@ export const TableToolbar: React.FC<IProps> = observer(({
   const getToolbarButton = (toolName: string) => {
     switch (toolName) {
       case "set-expression":
-        return <SetExpressionButton onClick={onSetExpression} />;
+        return <SetExpressionButton key={toolName} onClick={onSetExpression} />;
       case "delete":
-        return <DeleteSelectedButton onClick={deleteSelected} />;
+        return <DeleteSelectedButton key={toolName} onClick={deleteSelected} />;
     }
   };
 
