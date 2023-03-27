@@ -1,35 +1,21 @@
 import { observer } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
-import { Tooltip } from "react-tippy";
-import SetExpressionIconSvg from "../../../clue/assets/icons/table/set-expression-icon.svg";
+
+import { DeleteSelectedButton, SetExpressionButton } from "./table-toolbar-buttons";
 import { useSettingFromStores } from "../../../hooks/use-stores";
-import { useTooltipOptions } from "../../../hooks/use-tooltip-options";
 import { IFloatingToolbarProps, useFloatingToolbarLocation } from "../hooks/use-floating-toolbar-location";
 
 import "./table-toolbar.scss";
 
-interface ISetExpressionButtonProps {
-  onClick: () => void;
-}
-const SetExpressionButton: React.FC<ISetExpressionButtonProps> = ({ onClick }) => {
-  const tooltipOptions = useTooltipOptions({ title: "Set expression", distance: -34, offset: -19 });
-  return (
-    <Tooltip {...tooltipOptions}>
-      <div className="toolbar-button set-expression" onClick={onClick}>
-        <SetExpressionIconSvg />
-      </div>
-    </Tooltip>
-  );
-};
-
-const defaultButtons = ["set-expression"];
+const defaultButtons = ["set-expression", "delete"];
 
 interface IProps extends IFloatingToolbarProps {
+  deleteSelected: () => void;
   onSetExpression: () => void;
 }
 export const TableToolbar: React.FC<IProps> = observer(({
-  documentContent, onIsEnabled, onSetExpression, ...others
+  deleteSelected, documentContent, onIsEnabled, onSetExpression, ...others
 }) => {
   const enabled = onIsEnabled();
   const location = useFloatingToolbarLocation({
@@ -47,6 +33,8 @@ export const TableToolbar: React.FC<IProps> = observer(({
     switch (toolName) {
       case "set-expression":
         return <SetExpressionButton onClick={onSetExpression} />;
+      case "delete":
+        return <DeleteSelectedButton onClick={deleteSelected} />;
     }
   };
 
