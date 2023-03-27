@@ -1,8 +1,5 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
-import Modal from "react-modal";
-import { ModalProvider } from "react-modal-hook";
-import { QueryClient, QueryClientProvider } from "react-query";
 import { authenticate } from "../lib/auth";
 import { syncTeacherClassesAndOfferings } from "../lib/teacher-network";
 import { AppContentContainerComponent } from "./app-content";
@@ -145,10 +142,6 @@ export class AppComponent extends BaseComponent<IProps, IState> {
     authAndConnect(this.stores, (qaCleared, qaClearError) => {
       this.setState({qaCleared, qaClearError});
     });
-  }
-
-  public componentDidMount() {
-    Modal.setAppElement(".app");
   }
 
   public componentWillUnmount() {

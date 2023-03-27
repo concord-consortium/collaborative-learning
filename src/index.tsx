@@ -29,7 +29,7 @@ if (appMode === "qa" && urlParams.qaClear === "all") {
     });
 
     ReactDOM.render(
-      <AppProvider stores={stores}>
+      <AppProvider stores={stores} modalAppElement="#app">
         <AppComponent />
       </AppProvider>,
       document.getElementById("app")

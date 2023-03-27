@@ -1,9 +1,14 @@
 import "ts-polyfill";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Provider } from "mobx-react";
 import { setLivelinessChecking } from "mobx-state-tree";
+import Modal from "react-modal";
+import { ModalProvider } from "@concord-consortium/react-modal-hook";
+import { QueryClient, QueryClientProvider } from "react-query";
 
+import { AppMode } from "./models/stores/store-types";
+import { Logger } from "./lib/logger";
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
 import { AppConfigContext } from "./app-config-context";
 import { AppConfigModel } from "./models/stores/app-config-model";
@@ -15,10 +20,6 @@ import { gImageMap } from "./models/image-map";
 import PackageJson from "./../package.json";
 
 import "./index.scss";
-import { AppMode } from "./models/stores/store-types";
-import { ModalProvider } from "@concord-consortium/react-modal-hook";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { Logger } from "./lib/logger";
 
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
@@ -38,7 +39,7 @@ export interface IAppProperties {
  * - authoring (CMS clue-control.tsx)
  * - standalone doc editor (doc-editor.tsx)
  *
- * It is intended to only be run one time.
+ * It is intended to only be called one time.
  * It is basically an async wrapper around createStores
  *
  * @param appMode
@@ -80,11 +81,15 @@ const queryClient = new QueryClient();
 interface IAppProviderProps {
   children: any;
   stores: IStores;
+  modalAppElement: string;
 }
 
-// FIXME: in some cases a warning is printed that the ModalProvider cannot find the
-// app in order to disable it and prevent input.
-export const AppProvider = ({ children, stores }: IAppProviderProps) => {
+export const AppProvider = ({ children, stores, modalAppElement }: IAppProviderProps) => {
+  // react-modal needs to know the root element to hide it for accessibility when
+  // the modal is visible. The modalAppElement is a css selector for this root element.
+  // Typically this is the element that is passed to ReactDOM.render().
+  useEffect(() => Modal.setAppElement(modalAppElement), [modalAppElement]);
+
   // We use the ModalProvider from react-modal-hook to place modals at the top of
   // the React component tree to minimize the potential that events propagating
   // up the tree from modal dialogs will interact adversely with other content.

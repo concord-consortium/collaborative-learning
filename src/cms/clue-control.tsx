@@ -1,5 +1,6 @@
 import React from "react";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
+import { Map } from "immutable";
 import { appConfig, AppProvider, IAppProperties, initializeApp } from "../initialize-app";
 import { IStores } from "../models/stores/stores";
 import { createDocumentModel, DocumentModelType } from "../models/document/document";
@@ -47,7 +48,7 @@ export class ClueControl extends React.Component<IProps, IState>  {
   //     the draft saving code might only work with string fields. This guess is
   //     based on the behavior of onChange. Immediately after the ClueControl
   //     calls onChange the ClueControl is re-rendered, but its value is JS
-  //     object not an immer object. Also looking at the CMS code there is
+  //     object not an immutable object. Also looking at the CMS code there is
   //     one place where the value is typed with typescript to be a string The
   //     next place to look is at the CMS `Object` widget which must be saving a
   //     js object instead of a string.
@@ -89,11 +90,16 @@ export class ClueControl extends React.Component<IProps, IState>  {
           //   the CMS saying there are "unsaved changes".
           // - if the component is re-used without being re-initialized
           //   this approach could be a problem, but I haven't seen that in practice.
-          // - if the user reverts the document to the initialValue that reversion
+          // - FIXME: if the user reverts the document to the initialValue that reversion
           //   won't be sent to the CMS.
           if (stringifiedJson !== JSON.stringify(initialValue)) {
             console.log("ClueControl onChange", parsedJson);
-            this.props.onChange(parsedJson);
+            // Looking at the CMS code it seems safer to pass an immutable object here
+            // not a plain JS object. The plain JS object does get saved correctly,
+            // but it also gets returned in the value so it means sometimes the value
+            // is a immutable object and sometimes it is a plan JS object.
+            const immutableValue = Map(parsedJson);
+            this.props.onChange(immutableValue);
           }
         }
       });
@@ -109,7 +115,7 @@ export class ClueControl extends React.Component<IProps, IState>  {
 
     if (this.state.stores && this.state.document) {
       return (
-        <AppProvider stores={this.state.stores}>
+        <AppProvider stores={this.state.stores} modalAppElement="#nc-root">
           <EditableDocumentContent
             contained={true}
             mode="1-up"
@@ -125,15 +131,7 @@ export class ClueControl extends React.Component<IProps, IState>  {
     }
   }
 
-  // After onChange the value property is a plain JS object. When the component
-  // is first initialized and rendered the value is an immer object. This
-  // function handles both cases. It is currently only used for debugging since
-  // we don't use the value property after the constructor.
   getValue() {
-    if (this.props.value?.toJS) {
-      return this.props.value.toJS();
-    } else {
-      return this.props.value;
-    }
+    return this.props.value?.toJS?.();
   }
 }
