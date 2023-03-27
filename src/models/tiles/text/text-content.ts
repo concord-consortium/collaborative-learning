@@ -82,7 +82,7 @@ export const TextContentModel = TileContentModel
       // We need to escape both double quotes and backslashes, otherwise the curriculum json will break.
       const exportHtml = html.split("\n")
         .map((line, i, arr) =>
-          `    "${removeNewlines(escapeDoubleQuotes(escapeBackslashes(line)))}"${i < arr.length - 1 ? "," : ""}`);
+          `    "${escapeDoubleQuotes(escapeBackslashes(removeNewlines(line)))}"${i < arr.length - 1 ? "," : ""}`);
       return [
         `{`,
         `  "type": "Text",`,
