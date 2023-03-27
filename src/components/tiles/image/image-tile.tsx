@@ -198,23 +198,23 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
 
   private handlePaste = () => {
     this.setState({ isLoading: true }, () => {
-      pasteClipboardImage(({ file, image }) => this.handleNewImage(file, image));
+      pasteClipboardImage(({ image }) => this.handleNewImage(image));
     });
   };
 
   private handleUploadImageFile = (file: File) => {
     this.setState({ isLoading: true }, () => {
       gImageMap.addFileImage(file)
-        .then(image => this.handleNewImage(file, image));
+        .then(image => this.handleNewImage(image));
     });
   };
 
-  private handleNewImage = (file: File, image: ImageMapEntryType) => {
+  private handleNewImage = (image: ImageMapEntryType) => {
     if (this._isMounted) {
       const content = this.getContent();
       this.setState({ isLoading: false, imageEntry: image });
       if (image.contentUrl && (image.contentUrl !== content.url)) {
-        content.setUrl(image.contentUrl, file.name);
+        content.setUrl(image.contentUrl, image.filename);
       }
     }
   };
