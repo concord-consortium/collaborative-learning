@@ -57,6 +57,21 @@ context('Graph Tool', function() {
                 graphToolTile.getGraphPoint().last().click({force:true}).click({force:true});
                 graphToolTile.getGraphPolygon().should('exist');
             });
+            it('will copy a point to the clipboard', function(){
+                let clipSpy;
+                cy.window().then((win) => {
+                    clipSpy = cy.spy(win.navigator.clipboard, "write");
+                });
+
+                // platform test from hot-keys library
+                const isMac = navigator.platform.indexOf("Mac") === 0;
+                const cmdKey = isMac ? "meta" : "ctrl";
+                graphToolTile.getGraphPoint().last().click({force:true}).click({force:true})
+                    .type(`{${cmdKey}+c}`)
+                    .then(() => {
+                        expect(clipSpy.callCount).to.be.eq(1);
+                    });
+            });
 
             describe('restore points to canvas', function(){
                 it('will verify restore of point at origin', function(){
