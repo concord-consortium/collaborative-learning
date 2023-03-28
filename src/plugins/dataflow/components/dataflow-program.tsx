@@ -535,7 +535,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const existingAttributes = this.props.tileModel.existingAttributes();
     if (isRecording){
       this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes, caseId as string);
-      console.log("tick dataSet: ", this.props.tileModel.dataSet)
     }
 
     // set up to process each node, should processing be necessary
