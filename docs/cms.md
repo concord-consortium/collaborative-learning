@@ -15,7 +15,7 @@ https://console.firebase.google.com/project/cms-github-auth/overview
 
 The code for this function is located here: https://github.com/Herohtar/netlify-cms-oauth-firebase
 
-It was configured using with the client ID and client secret from the GitHub OAuth app.
+It was configured with the client ID and client secret from the GitHub OAuth app.
 
 # Known Issues
 
