@@ -144,22 +144,21 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     this.getContent().setProgramZoom(dx, dy, scale);
   };
 
-  // This function may be implemented when we want to preserve attributes accross runs
-  // private pairNodesToAttributes = () => {
-  //   const model = this.getContent();
+  private pairNodesToAttributes = () => {
+    const model = this.getContent();
 
-  //   //#1 check nodes on tile against dataset attributes, if already there do nothing, otherwise write.
-  //   model.program.nodes.forEach((n) => {
-  //     model.addNewAttrFromNode(n.id, n.name);
-  //   });
+    //#1 check nodes on tile against dataset attributes, if already there do nothing, otherwise write.
+    model.program.nodes.forEach((n) => {
+      model.addNewAttrFromNode(n.id, n.name);
+    });
 
-  //   //#2 check dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
-  //   const dataSet = model.dataSet;
-  //   const dataSetAttributes = dataSet.attributes;
-  //   dataSetAttributes.forEach((attribute, idx) => {
-  //     model.removeAttributesInDatasetMissingInTile(attribute.id);
-  //   });
-  // };
+    //#2 check dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
+    const dataSet = model.dataSet;
+    const dataSetAttributes = dataSet.attributes;
+    dataSetAttributes.forEach((attribute, idx) => {
+      model.removeAttributesInDatasetMissingInTile(attribute.id);
+    });
+  };
 
   private handleChangeOfRecordingMode = () => {
     // 0 - cleared, ready to record
@@ -169,9 +168,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const model = this.getContent();
 
     if (mode === 0){
-      model.program.nodes.forEach((n) => {
-        model.addNewAttrFromNode(n.id, n.name);
-      });
+      this.pairNodesToAttributes();
     }
 
     if (mode === 2){
