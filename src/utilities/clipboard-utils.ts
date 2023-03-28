@@ -38,7 +38,7 @@ export const getClipboardContent = async () => {
         clipboardContent.image = await item.getType("image/png");
       }
       if (item.types.includes("text/plain")) {
-        const textBlob = await clipboardContents[0].getType("text/plain");
+        const textBlob = await item.getType("text/plain");
         clipboardContent.text = await textBlob.text();
       }
     }
