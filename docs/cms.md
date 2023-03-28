@@ -16,4 +16,17 @@ In its `componentDidMount` function, you can see it call `retrieveLocalBackup` a
 
 A possible fix would be to delay the call to `retrieveLocalBackup` until `loadEntry` has either completed successfully or it was not successful at finding an entry. This way it would not be possible for `loadEntry` to come in later and replace the entry.
 
+A useful way to confirm this behavior is to add console logs in ClueControl when the component is initialized and when when it is rendered and when it calls the CMS's onChange.
 
+# Wishlist
+
+## More flexible nested collection support
+We are using the [nested collection beta feature](https://decapcms.org/docs/beta-features/#nested-collections) of Decap. It allows authors to edit a nested set of folders containing the content. However it requires that each folder only contains a single file and the file has the same name. CLUE uses `content.json` for this filename. It would be better if a folder could contain multiple files with different names. There has been work in Decap towards this:
+- https://github.com/decaporg/decap-cms/issues/4972
+- https://github.com/decaporg/decap-cms/pull/6498
+
+## Mixed entry types in nested collections
+Our units have investigations, problems, and sections. We have broken apart the sections into separate files. It would be nice if we broke apart the other levels as well. That way information from these levels could be used by the CMS at least for naming and possibly ordering.
+
+## Ordering in nested collections
+The levels of hierarchy of a unit have an order defined by their parent object. It would be useful if the tree shown by the nested collection could be ordered based on this. This seems tricky since the nested collection is based just on the folder structure, and if we started putting multiple files in a single folder, it wouldn't be obvious which file in a parent folder is the parent of the current entry.
