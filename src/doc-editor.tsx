@@ -1,20 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { DocEditorApp } from "./components/doc-editor-app";
 
-import { EditorApp, IAppProperties, initializeApp } from "./initialize-app";
+import { appConfig, AppProvider, IAppProperties, initializeApp } from "./initialize-app";
 
 (window as any).DISABLE_FIREBASE_SYNC = true;
 
-initializeApp().then(({ queryClient, stores }: IAppProperties) => {
-  if (stores && queryClient) {
-    const docEditorAppProps = {};
-    ReactDOM.render(
-      <EditorApp
-        docEditorAppProps={docEditorAppProps}
-        queryClient={queryClient}
-        stores={stores}
-      />,
-      document.getElementById("app")
-    );
-  }
+initializeApp("dev").then(({ stores }: IAppProperties) => {
+  ReactDOM.render(
+    <AppProvider stores={stores} modalAppElement="#app">
+      <DocEditorApp appConfig={appConfig}/>
+    </AppProvider>,
+    document.getElementById("app")
+  );
 });
