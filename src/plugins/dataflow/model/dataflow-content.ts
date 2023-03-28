@@ -209,10 +209,7 @@ export const DataflowContentModel = TileContentModel
           }
         });
         self.dataSet.addCanonicalCasesWithIDs(newCases);
-        //end
-
       }
-
     },
     setAttrName(attrId: string, name: string){
       self.dataSet.setAttributeName(attrId, name);
@@ -227,8 +224,7 @@ export const DataflowContentModel = TileContentModel
     },
 
     addNewAttrFromNode(nodeId: number, nodeName: string){ //if already an attribute with the same nodeId,else write
-      const dataSet = self.dataSet;
-      const dataSetAttributes = dataSet.attributes;
+      const dataSetAttributes = self.dataSet.attributes;
       let foundFlag = false;
 
       for (let i = 0; i < Object.keys(dataSetAttributes).length ; i++){ //look in dataSet.attributes for each Id
@@ -247,6 +243,7 @@ export const DataflowContentModel = TileContentModel
       }
     },
 
+    // this may be implemented if we change to preserve attributes accross runs
     removeAttributesInDatasetMissingInTile(attribute: string){
       const index = attribute.indexOf("*");
       const stringAfterIndex = attribute.substring(index + 1);

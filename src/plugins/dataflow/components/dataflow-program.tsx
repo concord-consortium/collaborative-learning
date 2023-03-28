@@ -520,18 +520,24 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  // [RECORDING: this will be called at the start of each tick
   private createCaseIdForTick = (collectedTime: number) => {
     return collectedTime + "*" + this.props.tileId;
   };
 
   private tick = () => {
-    const isRecording = this.props.programRecordState === 1;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
-    const caseId = isRecording ? this.createCaseIdForTick(now) : null;
 
+    // set up to record each node, should recording be on
+    const isRecording = this.props.programRecordState === 1;
+    const caseId = isRecording ? this.createCaseIdForTick(now) : null;
+    const existingAttributes = this.props.tileModel.existingAttributes();
+    if (isRecording){
+      this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes, caseId as string);
+    }
+
+    // set up to process each node, should processing be necessary
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
       Generator: this.updateGeneratorNode,
       Timer: this.updateTimerNode,
@@ -543,12 +549,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.sendDataToSerialDevice(n);
       }
     };
-
     let processNeeded = false;
 
-    const existingAttributes = this.props.tileModel.existingAttributes();
-    this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes, caseId as string);
-
+    // iterate over each node, recording and processing as configured above
     this.programEditor.nodes.forEach((n: Node, idx) => {
       if (isRecording && caseId){//write each node value to attribute
         const attributeIdArr = this.props.tileModel.existingAttributesWithNames();
