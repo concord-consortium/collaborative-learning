@@ -76,7 +76,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       return toolbarModel.map(toolButton => {
         const buttonProps: IToolbarButtonProps = {
           toolButton,
-          isActive: toolButton === this.state.activeTool,
+          isActive: toolButton.id === "solution"
+            ? this.selectedTilesIncludeTeacher()
+            : toolButton === this.state.activeTool,
           isDisabled: this.isButtonDisabled(toolButton),
           onSetToolActive: handleSetActiveTool,
           onClick: handleClickTool,
@@ -208,21 +210,31 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     });
   };
 
-  private handleToggleSelectedTilesSolution = () => {
+  // Returns true if any of the selected tiles have display: "teacher"
+  private selectedTilesIncludeTeacher = () => {
     const { ui } = this.stores;
     const { document } = this.props;
     const documentContent = document.content;
-    let setSolution = true;
+    let includesTeacher = false;
     if (documentContent) {
       ui.selectedTileIds.forEach(tileId => {
         const tile = documentContent.getTile(tileId);
         if (tile?.display === "teacher") {
-          // If there are any solution tiles selected, make them all not solutions
-          setSolution = false;
+          includesTeacher = true;
         }
       });
+    }
+    return includesTeacher;
+  };
+
+  private handleToggleSelectedTilesSolution = () => {
+    const { ui } = this.stores;
+    const { document } = this.props;
+    const documentContent = document.content;
+    if (documentContent) {
+      const includeTeacher = this.selectedTilesIncludeTeacher();
       ui.selectedTileIds.forEach(tileId => {
-        documentContent.getTile(tileId)?.setDisplay(setSolution ? "teacher" : undefined);
+        documentContent.getTile(tileId)?.setDisplay(includeTeacher ? undefined : "teacher");
       });
     }
   };
