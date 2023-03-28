@@ -4,6 +4,7 @@
   position: absolute;
   border: $toolbar-border;
   border-radius: 0 0 $toolbar-border-radius $toolbar-border-radius;
+  display: flex;
   z-index: $toolbar-z-index;
 
   &.disabled {
@@ -12,8 +13,15 @@
 
   .toolbar-button {
     position: relative;
+    // These are button elements so we have to disable default button styles
+    // of border, padding, and display
+    border: 0;    
+    padding: 0;
+    display: block;
+    user-select: none;
     width: $toolbar-button-width;
     height: $toolbar-button-height;
+    cursor: pointer;
     background-color: $workspace-teal-light-9;
 
     &:hover {

@@ -104,6 +104,13 @@ context('Table Tool Tile', function () {
         tableToolTile.getTableRow().should('have.length', 2);
       });
     });
+    it('delete button works', function () {
+      cy.get(".primary-workspace").within((workspace) => {
+        tableToolTile.getTableCell().eq(1).should('contain', '5');
+        tableToolTile.getTableToolbarButton('delete').click();
+        tableToolTile.getTableCell().eq(1).should('contain', '');
+      });
+    });
     it('will toggle index numbers', function () {
       tableToolTile.getIndexNumberToggle().click();
       cy.get(".primary-workspace").within(() => {
@@ -170,7 +177,7 @@ context('Table Tool Tile', function () {
       cy.get('.modal-content .prompt select').should('exist');
       cy.get('.modal-content .prompt select').select('y2');
       cy.get('.modal-content .prompt').should('contain', 'y2');
-      cy.get('#expression-input').click().type(`${headerX}+2` + '{enter}');
+      cy.get('#expression-input').click().type(`${headerX}+2{enter}`);
     });
     it('verify value caluculated based on formula correctly', function () {
       cy.get(".primary-workspace").within((workspace) => {
@@ -187,6 +194,7 @@ context('Table Tool Tile', function () {
         const title = "table test";
         //copy investigation
         canvas.copyDocument(copyTitle);
+        cy.wait(1000);
         canvas.getPersonalDocTitle().should('contain', copyTitle);
         tableToolTile.getTableTitle().should('contain', title);
         tableToolTile.getTableCell().eq(1).should('contain', '5');

@@ -56,5 +56,20 @@ context('Data Card Tool Tile', function () {
       dc.getNextCardButton().click();
       dc.getCardNofTotalListing().contains("Card 3 of 3");
     });
+    it("can delete a card", () => {
+      dc.getDeleteCardButton().click();
+      cy.wait(100);
+      dc.getDeleteCardButton().click();
+      cy.wait(100);
+      dc.getCardNofTotalListing().contains("Card 1 of 1");
+    });
+    it("can expand and collapse a card in sort view", () =>{
+      dc.getSortSelect().select("Attr1 Renamed");
+      dc.getSortView().should('exist');
+      dc.getSortCardCollapseToggle().click();
+      dc.getSortCardData().should('not.exist');
+      dc.getSortCardCollapseToggle().click();
+      dc.getSortCardData().should('exist');
+    });
   });
 });

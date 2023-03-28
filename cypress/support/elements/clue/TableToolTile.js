@@ -65,7 +65,7 @@ class TableToolTile{
         cy.get('.modal-button').contains("Link Table").click();
       });
     }
-    getTableToolbarButton(button){// ['set-expression']
+    getTableToolbarButton(button){// ['set-expression', 'delete']
       return cy.get(`.table-toolbar .toolbar-button.${button}`);
     }
 }

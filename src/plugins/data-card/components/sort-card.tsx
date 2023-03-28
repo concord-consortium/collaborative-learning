@@ -3,12 +3,15 @@ import classNames from "classnames";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { DataCardContentModelType } from "../data-card-content";
 import { SortCardAttribute } from "./sort-card-attribute";
+import { useDraggable } from "@dnd-kit/core";
+import TileDragHandle from "../../../assets/icons/drag-tile/move.svg";
 
 interface IProps {
   caseId: string;
   model: ITileModel;
   indexInStack: number;
   totalInStack: number;
+  id?: string;
 }
 
 const getShadeRGB = (index: number) => {
@@ -31,8 +34,26 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
 
   const [expanded, setExpanded] = useState(false);
   useEffect(()=> setExpanded(atStackTop), [atStackTop]); // "top" card loads expanded
-  const toggleExpanded = () => setExpanded(!expanded);
-  const cardClasses = classNames("sortable", "card", { collapsed: !expanded }, { expanded });
+
+  const toggleExpanded = (e: React.MouseEvent) => {
+    setExpanded(!expanded);
+  };
+
+  const cardClasses = classNames(
+    "sortable", "card",
+    { collapsed: !expanded }, { expanded }
+  );
+
+  const {attributes, listeners, setNodeRef, transform} = useDraggable({
+    id: `draggable-sort-card-${caseId}`,
+    data: { caseId, sortedByAttrId: content.selectedSortAttributeId, sortDrag: true }
+  });
+
+  const style = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y -25}px, 0)`,
+    zIndex: 1000,
+    opacity: 0.8
+  } : undefined;
 
   const loadAsSingle = () => {
     content.setSelectedSortAttributeId("");
@@ -40,13 +61,21 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
   };
 
   return (
-    <div className={cardClasses} id={caseId} onDoubleClick={loadAsSingle}>
+    <div
+      className={cardClasses} id={caseId}
+      onDoubleClick={loadAsSingle}
+      ref={setNodeRef}
+      style={style}
+    >
       <div className="heading" style={{ backgroundColor: shadeStr }}>
         <div className="expand-toggle-area">
           <button className="expand-toggle" onClick={toggleExpanded}>▶</button>
         </div>
         <div className="card-count-info">
           { `Card ${ deckCardNumberDisplay } of ${ content.totalCases } `}
+        </div>
+        <div className="drag-handle" {...listeners} {...attributes}>
+          <TileDragHandle />
         </div>
       </div>
 
@@ -64,9 +93,8 @@ export const SortCard: React.FC<IProps> = ({ model, caseId, indexInStack, totalI
           })}
         </div>
       }
-
       <div className="footer" style={{ backgroundColor: shadeStr }}></div>
-
     </div>
   );
 };
+

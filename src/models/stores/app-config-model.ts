@@ -45,31 +45,18 @@ export const AppConfigModel = types
     getUnit(unitId: string) {
       const unitCode = self.unitCodeMap.get(unitId) || unitId;
       const unitCodeIsUrl = isValidHttpUrl(unitCode);
-      gImageMap.setCurriculumBaseUrl(self.curriculumBaseUrl);
+      const unitUrl = unitCodeIsUrl ? unitCode : `${self.curriculumBaseUrl}/branch/main/${unitCode}/content.json`;
+      const teacherGuideUrl = unitUrl.replace(/content\.json$/, "teacher-guide/content.json");
+      gImageMap.setUnitUrl(unitUrl);
       gImageMap.setUnitCodeMap(getSnapshot(self.unitCodeMap));
-      if (unitCodeIsUrl) {
-        const teacherGuideUrl = unitCode.replace(/content\.json$/, "teacher-guide/content.json");
-        return {
-          "content": unitCode,
-          "guide": teacherGuideUrl
-        };
-      } else {
-        return {
-          "content": `${self.curriculumBaseUrl}branch/main/${unitCode}/content.json`,
-          "guide": `${self.curriculumBaseUrl}branch/main/${unitCode}/teacher-guide/content.json`
-        };
-      }
+      return {"content": unitUrl, "guide": teacherGuideUrl};
     }
   }))
   .views(self => ({
     getUnitBasePath(unitId: string) {
       const unitSpec = self.getUnit(unitId);
       if (!unitSpec) return "";
-      const parts = unitSpec.content.split("/");
-      if (parts.length > 0) {
-        parts.splice(parts.length - 1, 1);
-      }
-      return parts.join("/");
+      return `${unitId}`;
     }
   }))
   .views(self => ({

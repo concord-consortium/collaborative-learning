@@ -41,7 +41,7 @@ describe("ConfigurationManager", () => {
 
   it("can get URLs for remote curriculum content from a unit code", () => {
     const appConfig = AppConfigModel.create({
-      curriculumBaseUrl: "https://curriculum.example.com/",
+      curriculumBaseUrl: "https://curriculum.example.com",
       config: unitConfigDefaults
     });
     const exampleUnitCode = "example-unit-code";
@@ -50,6 +50,6 @@ describe("ConfigurationManager", () => {
       "guide": `https://curriculum.example.com/branch/main/${exampleUnitCode}/teacher-guide/content.json`
     };
     expect(appConfig.getUnit(exampleUnitCode)).toStrictEqual(exampleUnit);
-    expect(appConfig.getUnitBasePath(exampleUnitCode)).toBe(`https://curriculum.example.com/branch/main/${exampleUnitCode}`);
+    expect(appConfig.getUnitBasePath(exampleUnitCode)).toBe(exampleUnitCode);
   });
 });
