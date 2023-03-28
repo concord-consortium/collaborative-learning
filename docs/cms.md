@@ -1,4 +1,21 @@
-CLUE includes a CMS which can be accessed at `/admin.html`. It uses [Decap CMS](https://decapcms.org/). It is configured to edit the content in `clue-curriculum` repository. By default it edits the `author` branch. You can change the branch by passing a `curriculumBranch` parameter to admin.html.  By default it displays all of the units at the same time. It is better to work with a single unit at a time by using the `unit` param. This limits what is displayed in the CMS and it also configures the media library to show the images from that unit.
+CLUE includes a CMS which can be accessed at `/admin.html`. It uses [Decap CMS](https://decapcms.org/). It is configured to edit the content in `clue-curriculum` repository. It can be configured with the following URL params:
+- **`curriculumBranch`** By default the CMS edits the `author` branch. You can change the branch by passing a different branch name to this parameter. The CMS will not create this branch for you. You'll need to create it yourself.
+- **`unit`** By default the CMS displays all of the units at the same time. It is better to work with a single unit at a time by using the `unit` param. It should be passed the unit code. This limits what is displayed in the CMS and it also configures the media library to show the images from that unit.
+- **`localCMSBackend`** By default the CMS works with the `github` backend. This means even when doing local CLUE development the CMS will update the `clue-curriculum` repository directly. If you add the `localCMSBackend` parameter the CMS will attempt to work with a local git proxy running at localhost:8081. You can start this proxy with:
+
+  `cd ../clue-curriculum; npx netlify-cms-proxy-server`
+
+# Authorization
+The github backend used by the CMS requires a GitHub OAuth app and small service to handle getting a token from GitHub so the browser can talk directly to the GitHub API.
+
+The OAuth app is: [Concord Consortium CMS](https://github.com/organizations/concord-consortium/settings/applications/2137890)
+
+We are using a firebase function for the service. It is deployed to:
+https://console.firebase.google.com/project/cms-github-auth/overview
+
+The code for this function is located here: https://github.com/Herohtar/netlify-cms-oauth-firebase
+
+It was configured using with the client ID and client secret from the GitHub OAuth app.
 
 # Known Issues
 
@@ -16,7 +33,7 @@ In its `componentDidMount` function, you can see it call `retrieveLocalBackup` a
 
 A possible fix would be to delay the call to `retrieveLocalBackup` until `loadEntry` has either completed successfully or it was not successful at finding an entry. This way it would not be possible for `loadEntry` to come in later and replace the entry.
 
-A useful way to confirm this behavior is to add console logs in ClueControl when the component is initialized and when when it is rendered and when it calls the CMS's onChange.
+A useful way to confirm this behavior is to add console logs in ClueControl when the component is initialized and when when it is rendered and when it calls the CMS's onChange. It is also useful to look at the contents of the CMS's backup. That can be found in the browser Developer tools: `Application/IndexDB/localforage/keyvaluepairs`. In this database search for keys starting with `backup`.
 
 # Wishlist
 
