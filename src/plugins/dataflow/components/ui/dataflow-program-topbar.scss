@@ -6,7 +6,6 @@ $topbar-color: $gray-light;
 $duration-label-back: $gray-mid;
 $gray-text: #242424;
 
-
 .program-editor-topbar {
   display: flex;
   align-items: center;
@@ -180,9 +179,7 @@ $gray-text: #242424;
       }
     }
 
-
     /* ==[ Record Button ] == */
-
     .record-btn-container{
       width: 100px;
       margin-left: 10px;
@@ -217,8 +214,6 @@ $gray-text: #242424;
           text-align: center;
           color: var(--gray-text);
           margin-left: -2px;
-
-
         }
       }
     }
@@ -239,5 +234,4 @@ $gray-text: #242424;
       border: 2px solid #bcbcbc;
     }
   }
-
 }

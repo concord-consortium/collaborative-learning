@@ -9,7 +9,7 @@ import { autorun } from "mobx";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
 import { forEach } from "lodash";
-import { ProgramZoomType } from "../model/dataflow-content";
+import { ProgramZoomType, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
 import { DataflowReteNodeFactory } from "../nodes/factories/dataflow-rete-node-factory";
@@ -36,7 +36,6 @@ import { SerialDevice } from "../../../models/stores/serial";
 import { dataflowLogEvent } from "../dataflow-logger";
 
 import "./dataflow-program.sass";
-
 interface NodeNameValuePair {
   name: string;
   val: number;
@@ -68,7 +67,7 @@ interface IProps extends SizeMeProps {
   onRecordDataChange: () => void;
   programRecordState: number;
   numNodes: number;
-  tileModel: any;
+  tileModel: DataflowContentModelType;
 }
 
 interface IState {
@@ -548,12 +547,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     let processNeeded = false;
 
     const existingAttributes = this.props.tileModel.existingAttributes();
-    this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes, caseId, );
+    this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes, caseId as string);
 
     this.programEditor.nodes.forEach((n: Node, idx) => {
-      if (isRecording){//write each node value to attribute
+      if (isRecording && caseId){//write each node value to attribute
         const attributeIdArr = this.props.tileModel.existingAttributesWithNames();
-        this.props.tileModel.setAttrValue(caseId, attributeIdArr[idx].attrId, n.data.nodeValue);
+        this.props.tileModel.setAttrValue(caseId, attributeIdArr[idx].attrId, n.data.nodeValue as string);
       }
 
       const nodeProcess = nodeProcessMap[n.name];

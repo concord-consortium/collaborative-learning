@@ -31,7 +31,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   public static tileHandlesSelection = true;
 
-  // [RECORDING temporary state]
   constructor(props: IProps) {
     super(props);
     this.state = {
@@ -162,14 +161,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     });
   };
 
-
-
   private handleChangeOfRecordingMode = () => {
-    /* this should be enumerated somehow, but
-      0 - cleared, ready to record
-      1 - recording in progress
-      2 - stopped, ready to clear
-    */
+    // 0 - cleared, ready to record
+    // 1 - recording in progress
+    // 2 - stopped, ready to clear
     const mode = this.state.programRecordingMode;
     const model = this.getContent();
 
@@ -187,7 +182,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       allAttributes.forEach((attr)=>{
         dataSet.removeAttribute(attr.id); //remove all attributes
       });
-
     }
 
     this.setState({

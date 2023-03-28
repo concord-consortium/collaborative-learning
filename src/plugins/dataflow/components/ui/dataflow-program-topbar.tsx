@@ -67,9 +67,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   );
 };
 
-
 /* ==[ Record Data Button ] == */
-
 enum Mode { //button text
   "Record",
   "Stop",
@@ -130,7 +128,3 @@ const PlaybackButton = (props: IPlaybackProps) => {
     </div>
   );
 };
-
-
-
-
