@@ -22,7 +22,7 @@ import { ImageDragDrop } from "../../utilities/image-drag-drop";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import { HotKeys } from "../../../utilities/hot-keys";
-import { pasteClipboardImage } from "../../../utilities/clipboard-utils";
+import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 
 import "./image-tile.sass";
 
@@ -197,8 +197,11 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private handlePaste = () => {
-    this.setState({ isLoading: true }, () => {
-      pasteClipboardImage(({ image }) => this.handleNewImage(image));
+    this.setState({ isLoading: true }, async () => {
+      const osClipboardContents = await getClipboardContent();
+      if (osClipboardContents) {
+        pasteClipboardImage(osClipboardContents, ({ image }) => this.handleNewImage(image));
+      }
     });
   };
 

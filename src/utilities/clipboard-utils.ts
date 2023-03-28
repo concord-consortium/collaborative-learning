@@ -5,36 +5,43 @@ interface IOnCompleteParams {
 }
 type OnComplete = (params: IOnCompleteParams) => void;
 
-export const pasteClipboardImage = async (onComplete: OnComplete) => {
-  const clipboardContents = await navigator.clipboard.read();
-  if (clipboardContents.length > 0) {
-    switch (clipboardContents[0].types[0]) {
-      case "image/png": {
-        clipboardContents[0].getType("image/png").then(blob => {
-          const blobToFile = new File([blob], "clipboard-image.png");
-          gImageMap.addFileImage(blobToFile).then(image => {
-            onComplete({ image });
-          });
-        });
-        break;
+export const pasteClipboardImage = async (imageData: any, onComplete: OnComplete) => {
+  if (imageData.image) {
+    const blobToFile = new File([imageData.image], "clipboard-image.png");
+    gImageMap.addFileImage(blobToFile).then(image => {
+      onComplete({ image });
+    });
+  } else if (imageData.text) {
+    const url = imageData.text.match(/curriculum\/([^/]+\/images\/.*)/);
+    if (!url) {
+      console.error("ERROR: invalid image URL");
+      return;
+    }
+    const fileUrl = url[1];
+    const filename = fileUrl.split("/").pop();
+    const imageEntry = await gImageMap.getImage(fileUrl, {filename});
+    onComplete({ image: imageEntry });
+  } else {
+    console.error("ERROR: unknown clipboard content type");
+  }
+};
+
+export const getClipboardContent = async () => {
+  const clipboardContent: Record<string, any> = {
+    image: null,
+    text: null
+  };
+  if (navigator.clipboard.read) {
+    const clipboardContents = await navigator.clipboard.read();
+    for (const item of clipboardContents) {
+      if (item.types.includes("image/png")) {
+        clipboardContent.image = await item.getType("image/png");
       }
-      case "text/plain": {
+      if (item.types.includes("text/plain")) {
         const textBlob = await clipboardContents[0].getType("text/plain");
-        const text = await textBlob.text();
-        const url = text.match(/curriculum\/([^/]+\/images\/.*)/);
-        if (!url) {
-          console.error("ERROR: invalid image URL");
-          break;
-        }
-        const fileUrl = url[1];
-        const filename = fileUrl.split("/").pop();
-        const imageEntry = await gImageMap.getImage(fileUrl, {filename});
-        onComplete({ image: imageEntry });
-        break;
-      }
-      default: {
-        console.error("ERROR: unknown clipboard content type");
+        clipboardContent.text = await textBlob.text();
       }
     }
   }
+  return clipboardContent;
 };

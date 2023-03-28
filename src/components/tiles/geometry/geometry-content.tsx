@@ -52,7 +52,7 @@ import placeholderImage from "../../../assets/image_placeholder.png";
 import { LinkTableButton } from "./link-table-button";
 import ErrorAlert from "../../utilities/error-alert";
 import SingleStringDialog from "../../utilities/single-string-dialog";
-import { pasteClipboardImage } from "../../../utilities/clipboard-utils";
+import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 
 import "./geometry-tile.sass";
 
@@ -862,8 +862,8 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       clipboard.addTileContent(content.metadata.id, content.type, clipObjects, this.stores);
 
       // While the above code adds the content to the CLUE clipboard store, it doesn't copy it to
-      // the system clipboard. That's perfectly fine for typical CLUE usage, but for authoring,
-      // we also add the content to the system clipboard. We do so to better keep track of what the
+      // the system clipboard. That's perfectly fine for typical CLUE usage, but for authoring we
+      // also add the content to the system clipboard. We do so to better keep track of what the
       // author intends to paste in. For example, an author may have copied an image URL from the
       // CMS that they want to paste into the geometry tile for a background image. We use a custom
       // MIME type for easier identification of geometry tile content in the handlePaste function.
@@ -889,7 +889,7 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
       const content = this.getContent();
       this.setState({ isLoading: false, imageEntry: image });
       if (image.contentUrl && (image.contentUrl !== content.bgImage?.url)) {
-        this.updateImage(image.contentUrl, image.filename);
+        this.setBackgroundImage(image);
       }
     }
   };
@@ -901,20 +901,15 @@ export class GeometryContentComponent extends BaseComponent<IProps, IState> {
     // system clipboard contains a text/plain value matching the expected pattern for an
     // image URL in the CMS. If so, we paste that image URL into the geometry tile. See
     // comment about system clipboard in the handleCopy function for more details.
-    if (navigator.clipboard.read) {
-      const osClipboardContents = await navigator.clipboard.read();
-      const osClipboardIsPlainText = !!(osClipboardContents[0].types[0] === "text/plain");
-      if (osClipboardIsPlainText) {
-        const clipboardContent = await osClipboardContents[0].getType("text/plain");
-        const clipboardContentText = await clipboardContent.text();
-        const url = clipboardContentText.match(/curriculum\/([^/]+\/images\/.*)/);
-        if (url) {
-          pasteClipboardImage(({ image }) => this.handleNewImage(image));
-        } else {
-          console.log("ERROR: invalid image URL");
-        }
-        return;
+    const osClipboardContents = await getClipboardContent();
+    if (osClipboardContents?.text) {
+      const url = osClipboardContents.text.match(/curriculum\/([^/]+\/images\/.*)/);
+      if (url) {
+        pasteClipboardImage(osClipboardContents, ({ image }) => this.handleNewImage(image));
+      } else {
+        console.error("ERROR: invalid image URL pasted into geometry tile");
       }
+      return;
     }
 
     const content = this.getContent();
