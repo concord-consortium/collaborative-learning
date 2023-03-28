@@ -31,36 +31,30 @@ const initializeAppPromise = initializeApp("dev");
 
 export class ClueControl extends React.Component<IProps, IState>  {
   disposer: IDisposer;
+  // Because we only create the document from the value property in the
+  // constructor, it is important to make sure the component is reconstructed
+  // whenever the CMS changes the value. As far as I can tell that is always
+  // the case.
+  //
   // Notes on calls:
   // - After publishing a CMS page, the component on the page is not
   //   reconstructed. The existing component is reused. Because we are holding
-  //   onto our own value (the document) this works
+  //   onto the document this works fine.
   // - When leaving (using the CMS ui) and coming back to the same page the
   //   component is reconstructed.
   // - When leaving (using the CMS ui) with unsaved changes, a message is shown,
   //   and the control is reconstructed when returning to the page.
-  // - BUG: When leaving with unsaved changes by reloading the page in the
+  // - When leaving with unsaved changes by reloading the page in the
   //   browser:
   //   - a message is shown before reload confirming you want to lose your
   //     changes
   //   - a message is shown when the page is loaded again about an unsaved draft
-  //     Choosing the draft doesn't show the unsaved changes. My guess is that
-  //     the draft saving code might only work with string fields. This guess is
-  //     based on the behavior of onChange. Immediately after the ClueControl
-  //     calls onChange the ClueControl is re-rendered, but its value is JS
-  //     object not an immutable object. Also looking at the CMS code there is
-  //     one place where the value is typed with typescript to be a string The
-  //     next place to look is at the CMS `Object` widget which must be saving a
-  //     js object instead of a string.
+  //     Choosing the draft doesn't always work. See the "Known Issues" section of
+  //     cms.md
   constructor(props: IProps) {
     super(props);
-    console.log("ClueControl constructed", this.getValue());
     this.state = {};
 
-    // Based on functional component code it might be possible the
-    // value to start out falsy and then is set in a later render
-    // I haven't yet seen that in practice, so this approach is more
-    // simple for now.
     const initialValue = this.getValue();
 
     initializeAppPromise.then((appProperties: IAppProperties) => {
@@ -77,6 +71,10 @@ export class ClueControl extends React.Component<IProps, IState>  {
         document
       });
 
+      // Save the initial state, this is compared with the exported state
+      // on each snapshot. See the comment below for more details
+      let lastState = JSON.stringify(initialValue);
+
       // Update the widget's value whenever a change is made to the document's content
       this.disposer = onSnapshot(document, snapshot => {
         const json = document.content?.exportAsJson();
@@ -84,19 +82,22 @@ export class ClueControl extends React.Component<IProps, IState>  {
           const parsedJson = JSON.parse(json);
           const stringifiedJson = JSON.stringify(parsedJson);
           // Only update when actual changes have been made.
-          // This approach has a few problems:
-          // - just loading the content and exporting it again often causes
-          //   changes to the content. So just opening a page will result in
-          //   the CMS saying there are "unsaved changes".
-          // - if the component is re-used without being re-initialized
-          //   this approach could be a problem, but I haven't seen that in practice.
-          // - FIXME: if the user reverts the document to the initialValue that reversion
-          //   won't be sent to the CMS.
-          if (stringifiedJson !== JSON.stringify(initialValue)) {
-            console.log("ClueControl onChange", parsedJson);
+          // CLUE sometimes changes the document state but those changes are not
+          // part of the exported JSON. One example is when the row height is adjusted
+          // this is saved into the document but not exported and the value of this
+          // row height could change based on the window width.
+          // So we start with the initial JSON and then only call the CMS onChange
+          // when the exported value changes from the last exported value.
+          //
+          // Note: when loading manually authored content there will often be an
+          // immediate change which is not visible. An example of that is when an author
+          // has divided the text of a text tile into multiple strings. This is exported
+          // as a single string.
+          if (stringifiedJson !== lastState) {
+            lastState = stringifiedJson;
             // Looking at the CMS code it seems safer to pass an immutable object here
             // not a plain JS object. The plain JS object does get saved correctly,
-            // but it also gets returned in the value so it means sometimes the value
+            // but it also gets returned in the value property so it means sometimes the value
             // is a immutable object and sometimes it is a plan JS object.
             const immutableValue = Map(parsedJson);
             this.props.onChange(immutableValue);
@@ -111,8 +112,6 @@ export class ClueControl extends React.Component<IProps, IState>  {
   }
 
   render() {
-    console.log("ClueControl rendered", this.getValue());
-
     if (this.state.stores && this.state.document) {
       return (
         <AppProvider stores={this.state.stores} modalAppElement="#nc-root">
