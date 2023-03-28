@@ -211,12 +211,6 @@
         "isTileTool": true
       },
       {
-        "id": "solution",
-        "title": "Toggle Solution Tile",
-        "iconId": "icon-solution-tool",
-        "isTileTool": false
-      },
-      {
         "id": "undo",
         "title": "Undo",
         "iconId": "icon-undo-tool",
@@ -232,6 +226,14 @@
         "id": "delete",
         "title": "Delete",
         "iconId": "icon-delete-tool",
+        "isTileTool": false
+      }
+    ],
+    "authorTools": [
+      {
+        "id": "solution",
+        "title": "Toggle Solution Tile",
+        "iconId": "icon-solution-tool",
         "isTileTool": false
       }
     ],

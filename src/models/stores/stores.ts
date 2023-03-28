@@ -107,8 +107,9 @@ export const setUnitAndProblem = async (stores: IStores, unitId: string | undefi
   stores.appConfig.setConfigs([unit.config || {}, _investigation?.config || {}, _problem?.config || {}]);
 
   // load/initialize the necessary tools
-  const { toolbar = [], tools: tileTypes = [] } = stores.appConfig;
-  const unitTileTypes = new Set([...toolbar.map(button => button.id), ...tileTypes]);
+  const { authorTools = [], toolbar = [], tools: tileTypes = [] } = stores.appConfig;
+  const unitTileTypes = new Set(
+    [...toolbar.map(button => button.id), ...authorTools.map(button => button.id), ...tileTypes]);
   await registerTileTypes([...unitTileTypes]);
 
   // read the unit content with full contents now that we have tools
