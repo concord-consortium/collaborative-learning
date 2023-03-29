@@ -35,6 +35,14 @@ A possible fix would be to delay the call to `retrieveLocalBackup` until `loadEn
 
 A useful way to confirm this behavior is to add console logs in ClueControl when the component is initialized and when when it is rendered and when it calls the CMS's onChange. It is also useful to look at the contents of the CMS's backup. That can be found in the browser Developer tools: `Application/IndexDB/localforage/keyvaluepairs`. In this database search for keys starting with `backup`.
 
+## Nested collection uppercase paths
+The Decap nested collection implementation will lower case the path after publishing an entry if a "customPath" is setup. This happens in this function `slugFromCustomPath`. A customPath is configured with a line like:
+`meta: { path: { widget: "string", label: "Path", index_file: "content" } }` in the CMS config. That meta line makes the path to the entry visible to the user and allows them to change it. But the problem with this is that causes the slug to be lowercased which then in turn causes errors with the GitHub backend because the slug is used to figure the path to request. GitHub is case sensitive so a lowercased path will not be found.
+
+I think the right fix is to change `slugFromCustomPath` to not create a lowercased slug. However if we are going to try to use the PR which adds support for flat folders it might take care of this problem.
+
+The short term solution is to remove the `meta...` property from the config. This configure seems like it isn't needed. I suspect it was added so we could specify the `index_file`. However it seems to work without configuration. I'd guess it just loads which ever file it finds in the directory.
+
 # Wishlist
 
 ## More flexible nested collection support
