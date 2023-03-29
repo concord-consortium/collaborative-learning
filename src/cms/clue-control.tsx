@@ -1,35 +1,32 @@
 import React from "react";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { Map } from "immutable";
-import { appConfig, AppProvider, IAppProperties, initializeApp } from "../initialize-app";
+import { appConfig, AppProvider, initializeApp } from "../initialize-app";
 import { IStores } from "../models/stores/stores";
 import { createDocumentModel, DocumentModelType } from "../models/document/document";
 import { defaultDocumentModelParts } from "../components/doc-editor-app-defaults";
 import { EditableDocumentContent } from "../components/document/editable-document-content";
 
 import "./clue-control.scss";
+import { CmsWidgetControlProps } from "netlify-cms-core";
 
 (window as any).DISABLE_FIREBASE_SYNC = true;
-
-// There is a CmsWidgetControlProps type, but it doesn't seem to be
-// exported by DecapCMS
-interface IProps {
-  field: any,
-  onChange: (value: any) => void,
-  forID: string,
-  value: any,
-  classNameWrapper: string,
-  label?: string
-}
 
 interface IState {
   stores?: IStores;
   document?: DocumentModelType;
 }
 
+// Initialize the app just one time globally, each control waits for this
+// initialization to finish to know the `stores` so the document editor
+// can use these stores
 const initializeAppPromise = initializeApp("dev");
 
-export class ClueControl extends React.Component<IProps, IState>  {
+// We are using the CmsWidgetControlProps for the type of properties passed to
+// the control. This doesn't actually include all of the properties that are
+// available. A more complete list can be found in Widget.js in the DecapCMS
+// source code.
+export class ClueControl extends React.Component<CmsWidgetControlProps, IState>  {
   disposer: IDisposer;
   // Because we only create the document from the value property in the
   // constructor, it is important to make sure the component is reconstructed
@@ -51,13 +48,13 @@ export class ClueControl extends React.Component<IProps, IState>  {
   //   - a message is shown when the page is loaded again about an unsaved draft
   //     Choosing the draft doesn't always work. See the "Known Issues" section of
   //     cms.md
-  constructor(props: IProps) {
+  constructor(props: CmsWidgetControlProps) {
     super(props);
     this.state = {};
 
     const initialValue = this.getValue();
 
-    initializeAppPromise.then((appProperties: IAppProperties) => {
+    initializeAppPromise.then((stores) => {
 
       // Wait to construct the document until the main CLUE stuff is
       // initialized. I'm not sure if this is necessary but it seems
@@ -67,7 +64,7 @@ export class ClueControl extends React.Component<IProps, IState>  {
         content: initialValue
       });
       this.setState({
-        stores: appProperties.stores,
+        stores,
         document
       });
 

@@ -26,12 +26,6 @@ const kEnableLivelinessChecking = false;
 
 export const appConfig = AppConfigModel.create(appConfigSnapshot);
 
-// TODO: we might as well just return
-// stores instead of an object container stores
-export interface IAppProperties {
-  stores: IStores;
-}
-
 /**
  * This function is used by the 3 different entry points supported
  * by CLUE:
@@ -45,7 +39,7 @@ export interface IAppProperties {
  * @param appMode
  * @returns
  */
-export const initializeApp = async (appMode: AppMode) => {
+export const initializeApp = async (appMode: AppMode): Promise<IStores> => {
   const appVersion = PackageJson.version;
 
   const user = UserModel.create();
@@ -73,7 +67,7 @@ export const initializeApp = async (appMode: AppMode) => {
   // The logger will only be enabled if the appMode is "authed", or DEBUG_LOGGER is true
   Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
 
-  return { stores };
+  return stores;
 };
 
 const queryClient = new QueryClient();

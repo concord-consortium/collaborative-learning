@@ -17,6 +17,20 @@ The code for this function is located here: https://github.com/Herohtar/netlify-
 
 It was configured with the client ID and client secret from the GitHub OAuth app.
 
+# TODO
+
+## Preview links
+When editing a section in the CMS there should be a link to open full CLUE pointing at least to the unit, investigation, and problem being edited. And when CLUE supports specifying the section in the URL that should be part of the link too.
+
+## CLUE section editor scrolling
+The CLUE editor widget should expand its height like the CMS's rich text editor widget. This way the CLUE content won't have an extra scrollbar.
+
+## Unit editing
+The configuration of a CLUE unit cannot be edited yet.
+
+## Preview of a section on the right side of the CMS
+This would allow the author to see the section in its read-only mode like what is seen in the CLUE curriculum tabs.
+
 # Known Issues
 
 ## Backup Draft

@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { AppProvider, IAppProperties, initializeApp } from "./initialize-app";
+import { AppProvider, initializeApp } from "./initialize-app";
 import { AppComponent } from "./components/app";
 import { getAppMode } from "./lib/auth";
 import { urlParams } from "./utilities/url-params";
@@ -17,7 +17,7 @@ if (appMode === "qa" && urlParams.qaClear === "all") {
     document.getElementById("app")
   );
 } else {
-  initializeApp(appMode).then(({ stores }: IAppProperties) => {
+  initializeApp(appMode).then((stores) => {
     setPageTitle(stores);
     stores.ui.setShowDemoCreator(!!stores.showDemoCreator);
     stores.supports.createFromUnit({

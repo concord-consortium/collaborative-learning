@@ -32,7 +32,7 @@ function cmsBackend() {
   }
 }
 
-// Config or Decap CMS
+// Config for Decap CMS
 const cmsConfig: CmsConfig = {
   load_config_file: false,
   ...cmsBackend(),
@@ -73,7 +73,6 @@ const cmsConfig: CmsConfig = {
     }
   ]
 };
-// (window as any).CMS_CONFIG = cmsConfig;
 
 export function initCMS() {
   CMS.registerWidget("clue", ClueControl);
