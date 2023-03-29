@@ -600,8 +600,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private sendDataToSerialDevice(n: Node){
-    if (isFinite(n.data.nodeValue as number)){
-      this.stores.serialDevice.writeToOut(n.data.nodeValue as number); // micro:bit
+    const isNumberOutput = isFinite(n.data.nodeValue as number);
+    const { deviceFamily } = this.stores.serialDevice;
+
+    if (deviceFamily === "arduino" && isNumberOutput){
+      this.stores.serialDevice.writeToOutForArduino(n.data.nodeValue as number);
+    }
+    if (deviceFamily === "microbit"){
+      console.log("handle data destined for microbit");
     }
   }
 

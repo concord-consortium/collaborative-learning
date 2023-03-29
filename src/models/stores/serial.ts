@@ -1,8 +1,6 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 
 export class SerialDevice {
-  value: string;
-  outValue: number;
   localBuffer: string;
   private port: SerialPort | null;
   connectChangeStamp: number | null;
@@ -14,8 +12,6 @@ export class SerialDevice {
   deviceFamily: string | null;
 
   constructor() {
-    this.value = "0";
-    this.outValue = 0;
     this.localBuffer = "";
 
     navigator.serial?.addEventListener("connect", (e) => {
@@ -31,6 +27,7 @@ export class SerialDevice {
     this.serialNodesCount = n;
   }
 
+  // TODO, this is brittle and should be replaced
   public updateConnectionInfo(timeStamp: number | null, status: string ){
     this.connectChangeStamp = timeStamp;
     this.lastConnectMessage = status;
@@ -38,30 +35,16 @@ export class SerialDevice {
   }
 
   public hasPort(){
-    const portHere = this.port !== undefined;
-    const readablePort = this.port?.readable;
-    return portHere && readablePort;
+    return this.port !== undefined && this.port?.readable;
   }
 
   public async requestAndSetPort(){
 
-    /* The filters commented out below were set up so that only Arduino boards (and close-match non-Arduinos
-    such as the DFRobot one) will show as options for users to connect.  It turns out that there are working
-    Arduino clones that do not match these filters, one of which is being shipped with the latest generation
-    of BB hardware. Rather than attempt to match every non-standard board, we are removing the filters
-    for now and adding a message to the dialog that should help users make the right selection. A TODO item
-    would be to import an updatable and comprehensive list and use it to dynamically create filters.
-
+    // see note on filters in src/plugins/dataflow-tool/serial.md
     // const filters = [
     //   { usbVendorId: 0x2341, usbProductId: 0x0043 },
     //   { usbVendorId: 0x2341, usbProductId: 0x0001 }
     // ];
-
-    Additionally, we now work with a set of programs designed to be used with specific micro:bit programs.
-    micro:bits have reliable deviceInfo.  Therefore, we can assume that if we are connected to something
-    other than a micro:bit, we can treat it as an arduino.
-
-    */
 
     try {
       this.port = await navigator.serial.requestPort();
@@ -97,7 +80,12 @@ export class SerialDevice {
           if (done){
             break;
           }
-          this.handleStreamObj(value, channels);
+          if (this.deviceFamily === "arduino"){
+            this.handleArduinoStreamObj(value, channels);
+          }
+          if (this.deviceFamily === "microbit"){
+            this.handleMicroBitStreamObj(value, channels);
+          }
         }
       }
       catch (error) {
@@ -109,7 +97,15 @@ export class SerialDevice {
     }
   }
 
-  public handleStreamObj(value: string, channels: Array<NodeChannelInfo>){
+  public handleMicroBitStreamObj(value: string, channels: Array<NodeChannelInfo>){
+    console.log("handle stream bound for microbit");
+  }
+
+  public writeToOutForMicroBit(n:any){
+    console.log("write output for microbit");
+  }
+
+  public handleArduinoStreamObj(value: string, channels: Array<NodeChannelInfo>){
     this.localBuffer += value;
 
     const pattern = /(emg|fsr):([0-9]+)[\r][\n]/g;
@@ -132,7 +128,7 @@ export class SerialDevice {
     } while (match);
   }
 
-  public writeToOut(n:number){
+  public writeToOutForArduino(n:number){
     // number visible to user represents "percent closed"
     // so we need to map x percent to an angle in range where
     // 100% (closed) is 120deg, and 0% (open) is 180deg
