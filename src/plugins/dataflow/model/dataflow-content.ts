@@ -91,9 +91,6 @@ export const DataflowContentModel = TileContentModel
     get isUserResizable() {
       return true;
     },
-    get dataSet() {
-      return self.sharedModel?.dataSet || self.emptyDataSet;
-    },
     exportJson(options?: ITileExportOptions) {
       const zoom = getSnapshot(self.programZoom);
       return [
@@ -139,7 +136,6 @@ export const DataflowContentModel = TileContentModel
 
         // collecting the stats on current sharedModels here so we can pass on to reaction on 119
         const sharedDataSet = sharedModelManager?.isReady
-          // TODO, where is this coming from, might not want it id by any "metadata"
           ? sharedModelManager?.findFirstSharedModelByType(SharedDataSet, self.metadata.id)
           : undefined;
 

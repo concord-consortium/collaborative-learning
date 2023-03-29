@@ -34,6 +34,7 @@ import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { SerialDevice } from "../../../models/stores/serial";
 import { dataflowLogEvent } from "../dataflow-logger";
+import { addCanonicalCasesToDataSet, newCaseId } from "../../../models/data/data-set";
 
 import "./dataflow-program.sass";
 interface NodeNameValuePair {
@@ -520,21 +521,29 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  private createCaseIdForTick = (collectedTime: number) => {
-    return collectedTime + "*" + this.props.tileId;
-  };
+  // private createCaseIdForTick = (collectedTime: number) => {
+  //   return collectedTime + "*" + this.props.tileId;
+  // };
+
+
 
   private tick = () => {
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
-
-    // set up to record each node, should recording be on
     const isRecording = this.props.programRecordState === 1;
-    const caseId = isRecording ? this.createCaseIdForTick(now) : null;
     const existingAttributes = this.props.tileModel.existingAttributes();
+
     if (isRecording){
-      this.props.tileModel.addNewCaseFromAttrKeys(existingAttributes, caseId as string);
+      const aCase = { //create a case per tick
+        __id__: newCaseId(),
+      };
+      //loop through attribute (nodes) and write each value
+      this.programEditor.nodes.forEach((node, idx) => {
+        const key = existingAttributes[idx] as keyof typeof aCase;
+        aCase[key] = node.data.nodeValue as string;
+      });
+      addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
     }
 
     // set up to process each node, should processing be necessary
@@ -553,11 +562,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
     // iterate over each node, recording and processing as configured above
     this.programEditor.nodes.forEach((n: Node, idx) => {
-      if (isRecording && caseId){//write each node value to attribute
-        const attributeIdArr = this.props.tileModel.existingAttributesWithNames();
-        this.props.tileModel.setAttrValue(caseId, attributeIdArr[idx].attrId, n.data.nodeValue as string);
-      }
-
       const nodeProcess = nodeProcessMap[n.name];
       if (nodeProcess) {
         processNeeded = true;
@@ -576,6 +580,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         await this.programEngine.process(this.programEditor.toJSON());
       })();
     }
+
+    const dataSet = this.props.tileModel.dataSet;
+
+    console.log("dataSet after each tick:", dataSet);
   };
 
   private passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo){
