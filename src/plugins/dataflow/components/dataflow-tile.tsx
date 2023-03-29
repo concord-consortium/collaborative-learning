@@ -22,7 +22,7 @@ interface IProps extends ITileProps{
 }
 
 interface IDataflowTileState {
-  programRecordingMode: number // shoud be enumerated
+  programRecordingMode: number // TO DO: convert to enum;
 }
 
 @inject("stores")
