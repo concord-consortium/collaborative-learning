@@ -40,33 +40,37 @@ context('Text tool tile functionalities', function(){
         textToolTile.deleteText('{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}{backspace}...');
         textToolTile.getTextTile().last().should('not.contain', 'delete');
     });
+    // FIXME: For some reason that only seems present in these tests, we have to add seemingly
+    // superfluous spaces and line breaks before applying each text format. If we don't, the
+    // elements we're checking for either don't get added, or get added in a somewhat meaningless
+    // way (e.g., `<em></em> This should be italic`). This issue doesn't exist in the browser.
     it('has a toolbar that can be used', function(){
         textToolTile.clickToolbarTool("Bold");
         textToolTile.enterText('{end} {enter}');
-        textToolTile.enterText('{end}This should be bold. ');
+        textToolTile.enterText('{end}This should be bold.');
         textToolTile.getTextEditor().last().should('have.descendants', 'strong');
         textToolTile.clickToolbarTool("Bold");
 
         textToolTile.clickToolbarTool("Italic");
-        textToolTile.enterText('This should be italicized. ');
+        textToolTile.enterText('{end} {enter}');
+        textToolTile.enterText('{end} {enter}This should be italic.');
         textToolTile.getTextEditor().last().should('have.descendants', 'em');
         textToolTile.clickToolbarTool("Italic");
 
         textToolTile.clickToolbarTool("Underline");
-        textToolTile.enterText('This should be underlined. ');
+        textToolTile.enterText('{end} {enter}');
+        textToolTile.enterText('{end} {enter}This should be underlined.');
         textToolTile.getTextEditor().last().should('have.descendants', 'u');
         textToolTile.clickToolbarTool("Underline");
 
         textToolTile.clickToolbarTool("Subscript");
-        textToolTile.enterText('This should be subscript. ');
+        textToolTile.enterText('{end} {enter}');
+        textToolTile.enterText('{end} {enter}This should be subscript.');
         textToolTile.getTextEditor().last().should('have.descendants', 'sub');
         textToolTile.clickToolbarTool("Subscript");
 
-        // FIXME: For some reason that only seems present in these tests, we have to add seemingly
-        // superfluous spaces and line breaks before applying each text format. If we don't, the
-        // elements we're checking for either don't get added, or get added in a somewhat meaningless
-        // way (e.g., `<em></em> This should be italic`). This issue doesn't exist in the browser.
         textToolTile.clickToolbarTool("Superscript");
+        textToolTile.enterText('{end} {enter}');
         textToolTile.enterText('{end} {enter}This should be superscript.');
         textToolTile.getTextEditor().last().should('have.descendants', 'sup');
         textToolTile.clickToolbarTool("Superscript");
