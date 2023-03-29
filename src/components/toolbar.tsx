@@ -236,9 +236,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const { document } = this.props;
     const documentContent = document.content;
     if (documentContent) {
-      const includeTeacher = this.selectedTilesIncludeTeacher();
+      const display = this.selectedTilesIncludeTeacher() ? undefined : "teacher";
       ui.selectedTileIds.forEach(tileId => {
-        documentContent.getTile(tileId)?.setDisplay(includeTeacher ? undefined : "teacher");
+        documentContent.getTile(tileId)?.setDisplay(display);
       });
     }
   };

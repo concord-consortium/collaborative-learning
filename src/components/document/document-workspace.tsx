@@ -35,7 +35,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
   }
 
   public render() {
-    const { appMode, appConfig, documents, ui, groups } = this.stores;
+    const { appMode, appConfig: { toolbar }, documents, ui, groups } = this.stores;
     const { problemWorkspace } = ui;
     const { comparisonDocumentKey, hidePrimaryForCompare, comparisonVisible } = problemWorkspace;
     const showPrimary = !hidePrimaryForCompare;
@@ -50,7 +50,6 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       return this.renderDocument("single-workspace", "primary");
     }
 
-    const toolbar = appConfig.toolbar;
     const CompareDocument = groupVirtualDocument
       ? <GroupVirtualDocumentComponent
           key={comparisonDocumentKey}
