@@ -46,36 +46,48 @@ describe("getClipboardContent", () => {
 });
 
 describe("pasteClipboardImage", () => {
+  const onComplete = jest.fn();
+  const mockConsoleError = jest.fn();
+  const mockImageResponse = {
+    contentUrl: "test/test.png",
+    displayUrl: "https://example.com/test/test.png",
+    filename: "test.png",
+    height: 100,
+    retries: 0,
+    status: EntryStatus.Ready,
+    width: 100
+  };
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  beforeEach(() => {
+    jest.spyOn(console, "error").mockImplementation(mockConsoleError);
+    jest.spyOn(gImageMap, "addFileImage").mockResolvedValue(mockImageResponse);
+    jest.spyOn(gImageMap, "getImage").mockResolvedValue(mockImageResponse);
+  });
+
+  it ("does not call addFileImage or getImage when the clipboard does not contain an image or text item", () => {
+    pasteClipboardImage({image: null, text: null}, onComplete);
+    expect(gImageMap.addFileImage).not.toHaveBeenCalled();
+    expect(gImageMap.getImage).not.toHaveBeenCalled();
+    expect(mockConsoleError).toHaveBeenCalledWith("ERROR: unknown clipboard content type");
+  });
   it ("calls addFileImage when the clipboard contains an image item", () => {
     const image = { image: "test.png" };
-    const mockImageResponse = {
-      contentUrl: "test/test.png",
-      displayUrl: "https://example.com/test/test.png",
-      filename: "test.png",
-      height: 100,
-      retries: 0,
-      status: EntryStatus.Ready,
-      width: 100
-    };
-    const onComplete = jest.fn();
-    jest.spyOn(gImageMap, "addFileImage").mockResolvedValue(mockImageResponse);
     pasteClipboardImage(image, onComplete);
     expect(gImageMap.addFileImage).toHaveBeenCalled();
   });
-  it ("calls getImage when the clipboard contains a text item", () => {
+  it ("calls getImage when the clipboard contains a text item with a valid value", () => {
     const image = { text: "curriculum/test/images/test.png" };
-    const mockImageResponse = {
-      contentUrl: "test/test.png",
-      displayUrl: "https://example.com/test/test.png",
-      filename: "test.png",
-      height: 100,
-      retries: 0,
-      status: EntryStatus.Ready,
-      width: 100
-    };
-    const onComplete = jest.fn();
-    jest.spyOn(gImageMap, "getImage").mockResolvedValue(mockImageResponse);
     pasteClipboardImage(image, onComplete);
     expect(gImageMap.getImage).toHaveBeenCalled();
+  });
+  it ("does not call getImage when the clipboard contains a text item with an invalid value", () => {
+    const image = { text: "not-a-valid-url-value" };
+    pasteClipboardImage(image, onComplete);
+    expect(gImageMap.getImage).not.toHaveBeenCalled();
+    expect(mockConsoleError).toHaveBeenCalledWith("ERROR: invalid image URL");
   });
 });
