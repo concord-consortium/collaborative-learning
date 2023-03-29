@@ -4,6 +4,7 @@ import CMS from "netlify-cms-app";
 import { CmsBackendType, CmsConfig } from "netlify-cms-core";
 import { urlParams } from "../utilities/url-params";
 
+import { ClueControl } from "./clue-control";
 import { JsonControl } from "./json-control";
 
 // Local testing of the CMS without working with github directly:
@@ -31,7 +32,7 @@ function cmsBackend() {
   }
 }
 
-// Config or Decap CMS
+// Config for Decap CMS
 const cmsConfig: CmsConfig = {
   load_config_file: false,
   ...cmsBackend(),
@@ -62,18 +63,19 @@ const cmsConfig: CmsConfig = {
         {
           label: "Content",
           name: "content",
-          widget: "json" as any
+          widget: "clue" as any
         }
       ],
       // adding a meta object with a path property allows editing the path of entries
       // moving an existing entry will move the entire sub tree of the entry to the new location
-      meta: { path: { widget: "hidden", label: "Path", index_file: "content" } }
+      // However, this causes the path to be lowercased when publishing an entry.
+      // meta: { path: { widget: "hidden", label: "Path", index_file: "content" } }
     }
   ]
 };
-// (window as any).CMS_CONFIG = cmsConfig;
 
 export function initCMS() {
+  CMS.registerWidget("clue", ClueControl);
   CMS.registerWidget("json", JsonControl);
   CMS.init({config: cmsConfig});
 }

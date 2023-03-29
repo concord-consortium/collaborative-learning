@@ -35,7 +35,8 @@ module.exports = (env, argv) => {
     devtool: devMode ? 'eval-cheap-module-source-map' : 'source-map',
     entry: {
       index: './src/index.tsx',
-      admin: './src/admin.tsx'
+      admin: './src/admin.tsx',
+      'doc-editor': './src/doc-editor.tsx'
     },
     mode: devMode ? 'development' : 'production',
     output: {
@@ -202,14 +203,22 @@ module.exports = (env, argv) => {
         },
         cacheGroups: {
           // For the initial chunk, split modules from node_modules out even if
-          // they are only used by the 1 initial chunk. This results in a single
-          // extra chunk that contains all of the 3rd party dependencies.
+          // they are only used by one initial chunk. Because we have multiple
+          // entry points this will result in a few different vendor files.
+          // The entry points share code, so some of the vendor files are used by
+          // multiple entry points.
           initialVendors: {
             chunks: 'initial',
             test: /[\\/]node_modules[\\/]/,
             minChunks: 1,
             reuseExistingChunk: true,
-            filename: 'vendor-main.[chunkhash:8].js',
+            filename: (pathData) => {
+              // console.log("vendor filename", pathData.chunk.id,
+              //   [...pathData.chunk._groups].map(group => group.options?.name),
+              //   [...pathData.chunk._groups].map(group => group.chunks));
+              const groupsNames = [...pathData.chunk._groups].map(group => group.options?.name);
+              return `vendor-${groupsNames.join('-')}.[chunkhash:8].js`;
+            },
           },
         }
       }
@@ -251,6 +260,12 @@ module.exports = (env, argv) => {
         filename: 'index-top.html',
         publicPath: DEPLOY_PATH,
       })] : []),
+      new HtmlWebpackPlugin({
+        ...baseHtmlPluginConfig,
+        chunks: ['doc-editor'],
+        filename: 'doc-editor.html',
+        publicPath: '.',
+      }),
       new CopyWebpackPlugin({
         patterns: [
           {from: 'src/public'}

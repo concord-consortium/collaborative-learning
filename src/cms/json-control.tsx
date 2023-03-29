@@ -2,8 +2,11 @@ import React from "react";
 
 import "./json-control.scss";
 
-// There is a CmsWidgetControlProps type, but it doesn't seem to be
-// exported by DecapCMS
+// There is a CmsWidgetControlProps type which includes a few of the
+// properties passed to the control component by DecapCMS.
+// A more complete list can be found in Widget.js in the DecapCMS
+// source code. However even that list is missing the `label` property.
+// It isn't clear where this label property is coming from.
 interface IProps {
   field: any,
   onChange: (value: any) => void,
@@ -39,9 +42,6 @@ export class JsonControl extends React.Component<IProps, IState>  {
   }
 
   render() {
-    // `label` is not documented in the Decap docs and it is also not
-    // listed in the CmsWidgetControlProps provided by Decap
-    // but it does seem to provide the label of the field
     const { label } = this.props;
 
     return (
