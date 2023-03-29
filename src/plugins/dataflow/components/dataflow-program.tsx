@@ -580,10 +580,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         await this.programEngine.process(this.programEditor.toJSON());
       })();
     }
-
-    const dataSet = this.props.tileModel.dataSet;
-
-    console.log("dataSet after each tick:", dataSet);
   };
 
   private passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo){
