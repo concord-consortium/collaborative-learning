@@ -51,6 +51,18 @@ context('Test image functionalities', function(){
             cy.uploadFile(imageToolTile.imageChooseFileButton(), imageFilePath, 'image/gif');
             cy.wait(2000);
         });
+        it('will accept a valid image URL pasted from the clipboard', function(){
+            const imageFilePath = "curriculum/test/images/image.png";
+            cy.window().then((win) => {
+                win.navigator.clipboard.write([new win.ClipboardItem({
+                    "text/plain": new Blob([imageFilePath], { type: "text/plain" }),
+                })]);
+            });
+            const isMac = navigator.platform.indexOf("Mac") === 0;
+            const cmdKey = isMac ? "meta" : "ctrl";
+            imageToolTile.getImageToolTile().last().type(`{${cmdKey}+v}`);
+            imageToolTile.getImageToolImage().last().should("have.css", "background-image").and("contain", "test/images/image.png");
+        });
     });
     describe.skip('restore of images', function(){
         before(()=>{ //reopen the first canvas
