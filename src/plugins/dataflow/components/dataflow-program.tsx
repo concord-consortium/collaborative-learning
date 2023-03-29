@@ -521,12 +521,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  // private createCaseIdForTick = (collectedTime: number) => {
-  //   return collectedTime + "*" + this.props.tileId;
-  // };
-
-
-
   private tick = () => {
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
@@ -534,8 +528,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const isRecording = this.props.programRecordState === 1;
     const existingAttributes = this.props.tileModel.existingAttributes();
 
+    /* ==[ Per tick - create a case and write it to the dataSet ] == */
     if (isRecording){
-      const aCase = { //create a case per tick
+      const aCase = {
         __id__: newCaseId(),
       };
       //loop through attribute (nodes) and write each value
@@ -546,7 +541,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
     }
 
-    // set up to process each node, should processing be necessary
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
       Generator: this.updateGeneratorNode,
       Timer: this.updateTimerNode,
@@ -560,7 +554,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     };
     let processNeeded = false;
 
-    // iterate over each node, recording and processing as configured above
     this.programEditor.nodes.forEach((n: Node, idx) => {
       const nodeProcess = nodeProcessMap[n.name];
       if (nodeProcess) {
