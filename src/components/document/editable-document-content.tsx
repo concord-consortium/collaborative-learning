@@ -85,6 +85,7 @@ const DocumentCanvas: React.FC<IDocumentCanvasProps> = props => {
 };
 
 export interface IProps {
+  contained?: boolean;
   mode: WorkspaceMode;
   isPrimary: boolean;
   document: DocumentModelType;
@@ -93,7 +94,7 @@ export interface IProps {
   readOnly?: boolean;
 }
 export const EditableDocumentContent: React.FC<IProps> = props => {
-  const { mode, isPrimary, document, toolbar, readOnly, showPlayback } = props;
+  const { contained, mode, isPrimary, document, toolbar, readOnly, showPlayback } = props;
 
   const documentContext = useDocumentContext(document);
   const { db: { firebase }, ui, user } = useStores();
@@ -108,7 +109,7 @@ export const EditableDocumentContent: React.FC<IProps> = props => {
   const isChatEnabled = isNetworkedTeacher;
   const documentSelectedForComment = isChatEnabled && ui.showChatPanel && ui.selectedTileIds.length === 0 && !isPrimary;
   const editableDocContentClass = classNames("editable-document-content", showToolbarClass,
-                                             {"comment-select" : documentSelectedForComment});
+    contained ? "contained" : "full-screen", {"comment-select" : documentSelectedForComment});
 
   useDocumentSyncToFirebase(user, firebase, document, readOnly);
   return (
