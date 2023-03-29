@@ -50,8 +50,7 @@ export class DocumentWorkspaceComponent extends BaseComponent<IProps> {
       return this.renderDocument("single-workspace", "primary");
     }
 
-    // const toolbar = appConfig.toolbar;
-    const toolbar = appConfig.authorToolbar;
+    const toolbar = appConfig.toolbar;
     const CompareDocument = groupVirtualDocument
       ? <GroupVirtualDocumentComponent
           key={comparisonDocumentKey}

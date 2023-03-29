@@ -39,7 +39,7 @@ export const appConfig = AppConfigModel.create(appConfigSnapshot);
  * @param appMode
  * @returns
  */
-export const initializeApp = async (appMode: AppMode): Promise<IStores> => {
+export const initializeApp = async (appMode: AppMode, authoring?: boolean): Promise<IStores> => {
   const appVersion = PackageJson.version;
 
   const user = UserModel.create();
@@ -66,6 +66,12 @@ export const initializeApp = async (appMode: AppMode): Promise<IStores> => {
 
   // The logger will only be enabled if the appMode is "authed", or DEBUG_LOGGER is true
   Logger.initializeLogger(stores, { investigation: stores.investigation.title, problem: stores.problem.title });
+
+  if (authoring) {
+    // Make the user a teacher and show solution tiles
+    stores.user.setType("teacher");
+    stores.ui.toggleShowTeacherContent(true);
+  }
 
   return stores;
 };
