@@ -379,13 +379,6 @@ export const DocumentContentModel = types
     exportRowsAsJson(rows: (TileRowModelType | undefined)[], options?: IDocumentExportOptions) {
       const builder = new StringBuilder();
       builder.pushLine("{");
-
-      // TODO Only include necessary shared models
-      // const sharedModelsArray = Array.from(self.sharedModelMap.values());
-      // if (sharedModelsArray.length > 0){
-      //   builder.pushLine(`"sharedModels":${stringify(sharedModelsArray)},`, 2);
-      // }
-
       builder.pushLine(`"tiles": [`, 2);
 
       const includedTileIds: string[] = [];
@@ -416,10 +409,9 @@ export const DocumentContentModel = types
           }
         }
       });
-
       const sharedModels = Object.values(self.getSharedModelsUsedByTiles(includedTileIds));
-      const tilesComma = sharedModels.length > 0 ? "," : "";
 
+      const tilesComma = sharedModels.length > 0 ? "," : "";
       builder.pushLine(`]${tilesComma}`, 2);
 
       if (sharedModels.length > 0) {
