@@ -526,13 +526,13 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
     const isRecording = this.props.programRecordState === 1;
-    const existingAttributes = this.props.tileModel.existingAttributes();
 
     /* ==[ Per tick - create a case and write it to the dataSet ] == */
     if (isRecording){
       const aCase = {
         __id__: newCaseId(),
       };
+      const existingAttributes = this.props.tileModel.existingAttributes();
       //loop through attribute (nodes) and write each value
       this.programEditor.nodes.forEach((node, idx) => {
         const key = existingAttributes[idx] as keyof typeof aCase;
@@ -554,7 +554,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     };
     let processNeeded = false;
 
-    this.programEditor.nodes.forEach((n: Node, idx) => {
+    this.programEditor.nodes.forEach((n: Node) => {
       const nodeProcess = nodeProcessMap[n.name];
       if (nodeProcess) {
         processNeeded = true;
