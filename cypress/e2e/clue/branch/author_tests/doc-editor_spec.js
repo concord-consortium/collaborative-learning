@@ -1,8 +1,7 @@
 
 const url = "/doc-editor.html";
 
-context('History Playback', () => {
-
+context('Doc Editor', () => {
   beforeEach(() => {
     cy.clearQAData('all');
 
@@ -26,7 +25,9 @@ context('History Playback', () => {
     solutionButton().should("have.class", "enabled");
     solutionButton().click();
     imageTile().should("have.class", "teacher");
+    solutionButton().should("have.class", "active");
     solutionButton().click();
     imageTile().should("not.have.class", "teacher");
+    solutionButton().should("not.have.class", "active");
   });
 });
