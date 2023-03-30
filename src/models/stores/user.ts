@@ -36,7 +36,15 @@ export const UserModel = types
     className: "",
     classHash: "",
     offeringId: "",
+    // This is the last group the user joined. It is synced with the latestGroupId
+    // property in Firebase
     latestGroupId: types.maybe(types.string),
+    // This is the group of this user in the particular offering that is being
+    // run right now. There is a view which will return this value if set otherwise
+    // it returns latestGroupId. There might be a period when CLUE is being loaded
+    // where the currentGroupId is not set yet. This would happen if the user hasn't
+    // chosen a group yet. Or if groups haven't been loaded yet.
+    currentGroupId: types.maybe(types.string),
     portal: "",
     network: types.maybe(types.string),
     networks: types.array(types.string),
@@ -68,6 +76,9 @@ export const UserModel = types
     },
     setLatestGroupId(latestGroupId?: string) {
       self.latestGroupId = latestGroupId;
+    },
+    setCurrentGroupId(currentGroupId?: string) {
+      self.currentGroupId = currentGroupId;
     },
     setId(id: string) {
       self.id = id;

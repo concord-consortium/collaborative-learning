@@ -91,7 +91,9 @@ export class DBProblemDocumentsListener extends BaseListener {
         // both teachers and students listen to all problem documents
         // but only teachers listen to all content.  students only listen
         // to content of users in their group to reduce network traffic
-        const userInGroup = groups.userInGroup(document.self.uid, currentUser.latestGroupId);
+        // TODO: maybe currentGroupId isn't always available here and that can cause
+        // a problem?
+        const userInGroup = groups.userInGroup(document.self.uid, currentUser.currentGroupId);
         // Local changes take precedence over remote changes
         const monitor = isOwnDocument
                           ? Monitor.Local

@@ -184,7 +184,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
     }
 
     if (user.isStudent) {
-      if (!groups.groupForUser(user.id)) {
+      if (!user.currentGroupId) {
         if (appConfig.autoAssignStudentsToIndividualGroups || this.stores.isPreviewing) {
           // use userId as groupId
           db.joinGroup(user.id);

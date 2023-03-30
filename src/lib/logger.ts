@@ -105,7 +105,7 @@ export class Logger {
     const {
       appConfig: { appName }, appMode, problemPath,
       ui: { activeGroupId, activeNavTab, navTabContentShown, problemWorkspace, teacherPanelKey },
-      user: { activityUrl, classHash, id, isStudent, isTeacher, portal, type, latestGroupId,
+      user: { activityUrl, classHash, id, isStudent, isTeacher, portal, type, currentGroupId,
               loggingRemoteEndpoint, firebaseDisconnects, loggingDisconnects, networkStatusAlerts
     }} = this.stores;
     // only log disconnect counts if there have been any disconnections
@@ -138,7 +138,7 @@ export class Logger {
     }
 
     if (isStudent) {
-      logMessage.group = latestGroupId;
+      logMessage.group = currentGroupId;
       logMessage.workspaceMode = problemWorkspace.mode;
     }
     if (isTeacher) {

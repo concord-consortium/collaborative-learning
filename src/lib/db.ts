@@ -442,7 +442,9 @@ export class DB {
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getProblemPublicationsPath(user)).push();
-        const userGroup = groups.groupForUser(user.id)!;
+        // TODO: this is assuming there is always a group for this current user, that doesn't seem
+        // safe???
+        const userGroup = groups.getGroupById(user.currentGroupId)!;
         const groupUserConnections: DBGroupUserConnections = userGroup && userGroup.users
           .filter(groupUser => groupUser.id !== user.id)
           .reduce((allUsers: DBGroupUserConnections, groupUser) => {
