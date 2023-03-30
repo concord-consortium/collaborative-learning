@@ -34,15 +34,11 @@ export const getClipboardContent = async (clipboardData?: DataTransfer) => {
 
   if (clipboardData) {
     for (const item of clipboardData.items) {
-      if (item.type.includes("image")) {
-        const imageFile = item.getAsFile();
-        if (imageFile) {
-          clipboardContent.image = imageFile;
-        }
+      if (item.type === "image/png") {
+        clipboardContent.image = item.getAsFile();
       }
-      if (item.type.includes("text/plain")) {
-        const text = clipboardData.getData("text/plain");
-        clipboardContent.text = text;
+      if (item.type === "text/plain") {
+        clipboardContent.text = clipboardData.getData("text/plain");
       }
     }
   } else {

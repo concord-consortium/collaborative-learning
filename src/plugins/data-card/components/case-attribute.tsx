@@ -8,7 +8,7 @@ import { looksLikeDefaultLabel, EditFacet } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
 import { useErrorAlert } from "../../../components/utilities/use-error-alert";
-// import { getClipboardContent } from "../../../utilities/clipboard-utils";
+import { getClipboardContent } from "../../../utilities/clipboard-utils";
 
 import '../data-card-tile.scss';
 
@@ -117,9 +117,6 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handlePasteImage = (imageFile: File, targetElement: HTMLElement) => {
-    // const randomString = Date.now().toString(32) + Math.random().toString(16).substring(2, 15);
-    // const newFileName = `clipboard-image-${randomString}.png`;
-    // const newFileData = new File([imageFile], newFileName);
     gImageMap.addFileImage(imageFile).then(image => {
       if (image.contentUrl) {
         setValueCandidate(image.contentUrl);
@@ -129,37 +126,19 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   };
 
   const handleValuePaste = async (event: React.ClipboardEvent<HTMLInputElement>) => {
-    // If the clipboard contains an image element, prevent the default paste action
-    // and process the image so it can be saved and rendered. Otherwise, allow the
-    // default paste action to occur.
-    const pastedItem = event.clipboardData.items[1]?.type.includes("image")
-                         ? event.clipboardData.items[1]
-                         : event.clipboardData.items[0];
-    if (pastedItem.type.includes("image")) {
+    // If the clipboard contains an image element, process the image so it can be saved
+    // and rendered. If the clipboard contains a text element, check if it is an image URL.
+    // If it is, immediately set the value to the URL. Otherwise, allow the default paste
+    // action to occur.
+    const targetElement = event.currentTarget;
+    const clipboardContents = await getClipboardContent(event.clipboardData);
+    if (clipboardContents.image) {
       event.preventDefault();
-      const imageFile = pastedItem.getAsFile();
-      if (imageFile) {
-        handlePasteImage(imageFile, event.currentTarget);
-      }
-    } else if (pastedItem.type.includes("text/plain")) {
-      const text = event.clipboardData.getData("text/plain");
-      if (text && gImageMap.isImageUrl(text)) {
-        event.preventDefault();
-        setValueCandidate(text);
-        handleCompleteValue();
-        handleCompleteName();
-        event.currentTarget.blur();
-        setCurrEditAttrId("");
-        setCurrEditFacet("");
-      }
+      handlePasteImage(clipboardContents.image, targetElement);
+    } else if (gImageMap.isImageUrl(clipboardContents.text)) {
+      event.preventDefault();
+      setValue(clipboardContents.text);
     }
-
-    // TODO: Use existing pasteClipboardImage?
-    // const clipboardContents = await getClipboardContent(clipboardData);
-    // if (clipboardContents.image) {
-    //   event.preventDefault();
-    //   handlePasteImage(clipboardContents.image, targetElement);
-    // }
   };
 
   const RequireUniqueAlert = () => {
@@ -172,14 +151,12 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   });
 
   const handleCompleteValue = () => {
-    console.log("handleCompleteValue", valueCandidate, getValue());
     if (valueCandidate !== getValue()) {
       caseId && content.setAttValue(caseId, attrKey, valueCandidate);
     }
   };
 
-  const handleCompleteValue2 = (value: string) => {
-    console.log("handleCompleteValue2", value, getValue(), caseId);
+  const setValue = (value: string) => {
     if (value !== getValue()) {
       caseId && content.setAttValue(caseId, attrKey, value);
     }
