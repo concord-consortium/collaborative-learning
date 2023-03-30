@@ -36,6 +36,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     this.state = {
       programRecordingMode: 0
     };
+    console.log("<DataflowToolComponent with context", props.context);
   }
 
   public render() {
@@ -45,6 +46,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const { program, programDataRate, programZoom } = this.getContent();
     const numNodes = program.nodes.size;
     const tileModel = this.getContent();
+    const disabledRecordingStates = (this.state.programRecordingMode === 1 || this.state.programRecordingMode === 2);
+    const dataFlowTileReadOnly = readOnly || disabledRecordingStates;
 
     return (
       <>
@@ -54,7 +57,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
             {({ size }: SizeMeProps) => {
               return (
                 <DataflowProgram
-                  readOnly={readOnly}
+                  readOnly={dataFlowTileReadOnly}
                   documentProperties={this.getDocumentProperties()}
                   program={program}
                   onProgramChange={this.handleProgramChange}
