@@ -2,10 +2,11 @@
 
 import CMS from "netlify-cms-app";
 import { CmsBackendType, CmsConfig } from "netlify-cms-core";
-import { urlParams } from "../utilities/url-params";
 
+import { urlParams } from "../utilities/url-params";
 import { ClueControl } from "./clue-control";
 import { JsonControl } from "./json-control";
+import { defaultCurriculumBranch } from "./cms-constants";
 
 // Local testing of the CMS without working with github directly:
 // - Add the localCMSBacked parameter to the URL
@@ -24,7 +25,7 @@ function cmsBackend() {
       backend: {
         name: "github" as CmsBackendType,
         repo: "concord-consortium/clue-curriculum",
-        branch: urlParams.curriculumBranch || "author",
+        branch: urlParams.curriculumBranch || defaultCurriculumBranch,
         base_url: "https://us-central1-cms-github-auth.cloudfunctions.net",
         auth_endpoint: "/oauth/auth"
       }

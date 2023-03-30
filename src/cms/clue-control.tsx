@@ -1,11 +1,14 @@
 import React from "react";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { Map } from "immutable";
+
+import { defaultCurriculumBranch } from "./cms-constants";
+import { defaultDocumentModelParts } from "../components/doc-editor-app-defaults";
+import { EditableDocumentContent } from "../components/document/editable-document-content";
 import { appConfig, AppProvider, initializeApp } from "../initialize-app";
 import { IStores } from "../models/stores/stores";
 import { createDocumentModel, DocumentModelType } from "../models/document/document";
-import { defaultDocumentModelParts } from "../components/doc-editor-app-defaults";
-import { EditableDocumentContent } from "../components/document/editable-document-content";
+import { urlParams } from "../utilities/url-params";
 
 import "./clue-control.scss";
 import { CmsWidgetControlProps } from "netlify-cms-core";
@@ -13,8 +16,9 @@ import { CmsWidgetControlProps } from "netlify-cms-core";
 (window as any).DISABLE_FIREBASE_SYNC = true;
 
 interface IState {
-  stores?: IStores;
   document?: DocumentModelType;
+  previewUrl?: string;
+  stores?: IStores;
 }
 
 // Initialize the app just one time globally, each control waits for this
@@ -63,10 +67,6 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
         ...defaultDocumentModelParts,
         content: initialValue
       });
-      this.setState({
-        stores,
-        document
-      });
 
       // Save the initial state, this is compared with the exported state
       // on each snapshot. See the comment below for more details
@@ -101,6 +101,24 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
           }
         }
       });
+
+      // Set up preview link
+      const baseUrl = `https://collaborative-learning.concord.org`;
+      // TODO Do we ever want to preview on a CLUE branch other than master?
+      const clueBranch = "master";
+      const curriculumBranch = urlParams.curriculumBranch ?? defaultCurriculumBranch;
+      // TODO Determine unit from path if no param is specified.
+      const unit = urlParams.unit ?? "sas";
+      const previewUnit = `https://models-resources.concord.org/clue-curriculum/branch/${curriculumBranch}/${unit}/content.json`;
+      // TODO Determine investigation and problem from path
+      const problem = "1.1";
+      const previewUrl = `${baseUrl}/branch/${clueBranch}/?unit=${previewUnit}&problem=${problem}`;
+
+      this.setState({
+        document,
+        previewUrl,
+        stores
+      });
     });
   }
 
@@ -112,6 +130,9 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
     if (this.state.stores && this.state.document) {
       return (
         <AppProvider stores={this.state.stores} modalAppElement="#nc-root">
+          <div className="preview-link-box">
+            Preview link: <a href={this.state.previewUrl}>{this.state.previewUrl}</a>
+          </div>
           <EditableDocumentContent
             contained={true}
             mode="1-up"
@@ -123,7 +144,12 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
         </AppProvider>
       );
     } else {
-      return <div className="loading-box">Loading editor...</div>;
+      return (
+        <>
+          <div className="preview-link-box" />
+          <div className="loading-box">Loading editor...</div>
+        </>
+      );
     }
   }
 

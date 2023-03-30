@@ -11,8 +11,9 @@
   &.contained {
     position: relative;
     width: 100%;
-    height: 680px;
-    border-radius: 5px;
+    min-height: 650px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
     border: 2px solid #ddd;
   }
   &.comment-select {
