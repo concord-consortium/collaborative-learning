@@ -98,14 +98,16 @@ export class SerialDevice {
   public handleMicroBitStreamObj(value: string, channels: Array<NodeChannelInfo>){
     this.localBuffer += value;
 
-    const pattern = /([a-z]{1})([a-z]{1})([a-z]{1})([0-9.]+)/g;
+    const pattern = /([a-z]{1})([a-z]{1})([a-z 0-9]{1})([0-9.]+)\s{0,}[\r][\n]/g
+    //const pattern = /([a-z]{1})([a-z]{1})([a-z 0-9]{1}):([0-9.]+).[\r][\n]/g;
+    //const pattern = /(sat):([0-9.]+)[\r][\n]/g;
     let match: RegExpExecArray | null;
 
     do {
       match = pattern.exec(this.localBuffer);
       if (!match) break;
 
-      const [fullMatch, channel, numValue] = match;
+      const [fullMatch] = match;
       console.log("SERIAL match", match)
       this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
 
