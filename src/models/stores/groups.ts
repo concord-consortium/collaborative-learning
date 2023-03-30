@@ -35,7 +35,7 @@ export const GroupsModel = types
     acceptUnknownStudents: false
   })
   .actions((self) => ({
-    updateFromDB(uid: string, groups: DBOfferingGroupMap, clazz: ClassModelType) {
+    updateFromDB(groups: DBOfferingGroupMap, clazz: ClassModelType) {
       const allGroups = Object.keys(groups).map((groupId) => {
         const group = groups[groupId];
         const groupUsers = group.users || {};

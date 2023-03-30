@@ -127,11 +127,11 @@ describe("Groups model", () => {
       }
     });
 
-    groups.updateFromDB("1", dbGroupsWithoutUsers, clazz);
+    groups.updateFromDB(dbGroupsWithoutUsers, clazz);
     expect(groups.allGroups.length).toEqual(1);
     expect(groups.allGroups[0].users.length).toEqual(0);
 
-    groups.updateFromDB("1", dbGroupsWithUsers, clazz);
+    groups.updateFromDB(dbGroupsWithUsers, clazz);
     expect(groups.allGroups.length).toEqual(1);
     expect(groups.allGroups[0].users.length).toEqual(1);
     expect(groups.allGroups[0].users[0].id).toEqual("1");
