@@ -27,11 +27,16 @@ export class SerialDevice {
     this.serialNodesCount = n;
   }
 
-  // TODO, this is brittle and should be replaced
+  // TODO, this is brittle
   public updateConnectionInfo(timeStamp: number | null, status: string ){
     this.connectChangeStamp = timeStamp;
     this.lastConnectMessage = status;
     localStorage.setItem("last-connect-message", status);
+  }
+
+  public determineDeviceFamily(info: SerialPortInfo){
+    const isMicrobit = info.usbProductId === 516 && info.usbVendorId === 3368;
+    return isMicrobit ? "microbit" : "arduino"
   }
 
   public hasPort(){
@@ -39,18 +44,10 @@ export class SerialDevice {
   }
 
   public async requestAndSetPort(){
-
-    // see note on filters in src/plugins/dataflow-tool/serial.md
-    // const filters = [
-    //   { usbVendorId: 0x2341, usbProductId: 0x0043 },
-    //   { usbVendorId: 0x2341, usbProductId: 0x0001 }
-    // ];
-
     try {
       this.port = await navigator.serial.requestPort();
       this.deviceInfo = await this.port.getInfo();
-      const isMicrobit = this.deviceInfo.usbProductId === 516 && this.deviceInfo.usbVendorId === 3368;
-      this.deviceFamily = isMicrobit ? "microbit" : "arduino";
+      this.deviceFamily = this.determineDeviceFamily(this.deviceInfo);
     }
     catch (error) {
       console.error("error requesting port: ", error);
@@ -58,6 +55,7 @@ export class SerialDevice {
   }
 
   public async handleStream(channels: Array<NodeChannelInfo>){
+    console.log("SERIAL handleStream!")
     //our port cannot be null if we are to open streams
     if (!this.port){
       return;
@@ -69,7 +67,7 @@ export class SerialDevice {
     textEncoder.readable.pipeTo(this.port.writable as any);
     this.writer = textEncoder.writable.getWriter();
 
-    // listen for serial data coming up from Arduino
+    // listen for serial data coming in to computer
     while (this.port.readable) {
       const textDecoder = new TextDecoderStream();
       this.port.readable.pipeTo(textDecoder.writable);
@@ -98,7 +96,31 @@ export class SerialDevice {
   }
 
   public handleMicroBitStreamObj(value: string, channels: Array<NodeChannelInfo>){
-    console.log("handle stream bound for microbit");
+    this.localBuffer += value;
+
+    const pattern = /([a-z]{1})([a-z]{1})([a-z]{1})([0-9.]+)/g;
+    let match: RegExpExecArray | null;
+
+    do {
+      match = pattern.exec(this.localBuffer);
+      if (!match) break;
+
+      const [fullMatch, channel, numValue] = match;
+      console.log("SERIAL match", match)
+      this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
+
+      // ok this is working, but I think we should idenfify relays by letters
+      // this way I wont get messed up parsing the data and thing is always a letter
+      // and value is always a number
+
+      // const targetChannel = channels.find((c: NodeChannelInfo) => {
+      //   return c.channelId === channel;
+      // });
+
+      // if (targetChannel){
+      //   targetChannel.value = parseInt(numValue, 10);
+      // }
+    } while (match);
   }
 
   public writeToOutForMicroBit(n:any){
@@ -149,3 +171,4 @@ export class SerialDevice {
     }
   }
 }
+

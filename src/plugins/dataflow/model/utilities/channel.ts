@@ -93,7 +93,7 @@ function createMicroBitChannels(sensors: MicroBitSensorChannelInfo[] ){
 
 const microBitSensorChannels = createMicroBitChannels(microBitSensors);
 
-console.log("created microBitSensorChannels", microBitSensorChannels);
+console.log("SERIAL created microBitSensorChannels", microBitSensorChannels);
 
 export const serialSensorChannels: NodeChannelInfo[] = [
   emgSensorChannel, fsrSensorChannel, ...microBitSensorChannels
