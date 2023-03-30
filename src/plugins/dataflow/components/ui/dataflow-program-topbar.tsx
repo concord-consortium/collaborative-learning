@@ -27,6 +27,9 @@ interface TopbarProps {
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates,
     dataRate, onRateSelectClick, onRecordDataChange, programRecordState, numNodes } = props;
+  console.log("<dataflow ProgramToolbar> with readOnly", readOnly);
+
+  const disableRecordButton = readOnly && programRecordState === 0; //hides RecordButton on leftside read only docs
 
   return (
     <div className="program-editor-topbar">
@@ -54,6 +57,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
             onRecordDataChange={onRecordDataChange}
           />
           <RecordStopOrClearButton
+            disabled={disableRecordButton}
             programRecordState={programRecordState}
             buttonClickHandler={onRecordDataChange}
           />
@@ -80,17 +84,19 @@ const iconArr = [ //button icon
 ];
 
 interface IRecordStopOrClearProps {
+  disabled: boolean;
   buttonClickHandler: (program: any) => void;
   programRecordState: number;
 }
 
 const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
-  const { buttonClickHandler, programRecordState } = props;
+  const { disabled, buttonClickHandler, programRecordState } = props;
   return (
     <div className="record-btn-container">
       <button
         className="record-data-btn"
         onClick={buttonClickHandler}
+        disabled={disabled}
       >
         <div className="record-data-icon">
           {iconArr[programRecordState]}
