@@ -26,22 +26,39 @@ export const pasteClipboardImage = async (imageData: any, onComplete: OnComplete
   }
 };
 
-export const getClipboardContent = async () => {
+export const getClipboardContent = async (clipboardData?: DataTransfer) => {
   const clipboardContent: Record<string, any> = {
     image: null,
     text: null
   };
-  if (navigator.clipboard.read) {
-    const clipboardContents = await navigator.clipboard.read();
-    for (const item of clipboardContents) {
-      if (item.types.includes("image/png")) {
-        clipboardContent.image = await item.getType("image/png");
+
+  if (clipboardData) {
+    for (const item of clipboardData.items) {
+      if (item.type.includes("image")) {
+        const imageFile = item.getAsFile();
+        if (imageFile) {
+          clipboardContent.image = imageFile;
+        }
       }
-      if (item.types.includes("text/plain")) {
-        const textBlob = await item.getType("text/plain");
-        clipboardContent.text = await textBlob.text();
+      if (item.type.includes("text/plain")) {
+        const text = clipboardData.getData("text/plain");
+        clipboardContent.text = text;
+      }
+    }
+  } else {
+    if (navigator.clipboard.read) {
+      const clipboardContents = await navigator.clipboard.read();
+      for (const item of clipboardContents) {
+        if (item.types.includes("image/png")) {
+          clipboardContent.image = await item.getType("image/png");
+        }
+        if (item.types.includes("text/plain")) {
+          const textBlob = await item.getType("text/plain");
+          clipboardContent.text = await textBlob.text();
+        }
       }
     }
   }
+
   return clipboardContent;
 };
