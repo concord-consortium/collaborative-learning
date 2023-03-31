@@ -45,7 +45,7 @@ export const DocEditorApp = ({ appConfig }: IDocEditorAppProps) => {
     }
 
     // construct the contents of the section
-    const docContentString = document.content.exportAsJson();
+    const docContentString = document.content.exportAsJson({ includeTileIds: true });
     const docContentJSON = JSON.parse(docContentString);
     sectionSnapshot.content = docContentJSON;
     const contents = JSON.stringify(sectionSnapshot, undefined, 2);

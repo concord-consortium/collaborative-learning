@@ -37,12 +37,6 @@ import { safeJsonParse } from "../utilities/js-utils";
 import { urlParams } from "../utilities/url-params";
 import { firebaseConfig } from "./firebase-config";
 
-export enum Monitor {
-  None = "None",
-  Local = "Local",
-  Remote = "Remote",
-}
-
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBBaseConnectOptions {
   stores: IStores;
@@ -723,22 +717,16 @@ export class DB {
 
   public createDocumentModelFromProblemMetadata(
           type: ProblemOrPlanningDocumentType, userId: string,
-          metadata: DBOfferingUserProblemDocument, monitor: Monitor) {
+          metadata: DBOfferingUserProblemDocument) {
     const {documentKey} = metadata;
     const group = this.stores.groups.groupForUser(userId);
     return this.openDocument({
-        type,
-        userId,
-        groupId: group?.id,
-        documentKey,
-        visibility: metadata.visibility
-      })
-      .then((document) => {
-        if (monitor !== Monitor.None) {
-          this.listeners.monitorDocument(document, monitor);
-        }
-        return document;
-      });
+      type,
+      userId,
+      groupId: group?.id,
+      documentKey,
+      visibility: metadata.visibility
+    });
   }
 
   public updateDocumentFromProblemDocument(document: DocumentModelType,
@@ -751,11 +739,7 @@ export class DB {
     const {title, properties, self: {uid, documentKey}} = dbDocument;
     const group = this.stores.groups.groupForUser(uid);
     const groupId = group && group.id;
-    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties})
-      .then((documentModel) => {
-        this.listeners.monitorDocument(documentModel, Monitor.Local);
-        return documentModel;
-      });
+    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties});
   }
 
   // handles published personal documents and published learning logs

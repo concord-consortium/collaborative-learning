@@ -1,11 +1,9 @@
 import { DBListeners } from ".";
-import { createDocumentModel } from "../../models/document/document";
-import { ProblemDocument } from "../../models/document/document-types";
 import { DocumentsModel } from "../../models/stores/documents";
 import { specAppConfig } from "../../models/stores/spec-app-config";
 import { createStores } from "../../models/stores/stores";
 import { UserModel } from "../../models/stores/user";
-import { DB, Monitor } from "../db";
+import { DB } from "../db";
 
 describe("DBListeners", () => {
   const stores = createStores({
@@ -15,8 +13,6 @@ describe("DBListeners", () => {
     user: UserModel.create({id: "1", portal: "example.com"})
   });
   const db = new DB();
-  const document = createDocumentModel({
-                    uid: "1", type: ProblemDocument, key: "doc-1", content: {} });
 
   beforeEach(async () => {
     await db.connect({appMode: "test", stores, dontStartListeners: true});
@@ -26,14 +22,10 @@ describe("DBListeners", () => {
     db.disconnect();
   });
 
-  it("no longer warns when monitoring the same document multiple times", () => {
+  it("can create all of the listeners", () => {
     const listeners = new DBListeners(db);
-    expect(listeners).toBeDefined();
-
-    listeners.monitorDocument(document, Monitor.Local);
-    jestSpyConsole("warn", mockConsole => {
-      listeners.monitorDocument(document, Monitor.Local);
-      expect(mockConsole).not.toHaveBeenCalled();
-    });
+    expect(listeners.isListening).toBeFalsy();
   });
+
+  // TODO: add more tests of these listeners
 });

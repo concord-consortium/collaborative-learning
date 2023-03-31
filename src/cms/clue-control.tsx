@@ -74,7 +74,7 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
 
       // Update the widget's value whenever a change is made to the document's content
       this.disposer = onSnapshot(document, snapshot => {
-        const json = document.content?.exportAsJson();
+        const json = document.content?.exportAsJson({ includeTileIds: true });
         if (json) {
           const parsedJson = JSON.parse(json);
           const stringifiedJson = JSON.stringify(parsedJson);
