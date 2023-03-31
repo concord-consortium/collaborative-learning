@@ -665,14 +665,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodeSensorValue = (n: Node) => {
+    if (this.props.readOnly === false) console.log(`-------------- updateNodeSensorValue start ---------readOnly: ${this.props.readOnly}--------`);
+    if (this.props.readOnly === false) console.log("📁 dataflow-program.tsx > 🔨 updateNodeSensorValue >  🍔 n:", n);
+
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
+    if (this.props.readOnly === false) console.log("📁 dataflow-program.tsx > 🔨 updateNodeSensorValue >  🍳 sensorSelect:", sensorSelect);
+
     if (sensorSelect) {
       const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
+      if (this.props.readOnly === false) console.log("📁 dataflow-program.tsx > 🔨 updateNodeSensorValue >  🍳 chInfo:", chInfo);
 
       // update virtual sensors
       if (chInfo?.virtualValueMethod && chInfo.timeFactor) {
-        const time = Math.floor(Date.now() / chInfo.timeFactor);
-        chInfo.value = chInfo.virtualValueMethod(time);
+        if (this.props.readOnly === false) console.log("📁 dataflow-program.tsx > 🔨 updateNodeSensorValue >  if(virtualValueMethod and timeFactor) \n 🍳 chInfo:", chInfo);
+          const time = Math.floor(Date.now() / chInfo.timeFactor);
+          chInfo.value = chInfo.virtualValueMethod(time);
+        if (this.props.readOnly === false) console.log("📁 dataflow-program.tsx > 🔨 updateNodeSensorValue > 🍳 chInfo.value:", chInfo.value);
       }
 
       if (chInfo && chInfo.value) {
@@ -681,6 +689,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         sensorSelect.setSensorValue(NaN);
       }
     }
+    if (this.props.readOnly === false) console.log(`-------------- updateNodeSensorValue end --------readOnly: ${this.props.readOnly}--------`);
+
   };
 
   private updateNodeRecentValues = (n: Node) => {
@@ -720,6 +730,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateGeneratorNode = (n: Node) => {
+    console.log("📁 dataflow-program.tsx > 🔨 updateGeneratorNode >  🍔 n:", n);
+
     const generatorType = n.data.generatorType;
     const period = Number(n.data.period);
     const amplitude = Number(n.data.amplitude);
@@ -731,6 +743,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const nodeValue = n.controls.get("nodeValue") as NumControl;
       if (nodeValue) {
         nodeValue.setValue(val);
+        console.log("📁 dataflow-program.tsx > 🔨 updateGeneratorNode > nodeValue being set to val:", val);
+
       }
     }
   };

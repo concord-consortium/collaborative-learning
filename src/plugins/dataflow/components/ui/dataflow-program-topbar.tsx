@@ -27,8 +27,6 @@ interface TopbarProps {
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates,
     dataRate, onRateSelectClick, onRecordDataChange, programRecordState, numNodes } = props;
-  console.log("<dataflow ProgramToolbar> with readOnly", readOnly);
-
   const disableRecordButton = readOnly && programRecordState === 0; //hides RecordButton on leftside read only docs
 
   return (

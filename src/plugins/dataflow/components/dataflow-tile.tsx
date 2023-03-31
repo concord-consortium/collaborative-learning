@@ -36,7 +36,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     this.state = {
       programRecordingMode: 0
     };
-    console.log("<DataflowToolComponent with context", props.context);
+    // console.log("<DataflowToolComponent with context", props.context);
   }
 
   public render() {
