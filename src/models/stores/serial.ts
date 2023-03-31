@@ -1,5 +1,10 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 
+interface RelayStatus {
+  hubId: string,
+  relayIndex: number,
+  status: 0 | 1
+}
 export class SerialDevice {
   localBuffer: string;
   private port: SerialPort | null;
@@ -10,6 +15,7 @@ export class SerialDevice {
   writer: WritableStreamDefaultWriter;
   serialModalShown: boolean | null;
   deviceFamily: string | null;
+  remoteRelays: RelayStatus[];
 
   constructor() {
     this.localBuffer = "";
@@ -98,30 +104,43 @@ export class SerialDevice {
   public handleMicroBitStreamObj(value: string, channels: Array<NodeChannelInfo>){
     this.localBuffer += value;
 
+
+
     const pattern = /([a-z]{1})([a-z]{1})([a-z 0-9]{1})([0-9.]+)\s{0,}[\r][\n]/g
-    //const pattern = /([a-z]{1})([a-z]{1})([a-z 0-9]{1}):([0-9.]+).[\r][\n]/g;
-    //const pattern = /(sat):([0-9.]+)[\r][\n]/g;
     let match: RegExpExecArray | null;
 
     do {
       match = pattern.exec(this.localBuffer);
       if (!match) break;
 
-      const [fullMatch] = match;
-      console.log("SERIAL match", match)
+      // capturing encoded information from regex
+      // [0] fullMatch
+      // [1] signalType r|s (relay | sensor)
+      // [2] microBitId a|b|c|d
+      // [3] readingSource t|h|0|1|2 (temp, humidity, relay indices 0,1,2 )
+      // [4] reading (number)
+
+      const [fullMatch, signalType, microbitId, readingSource, reading] = match;
       this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
 
-      // ok this is working, but I think we should idenfify relays by letters
-      // this way I wont get messed up parsing the data and thing is always a letter
-      // and value is always a number
+      const targetChannelId = `${readingSource}-${microbitId}`
 
-      // const targetChannel = channels.find((c: NodeChannelInfo) => {
-      //   return c.channelId === channel;
-      // });
+      console.log("SERIAL: find targetChannelId in channels:", targetChannelId, channels)
 
-      // if (targetChannel){
-      //   targetChannel.value = parseInt(numValue, 10);
-      // }
+      const targetChannel = channels.find((c: NodeChannelInfo) => {
+        return c.channelId === targetChannelId;
+      });
+
+      console.log("SERIAL - targetChannel?", targetChannel)
+      if (targetChannel && signalType === "s"){
+        targetChannel.value = parseInt(reading, 10);
+      }
+
+      if (signalType === "r"){
+        console.log("pass this relay state on:", `${readingSource}, ${microbitId}, ${reading}`)
+        // this is information about the state of a relay
+        // update SerialConnection.relays with relays status report
+      }
     } while (match);
   }
 

@@ -54,17 +54,17 @@ interface MicroBitSensorChannelInfo {
   plug: number
 }
 
-// "plug" is not really used now, but keeping for now for ease of transition
+// "plug" is not really used now, but considering keeping for now for ease of transition
 // maybe it has a metaphor that will be useful soon
 const microBitSensors: MicroBitSensorChannelInfo[] = [
- { microBitId: "A", plug: 11, type: "temperature", units: "°C" },
- { microBitId: "A", plug: 12, type: "humidity", units: "%"},
- { microBitId: "B", plug: 13, type: "temperature", units: "°C"  },
- { microBitId: "B", plug: 14, type: "humidity", units: "%"  },
- { microBitId: "C", plug: 15, type: "temperature", units: "°C"  },
- { microBitId: "C", plug: 16, type: "humidity", units: "%"  },
- { microBitId: "D", plug: 17, type: "temperature", units: "°C"  },
- { microBitId: "D", plug: 18, type: "humidity", units: "%"  }
+ { microBitId: "a", plug: 11, type: "temperature", units: "°C" },
+ { microBitId: "a", plug: 12, type: "humidity", units: "%"},
+ { microBitId: "b", plug: 13, type: "temperature", units: "°C"  },
+ { microBitId: "b", plug: 14, type: "humidity", units: "%"  },
+ { microBitId: "c", plug: 15, type: "temperature", units: "°C"  },
+ { microBitId: "c", plug: 16, type: "humidity", units: "%"  },
+ { microBitId: "d", plug: 17, type: "temperature", units: "°C"  },
+ { microBitId: "d", plug: 18, type: "humidity", units: "%"  }
 ];
 
 function createMicroBitChannels(sensors: MicroBitSensorChannelInfo[] ){
@@ -82,7 +82,7 @@ function createMicroBitChannels(sensors: MicroBitSensorChannelInfo[] ){
       hubId: `MICROBIT-RADIO-${s.microBitId}`,
       hubName: `micro:bit ${s.microBitId}`,
       name: `${s.type}-micro:bit-${s.microBitId}`,
-      channelId: `${s.type}-${s.microBitId}`,
+      channelId: `${s.type.substring(0,1)}-${s.microBitId}`,
       type: `${s.type}`,
       units: `${s.units}`,
       plug: s.plug
@@ -93,8 +93,7 @@ function createMicroBitChannels(sensors: MicroBitSensorChannelInfo[] ){
 
 const microBitSensorChannels = createMicroBitChannels(microBitSensors);
 
-console.log("SERIAL created microBitSensorChannels", microBitSensorChannels);
-
+console.log("SERIAL created microbit channels: ", microBitSensorChannels)
 export const serialSensorChannels: NodeChannelInfo[] = [
   emgSensorChannel, fsrSensorChannel, ...microBitSensorChannels
 ];

@@ -1,14 +1,14 @@
 /**
- * micro:bit + Dataflow: "Mock Communicator"
+ *  micro:bit + Dataflow: "Mock Communicator"
  *
- * This is a program for the micro:bit physically attached to the computer, used for development on the dataflow side.
- * This is designed to mock output from the communicator micro:bit in a world of radio networked sensor/actuator hubs
+ *  This is a program for the micro:bit physically attached to the computer, used for development on the dataflow side.
+ *  This is designed to mock output from the communicator micro:bit in a world of radio networked sensor/actuator hubs
  *
- * To deploy to a micro:bit you need to:
- * - Paste this file at https://makecode.microbit.org/#editor
- * - Download to micro:bit
+ *  To deploy to a micro:bit you need to:
+ *  - Paste this file at https://makecode.microbit.org/#editor
+ *  - Download to micro:bit
  *
- * [ A ] - mode 1 - "on" : pass a stream of mock messages to serial (dataflow)
+ *  [ A ] - mode 1 - "on" : pass a stream of mock messages to serial (dataflow)
  *
  *  (name: sat, value: 20.4)     sat20.2      "the temperature reading on microbit A is 20.2 degrees"
  *  (name: sbt, value: 17.32)    sbt17.32     "the temperature reading on microbit B is 17.32 degrees"
@@ -16,7 +16,7 @@
  *  (name: sa2, value: 1)        sa21         "the state of microbit A's relay 2 is on"
  *  (name: sa2, value: 0)        sa20         "the state of microbit A's relay 2 is off"
  *
- * [ B ] - mode 0 - "off": dont' send any mock messages
+ *  [ B ] - mode 0 - "off": dont' send any mock messages
  */
 
 let mode = 0
@@ -42,10 +42,10 @@ let messageObjects = [
     { name: "sah", value: 40 },
     { name: "sah", value: 20 },
     { name: "sah", value: 10 },
-    { name: "sa2", value: 1 },  // relay A2 on, then off
-    { name: "sa2", value: 0 },
-    { name: "sa1", value: 0 },  // relay A1 off, then on
-    { name: "sb1", value: 1 }
+    { name: "ra2", value: 1 },  // relay A2 on, then off
+    { name: "ra2", value: 0 },
+    { name: "ra1", value: 0 },  // relay A1 off, then on
+    { name: "rb1", value: 1 }
 ]
 
 function startUp() {
@@ -66,13 +66,11 @@ function nextIndex() {
     }
 }
 
-function sendStreamMessage(name: string, value: number) {
+function sendStreamMessage(name, value) {
     if (mode == 1) {
-        // send with :
-        // serial.writeValue(name, value)
-
-        // send without :
         serial.writeLine(`${name}${value}`)
+        // alternative method sends typed <name>:<value>
+        // serial.writeValue(name, value)
     }
 }
 
