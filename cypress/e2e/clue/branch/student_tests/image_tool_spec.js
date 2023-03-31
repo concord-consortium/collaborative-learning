@@ -51,13 +51,25 @@ context('Test image functionalities', function(){
             cy.uploadFile(imageToolTile.imageChooseFileButton(), imageFilePath, 'image/gif');
             cy.wait(2000);
         });
+        // TODO: Figure out how to get the clipboard paste check below to work when the tests 
+        // are run using Chrome. It will pass when using Electron, but not Chrome. In Chrome 
+        // the attempt to write to the clipboard results in an error: "Must be handling a user 
+        // gesture to use custom clipboard." See https://github.com/cypress-io/cypress/issues/2752
+        // for more background. Apparently, the basic problem is that Cypress "currently uses 
+        // programmatic browser APIs which Chrome doesn't consider as genuine user interaction."
         it('will accept a valid image URL pasted from the clipboard', function(){
             const imageFilePath = "curriculum/test/images/image.png";
-            cy.window().then((win) => {
+            Cypress.automation("remote:debugger:protocol", {
+                command: "Browser.grantPermissions",
+                params: {
+                  permissions: ["clipboardReadWrite", "clipboardSanitizedWrite"],
+                  origin: window.location.origin,
+                },
+              }).then(cy.window().then((win) => {
                 win.navigator.clipboard.write([new win.ClipboardItem({
                     "text/plain": new Blob([imageFilePath], { type: "text/plain" }),
                 })]);
-            });
+            }));
             const isMac = navigator.platform.indexOf("Mac") === 0;
             const cmdKey = isMac ? "meta" : "ctrl";
             imageToolTile.getImageToolTile().last().type(`{${cmdKey}+v}`);

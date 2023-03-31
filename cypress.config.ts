@@ -14,9 +14,6 @@ export default defineConfig({
   },
   env: {
     coverage: false,
-    browserPermissions: {
-      "clipboard": "allow",
-    },
   },
   queryParams:
     '?appMode=qa&fakeClass=5&fakeUser=student:5&demoOffering=5&problem=2.1&qaGroup=5',
