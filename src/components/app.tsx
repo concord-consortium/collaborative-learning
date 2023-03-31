@@ -160,7 +160,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
   // time.
 
   public render() {
-    const {appConfig, user, ui, db, groups} = this.stores;
+    const {appConfig, user, ui, db} = this.stores;
 
     if (ui.showDemoCreator) {
       return this.renderApp(<DemoCreatorComponent />);

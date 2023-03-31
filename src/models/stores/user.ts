@@ -40,10 +40,8 @@ export const UserModel = types
     // property in Firebase
     latestGroupId: types.maybe(types.string),
     // This is the group of this user in the particular offering that is being
-    // run right now. There is a view which will return this value if set otherwise
-    // it returns latestGroupId. There might be a period when CLUE is being loaded
-    // where the currentGroupId is not set yet. This would happen if the user hasn't
-    // chosen a group yet. Or if groups haven't been loaded yet.
+    // run right now. This is the property you usually will want to use.
+    // latestGroupId could be referring to a group from a different assignment/offering
     currentGroupId: types.maybe(types.string),
     portal: "",
     network: types.maybe(types.string),
