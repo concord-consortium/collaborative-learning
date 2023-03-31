@@ -54,13 +54,6 @@ export class DBDocumentContentListener extends BaseListener {
     this.disposer = autorun(() => {
       const {documents, groups, user} = this.db.stores;
 
-      const userGroupIds: any = {};
-      groups.allGroups.forEach((group) => {
-        group.users.forEach((groupUser) => {
-          userGroupIds[groupUser.id] = group.id;
-        });
-      });
-
       const documentsToMonitor: DocumentModelType[] = [];
 
       documents.byType(ProblemDocument).forEach((document) => {
@@ -68,7 +61,7 @@ export class DBDocumentContentListener extends BaseListener {
         // id of the document. A new document could be added with an out of date
         // group id. Or a user's group can change. In both cases the document
         // should be updated.
-        document.setGroupId(userGroupIds[document.uid]);
+        document.setGroupId(groups.groupIdForUser(document.uid));
 
         // Users don't monitor their own documents
         if ((document.uid === user.id)) {
