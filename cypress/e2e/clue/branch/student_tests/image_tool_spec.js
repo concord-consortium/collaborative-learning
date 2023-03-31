@@ -53,11 +53,17 @@ context('Test image functionalities', function(){
         });
         it('will accept a valid image URL pasted from the clipboard', function(){
             const imageFilePath = "curriculum/test/images/image.png";
-            cy.window().then((win) => {
+            Cypress.automation('remote:debugger:protocol', {
+                command: 'Browser.grantPermissions',
+                params: {
+                  permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'],
+                  origin: window.location.origin,
+                },
+              }).then(cy.window().then((win) => {
                 win.navigator.clipboard.write([new win.ClipboardItem({
                     "text/plain": new Blob([imageFilePath], { type: "text/plain" }),
                 })]);
-            });
+            }));
             const isMac = navigator.platform.indexOf("Mac") === 0;
             const cmdKey = isMac ? "meta" : "ctrl";
             imageToolTile.getImageToolTile().last().type(`{${cmdKey}+v}`);
