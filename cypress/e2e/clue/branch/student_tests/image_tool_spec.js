@@ -57,7 +57,7 @@ context('Test image functionalities', function(){
         // gesture to use custom clipboard." See https://github.com/cypress-io/cypress/issues/2752
         // for more background. Apparently, the basic problem is that Cypress "currently uses 
         // programmatic browser APIs which Chrome doesn't consider as genuine user interaction."
-        it('will accept a valid image URL pasted from the clipboard', function(){
+        it.skip('will accept a valid image URL pasted from the clipboard', function(){
             const imageFilePath = "curriculum/test/images/image.png";
             Cypress.automation("remote:debugger:protocol", {
                 command: "Browser.grantPermissions",
