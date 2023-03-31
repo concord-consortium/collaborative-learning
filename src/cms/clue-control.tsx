@@ -116,6 +116,7 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
       return (
         <AppProvider stores={this.state.stores} modalAppElement="#nc-root">
           <EditableDocumentContent
+            className="custom-widget"
             contained={true}
             mode="1-up"
             isPrimary={true}
