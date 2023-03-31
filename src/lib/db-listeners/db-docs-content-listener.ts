@@ -38,9 +38,10 @@ class DocumentMonitor {
   }
 }
 
-export class DBDocumentContentListener extends BaseListener {
+export class DBDocumentsContentListener extends BaseListener {
   private db: DB;
-  private monitoredDocuments: Record<string, DocumentMonitor> = {};
+  // key is the document's path in firebase
+  private documentMonitors: Record<string, DocumentMonitor> = {};
   private disposer: IReactionDisposer;
 
   constructor(db: DB) {
@@ -73,7 +74,7 @@ export class DBDocumentContentListener extends BaseListener {
           return;
         }
 
-        // teacher monitor all problem documents
+        // teachers monitor all problem documents
         // students only monitor documents in their group to save bandwidth
         if (user.isTeacher || document.groupId === user.latestGroupId) {
           documentsToMonitor.push(document);
@@ -82,7 +83,7 @@ export class DBDocumentContentListener extends BaseListener {
 
       // Stop monitoring any documents we shouldn't be
       // This could happen if a user changes groups
-      Object.keys(this.monitoredDocuments).forEach(monitoredDocPath => {
+      Object.keys(this.documentMonitors).forEach(monitoredDocPath => {
         // Should this document be monitored?
         if(!documentsToMonitor.find((document) => this.getDocumentPath(document) === monitoredDocPath)) {
           this.unmonitorDocumentByPath(monitoredDocPath);
@@ -112,27 +113,27 @@ export class DBDocumentContentListener extends BaseListener {
   private monitorDocument = (document: DocumentModelType) => {
     const documentPath = this.getDocumentPath(document);
 
-    if (this.monitoredDocuments[documentPath]) {
+    if (this.documentMonitors[documentPath]) {
       // We are already monitoring this document
       return;
     }
 
     const documentMonitor = new DocumentMonitor(document, documentPath, this.db);
     this.debugLog("#monitorDocument", documentMonitor.description);
-    this.monitoredDocuments[documentPath] = documentMonitor;
+    this.documentMonitors[documentPath] = documentMonitor;
   };
 
   private unmonitorDocumentByPath = (documentPath: string) => {
-    const documentMonitor = this.monitoredDocuments[documentPath];
+    const documentMonitor = this.documentMonitors[documentPath];
     if (documentMonitor) {
       this.debugLog("#unmonitorDocument", documentMonitor.description);
       documentMonitor.off();
-      delete this.monitoredDocuments[documentPath];
+      delete this.documentMonitors[documentPath];
     }
   };
 
   private unmonitorAllDocuments() {
-    Object.keys(this.monitoredDocuments).forEach(documentPath => this.unmonitorDocumentByPath(documentPath));
+    Object.keys(this.documentMonitors).forEach(documentPath => this.unmonitorDocumentByPath(documentPath));
   }
 
 }
