@@ -14,7 +14,7 @@ import { DBSupportsListener } from "./db-supports-listener";
 import { DBCommentsListener } from "./db-comments-listener";
 import { DBStarsListener } from "./db-stars-listener";
 import { BaseListener } from "./base-listener";
-import { DBDocumentContentListener } from "./db-doc-content-listener";
+import { DBDocumentsContentListener } from "./db-docs-content-listener";
 
 export class DBListeners extends BaseListener {
   @observable public isListening = false;
@@ -29,7 +29,7 @@ export class DBListeners extends BaseListener {
   private supportsListener: DBSupportsListener;
   private commentsListener: DBCommentsListener;
   private starsListener: DBStarsListener;
-  private documentContentListener: DBDocumentContentListener;
+  private documentsContentListener: DBDocumentsContentListener;
 
   constructor(db: DB) {
     super("DBListeners");
@@ -44,7 +44,7 @@ export class DBListeners extends BaseListener {
     this.supportsListener = new DBSupportsListener(db);
     this.commentsListener = new DBCommentsListener(db);
     this.starsListener = new DBStarsListener(db);
-    this.documentContentListener = new DBDocumentContentListener(db);
+    this.documentsContentListener = new DBDocumentsContentListener(db);
   }
 
   public async start() {
@@ -63,7 +63,7 @@ export class DBListeners extends BaseListener {
     await Promise.all([
       this.commentsListener.start(),
       this.starsListener.start(),
-      this.documentContentListener.start()
+      this.documentsContentListener.start()
     ]);
 
     runInAction(() => this.isListening = true);
@@ -72,7 +72,7 @@ export class DBListeners extends BaseListener {
   public stop() {
     runInAction(() => this.isListening = false);
 
-    this.documentContentListener.stop();
+    this.documentsContentListener.stop();
     this.starsListener.stop();
     this.commentsListener.stop();
     this.supportsListener.stop();
