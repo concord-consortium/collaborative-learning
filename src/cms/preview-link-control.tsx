@@ -33,7 +33,10 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
 
     // entry is not included in CmsWidgetControlProps, but it is included in the props.
     const entry = (this.props as any).entry.toJS();
+    // path is of the form
+    // curriculum/[unit]/teacher-guide?/investigation-[ordinal]/problem-[ordinal]/[sectionType]/content.json
     const pathParts = entry.path.split("/");
+    const teacherGuideOffset = pathParts[2] === "teacher-guide" ? 1 : 0;
 
     // If there's a unit url parameter, use that. Otherwise try to find the unit from the entry path.
     const defaultUnit = "sas";
@@ -45,14 +48,14 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
 
     // Determine the problem from the path
     const defaultInvestigationOrdinal = 1;
-    const investigationName = pathParts[2];
+    const investigationName = pathParts[2 + teacherGuideOffset];
     const _investigationOrdinal = investigationName.split("investigation-")[1];
     if (!_investigationOrdinal) {
       warning = `Could not determine investigation. Using default ${defaultInvestigationOrdinal}.`;
     }
     const investigationOrdinal = _investigationOrdinal ?? defaultInvestigationOrdinal;
     const defaultProblemOrdinal = 1;
-    const problemName = pathParts[3];
+    const problemName = pathParts[3 + teacherGuideOffset];
     const _problemOrdinal = problemName.split("problem-")[1];
     if (!_problemOrdinal) {
       warning = `Could not determine problem. Using default ${defaultProblemOrdinal}.`;
@@ -60,10 +63,12 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
     const problemOrdinal = _problemOrdinal ?? 1;
     const problemParam = `${investigationOrdinal}.${problemOrdinal}`;
 
-    const sectionType = pathParts[4];
+    const sectionType = pathParts[4 + teacherGuideOffset];
 
-    const params = `?unit=${previewUnit}&problem=${problemParam}&section=${sectionType}&appMode=dev`;
-    const previewUrl = `${baseUrl}/branch/${clueBranch}/${params}`;
+    const params = `?unit=${previewUnit}&problem=${problemParam}&section=${sectionType}`;
+    // TODO It would be better to use the github user for the demoName rather than the curriculum branch.
+    const demoParams = `&appMode=demo&domeName=${curriculumBranch}&fakeClass=1&fakeUser=teacher:2`;
+    const previewUrl = `${baseUrl}/branch/${clueBranch}/${params}${demoParams}`;
 
     this.state = {
       warning,
