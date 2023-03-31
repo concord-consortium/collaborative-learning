@@ -40,6 +40,7 @@ describe("user model", () => {
     expect(user.name).toBe("Anonymous User");
     expect(user.className).toBe("");
     expect(user.latestGroupId).toBeUndefined();
+    expect(user.currentGroupId).toBeUndefined();
     expect(user.id).toBe("0");
   });
 
@@ -50,6 +51,7 @@ describe("user model", () => {
         name: "Test User",
         className: "Test Class",
         latestGroupId: "1",
+        currentGroupId: "2",
         id: "2",
     });
     expect(user.authenticated).toBe(true);
@@ -57,6 +59,7 @@ describe("user model", () => {
     expect(user.name).toBe("Test User");
     expect(user.className).toBe("Test Class");
     expect(user.latestGroupId).toBe("1");
+    expect(user.currentGroupId).toBe("2");
     expect(user.id).toBe("2");
     expect(user.initials).toBe("TU");
   });
@@ -85,11 +88,18 @@ describe("user model", () => {
     expect(user.className).toBe(className);
   });
 
-  it("can set a group", () => {
+  it("can set a latest group", () => {
     const user = UserModel.create();
     const group = "1";
     user.setLatestGroupId(group);
     expect(user.latestGroupId).toBe(group);
+  });
+
+  it("can set a current group", () => {
+    const user = UserModel.create();
+    const group = "1";
+    user.setCurrentGroupId(group);
+    expect(user.currentGroupId).toBe(group);
   });
 
   it("can set an id", () => {
@@ -121,6 +131,7 @@ describe("user model", () => {
     expect(user.name).toBe(authenticatedUser.fullName);
     expect(user.className).toBe(authenticatedUser.className);
     expect(user.latestGroupId).toBe(undefined);
+    expect(user.currentGroupId).toBe(undefined);
     expect(user.isStudent).toBe(true);
     expect(user.isTeacher).toBe(false);
     expect(user.isNetworkedTeacher).toBe(false);
@@ -153,6 +164,7 @@ describe("user model", () => {
     expect(user.name).toBe(authenticatedUser.fullName);
     expect(user.className).toBe(authenticatedUser.className);
     expect(user.latestGroupId).toBeUndefined();
+    expect(user.currentGroupId).toBeUndefined();
     expect(user.isStudent).toBe(false);
     expect(user.isTeacher).toBe(true);
     expect(user.isNetworkedTeacher).toBe(false);
@@ -188,6 +200,7 @@ describe("user model", () => {
     expect(user.name).toBe(authenticatedUser.fullName);
     expect(user.className).toBe(authenticatedUser.className);
     expect(user.latestGroupId).toBeUndefined();
+    expect(user.currentGroupId).toBeUndefined();
     expect(user.isStudent).toBe(false);
     expect(user.isTeacher).toBe(true);
     expect(user.isNetworkedTeacher).toBe(true);
@@ -217,6 +230,7 @@ describe("user model", () => {
     expect(user.name).toBe(authenticatedUser.fullName);
     expect(user.className).toBe(authenticatedUser.className);
     expect(user.latestGroupId).toBeUndefined();
+    expect(user.currentGroupId).toBeUndefined();
     expect(user.isStudent).toBe(false);
     expect(user.isTeacher).toBe(true);
     expect(user.isNetworkedTeacher).toBe(false);

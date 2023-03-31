@@ -21,6 +21,8 @@ class DocumentMonitor {
     this.ref.on("value", this.snapshotHandler);
   }
 
+  // The arrow function is required here so the function will be
+  // bound to `this` when used by `ref.on(...)`
   private snapshotHandler = (snapshot: firebase.database.DataSnapshot) => {
     if (snapshot?.val()) {
       const updatedDoc: DBDocument = snapshot.val();
@@ -53,13 +55,6 @@ export class DBDocumentsContentListener extends BaseListener {
     this.disposer = autorun(() => {
       const {documents, groups, user} = this.db.stores;
 
-      const userGroupIds: any = {};
-      groups.allGroups.forEach((group) => {
-        group.users.forEach((groupUser) => {
-          userGroupIds[groupUser.id] = group.id;
-        });
-      });
-
       const documentsToMonitor: DocumentModelType[] = [];
 
       documents.byType(ProblemDocument).forEach((document) => {
@@ -67,7 +62,7 @@ export class DBDocumentsContentListener extends BaseListener {
         // id of the document. A new document could be added with an out of date
         // group id. Or a user's group can change. In both cases the document
         // should be updated.
-        document.setGroupId(userGroupIds[document.uid]);
+        document.setGroupId(groups.groupIdForUser(document.uid));
 
         // Users don't monitor their own documents
         if ((document.uid === user.id)) {
@@ -76,7 +71,7 @@ export class DBDocumentsContentListener extends BaseListener {
 
         // teachers monitor all problem documents
         // students only monitor documents in their group to save bandwidth
-        if (user.isTeacher || document.groupId === user.latestGroupId) {
+        if (user.isTeacher || document.groupId === user.currentGroupId) {
           documentsToMonitor.push(document);
         }
       });

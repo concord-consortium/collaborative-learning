@@ -25,7 +25,7 @@ interface IProps extends IBaseProps {
 export const ClueAppHeaderComponent: React.FC<IProps> = observer(function ClueAppHeaderComponent(props) {
   const { showGroup } = props;
   const { appConfig, appMode, appVersion, db, user, problem, groups, investigation, ui, unit } = useStores();
-  const myGroup = showGroup ? groups.groupForUser(user.id) : undefined;
+  const myGroup = showGroup ? groups.getGroupById(user.currentGroupId) : undefined;
   const userTitle = appMode !== "authed" && appMode !== "demo"
                       ? `Firebase UID: ${db.firebase.userId}` : undefined;
 

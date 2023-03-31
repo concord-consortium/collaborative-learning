@@ -25,7 +25,7 @@ export class DBGroupsListener extends BaseListener {
           const dbGroups: DBOfferingGroupMap = snapshot.val() || {};
           this.debugLogSnapshot("#start", snapshot);
           // Groups may be invalid at this point, but the listener will resolve it once connection times are set
-          groups.updateFromDB(user.id, dbGroups, this.db.stores.class);
+          groups.updateFromDB(dbGroups, this.db.stores.class);
 
           const group = groups.groupForUser(user.id);
           if (group) {
@@ -100,7 +100,10 @@ export class DBGroupsListener extends BaseListener {
     }
     else {
       // otherwise set the groups
-      this.db.stores.groups.updateFromDB(user.id, groups, this.db.stores.class);
+      this.db.stores.groups.updateFromDB(groups, this.db.stores.class);
+
+      user.setCurrentGroupId(this.db.stores.groups.groupIdForUser(user.id));
+
     }
   };
 }

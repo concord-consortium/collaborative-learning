@@ -276,7 +276,7 @@ export class DocumentComponent extends BaseComponent<IProps, IState> {
 
     const stickyNotes = supports.getStickyNotesForUserProblem({
       userId: user.id,
-      groupId: user.latestGroupId
+      groupId: user.currentGroupId
     }).filter((support) => support.supportType === SupportType.teacher) as TeacherSupportModelType[];
     stickyNotes.sort((a, b) => b.authoredTime - a.authoredTime);
 
