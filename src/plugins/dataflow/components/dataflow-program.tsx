@@ -1,7 +1,7 @@
+import React from "react";
 import "regenerator-runtime/runtime";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../../components/base";
-import React from "react";
 import Rete, { NodeEditor, Engine, Node } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
@@ -67,6 +67,8 @@ interface IProps extends SizeMeProps {
   tileId: string;
   onRecordDataChange: () => void;
   programRecordState: number;
+  isPlaying: boolean;
+  handleChangeIsPlaying: () => void;
   numNodes: number;
   tileModel: DataflowContentModelType;
 }
@@ -131,6 +133,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           serialDevice={this.stores.serialDevice}
           onRecordDataChange={this.props.onRecordDataChange}
           programRecordState={this.props.programRecordState}
+          isPlaying={this.props.isPlaying}
+          handleChangeIsPlaying={this.props.handleChangeIsPlaying}
           numNodes={numNodes}
         />
         <div className={toolbarEditorContainerClass}>

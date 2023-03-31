@@ -13,6 +13,8 @@ interface IRateSelectorProps {
   onRateSelectClick: (rate: number) => void;
   readOnly: boolean;
   programRecordState: number;
+  isPlaying: boolean; //for playback of data
+  // handleChangeIsPlaying: () => void;
   numNodes: number;
   onRecordDataChange: () => void;
 }
@@ -27,7 +29,7 @@ function formatTime(seconds: number) {
 
 export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState,
-          numNodes, onRecordDataChange} = props;
+          isPlaying, numNodes, onRecordDataChange} = props;
 
   /* ==[ Total Recording Time  - Calculate] format as "MMM:SS" */
   const totalTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
@@ -81,7 +83,6 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
         {
           programRecordState ?
           <div className="slider-container">
-
             <Slider
               min={0}
               max={totalTimeSec}

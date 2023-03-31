@@ -22,7 +22,8 @@ interface IProps extends ITileProps{
 }
 
 interface IDataflowTileState {
-  programRecordingMode: number // TO DO: convert to enum;
+  programRecordingMode: number; // TO DO: convert to enum
+  isPlaying: boolean;
 }
 
 @inject("stores")
@@ -34,7 +35,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   constructor(props: IProps) {
     super(props);
     this.state = {
-      programRecordingMode: 0
+      programRecordingMode: 0,
+      isPlaying: false,
     };
     // console.log("<DataflowToolComponent with context", props.context);
   }
@@ -70,6 +72,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   tileId={model.id}
                   onRecordDataChange={this.handleChangeOfRecordingMode}
                   programRecordState={this.state.programRecordingMode}
+                  isPlaying={this.state.isPlaying}
+                  handleChangeIsPlaying={this.handleChangeIsPlaying}
                   numNodes={numNodes}
                   tileModel={tileModel}
                 />
@@ -167,6 +171,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     // 0 - cleared, ready to record
     // 1 - recording in progress
     // 2 - stopped, ready to clear
+    console.log("📁 dataflow-tile.tsx > 🔨 handleChangeOfRecordingMode");
     const mode = this.state.programRecordingMode;
     const model = this.getContent();
 
@@ -187,6 +192,10 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     this.setState({
       programRecordingMode:  (mode + 1) % 3
     });
+  };
+
+  private handleChangeIsPlaying = () => {
+    this.setState({isPlaying: !this.state.isPlaying});
   };
 
   private getContent() {
