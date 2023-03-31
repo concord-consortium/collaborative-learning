@@ -42,7 +42,7 @@ export class SerialDevice {
 
   public determineDeviceFamily(info: SerialPortInfo){
     const isMicrobit = info.usbProductId === 516 && info.usbVendorId === 3368;
-    return isMicrobit ? "microbit" : "arduino"
+    return isMicrobit ? "microbit" : "arduino";
   }
 
   public hasPort(){
@@ -61,7 +61,6 @@ export class SerialDevice {
   }
 
   public async handleStream(channels: Array<NodeChannelInfo>){
-    console.log("SERIAL handleStream!")
     //our port cannot be null if we are to open streams
     if (!this.port){
       return;
@@ -104,9 +103,7 @@ export class SerialDevice {
   public handleMicroBitStreamObj(value: string, channels: Array<NodeChannelInfo>){
     this.localBuffer += value;
 
-
-
-    const pattern = /([a-z]{1})([a-z]{1})([a-z 0-9]{1})([0-9.]+)\s{0,}[\r][\n]/g
+    const pattern = /([a-z]{1})([a-z]{1})([a-z 0-9]{1})([0-9.]+)\s{0,}[\r][\n]/g;
     let match: RegExpExecArray | null;
 
     do {
@@ -120,24 +117,21 @@ export class SerialDevice {
       // [3] readingSource t|h|0|1|2 (temp, humidity, relay indices 0,1,2 )
       // [4] reading (number)
 
+
       const [fullMatch, signalType, microbitId, readingSource, reading] = match;
       this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
 
-      const targetChannelId = `${readingSource}-${microbitId}`
-
-      console.log("SERIAL: find targetChannelId in channels:", targetChannelId, channels)
-
+      const targetChannelId = `${readingSource}-${microbitId}`;
       const targetChannel = channels.find((c: NodeChannelInfo) => {
         return c.channelId === targetChannelId;
       });
 
-      console.log("SERIAL - targetChannel?", targetChannel)
       if (targetChannel && signalType === "s"){
-        targetChannel.value = parseInt(reading, 10);
+        targetChannel.value = Number(reading);
       }
 
       if (signalType === "r"){
-        console.log("pass this relay state on:", `${readingSource}, ${microbitId}, ${reading}`)
+        console.log("SERIAL: this relay state on to SerialConnection:", `${readingSource}, ${microbitId}, ${reading}`);
         // this is information about the state of a relay
         // update SerialConnection.relays with relays status report
       }

@@ -40,8 +40,6 @@ import CurrentValueIcon from "../../assets/icons/control/control-current-value.s
 import PreviousValueIcon from "../../assets/icons/control/control-previous-value.svg";
 import ZeroValueIcon from "../../assets/icons/control/control-zero-value.svg";
 
-import { demoStreams } from "./demo-data";
-
 export interface NodeType {
   name: string;
   displayName: string;

@@ -561,7 +561,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo){
     if (sd.hasPort()){
       channel.serialConnected = true;
-      channel.missing = false;
+      channel.missing = sd.deviceFamily !== channel.deviceFamily;
     } else {
       channel.serialConnected = false;
       channel.missing = true;
@@ -572,12 +572,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // implementing with a "count" of 1 or 0 in case we need to count nodes in future
     let serialNodesCt = 0;
 
-    //sensor will need serial once these particular sensors are chosen
     nodes.forEach((n) => {
-      if(n.data.sensor === "emg" || n.data.sensor === "fsr"){
+      const isLiveSensor = /fsr|emg|[th]-[abcd]/;
+      if(isLiveSensor.test(n.data.sensor as string)){
         serialNodesCt++;
       }
-
       //live output block will alert need for serial
       // only after connection to another node is made
       // this allows user to drag a block out and work on program before connecting
@@ -607,7 +606,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       this.stores.serialDevice.writeToOutForArduino(n.data.nodeValue as number);
     }
     if (deviceFamily === "microbit"){
-      console.log("handle data destined for microbit");
+      // Stub for PT: https://www.pivotaltracker.com/n/projects/2441242/stories/184753741
+      console.log("SERIAL send out control messages for microbit");
     }
   }
 
