@@ -1,10 +1,5 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 
-interface RelayStatus {
-  hubId: string,
-  relayIndex: number,
-  status: 0 | 1
-}
 export class SerialDevice {
   localBuffer: string;
   private port: SerialPort | null;
@@ -15,7 +10,6 @@ export class SerialDevice {
   writer: WritableStreamDefaultWriter;
   serialModalShown: boolean | null;
   deviceFamily: string | null;
-  remoteRelays: RelayStatus[];
 
   constructor() {
     this.localBuffer = "";
@@ -33,7 +27,7 @@ export class SerialDevice {
     this.serialNodesCount = n;
   }
 
-  // TODO, this is brittle
+  // TODO, revise this so it is more clear how its used
   public updateConnectionInfo(timeStamp: number | null, status: string ){
     this.connectChangeStamp = timeStamp;
     this.lastConnectMessage = status;
@@ -41,8 +35,9 @@ export class SerialDevice {
   }
 
   public determineDeviceFamily(info: SerialPortInfo){
-    const isMicrobit = info.usbProductId === 516 && info.usbVendorId === 3368;
-    return isMicrobit ? "microbit" : "arduino";
+    return info.usbProductId === 516 && info.usbVendorId === 3368
+      ? "microbit"
+      : "arduino";
   }
 
   public hasPort(){
@@ -61,10 +56,7 @@ export class SerialDevice {
   }
 
   public async handleStream(channels: Array<NodeChannelInfo>){
-    //our port cannot be null if we are to open streams
-    if (!this.port){
-      return;
-    }
+    if (!this.port) return;
     await this.port.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
 
     // set up writer
@@ -110,14 +102,6 @@ export class SerialDevice {
       match = pattern.exec(this.localBuffer);
       if (!match) break;
 
-      // capturing encoded information from regex
-      // [0] fullMatch
-      // [1] signalType r|s (relay | sensor)
-      // [2] microBitId a|b|c|d
-      // [3] readingSource t|h|0|1|2 (temp, humidity, relay indices 0,1,2 )
-      // [4] reading (number)
-
-
       const [fullMatch, signalType, microbitId, readingSource, reading] = match;
       this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
 
@@ -131,15 +115,10 @@ export class SerialDevice {
       }
 
       if (signalType === "r"){
-        console.log("SERIAL: this relay state on to SerialConnection:", `${readingSource}, ${microbitId}, ${reading}`);
-        // this is information about the state of a relay
-        // update SerialConnection.relays with relays status report
+        // UPCOMING PT #184816949 update local intel re relays:
+        // this.updateRelayIntelligence(microbitId, reading)
       }
     } while (match);
-  }
-
-  public writeToOutForMicroBit(n:any){
-    console.log("write output for microbit");
   }
 
   public handleArduinoStreamObj(value: string, channels: Array<NodeChannelInfo>){
@@ -163,6 +142,13 @@ export class SerialDevice {
         targetChannel.value = parseInt(numValue, 10);
       }
     } while (match);
+  }
+
+
+  public writeToOutForMicroBit(data: string | number){
+    // UPCOMING PT #184753741 compute control message string
+    // const controlMessage = makeCotrolMessage(data)
+    // this.writer.write(`${controlMessage}\n`)
   }
 
   public writeToOutForArduino(n:number){

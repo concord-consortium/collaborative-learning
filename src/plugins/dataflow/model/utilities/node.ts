@@ -358,8 +358,6 @@ export const NodeTimerInfo =
   method: (t: number, tOn: number, tOff: number) => t % (tOn + tOff) < tOn ? 1 : 0,
 };
 
-
-
 export const roundNodeValue = (n: number) => {
   return Math.round(n * 1000) / 1000;
 };
