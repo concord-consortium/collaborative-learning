@@ -4,10 +4,12 @@ import { DBOfferingGroupMap } from "../db-types";
 import { ProblemDocument } from "../../models/document/document-types";
 import { map } from "lodash";
 import { BaseListener } from "./base-listener";
+import { autorun } from "mobx";
 
 export class DBGroupsListener extends BaseListener {
   private db: DB;
   private groupsRef: firebase.database.Reference | null = null;
+  private groupsMonitorDisposer: any;
 
   constructor(db: DB) {
     super("DBGroupsListener");
@@ -15,6 +17,50 @@ export class DBGroupsListener extends BaseListener {
   }
 
   public start() {
+    // TODO: we probably want to improve this so each new document
+    // doesn't trigger a bunch of monitor and unmonitor calls
+    // If we had the list of documents to monitor and we could get
+    // the list of documents that were currently monitored, then
+    // we could just rerun the code if the list to monitor changes
+    // and when it changes we could unmonitor everything not in the list
+    // that is a Problem document.
+    //
+    // Ideally we'd have a computed value which was the documents to
+    // monitor. We don't have a good place to put computed values like
+    // this, other than making a new MST Object. And this would just
+    // be for students without additional work so the documents
+    // are only monitored. To make it worse the documents start out
+    // monitored.
+    //
+    // This is important for this reason:
+    // https://firebase.google.com/docs/firestore/best-practices#realtime_updates
+    this.groupsMonitorDisposer = autorun(() => {
+      console.log("running groupsMonitor");
+      const {user, groups, documents} = this.db.stores;
+
+      // in teacher mode we listen to all documents and the document's group might change
+      // if a student changes groups so we need to gather the updated group id for each
+      // student and set it for the student's problem documents
+      documents.byType(ProblemDocument).forEach((document) => {
+        const groupId = groups.groupIdForUser(document.uid);
+        document.setGroupId(groupId);
+
+        // enable/disable monitoring of other students' documents when groups change
+        if (user.isStudent && (document.uid !== user.id)) {
+          // students only monitor documents in their group to save bandwidth
+          if (document.groupId === user.currentGroupId) {
+            // ensure the group document is monitored
+            this.db.listeners.monitorDocument(document, Monitor.Remote);
+          }
+          else {
+            // ensure we don't monitor documents outside the group
+            this.db.listeners.unmonitorDocument(document, Monitor.Remote);
+          }
+        }
+      });
+
+    });
+
     return new Promise<void>((resolve, reject) => {
       const {user, groups} = this.db.stores;
       const groupsRef = this.groupsRef = this.db.firebase.ref(this.db.firebase.getGroupsPath(user));
@@ -54,10 +100,11 @@ export class DBGroupsListener extends BaseListener {
       this.groupsRef.off("value", this.handleGroupsRef);
       this.groupsRef = null;
     }
+    this.groupsMonitorDisposer?.();
   }
 
   private handleGroupsRef = (snapshot: firebase.database.DataSnapshot) => {
-    const {user, documents} = this.db.stores;
+    const {user} = this.db.stores;
     const groups: DBOfferingGroupMap = snapshot.val() || {};
     const myGroupIds: string[] = [];
     const overSubscribedUserUpdates: any = {};
@@ -103,34 +150,8 @@ export class DBGroupsListener extends BaseListener {
       // otherwise set the groups
       this.db.stores.groups.updateFromDB(groups, this.db.stores.class);
 
-      // in teacher mode we listen to all documents and the document's group might change
-      // if a student changes groups so we need to gather the updated group id for each
-      // student and set it for the student's problem documents
-      const userGroupIds: any = {};
-      this.db.stores.groups.allGroups.forEach((group) => {
-        group.users.forEach((groupUser) => {
-          userGroupIds[groupUser.id] = group.id;
-        });
-      });
+      user.setCurrentGroupId(this.db.stores.groups.groupIdForUser(user.id));
 
-      user.setCurrentGroupId(userGroupIds[user.id]);
-
-      documents.byType(ProblemDocument).forEach((document) => {
-        document.setGroupId(userGroupIds[document.uid]);
-
-        // enable/disable monitoring of other students' documents when groups change
-        if (user.isStudent && (document.uid !== user.id)) {
-          // students only monitor documents in their group to save bandwidth
-          if (document.groupId === user.currentGroupId) {
-            // ensure the group document is monitored
-            this.db.listeners.monitorDocument(document, Monitor.Remote);
-          }
-          else {
-            // ensure we don't monitor documents outside the group
-            this.db.listeners.unmonitorDocument(document, Monitor.Remote);
-          }
-        }
-      });
     }
   };
 }
