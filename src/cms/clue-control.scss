@@ -1,28 +1,7 @@
 .loading-box {
   align-items: center;
-  border: 2px solid #ddd;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
   display: flex;
   height: 650px;
   justify-content: center;
   width: 100%;
-}
-
-.preview-link-box {
-  border-left: 2px solid #ddd;
-  border-right: 2px solid #ddd;
-  border-top: 2px solid #ddd;
-  border-top-right-radius: 5px;
-  min-height: 30px;
-  padding: 4px;
-  width: 100%;
-
-  a {
-    color: blue;
-
-    &:hover {
-      color: purple;
-    }
-  }
 }

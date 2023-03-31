@@ -1,0 +1,17 @@
+.preview-link-box {
+  min-height: 30px;
+  padding: 4px;
+  width: 100%;
+
+  a {
+    color: blue;
+
+    &:hover {
+      color: purple;
+    }
+  }
+
+  .warning {
+    color: red;
+  }
+}
