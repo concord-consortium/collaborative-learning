@@ -2,7 +2,7 @@ import initials from "initials";
 import { Instance, types } from "mobx-state-tree";
 import { AuthenticatedUser, isAuthenticatedTeacher } from "../../lib/auth";
 import { PortalFirebaseStudentJWT } from "../../lib/portal-types";
-import { UserTypeEnum } from "./user-types";
+import { UserType, UserTypeEnum } from "./user-types";
 
 export const UserPortalOffering = types
   .model("UserPortalOffering", {
@@ -71,6 +71,9 @@ export const UserModel = types
     },
     setId(id: string) {
       self.id = id;
+    },
+    setType(type: UserType) {
+      self.type = type;
     },
     setNetworks(network: string, networks: string[]) {
       self.network = network;

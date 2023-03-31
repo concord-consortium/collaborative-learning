@@ -12,6 +12,7 @@ export type IToolbarModelSnapshot = SnapshotIn<typeof ToolbarModel>;
 export interface ProblemConfiguration {
   disabledFeatures: string[];
   toolbar: SnapshotIn<typeof ToolbarModel>;
+  authorTools: SnapshotIn<typeof ToolbarModel>;
   // required tile types that aren't in the toolbar can be specified here
   tools?: string[]; // legacy use of `tools` preserved to avoid content changes
   defaultDocumentTemplate?: IAuthoredDocumentContent;
