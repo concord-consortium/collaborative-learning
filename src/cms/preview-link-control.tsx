@@ -14,6 +14,8 @@ interface IState {
   previewUrl?: string;
 }
 
+const delayWarning = " (Your changes may take a minute or two to appear after publishing.)";
+
 // We are using the CmsWidgetControlProps for the type of properties passed to
 // the control. This doesn't actually include all of the properties that are
 // available. A more complete list can be found in Widget.js in the DecapCMS
@@ -33,7 +35,7 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
     const entry = (this.props as any).entry.toJS();
     const pathParts = entry.path.split("/");
 
-    // If there's a unit url parameter, use that. Otherwise try to find the unit from the url path.
+    // If there's a unit url parameter, use that. Otherwise try to find the unit from the entry path.
     const defaultUnit = "sas";
     if (!urlParams.unit && !pathParts[1]) {
       warning = `Could not determine unit. Using default ${defaultUnit}.`;
@@ -72,8 +74,10 @@ export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, I
   render() {
     return (
       <div className="preview-link-box custom-widget">
-        <p><a href={this.state.previewUrl} target="_blank" rel="noreferrer">Preview Link</a></p>
-        <p>Please note: Your changes may take a minute or two to appear after publishing.</p>
+        <p>
+          <a href={this.state.previewUrl} target="_blank" rel="noreferrer">Preview Link</a>
+          {delayWarning}
+        </p>
         { this.state.warning &&
           <p className="warning">Preview link may be incorrect. {this.state.warning}</p>
         }
