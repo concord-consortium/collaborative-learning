@@ -14,6 +14,7 @@ import { PlaybackComponent } from "../playback/playback";
 import {
   ITileApi, ITileApiInterface, ITileApiMap, TileApiInterfaceContext, EditableTileApiInterfaceRefContext
 } from "../tiles/tile-api";
+import { StringBuilder } from "../../utilities/string-builder";
 import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT } from "../../lib/debug";
 import { DocumentError } from "./document-error";
@@ -192,7 +193,13 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
             const typeDir = await sectionDir.getDirectoryHandle(type, { create: true });
             const typeFile = await typeDir.getFileHandle("content.json", { create: true });
             const writableStream = await typeFile.createWritable();
-            await writableStream.write(json);
+            const builder = new StringBuilder();
+            builder.pushLine(`{`);
+            builder.pushLine(`"type": "${type}",`, 2);
+            builder.pushLine(`"content":`, 2);
+            builder.pushBlock(json, 4);
+            builder.pushLine(`}`);
+            await writableStream.write(builder.build());
             await writableStream.close();
           });
         }
