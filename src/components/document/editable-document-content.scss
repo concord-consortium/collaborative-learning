@@ -1,21 +1,22 @@
 @import "../vars";
 
+.full-screen-editable-document-content {
+  position: absolute;
+  top: $workspace-titlebar-height;
+  left: 0;
+  width: 100%;
+  height: calc(100% - #{$workspace-titlebar-height});
+}
+
+.contained-editable-document-content {
+  position: relative;
+  width: 100%;
+  height: 680px;
+  border-radius: 5px;
+  border: 2px solid #ddd;
+}
+
 .editable-document-content {
-  &.full-screen {
-    position: absolute;
-    top: $workspace-titlebar-height;
-    left: 0;
-    width: 100%;
-    height: calc(100% - #{$workspace-titlebar-height});
-  }
-  &.contained {
-    position: relative;
-    width: 100%;
-    min-height: 650px;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
-    border: 2px solid #ddd;
-  }
   &.comment-select {
     .document-content {
       background-color: $comment-select-green;

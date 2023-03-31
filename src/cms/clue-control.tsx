@@ -22,7 +22,7 @@ interface IState {
 // Initialize the app just one time globally, each control waits for this
 // initialization to finish to know the `stores` so the document editor
 // can use these stores
-const initializeAppPromise = initializeApp("dev");
+const initializeAppPromise = initializeApp("dev", true);
 
 // We are using the CmsWidgetControlProps for the type of properties passed to
 // the control. This doesn't actually include all of the properties that are
@@ -121,7 +121,7 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
             isPrimary={true}
             readOnly={false}
             document={this.state.document}
-            toolbar={appConfig.toolbar}
+            toolbar={appConfig.authorToolbar}
           />
         </AppProvider>
       );

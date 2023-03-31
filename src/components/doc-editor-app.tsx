@@ -67,7 +67,7 @@ export const DocEditorApp = ({ appConfig }: IDocEditorAppProps) => {
         isPrimary={true}
         readOnly={false}
         document={document}
-        toolbar={appConfig.toolbar}
+        toolbar={appConfig.authorToolbar}
       />
     </>
   );
