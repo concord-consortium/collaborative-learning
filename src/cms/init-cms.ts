@@ -1,7 +1,7 @@
 (window as any).CMS_MANUAL_INIT = true;
 
 import CMS from "netlify-cms-app";
-import { CmsBackendType, CmsConfig } from "netlify-cms-core";
+import { CmsBackendType, CmsConfig, CmsField } from "netlify-cms-core";
 
 import { urlParams } from "../utilities/url-params";
 import { ClueControl } from "./clue-control";
@@ -65,8 +65,9 @@ const cmsConfig: CmsConfig = {
         {
           label: "Preview Link",
           name: "preview-link",
+          required: false,
           widget: "preview-link"
-        },
+        } as CmsField,
         {
           label: "Content",
           name: "content",
