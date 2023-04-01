@@ -3,6 +3,8 @@ import { CmsWidgetControlProps } from "netlify-cms-core";
 
 import { defaultCurriculumBranch } from "./cms-constants";
 import { urlParams } from "../utilities/url-params";
+import { getGuideJson, getUnitJson } from "../models/curriculum/unit";
+import { appConfig } from "../initialize-app";
 
 import "./custom-control.scss";
 import "./preview-link-control.scss";
@@ -10,78 +12,105 @@ import "./preview-link-control.scss";
 (window as any).DISABLE_FIREBASE_SYNC = true;
 
 interface IState {
-  warning?: string;
   previewUrl?: string;
+  warning?: string;
 }
 
 const delayWarning = " (Your changes may take a minute or two to appear after publishing.)";
+const loadingMessage = "Finding preview link...";
 
 // We are using the CmsWidgetControlProps for the type of properties passed to
 // the control. This doesn't actually include all of the properties that are
 // available. A more complete list can be found in Widget.js in the DecapCMS
 // source code.
 export class PreviewLinkControl extends React.Component<CmsWidgetControlProps, IState>  {
+  isTeacherGuide?: boolean;
+  pathParts?: string[];
+  unit?: string;
+  
   constructor(props: CmsWidgetControlProps) {
     super(props);
 
-    // Set up preview link
     let warning = "";
-    const baseUrl = `https://collaborative-learning.concord.org`;
-    // TODO Do we ever want to preview on a CLUE branch other than master?
-    const clueBranch = "master";
-    const curriculumBranch = urlParams.curriculumBranch ?? defaultCurriculumBranch;
 
     // entry is not included in CmsWidgetControlProps, but it is included in the props.
     const entry = (this.props as any).entry.toJS();
     // path is of the form
     // curriculum/[unit]/teacher-guide?/investigation-[ordinal]/problem-[ordinal]/[sectionType]/content.json
-    const pathParts = entry.path.split("/");
-    const teacherGuideOffset = pathParts[2] === "teacher-guide" ? 1 : 0;
+    this.pathParts = entry.path.split("/");
 
     // If there's a unit url parameter, use that. Otherwise try to find the unit from the entry path.
     const defaultUnit = "sas";
-    if (!urlParams.unit && !pathParts[1]) {
+    if (!urlParams.unit && !this.pathParts?.[1]) {
       warning = `Could not determine unit. Using default ${defaultUnit}.`;
     }
-    const unit = urlParams.unit ?? pathParts[1] ?? defaultUnit;
-    const previewUnit = `https://models-resources.concord.org/clue-curriculum/branch/${curriculumBranch}/${unit}/content.json`;
+    this.unit = urlParams.unit ?? this.pathParts?.[1] ?? defaultUnit;
 
-    // Determine the problem from the path
-    const defaultInvestigationOrdinal = 1;
-    const investigationName = pathParts[2 + teacherGuideOffset];
-    const _investigationOrdinal = investigationName.split("investigation-")[1];
-    if (!_investigationOrdinal) {
-      warning = `Could not determine investigation. Using default ${defaultInvestigationOrdinal}.`;
+    // Finish setting up the preview link after reading the unit json
+    this.isTeacherGuide = this.pathParts?.[2] === "teacher-guide";
+    if (this.isTeacherGuide) {
+      getGuideJson(this.unit, appConfig).then(unitJson => this.setPreviewLink(unitJson));
+    } else {
+      getUnitJson(this.unit, appConfig).then(unitJson => this.setPreviewLink(unitJson));
     }
-    const investigationOrdinal = _investigationOrdinal ?? defaultInvestigationOrdinal;
-    const defaultProblemOrdinal = 1;
-    const problemName = pathParts[3 + teacherGuideOffset];
-    const _problemOrdinal = problemName.split("problem-")[1];
-    if (!_problemOrdinal) {
-      warning = `Could not determine problem. Using default ${defaultProblemOrdinal}.`;
-    }
-    const problemOrdinal = _problemOrdinal ?? 1;
-    const problemParam = `${investigationOrdinal}.${problemOrdinal}`;
-
-    const sectionType = pathParts[4 + teacherGuideOffset];
-
-    const params = `?unit=${previewUnit}&problem=${problemParam}&section=${sectionType}`;
-    // TODO It would be better to use the github user for the demoName rather than the curriculum branch.
-    const demoParams = `&appMode=demo&domeName=${curriculumBranch}&fakeClass=1&fakeUser=teacher:2`;
-    const previewUrl = `${baseUrl}/branch/${clueBranch}/${params}${demoParams}`;
 
     this.state = {
-      warning,
-      previewUrl
+      warning
     };
+  }
+
+  // Finishes setting up the preview link after loading the unit's json so we can determine the problem parameter.
+  setPreviewLink(unitJson: any) {
+    // Determine the unit parameter
+    const curriculumBranch = urlParams.curriculumBranch ?? defaultCurriculumBranch;
+    const previewUnit = `https://models-resources.concord.org/clue-curriculum/branch/${curriculumBranch}/${this.unit}/content.json`;
+
+    // Determine the problem parameter
+    // path is of the form
+    // curriculum/[unit]/teacher-guide?/investigation-[ordinal]/problem-[ordinal]/[sectionType]/content.json
+    const sectionPath = this.pathParts?.slice(-4).join("/");
+    let problemParam = "";
+    unitJson.investigations.forEach((investigation: any) => {
+      investigation.problems.forEach((problem: any) => {
+        problem.sections.forEach((section: any) => {
+          if (section.sectionPath === sectionPath) {
+            problemParam = `${investigation.ordinal}.${problem.ordinal}`;
+          }
+        });
+      });
+    });
+    if (!problemParam) {
+      problemParam = "1.1";
+      this.setState({ warning: `Could not determine problem parameter. Using default ${problemParam}.`});
+    }
+
+    // Determine the section parameter
+    const teacherGuideOffset = this.isTeacherGuide ? 1 : 0;
+    const sectionType = this.pathParts?.[4 + teacherGuideOffset];
+
+    // Finish creating the preview link
+    // TODO Do we ever want to preview on a CLUE branch other than master?
+    const clueBranch = "master";
+    const baseUrl = `https://collaborative-learning.concord.org/branch/${clueBranch}/`;
+    const params = `?unit=${previewUnit}&problem=${problemParam}&section=${sectionType}`;
+    // TODO It would be better to use the github user for the demoName rather than the curriculum branch.
+    // TODO Do we want to make the user a teacher when they are not modifying a teacher guide?
+    const demoParams = `&appMode=demo&domeName=${curriculumBranch}&fakeClass=1&fakeUser=teacher:2`;
+    const previewUrl = `${baseUrl}${params}${demoParams}`;
+    this.setState({ previewUrl });
   }
 
   render() {
     return (
       <div className="preview-link-box custom-widget">
         <p>
-          <a href={this.state.previewUrl} target="_blank" rel="noreferrer">Preview Link</a>
-          {delayWarning}
+          {this.state.previewUrl
+            ? <>
+                <a href={this.state.previewUrl} target="_blank" rel="noreferrer">Preview Link</a>
+                {delayWarning}
+              </>
+            : loadingMessage
+          }
         </p>
         { this.state.warning &&
           <p className="warning">Preview link may be incorrect. {this.state.warning}</p>
