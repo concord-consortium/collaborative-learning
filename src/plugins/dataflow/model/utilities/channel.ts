@@ -16,6 +16,7 @@ export interface NodeChannelInfo {
   outputTargetActuator?: string;
   timeFactor?: number;
   deviceFamily?: string;
+  lastMessageRecievedAt?: number | null;
 }
 
 const emgSensorChannel: NodeChannelInfo = {
@@ -77,7 +78,8 @@ function createMicroBitChannels(sensors: MicroBitSensorChannelInfo[] ){
     virtual: false,
     usesSerial: true,
     serialConnected: null,
-    deviceFamily: "microbit"
+    deviceFamily: "microbit",
+    lastMessageRecievedAt: Date.now()
   };
 
   const channels = sensors.map((s) => {

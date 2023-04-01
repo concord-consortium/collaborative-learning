@@ -559,8 +559,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo){
     if (sd.hasPort()){
       channel.serialConnected = true;
-      channel.missing = sd.deviceFamily !== channel.deviceFamily;
-    } else {
+      const deviceMismatch = sd.deviceFamily !== channel.deviceFamily;
+      const timeSinceActive = channel.usesSerial && channel.lastMessageRecievedAt
+        ? Date.now() - channel.lastMessageRecievedAt
+        : 0;
+
+      const fellOff = timeSinceActive > 5000;
+      channel.missing = deviceMismatch || fellOff;
+    }
+
+    else {
       channel.serialConnected = false;
       channel.missing = true;
     }

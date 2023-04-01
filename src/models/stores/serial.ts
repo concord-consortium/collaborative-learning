@@ -112,6 +112,7 @@ export class SerialDevice {
 
       if (targetChannel && signalType === "s"){
         targetChannel.value = Number(reading);
+        targetChannel.lastMessageRecievedAt = Date.now();
       }
 
       if (signalType === "r"){
