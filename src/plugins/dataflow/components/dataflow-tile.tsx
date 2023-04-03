@@ -171,11 +171,16 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     // 0 - cleared, ready to record
     // 1 - recording in progress
     // 2 - stopped, ready to clear
-    console.log("📁 dataflow-tile.tsx > 🔨 handleChangeOfRecordingMode");
+    // console.log("📁 dataflow-tile.tsx > 🔨 handleChangeOfRecordingMode with state:", this.state.programRecordingMode);
+    // if (this.state.programRecordingMode === 0){
+    //   console.log("lesssss goooooo");
+    // }
+
     const mode = this.state.programRecordingMode;
     const model = this.getContent();
 
     if (mode === 0){
+      this.setState({isPlaying: false}); //reset isPlaying
       this.pairNodesToAttributes();
     }
 
@@ -192,6 +197,9 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     this.setState({
       programRecordingMode:  (mode + 1) % 3
     });
+    // console.log("📁 dataflow-tile.tsx > 🔨 handleChangeOfRecordingMode EOF with state:", this.state.programRecordingMode);
+
+
   };
 
   private handleChangeIsPlaying = () => {

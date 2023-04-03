@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { RateSelectorOrPlayBack } from "./dataflow-rateselector-playback";
 import { ProgramDataRate } from "../../model/utilities/node";
 import { SerialDevice } from "../../../../models/stores/serial";
@@ -30,7 +30,12 @@ interface TopbarProps {
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates, dataRate,
     onRateSelectClick, onRecordDataChange, programRecordState, isPlaying, handleChangeIsPlaying, numNodes } = props;
+
   const disableRecordButton = readOnly && programRecordState === 0; //hides RecordButton on leftside read only docs
+  //create a piece of state
+  const [playBackReset, setPlayBackReset] = useState(false);
+
+
 
   return (
     <div className="program-editor-topbar">
@@ -97,6 +102,9 @@ interface IRecordStopOrClearProps {
 
 const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
   const { disabled, onRecordDataChange, programRecordState } = props;
+  if (programRecordState === 2){ //stop button pressed
+    console.log("<RecordStopOrClearButton Stop pressed");
+  }
   return (
     <div className="record-btn-container">
       <button
@@ -125,7 +133,7 @@ interface IPlaybackProps {
 
 const PlaybackButton = (props: IPlaybackProps) => {
   const {programRecordState, isPlaying, handleChangeIsPlaying} = props;
-  console.log("<PlaybackButton> with isPLaying:", isPlaying);
+  // console.log("<PlaybackButton> with isPLaying:", isPlaying);
   return (
     <div className="playback-btn-container">
       <button
