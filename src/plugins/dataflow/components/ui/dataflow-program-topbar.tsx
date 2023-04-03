@@ -35,7 +35,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   //create a piece of state
   const [playBackReset, setPlayBackReset] = useState(false);
 
-
   return (
     <div className="program-editor-topbar">
 
@@ -63,6 +62,7 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
             readOnly={readOnly}
             programRecordState={programRecordState}
             isPlaying={isPlaying}
+            handleChangeIsPlaying={handleChangeIsPlaying}
             numNodes={numNodes}
             onRecordDataChange={onRecordDataChange}
           />
@@ -102,7 +102,7 @@ interface IRecordStopOrClearProps {
 const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
   const { disabled, onRecordDataChange, programRecordState } = props;
   if (programRecordState === 2){ //stop button pressed
-    console.log("<RecordStopOrClearButton Stop pressed");
+    // console.log("<RecordStopOrClearButton Stop pressed");
   }
   return (
     <div className="record-btn-container">

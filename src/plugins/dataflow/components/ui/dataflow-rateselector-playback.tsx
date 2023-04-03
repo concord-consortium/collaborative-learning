@@ -14,7 +14,7 @@ interface IRateSelectorProps {
   readOnly: boolean;
   programRecordState: number;
   isPlaying: boolean; //for playback of data
-  // handleChangeIsPlaying: () => void;
+  handleChangeIsPlaying: () => void;
   numNodes: number;
   onRecordDataChange: () => void;
 }
@@ -29,9 +29,9 @@ function formatTime(seconds: number) {
 
 export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState,
-          isPlaying, numNodes, onRecordDataChange} = props;
+          isPlaying, handleChangeIsPlaying, numNodes, onRecordDataChange} = props;
 
-  console.log(" <RateSelectorOrPlayback> >  🍳 programRecordState:", programRecordState);
+  console.log("---------- <RateSelectorOrPlayback >------------");
 
   /* ==[ Total Recording Time  - Calculate] format as "MMM:SS" */
   const totalTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
@@ -56,12 +56,27 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   /* ==[ Timer - Enable ] == */
   const timerRunning = numNodes > 0 && sliderSec.current < totalTimeSec && (programRecordState === 1);
   const playBackTimerRunning = !timerRunning && isPlaying;
+  console.log("isPlaying:", isPlaying);
+  const playBackIsFinished = (playBackTimerSec.current === timerSec.current) && (playBackTimerSec.current !== 0);
+  console.log("playBackIsFinished", playBackIsFinished);
 
+  //after you've hit is playing, or when you've paused (!isPlaying) and its not done yet, and you're in clear state
+  let condition = (playBackTimerRunning || ((!isPlaying) && (!playBackIsFinished) && programRecordState === 2))
+  || playBackIsFinished;
+
+  // condition = playBackTimerRunning;
+  console.log("condition:", condition);
+
+  if (playBackIsFinished ){
+    console.log("PLAYBACK FINISHED!!!!!!");
+  }
   /* ==[ Slider Max Value ] == */
-  const sliderMaxValue = playBackTimerRunning ? timerSec.current : totalTimeSec;
+  const sliderMaxValue = condition ? timerSec.current : totalTimeSec;
 
+  /* ==[ Timer for Play, Timer for Playback ] == */
   useEffect(()=>{
     if (timerRunning){
+      console.log("useEffect 1 timerRunning");
       const timer = setInterval(() => {
         timerSec.current++;
         sliderSec.current++;
@@ -72,8 +87,8 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
       }, 1000);
       return () => clearInterval(timer);
     }
-    if (playBackTimerRunning){
-      console.log("run once");
+    if (playBackTimerRunning && !playBackIsFinished){
+      console.log("useEffect 1 playBackTimerRunning:", playBackTimerRunning);
       const playBackTimer = setInterval(() => {
         playBackTimerSec.current++;
         sliderSec.current++;
@@ -84,12 +99,35 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
       }, 1000);
       return () => clearInterval(playBackTimer);
     }
-    //reset slider back to 0 if user presses stop
-    if (programRecordState === 2){
+  }, [timerSec, timerRunning, sliderSec, playBackTimerRunning, programRecordState, playBackIsFinished]);
+
+  /* ==[ Stop Mode - Reset slider and counter to 0 ] == */
+  useEffect(()=>{
+     if (programRecordState === 2){
+      console.log("---------useEffect 2 reset slider and counter --------");
+      playBackTimerSec.current = 0;
       sliderSec.current = 0;
     }
+  }, [programRecordState]);
 
-  }, [timerSec, timerRunning, sliderSec, playBackTimerRunning, programRecordState]);
+
+  useEffect(()=>{
+    if (playBackIsFinished && isPlaying) {
+      console.log("useEffect 3 playBackIsFinished, handleChangeIsPlaying invoked");
+      handleChangeIsPlaying(); //go from pause to play
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[playBackIsFinished, isPlaying]);
+
+  useEffect(()=>{
+    if (!isPlaying && playBackIsFinished){
+      console.log("useEffect 4 isPlaying and playBackIsFinished --- reset to 0");
+      playBackTimerSec.current = 0;
+      sliderSec.current = 0;
+    }
+  }, [isPlaying, playBackIsFinished]);
+
+
 
   /* ==[ Timer - Reset ] == */
   if (programRecordState === 0) {
@@ -111,6 +149,8 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   return (
     <>
       <div className="topbar-sampleratetext-or-timeslider">
+        {sliderMaxValue} <br/>
+        {sliderSec.current}
         {
           programRecordState ?
           <div className="slider-container">
