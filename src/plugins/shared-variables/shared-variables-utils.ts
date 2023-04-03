@@ -6,8 +6,9 @@ import { DiagramContentModelType } from "../diagram-viewer/diagram-content";
 import { kDiagramTileType } from "../diagram-viewer/diagram-types";
 import { DrawingContentModelType } from "../drawing/model/drawing-content";
 import { kDrawingTileType } from "../drawing/model/drawing-types";
-import { kTextTileType } from "../../models/tiles/text/text-content";
+import { kTextTileType, TextContentModelType } from "../../models/tiles/text/text-content";
 import { ITileContentModel } from "../../models/tiles/tile-content";
+import { VariablesPlugin } from "./slate/variables-plugin";
 
 const getTileVariables = (content: ITileContentModel) => {
   if (content.type === kDiagramTileType) {
@@ -15,8 +16,17 @@ const getTileVariables = (content: ITileContentModel) => {
   } else if (content.type === kDrawingTileType) {
     return drawingVariables(content as DrawingContentModelType);
   } else if (content.type === kTextTileType) {
-    // TODO Get variables used by text tiles
-    return [];
+    // Note: This isn't the most efficient. But it reduces duplicate
+    // code. One way to improve this would be to make plugins to tiles
+    // more official. Then we could maintain a document level structure
+    // that lists all a tiles plugins. Then we could use this to lookup
+    // the text tile's plugin.
+    const textContent = content as TextContentModelType;
+    const textPlugin = new VariablesPlugin(textContent);
+    // FIXME: The intention here is to return unique variables used by the plugin.
+    // Currently this will return a variable object for each chip in the text
+    // tile and there might be multiple chips per variable
+    return textPlugin.chipVariables;
   } else {
     return [];
   }

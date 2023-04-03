@@ -1,0 +1,80 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles":
+    [
+      {
+        "id": "WA-h_rcD-bL-CgzA",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started)</strong></u></p>",
+            "<p><u><em>Connecting to Prior Knowledge</em></u></p>",
+            "<p>In the previous Investigation, students explored the relationship between the corresponding sides, corresponding angles, perimeters, and areas of similar figures. This Problem continues students’ exploration of scale factors and similarity by rep-tiling, or building shapes from copies of smaller, similar shapes with a focus on the area change.</p>",
+            "<p>In each of these contexts, students study how the areas of two similar figures are related to the scale factor. It is often surprising to students that if they apply a scale factor of 2 to a figure (or in general, n), the area becomes four times as great (in general, n2 as great).</p>",
+            "<p>At this stage, students should not be concerned with area calculations. Instead, students use rep-tiles to see that when they apply a scale factor of 2, it requires four copies of the original figure. In this case, students measure area using the original figure as the unit rather than units of square inches or square centimeters.</p>"
+          ]
+        }
+      },
+      {
+        "id": "pR5bV3Qq8Wu_KS1o",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p>Use the diagrams in the student edition. </p>"
+          ]
+        }
+      },
+      {
+        "id": "TupYGJOAoFAsDyUk",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>How are these patterns similar? (The patterns both tessellate. The shapes fit together exactly with no overlap or underlap.) </li><li>What is different about these patterns that might make one a rep‑tile and the other not?</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "YfoaYM_AqwLK9FgZ",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Note:</strong> A regular hexagon will tessellate because it fits together with no overlaps or underlaps. It has a pattern that can be continued forever. However, there is no larger regular hexagon in the pattern formed by the small hexagons. The regular hexagon tessellates, but it is not a rep‑tile. On the other hand, if you put four squares together, you can make a larger square that is similar to the small squares. Students will find other figures for which this is the case.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Students are going to work with quadrilaterals and triangles. The challenge is to determine which types of quadrilaterals and triangles are rep‑tiles. For each shape, find whether it is possible to put together several identical small shapes to form a larger version of the same shape. When it is possible, you will sketch how the shapes fit together and answer some questions about the measurements of the figures.</p>",
+            "<p></p>",
+            "<p>Students can work with partners or in small groups.</p>",
+            "<p></p>",
+            "<p>Students can use their own drawings, the Shapes Set, or copies of <strong>Learning Aid 3.1: Quadrilaterals for Rep-Tiles </strong>(accessibility)  and L<strong>earning Aids 3.1B: Triangles for Rep-Tiles </strong>(Portrayal) to make copies of figures. If they fold a piece of paper in fourths, trace a figure, and then cut it out, students will have four congruent copies of that figure.</p>",
+            "<p></p>",
+            "<p>Students may want to use colored pencils so that they can clearly see the borders between figure copies. Rulers can be helpful as well. Students can use them as straight‑edges when sketching, and also measure lengths in order to find scale factors. Students can use angle</p>"
+          ]
+        }
+      },
+      {
+        "id": "oYTCdEGdHbBbjEDX",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Implementation Note:</strong> Stopping after students have worked on the Initial Challenge to have a short conversation can help students to stay focused on the math. Students can get lost in the cutting, drawing, and/or manipulating shape sets and miss the mathematics. Have a brief conversation on which ones they were able to rep-tile and then send them to the What If.  </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

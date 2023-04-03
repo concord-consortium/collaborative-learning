@@ -1,0 +1,43 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles":
+    [
+      {
+        "id": "lS_whb-yad1Hpo4u",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started)</strong></u></p>",
+            "<p><u>Connecting to Prior Knowledge</u></p>",
+            "<p>Remind students of the work they did in Investigation 2 when they were finding the Wump imposters</p>"
+          ]
+        }
+      },
+      {
+        "id": "yoD8h0rZt9To-Hn2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>How did we decide which Wumps were imposters? (Answer will vary. Students should be able to talk about scale factor, corresponding angle measures, ratios of adjacent sides, coordinate rules, etc.)</li><li>How could we use these ideas to find imposters with other shapes? (Answer will vary. Students should be able to talk about scale factor, corresponding angle measures, ratios of adjacent sides, coordinate rules, etc.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "wNB9Rp792QDnnBfs",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p>Have students work with a partner on this Problem. In the Initial Challenge they will look at each set and determine which shape is the imposter. Have each partner group work on 2-3 sets.  </p>",
+            "<p>Distribute <strong>Learning Aid 4.3: Sets of Figures.</strong> Implementation Note:  Have each partner group work on 2-3 of the sets in the Initial Challenge.  </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

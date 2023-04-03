@@ -1,0 +1,72 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles":
+    [
+      {
+        "id": "CQBXsqAuCzONCXoX",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started)</strong></u></p>",
+            "<p><u><em>Connecting to Prior Knowledge</em></u></p>",
+            "Introduce the vocabulary of scale factor and connect it to the work from previous problems. Discussing the pair of similar rectangles below can spring board the conversation."
+          ]
+        }
+      },
+      {
+        "id": "KVr12DYAKUFasdfPcFs",
+        "title": "Similar rectangles with a scale factor of 3",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/similarRectanglesTG2_3.png"
+        }
+      },
+      {
+        "id": "NjIU7qTNK5_oC7fX",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>How would you describe the relationship between the side lengths when going from the large shape to the smaller shape and vice versa? (Answers will vary. Focus the conversation on the lengths of the sides.)</li><li> What would you multiply each side length of the small rectangle by to get the larger rectangle?  (3) </li><li>What would you multiply each side length of the larger rectangle to get the smaller rectangle? (1/3) </li><li>What scale factor was used to turn Mug into Zug? (2)  </li><li>What scale factor was used to turn Mug into Bug? (3) </li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "YRb3kaqYQzXV6cVk",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p>Tell the class that the challenge is to use the criteria of corresponding angles and side lengths to determine which rectangles (mouths) and which triangles (noses) are similar.</p>"
+          ]
+        }
+      },
+      {
+        "id": "KvYsB6cEG6QJxm2k",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The following statements are true for similar figures.</p>",
+            "<ul><li>Corresponding angles have the same measure.</li><li>Corresponding side lengths from one figure to the other are multiplied by the same scale factor.</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "FA58-2P5sF5d0O8Y",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Because corresponding sides and angles constitute an essential idea, you may want to be explicit with students about the need for labeling figures. The vertices of the Wump mouths and noses are not labeled. You could label these vertices to clear up any difficulties in referring to specific sides later. (Language and Time)</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

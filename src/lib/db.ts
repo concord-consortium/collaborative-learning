@@ -31,18 +31,11 @@ import { Logger } from "./logger";
 import { LogEventName } from "./logger-types";
 import { IGetImageDataParams, IPublishSupportParams } from "../../functions/src/shared";
 import { getFirebaseFunction } from "../hooks/use-firebase-function";
-import { getUserContext } from "../hooks/use-user-context";
 import { IStores } from "../models/stores/stores";
 import { TeacherSupportModelType, SectionTarget, AudienceModelType } from "../models/stores/supports";
 import { safeJsonParse } from "../utilities/js-utils";
 import { urlParams } from "../utilities/url-params";
 import { firebaseConfig } from "./firebase-config";
-
-export enum Monitor {
-  None = "None",
-  Local = "Local",
-  Remote = "Remote",
-}
 
 export type IDBConnectOptions = IDBAuthConnectOptions | IDBNonAuthConnectOptions;
 export interface IDBBaseConnectOptions {
@@ -443,8 +436,8 @@ export class DB {
     return new Promise<{document: DBDocument, metadata: DBPublicationDocumentMetadata}>((resolve, reject) => {
       this.createDocument({ type: ProblemPublication, content }).then(({document, metadata}) => {
         const publicationRef = this.firebase.ref(this.firebase.getProblemPublicationsPath(user)).push();
-        const userGroup = groups.groupForUser(user.id)!;
-        const groupUserConnections: DBGroupUserConnections = userGroup && userGroup.users
+        const userGroup = groups.getGroupById(user.currentGroupId);
+        const groupUserConnections: DBGroupUserConnections | undefined = userGroup && userGroup.users
           .filter(groupUser => groupUser.id !== user.id)
           .reduce((allUsers: DBGroupUserConnections, groupUser) => {
             allUsers[groupUser.id] = groupUser.connected;
@@ -521,7 +514,7 @@ export class DB {
       throw new Error("Could not publish the specified document because its content is not available.");
     }
     return publishSupport?.({
-      context: getUserContext(this.stores),
+      context: this.stores.userContextProvider.userContext,
       caption,
       problem: problemPath,
       classes: user.classHashesForProblemPath(problemPath),
@@ -722,22 +715,16 @@ export class DB {
 
   public createDocumentModelFromProblemMetadata(
           type: ProblemOrPlanningDocumentType, userId: string,
-          metadata: DBOfferingUserProblemDocument, monitor: Monitor) {
+          metadata: DBOfferingUserProblemDocument) {
     const {documentKey} = metadata;
     const group = this.stores.groups.groupForUser(userId);
     return this.openDocument({
-        type,
-        userId,
-        groupId: group?.id,
-        documentKey,
-        visibility: metadata.visibility
-      })
-      .then((document) => {
-        if (monitor !== Monitor.None) {
-          this.listeners.monitorDocument(document, monitor);
-        }
-        return document;
-      });
+      type,
+      userId,
+      groupId: group?.id,
+      documentKey,
+      visibility: metadata.visibility
+    });
   }
 
   public updateDocumentFromProblemDocument(document: DocumentModelType,
@@ -750,11 +737,7 @@ export class DB {
     const {title, properties, self: {uid, documentKey}} = dbDocument;
     const group = this.stores.groups.groupForUser(uid);
     const groupId = group && group.id;
-    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties})
-      .then((documentModel) => {
-        this.listeners.monitorDocument(documentModel, Monitor.Local);
-        return documentModel;
-      });
+    return this.openDocument({type, userId: uid, documentKey, groupId, title, properties});
   }
 
   // handles published personal documents and published learning logs
@@ -847,7 +830,7 @@ export class DB {
   }
 
   public async getCloudImage(url: string) {
-    const context = getUserContext(this.stores);
+    const context = this.stores.userContextProvider.userContext;
     const getImageData = getFirebaseFunction<IGetImageDataParams>("getImageData_v1");
     const result = await getImageData({ context, url });
     return result?.data;

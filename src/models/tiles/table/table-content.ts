@@ -9,9 +9,11 @@ import {
 import { IDocumentExportOptions, IDefaultContentOptions } from "../tile-content-info";
 import { TileMetadataModel } from "../tile-metadata";
 import { tileModelHooks } from "../tile-model-hooks";
+import { setTileTitleFromContent } from "../tile-model";
 import { TileContentModel } from "../tile-content";
 import { addCanonicalCasesToDataSet, IDataSet, ICaseCreation, ICase, DataSet } from "../../data/data-set";
-import { SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
+import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../../shared/shared-data-set";
+import { updateSharedDataSetColors } from "../../shared/shared-data-set-colors";
 import { SharedModelType } from "../../shared/shared-model";
 import { kMinColumnWidth } from "../../../components/tiles/table/table-types";
 import { canonicalizeExpression, kSerializedXKey } from "../../data/expression-utils";
@@ -299,6 +301,10 @@ export const TableContentModel = TileContentModel
           // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, sharedDataSet);
         }
+
+        // update the colors
+        const dataSets = sharedModelManager.getSharedModelsByType(kSharedDataSetType) as SharedDataSetType[];
+        updateSharedDataSetColors(dataSets);
       },
       {name: "sharedModelSetup", fireImmediately: true}));
     },
@@ -328,7 +334,7 @@ export const TableContentModel = TileContentModel
     },
     setTableName(name: string) {
       self.dataSet.setName(name);
-
+      setTileTitleFromContent(self, name);
       self.logChange({ action: "update", target: "table", props: { name } });
     },
     setColumnWidth(attrId: string, width: number) {

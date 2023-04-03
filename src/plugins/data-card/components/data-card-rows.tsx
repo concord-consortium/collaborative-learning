@@ -6,7 +6,7 @@ import { CaseAttribute } from "./case-attribute";
 import { EditFacet } from "../data-card-types";
 
 interface IProps {
-  caseIndex: any;
+  caseIndex: number;
   model: ITileModel;
   totalCases: number;
   readOnly?: boolean;

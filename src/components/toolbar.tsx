@@ -57,6 +57,9 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
         case "delete":
           this.handleDelete();
           break;
+        case "solution":
+          this.handleToggleSelectedTilesSolution();
+          break;
         default:
           this.handleAddTile(tool);
           break;
@@ -70,12 +73,11 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       this.handleDragNewTile(tool, e);
     };
     const renderToolButtons = (toolbarModel: IToolbarModel) => {
-      const { ui: { selectedTileIds } } = this.stores;
       return toolbarModel.map(toolButton => {
         const buttonProps: IToolbarButtonProps = {
           toolButton,
-          isActive: toolButton === this.state.activeTool,
-          isDisabled: toolButton.id === "delete" && !selectedTileIds.length,
+          isActive: this.buttonIsActive(toolButton),
+          isDisabled: this.isButtonDisabled(toolButton),
           onSetToolActive: handleSetActiveTool,
           onClick: handleClickTool,
           onDragStart: handleDragTool,
@@ -115,6 +117,35 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
     const { type, titleBase } = tileContentInfo;
     const getTileTitle = (tileId: string) => tileApiInterface?.getTileApi(tileId)?.getTitle?.();
     return titleBase && document.getUniqueTitle(type, titleBase, getTileTitle);
+  }
+
+  private buttonIsActive(toolButton: IToolbarButtonModel) {
+    return toolButton.id === "solution"
+      ? this.selectedTilesIncludeTeacher()
+      : toolButton === this.state.activeTool;
+  }
+
+  private isButtonDisabled(toolButton: IToolbarButtonModel) {
+    const { document: { content } } = this.props;
+    const { appConfig: { settings }, ui: { selectedTileIds } } = this.stores;
+
+    const undoManager = this.props.document.treeManagerAPI?.undoManager;
+    if (toolButton.id === "undo" && !undoManager?.canUndo) return true;
+    if (toolButton.id === "redo" && !undoManager?.canRedo) return true;
+
+    // If no tiles are selected, disable the delete and solution buttons.
+    if (["delete", "solution"].includes(toolButton.id) && !selectedTileIds.length) return true;
+
+    if (toolButton.isTileTool && settings) {
+      // If a limit on the number of tiles of a certain type has been specified in settings,
+      // disable the related tile button when that limit is reached.
+      const tilesOfTypeCount = content?.getTilesOfType(toolButton.id).length || 0;
+      const tileSettings = settings[toolButton.id.toLowerCase()] as Record<string, any>;
+      const maxTilesOfType = tileSettings ? tileSettings.maxTiles : undefined;
+      if (maxTilesOfType && tilesOfTypeCount >= maxTilesOfType) return true;
+    }
+
+    return false;
   }
 
   private handleAddTile(tool: IToolbarButtonModel) {
@@ -181,6 +212,35 @@ export class ToolbarComponent extends BaseComponent<IProps, IState> {
       ui.removeTileIdFromSelection(tileId);
       document.deleteTile(tileId);
     });
+  };
+
+  // Returns true if any of the selected tiles have display: "teacher"
+  private selectedTilesIncludeTeacher = () => {
+    const { ui } = this.stores;
+    const { document } = this.props;
+    const documentContent = document.content;
+    let includesTeacher = false;
+    if (documentContent) {
+      ui.selectedTileIds.forEach(tileId => {
+        const tile = documentContent.getTile(tileId);
+        if (tile?.display === "teacher") {
+          includesTeacher = true;
+        }
+      });
+    }
+    return includesTeacher;
+  };
+
+  private handleToggleSelectedTilesSolution = () => {
+    const { ui } = this.stores;
+    const { document } = this.props;
+    const documentContent = document.content;
+    if (documentContent) {
+      const display = this.selectedTilesIncludeTeacher() ? undefined : "teacher";
+      ui.selectedTileIds.forEach(tileId => {
+        documentContent.getTile(tileId)?.setDisplay(display);
+      });
+    }
   };
 
   private handleDragNewTile = (tool: IToolbarButtonModel, e: React.DragEvent<HTMLDivElement>) => {

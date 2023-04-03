@@ -14,6 +14,7 @@ import { PlaybackComponent } from "../playback/playback";
 import {
   ITileApi, ITileApiInterface, ITileApiMap, TileApiInterfaceContext, EditableTileApiInterfaceRefContext
 } from "../tiles/tile-api";
+import { StringBuilder } from "../../utilities/string-builder";
 import { HotKeys } from "../../utilities/hot-keys";
 import { DEBUG_CANVAS, DEBUG_DOCUMENT } from "../../lib/debug";
 import { DocumentError } from "./document-error";
@@ -72,6 +73,7 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
 
     this.hotKeys.register({
       "cmd-shift-s": this.handleCopyDocumentJson,
+      "cmd-option-shift-s": this.handleExportSectionJson,
       "cmd-z": this.handleDocumentUndo,
       "cmd-shift-z": this.handleDocumentRedo
     });
@@ -153,27 +155,68 @@ export class CanvasComponent extends BaseComponent<IProps, IState> {
   private handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     this.hotKeys.dispatch(e);
   };
+  
+  private getDocumentContent = () => {
+    const { content, document } = this.props;
+    return document?.content ?? content;
+  };
 
-  private handleCopyDocumentJson = () => {
-    const {content, document } = this.props;
+  private getTransformImageUrl = () => {
     const { appConfig, unit } = this.stores;
     const unitBasePath = appConfig.getUnitBasePath(unit.code);
-    const documentContent = document?.content ?? content;
-    const transformImageUrl = (url?: string, filename?: string) => {
+    return (url?: string, filename?: string) => {
       return transformCurriculumImageUrl(url, unitBasePath, filename);
     };
+  };
+
+  private handleCopyDocumentJson = () => {
+    const documentContent = this.getDocumentContent();
+    const transformImageUrl = this.getTransformImageUrl();
     const json = documentContent?.exportAsJson({ includeTileIds: true, transformImageUrl });
     json && navigator.clipboard.writeText(json);
   };
 
+  // Saves the current document as separate section files on the user's hard drive.
+  // Saved in [user selected folder]/CLUE Sections/[section type]/content.json
+  private handleExportSectionJson = async () => {
+    const documentContent = this.getDocumentContent();
+    const transformImageUrl = this.getTransformImageUrl();
+    const sections = documentContent?.exportSectionsAsJson({ includeTileIds: true, transformImageUrl });
+
+    if (sections) {
+      try {
+        const rootHandle = await (window as any).showDirectoryPicker({ mode: "readwrite", startIn: "desktop" });
+        if (rootHandle) {
+          const sectionDir = await rootHandle.getDirectoryHandle("CLUE Sections", { create: true });
+          Object.keys(sections).forEach(async type => {
+            const json = sections[type];
+            const typeDir = await sectionDir.getDirectoryHandle(type, { create: true });
+            const typeFile = await typeDir.getFileHandle("content.json", { create: true });
+            const writableStream = await typeFile.createWritable();
+            const builder = new StringBuilder();
+            builder.pushLine(`{`);
+            builder.pushLine(`"type": "${type}",`, 2);
+            builder.pushLine(`"content":`, 2);
+            builder.pushBlock(json, 4);
+            builder.pushLine(`}`);
+            await writableStream.write(builder.build());
+            await writableStream.close();
+          });
+        }
+      } catch (error) {
+        console.error(`Unable to export section json`, error);
+      }
+    }
+  };
+
   private handleDocumentUndo = () => {
-    const { document } = this.props;
-    document?.undoLastAction();
+    this.props.document?.undoLastAction();
+    return true;
   };
 
   private handleDocumentRedo = () => {
-    const { document } = this.props;
-    document?.redoLastAction();
+    this.props.document?.redoLastAction();
+    return true;
   };
 
   private handleTogglePlaybackControlComponent = () => {

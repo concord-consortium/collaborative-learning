@@ -1,0 +1,41 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "How do rep-tiles show the relationship between the scale factor and the perimeter of a similar shape? What about the scale factor and the area? "
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>When rep-tiling, we can use multiple tiles of a shape to make a larger or smaller similar shape. Rep-tiles keep the corresponding angles the same measure. This lets us focus on the relationships in the other measures, like lengths and area.</p>",
+            "<p>If you make a rep-tile using four same copies, then the area of a rep-tile is four times the area of the original copy. And the scale factor is 2, because the side length of a rep-tile will be twice the side length of the original copy.</p>",
+            "<p>If the scale factor is k, then the side lengths of the image will be  times the side lengths of the original copy. Each dimension of the shape is stretched or shrunk by the scale factor. Since we find area by multiplying both dimensions, we also multiply the scale factor times the scale factor on the image. The area of the rep-tile will be times larger. If</p>",
+            "<p>A<sub>original</sub> = L • W , then</p>",
+            "<p>A <sub>scale factor k</sub> = K • L • K• W =</p>",
+            "<p>                                  K • K • L • W =</p>",
+            "<p>                                        K<sup>2</sup> • L • W</p>",
+            "<p>Note that students will need to use their knowledge of the Commutative Property from the previous unit.</p>"
+          ]
+        }
+      },
+      {
+        "id": "6wzAUG202201121pM",
+        "title": "Did You Know?: Tiling and crystals",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_3_1_NW_22_did_you_know_350w.png"
+        }
+      }
+    ]
+  }
+}

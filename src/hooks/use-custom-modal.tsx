@@ -35,7 +35,8 @@ interface IProps<IContentProps> {
   onClose?: () => void;
 }
 export const useCustomModal = <IContentProps,>({
-  className, Icon, title, Content, contentProps, focusElement, canCancel, buttons, onClose
+  className, Icon, title, Content, contentProps, focusElement, canCancel, buttons,
+  onClose
 }: IProps<IContentProps>, dependencies?: any[]) => {
 
   const [contentElt, setContentElt] = useState<HTMLDivElement>();
@@ -49,7 +50,7 @@ export const useCustomModal = <IContentProps,>({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter") {
+      if (e.key === "Enter" && !(e.target instanceof HTMLTextAreaElement)) {
         const defaultButton = buttons.find(b => b.isDefault);
         if (defaultButton && !defaultButton.isDisabled) {
           blurModal();

@@ -1,9 +1,9 @@
 import { registerSharedModelInfo } from "../../models/shared/shared-model-registry";
 import { registerTextPluginInfo } from "../../models/tiles/text/text-plugin-info";
 import { kSharedVariablesID, SharedVariables } from "./shared-variables";
-import VariablesToolIcon from "./slate/variables.svg";
-import { VariablesPlugin } from "./slate/variables-plugin";
-import { updateAfterSharedModelChanges } from "./slate/variables-text-content";
+import { NewVariableTextButton, InsertVariableTextButton, EditVariableTextButton,
+  kNewVariableButtonName, kInsertVariableButtonName, kEditVariableButtonName} from "./slate/text-tile-buttons";
+import { kVariableTextPluginName, VariablesPlugin } from "./slate/variables-plugin";
 import { registerDrawingObjectInfo, registerDrawingToolInfo } from "../drawing/components/drawing-object-manager";
 import { EditVariableButton, InsertVariableButton, NewVariableButton, VariableChipComponent, VariableChipObject }
   from "./drawing/variable-object";
@@ -14,12 +14,17 @@ registerSharedModelInfo({
 });
 
 registerTextPluginInfo({
-  iconName: "m2s-variables",
-  Icon: VariablesToolIcon,
-  toolTip: "Variables",
-  createSlatePlugin: (textContent) => VariablesPlugin(textContent),
-  command: "configureVariable",
-  updateTextContentAfterSharedModelChanges: updateAfterSharedModelChanges
+  pluginName: kVariableTextPluginName,
+  createSlatePlugin(textContent) {
+    const plugin = new VariablesPlugin(textContent);
+    plugin.addTileSharedModelWhenReady();
+    return plugin;
+  },
+  buttonDefs: {
+    [kNewVariableButtonName]: NewVariableTextButton,
+    [kInsertVariableButtonName]: InsertVariableTextButton,
+    [kEditVariableButtonName]: EditVariableTextButton
+  }
 });
 
 registerDrawingObjectInfo({

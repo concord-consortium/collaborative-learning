@@ -1,0 +1,239 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "id": "eDp86zl9LDrWO-B4",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation A. Claims About Rep-tiles</h3>",
+            "<p>Examine each claim. Is it correct? Explain why.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Patricia’s Claim</strong> If it takes nine copies of a certain rectangle or triangle to make a similar figure, the scale factor is 9. "
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Not correct. If it takes 9 copies of a figure to make a rep-tile, then the scale factor is 3. Since the area grows by the square of the scale factor, then the scale factor must be 3 since 3•3 or 32 is 9. Note: For students who have already been exposed to the idea of square root, the following equation can also be referenced: square root 9 = 3.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Pete’s Claim</strong>  If you are given a certain rectangle or triangle and a scale factor of 5, then it will take 5 copies of the original to make a scale copy."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Not correct. If we consider a rectangle, both the length and the width will increase by a factor of 5. You will need 25 copies of the original. The area grows by the scale factor times the scale factor, or square of the scale factor, so you need 25 copies.</p>",
+            "<p>A<sub>original</sub>= L • W</p>",
+            "<p>A<sub>scale factor</sub> <sub>5</sub> = 5 • L • 5 • W</p>",
+            "<p>                              =  5 • 5 •L • W  or</p>",
+            "<p>                               = 5<sup>2</sup> • L • W</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Tomiko’s Claim</strong> All triangles are rep-tiles."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>It is true that all triangles are rep-tiles. You can subdivide any triangle into four congruent triangles, each of which is similar to the larger triangle. You can do this by finding the midpoint of each side of the triangle and then connecting the midpoints to form four smaller triangles. Each smaller triangle will be similar to the larger triangle. This can be extended to more scale factors by subdividing the sides into even smaller equal segments, then connecting these points so that the connecting lines are parallel.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Kazuko’s Claim</strong>  If you want to show two triangles with the same angle measures are similar, you can use a unit rep-tile. I used an equilateral triangle whose side lengths are one unit. To show that the following two triangles are similar."
+          ]
+        }
+      },
+      {
+        "id": "6wzAUG20220118pM",
+        "title": "Kazuko’s Claim: Measuring corresponding angles using a unit rep-tile",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_3_1_similar.jpg"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>It is true. We can use a unit rep-tile to show that corresponding angles are the same measure. Note that this strategy may be more difficult to use if scale factors are not whole numbers.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "6wzAUG20220119pM",
+        "title": "Unit rep-tile",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_C_1.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "6wzAUG202201120pM",
+        "title": "Measuring corresponding angles using a unit rep-tile",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_C_2.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation B. Going Backwards</h3>",
+            "Dola started with a sketch of a quadrilateral. She divided it into four smaller quadrilaterals that have the same size and shape (congruent). She claims they are similar.<ol><li>Explain why the smaller shapes are similar to the original.</li><li>How do the lengths, perimeter, and area of the original figure compare to one of the four smaller figures?</li><li>Would this work for triangles? Explain.</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "6wzAUG2022125asd6AM",
+        "title": "Dividing a rectangle into rep-tiles",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_1.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "6wzAUG20221257pM",
+        "title": "Dividing a parallelogram into rep-tiles",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_2.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The smaller shapes have corresponding angles with the same measure. The corresponding lengths have all changed in the same way. We can see that two of the smaller lengths will equal the length of the corresponding side of the original.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>2. The lengths, which includes the perimeters, are ½ the size of the original and areas are ¼ of the original.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>3. Yes. Many find it more difficult to sub-divide triangles. You can begin by sub-dividing the side lengths. Then draw in the smaller triangles making sure you keep the corresponding sides parallel.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "6wzAUG20221258324pM",
+        "title": "Dividing a triangle into rep-tiles",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_3.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "6wzAUG20221259pM",
+        "title": "Subdividing sides of a triangle to create 4 rep-tiles",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_4.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Then draw in the smaller triangles making sure you keep the corresponding sides parallel.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "6wzAUG20220117pM",
+        "title": "Subdividing sides of a triangle with parallel lines",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/parallelSubdivide3_1.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Example with a scale factor of 1/3.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "6wzAUG20220117pM",
+        "title": "Subdividing sides of a triangle to create 9 rep-tiles",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-1_What_If_Situation_B_6.png"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "type": "overview",
+  "content":
+  {
+    "tiles":
+    [
+      {
+        "id": "j6USDDJonxwoODAS",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Overview</strong></p>",
+            "<p>In this Problem students learn how to make similar and non-similar shapes using a coordinate system. Students graph members of the Wump family, plus other figures that claim to be in the Wump family. Students will notice that members of the Wump family are similar to one another (Zug and Bug are both similar to Mug). The imposters (Glug and Lug) are not similar—one is distorted vertically and one is distorted horizontally. Corresponding angles are not congruent, and corresponding side lengths are not multiplied by the same factor. Students compare the shapes, side lengths, and angles of the figures they draw as they contrast similar figures with non-similar ones.</p>"
+          ]
+        }
+      },
+      {
+        "id": "gcodqmxzhRii9Xad",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'>Revision Comments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>CMP STEM Problem Format</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>Unit Descriptions</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'>Goals of the Units</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'>Unit Alignments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'>General Arc of Learning </a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'>Unit Arc of Learning</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'>Mathematical Overview</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'>Learning Aids</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'>Teaching Aids</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'>Family Letters </a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'>Assessments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'>ACE Homework</a></strong></p>"
+                        ]
+        }
+      },
+      {
+        "id": "dHwdyPOlwXY1hxES",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>AoL:</strong> Exploration, Analysis</p>",
+            "<p><strong>CCSSM:</strong> Responses to the reflection are informed by the work in the Investigation and thus also reflect 7.G.A.1, 7.RP.A.2, 7.RP.A.2.B</p>"
+          ]
+        }
+      },
+      {
+        "id": "acONqc2rn2yPLm0l",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Early exploration of proportional relationships between corresponding side length, perimeter, and area of similar figures. </p>",
+            "<p>When exploring a set of geometric figures including an original and enlargement or a reduction, begin to use and articulate relationships between attributes, such as: </p>",
+            "<ul><li>corresponding angles of an enlargement or reduction of an original figure stay the same</li><li>side lengths of an enlargement or reduction figure, as compared to the original figure, change in size by the multiplier used with the original</li><li>perimeter of an enlargement or reduction figure, as compared to the original figure, change in size by the multiplier used with the original </li><li>area of an enlargement figure, as compared to the original figure, changes but not by the multiplier used on the original figure; rather it grows by a greater factor than the multiplier</li><li>area of a reduced figure, as compared to the original figure, changes but not by the multiplier used on the original figure; rather it shrinks by a factor greater than the multiplier.</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>NWDYK</strong></p>",
+            "<p>How can you determine if an original figure and its image are similar by looking at the coordinate rule that produced the image? What features (attributes) stay the same for Mug and similar figures? What features change?</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -229,111 +229,54 @@
         "isTileTool": false
       }
     ],
+    "authorTools": [
+      {
+        "id": "solution",
+        "title": "Toggle Solution Tile",
+        "iconId": "icon-solution-tool",
+        "isTileTool": false
+      }
+    ],
     "placeholderText": "",
     "stamps": [],
     "settings": {}
   },
-  "units": {
-    "brain": {
-      "content": "curriculum/neural-engineering/neural-engineering.json",
-      "guide": "curriculum/neural-engineering/neural-engineering-teacher-guide.json"
-    },
-    "bio": {
-      "content": "curriculum/bio4community/bio4community.json",
-      "guide": "curriculum/bio4community/bio4-teacher-guide.json"
-    },
-    "cr": {
-      "content": "curriculum/completely-rational/completely-rational.json"
-    },
-    "cas": {
-      "content": "curriculum/comparing-and-scaling/comparing-and-scaling.json",
-      "guide": "curriculum/comparing-and-scaling/cas-teacher-guide.json"
-    },
-    "dfe": {
-      "content": "curriculum/dataflow/dataflow-example.json"
-    },
-    "example": {
-      "content": "curriculum/example-curriculum/example-curriculum.json"
-    },
-    "example-no-group-share": {
-      "content": "curriculum/example-curriculum/example-no-group-share.json"
-    },
-    "example-no-my-work": {
-      "content": "curriculum/example-curriculum/example-no-my-work.json"
-    },
-    "example-show-nav-panel": {
-      "content": "curriculum/example-curriculum/example-show-nav-panel.json"
-    },
-    "example-config-subtabs": {
-      "content": "curriculum/example-curriculum/example-config-subtabs.json"
-    },
-    "example-no-section-problem-tab": {
-      "content": "curriculum/example-curriculum/example-no-section-problem-tab.json"
-    },
-    "example-template": {
-      "content": "curriculum/example-curriculum/example-template.json"
-    },
-    "example-variables": {
-      "content": "curriculum/example-curriculum/example-variables.json"
-    },
-    "faw": {
-      "content": "curriculum/filling-and-wrapping/filling-and-wrapping.json"
-    },
-    "ffpc": {
-      "content": "curriculum/frogs-fleas-and-painted-cubes/frogs-fleas-and-painted-cubes.json"
-    },
-    "fsss": {
-      "content": "curriculum/flip-spin-slide-stretch/flip-spin-slide-stretch.json"
-    },
-    "ggg": {
-      "content": "curriculum/growing-growing-growing/growing-growing-growing.json"
-    },
-    "hlit": {
-      "content": "curriculum/how-likely-is-it/how-likely-is-it.json"
-    },
-    "help": {
-      "content": "curriculum/help/help.json"
-    },
-    "lfp": {
-      "content": "curriculum/looking-for-pythagoras/looking-for-pythagoras.json"
-    },
-    "m2s": {
-      "content": "curriculum/m2studio/m2studio.json"
-    },
-    "m2s-proto": {
-      "content": "curriculum/m2studio/m2studio-prototype.json"
-    },
-    "moth": {
-      "content": "curriculum/mothed/mothed.json",
-      "guide": "curriculum/mothed/mothed-teacher-guide.json"
-    },
-    "msa": {
-      "content": "curriculum/moving-straight-ahead/moving-straight-ahead.json",
-      "guide": "curriculum/moving-straight-ahead/msa-teacher-guide.json"
-    },
-    "pc": {
-      "content": "curriculum/pc2/pc2.json"
-    },
-    "sad": {
-      "content": "curriculum/shapes-and-designs/shapes-and-designs.json"
-    },
-    "sap": {
-      "content": "curriculum/samples-and-populations/samples-and-populations.json"
-    },
-    "sas": {
-      "content": "curriculum/stretching-and-shrinking/stretching-and-shrinking.json",
-      "guide": "curriculum/stretching-and-shrinking/sas-teacher-guide.json"
-    },
-    "sws": {
-      "content": "curriculum/say-it-with-symbols/say-it-with-symbols.json"
-    },
-    "twmm": {
-      "content": "curriculum/thinking-with-math-models/thinking-with-math-models.json"
-    }
-  },
+  "curriculumBaseUrl": "https://models-resources.concord.org/clue-curriculum",
   "unitCodeMap": {
+    "bio4community": "bio",
+    "completely-rational": "cr",
+    "comparing-and-scaling": "cas",
+    "dataflow-example": "dfe",
+    "example-curriculum": "example",
+    "example-curriculum/example-no-group-share": "example-no-group-share",
+    "example-curriculum/example-no-my-work": "example-no-my-work",
+    "example-curriculum/example-show-nav-panel": "example-show-nav-panel",
+    "example-curriculum/example-config-subtabs": "example-config-subtabs",
+    "example-curriculum/example-no-section-problem-tab": "example-no-section-problem-tab",
+    "example-curriculum/example-template": "example-template",
+    "example-curriculum/example-variables": "example-variables",
+    "example-curriculum/example-shared-data": "example-shared-data",
+    "filling-and-wrapping": "faw",
+    "frogs-fleas-and-painted-cubes": "ffpc",
+    "flip-spin-slide-stretch": "fsss",
+    "growing-growing-growing": "ggg",
+    "how-likely-is-it": "hlit",
+    "help": "help",
+    "looking-for-pythagoras": "lfp",
+    "m2studio": "m2s",
+    "m2s/m2studio-prototype": "m2s-proto",
+    "mothed": "moth",
+    "mods": "mods",
+    "moving-straight-ahead": "msa",
+    "neural-engineering": "brain",
+    "pc2": "pc",
     "s s": "sas",
-    "s+s": "sas"
+    "s+s": "sas",
+    "shapes-and-designs": "sad",
+    "samples-and-populations": "sap",
+    "stretching-and-shrinking": "sas",
+    "say-it-with-symbols": "sws",
+    "thinking-with-math-models": "twmm"
   },
   "defaultUnit": "sas"
 }

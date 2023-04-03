@@ -1,0 +1,42 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started)</strong></u></p>",
+            "<p><u>Connecting to Prior Knowledge</u></p>",
+            "<p>This Problem continues to focus on developing students’ informal understanding of the concept of similarity. It uses the context of copier size factors to introduce scale factors other than 2. Connecting back to the sixth-grade rational number Units, students explore scale factors of 75% and 150%.  During the discussions in Problem 1.2 you may have already introduced the term corresponding to talk about corresponding sides and angles of shapes. If you haven’t discussed corresponding angles, corresponding sides, and/or how to name angles, use the introduction to Problem 1.3 prior to presenting the challenge.  </p>"
+          ]
+        }
+      },
+      {
+        "id": "3dydi2-IUIWkUnkU",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p>Set up the photocopier context by talking with students about the rubber-band stretchers and other methods for enlarging figures.</p>"
+          ]
+        }
+      },
+      {
+        "id": "rz21bLYT6EWhJUnA",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>If you wanted to make a very accurate enlargement of a figure, would you use a rubber-band stretcher? (No)</li><li>What other ways do you know of to make a larger copy of something? (Students might mention a poster-making machine, a projector, and a photocopy machine. You will likely have many students who know that a photocopier can make enlargements and reductions but have never used one to do this. Be prepared to tell students that we enter a percent into the photocopier to tell it what size to make the copy.)</li></ul>",
+            "<p>Project <strong>Learning Aid 1.3: Super Sleuth Figure and Two Copies</strong> to do a quick review of basic percent concepts. Cover up the captions under each figure. Tell students that the middle figure is the original.<strong>Suggested Questions</strong></p>",
+            "<ul><li>Estimate the percent Daphne entered into the photocopier in order to get the smaller image on the left. Write your estimate in your notebook. (Student estimates can vary widely. Most will recognize that the smaller image is more than half of the original and so will guess something between 50% and 100%. This is as much precision as you ought to expect at this stage. Repeat the estimation with the enlarged figure. Make sure that students realize that the result of entering 100% into the photocopier would be an image identical to the original.)</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

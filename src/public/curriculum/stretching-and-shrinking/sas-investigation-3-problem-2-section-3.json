@@ -1,0 +1,90 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation A. Similar Rectangles</h3>These two rectangles are similar. Is it possible to find the length of side AD? Explain your reasoning."
+          ]
+        }
+      },
+      {
+        "id": "-6wzAUG20220136pM",
+        "title": "Similar rectangles with an unknown side length",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_3_2_WI_24_Q1_500w.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "4cm. Side AD corresponds to side EH, and side CD corresponds to side EF."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "-6wzAUG20220137pM",
+        "title": "Sample diagram using scale factor to find an unknown side length",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-2_What_If_Situation_A_1.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation B. Similar Triangles</h3>These two triangles are similar. Find all the missing side lengths and angles. Explain your reasoning."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "The scale factor from one figure to the other is 7.5 ÷ 6, or 1.25. Side DF is 3.75 cm since 3 × 1.25 is 3.75. Side FE is 6.25 cm (5 × 1.25 = 6.25). Because the triangles are similar, the corresponding angle measures are the same. So, the measure of angle F is 94°. Angle B and corresponding angle E are each 30° since 180 – (94 + 56) = 30. Note: Students will need to use the fact that the sum of the interior angles of a triangle is 180°."
+          ]
+        }
+      },
+      {
+        "id": "-6wzAUG202201df38pM",
+        "title": "Similar triangles with unknown side lengths and angles",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_3_2_WI_25_Q2_500w.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "-6wzAUG20220138pM",
+        "title": "Sample diagram using scale factor to find unknown side lengths and angles",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-2_What_If_Situation_B_2.jpg"
+        }
+      }
+    ]
+  },
+  "supports": [
+    {
+      "text": "Can using corresponding sides help?"
+    },
+    {
+      "text": "Can using corresponding angles help?"
+    },
+    {
+      "text": "What is the scale factor from one shape to the other?"
+    }
+  ]
+}

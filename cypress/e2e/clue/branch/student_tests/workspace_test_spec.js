@@ -52,6 +52,7 @@ context('Test the overall workspace', function () {
       cy.get('.nav-tab-panel').should('exist');
     });
     // TODO: Changes in new document add feature.
+    // FIXME: The test is failing looking for the selected class
     it('will verify canvases do not persist between problems', function () {
       let problem1 = '1',
         problem2 = '2.1';
@@ -75,6 +76,7 @@ context('Test the overall workspace', function () {
       cy.visit('?appMode=qa&fakeClass=5&fakeUser=student:1&qaGroup=1&problem=' + problem1);
       cy.waitForLoad();
       // cy.wait(2000);
+      textToolTile.getTextTile().click();
       textToolTile.getTextTile().last().should('contain', 'Problem ' + problem1);
       clueCanvas.deleteTile('text');//clean up
     });

@@ -10,7 +10,8 @@ import { TileContentModel } from "../../models/tiles/tile-content";
 import {
   addAttributeToDataSet, addCanonicalCasesToDataSet, addCasesToDataSet, DataSet
 } from "../../models/data/data-set";
-import { SharedDataSet, SharedDataSetType } from "../../models/shared/shared-data-set";
+import { kSharedDataSetType, SharedDataSet, SharedDataSetType } from "../../models/shared/shared-data-set";
+import { updateSharedDataSetColors } from "../../models/shared/shared-data-set-colors";
 import { SharedModelType } from "../../models/shared/shared-model";
 import { uniqueId, uniqueTitle } from "../../utilities/js-utils";
 
@@ -32,7 +33,8 @@ export const DataCardContentModel = TileContentModel
   .named("DataCardTool")
   .props({
     type: types.optional(types.literal(kDataCardTileType), kDataCardTileType),
-    caseIndex: 0
+    caseIndex: 0,
+    selectedSortAttributeId: types.maybe(types.string)
   })
   .volatile(self => ({
     metadata: undefined as any as ITileMetadataModel,
@@ -114,11 +116,16 @@ export const DataCardContentModel = TileContentModel
       });
       return attributesWithValues === 0;
     },
+    caseIdsFromAttributeValue(attrId: string, value: string){
+      const allCases = this.allCases();
+      const foundCases: string[] = [];
+      allCases.forEach((c) => c && c[attrId] === value && foundCases.push(c.__id__));
+      return foundCases;
+    },
     exportJson(options?: ITileExportOptions){
-      this.allAttributesJsonString();
       return [
         `{`,
-        `  "type": "DataCard",`,
+        `  "type": "DataCard"`,
         `}`
       ].join("\n");
     }
@@ -169,6 +176,10 @@ export const DataCardContentModel = TileContentModel
           // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, sharedDataSet);
         }
+
+        // update the colors
+        const dataSets = sharedModelManager.getSharedModelsByType(kSharedDataSetType) as SharedDataSetType[];
+        updateSharedDataSetColors(dataSets);
       },
       {name: "sharedModelSetup", fireImmediately: true}));
     },
@@ -185,6 +196,10 @@ export const DataCardContentModel = TileContentModel
       withoutUndo();
       self.caseIndex = caseIndex;
     },
+    setSelectedSortAttributeId(attrId: string){
+      withoutUndo();
+      self.selectedSortAttributeId = attrId;
+    },
     setAttName(attrId: string, name: string){
      self.dataSet.setAttributeName(attrId, name);
     },
@@ -193,9 +208,13 @@ export const DataCardContentModel = TileContentModel
         { __id__: caseId, [attrId]: val }
       ]);
     },
-    addNewCaseFromAttrKeys(atts: string[]){
+    addNewCaseFromAttrKeys(atts: string[], beforeId?: string ){
       const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
-      addCanonicalCasesToDataSet(self.dataSet, [obj]);
+      if (beforeId){
+        addCanonicalCasesToDataSet(self.dataSet, [obj], beforeId);
+      } else {
+        addCanonicalCasesToDataSet(self.dataSet, [obj]);
+      }
     },
     addNewAttr(){
       self.dataSet.addAttributeWithID({

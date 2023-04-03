@@ -69,8 +69,10 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   };
   const insertVariable = (variable: VariableType, x?: number, y?: number) => insertVariables([variable], x, y);
 
-  const [showNewVariableDialog] =
-    useNewVariableDialog({ addVariable: insertVariable, sharedModel: content.sharedModel as SharedVariablesType });
+  const [showNewVariableDialog] = useNewVariableDialog({
+    addVariable: insertVariable,
+    sharedModel: content.sharedModel as SharedVariablesType
+  });
 
   const { selfVariables, otherVariables, unusedVariables } = variableBuckets(content, content.sharedModel);
   const [showInsertVariableDialog] = useInsertVariableDialog({
@@ -98,12 +100,13 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
         const clientX = pointerEvent.clientX + event.delta.x;
         const clientY = pointerEvent.clientY + event.delta.y;
         const position = diagramHelper?.convertClientToDiagramPosition({x: clientX, y: clientY});
-        const x = position.x;
-        const y = position.y;
+        const { x, y } = position;
 
         const variable = Variable.create({});
-        content.sharedModel?.addVariable(variable);
-        insertVariable(variable, x, y);
+        content.sharedModel?.addAndInsertVariable(
+          variable,
+          (v: VariableType) => insertVariable(variable, x, y)
+        );
       }
     }
   });

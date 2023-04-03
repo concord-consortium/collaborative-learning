@@ -1,3 +1,4 @@
+import stringify from "json-stringify-pretty-compact";
 import { cloneDeep, each } from "lodash";
 import { types, getSnapshot, Instance, SnapshotIn, getType, getEnv } from "mobx-state-tree";
 import {
@@ -13,6 +14,7 @@ import {
   IDropRowInfo, TileRowModel, TileRowModelType, TileRowSnapshotType, TileRowSnapshotOutType, TileLayoutModelType
 } from "../document/tile-row";
 import { migrateSnapshot } from "./document-content-import";
+import { isImportDocument } from "./document-content-import-types";
 import { IDocumentEnvironment } from "./document-environment";
 import { logTileCopyEvent } from "../tiles/log/log-tile-copy-event";
 import { logTileDocumentEvent } from "../tiles/log/log-tile-document-event";
@@ -21,7 +23,6 @@ import { safeJsonParse, uniqueId } from "../../utilities/js-utils";
 import { comma, StringBuilder } from "../../utilities/string-builder";
 import { SharedModel, SharedModelType } from "../shared/shared-model";
 import { SharedModelUnion } from "../shared/shared-model-manager";
-
 export interface IDocumentAddTileOptions {
   title?: string;
   addSidecarNotes?: boolean;
@@ -77,7 +78,14 @@ export const SharedModelEntry = types.model("SharedModelEntry", {
     self.tiles.remove(tile);
   }
 }));
-export type SharedModelEntryType = Instance<typeof SharedModelEntry>;
+export interface SharedModelEntryType extends Instance<typeof SharedModelEntry> {}
+
+export interface IDragTilesData {
+  sourceDocId: string;
+  tiles: IDragTileItem[];
+  // TODO: should really be something like SharedModelEntry snapshots
+  sharedModels: SharedModelType[];
+}
 
 export const DocumentContentModel = types
   .model("DocumentContent", {
@@ -88,9 +96,7 @@ export const DocumentContentModel = types
     sharedModelMap: types.map(SharedModelEntry),
   })
   .preProcessSnapshot(snapshot => {
-    return snapshot && (snapshot as any).tiles
-            ? migrateSnapshot(snapshot)
-            : snapshot;
+    return isImportDocument(snapshot) ? migrateSnapshot(snapshot) : snapshot;
   })
   .volatile(self => ({
     visibleRows: [] as string[],
@@ -255,6 +261,17 @@ export const DocumentContentModel = types
       getSharedModelsByType<IT extends typeof SharedModel>(type: string): IT["Type"][] {
         const sharedModelEntries = Array.from(self.sharedModelMap.values());
         return sharedModelEntries.map(entry => entry.sharedModel).filter(model => model.type === type);
+      },
+      getSharedModelsUsedByTiles(tileIds: string[]) {
+        const sharedModels: Record<string, SharedModelEntryType> = {};
+        Array.from(self.sharedModelMap.values()).forEach(sharedModel => {
+          sharedModel.tiles.forEach(tile => {
+            if (tileIds.includes(tile.id)) {
+              sharedModels[sharedModel.sharedModel.id] = sharedModel;
+            }
+          });
+        });
+        return sharedModels;
       }
     };
   })
@@ -324,7 +341,7 @@ export const DocumentContentModel = types
       const tile = self.getTile(tileInfo.tileId);
       const json = tile?.exportJson(tileOptions);
       if (json) {
-        return json.concat(comma(!!options?.appendComma));
+        return json;
       }
     }
   }))
@@ -359,19 +376,14 @@ export const DocumentContentModel = types
       });
       return counts;
     },
-    exportAsJson(options?: IDocumentExportOptions) {
+    exportRowsAsJson(rows: (TileRowModelType | undefined)[], options?: IDocumentExportOptions) {
       const builder = new StringBuilder();
       builder.pushLine("{");
       builder.pushLine(`"tiles": [`, 2);
 
-      // identify rows with exportable tiles
-      const rowsToExport = self.rowOrder.map(rowId => {
-        const row = self.getRow(rowId);
-        return row && !row.isSectionHeader && !row.isEmpty && !self.isPlaceholderRow(row) ? row : undefined;
-      }).filter(row => !!row);
-
-      const exportRowCount = rowsToExport.length;
-      rowsToExport.forEach((row, rowIndex) => {
+      const includedTileIds: string[] = [];
+      const exportRowCount = rows.length;
+      rows.forEach((row, rowIndex) => {
         const isLastRow = rowIndex === exportRowCount - 1;
         // export each exportable tile
         const tileExports = row?.tiles.map((tileInfo, tileIndex) => {
@@ -379,6 +391,7 @@ export const DocumentContentModel = types
           const showComma = row.tiles.length > 1 ? !isLastTile : !isLastRow;
           const rowHeight = self.rowHeightToExport(row, tileInfo.tileId);
           const rowHeightOption = rowHeight ? { rowHeight } : undefined;
+          includedTileIds.push(tileInfo.tileId);
           return self.exportTileAsJson(tileInfo, { ...options, appendComma: showComma, ...rowHeightOption });
         }).filter(json => !!json);
         if (tileExports?.length) {
@@ -396,10 +409,65 @@ export const DocumentContentModel = types
           }
         }
       });
+      const sharedModels = Object.values(self.getSharedModelsUsedByTiles(includedTileIds));
 
-      builder.pushLine("]", 2);
+      const tilesComma = sharedModels.length > 0 ? "," : "";
+      builder.pushLine(`]${tilesComma}`, 2);
+
+      if (sharedModels.length > 0) {
+        builder.pushLine(`"sharedModels": [`, 2);
+        sharedModels.forEach((sharedModel, index) => {
+          const sharedModelLines = stringify(sharedModel).split("\n");
+          sharedModelLines.forEach((sharedModelLine, lineIndex) => {
+            const lineComma =
+              lineIndex === sharedModelLines.length - 1 && index < sharedModels.length - 1
+              ? "," : "";
+            builder.pushLine(`${sharedModelLine}${lineComma}`, 4);
+          });
+        });
+        builder.pushLine("]", 2);
+      }
+
       builder.pushLine("}");
       return builder.build();
+    }
+  }))
+  .views(self => ({
+    exportAsJson(options?: IDocumentExportOptions) {
+      // identify rows with exportable tiles
+      const rowsToExport = self.rowOrder.map(rowId => {
+        const row = self.getRow(rowId);
+        return row && !row.isSectionHeader && !row.isEmpty && !self.isPlaceholderRow(row) ? row : undefined;
+      }).filter(row => !!row);
+
+      return self.exportRowsAsJson(rowsToExport, options);
+    },
+    exportSectionsAsJson(options?: IDocumentExportOptions) {
+      const sections: Record<string, string> = {};
+      let section = "";
+      let rows: (TileRowModelType | undefined)[] = [];
+
+      self.rowOrder.forEach(rowId => {
+        const row = self.getRow(rowId);
+        if (row) {
+          if (row.isSectionHeader) {
+            if (section !== "") {
+              // We've finished the last section
+              sections[section] = self.exportRowsAsJson(rows.filter(r => !!r), options);
+            }
+            section = row.sectionId ?? "unknown";
+            rows = [];
+          } else if (!row.isEmpty && !self.isPlaceholderRow(row)) {
+            rows.push(row);
+          }
+        }
+      });
+      if (section !== "") {
+        // Save the final section
+        sections[section] = self.exportRowsAsJson(rows.filter(r => !!r), options);
+      }
+
+      return sections;
     }
   }))
   .views(self => ({
@@ -918,6 +986,48 @@ export const DocumentContentModel = types
         }
       });
       return results;
+    },
+    userCopySingleTileWithSharedModel(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
+      const { tiles, sharedModels } = dragTiles;
+      const results = this.userCopyTiles(tiles, rowInfo);
+      results.forEach((result, i) => {
+        const newSharedModelId = sharedModels[0].id;
+        // TODO: fix types -- should be SharedModelEntry
+        const pckg = {
+          sharedModel: sharedModels[0],
+          tiles: [result?.tileId]
+        };
+        self.sharedModelMap.set(newSharedModelId, pckg as any);
+        // "copy" is already logged above
+      });
+    },
+    handleDragCopyTiles(dragTiles: IDragTilesData, rowInfo: IDropRowInfo) {
+      const { tiles, sharedModels } = dragTiles;
+      // if this is not dragging any sharedData, proceed as usual
+      if (!sharedModels.length) {
+        this.userCopyTiles(tiles, rowInfo);
+      }
+
+      // For now only handle shared data if tile is new to destination, and is paired 1:1 with a sharedModel
+      else if (sharedModels.length === 1) {
+        const existingProviderIds = self.getSharedModelsByType("SharedDataSet").map((sm) => {
+          return (sm as any).providerId;
+        });
+        const incomingProviderId = (sharedModels[0] as any).providerId;
+        const tileAlreadyCopied = existingProviderIds.includes(incomingProviderId);
+
+        if (tileAlreadyCopied) return console.warn("not handling new drags of same tile");
+        if (tiles.length > 1) return console.warn("not handling multiple tiles in a drag of shared data");
+
+        // this is a drag with a sharedModel we can currently handle
+        if (!tileAlreadyCopied && tiles.length === 1) {
+          this.userCopySingleTileWithSharedModel(dragTiles, rowInfo);
+        }
+      }
+
+      else {
+        return console.warn("not handling multiple incoming sharedModels in drag");
+      }
     }
   }))
   .actions(self => ({
@@ -933,6 +1043,11 @@ export const DocumentContentModel = types
 
       return sharedModelEntry;
     },
+    addSharedModelFromImport(id: string, sharedModelEntry: SharedModelEntryType){
+      if (self.sharedModelMap){
+        self.sharedModelMap.set(id, sharedModelEntry);
+      }
+    }
 
   }));
 

@@ -603,7 +603,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private postSerialModal(){
-    const lastMsg = localStorage.getItem('last-connect-message');
+    const lastMsg = localStorage.getItem("last-connect-message");
 
     let alertMessage = "";
 

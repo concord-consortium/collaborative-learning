@@ -7,11 +7,16 @@ class TextToolTile {
     }
     enterText(text){
         this.getTextTile().last().focus();
-        this.getTextEditor().last().type(text);
+        this.getTextEditor().last().click().type(text);
         // This doesn't guarantee the text has been saved to firebase. It would be best
         // if there was a way to tell if it has been saved perhaps by some saving indicator
         // in the UI. Or reaching into app to find some saving state.
         // In the meantime a short wait is added to decrease the chances this might happen
+        cy.wait(300);
+    }
+    enterAdditionalText(text){
+        this.getTextTile().last().focus();    
+        this.getTextEditor().last().type('{moveToEnd}'+text);
         cy.wait(300);
     }
 
@@ -24,6 +29,15 @@ class TextToolTile {
         // Note that the title is dynamic based on the OS sometimes it has Cmd- and
         // sometimes Ctrl-
         cy.get(`.primary-workspace .text-toolbar [data-original-title^="${titlePrefix}"]`).click();
+    }
+    getVariableChip() {
+      return cy.get('.primary-workspace [data-testid=ccrte-editor] .slate-variable-chip .variable-chip');
+    }
+    getTextToolInsertVariable(){
+        return cy.get('.primary-workspace .text-toolbar [data-original-title="Insert Variable"]');
+    }
+    getTextToolNewVariable(){
+        return cy.get('.primary-workspace .text-toolbar [data-original-title="New Variable"]');
     }
 }
 export default TextToolTile;

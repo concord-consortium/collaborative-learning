@@ -83,15 +83,23 @@ export const useDataSet = ({
 
   const hasLinkableRows = getContent().hasLinkableCases(dataSet);
 
-  const formatter = useNumberFormat();
-  const onRowsChange = (_rows: TRow[]) => {
-    // for now, assume that all changes are single cell edits
+  const getUpdatedRowAndColumn = (_rows?: TRow[], _columns?: TColumn[]) => {
+    const rs = _rows ?? rows;
+    const cs = _columns ?? columns;
     const selectedCellRowIndex = selectedCell.current?.rowIdx;
     const selectedCellColIndex = selectedCell.current?.idx;
     const updatedRow = (selectedCellRowIndex != null) && (selectedCellRowIndex >= 0)
-                        ? _rows[selectedCellRowIndex] : undefined;
+                        ? rs[selectedCellRowIndex] : undefined;
     const updatedColumn = (selectedCellColIndex != null) && (selectedCellColIndex >= 0)
-                            ? columns[selectedCellColIndex] : undefined;
+                            ? cs[selectedCellColIndex] : undefined;
+    return { selectedCellRowIndex, selectedCellColIndex, updatedRow, updatedColumn };
+
+  };
+
+  const formatter = useNumberFormat();
+  const onRowsChange = (_rows: TRow[]) => {
+    // for now, assume that all changes are single cell edits
+    const { selectedCellRowIndex, updatedRow, updatedColumn } = getUpdatedRowAndColumn(_rows);
     if (!readOnly && updatedRow && updatedColumn) {
       const originalValue = dataSet.getValue(updatedRow.__id__, updatedColumn.key);
       const originalStrValue = formatValue(formatter, originalValue);
@@ -112,10 +120,23 @@ export const useDataSet = ({
       }
     }
   };
+
+  const deleteSelected = () => {
+    const { updatedRow, updatedColumn } = getUpdatedRowAndColumn();
+    if (!readOnly && updatedRow && updatedColumn) {
+      const updatedCaseValues: ICase = {
+        __id__: updatedRow.__id__,
+        [updatedColumn.key]: ""
+      };
+      onUpdateRow(updatedCaseValues);
+    }
+  };
+
   const handleColumnResize = useCallback((idx: number, width: number, complete?: boolean) => {
     const returnVal = onColumnResize(idx, width, complete || false);
     triggerColumnChange();
     return returnVal;
   }, [onColumnResize, triggerColumnChange]);
-  return { hasLinkableRows, onColumnResize: handleColumnResize, onRowsChange, onSelectedCellChange};
+  
+  return { hasLinkableRows, onColumnResize: handleColumnResize, onRowsChange, deleteSelected, onSelectedCellChange};
 };

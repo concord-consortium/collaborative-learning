@@ -1,10 +1,11 @@
-import { types, Instance, SnapshotIn, clone, getSnapshot, flow } from "mobx-state-tree";
+import { types, Instance, SnapshotIn, clone, getSnapshot, flow, IMSTMap, ISimpleType } from "mobx-state-tree";
 import {
   getImageDimensions, IImageDimensions, ISimpleImage, isPlaceholderImage, storeCorsImage, storeFileImage, storeImage
 } from "../utilities/image-utils";
-import { getAssetUrl } from "../utilities/asset-utils";
 import { DB } from "../lib/db";
+import { DEBUG_IMAGES } from "../lib/debug";
 import placeholderImage from "../assets/image_placeholder.png";
+import { getAssetUrl } from "../utilities/asset-utils";
 
 export const kExternalUrlHandlerName = "externalUrl";
 export const kLocalAssetsHandlerName = "localAssets";
@@ -38,7 +39,7 @@ export interface IImageContext {
 export interface IImageBaseOptions {
   filename?: string;
 }
-export interface IImageHandlerStoreOptions extends IImageBaseOptions{
+export interface IImageHandlerStoreOptions extends IImageBaseOptions {
   db?: DB;
 }
 export interface IImageHandlerStoreResult {
@@ -47,7 +48,12 @@ export interface IImageHandlerStoreResult {
   displayUrl?: string;
   success: boolean;
 }
+interface IImageMap {
+  unitCodeMap?: IMSTMap<ISimpleType<string>>;
+  curriculumUrl?: string;
+}
 export interface IImageHandler {
+  imageMap: IImageMap;
   name: string;
   priority: number;
   match: (url: string) => boolean;
@@ -58,7 +64,9 @@ export type ImageListenerMap = Record<string, Record<string, () => void>>;
 
 export const ImageMapModel = types
   .model("ImageMap", {
-    images: types.map(ImageMapEntry)
+    images: types.map(ImageMapEntry),
+    unitCodeMap: types.maybe(types.map(types.string)),
+    unitUrl: types.maybe(types.string)
   })
   .volatile(self => ({
     handlers: [] as IImageHandler[],
@@ -85,10 +93,15 @@ export const ImageMapModel = types
     },
     getCachedImage(url?: string) {
       return url ? self.images.get(url) : undefined;
+    },
+    get curriculumUrl() {
+      if (!self.unitUrl) return;
+      return (new URL("../", self.unitUrl)).href;
     }
   }))
   .actions(self => ({
     registerHandler(handler: IImageHandler) {
+      handler.imageMap = self;
       self.handlers.push(handler);
       self.handlers.sort((a, b) => {
         return (b.priority || 0) - (a.priority || 0);
@@ -127,6 +140,12 @@ export const ImageMapModel = types
         self.images.set(entry.contentUrl, getSnapshot(entry));
       }
     },
+    setUnitUrl(url: string) {
+      self.unitUrl = url;
+    },
+    setUnitCodeMap(map: any) {
+      self.unitCodeMap = map;
+    }
   }))
   .actions(self => ({
     // Flows are the recommended way to deal with async actions in MobX and MobX State Tree.
@@ -246,7 +265,10 @@ export const ImageMapModel = types
     return {
       afterCreate() {
         // placeholder doesn't have contentUrl
-        self._addImage(placeholderImage, { displayUrl: placeholderImage, success: true });
+        self._addImage(
+          placeholderImage,
+          { displayUrl: placeholderImage, success: true }
+        );
 
         self.registerHandler(firebaseRealTimeDBImagesHandler);
         self.registerHandler(firebaseStorageImagesHandler);
@@ -270,8 +292,11 @@ export const ImageMapModel = types
         return self._addImage(entry.contentUrl!, entry);
       }),
 
-      _storeAndAddImage: flow(function* (url: string, handler: IImageHandler, options?: IImageBaseOptions)
-                       : Generator<PromiseLike<any>, ImageMapEntryType | Promise<ImageMapEntryType>, unknown> {
+      _storeAndAddImage: flow(function* (
+          url: string,
+          handler: IImageHandler,
+          options?: IImageBaseOptions
+        ): Generator<PromiseLike<any>, ImageMapEntryType | Promise<ImageMapEntryType>, unknown> {
         const storeResult = (yield handler.store(url, { db: _db, ...options })) as IImageHandlerStoreResult;
         return self._addImage(url, storeResult);
       }),
@@ -345,7 +370,6 @@ export const ImageMapModel = types
       self.getImage(url, options);
       return self.getCachedImage(url);
     }
-
   }));
 
 export type ImageMapModelType = Instance<typeof ImageMapModel>;
@@ -392,17 +416,18 @@ export const externalUrlImagesHandler: IImageHandler = {
             success: true  };
         }
       } catch (error) {
-          // If the silent upload has failed, do we retain the full url or
-          // encourage the user to download a copy and re-upload?
-          // For now, return the original image url.
-          return { contentUrl: url, displayUrl: url, success: true  };
+        // If the silent upload has failed, do we retain the full url or
+        // encourage the user to download a copy and re-upload?
+        // For now, return the original image url.
+        return { contentUrl: url, displayUrl: url, success: true };
       }
     }
     else {
       // For now, return the original image url.
-      return { contentUrl: url, displayUrl: url, success: true  };
+      return { contentUrl: url, displayUrl: url, success: true };
     }
-  }
+  },
+  imageMap: {}
 };
 
 /*
@@ -413,17 +438,39 @@ export const localAssetsImagesHandler: IImageHandler = {
   priority: 2,
 
   match(url: string) {
-    return url ? url.startsWith("assets/") || url.startsWith("curriculum/") : false;
+           // don't match values with a protocol or port specified
+    return !/:/.test(url) &&
+           // or legacy firebase storage references
+           !/^\/.+\/portals\/.+$/.test(url) &&
+           // make sure there's at least one slash
+           /\//.test(url) &&
+           // make sure value ends with a file extension
+           /\.[a-z0-9]+$/i.test(url);
   },
 
-  async store(url: string) {
-                    // convert original curriculum image paths
-    const _url = url.replace("assets/curriculum", "curriculum")
-                    // convert original drawing tool stamp paths
-                    .replace("assets/tools/drawing-tool/stamps",
-                             "curriculum/moving-straight-ahead/stamps");
-    return { contentUrl: _url, displayUrl: getAssetUrl(_url), success: true  };
-  }
+  async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
+    // Legacy curriculum units lived in the defunct "curriculum" directory in subfolders
+    // named after the unit title, e.g. "curriculum/stretching-and-shrinking". References
+    // to files in those directories need to be converted to use the new file structure
+    // where the unit code is the directory name, e.g. "sas".
+    const urlPieces = url.match(/curriculum\/([^/]+)\/(.*)/);
+    let _url = url;
+    if (urlPieces && this.imageMap.unitCodeMap) {
+      const urlUnitDir = urlPieces[1];
+      const newUnitDir = this.imageMap.unitCodeMap.get(urlUnitDir);
+      _url = `${newUnitDir}/${urlPieces[2]}`;
+    }
+    // We also need to convert legacy drawing tool stamp paths
+    _url = _url.replace("assets/tools/drawing-tool/stamps", "msa/stamps");
+
+    // If curriculumUrl is defined and the image isn't in CLUE's own assets directory,
+    // build an absolute URL for the displayUrl.
+    const displayUrl = this.imageMap.curriculumUrl && !/^assets\//.test(_url)
+                         ? new URL(_url, this.imageMap.curriculumUrl).href
+                         : getAssetUrl(_url);
+    return { filename: options?.filename, contentUrl: _url, displayUrl, success: true };
+  },
+  imageMap: {}
 };
 
 /*
@@ -447,8 +494,8 @@ export const firebaseStorageImagesHandler: IImageHandler = {
 
   match(url: string) {
     return url.startsWith(kFirebaseStorageUrlPrefix) ||
-                          // original firebase storage path reference
-                          /^\/.+\/portals\/.+$/.test(url);
+      // original firebase storage path reference
+      /^\/.+\/portals\/.+$/.test(url);
   },
 
   async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
@@ -482,7 +529,8 @@ export const firebaseStorageImagesHandler: IImageHandler = {
     else {
       return kErrorStorageResult;
     }
-  }
+  },
+  imageMap: {}
 };
 
 /*
@@ -520,7 +568,7 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
 
   match(url: string) {
     return url.startsWith(kFirebaseRTDBFauxUrlPrefix) ||
-          (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
+      (url.startsWith(`${kCCImageScheme}://`) && (url.indexOf("concord.org") < 0));
   },
 
   async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
@@ -531,23 +579,29 @@ export const firebaseRealTimeDBImagesHandler: IImageHandler = {
       // In theory we could direct all firebase image requests to the cloud function,
       // but only cross-class supports require the use of the cloud function.
       const blobUrl = classHash !== db.stores.user.classHash
-                            ? await db.getCloudImageBlob(normalized)
-                            : await db.getImageBlob(imageKey);
+        ? await db.getCloudImageBlob(normalized)
+        : await db.getImageBlob(imageKey);
       return blobUrl
-             ? { filename: options?.filename, contentUrl: normalized, displayUrl: blobUrl,
-                 success: true }
-             // Note: we used to return an empty image entry here. This used to cause
-             // problems with some code that would then try to load the original url which
-             // might be a ccimg: url.
-             // This empty entry seems to also be expected by jxg-image which was testing
-             // for falsey displayUrl. It has been updated to also check the status of the
-             // entry
-             : kErrorStorageResult;
+        ? {
+          filename: options?.filename, contentUrl: normalized, displayUrl: blobUrl,
+          success: true
+        }
+        // Note: we used to return an empty image entry here. This used to cause
+        // problems with some code that would then try to load the original url which
+        // might be a ccimg: url.
+        // This empty entry seems to also be expected by jxg-image which was testing
+        // for falsey displayUrl. It has been updated to also check the status of the
+        // entry
+        : kErrorStorageResult;
     }
     else {
       return kErrorStorageResult;
     }
-  }
+  },
+  imageMap: {}
 };
 
 export const gImageMap = ImageMapModel.create();
+if (DEBUG_IMAGES) {
+  (window as any).imageMap = gImageMap;
+}

@@ -43,6 +43,7 @@ Cypress.Commands.add("setupGroup", (students, group) => {
         cy.visit('?appMode=qa&qaGroup='+group+'&fakeClass='+qaClass+'&fakeUser=student:'+students[i]+'&problem='+problem);
         // These checks are here to make sure the workspace has loaded enough to create
         // the student
+        cy.waitForLoad();
         header.getGroupName().should('contain','Group '+group);
         header.getGroupMembers().find('div.member').should('contain','S'+students[i]);
     }
@@ -230,4 +231,7 @@ Cypress.Commands.add('unlinkTableToGraph', (table, graph) => {
     cy.get('[data-test=link-graph-select]').select(graph);
     cy.get('button').contains('Unlink').click();
   });
+});
+Cypress.Commands.add("deleteDocumentThumbnail", (tab, section,title) => { 
+  cy.get('.'+tab+' .list.'+section+' [data-test='+section+'-list-items] .footer .icon-delete-document').eq(1).click({force:true});
 });

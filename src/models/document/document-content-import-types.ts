@@ -7,6 +7,7 @@
  */
 
 import { DisplayUserType } from "../stores/user-types";
+import { SharedModelEntryType } from "./document-content";
 
 // authored content is converted to current content on the fly
 export interface IAuthoredBaseTileContent {
@@ -53,3 +54,12 @@ export function isOriginalAuthoredTileModel(tile: OriginalTileModel): tile is Or
 }
 
 export type OriginalTilesSnapshot = Array<OriginalTileModel | OriginalTileModel[]>;
+
+export interface IDocumentImportSnapshot {
+  sharedModels?: SharedModelEntryType[];
+  tiles: OriginalTilesSnapshot;
+}
+
+export function isImportDocument(snap: any): snap is IDocumentImportSnapshot {
+  return snap?.tiles != null;
+}

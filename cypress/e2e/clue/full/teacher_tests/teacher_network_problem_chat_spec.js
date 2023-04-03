@@ -34,7 +34,8 @@ const clueTeacher2 = {
 };
 
 describe('Teachers can communicate back and forth in chat panel', () => {
-  it("verify teacher1 can add comments in Problem tab documents and tiles", ()=> {
+  // TODO: Re-instate the skipped tests below once learn.staging.concord.org is fully functional again
+  it.skip("verify teacher1 can add comments in Problem tab documents and tiles", ()=> {
     chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
@@ -47,7 +48,7 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     cy.wait(1000);
     chatPanel.addCommentAndVerify("This is a teacher1 problem tile comment");
   });
-  it("verify teacher2 can view teacher1's comments and add more comments in Problem tab", () => {
+  it.skip("verify teacher2 can view teacher1's comments and add more comments in Problem tab", () => {
     chatPanel.openTeacherChat(portalUrl, clueTeacher2, reportUrl2);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
@@ -63,7 +64,7 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     chatPanel.verifyCommentThreadContains("This is a teacher1 problem tile comment");
     chatPanel.addCommentAndVerify("This is a teacher2 problem tile comment");
   });
-  it("verify teacher1 can view teacher2's comments in Problem tab", () => {
+  it.skip("verify teacher1 can view teacher2's comments in Problem tab", () => {
     chatPanel.openTeacherChat(portalUrl, clueTeacher1, reportUrl1);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");
@@ -78,7 +79,7 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     chatPanel.verifyCommentThreadContains("This is a teacher2 problem tile comment");
   });
     //TODO: verify delete is disabled for now until work is merged to master, but keep the delete to clean up chat space
-  it('verify teacher1 can only delete own comments', () => {
+  it.skip('verify teacher1 can only delete own comments', () => {
     cy.get(".user-name").contains("Tejal Teacher2").siblings("[data-testid=delete-message-button]").should("not.exist");
     cy.get(".user-name").contains("Tejal Teacher1").siblings("[data-testid=delete-message-button]").click();
     cy.get(".confirm-delete-alert button").contains("Delete").click();
@@ -89,7 +90,7 @@ describe('Teachers can communicate back and forth in chat panel', () => {
     cy.get(".confirm-delete-alert button").contains("Delete").click();
     // chatPanel.getCommentFromThread().should("not.contain", "This is a teacher1 problem document comment");
   });
-  it('verify teacher2 does not see teacher1 deleted comments', () => {
+  it.skip('verify teacher2 does not see teacher1 deleted comments', () => {
     chatPanel.openTeacherChat(portalUrl, clueTeacher2, reportUrl2);
     cy.openTopTab("problems");
     cy.openProblemSection("Introduction");

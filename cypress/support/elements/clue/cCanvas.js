@@ -3,6 +3,7 @@ import ImageToolTile from './ImageToolTile';
 import DrawToolTile from './DrawToolTile';
 import TextToolTile from './TextToolTile';
 import TableToolTile from './TableToolTile';
+import DiagramToolTile from './DiagramToolTile';
 import Canvas from '../common/Canvas';
 import Dialog from '../common/Dialog';
 
@@ -11,6 +12,7 @@ let graphToolTile = new GraphToolTile,
     drawToolTile = new DrawToolTile,
     textToolTile = new TextToolTile,
     tableToolTile = new TableToolTile,
+    diagramToolTile = new DiagramToolTile,
     canvas = new Canvas,
     dialog = new Dialog;
 
@@ -222,7 +224,7 @@ class ClueCanvas {
       switch (tileType) {
           case 'text':
               textToolTile.getTextTile().last().focus();
-              tileElement = cy.get('.text-tool-wrapper').parent();
+              tileElement = cy.get('.text-tool-wrapper').last().click({ force: true }).parent();
               break;
           case 'graph':
               tileElement = graphToolTile.getGraphTile().last().click({ force: true }).parent();
@@ -237,6 +239,9 @@ class ClueCanvas {
           case 'table':
               tileElement = tableToolTile.getTableTile().last().click({ force: true }).parent();
               break;
+          case 'geometry':
+              tileElement = graphToolTile.getGraphTile().last().click({ force: true }).parent();
+              break;  
       }
       tileElement.should('have.class','selected');
     }
@@ -304,6 +309,20 @@ class ClueCanvas {
      linkIconEl(){
          return '[data-test="link-indicator-icon"]';
      }
+     getUndoTool() {
+        return cy.get('.tool.undo');
+     }
+     getRedoTool() {
+        return cy.get('.tool.redo');
+     }
+     publishDoc(button) {
+        this.getPublishTeacherDocument().click();
+        dialog.getModalTitle().should('be.visible').and('contain', 'Publish');
+        dialog.getModalButton().contains(button).click();
+        dialog.getDialogTitle().should('exist').contains('Published');
+        dialog.getDialogOKButton().click();
+        dialog.getDialogTitle().should('not.exist');
+    }
 }
 
 export default ClueCanvas;

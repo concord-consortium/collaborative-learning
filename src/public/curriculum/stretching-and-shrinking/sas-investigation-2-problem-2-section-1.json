@@ -1,0 +1,340 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Zack experiments with multiplying Mug’s coordinates by different whole numbers to make other characters. Marta asks her uncle how multiplying the coordinates by a decimal or adding numbers to or subtracting numbers from each coordinate will affect Mug’s shape. He gives her a sketch for a new shape (a hat for Mug) and some rules to investigate."
+          ]
+        }
+      },
+      {
+        "id": "-6wzAUG20220914AM",
+        "title": "Mug’s hat",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_2_2_In_15_mug_hat_500w.png"
+        }
+      },
+      {
+        "id": "21AUG20220518PM",
+        "title": "Mug's Hat",
+        "layout": {
+          "height": 200
+        },
+        "content": {
+          "type": "Geometry",
+          "board": {
+            "properties": {
+              "axisMin": [-1, -1],
+              "axisRange": [15, 15]
+            }
+          },
+          "objects": [
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [1, 1],
+                  "properties": {
+                    "name": "A"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [9, 1],
+                  "properties": {
+                    "name": "B"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [6, 2],
+                  "properties": {
+                    "name": "C"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [6, 3],
+                  "properties": {
+                    "name": "D"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [4, 3],
+                  "properties": {
+                    "name": "E"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [4, 2],
+                  "properties": {
+                    "name": "F"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "id": "-6wzAUG20220915AM",
+        "title": "Rules for transforming Mug’s hat",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_2_2_In_16_rules_mug_hat_500w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li> Look at each rule and predict what will happen to the hat with each rule.</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Students’ predictions will vary. At this time, many students may not have connected the stretching and shrinking to a multiplicative relationship. They may predict that adding will make a shape enlarge and subtracting will make a shape shrink. If so, students may predict that Hat 1 and Hat 5 will look the same."
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li> Test each rule. How does your result compare with your prediction? </li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Answers will vary. Predictions may or may not have matched what happened to the shapes.",
+            "* Hat 1 will move 2 units to the right and 3 units up without changing its size or shape. (congruent and similar)",
+            "* Hat 2 will move 1 unit left and 4 units up, also without changing its size or shape. (congruent and similar)",
+            "* Hat 3 will be located 2 units to the right, and it will be 3 times as high (stretched vertically and not similar)",
+            "* Hat 4 will shrink vertically and horizontally by the same factor: 0.5. It keeps the same shape. Each length will be half of the original corresponding length. (similar)",
+            "* Hat 5 will be stretched vertically by the factor of 2, and horizontally by the factor of 3. (not similar)",
+            "* Hats 1, 2, and 4 are similar to Mug’s Hat. Hat 1 and Hat 2 are the same size and shape as Mug’s hat, but they move to different place on the coordinate graph. Hat 4 has the same shape, but different size from the Mug’s hat."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Table",
+          "name": "Table of Coordinate Pairs",
+          "columns": [
+            {"name":" ","values":["Point","A","B","C","D","E","F","G"]},
+            {"name":"Mug's Hat","values":["(x , y)","(1, 1)","(9, 1)","(6, 2)","(6, 3)","(4, 3)","(4, 2)","(1, 1)"]},
+            {"name":"Hat 1","values":["(x + 2, y + 3)","(3, 4)","(11, 4)","(8, 5)"," (8, 6)","(6, 6)","(6, 5)","(3, 4)"]},
+            {"name":"Hat 2","values":["(x - 1, y + 4)","(0, 5)","(8, 5)","(5, 6)","(5, 7)","(3, 7)","(3, 6)","(0, 5)"]},
+            {"name":"Hat 3","values":["(x + 2, 3y)","(3, 3)","(11, 3)","(8, 6)","(8, 9)","(6, 9)","(6, 6)","(3, 3)"]},
+            {"name":"Hat 4","values":["(0.5x, 0.5y)","(0,5, 0.5)","(4.5, 0.5)","(3, 1)","(3, 1.5)","(2, 1.5)","(2, 1)","(0.5, 0.5)"]},
+            {"name":"Hat 5","values":["(2x, 3y)","(2, 3)","(18, 3)","(12, 6)","(12, 9)","(8, 9)","(8, 6)","(2, 3)"]}
+          ]
+        }
+      },
+      [{
+        "display": "teacher",
+        "id": "21AUG20220517PM",
+        "title": "Mug’s Hat",
+        "layout": {
+          "height": 200
+        },
+        "content": {
+          "type": "Geometry",
+          "board": {
+            "properties": {
+              "axisMin": [-1, -1],
+              "axisRange": [15, 15]
+            }
+          },
+          "objects": [
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [1, 1],
+                  "properties": {
+                    "name": "A"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [9, 1],
+                  "properties": {
+                    "name": "B"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [6, 2],
+                  "properties": {
+                    "name": "C"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [6, 3],
+                  "properties": {
+                    "name": "D"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [4, 3],
+                  "properties": {
+                    "name": "E"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [4, 2],
+                  "properties": {
+                    "name": "F"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220517sfaPM",
+        "title": "Hat 1",
+        "content": {
+          "type": "Geometry",
+          "board": {
+            "properties": {
+              "axisMin": [-2.186, -1.093],
+              "axisRange": [26.23, 17.486]
+            }
+          },
+          "objects": [
+            { "type": "point", "parents": [3, 4.1000000000000005], "properties": {"id":"CKZsETthyV76sI63","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [11, 4], "properties": {"id":"XVgLFUmtZZRp6XR7","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [8, 5], "properties": {"id":"1zt_o2C8_NO7jgdU","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [8, 6], "properties": {"id":"sgL9jiY3sEHLTDLw","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [6, 6], "properties": {"id":"CejYRi5zciQV1SsJ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [6, 5], "properties": {"id":"nfCP5Vs119FDWjK0","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "polygon", "parents": ["CKZsETthyV76sI63", "XVgLFUmtZZRp6XR7", "1zt_o2C8_NO7jgdU", "sgL9jiY3sEHLTDLw", "CejYRi5zciQV1SsJ", "nfCP5Vs119FDWjK0"],"properties": {"id":"UWTq-bMbU0dC2ud_"} }
+          ]
+        }
+      }],
+      [{
+        "display": "teacher",
+        "id": "21AUG20220516PM",
+        "title": "Hat 2",
+        "content": {
+          "type": "Geometry",
+          "board": {
+            "properties": {
+              "axisMin": [-2.186, -1.093],
+              "axisRange": [26.23, 17.486]
+            }
+          },
+          "objects": [
+            { "type": "point", "parents": [0, 5], "properties": {"id":"EWwmGMykqI3EAfmJ","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [8, 5], "properties": {"id":"SA5Uo1SRsw64HI-o","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [5, 6], "properties": {"id":"NW3dnnZJt74VMb8_","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [5, 7], "properties": {"id":"nflYISZovV1bWrYC","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [3, 7], "properties": {"id":"7PemD2FkWhS387Sr","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [3, 6], "properties": {"id":"RNvBCcnVQBdah8ue","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "polygon", "parents": ["EWwmGMykqI3EAfmJ", "SA5Uo1SRsw64HI-o", "NW3dnnZJt74VMb8_", "nflYISZovV1bWrYC", "7PemD2FkWhS387Sr", "RNvBCcnVQBdah8ue"],"properties": {"id":"ugV7bOncUuZNn_WH"} }
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220515PM",
+        "title": "Hat3",
+        "content": {
+          "type": "Geometry",
+          "board": {
+            "properties": {
+              "axisMin": [-2.186, -1.093],
+              "axisRange": [26.23, 17.486]
+            }
+          },
+          "objects": [
+            { "type": "point", "parents": [2.9508196721311473, 3.0054644808743194], "properties": {"id":"OEly5WN6_YCdEJgj","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [11, 3], "properties": {"id":"Mqye7QHgnIRpgokl","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [7.978142076502732, 5.956284153005466], "properties": {"id":"hqajRtfZi5G3XId9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [8, 9], "properties": {"id":"kXay8UaR7h4c5vZP","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [6, 9], "properties": {"id":"3_sBOLAQMamD60lk","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [6, 6], "properties": {"id":"k4Fy8YnkcfQN9VtX","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "polygon", "parents": ["OEly5WN6_YCdEJgj", "Mqye7QHgnIRpgokl", "hqajRtfZi5G3XId9", "kXay8UaR7h4c5vZP", "3_sBOLAQMamD60lk", "k4Fy8YnkcfQN9VtX"],"properties": {"id":"qu3-4pPyMgaN6U_H"} }
+          ]
+        }
+      }],
+      [
+        {
+          "display": "teacher",
+          "id": "21AUG20220514PM",
+          "title": "Hat4",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [-2.186, -1.093],
+                "axisRange": [26.23, 17.486]
+              }
+            },
+            "objects": [
+              { "type": "point", "parents": [0.5, 0.5], "properties": {"id":"D3diq-xIS8sWwPgN","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [4.48087431693989, 0.5464480874316969], "properties": {"id":"ITD9jGE5DKQBBZ05","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [3, 1], "properties": {"id":"hrg0GrlvJ5B3cdFW","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [3, 1.5], "properties": {"id":"_rmZutpv-I_TFPsE","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [2, 1.5], "properties": {"id":"XLjFFqoXMQOeoXHe","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [2, 1], "properties": {"id":"f0qh7hBuA8pj5ksD","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "polygon", "parents": ["D3diq-xIS8sWwPgN", "ITD9jGE5DKQBBZ05", "hrg0GrlvJ5B3cdFW", "_rmZutpv-I_TFPsE", "XLjFFqoXMQOeoXHe", "f0qh7hBuA8pj5ksD"],"properties": {"id":"m7LQmMcwz-y2AC_J"} }
+            ]
+          }
+        },
+        {
+          "display": "teacher",
+          "id": "21AUG20220521PM",
+          "title": "Hat 5",
+          "content": {
+            "type": "Geometry",
+            "board": {
+              "properties": {
+                "axisMin": [-2.186, -1.093],
+                "axisRange": [26.23, 17.486]
+              }
+            },
+            "objects": [
+              { "type": "point", "parents": [2, 3], "properties": {"id":"CxvwoD441FDOurrq","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [17.97814207650273, 3.0054644808743194], "properties": {"id":"l2cuZc5MkvZdbpua","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [12, 6], "properties": {"id":"PQ2v83foCQO-aUD6","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [12, 9], "properties": {"id":"HlTMZnInmez7o57i","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [7.978142076502732, 9.016393442622952], "properties": {"id":"1W9MKKR3tdYI9VJV","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "point", "parents": [8, 6], "properties": {"id":"oiPQtV7kirzjQMD9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+              { "type": "polygon", "parents": ["CxvwoD441FDOurrq", "l2cuZc5MkvZdbpua", "PQ2v83foCQO-aUD6", "HlTMZnInmez7o57i", "1W9MKKR3tdYI9VJV", "oiPQtV7kirzjQMD9"],"properties": {"id":"e9gzLZ1M3pJ-h_pr"} }
+            ]
+          }
+        }
+      ]
+    ]
+  }
+}

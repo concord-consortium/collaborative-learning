@@ -1,16 +1,14 @@
-import { apps, clearFirestoreData, initializeAdminApp, useEmulators } from "@firebase/rules-unit-testing";
+import { apps, clearFirestoreData, initializeAdminApp } from "@firebase/rules-unit-testing";
 import { publishSupport } from "../src/publish-support";
 import { IPublishSupportParams } from "../src/shared";
 import { buildFirebaseImageUrl, parseFirebaseImageUrl, replaceAll } from "../src/shared-utils";
 import {
+  configEmulators,
   kCanonicalPortal, kClassHash, kOtherClassHash, kPortal, kTeacherNetwork,
   specAuth, specDocumentContent, specUserContext
 } from "./test-utils";
 
-useEmulators({
-  database: { host: "localhost", port: 9000 },
-  firestore: { host: "localhost", port: 8088 }
-});
+configEmulators();
 
 // Considerable trial and error was required to come up with this mock
 // Initialize the mock admin app using initializeAdminApp from @firebase/rules-unit-testing
@@ -20,7 +18,7 @@ const mockAdmin = initializeAdminApp({ databaseName: kCLUEFirebaseProjectId, pro
 // by default get requests respond as though the requested data doesn't exist
 // test can override via mockDatabaseGet.mockImplementation(path => ...) to return
 // appropriate data based on the path requested.
-var mockDatabaseGet = jest.fn();
+const mockDatabaseGet = jest.fn();
 
 // Mock the actual "firebase-admin" module so that clients get our mock instead
 jest.mock('firebase-admin', () => {
@@ -186,8 +184,11 @@ describe("publishSupport", () => {
     const canonicalUrls = [1, 2, 3].map(i => buildFirebaseImageUrl(kClassHash, `image-${i}`));
     const legacyUrls = canonicalUrls.map(url => parseFirebaseImageUrl(url).legacyUrl);
     const content = specDocumentContent([
-      { type: "Drawing", changes: [{ url: legacyUrls[0] }, { url: legacyUrls[1] }] },
-      { type: "Image", changes: [{ url: legacyUrls[0] }, { url: legacyUrls[2] }] }
+      { type: "Drawing", objects: [
+        { type: "image", url: legacyUrls[0], width: 100, height: 100 },
+        { type: "image", url: legacyUrls[1], width: 100, height: 100 }
+      ]},
+      { type: "Image", url: legacyUrls[2] }
     ]);
     const specSupportDoc = specPublicationRequest({ add: { content } });
     const params: IPublishSupportParams = { context, ...specSupportDoc };
@@ -240,8 +241,11 @@ describe("publishSupport", () => {
     });
     await Promise.all(imagePromises);
     const content = specDocumentContent([
-        { type: "Drawing", changes: [{ url: legacyUrls[0] }, { url: legacyUrls[1] }] },
-        { type: "Image", changes: [{ url: legacyUrls[0] }, { url: legacyUrls[2] }] }
+        { type: "Drawing", objects: [
+          { type: "image", url: legacyUrls[0], width: 100, height: 100 },
+          { type: "image", url: legacyUrls[1], width: 100, height: 100 }
+        ]},
+        { type: "Image", url: legacyUrls[2] }
       ]);
     const specSupportDoc = specPublicationRequest({ add: { content } });
     const params: IPublishSupportParams = { context, ...specSupportDoc };

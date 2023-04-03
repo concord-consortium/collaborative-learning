@@ -1,4 +1,4 @@
-import { getSnapshot } from "mobx-state-tree";
+import { getSnapshot, getRoot, hasParent, getEnv } from "mobx-state-tree";
 import { ProblemModel } from "./problem";
 import { SectionModelType } from "./section";
 import { omitUndefined } from "../../utilities/test-utils";
@@ -14,13 +14,13 @@ describe("problem model", () => {
       ordinal: 1,
       title: "test",
       subtitle: "",
-      sections: [],
+      loadedSections: [],
       supports: []
     });
     expect(problem.fullTitle).toBe("test");
   });
 
-  it("uses override values", () => {
+  it("uses override values and renames sections to loadedSections", () => {
     const problem = ProblemModel.create({
       ordinal: 1,
       title: "test",
@@ -39,7 +39,7 @@ describe("problem model", () => {
       ordinal: 1,
       title: "test",
       subtitle: "sub",
-      sections: [
+      loadedSections: [
         {
           type: "introduction",
           disabled: [],
@@ -54,6 +54,47 @@ describe("problem model", () => {
       supports: []
     });
     expect(problem.fullTitle).toBe("test: sub");
+  });
+
+  test("each section is its own MST tree", () => {
+    const problem = ProblemModel.create({
+      ordinal: 1,
+      title: "test",
+      sections: [
+        {
+          type: "introduction"
+        },
+        {
+          type: "initialChallenge"
+        }
+      ]
+    });
+    problem.sections.forEach(section => {
+      expect(hasParent(section)).toBeFalsy();
+      expect(getRoot(section)).toBe(section);
+      expect(section.realParent).toBe(problem);
+    });
+  });
+
+  test("sections with content have a unique sharedModelManager in their environment", () => {
+    const problem = ProblemModel.create({
+      ordinal: 1,
+      title: "test",
+      sections: [
+        {
+          type: "introduction"
+        },
+        {
+          type: "initialChallenge"
+        }
+      ]
+    });
+
+    const sharedModelManagers = problem.sections.map(section =>
+      getEnv(section)?.sharedModelManager
+    );
+    const uniqueManagers = [...new Set(sharedModelManagers)];
+    expect(uniqueManagers).toHaveLength(2);
   });
 
   it("can get sections by index", () => {
@@ -115,7 +156,7 @@ describe("problem model", () => {
       ordinal: 1,
       title: "Test",
       subtitle: "",
-      sections: [],
+      loadedSections: [],
       supports: [],
       config: {
         disabledFeatures: ["foo"],
@@ -137,7 +178,7 @@ describe("problem model", () => {
       ordinal: 1,
       title: "Test",
       subtitle: "",
-      sections: [],
+      loadedSections: [],
       supports: [],
       config: {
         disabledFeatures: ["foo"],
@@ -161,7 +202,7 @@ describe("problem model", () => {
       ordinal: 1,
       title: "Test",
       subtitle: "",
-      sections: [],
+      loadedSections: [],
       supports: [],
       config: {
         disabledFeatures: ["foo"],

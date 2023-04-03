@@ -78,15 +78,20 @@ interface IInsertVariableDialog {
   otherVariables: VariableType[]; // A list of variables used by other tiles
   selfVariables: VariableType[]; // A list of variables used by the tile showing this dialog
   unusedVariables: VariableType[]; // A list of variables not used by any tiles
+  onClose?: () => void;
 }
-export const useInsertVariableDialog =
-  ({ disallowSelf, Icon, insertVariables, otherVariables, selfVariables, unusedVariables }: IInsertVariableDialog) =>
+export const useInsertVariableDialog = ({
+  disallowSelf, Icon, insertVariables, otherVariables, selfVariables, unusedVariables, onClose
+}: IInsertVariableDialog) =>
 {
   const { clearSelectedVariables, selectedVariables, toggleVariable } = useSelectMultipleVariables();
 
   const handleOk = () => insertVariables(selectedVariables);
 
-  const onClose = clearSelectedVariables;
+  const handleClose = () => {
+    clearSelectedVariables();
+    onClose?.();
+  };
 
   const [showModal, hideModal] = useCustomModal({
     Icon: Icon || InsertVariableChipIcon,
@@ -108,7 +113,7 @@ export const useInsertVariableDialog =
         onClick: handleOk
       }
     ],
-    onClose
+    onClose: handleClose
   }, [selectedVariables, otherVariables, selfVariables, unusedVariables]);
 
   return [showModal, hideModal];

@@ -1,20 +1,20 @@
 import { IReactionDisposer, reaction } from "mobx";
 import { getParent, Instance, SnapshotIn, types } from "mobx-state-tree";
+
 import { buildProblemPath, buildSectionPath } from "../../../functions/src/shared";
 import { DocumentContentModel } from "../document/document-content";
 import { InvestigationModel, InvestigationModelType } from "./investigation";
 import {
-  ISectionInfoMap, SectionModel, SectionModelType, 
+  ISectionInfoMap, SectionModel, SectionModelType,
   registerSectionInfo, suspendSectionContentParsing, resumeSectionContentParsing
 } from "./section";
 import { ProblemModelType } from "./problem";
 import { resumeSupportContentParsing, SupportModel, suspendSupportContentParsing } from "./support";
 import { StampModel } from "../../plugins/drawing/model/stamp";
-import { getAssetUrl } from "../../utilities/asset-utils";
 import { AppConfigModelType } from "../stores/app-config-model";
 import { NavTabsConfigModel } from "../stores/nav-tabs";
 import { SettingsMstType } from "../stores/settings";
-import { IBaseStores } from "../stores/stores";
+import { IBaseStores } from "../stores/base-stores-types";
 import { UnitConfiguration } from "../stores/unit-configuration";
 
 const PlanningDocumentConfigModel = types
@@ -153,38 +153,93 @@ function getUnitSpec(unitId: string | undefined, appConfig: AppConfigModelType) 
   return requestedUnit || (appConfig.defaultUnit ? appConfig.getUnit(appConfig.defaultUnit) : undefined);
 }
 
+const getExternalProblemSectionData =
+  async (invIdx: number, probIdx: number, sectIdx: number, dataUrl: string, sectionPath?: string) => {
+    const sectionData = await fetch(dataUrl).then(res => res.json());
+    sectionData.sectionPath = sectionPath;
+    return { invIdx, probIdx, sectIdx, sectionData };
+};
+
+const populateProblemSections = async (content: Record<string, any>, unitUrl: string) => {
+  const externalSectionsArray = [];
+  for (let invIdx = 0; invIdx < content.investigations.length; invIdx++) {
+    const investigation = content.investigations[invIdx];
+    for (let probIdx = 0; probIdx < investigation.problems.length; probIdx++) {
+      const problem = investigation.problems[probIdx];
+      for (let sectIdx = 0; sectIdx < problem.sections.length; sectIdx++) {
+        // Currently, curriculum files can either contain their problem section data inline
+        // or in external JSON files. In the latter case, the problem sections arrays will
+        // be made up of strings that are paths to the external files. We fetch the data from
+        // those files and populate the section with it. Otherwise, we leave the section as
+        // is. Eventually, all curriculum files will be updated so their problem section data
+        // is in external files.
+        const section = problem.sections[sectIdx];
+        if (typeof section === "string") {
+          const sectionDataFile = section;
+          const sectionDataUrl = new URL(sectionDataFile, unitUrl).href;
+          externalSectionsArray.push(
+            getExternalProblemSectionData(invIdx, probIdx, sectIdx, sectionDataUrl, sectionDataFile)
+          );
+        }
+      }
+    }
+  }
+  if (externalSectionsArray.length > 0) {
+    await Promise.all(externalSectionsArray).then((sections: any) => {
+      for (const section of sections) {
+        const { invIdx, probIdx, sectIdx, sectionData } = section;
+        content.investigations[invIdx].problems[probIdx].sections[sectIdx] = sectionData;
+      }
+    });
+  }
+  return content;
+};
+
 export function getUnitJson(unitId: string | undefined, appConfig: AppConfigModelType) {
   const unitSpec = getUnitSpec(unitId, appConfig);
   const unitUrl = unitSpec?.content;
-  return fetch(getAssetUrl(unitUrl!))
-          .then(response => {
-            if (response.ok) {
-              return response.json();
-            }
-            else {
-              throw Error(`Request rejected with status ${response.status}`);
-            }
-          })
-          .catch(error => {
-            throw Error(`Request rejected with exception`);
-          });
+  return fetch(unitUrl!)
+           .then(async response => {
+             if (response.ok) {
+               const unitContent = await response.json();
+               const fullUnitContent = unitContent && populateProblemSections(unitContent, unitUrl!);
+               return fullUnitContent;
+             } else {
+               // If the unit content is not found, return the response so that the caller can
+               // handle it appropriately.
+               if (response.status === 404) {
+                 return response;
+               } else {
+                 throw Error(`Request rejected with status ${response.status}`);
+               }
+             }
+           })
+           .catch(error => {
+             throw Error(`Request rejected with exception ${error}`);
+           });
 }
 
 export function getGuideJson(unitId: string | undefined, appConfig: AppConfigModelType) {
   const unitSpec = getUnitSpec(unitId, appConfig);
   const guideUrl = unitSpec?.guide;
-  if (!guideUrl) return;
-  return fetch(getAssetUrl(guideUrl))
-          .then(response => {
+  return fetch(guideUrl!)
+          .then(async response => {
             if (response.ok) {
-              return response.json();
-            }
-            else {
-              throw Error(`Request rejected with status ${response.status}`);
+              const guideContent = await response.json();
+              const fullGuideContent = guideContent && populateProblemSections(guideContent, guideUrl!);
+              return fullGuideContent;
+            } else {
+              // If the guide content is not found, return the response so that the caller can
+              // handle it appropriately.
+              if (response.status === 404) {
+                return response;
+              } else {
+                throw Error(`Request rejected with status ${response.status}`);
+              }
             }
           })
           .catch(error => {
-            throw Error(`Request rejected with exception`);
+            throw Error(`Request rejected with exception: ${error}`);
           });
 }
 
@@ -209,11 +264,18 @@ export function isDifferentUnitAndProblem(stores: IBaseStores, unitId?: string |
 }
 
 export function getSectionPath(section: SectionModelType) {
+  // The sections we work with at runtime are not MST children of their problem
+  // In order to avoid circular dependencies the problem is stored in a generic
+  // realParent volatile property of the section model
+  const problem = section.realParent as ProblemModelType | undefined;
+  if (!problem) {
+    // If there is a coding error, realParent might undefined
+    throw new Error("section was not initialized right");
+  }
   // getParent is called twice because the direct parent is an array
-  const problem = getParent(getParent(section)) as ProblemModelType;
   const investigation = getParent(getParent(problem)) as InvestigationModelType;
   const unit = getParent(getParent(investigation)) as UnitModelType;
   const problemPath = buildProblemPath(unit.code, `${investigation.ordinal}`, `${problem.ordinal}`);
 
-  return buildSectionPath(problemPath, section.type, unit.facet) || '';  
+  return buildSectionPath(problemPath, section.type, unit.facet) || '';
 }

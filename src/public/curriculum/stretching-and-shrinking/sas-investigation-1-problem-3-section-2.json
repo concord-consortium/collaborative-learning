@@ -1,0 +1,105 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+       {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Daphne thinks the rubber-band method is clever, but she believes the school copier can make more accurate copies in a greater variety of sizes. She makes a copy of “Super Sleuth” with two different percent size factors. The results are shown below."
+          ]
+        }
+      },
+      {
+        "id": "21AUG20220852340AM",
+        "title": "Copies of Super Sleuth with different percent size factors.",
+        "content": {
+        "type": "Image",
+        "url": "curriculum/stretching-and-shrinking/images/copiesOfSuperSleuth1_3.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>What percent size multiplier did Daphne use to create Copy 1 and Copy 2? Explain your reasoning.</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>For Copy 2, if we compare corresponding sides such as the base of the triangle, 1 and ½ lengths of the original make the corresponding length of the copy. This means that the multiplier is 1.5 or 150% of the original.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUsfafG20220850AM",
+        "title": "Comparing side lengths for Super Sleuth and Copy 2",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/comparingSideLengths1_3.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content":
+        {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>For Copy 1, if we compare corresponding sides such as the base of the triangle, ¾ of the length of the original makes the corresponding length of the copy. This means that the multiplier is 0.75 or 75% of the original.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUasG2022adsf0850AM",
+        "title": "Comparing side lengths for Super Sleuth and Copy 1",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/1-3_Initial_Challenge_2.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li> How are the copies like the original? How are they different?</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "_7HJi5zFt89fPzIp",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Possible answers</strong></p>",
+            "<p>Stays the same/alike:</p>",
+            "<ul><li>Same basic shapes</li><li>Corresponding angle measures</li></ul>",
+            "<p>Size changes:</p>",
+            "<ul><li>Copy 1 is smaller/shrunk</li><li>Copy 2 is bigger/stretched</li></ul>",
+            "<p>Corresponding side lengths change:</p>",
+            "<ul><li>Copy 1 are ¾ the size of the corresponding side lengths in the original</li><li>Copy 2 are 1.5 times the size of the corresponding side lengths in the original</li></ul>",
+            "<p>Perimeter changes in the same way the corresponding side lengths change. This can be explained by the Distributive Property: For example, in Copy 2 the sides of the hat change b6 150%, so the perimeter will also change by 150%: 1.5l+1.5l+1.5w+1.5w=1.5(l+l+w+w)</p>",
+            "<p>Area changes:</p>",
+            "<ul><li>It’s smaller from the original to Copy 1</li><li>It’s larger from the original to Copy 2, but it is not 1.5 times larger.</li></ul>",
+            "<p>Note: At this time in the Unit, students will make general statements about the area. Such as, “The area grows (or shrinks) but not in the same way as the lengths.” The area change relationship in scale figures will be developed in Investigations 2 and 3.</p>",
+            "<p>Ratios change:</p>",
+            "<ul><li>The ratio in length from the original to Copy 1 is 1 to ¾.</li><li>The ratio in length from the original to Copy 2 is 1 to 1.5</li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

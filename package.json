@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "3.6.0",
+  "version": "3.9.0",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "config": {
@@ -104,9 +104,7 @@
   },
   "homepage": "https://github.com/concord-consortium/collaborative-learning#readme",
   "overrides": {
-    "mobx-state-tree": "npm:@concord-consortium/mobx-state-tree@5.1.5-cc.1",
-    "slate-react": "npm:@concord-consortium/slate-react",
-    "slate-react-placeholder": "@concord-consortium/slate-react-placeholder"
+    "mobx-state-tree": "npm:@concord-consortium/mobx-state-tree@5.1.5-cc.1"
   },
   "devDependencies": {
     "@babel/core": "^7.18.13",
@@ -136,9 +134,6 @@
     "@types/react-dom": "^17.0.17",
     "@types/react-modal": "^3.13.1",
     "@types/react-tabs": "^2.3.4",
-    "@types/slate-html-serializer": "^0.6.5",
-    "@types/slate-plain-serializer": "^0.7.2",
-    "@types/slate-react": "^0.22.9",
     "@types/superagent": "^4.1.15",
     "@types/uuid": "^8.3.4",
     "@types/w3c-web-serial": "^1.0.2",
@@ -194,12 +189,12 @@
     "xhr-mock": "^2.5.1"
   },
   "dependencies": {
-    "@concord-consortium/diagram-view": "^0.0.24",
+    "@concord-consortium/diagram-view": "^0.0.41",
     "@concord-consortium/mobx-state-tree": "5.1.5-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",
     "@concord-consortium/rete-react-render-plugin": "^0.2.1-cc.2",
-    "@concord-consortium/slate-editor": "^0.8.2",
+    "@concord-consortium/slate-editor": "^0.9.1",
     "@dnd-kit/core": "^6.0.5",
     "chart.js": "^2.9.4",
     "classnames": "^2.3.1",
@@ -209,7 +204,6 @@
     "expr-eval": "^2.0.2",
     "file-saver": "^2.0.5",
     "firebase": "^8.10.1",
-    "immutable": "^3.8.2",
     "initials": "^3.1.2",
     "json-stringify-pretty-compact": "^4.0.0",
     "jsxgraph": "1.4.4",
@@ -218,6 +212,7 @@
     "mobx": "^6.6.1",
     "mobx-react": "^7.5.2",
     "nanoid": "^3.3.4",
+    "netlify-cms-app": "^2.15.72",
     "object-hash": "^3.0.0",
     "patch-package": "^6.4.7",
     "query-string": "7.1.1",
@@ -238,8 +233,6 @@
     "rete-area-plugin": "^0.2.1",
     "rete-connection-plugin": "^0.9.0",
     "rollbar": "^2.25.1",
-    "slate-md-serializer": "^5.5.4",
-    "slate-plain-serializer": "^0.7.13",
     "superagent": "^8.0.0",
     "ts-polyfill": "^3.8.2",
     "tslib": "^2.4.0",

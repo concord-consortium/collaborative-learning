@@ -1,0 +1,104 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles":
+    [
+      {
+        "id": "Q0DC7mzAfyeZFQ-e",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started)</strong></u></p>",
+            "<p><u>Connecting to Prior Knowledge</u></p>",
+            "<p>If needed you can begin this Problem by having students practice one  or two missing-part problems such as the one below, also displayed in <strong>Teaching Aid 4.2: Sample Missing Triangle Length</strong>.</p>"
+          ]
+        }
+      },
+      {
+        "id": "-MCSc0um2sM2EPaJ",
+        "title": "Example of non-similar parallelograms with congruent angles",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SASTG_4-2_connecting_to_prior_knowledge_1.png"
+        }
+      },
+      {
+        "id": "IuLY-LnWGJQl6fK_",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>In this example, a = 2.4 in. (You can use a scale factor of 0.75 from the larger triangle to the smaller triangle.)</p>",
+            "<p></p>",
+            "<p>Explain that, for this Problem, students need to find a pretty good estimate for the height of a tower, a building, a pole, etc., but there is not any way to measure it directly. They are tasked with finding out how they can use mathematics to estimate such measurements.</p>"
+          ]
+        }
+      },
+      {
+        "id": "k_0fP7Lqx40SzYje",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong> </p>",
+            "<ul><li>What do you notice about the drawing of the mirror method to find the height of the principal?  (Answers will vary)</li><li>Are there similar figures in the drawing?  (Two triangles.)</li><li>How do you know they are similar? (Answers will vary.  The corresponding angles are congruent)</li><li>If it is a sunny day, we can use the sun to help us estimate heights that we are interested in measuring. When the sun shines on objects, the objects cast shadows. From your experiences, what can you say about the shadows that the sun casts? (Students may note that the length of the shadow depends on the height of the object. They may also note that shadows for all objects change length as the sun moves during the day. Shadows are longer when the sun is near the horizon, whether in the morning or evening, and very short in the middle of the day when the sun is more directly overhead. They may mention that shadows are cast in the same direction for all objects.) </li><li>Let’s think about the relationship between the length of a shadow and the height of an object. At the same time of day, how will the shadows of two objects that have different heights compare? (The shadow of the taller object will be longer.) </li><li>This means that the length of the shadow depends on the height of the object. Imagine that you are looking at a tall pole when the sun casts a shadow for the pole. In your mind, move around the pole until you can see both the pole and its shadow from the side. Sketch what you think this would look like. (Make sure the students envision the two legs of the right triangle made by the pole and the shadow.) (Portrayal)</li><li>Who would like to share their sketch with the class? (A sample sketch is shown below)</li></ul>"
+          ]
+        }
+      },
+      {
+        "id": "7OfGeizw49Hhehpn",
+        "title": "Sample sketch of object’s shadow",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SASTG_4-2_presenting_the_challenge_1.png"
+        }
+      },
+      {
+        "id": "w1rAMJBy2sFwsP87",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>What do you think? Is your sketch somewhat like this one? (Allow students to describe any important similarities or differences between their sketches and the displayed sketch.)</li><li>Draw a dashed line on your sketch to show a triangle formed by the pole, the shadow, and the line from the top of the pole to the tip of the shadow. (It is not important that students draw this sketch completely correctly at this stage. This activity is to increase interest in the setting and to get students to visualize the scene.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Suppose you took a meter stick outside and held it perpendicular to the ground. You can picture an imaginary line (the ray of the sun) from the top of the meter stick to the ground.  </p>",
+            "<ul><li>Can you picture a triangle formed by the meter stick, the ray of the sun, and the shadow? (Sketch a picture of the triangle.)</li><li>If there is another nearby object, such as a flagpole or a tree, what do you think will be true about that object, its shadow, and the ray of the sun? Will they form a triangle? Is the triangle similar to the one formed by our meter stick?  Explain your reasoning. (At this stage, some students may understand that the two triangles are similar. They might be able to prove this by considering the interior angles of the triangles. Others might continue to feel that sides should be measured and compared before they are sure the triangles are similar.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Hold up a meter stick.</p>",
+            "<ul><li>How can you use this meter stick and the sun to find out how tall our school is?  What measurements do you need to take? (Students can describe using similar triangles consisting of the objects (the school and the meter stick), their shadows, and the sun’s rays to determine the height of the school.  They need to find the measurements of both shadows and the meter stick.)</li></ul>",
+            "<p>In order to reinforce the importance of checking angles, you might hold the meter stick at an obtuse angle to the ground and stick:</p>",
+            "<ul><li>Can I hold the meter stick this way and use the resulting shadow length to find the height of the building? Why or why not? (No, the school’s wall is perpendicular to the ground, so the meter stick must also be perpendicular.)</li><li>The parallel lines of the rays can be used to show that the corresponding angles are equal. This was done in Shapes and Designs. You could choose to tell them that sun and shadows always produce similar triangles.  </li></ul>",
+            "Tell students that in this problem they will look for similar figures and use them to find missing measurements.  Distribute Learning Aid 4.2: Reflection and Shadow Diagrams.  Have students now begin the Problem in groups of 2. "
+          ]
+        }
+      },
+      {
+        "id": "T2CsuBqtnVyjD4Cg",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Pass out materials and <strong>Learning Aid 4.2:  Statue of Liberty Diagram.</strong>  Have students now begin the Problem in groups of 2-4. (If you prefer not to do the experiment you can tell the students that the length of the stick is 3 feet, and its shadow is 2 feet. The length of the shadow of the statue is 74 feet.)</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

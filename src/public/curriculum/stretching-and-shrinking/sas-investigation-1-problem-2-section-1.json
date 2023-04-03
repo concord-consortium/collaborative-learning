@@ -1,0 +1,20 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "In Problem 1.1 A, Daphne used ratio relationships to solve the mystery. She reasoned:",
+            "<p><em>For every inch measured on the PI magazine, there are 10 inches of the PI magazine in real life. I used the PI magazine height to measure the height of the teacher. The teacher is 7 PI magazines tall. So, in real life the teacher is 7 x 10 inches or 70 inches tall.</em></p>",
+            "Daphne’s reasoning is similar to the reasoning you have done in the _Comparing Quantities_ unit where you used ratios to describe and compare quantities. Recall that a **ratio** is a comparison of two quantities which have a multiplicative relationship, such as two lengths.",
+            "<ul><li>1 PI magazine height to the height of the teacher (7 PI magazines) </li><li> **or**  </li><li> 1 PI magazine: 7 PI magazines </li><li> **or** </li><li> 10 in: 70 in </li></ul>",
+            "Using ratio relationships to solve problems is also called proportional reasoning."
+          ]
+        }
+      }
+    ]
+  }
+}

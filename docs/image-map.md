@@ -4,16 +4,16 @@ The Image Map is a cache used by CLUE to handle image loading. To understand thi
 
 The key of an entry in the cache is its URL. As described in the images doc these URLs can be:
 - regular http/https URLs
-- "local" assets stored in this repository (generally curriculum images)
+- "local" assets stored in the authored curriculum repository (generally curriculum images)
 - special URLs pointing at Firebase Storage or an object in the Firebase Realtime DB.
 
 Entries in the cache have the following properties:
 - **contentUrl** the location to download the image from. This URL might not be something the browser can handle directly. If the key of the entry is a URL that was modified before downloading, this contentUrl contains the modified version.
-- **displayUrl** a url to render the actual image, it should be a URL that can be used by the browser. For example the `src` of an `img` or the background of a div in css.
+- **displayUrl** a url to render the actual image, it should be a URL that can be used by the browser. For example the `src` of an `img` or the background of a `div` in CSS.
 - **width, height** the dimension of the image
 - **filename** if the image was loaded from a file, this is the name of the file
 - **status** what state the entry is in, see below
-- **retries** how many times getImage has tried to store the image after a previous attempt
+- **retries** how many times `getImage` has tried to store the image after a previous attempt
 
 Entries in the cache can have 4 status values:
 - **PendingStorage**: `getImage` has been called with a URL and this URL is being processed to download and store the image data.
@@ -86,6 +86,13 @@ If the existing entry is
 - `PendingStorage` this should mean the existing entry is being updated right now, do nothing. Hopefully this update of the entry will succeed where the new entry failed. Unlike `PendingDimensions` an existing entry in the `PendingStorage` state should never be a copy due to a URL conversion.
 - `Error` do nothing, no point in replacing an error with an error.
 - `undefined` do nothing, no point is adding a error entry where one didn't exist before.
+
+### Notes on conversion of local/relative asset URLs
+Authored curriculum content was originally located at src/public/curriculum in the CLUE code repository. In 2023, the curriculum content was split off into its own repository named clue-curriculum. That separate repository includes many asset files used within the authored content. CLUE now imports most authored content from this external repository, the deployed version of which is currently located at https://models-resources.concord.org/clue-curriculum.
+
+ImageMap's `localAssetsImagesHandler` converts relative asset URLs that appear in content (e.g., sas/images/image.png) to full URLs (e.g. https://models-resources.concord.org/clue-curriculum/branch/main/sas/images/image.png) so the images properly load within CLUE.
+
+`localAssetsImageHandler` also includes special handling of legacy relative URLs. When authored content was part of the CLUE code repository, relative asset URLs in the authored content started with `curriculum/[full-name-of-unit]`. For example:`curriculum/stretching-and-shrinking/images/1.png`. `localAssetsImageHandler` makes sure to convert any URLs that start with `curriculum/` so they resolve to full URLs that will work within CLUE. That means removing `curriculum/`, converting the `[full-name-of-unit]` value to its corresponding unit code value (e.g. `stretching-and-shrinking` becomes `sas`), and then prepending the deployed curriculum repository's base URL plus branch (`branch/main/` is the default).
 
 ## Placeholder image
 

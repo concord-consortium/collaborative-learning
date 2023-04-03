@@ -1,0 +1,101 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "We can enhance a report or story by adding photographs, drawings, or diagrams. If we place a graphic in an electronic document, we can enlarge, reduce, or move it. When we click on the graphic, it appears inside a frame with handles along the sides, such as the figure shown below."
+          ]
+        }
+      },
+      {
+        "id": "-6wzAUG202201df4at43q56pM",
+        "title": "Original image",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_4_1_In_28_fish_350w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "We can change the size and shape of the image by dragging the handles."
+          ]
+        }
+      },
+      {
+        "id": "-6wzAUG202201df47pM",
+        "title": "Stretched images",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_4_1_In_29_fish_resized_350w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<em>How did this technique produce these variations of the original shape? Which of these images appears to be similar to the original? Why?</em>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Recall from our work in the Comparing Quantities unit that a ratio is a comparison of two quantities such as two lengths. The rectangle around the original photo is about 10 centimeters tall and 8 centimeters wide. We can say</p>",
+            "For every 10 cm of height there are 8 cm of width.",
+            "Or",
+            "The ratio of height to width is 10 to 8.",
+            "<p>This table gives the ratios of height to width for the images.</p>"
+          ]
+        }
+      },
+      {
+        "id": "-6wzAUG202201dardtf47pM",
+        "title": "What do you notice about the height-to-width ratios?",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_4_1_In_30_image_table_350w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The comparisons “10cm to 8cm” and “5cm to 4cm” are equivalent ratios. We can scale the ratio 10 to 8 down by multiplying each quantity by 1/2. Or we could scale the ratio 5 to 4 up by multiplying each quantity by 2.</p>",
+            "<p>Equivalent ratios are like equivalent fractions. In fact, ratios are often written in fraction form. You can express equivalent ratios with equations. A <strong>proportion</strong> is an equation stating that two ratios are equal. </p>",
+            "<p>For every 10 cm of height there are 8 cm of width </p>",
+            "<p>10 to 8 equals 5 to 4</p>",
+            "   10 cm height                        5 cm height",
+            "_________________        =       ___________________",
+            "    8 cm width                           4 cm width"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "We can also say:",
+            "For every 8 cm of width there are 10 cm in height or 8 to 10.",
+            "<p>How can you express this in fraction form?</p>",
+            "<em>What information does each ratio written in fraction fraction form represent in the similar figures?</em>",
+            "<p>For the set of figures of the student holding the fish, the original figure is similar to the figure on the right. Notice that the ratios are equal.</p>",
+            "We know that a scale factor relates each length in a figure to the corresponding length in its image. In this problem we will explore ratios of adjacent side lengths within figures.",
+            "For the diagrams in this problem, all measurements are drawn to scale unless otherwise noted."
+          ]
+        }
+      }
+    ]
+  }
+}

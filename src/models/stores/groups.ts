@@ -35,7 +35,7 @@ export const GroupsModel = types
     acceptUnknownStudents: false
   })
   .actions((self) => ({
-    updateFromDB(uid: string, groups: DBOfferingGroupMap, clazz: ClassModelType) {
+    updateFromDB(groups: DBOfferingGroupMap, clazz: ClassModelType) {
       const allGroups = Object.keys(groups).map((groupId) => {
         const group = groups[groupId];
         const groupUsers = group.users || {};
@@ -67,10 +67,22 @@ export const GroupsModel = types
     }
   }))
   .views((self) => ({
-    groupForUser(uid: string) {
-      return self.allGroups.find((group) => {
-        return !!group.users.find((user) => user.id === uid);
+    get groupsByUser() {
+      const groupsByUser: Record<string, GroupModelType> = {};
+      self.allGroups.forEach((group) => {
+        group.users.forEach((groupUser) => {
+          groupsByUser[groupUser.id] = group;
+        });
       });
+      return groupsByUser;
+    }
+  }))
+  .views((self) => ({
+    groupForUser(uid: string) {
+      return self.groupsByUser[uid];
+    },
+    groupIdForUser(uid: string) {
+      return self.groupsByUser[uid]?.id;
     },
     get groupVirtualDocuments() {
       return self.allGroups.map((group) => {
@@ -79,7 +91,7 @@ export const GroupsModel = types
     },
     getGroupById(id?: string) {
       return self.allGroups.find(group => group.id === id);
-    }
+    },
   }))
   .views((self) => ({
     userInGroup(uid: string, groupId?: string) {
