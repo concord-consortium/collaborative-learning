@@ -128,15 +128,13 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
   const handleValuePaste = async (event: React.ClipboardEvent<HTMLInputElement>) => {
     // If the clipboard contains an image element, process the image so it can be saved
     // and rendered. If the clipboard contains a text element, check if it is an image URL.
-    // If it is, immediately set the value to the URL. Otherwise, allow the default paste
-    // action to occur.
+    // If it is, immediately set the value to the URL. Otherwise, simply let the default
+    // paste action occur without any special handling.
     const targetElement = event.currentTarget;
     const clipboardContents = await getClipboardContent(event.clipboardData);
     if (clipboardContents.image) {
-      event.preventDefault();
       handlePasteImage(clipboardContents.image, targetElement);
     } else if (clipboardContents.text && gImageMap.isImageUrl(clipboardContents.text)) {
-      event.preventDefault();
       setValue(clipboardContents.text);
     }
   };
