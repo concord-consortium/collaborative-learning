@@ -19,17 +19,24 @@ It was configured with the client ID and client secret from the GitHub OAuth app
 
 # TODO
 
-## Preview links
-When editing a section in the CMS there should be a link to open full CLUE pointing at least to the unit, investigation, and problem being edited. And when CLUE supports specifying the section in the URL that should be part of the link too.
+## Image tiles cause changes
+we should look at what the image tile is changing in the export. Perhaps we can fix the export to be more consistent. My guess is it will have something to do with the size bouncing around on load. I think that will be hard to fix, but we should document it to see if Leslie wants to prioritize it.
+https://www.pivotaltracker.com/story/show/184824215
+
+## Try to hide the unit content.json files
+They currently show up on the right side when traversing the CMS tree on the left. I think they could be hidden using some of the filter properties.
 
 ## CLUE section editor scrolling
 The CLUE editor widget should expand its height like the CMS's rich text editor widget. This way the CLUE content won't have an extra scrollbar.
 
 ## Unit editing
-The configuration of a CLUE unit cannot be edited yet.
+It would be helpful if the unit configuration could be edited in the CMS. Perhaps just as raw JSON. However when we tackle supporting the addition of new sections, problems, and investigations we will need more than just raw JSON editing. We could switch to a folder based approach for defining the parts of the units, but that might not solve all of the problems. This needs some research to figure out the most efficient way to support this editing while using the CMS.
 
 ## Preview of a section on the right side of the CMS
 This would allow the author to see the section in its read-only mode like what is seen in the CLUE curriculum tabs.
+
+## Debug flag to log CMS onChange document export
+To help track down issues like the image tile changes, it would be useful to log each CMS onChange along with the value being sent. This should make it easy to see what changes are being sent. I suspect we'll routinely find things that cause unexpected changes in the export.
 
 # Known Issues
 
