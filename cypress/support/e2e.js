@@ -21,7 +21,7 @@ import './commands';
 // Alternatively you can use CommonJS syntax:
 // require('./commands'
 
-// From the install directions: https://github.com/archfz/cypress-terminal-report 
+// From the install directions: https://github.com/archfz/cypress-terminal-report
 // It recommends:
 //   require('cypress-terminal-report/src/installLogsCollector')();
 // This is switched to an import.
@@ -39,6 +39,23 @@ Cypress.on('uncaught:exception', (err, runnable) => {
     // failing the test
     return false;
 });
+
+// Hide fetch/XHR requests from command log
+if (Cypress.config('hideXHRInCommandLog')) {
+  const app = window.top;
+
+  if (
+    app &&
+    !app.document.head.querySelector('[data-hide-command-log-request]')
+  ) {
+    const style = app.document.createElement('style');
+    style.innerHTML =
+      '.command-name-request, .command-name-xhr { display: none }';
+    style.setAttribute('data-hide-command-log-request', '');
+
+    app.document.head.appendChild(style);
+  }
+}
 
 after(function(){
   cy.clearQAData('all');
