@@ -21,7 +21,7 @@ import './commands';
 // Alternatively you can use CommonJS syntax:
 // require('./commands'
 
-// From the install directions: https://github.com/archfz/cypress-terminal-report 
+// From the install directions: https://github.com/archfz/cypress-terminal-report
 // It recommends:
 //   require('cypress-terminal-report/src/installLogsCollector')();
 // This is switched to an import.
@@ -41,9 +41,7 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 });
 
 // Hide fetch/XHR requests from command log
-// if (Cypress.config('hideXHRInCommandLog')) {
-// eslint-disable-next-line no-constant-condition
-if (true) {
+if (Cypress.config('hideXHRInCommandLog')) {
   const app = window.top;
 
   if (
