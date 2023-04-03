@@ -3,4 +3,18 @@
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
   border-top-right-radius: 5px;
+
+  /*
+   * To override or revert Decap CMS styling that adversely affects
+   * Clue content styling in the editor, place related style rules
+   * within the .canvas .tool-tile block below.
+   */
+  .canvas .tool-tile {
+    ul, ol {
+      color: rgb(49, 61, 62);
+      font-size: 15px;
+      padding-left: revert;
+    }
+  }
+
 }
