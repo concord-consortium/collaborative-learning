@@ -149,8 +149,8 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   return (
     <>
       <div className="topbar-sampleratetext-or-timeslider">
-        {sliderMaxValue} <br/>
-        {sliderSec.current}
+        {/* {sliderMaxValue} <br/> */}
+        {/* {sliderSec.current} */}
         {
           programRecordState ?
           <div className="slider-container">
