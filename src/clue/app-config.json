@@ -229,6 +229,14 @@
         "isTileTool": false
       }
     ],
+    "authorTools": [
+      {
+        "id": "solution",
+        "title": "Toggle Solution Tile",
+        "iconId": "icon-solution-tool",
+        "isTileTool": false
+      }
+    ],
     "placeholderText": "",
     "stamps": [],
     "settings": {}

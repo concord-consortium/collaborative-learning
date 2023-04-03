@@ -2,6 +2,7 @@ import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
 import { isValidHttpUrl } from "../../utilities/url-utils";
 import { SectionModelType } from "../curriculum/section";
 import { gImageMap } from "../image-map";
+import { ToolbarButtonModel } from "../tiles/toolbar-button";
 import { ConfigurationManager, mergeDisabledFeatures } from "./configuration-manager";
 import { NavTabsConfigModel } from "./nav-tabs";
 import { ToolbarModel } from "./problem-configuration";
@@ -30,6 +31,7 @@ export const AppConfigModel = types
     navTabs: NavTabsConfigModel.create(self.config?.navTabs || {}),
     disabledFeatures: self.config?.disabledFeatures || [],
     toolbar: ToolbarModel.create(self.config?.toolbar || []),
+    authorTools: ToolbarModel.create(self.config?.authorTools || []),
     settings: self.config?.settings
   }))
   .actions(self => ({
@@ -88,6 +90,12 @@ export const AppConfigModel = types
     get placeholderText() { return self.configMgr.placeholderText; },
     get stamps() { return self.configMgr.stamps; },
     get tools() { return self.configMgr.tools; },
+    get authorToolbar() {
+      return ToolbarModel.create([
+        ...self.toolbar.map(button => ToolbarButtonModel.create(getSnapshot(button))),
+        ...self.authorTools.map(button => ToolbarButtonModel.create(getSnapshot(button)))
+      ]);
+    },
     getSetting(key: string, group?: string) {
       const groupSettings = group ? self.settings?.[group] as SnapshotIn<typeof SettingsGroupMstType> : undefined;
       return groupSettings?.[key] || self.settings?.[key];

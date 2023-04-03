@@ -61,6 +61,24 @@ describe("TableContent", () => {
     expect(table.dataSet.cases.length).toBe(0);
   });
 
+  const colWidth = 200;
+  const biggerColWidth = 500;
+  it("can import column widths using the new export format", () => {
+    const kTableTitle = "Table Title";
+    const importData: TableContentTableImport = {
+      type: "Table",
+      columnWidths: {
+        "col1": colWidth,
+        "col2": biggerColWidth
+      },
+      name: kTableTitle
+    };
+    const table = TableContentModel.create(importData);
+    expect(table.type).toBe(kTableTileType);
+    expect(table.columnWidth("col1")).toBe(colWidth);
+    expect(table.columnWidth("col2")).toBe(biggerColWidth);
+  });
+
   it("can import an authored table with data", () => {
     const kTableTitle = "Table Title";
     const importData: TableContentTableImport = {
@@ -83,8 +101,6 @@ describe("TableContent", () => {
   });
 
   it("can import an authored table with column widths", () => {
-    const colWidth = 200;
-    const biggerColWidth = 500;
     const importData: TableContentTableImport = {
       type: "Table",
       name: "Table Title",

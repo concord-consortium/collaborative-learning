@@ -4,7 +4,7 @@ import { getParent, getSnapshot, getType,
 import { findMetadata, getTileContentInfo, ITileExportOptions } from "./tile-content-info";
 import { TileContentUnion } from "./tile-content-union";
 import { ITileContentModel } from "./tile-content";
-import { DisplayUserTypeEnum } from "../stores/user-types";
+import { DisplayUserType, DisplayUserTypeEnum } from "../stores/user-types";
 import { uniqueId } from "../../utilities/js-utils";
 import { StringBuilder } from "../../utilities/string-builder";
 
@@ -98,6 +98,9 @@ export const TileModel = types
       if (!excludeTitle && self.title) {
         builder.pushLine(`"title": "${self.title}",`, 2);
       }
+      if (self.display) {
+        builder.pushLine(`"display": "${self.display}",`, 2);
+      }
       builder.pushBlock(`"content": ${contentJson}`, 2);
       options?.rowHeight && builder.pushLine(`"layout": { "height": ${options.rowHeight} }`, 2);
       const comma = options?.appendComma ? ',' : '';
@@ -108,6 +111,9 @@ export const TileModel = types
   .actions(self => ({
     setTitle(title: string) {
       self.title = title;
+    },
+    setDisplay(display: DisplayUserType) {
+      self.display = display;
     }
   }))
   .actions(self => ({

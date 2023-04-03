@@ -153,9 +153,11 @@ function getUnitSpec(unitId: string | undefined, appConfig: AppConfigModelType) 
   return requestedUnit || (appConfig.defaultUnit ? appConfig.getUnit(appConfig.defaultUnit) : undefined);
 }
 
-const getExternalProblemSectionData = async (invIdx: number, probIdx: number, sectIdx: number, dataUrl: string) => {
-  const sectionData = await fetch(dataUrl).then(res => res.json());
-  return { invIdx, probIdx, sectIdx, sectionData };
+const getExternalProblemSectionData =
+  async (invIdx: number, probIdx: number, sectIdx: number, dataUrl: string, sectionPath?: string) => {
+    const sectionData = await fetch(dataUrl).then(res => res.json());
+    sectionData.sectionPath = sectionPath;
+    return { invIdx, probIdx, sectIdx, sectionData };
 };
 
 const populateProblemSections = async (content: Record<string, any>, unitUrl: string) => {
@@ -175,7 +177,9 @@ const populateProblemSections = async (content: Record<string, any>, unitUrl: st
         if (typeof section === "string") {
           const sectionDataFile = section;
           const sectionDataUrl = new URL(sectionDataFile, unitUrl).href;
-          externalSectionsArray.push(getExternalProblemSectionData(invIdx, probIdx, sectIdx, sectionDataUrl));
+          externalSectionsArray.push(
+            getExternalProblemSectionData(invIdx, probIdx, sectIdx, sectionDataUrl, sectionDataFile)
+          );
         }
       }
     }
