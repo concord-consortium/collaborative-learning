@@ -58,6 +58,19 @@ interface MicroBitSensorChannelInfo {
   plug: number
 }
 
+interface MicroBitHubInfo {
+  microBitId: string,
+  location?: string
+  plug: number
+}
+
+const microBitHubs = [
+  { microBitId: "a", plug: 19 },
+  { microBitId: "b", plug: 20 },
+  { microBitId: "c", plug: 21 },
+  { microBitId: "d", plug: 22 },
+];
+
 // "plug" is not really used now, but considering keeping for now for ease of transition
 // maybe it has a metaphor that will be useful soon
 const microBitSensors: MicroBitSensorChannelInfo[] = [
@@ -71,7 +84,7 @@ const microBitSensors: MicroBitSensorChannelInfo[] = [
  { microBitId: "d", plug: 18, type: "humidity", units: "%" }
 ];
 
-function createMicroBitChannels(sensors: MicroBitSensorChannelInfo[] ){
+function createMicroBitSensorChannels(sensors: MicroBitSensorChannelInfo[] ){
   const basis = {
     missing: true,
     value: 0,
@@ -97,8 +110,35 @@ function createMicroBitChannels(sensors: MicroBitSensorChannelInfo[] ){
   return channels;
 }
 
-const microBitSensorChannels = createMicroBitChannels(microBitSensors);
+function createMicroBitRelayInfoChannels(hubs: MicroBitHubInfo[] ){
+  const basis = {
+    missing: true,
+    value: 0,
+    virtual: false,
+    type: "relays",
+    usesSerial: true,
+    serialConnected: null,
+    deviceFamily: "microbit",
+    lastMessageRecievedAt: Date.now()
+  };
+
+  const channels = hubs.map((h) => {
+    return {
+      ...basis,
+      hubId: `MICROBIT-RADIO-${h.microBitId}`,
+      hubName: `microbit ${h.microBitId}`,
+      name: `relays-microbit-${h.microBitId}`,
+      channelId: `r-${h.microBitId}`,
+      units: `b`,
+      plug: h.plug
+    };
+  });
+  return channels;
+}
+
+const microBitSensorChannels = createMicroBitSensorChannels(microBitSensors);
+const microBitRelayChannels = createMicroBitRelayInfoChannels(microBitHubs);
 
 export const serialSensorChannels: NodeChannelInfo[] = [
-  emgSensorChannel, fsrSensorChannel, ...microBitSensorChannels
+  emgSensorChannel, fsrSensorChannel, ...microBitSensorChannels, ...microBitRelayChannels
 ];

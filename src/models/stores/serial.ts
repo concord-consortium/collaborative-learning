@@ -1,5 +1,16 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 
+// const kRelayStates = [
+//   "000", // 0
+//   "001", // 1
+//   "010", // 2
+//   "011", // 3
+//   "100", // 4
+//   "101", // 5
+//   "110", // 6
+//   "111"  // 7
+// ]
+
 export class SerialDevice {
   localBuffer: string;
   private port: SerialPort | null;
@@ -95,29 +106,34 @@ export class SerialDevice {
   public handleMicroBitStreamObj(value: string, channels: Array<NodeChannelInfo>){
     this.localBuffer += value;
 
-    const pattern = /([a-z]{1})([a-z]{1})([a-z 0-9]{1})([0-9.]+)\s{0,}[\r][\n]/g;
+    const pattern = /([sc]{1})([abcd]{1})([rth]{1})([0-9.]+)\s{0,}[\r][\n]/g;
     let match: RegExpExecArray | null;
 
     do {
       match = pattern.exec(this.localBuffer);
       if (!match) break;
 
-      const [fullMatch, signalType, microbitId, readingSource, reading] = match;
+      const [fullMatch, signalType, microbitId, element, reading] = match;
+
       this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
 
-      const targetChannelId = `${readingSource}-${microbitId}`;
+      const targetChannelId = `${element}-${microbitId}`;
       const targetChannel = channels.find((c: NodeChannelInfo) => {
         return c.channelId === targetChannelId;
       });
 
-      if (targetChannel && signalType === "s"){
-        targetChannel.value = Number(reading);
-        targetChannel.lastMessageRecievedAt = Date.now();
-      }
+      if (targetChannel && signalType === "s" ){
+        console.log({signalType}, {microbitId}, {element}, {reading})
+        if (["h", "t"].includes(element)){
+          // handle message from a humidity or temperature sensor
 
-      if (signalType === "r"){
-        // UPCOMING PT #184816949 update local intel re relays:
-        // this.updateRelayIntelligence(microbitId, reading)
+          targetChannel.value = Number(reading);
+          targetChannel.lastMessageRecievedAt = Date.now();
+        }
+        if (["r"].includes(element)){
+          // handle message about relays
+          console.log("SERIAL relay states are: ", microbitId, reading)
+        }
       }
     } while (match);
   }
