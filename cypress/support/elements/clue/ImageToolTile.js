@@ -6,7 +6,7 @@ class ImageToolTile{
         return ('.toolbar-button.image-upload input');
     }
     getImageToolImage(){
-        return cy.get('.image-tool.editable > .image-tool-image');
+        return cy.get('.image-tool.editable .image-tool-image');
     }
     getImageToolTile(workspaceClass) {
         return cy.get('.image-tool-tile');

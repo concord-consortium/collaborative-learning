@@ -114,11 +114,10 @@ context('Text tool tile functionalities', function(){
         textToolTile.getTextEditor().last().should('have.descendants', 'ul');
         canvas.deleteDocument();
     });
-    // FIXME: This test broke post slate upgrade.
-    // it('delete text tile',()=>{
-    //     clueCanvas.deleteTile('text');
-    //     textToolTile.getTextTile().should('not.exist');
-    // });
+    it('delete text tile',()=>{
+        clueCanvas.deleteTile('text');
+        textToolTile.getTextTile().should('not.exist');
+    });
 });
 context('Text Tool Tile selection', function () {
     before(function () {

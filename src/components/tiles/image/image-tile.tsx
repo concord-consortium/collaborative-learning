@@ -22,7 +22,7 @@ import { ImageDragDrop } from "../../utilities/image-drag-drop";
 import { isPlaceholderImage } from "../../../utilities/image-utils";
 import placeholderImage from "../../../assets/image_placeholder.png";
 import { HotKeys } from "../../../utilities/hot-keys";
-import { pasteClipboardImage } from "../../../utilities/clipboard-utils";
+import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 
 import "./image-tile.sass";
 
@@ -197,24 +197,27 @@ export default class ImageToolComponent extends BaseComponent<IProps, IState> {
   }
 
   private handlePaste = () => {
-    this.setState({ isLoading: true }, () => {
-      pasteClipboardImage(({ file, image }) => this.handleNewImage(file, image));
+    this.setState({ isLoading: true }, async () => {
+      const osClipboardContents = await getClipboardContent();
+      if (osClipboardContents) {
+        pasteClipboardImage(osClipboardContents, ({ image }) => this.handleNewImage(image));
+      }
     });
   };
 
   private handleUploadImageFile = (file: File) => {
     this.setState({ isLoading: true }, () => {
       gImageMap.addFileImage(file)
-        .then(image => this.handleNewImage(file, image));
+        .then(image => this.handleNewImage(image));
     });
   };
 
-  private handleNewImage = (file: File, image: ImageMapEntryType) => {
+  private handleNewImage = (image: ImageMapEntryType) => {
     if (this._isMounted) {
       const content = this.getContent();
       this.setState({ isLoading: false, imageEntry: image });
       if (image.contentUrl && (image.contentUrl !== content.url)) {
-        content.setUrl(image.contentUrl, file.name);
+        content.setUrl(image.contentUrl, image.filename);
       }
     }
   };
