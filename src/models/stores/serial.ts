@@ -1,16 +1,5 @@
 import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 
-// const kRelayStates = [
-//   "000", // 0
-//   "001", // 1
-//   "010", // 2
-//   "011", // 3
-//   "100", // 4
-//   "101", // 5
-//   "110", // 6
-//   "111"  // 7
-// ]
-
 export class SerialDevice {
   localBuffer: string;
   private port: SerialPort | null;
@@ -123,16 +112,15 @@ export class SerialDevice {
       });
 
       if (targetChannel && signalType === "s" ){
-        console.log({signalType}, {microbitId}, {element}, {reading})
         if (["h", "t"].includes(element)){
           // handle message from a humidity or temperature sensor
-
           targetChannel.value = Number(reading);
           targetChannel.lastMessageRecievedAt = Date.now();
         }
         if (["r"].includes(element)){
-          // handle message about relays
-          console.log("SERIAL relay states are: ", microbitId, reading)
+          // handle message about relays state
+          targetChannel.relaysState = reading.split('').map(s => Number(s));
+          targetChannel.lastMessageRecievedAt = Date.now();
         }
       }
     } while (match);

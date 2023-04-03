@@ -5,28 +5,21 @@
  * micro:bit + Dataflow: "Mock Communicator"
  *
  * This is a program for the micro:bit physically attached to the computer, used for development on the dataflow side.
- * This is designed to mock output from the communicator micro:bit in a world of radio networked sensor/actuator hubs
- *
- * [ A ] - mode 1 - "on" : pass a stream of mock messages to serial (dataflow)
+ * This is designed to mock output from the communicator micro:bit that connects to a world of radio networked sensor/actuator hubs
+ * Readings begin as numbers and strings are are concatenated before sending to serial
  *
  *  (name: sat, value: 20.4)     sat20.2      "the temperature reading on microbit a is 20.2 degrees"
  *  (name: sbt, value: 17.32)    sbt17.32     "the temperature reading on microbit b is 17.32 degrees"
  *  (name: sah, value: 40)       sah40        "the humidity reading on microbit a is 40 percent"
- *  (name: rb1, value: 1)        rb1          "the state of relays on microbit b is relayStates[1]"
- * [ B ] - mode 0 - "off": dont' send any mock messages
+ *  (name: sar, value: "010")    sar010       "the state of relays on microbit a is [off, on, off]"
+ *
+ * [ A ] - on - send mock messages
+ * [ B ] - off - don't send messages
  */
-
-// eight possible relay states we can encode it as a single digit, and an array to fetch value
-
-//  0    1    2    3    4    5    6    7
-// [000, 001, 010, 011, 100, 101, 110, 111]
-//
-
-
-// above should work
 
 let mode = 0
 let mIndex = 0
+
 
 function turnOn() {
     mode = 1
@@ -39,19 +32,18 @@ function turnOff() {
 }
 
 let messageObjects = [
-    { name: "sat", value: 10.4 },  // temp a rises
+    { name: "sar", value: "000" }, // relays on a: off, off, off
+    { name: "sat", value: 10.4 },  // temp a rising...
     { name: "sat", value: 10.5 },
     { name: "sat", value: 10.6 },
-    { name: "sbt", value: 11.32 }, // temb b falls
+    { name: "sbt", value: 11.32 }, // temb b falling...
     { name: "sbt", value: 11.22 },
     { name: "sbt", value: 11.12 },
-    { name: "sah", value: 40 },
+    { name: "sar", value: "010" }, // relays on a: off, on, off
+    { name: "sah", value: 40 },    // humididty a falling...
     { name: "sah", value: 20 },
     { name: "sah", value: 10 },
-    { name: "ra2", value: 1 },  // relay A2 on, then off
-    { name: "ra2", value: 0 },
-    { name: "ra1", value: 0 },  // relay A1 off, then on
-    { name: "rb1", value: 1 }
+
 ]
 
 function startUp() {
@@ -72,12 +64,8 @@ function nextIndex() {
     }
 }
 
-function sendStreamMessage(name: string, value: number) {
+function sendStreamMessage(name: string, value: string | number) {
     if (mode == 1) {
-        // send with :
-        // serial.writeValue(name, value)
-
-        // send without :
         serial.writeLine(`${name}${value}`)
     }
 }

@@ -1,11 +1,11 @@
 export interface NodeChannelInfo {
-  hubId: string; // would use this but "hub" is local microbit
+  hubId: string;
   hubName: string;
   channelId: string;
   missing: boolean;
   type: string;
   units: string;
-  plug: number;
+  plug: number;  // TODO: make optional and preserve any usage, or remove
   value: number;
   name: string;
   virtual?: boolean;
@@ -17,6 +17,7 @@ export interface NodeChannelInfo {
   timeFactor?: number;
   deviceFamily?: string;
   lastMessageRecievedAt?: number | null;
+  relaysState?: number[]
 }
 
 const emgSensorChannel: NodeChannelInfo = {
@@ -65,10 +66,10 @@ interface MicroBitHubInfo {
 }
 
 const microBitHubs = [
-  { microBitId: "a", plug: 19 },
-  { microBitId: "b", plug: 20 },
-  { microBitId: "c", plug: 21 },
-  { microBitId: "d", plug: 22 },
+  { microBitId: "a", plug: 19, relaysState: [0,0,0] },
+  { microBitId: "b", plug: 20, relaysState: [0,0,0] },
+  { microBitId: "c", plug: 21, relaysState: [0,0,0] },
+  { microBitId: "d", plug: 22, relaysState: [0,0,0] },
 ];
 
 // "plug" is not really used now, but considering keeping for now for ease of transition
