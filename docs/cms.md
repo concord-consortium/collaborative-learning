@@ -30,7 +30,7 @@ They currently show up on the right side when traversing the CMS tree on the lef
 The CLUE editor widget should expand its height like the CMS's rich text editor widget. This way the CLUE content won't have an extra scrollbar.
 
 ## Unit editing
-It would be helpful of the unit configuration could be edited in the CMS. Perhaps just as raw JSON. However when we tackle supporting the addition of new sections, problems, and investigations we will need more than just raw JSON editing. We could switch to a folder based approach for defining the parts of the units, but that might not solve all of the problems. This needs some researcher to trying to figure out the most efficient way to support this editing while using the CMS.
+It would be helpful if the unit configuration could be edited in the CMS. Perhaps just as raw JSON. However when we tackle supporting the addition of new sections, problems, and investigations we will need more than just raw JSON editing. We could switch to a folder based approach for defining the parts of the units, but that might not solve all of the problems. This needs some research to figure out the most efficient way to support this editing while using the CMS.
 
 ## Preview of a section on the right side of the CMS
 This would allow the author to see the section in its read-only mode like what is seen in the CLUE curriculum tabs.
