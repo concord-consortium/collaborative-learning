@@ -1,11 +1,13 @@
 (window as any).CMS_MANUAL_INIT = true;
 
 import CMS from "netlify-cms-app";
-import { CmsBackendType, CmsConfig } from "netlify-cms-core";
-import { urlParams } from "../utilities/url-params";
+import { CmsBackendType, CmsConfig, CmsField } from "netlify-cms-core";
 
+import { urlParams } from "../utilities/url-params";
 import { ClueControl } from "./clue-control";
 import { JsonControl } from "./json-control";
+import { PreviewLinkControl } from "./preview-link-control";
+import { defaultCurriculumBranch } from "./cms-constants";
 
 // Local testing of the CMS without working with github directly:
 // - Add the localCMSBacked parameter to the URL
@@ -24,7 +26,7 @@ function cmsBackend() {
       backend: {
         name: "github" as CmsBackendType,
         repo: "concord-consortium/clue-curriculum",
-        branch: urlParams.curriculumBranch || "author",
+        branch: urlParams.curriculumBranch || defaultCurriculumBranch,
         base_url: "https://us-central1-cms-github-auth.cloudfunctions.net",
         auth_endpoint: "/oauth/auth"
       }
@@ -61,6 +63,12 @@ const cmsConfig: CmsConfig = {
           widget: "string"
         },
         {
+          label: "Preview Link",
+          name: "preview-link",
+          required: false,
+          widget: "preview-link"
+        } as CmsField,
+        {
           label: "Content",
           name: "content",
           widget: "clue" as any
@@ -77,5 +85,6 @@ const cmsConfig: CmsConfig = {
 export function initCMS() {
   CMS.registerWidget("clue", ClueControl);
   CMS.registerWidget("json", JsonControl);
+  CMS.registerWidget("preview-link", PreviewLinkControl);
   CMS.init({config: cmsConfig});
 }

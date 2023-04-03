@@ -1,20 +1,22 @@
 import React from "react";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { Map } from "immutable";
+import { CmsWidgetControlProps } from "netlify-cms-core";
+
+import { defaultDocumentModelParts } from "../components/doc-editor-app-defaults";
+import { EditableDocumentContent } from "../components/document/editable-document-content";
 import { appConfig, AppProvider, initializeApp } from "../initialize-app";
 import { IStores } from "../models/stores/stores";
 import { createDocumentModel, DocumentModelType } from "../models/document/document";
-import { defaultDocumentModelParts } from "../components/doc-editor-app-defaults";
-import { EditableDocumentContent } from "../components/document/editable-document-content";
 
 import "./clue-control.scss";
-import { CmsWidgetControlProps } from "netlify-cms-core";
+import "./custom-control.scss";
 
 (window as any).DISABLE_FIREBASE_SYNC = true;
 
 interface IState {
-  stores?: IStores;
   document?: DocumentModelType;
+  stores?: IStores;
 }
 
 // Initialize the app just one time globally, each control waits for this
@@ -63,10 +65,6 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
         ...defaultDocumentModelParts,
         content: initialValue
       });
-      this.setState({
-        stores,
-        document
-      });
 
       // Save the initial state, this is compared with the exported state
       // on each snapshot. See the comment below for more details
@@ -101,6 +99,11 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
           }
         }
       });
+
+      this.setState({
+        document,
+        stores
+      });
     });
   }
 
@@ -113,6 +116,7 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
       return (
         <AppProvider stores={this.state.stores} modalAppElement="#nc-root">
           <EditableDocumentContent
+            className="custom-widget"
             contained={true}
             mode="1-up"
             isPrimary={true}
@@ -123,7 +127,9 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
         </AppProvider>
       );
     } else {
-      return <div className="loading-box">Loading editor...</div>;
+      return (
+        <div className="custom-widget loading-box">Loading editor...</div>
+      );
     }
   }
 
