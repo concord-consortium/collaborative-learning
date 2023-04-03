@@ -31,6 +31,8 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState,
           isPlaying, numNodes, onRecordDataChange} = props;
 
+  console.log(" <RateSelectorOrPlayback> >  🍳 programRecordState:", programRecordState);
+
   /* ==[ Total Recording Time  - Calculate] format as "MMM:SS" */
   const totalTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
   const totalTimeFormatted = formatTime(totalTimeSec);
@@ -43,14 +45,26 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const formattedSec = timerSec.current.toString().padStart(2, "0");
   const formattedTime = `${formattedMin}:${formattedSec}`;
 
+  /* ==[ Playback Recording Time  - Calculate] format as "MMM:SS" */
+  // seperate timer for when programRecordState is stopped (2), and Play button is hit
+  const playBackTimerMin = useRef(0);
+  const playBackTimerSec = useRef(0);
+  const playBackFormattedMin = playBackTimerMin.current.toString().padStart(3, "0");
+  const playBackFormattedSec = playBackTimerSec.current.toString().padStart(2, "0");
+  const playBackFormattedTime = `${playBackFormattedMin}:${playBackFormattedSec}`;
+
   /* ==[ Timer - Enable ] == */
   const timerRunning = numNodes > 0 && sliderSec.current < totalTimeSec && (programRecordState === 1);
+  const playBackTimerRunning = !timerRunning && isPlaying;
+
+  /* ==[ Slider Max Value ] == */
+  const sliderMaxValue = playBackTimerRunning ? timerSec.current : totalTimeSec;
 
   useEffect(()=>{
     if (timerRunning){
       const timer = setInterval(() => {
-        timerRunning && timerSec.current++;
-        timerRunning && sliderSec.current++;
+        timerSec.current++;
+        sliderSec.current++;
         if (timerSec.current === 60){
           timerMin.current++;
           timerSec.current = 0;
@@ -58,7 +72,24 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [timerSec, timerRunning, sliderSec]);
+    if (playBackTimerRunning){
+      console.log("run once");
+      const playBackTimer = setInterval(() => {
+        playBackTimerSec.current++;
+        sliderSec.current++;
+        if (playBackTimerSec.current === 60){
+          playBackTimerMin.current++;
+          playBackTimerSec.current = 0;
+        }
+      }, 1000);
+      return () => clearInterval(playBackTimer);
+    }
+    //reset slider back to 0 if user presses stop
+    if (programRecordState === 2){
+      sliderSec.current = 0;
+    }
+
+  }, [timerSec, timerRunning, sliderSec, playBackTimerRunning, programRecordState]);
 
   /* ==[ Timer - Reset ] == */
   if (programRecordState === 0) {
@@ -85,7 +116,7 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
           <div className="slider-container">
             <Slider
               min={0}
-              max={totalTimeSec}
+              max={sliderMaxValue}
               step={1}
               value={sliderSec.current}
               ref={railRef}
@@ -116,7 +147,7 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
             numNodes > 0 &&
             <div className="countdown-timer">
               {/* {console.log("programRecordState:", programRecordState)} */}
-              {programRecordState === 1 ? `${formattedTime} / ${totalTimeFormatted}` : `/${formattedTime}`}
+              {programRecordState === 1 ? `${formattedTime} / ${totalTimeFormatted}` : `${playBackFormattedTime}/${formattedTime}`}
             </div>
           }
 

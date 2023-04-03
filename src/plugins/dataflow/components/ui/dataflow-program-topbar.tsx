@@ -36,7 +36,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
   const [playBackReset, setPlayBackReset] = useState(false);
 
 
-
   return (
     <div className="program-editor-topbar">
 
