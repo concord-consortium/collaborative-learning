@@ -1,6 +1,15 @@
 import { EntryStatus, gImageMap } from "../models/image-map";
 import { getClipboardContent, pasteClipboardImage } from "./clipboard-utils";
 
+const mockBlob = {
+  arrayBuffer: jest.fn(),
+  size: 1024,
+  text: jest.fn().mockResolvedValue("test"),
+  type: "text/plain",
+  slice: jest.fn(),
+  stream: jest.fn()
+};
+
 describe("getClipboardContent", () => {
   afterEach(() => {
     jest.resetAllMocks();
@@ -17,14 +26,6 @@ describe("getClipboardContent", () => {
     expect(clipboardContent.text).toBe(null);
   });
   it("returns a text item when the clipboard contains a text item", async () => {
-    const mockBlob = {
-      arrayBuffer: jest.fn(),
-      size: 1024,
-      text: jest.fn().mockResolvedValue("test"),
-      type: "text/plain",
-      slice: jest.fn(),
-      stream: jest.fn()
-    };
     const mockReturnValue = {
       types: ["text/plain"], getType: jest.fn().mockResolvedValue(mockBlob)
     };
@@ -69,25 +70,25 @@ describe("pasteClipboardImage", () => {
   });
 
   it ("does not call addFileImage or getImage when the clipboard does not contain an image or text item", () => {
-    pasteClipboardImage({image: null, text: null}, onComplete);
+    pasteClipboardImage({image: null, text: null, types: ["text/html"]}, onComplete);
     expect(gImageMap.addFileImage).not.toHaveBeenCalled();
     expect(gImageMap.getImage).not.toHaveBeenCalled();
-    expect(mockConsoleError).toHaveBeenCalledWith("ERROR: unknown clipboard content type");
+    expect(mockConsoleError).toHaveBeenCalledWith("ERROR: unknown clipboard content type(s): text/html");
   });
   it ("calls addFileImage when the clipboard contains an image item", () => {
-    const image = { image: "test.png" };
+    const image = { image: mockBlob, text: null, types: ["image/png"] };
     pasteClipboardImage(image, onComplete);
     expect(gImageMap.addFileImage).toHaveBeenCalled();
   });
   it ("calls getImage when the clipboard contains a text item with a valid value", () => {
-    const image = { text: "curriculum/test/images/test.png" };
+    const image = { image: null, text: "curriculum/test/images/test.png", types: ["text/plain"] };
     pasteClipboardImage(image, onComplete);
     expect(gImageMap.getImage).toHaveBeenCalled();
   });
   it ("does not call getImage when the clipboard contains a text item with an invalid value", () => {
-    const image = { text: "not-a-valid-url-value" };
+    const image = { image: null, text: "not-a-valid-url-value", types: ["text/plain"] };
     pasteClipboardImage(image, onComplete);
     expect(gImageMap.getImage).not.toHaveBeenCalled();
-    expect(mockConsoleError).toHaveBeenCalledWith("ERROR: invalid image URL");
+    expect(mockConsoleError).toHaveBeenCalledWith("ERROR: invalid image URL: not-a-valid-url-value");
   });
 });

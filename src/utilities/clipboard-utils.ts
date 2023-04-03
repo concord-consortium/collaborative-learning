@@ -3,9 +3,14 @@ import { gImageMap, ImageMapEntryType } from "../models/image-map";
 interface IOnCompleteParams {
   image: ImageMapEntryType;
 }
+interface IClipboardContents {
+  image: Blob | null;
+  text: string | null;
+  types: string[];
+}
 type OnComplete = (params: IOnCompleteParams) => void;
 
-export const pasteClipboardImage = async (imageData: any, onComplete: OnComplete) => {
+export const pasteClipboardImage = async (imageData: IClipboardContents, onComplete: OnComplete) => {
   if (imageData.image) {
     const blobToFile = new File([imageData.image], "clipboard-image.png");
     gImageMap.addFileImage(blobToFile).then(image => {
@@ -14,7 +19,7 @@ export const pasteClipboardImage = async (imageData: any, onComplete: OnComplete
   } else if (imageData.text) {
     const url = imageData.text.match(/curriculum\/([^/]+\/images\/.*)/);
     if (!url) {
-      console.error("ERROR: invalid image URL");
+      console.error(`ERROR: invalid image URL: ${imageData.text}`);
       return;
     }
     const fileUrl = url[1];
@@ -22,18 +27,20 @@ export const pasteClipboardImage = async (imageData: any, onComplete: OnComplete
     const imageEntry = await gImageMap.getImage(fileUrl, {filename});
     onComplete({ image: imageEntry });
   } else {
-    console.error("ERROR: unknown clipboard content type");
+    console.error(`ERROR: unknown clipboard content type(s): ${imageData.types}`);
   }
 };
 
 export const getClipboardContent = async () => {
-  const clipboardContent: Record<string, any> = {
+  const clipboardContent: IClipboardContents = {
     image: null,
-    text: null
+    text: null,
+    types: []
   };
   if (navigator.clipboard.read) {
     const clipboardContents = await navigator.clipboard.read();
     for (const item of clipboardContents) {
+      clipboardContent.types.push(...item.types);
       if (item.types.includes("image/png")) {
         clipboardContent.image = await item.getType("image/png");
       }
