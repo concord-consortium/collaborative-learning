@@ -4,7 +4,7 @@ interface IOnCompleteParams {
   image: ImageMapEntryType;
 }
 interface IClipboardContents {
-  image: Blob | null;
+  image: File | null;
   text: string | null;
   types: string[];
 }
@@ -12,8 +12,7 @@ type OnComplete = (params: IOnCompleteParams) => void;
 
 export const pasteClipboardImage = async (imageData: IClipboardContents, onComplete: OnComplete) => {
   if (imageData.image) {
-    const blobToFile = new File([imageData.image], "clipboard-image.png");
-    gImageMap.addFileImage(blobToFile).then(image => {
+    gImageMap.addFileImage(imageData.image).then(image => {
       onComplete({ image });
     });
   } else if (imageData.text) {
@@ -53,7 +52,9 @@ export const getClipboardContent = async (clipboardData?: DataTransfer) => {
       for (const item of clipboardContents) {
         clipboardContent.types.push(...item.types);
         if (item.types.includes("image/png")) {
-          clipboardContent.image = await item.getType("image/png");
+          const imageBlob = await item.getType("image/png");
+          const blobToFile = new File([imageBlob], "clipboard-image.png");
+          clipboardContent.image = blobToFile;
         }
         if (item.types.includes("text/plain")) {
           const textBlob = await item.getType("text/plain");

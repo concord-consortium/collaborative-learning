@@ -135,7 +135,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     if (clipboardContents.image) {
       event.preventDefault();
       handlePasteImage(clipboardContents.image, targetElement);
-    } else if (gImageMap.isImageUrl(clipboardContents.text)) {
+    } else if (clipboardContents.text && gImageMap.isImageUrl(clipboardContents.text)) {
       event.preventDefault();
       setValue(clipboardContents.text);
     }
