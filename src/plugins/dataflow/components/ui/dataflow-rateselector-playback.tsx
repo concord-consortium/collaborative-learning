@@ -61,7 +61,7 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   // console.log("playBackIsFinished", playBackIsFinished);
 
   //after you've hit is playing, or when you've paused (!isPlaying) and its not done yet, and you're in clear state
-  let condition = (playBackTimerRunning || ((!isPlaying) && (!playBackIsFinished) && programRecordState === 2))
+  const condition = (playBackTimerRunning || ((!isPlaying) && (!playBackIsFinished) && programRecordState === 2))
   || playBackIsFinished;
 
   // condition = playBackTimerRunning;
