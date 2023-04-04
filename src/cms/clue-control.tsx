@@ -8,6 +8,7 @@ import { EditableDocumentContent } from "../components/document/editable-documen
 import { appConfig, AppProvider, initializeApp } from "../initialize-app";
 import { IStores } from "../models/stores/stores";
 import { createDocumentModel, DocumentModelType } from "../models/document/document";
+import { DEBUG_CMS } from "../lib/debug";
 
 import "./clue-control.scss";
 import "./custom-control.scss";
@@ -93,9 +94,15 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
             // Looking at the CMS code it seems safer to pass an immutable object here
             // not a plain JS object. The plain JS object does get saved correctly,
             // but it also gets returned in the value property so it means sometimes the value
-            // is a immutable object and sometimes it is a plan JS object.
+            // is a immutable object and sometimes it is a plain JS object.
             const immutableValue = Map(parsedJson);
             this.props.onChange(immutableValue);
+            if (DEBUG_CMS) {
+              // eslint-disable
+              console.log("DEBUG: CMS ClueControl onChange called with new content value: ", parsedJson);
+              console.log("DEBUG: CMS ClueControl initial content value was: ", initialValue);
+              // eslint-enable
+            }
           }
         }
       });
