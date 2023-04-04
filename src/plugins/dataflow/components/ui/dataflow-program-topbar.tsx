@@ -24,12 +24,13 @@ interface TopbarProps {
   programRecordState: number;
   isPlaying: boolean;
   handleChangeIsPlaying: () => void;
+  // playBackIndex: number | null;
   numNodes: number;
 }
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
-  const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates, dataRate,
-    onRateSelectClick, onRecordDataChange, programRecordState, isPlaying, handleChangeIsPlaying, numNodes } = props;
+  const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates, dataRate, onRateSelectClick,
+          onRecordDataChange, programRecordState, isPlaying, handleChangeIsPlaying, numNodes } = props;
 
   const disableRecordButton = readOnly && programRecordState === 0; //hides RecordButton on leftside read only docs
   //create a piece of state

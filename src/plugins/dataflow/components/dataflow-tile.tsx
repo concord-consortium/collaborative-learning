@@ -1,7 +1,7 @@
 import React from "react";
 import { SizeMe, SizeMeProps } from "react-sizeme";
 import { observer, inject } from "mobx-react";
-import { DataflowProgram } from "./dataflow-program";
+import { DataflowProgram, UpdateMode } from "./dataflow-program";
 import { BaseComponent } from "../../../components/base";
 import { ITileModel } from "../../../models/tiles/tile-model";
 import { ITileExportOptions } from "../../../models/tiles/tile-content-info";
@@ -12,6 +12,7 @@ import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { ToolTitleArea } from "../../../components/tiles/tile-title-area";
 import { dataflowLogEvent } from "../dataflow-logger";
+
 
 import "./dataflow-tile.scss";
 
@@ -24,6 +25,7 @@ interface IProps extends ITileProps{
 interface IDataflowTileState {
   programRecordingMode: number; // TO DO: convert to enum
   isPlaying: boolean;
+  playBackIndex: number;
 }
 
 @inject("stores")
@@ -37,6 +39,7 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     this.state = {
       programRecordingMode: 0,
       isPlaying: false,
+      playBackIndex: 0,
     };
     // console.log("<DataflowToolComponent with context", props.context);
   }
@@ -74,6 +77,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   programRecordState={this.state.programRecordingMode}
                   isPlaying={this.state.isPlaying}
                   handleChangeIsPlaying={this.handleChangeIsPlaying}
+                  playBackIndex={this.state.playBackIndex}
+                  updatePlayBackIndex={this.updatePlayBackIndex}
                   numNodes={numNodes}
                   tileModel={tileModel}
                 />
@@ -204,6 +209,15 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
 
   private handleChangeIsPlaying = () => {
     this.setState({isPlaying: !this.state.isPlaying});
+  };
+
+  private updatePlayBackIndex = (update: string) => {
+    if (update === UpdateMode.Increment){
+      this.setState({playBackIndex: this.state.playBackIndex + 1});
+    }
+    if (update === UpdateMode.Reset){
+      this.setState({playBackIndex: 0});
+    }
   };
 
   private getContent() {

@@ -54,6 +54,11 @@ export interface IStartProgramParams {
   title: string;
 }
 
+export enum UpdateMode {
+  Increment = "Increment",
+  Reset = "Reset",
+}
+
 interface IProps extends SizeMeProps {
   readOnly?: boolean;
   documentProperties?: { [key: string]: string };
@@ -69,6 +74,8 @@ interface IProps extends SizeMeProps {
   programRecordState: number;
   isPlaying: boolean;
   handleChangeIsPlaying: () => void;
+  playBackIndex: number | null;
+  updatePlayBackIndex: (update: string) => void;
   numNodes: number;
   tileModel: DataflowContentModelType;
 }
@@ -135,6 +142,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           programRecordState={this.props.programRecordState}
           isPlaying={this.props.isPlaying}
           handleChangeIsPlaying={this.props.handleChangeIsPlaying}
+          // playBackIndex={playBackIndex}
+          // updatePlayBackIndex
           numNodes={numNodes}
         />
         <div className={toolbarEditorContainerClass}>
@@ -525,7 +534,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  private tick = () => {
+  private tick = (isPlaying: boolean) => {
+    console.log("-------tick------programRecordState:---", this.props.programRecordState);
+    console.log("playBackIndex", this.props.playBackIndex);
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
@@ -576,6 +587,21 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         await this.programEngine.abort();
         await this.programEngine.process(this.programEditor.toJSON());
       })();
+    }
+
+
+    const dataSet = this.props.tileModel.dataSet;
+    if (this.props.programRecordState === 1){
+      console.log("recording...dataSet:", dataSet);
+    }
+
+    // you want it to be in clear Mode and play button is pressed
+    if (this.props.programRecordState === 2 && this.props.isPlaying) {
+      console.log("dataSet during Record = ", dataSet);
+      this.props.updatePlayBackIndex(UpdateMode.Increment);
+    }
+    else {
+      this.props.updatePlayBackIndex(UpdateMode.Reset);
     }
   };
 
