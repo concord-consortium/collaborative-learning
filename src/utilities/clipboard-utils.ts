@@ -4,7 +4,7 @@ interface IOnCompleteParams {
   image: ImageMapEntryType;
 }
 interface IClipboardContents {
-  image: Blob | null;
+  image: File | null;
   text: string | null;
   types: string[];
 }
@@ -12,8 +12,7 @@ type OnComplete = (params: IOnCompleteParams) => void;
 
 export const pasteClipboardImage = async (imageData: IClipboardContents, onComplete: OnComplete) => {
   if (imageData.image) {
-    const blobToFile = new File([imageData.image], "clipboard-image.png");
-    gImageMap.addFileImage(blobToFile).then(image => {
+    gImageMap.addFileImage(imageData.image).then(image => {
       onComplete({ image });
     });
   } else if (imageData.text) {
@@ -31,24 +30,39 @@ export const pasteClipboardImage = async (imageData: IClipboardContents, onCompl
   }
 };
 
-export const getClipboardContent = async () => {
+export const getClipboardContent = async (clipboardData?: DataTransfer) => {
   const clipboardContent: IClipboardContents = {
     image: null,
     text: null,
     types: []
   };
-  if (navigator.clipboard.read) {
-    const clipboardContents = await navigator.clipboard.read();
-    for (const item of clipboardContents) {
-      clipboardContent.types.push(...item.types);
-      if (item.types.includes("image/png")) {
-        clipboardContent.image = await item.getType("image/png");
+
+  if (clipboardData) {
+    for (const item of clipboardData.items) {
+      if (item.type === "image/png") {
+        clipboardContent.image = item.getAsFile();
       }
-      if (item.types.includes("text/plain")) {
-        const textBlob = await item.getType("text/plain");
-        clipboardContent.text = await textBlob.text();
+      if (item.type === "text/plain") {
+        clipboardContent.text = clipboardData.getData("text/plain");
+      }
+    }
+  } else {
+    if (navigator.clipboard.read) {
+      const clipboardContents = await navigator.clipboard.read();
+      for (const item of clipboardContents) {
+        clipboardContent.types.push(...item.types);
+        if (item.types.includes("image/png")) {
+          const imageBlob = await item.getType("image/png");
+          const blobToFile = new File([imageBlob], "clipboard-image.png");
+          clipboardContent.image = blobToFile;
+        }
+        if (item.types.includes("text/plain")) {
+          const textBlob = await item.getType("text/plain");
+          clipboardContent.text = await textBlob.text();
+        }
       }
     }
   }
+
   return clipboardContent;
 };

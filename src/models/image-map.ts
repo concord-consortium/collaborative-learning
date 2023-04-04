@@ -457,7 +457,7 @@ export const localAssetsImagesHandler: IImageHandler = {
     let _url = url;
     if (urlPieces && this.imageMap.unitCodeMap) {
       const urlUnitDir = urlPieces[1];
-      const newUnitDir = this.imageMap.unitCodeMap.get(urlUnitDir);
+      const newUnitDir = this.imageMap.unitCodeMap.get(urlUnitDir) || urlUnitDir;
       _url = `${newUnitDir}/${urlPieces[2]}`;
     }
     // We also need to convert legacy drawing tool stamp paths

@@ -49,6 +49,17 @@ describe("getClipboardContent", () => {
 describe("pasteClipboardImage", () => {
   const onComplete = jest.fn();
   const mockConsoleError = jest.fn();
+  const mockImageFile = {
+    arrayBuffer: jest.fn(),
+    lastModified: 0,
+    name: "test.png",
+    size: 1024,
+    slice: jest.fn(),
+    stream: jest.fn(),
+    text: jest.fn(),
+    type: "image/png",
+    webkitRelativePath: ""
+  };
   const mockImageResponse = {
     contentUrl: "test/test.png",
     displayUrl: "https://example.com/test/test.png",
@@ -76,7 +87,7 @@ describe("pasteClipboardImage", () => {
     expect(mockConsoleError).toHaveBeenCalledWith("ERROR: unknown clipboard content type(s): text/html");
   });
   it ("calls addFileImage when the clipboard contains an image item", () => {
-    const image = { image: mockBlob, text: null, types: ["image/png"] };
+    const image = { image: mockImageFile, text: null, types: ["image/png"] };
     pasteClipboardImage(image, onComplete);
     expect(gImageMap.addFileImage).toHaveBeenCalled();
   });
