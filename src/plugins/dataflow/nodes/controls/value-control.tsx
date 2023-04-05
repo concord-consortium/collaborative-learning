@@ -1,6 +1,6 @@
 import React from "react";
 import classNames from "classnames";
-import Rete, { NodeEditor, Node} from "rete";
+import Rete, { NodeEditor, Node } from "rete";
 import { roundNodeValue } from "../../model/utilities/node";
 import "./value-control.sass";
 
