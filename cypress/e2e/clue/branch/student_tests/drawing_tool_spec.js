@@ -350,6 +350,31 @@ context('Draw Tool Tile', function () {
         // Uploading images doesn't seem to be working at the moment.
         // drawToolTile.getImageDrawing().should("exist").and("have.length", 1);
       });
+      // TODO: Figure out how to get the clipboard paste check below to work when the tests 
+      // are run using Chrome. It will pass when using Electron, but not Chrome. In Chrome 
+      // the attempt to write to the clipboard results in an error: "Must be handling a user 
+      // gesture to use custom clipboard." See https://github.com/cypress-io/cypress/issues/2752
+      // for more background. Apparently, the basic problem is that Cypress "currently uses 
+      // programmatic browser APIs which Chrome doesn't consider as genuine user interaction."
+      it.skip('will accept a valid image URL pasted from the clipboard', function(){
+        // For the drawing tool, this path needs to correspond to an actual file in the curriculum repository.
+        const imageFilePath = "curriculum/sas/images/survey.png";
+        Cypress.automation("remote:debugger:protocol", {
+          command: "Browser.grantPermissions",
+          params: {
+            permissions: ["clipboardReadWrite", "clipboardSanitizedWrite"],
+            origin: window.location.origin,
+          },
+        }).then(cy.window().then((win) => {
+          win.navigator.clipboard.write([new win.ClipboardItem({
+              "text/plain": new Blob([imageFilePath], { type: "text/plain" }),
+          })]);
+        }));
+        const isMac = navigator.platform.indexOf("Mac") === 0;
+        const cmdKey = isMac ? "meta" : "ctrl";
+        drawToolTile.getDrawTileComponent().last().type(`{${cmdKey}+v}`);
+        drawToolTile.getImageDrawing().last().should("exist").invoke("attr", "href").should("contain", "sas/images/survey.png");
+      });
     });
   });
 });

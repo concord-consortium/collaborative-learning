@@ -224,7 +224,7 @@ class ClueCanvas {
       switch (tileType) {
           case 'text':
               textToolTile.getTextTile().last().focus();
-              tileElement = cy.get('.text-tool-wrapper').parent();
+              tileElement = cy.get('.text-tool-wrapper').last().click({ force: true }).parent();
               break;
           case 'graph':
               tileElement = graphToolTile.getGraphTile().last().click({ force: true }).parent();

@@ -1,6 +1,6 @@
 import firebase from "firebase/app";
 import { forEach, size } from "lodash";
-import { DB, Monitor } from "../db";
+import { DB } from "../db";
 import { DBOfferingUser, DBOfferingUserMap } from "../db-types";
 import { PlanningDocument, ProblemDocument } from "../../models/document/document-types";
 import { BaseListener } from "./base-listener";
@@ -75,39 +75,30 @@ export class DBProblemDocumentsListener extends BaseListener {
 
   private handleOfferingUser = (user: DBOfferingUser) => {
     if (!user?.self?.uid) return;
-    const { documents, user: currentUser, groups } = this.db.stores;
+    const { documents, user: currentUser } = this.db.stores;
     // uid should always be a string, but demo users with numeric uids have been encountered
     const isOwnDocument = String(user.self.uid) === currentUser.id;
-    // monitor problem documents
+
     if (isOwnDocument && (size(user.documents) === 0)) {
       documents.resolveRequiredDocumentPromiseWithNull(ProblemDocument);
     }
+
     forEach(user.documents, document => {
       if (!document?.documentKey || !document?.self?.uid) return;
       const existingDoc = documents.getDocument(document.documentKey);
       if (existingDoc) {
         this.db.updateDocumentFromProblemDocument(existingDoc, document);
       } else {
-        // both teachers and students listen to all problem documents
-        // but only teachers listen to all content.  students only listen
-        // to content of users in their group to reduce network traffic
-        const userInGroup = groups.userInGroup(document.self.uid, currentUser.latestGroupId);
-        // Local changes take precedence over remote changes
-        const monitor = isOwnDocument
-                          ? Monitor.Local
-                          : currentUser.isTeacher || userInGroup
-                            ? Monitor.Remote
-                            : Monitor.None;
-        this.db.createDocumentModelFromProblemMetadata(ProblemDocument, document.self.uid, document, monitor)
-          .then((doc) => {
+        this.db.createDocumentModelFromProblemMetadata(ProblemDocument, document.self.uid, document)
+          .then((docModel) => {
             if (isOwnDocument) {
-              documents.resolveRequiredDocumentPromise(doc);
-              syncStars(doc, this.db);
+              documents.resolveRequiredDocumentPromise(docModel);
+              syncStars(docModel, this.db);
             }
           });
       }
     });
-    // monitor planning documents
+
     if (isOwnDocument && (size(user.planning) === 0)) {
       documents.resolveRequiredDocumentPromiseWithNull(PlanningDocument);
     }
@@ -115,7 +106,7 @@ export class DBProblemDocumentsListener extends BaseListener {
       if (!document?.documentKey || !document?.self?.uid) return;
       const existingDoc = documents.getDocument(document.documentKey);
       if (!existingDoc) {
-        this.db.createDocumentModelFromProblemMetadata(PlanningDocument, document.self.uid, document, Monitor.Local)
+        this.db.createDocumentModelFromProblemMetadata(PlanningDocument, document.self.uid, document)
           .then(doc => {
             isOwnDocument && documents.resolveRequiredDocumentPromise(doc);
           });

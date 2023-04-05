@@ -448,7 +448,7 @@ export const localAssetsImagesHandler: IImageHandler = {
            /\.[a-z0-9]+$/i.test(url);
   },
 
-  async store(url: string) {
+  async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {
     // Legacy curriculum units lived in the defunct "curriculum" directory in subfolders
     // named after the unit title, e.g. "curriculum/stretching-and-shrinking". References
     // to files in those directories need to be converted to use the new file structure
@@ -457,7 +457,7 @@ export const localAssetsImagesHandler: IImageHandler = {
     let _url = url;
     if (urlPieces && this.imageMap.unitCodeMap) {
       const urlUnitDir = urlPieces[1];
-      const newUnitDir = this.imageMap.unitCodeMap.get(urlUnitDir);
+      const newUnitDir = this.imageMap.unitCodeMap.get(urlUnitDir) || urlUnitDir;
       _url = `${newUnitDir}/${urlPieces[2]}`;
     }
     // We also need to convert legacy drawing tool stamp paths
@@ -468,7 +468,7 @@ export const localAssetsImagesHandler: IImageHandler = {
     const displayUrl = this.imageMap.curriculumUrl && !/^assets\//.test(_url)
                          ? new URL(_url, this.imageMap.curriculumUrl).href
                          : getAssetUrl(_url);
-    return { contentUrl: _url, displayUrl, success: true };
+    return { filename: options?.filename, contentUrl: _url, displayUrl, success: true };
   },
   imageMap: {}
 };

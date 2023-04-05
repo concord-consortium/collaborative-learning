@@ -39,9 +39,9 @@ import { addCanonicalCasesToDataSet, newCaseId } from "../../../models/data/data
 import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
+import { addCanonicalCasesToDataSet, ICaseCreation } from "../../../models/data/data-set";
 
 import "./dataflow-program.sass";
-
 interface NodeNameValuePair {
   name: string;
   val: number;
@@ -147,8 +147,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           programRecordState={this.props.programRecordState}
           isPlaying={this.props.isPlaying}
           handleChangeIsPlaying={this.props.handleChangeIsPlaying}
-          // playBackIndex={playBackIndex}
-          // updatePlayBackIndex
           numNodes={numNodes}
         />
         <div className={toolbarEditorContainerClass}>
@@ -679,134 +677,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           }
           console.log("playback node:", node.name, valueToSendToNode);
         });
-
+        
+       
       }
     }
-
-    // //old process
-    // if (isPlaying){
-    //   const currentCase = dataSet.getCaseAtIndex(playBackIndex);
-    //   if (currentCase){
-    //     const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
-    //     this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
-
-    //       const attrId = dataSet.attributes[idx].id;
-    //       const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
-    //       let nodeControl;
-    //       // console.log("valueToSendToNode:", valueToSendToNode);
-    //       switch (node.name){
-    //         case "Sensor":
-    //           nodeControl = node.controls.get("nodeValue") as SensorValueControl;
-    //           nodeControl.setValue(valueToSendToNode);
-    //           break;
-    //         case "Number":
-    //           nodeControl = node.controls.get("nodeValue") as NumControl;
-    //           nodeControl.setValue(valueToSendToNode);
-    //           break;
-    //         case "Generator":
-    //           nodeControl = node.controls.get("nodeValue") as ValueControl;
-    //           console.log("in Generator switch with valueToSendNode", valueToSendToNode);
-    //           nodeControl.setValue(0.96);
-    //           // nodeControl.setValue(1);
-
-    //           break;
-    //         case "Timer":
-    //           nodeControl = node.controls.get("nodeValue") as ValueControl; //not working
-    //           nodeControl.setValue(valueToSendToNode);
-    //           break;
-    //         case "Math":
-    //           break;
-    //         case "Logic":
-    //           break;
-    //         case "Transform":
-    //           break;
-    //         case "Control":
-    //           break;
-    //         case "Demo Output":
-    //           // console.log("Demo Output!!!", node);
-    //           nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
-    //           nodeControl.setValue(1); //---> shines light bulb on, but the off should say on!
-    //           nodeControl.putData(nodeControl.key, valueToSendToNode); //doesn't work for on/off
-    //           break;
-    //         case "Live Output":
-    //           // console.log("live output node", node);
-    //           // nodeControl = node.inputs.get("nodeValue")?.control as Control;
-    //           // nodeControl.putData("nodeValue", 1); //doesn't work
-
-    //           // nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-    //           // nodeControl.setValue(1); //doesn't work
-
-    //           // nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-    //           // nodeControl.putData("nodeValue", 1); //doesn't work
-
-    //           // nodeControl = node.inputs.get("nodeValue") as Input;
-    //           // nodeControl.control?.putData("nodeValue", 1); //doesn't work
-    //           // console.log("Live Output Node > nodeControl > ", nodeControl);
-    //           break;
-    //         default:
-    //           console.log("other node option");
-    //       }
-
-    //       // console.log("playback node:", node.name, "nodeControl:", nodeControl);
-    //       // console.log("full node:", node);
-
-    //       console.log("playback node:", node.name, valueToSendToNode);
-    //     });
-
-    //   }
-    //   // console.log("currentCaseId:", currentCase);
-    // }
-    // else {
-    //   /* ==[ Per tick - create a case and write it to the dataSet ] == */
-    //   if (isRecording){
-    //     const aCase = {
-    //       __id__: newCaseId(),
-    //     };
-    //     const existingAttributes = this.props.tileModel.existingAttributes();
-    //     //loop through attribute (nodes) and write each value
-    //     this.programEditor.nodes.forEach((node, idx) => {
-    //       const key = existingAttributes[idx] as keyof typeof aCase;
-    //       aCase[key] = node.data.nodeValue as string;
-    //       console.log("recording node:", node.name, aCase[key]);
-    //     });
-    //     addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
-    //   }
-    //   const nodeProcessMap: { [name: string]: (n: Node) => void } = {
-    //     Generator: this.updateGeneratorNode,
-    //     Timer: this.updateTimerNode,
-    //     Sensor: (n: Node) => {
-    //       this.updateNodeChannelInfo(n);
-    //       this.updateNodeSensorValue(n);
-    //     },
-    //     "Live Output": (n: Node) => {
-    //       this.sendDataToSerialDevice(n);
-    //     }
-    //   };
-    //   let processNeeded = false;
-    //   this.programEditor.nodes.forEach((n: Node) => {
-    //     const nodeProcess = nodeProcessMap[n.name];
-    //     if (nodeProcess) {
-    //       processNeeded = true;
-    //       nodeProcess(n);
-    //     }
-    //     if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
-    //       this.updateNodeRecentValues(n);
-    //     }
-    //   });
-    //   if (processNeeded) {
-    //       // if we've updated values on 1 or more nodes (such as a generator),
-    //       // we need to abort any current processing and reprocess all
-    //       // nodes so current values are up to date
-    //     (async () => {
-    //       await this.programEngine.abort();
-    //       await this.programEngine.process(this.programEditor.toJSON());
-    //     })();
-    //   }
-    // }
-    // // end old process
-
-
-
 
     //* ==[ Playback Index ] == */
 

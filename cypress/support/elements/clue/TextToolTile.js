@@ -39,5 +39,10 @@ class TextToolTile {
     getTextToolNewVariable(){
         return cy.get('.primary-workspace .text-toolbar [data-original-title="New Variable"]');
     }
+    deleteTextTile() {
+        this.getTextTile().last().click();
+        cy.get('.tool.delete').click();
+        cy.get('.ReactModalPortal .modal-footer .modal-button.default').click();
+    }
 }
 export default TextToolTile;

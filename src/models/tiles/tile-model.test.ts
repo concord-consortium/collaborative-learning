@@ -66,6 +66,15 @@ describe("TileModel", () => {
     });
   });
 
+  it(`exports display setting`, () => {
+    const toolDefaultContent = getTileContentInfo("Table")?.defaultContent;
+    assertIsDefined(toolDefaultContent);
+    const tile = TileModel.create({ content: getSnapshot(toolDefaultContent()) });
+    tile.setDisplay("teacher");
+    const json = JSON.parse(tile.exportJson() ?? "{}");
+    expect(json?.display).toBe("teacher");
+  });
+
   it("returns UnknownToolModel for unrecognized snapshots", () => {
     const type = "foo";
     const content: any = { type, bar: "baz" };
