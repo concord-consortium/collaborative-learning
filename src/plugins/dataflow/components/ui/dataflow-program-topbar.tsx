@@ -24,7 +24,6 @@ interface TopbarProps {
   programRecordState: number;
   isPlaying: boolean;
   handleChangeIsPlaying: () => void;
-  // playBackIndex: number | null;
   numNodes: number;
 }
 
@@ -33,8 +32,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
           onRecordDataChange, programRecordState, isPlaying, handleChangeIsPlaying, numNodes } = props;
 
   const disableRecordButton = readOnly && programRecordState === 0; //hides RecordButton on leftside read only docs
-  //create a piece of state
-  const [playBackReset, setPlayBackReset] = useState(false);
 
   return (
     <div className="program-editor-topbar">
