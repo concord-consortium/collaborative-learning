@@ -7,6 +7,7 @@ import OpenWorkspaceIcon from "../assets/icons/1-4-up/1-up-icon-default.svg";
 import DeleteToolIcon from "./assets/icons/delete-tool.svg";
 import RedoToolIcon from "./assets/icons/redo-tool.svg";
 import SelectToolIcon from "./assets/icons/select-tool.svg";
+import SolutionToolIcon from "./assets/icons/solution-tool.svg";
 import UndoToolIcon from "./assets/icons/undo-tool.svg";
 
 export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>> = {
@@ -20,6 +21,7 @@ export const appIcons: Record<string, FunctionComponent<SVGProps<SVGSVGElement>>
   "icon-delete-tool": DeleteToolIcon,
   "icon-redo-tool": RedoToolIcon,
   "icon-select-tool": SelectToolIcon,
+  "icon-solution-tool": SolutionToolIcon,
   "icon-undo-tool": UndoToolIcon
 
   // Icons for tool tiles are not stored here.

@@ -1,0 +1,76 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles": [
+      {
+        "id": "C78sjPFpiUlbz97B",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Overview</strong></p>",
+            "<p>In this Problem, using the context of a copy machine, students work with figures of various sizes that are similar to an original figure. They will work with some scale drawings that are smaller than the original figure and some that are larger. They will use percents to compare similar figures. They will compare side lengths and angles of similar figures and notice that lengths of sides may differ, but the measures of angles do not.</p>"
+          ]
+        }
+      },
+      {
+        "id": "hZyeAAxIsobOZnxL",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>AoL:</strong> Introduction, Exploration, Analysis</p>",
+            "<p><strong>CCSSM:</strong> 7.G.A.1, 7.RP.A.2, 7.RP.A.2.B</p>"
+          ]
+        }
+      },
+      {
+        "id": "xtNnMetSsgXrBQMX",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Continue exploring enlargements and reduction of geometric figures, working to understand what attributes change and what attributes stay the same and by how much (the multiplier). </p>",
+            "<p>When exploring a set of geometric figures: original, an enlargement and a reduction, begin to use and articulate relationships between attributes, such as: </p>",
+            "<ul><li>corresponding angles of an enlargement or reduction of an original figure stay the same</li><li>side lengths of an enlargement or reduction figure, as compared to the original figure, change in size by the multiplier used with the original</li><li>perimeter of an enlargement or reduction figure, as compared to the original figure, changes in size by the multiplier used with the original</li><li>area of an enlargement figure, as compared to the original figure, changes, but not by the multiplier used on the original figure; rather it grows by a greater factor than the multiplier</li><li>area of a reduced figure, as compared to the original figure, changes but not by the multiplier used on the original figure; rather it shrinks by a greater factor than the multiplier</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>NWDYK</strong></p>",
+            "<p>For similar figures, what features (attributes) and measures stayed the same? What features (attributes) and measures changed? How does a multiplier play a role in these changes? </p>"
+          ]
+        }
+      },
+      {
+        "id": "lXW2amZMg_PIGXCv",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'>Revision Comments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>CMP STEM Problem Format</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>Unit Descriptions</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'>Goals of the Units</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'>Unit Alignments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'>General Arc of Learning </a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'>Unit Arc of Learning</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'>Mathematical Overview</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'>Learning Aids</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'>Teaching Aids</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'>Family Letters </a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'>Assessments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'>ACE Homework</a></strong></p>"
+                        ]
+        }
+      }
+    ]
+
+  }
+}

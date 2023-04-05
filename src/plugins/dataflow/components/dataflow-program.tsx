@@ -9,7 +9,7 @@ import { autorun } from "mobx";
 import { IDisposer, onSnapshot } from "mobx-state-tree";
 import { SizeMeProps } from "react-sizeme";
 import { forEach } from "lodash";
-import { ProgramZoomType } from "../model/dataflow-content";
+import { ProgramZoomType, DataflowContentModelType } from "../model/dataflow-content";
 import { DataflowProgramModelType } from "../model/dataflow-program-model";
 import { SensorSelectControl } from "../nodes/controls/sensor-select-control";
 import { DataflowReteNodeFactory } from "../nodes/factories/dataflow-rete-node-factory";
@@ -34,9 +34,9 @@ import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { SerialDevice } from "../../../models/stores/serial";
 import { dataflowLogEvent } from "../dataflow-logger";
+import { addCanonicalCasesToDataSet, ICaseCreation } from "../../../models/data/data-set";
 
 import "./dataflow-program.sass";
-
 interface NodeNameValuePair {
   name: string;
   val: number;
@@ -65,6 +65,10 @@ interface IProps extends SizeMeProps {
   onZoomChange: (dx: number, dy: number, scale: number) => void;
   tileHeight?: number;
   tileId: string;
+  onRecordDataChange: () => void;
+  programRecordState: number;
+  numNodes: number;
+  tileModel: DataflowContentModelType;
 }
 
 interface IState {
@@ -95,6 +99,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   private onSnapshotSetup = false;
   private processing = false;
 
+
   constructor(props: IProps) {
     super(props);
     this.state = {
@@ -105,7 +110,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
-    const { readOnly, documentProperties } = this.props;
+    const { readOnly, documentProperties, numNodes} = this.props;
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
     const toolbarEditorContainerClass = `toolbar-editor-container`;
@@ -124,6 +129,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           showRateUI={showRateUI}
           lastIntervalDuration={this.state.lastIntervalDuration}
           serialDevice={this.stores.serialDevice}
+          onRecordDataChange={this.props.onRecordDataChange}
+          programRecordState={this.props.programRecordState}
+          numNodes={numNodes}
         />
         <div className={toolbarEditorContainerClass}>
           { showProgramToolbar && <DataflowProgramToolbar
@@ -514,10 +522,22 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => {
-    // Update the sampling rate
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
+    const isRecording = this.props.programRecordState === 1;
+
+    /* ==[ Per tick - create a case and write it to the dataSet ] == */
+    if (isRecording){
+      const aCase: ICaseCreation = {};
+      const dataSet = this.props.tileModel.dataSet;
+      //loop through attribute (nodes) and write each value
+      this.programEditor.nodes.forEach((node, idx) => {
+        const key = dataSet.attributes[idx].id;
+        aCase[key] = node.data.nodeValue as string;
+      });
+      addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
+    }
 
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
       Generator: this.updateGeneratorNode,
@@ -530,7 +550,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.sendDataToSerialDevice(n);
       }
     };
-
     let processNeeded = false;
 
     this.programEditor.nodes.forEach((n: Node) => {
@@ -539,7 +558,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         processNeeded = true;
         nodeProcess(n);
       }
-      // TODO: We probably need a better way to determine if recentValues should be updated
       if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
         this.updateNodeRecentValues(n);
       }

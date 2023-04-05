@@ -1,0 +1,115 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Consider this set of Rectangles"
+          ]
+        }
+      },
+      {
+        "id": "21AUG20200148pm",
+        "title": "Rectangles A, B, C, and D",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_4_1_IC_32_rectangles_350w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "• For the set of rectangles, which are similar? Why?"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Rectangles: A, B, and C are similar.</p>",
+            "<p>Possible explanation:</p>",
+            "<p>Because the shapes are rectangles, all the angles will be 90˚. So, corresponding angles will have the same measures.</p>",
+            "<p>To determine similarity of these rectangles, students may use scale factors or ratios.</p>",
+            "<p>Ratio of adjacent side lengths:</p>",
+            "<p>Rectangle A: (12 short side)/(20 long side)  =   (3 short side)/(5  long side)  =   (0.6 short side)/(1 long side)</p>",
+            "<p>Rectangle B: (6 short side)/(10 long side)  =   (3 short side)/(5  long side)  =   (0.6 short side)/(1 long side)</p>",
+            "<p>Rectangle C: (9 short side)/(15 long side)  =   (3 short side)/(5  long side)  =   (0.6 short side)/(1 long side)</p>",
+            "<p>Rectangle D: (6 short side)/(20 long side)  =   (3 short side)/(10  long side)  =   (0.3 short side)/(1 long side)</p>",
+            "<p>The ratio of the length of the short side to the length of the long side is the same for all three similar rectangles. The rectangle that is not similar to the others has a different ratio.</p>",
+            "<p>If the scale factors for both length and width are equivalent, two rectangles are similar.</p>",
+            "<p>The scale factors are:</p>"
+
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20200149pm",
+        "title": "Scale factors for similar Rectangles A, B, and C",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-1_Initial_Challenge_1.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "WTNLpOzp7NnIBqAn",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>If the scale factors for both length and width are equivalent, two rectangles are similar. </p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "D42ENgHpU-YlUiFP",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Note:</strong> If figures are similar, their ratios of corresponding side lengths will be equivalent. The ratio of adjacent side lengths within a figure gives an indication of the shape of the original figure (and image) since it compares measures within one figure. The ratio of side lengths is not enough to know of a figure is scaled, corresponding angles measures must be equivalent.</p>",
+            "<p>After finding scale factors like those in this Problem, many students will discuss the advantages of finding the ratio of the adjacent side lengths for measurements like these. </p>"
+          ]
+        }
+      },
+      {
+        "id": "rGyS1Rt0W_Js6z2H",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>• If two rectangles are similar, write as many ratios as possible of adjacent side lengths in one rectangle compared to the corresponding adjacent side lengths in the other rectangle. What do you notice?</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "Q8-PdqSOVbZqWwS_",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The ratios of adjacent sides of similar figures are equivalent. </p>",
+            "<p>See some examples of ratios above.</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports" : [
+  ]
+}

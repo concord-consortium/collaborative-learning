@@ -1,0 +1,90 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles": [
+      {
+        "id": "OImZGGBDWUz6-8tz",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started)</strong></u></p>",
+            "<p><u>Connecting to Prior Knowledge</u></p>",
+            "<p>In launching this Problem, your goal is to understand what your students intuitively know about scaled drawings or similar figures. Students’ understanding will likely be based on the use of “similarity” in everyday situations. In addition, you will want to assess their measurement skills.</p>"
+          ]
+        }
+      },
+      {
+        "id": "mS3_zohH7CTRwjG_",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p>Members of the Mystery Club want to make a poster that shows their logo. To do this, they need to enlarge the logo on the flyer they designed. Briefly discuss with students the desire to make a larger version of the original picture. Then tell them that you are going to demonstrate one method for doing so.</p>",
+            "<p></p>",
+            "<p>You will need to demonstrate how to draw a figure using a rubber band stretcher, using a marker either on the board or on chart paper taped to the wall. Test your setup before class so you know everything works. ",
+            "This <a href='https://www.youtube.com/watch?v=IFg71N3EKdc'>short video</a> shows a teacher using a rubber band stretcher to make a similar triangle.",
+            "Place the anchor point so that the enlarged drawing will not overlap the original. Choose a figure to enlarge that your students will find interesting, such as a popular cartoon character, a logo, a smiley face, or a ghost. Some teachers make a stretcher with larger rubber bands to make it easier for students to see what the teacher is doing at the board.</p>"
+          ]
+        }
+      },
+      {
+        "id": "21AUG20220839AM",
+        "title": "Rubber band stretcher to produce overlapping and non-overlapping figures.",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_presenting_the_challenge.png"
+        }
+      },
+      {
+        "id": "ftmLbbrAMDkkrFHA",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Explain the following to students.</p>",
+            "<p></p>",
+            "<ul><li>I have a super machine called a stretcher that will help me draw a copy of this figure. My machine has two parts. Watch me carefully while I make a stretcher before your very eyes!</li></ul>",
+            "<p></p>",
+            "<p>Tie the two rubber bands together by passing one band through the other and back through itself. Pull on the two ends, moving the knot to the center of the bands. You may need to pull on the knot so that each band forms half of the knot.</p>",
+            "<p></p>",
+            "<p>Hold your finished stretcher in the air and demonstrate its stretch. Then, use it to draw a copy of the figure as you describe the process.</p>",
+            "<p></p>",
+            "<ul><li>Notice that I put one end of my stretcher on a point, called the anchor point, and hold it down securely without covering up any more of the band than necessary. I put the marker through the other end and stretch the bands until the knot is just above part of my figure. I move my marker as I trace the figure with the knot. I try to keep the knot directly over the original figure as my marker draws the new figure. I do not look at the marker as I draw. I only watch the knot. The more carefully the knot traces the original, the better my drawing will be.</li></ul>",
+            "<p></p>",
+            "<p>Finish the drawing and ask students to describe the results. They will probably say the two figures look alike but that the new one is larger. Until they have made their own drawings, you do not need to press for more specific observations or relationships.</p>",
+            "<p></p>",
+            "<p>Distribute two rubber bands, a blank sheet of paper, and <strong>Learning Aid 1.2A: Right-handed version or Learning Aid 1.2B: Left-handed version</strong> to each student (one side will have the Super Sleuth and the other side some simpler shapes.  Choose the one best suited for your classroom environment). Have students tape the two sheets to their desks using masking tape as shown below and in the Student Edition. Left-handed students will have the anchor point to their right and the blank sheet of paper to their left.</p>"
+          ]
+        }
+      },
+      {
+        "id": "21AUG20220840AM",
+        "title": "Right-handed setup for using a rubber band stretcher",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_presenting_the_challenge_2.png"
+        }
+      },
+      {
+        "id": "21AUG20220841AM",
+        "title": "Left-handed setup for using a rubber band stretcher",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SASTG_1-2_presenting_the_challenge_3.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Let the students make their stretchers. Some students will have a hard time tying the bands together and will need assistance. You may want to be sure everyone has made a stretcher before the class begins drawing.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

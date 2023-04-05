@@ -1,0 +1,21 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "id": "RI5aJ-AhLF4b6m25",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The scale factor provides information about how side lengths, perimeters and areas of the figures are related. It </p>",
+            "<ul><li>Is the ratio of an image side length to the corresponding side length of the original.</li><li>is the multiplier that connects the original length to the image length. </li><li>tells us how one length grows or shrinks by a certain factor.</li></ul>",
+            "<p>In Problem 3.2, we use scale drawings to make similar shapes given a set of constraints (criteria).</p>"
+          ]
+        }
+      }
+    ],
+    "supports": []
+  }
+}

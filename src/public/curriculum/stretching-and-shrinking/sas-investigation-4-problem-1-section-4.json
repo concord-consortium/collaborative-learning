@@ -1,0 +1,35 @@
+{
+  "type": "nowWhatDoYouKnow",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "What information do the ratios of adjacent side lengths within two similar figures provide about similar figures? How are these ratios helpful in solving problems?"
+          ]
+        }
+      },
+      {
+        "id": "-AUG20220211PM",
+        "title": "Did You Know?: Non-rectangular buildings",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_4_1_DYK.jpg"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>If two shapes have corresponding angles with the same measure and the ratios of adjacent side lengths are equivalent, the shapes are similar. If the ratios of corresponding adjacent side lengths are equal, the multiplicative relationship is the same which means the shape lengths are scaled in the same way.</p>",
+            "<p>These ratios are helpful when you find missing side lengths related to two similar figures.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

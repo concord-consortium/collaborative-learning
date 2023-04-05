@@ -7,6 +7,8 @@ import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultLabel, EditFacet } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
+import { useErrorAlert } from "../../../components/utilities/use-error-alert";
+import { getClipboardContent } from "../../../utilities/clipboard-utils";
 
 import '../data-card-tile.scss';
 
@@ -105,13 +107,56 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const handleCompleteName = () => {
     if (labelCandidate !== getLabel()) {
-      caseId && content.setAttName(attrKey, labelCandidate);
+      const names = content.existingAttributesWithNames().map(a => a.attrName);
+      if (!names.includes(labelCandidate)){
+        caseId && content.setAttName(attrKey, labelCandidate);
+      } else {
+        showRequireUniqueAlert();
+      }
     }
   };
+
+  const handlePasteImage = (imageFile: File, targetElement: HTMLElement) => {
+    gImageMap.addFileImage(imageFile).then(image => {
+      if (image.contentUrl) {
+        setValueCandidate(image.contentUrl);
+        targetElement.blur();
+      }
+    });
+  };
+
+  const handleValuePaste = async (event: React.ClipboardEvent<HTMLInputElement>) => {
+    // If the clipboard contains an image element, process the image so it can be saved
+    // and rendered. If the clipboard contains a text element, check if it is an image URL.
+    // If it is, immediately set the value to the URL. Otherwise, simply let the default
+    // paste action occur without any special handling.
+    const targetElement = event.currentTarget;
+    const clipboardContents = await getClipboardContent(event.clipboardData);
+    if (clipboardContents.image) {
+      handlePasteImage(clipboardContents.image, targetElement);
+    } else if (clipboardContents.text && gImageMap.isImageUrl(clipboardContents.text)) {
+      setValue(clipboardContents.text);
+    }
+  };
+
+  const RequireUniqueAlert = () => {
+    return <p>Each field should have a unique name.  Enter a name that is not already in use in this collection.</p>;
+  };
+
+  const [showRequireUniqueAlert] = useErrorAlert({
+    title: "Error Naming Data Card Field",
+    content: RequireUniqueAlert
+  });
 
   const handleCompleteValue = () => {
     if (valueCandidate !== getValue()) {
       caseId && content.setAttValue(caseId, attrKey, valueCandidate);
+    }
+  };
+
+  const setValue = (value: string) => {
+    if (value !== getValue()) {
+      caseId && content.setAttValue(caseId, attrKey, value);
     }
   };
 
@@ -121,7 +166,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   }
 
-  const AlertContent = () => {
+  const DeleteAttributeAlertContent = () => {
     return (
       <p>
         Are you sure you want to remove the <em style={{ fontWeight: "bold"}}>{ getLabel() }</em>&nbsp;
@@ -131,15 +176,15 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     );
   };
 
-  const [showAlert] = useCautionAlert({
+  const [showDeleteAttributeAlert] = useCautionAlert({
     title: "Delete Attribute",
-    content: AlertContent,
+    content: DeleteAttributeAlertContent,
     confirmLabel: "Delete Attribute",
     onConfirm: () => deleteAttribute()
   });
 
   const handleDeleteAttribute = () => {
-    showAlert();
+    showDeleteAttributeAlert();
   };
 
   const valueIsImage = () => {
@@ -206,6 +251,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
             onBlur={handleCompleteValue}
             onDoubleClick={handleInputDoubleClick}
             onFocus={handleValueInputFocus}
+            onPaste={handleValuePaste}
           />
         }
         { !readOnly && valueIsImage() &&

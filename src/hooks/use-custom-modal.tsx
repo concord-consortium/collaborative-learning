@@ -35,7 +35,8 @@ interface IProps<IContentProps> {
   onClose?: () => void;
 }
 export const useCustomModal = <IContentProps,>({
-  className, Icon, title, Content, contentProps, focusElement, canCancel, buttons, onClose
+  className, Icon, title, Content, contentProps, focusElement, canCancel, buttons,
+  onClose
 }: IProps<IContentProps>, dependencies?: any[]) => {
 
   const [contentElt, setContentElt] = useState<HTMLDivElement>();

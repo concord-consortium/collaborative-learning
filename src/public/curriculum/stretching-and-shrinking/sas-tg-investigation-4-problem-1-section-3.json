@@ -1,0 +1,56 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles":
+    [
+      {
+        "id": "pMoP3iM4mTtWg1gy",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Explore (Digging In)</strong></u></p>",
+            "<p><u>Providing for Individual Needs</u></p>",
+            "<p>As you circulate, check to make sure that students are writing correct ratios for each rectangle and for each triangle. You can hand out copies of <strong>Learning Aid 4.1C: Ratio Recording Sheet</strong> (Agency, Identity, Ownership) if your students would benefit from using a table to organize their work. Provide any necessary help in keeping track of the place of corresponding measures in the ratios. The numerators of each ratio need to relate corresponding lengths, and the denominators of each ratio need to relate corresponding lengths.</p>",
+            "<p>Students should label their work in some way, such as length to width or width to length. Students need to be consistent in what they consider to be the width or length in terms of which one is the long side, and which one is the short side on rectangles and parallelograms.</p>"
+          ]
+        }
+      },
+      {
+        "id": "c6y1dpOQn0oLljOC",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Can finding two corresponding angles help? (This can help students with orientation of the shapes and to find adjacent sides.)</li><li>Can finding corresponding side lengths help? (Yes. This will help them create the ratios.)</li><li>How do you know that you have the correct numbers in the numerator and the denominator of your ratio for the triangles? (Possible answers: I labeled the sides “long side,” “short side,” and “middle side” for each triangle to be sure that my numerators represent corresponding sides, and my denominators represent corresponding sides; or I color-coded the sides so that corresponding sides are the same color; or, for each triangle, I wrote  the following ratio: short to long, and then I filled the ratio in with the correct  side lengths.) (Language)</li><li>Can you form different ratios than the ones you have been recording? (Yes, each ratio can be rewritten so that its numerator and denominator are swapped. If each ratio is changed in this way, the ratios will still compare corresponding sides.)</li><li>How do these two ratios compare? (They are reciprocals of each other.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Planning for the Summary</u></p>",
+            "<p><u></u>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence?</p>",
+            "<p><em>Now What Do You Know?</em></p>",
+            "<p><em>How does the ratio of adjacent side lengths with in two similar figures compare to the ratio of corresponding side lengths across two similar figures? How are these ratios helpful in solving problems?</em> (As you are circulating during the Explore, look for students making sense of using ratios and connecting this reasoning with their understanding of scale factors.)</p>"
+          ]
+        }
+      },
+      {
+        "id": "QYwX1E3A-4ihIbTz",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><em></em></p>",
+            "<p>Look for students making sense of using ratios and connecting this reasoning with their understanding of scale factors.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

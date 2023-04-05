@@ -178,25 +178,32 @@ function getBoardBounds(axisMin?: JXGCoordPair, protoRange?: JXGCoordPair) {
   return [xAxis.min, yAxisMax, xAxisMax, yAxis.min];
 }
 
-export function defaultGeometryBoardChange(xAxis: AxisModelType, yAxis: AxisModelType, overrides?: JXGProperties) {
+export interface IGeometryBoardChangeOptions {
+  addBuffers?: boolean;
+  includeUnits?: boolean;
+}
+export function defaultGeometryBoardChange(
+  xAxis: AxisModelType, yAxis: AxisModelType, overrides?: JXGProperties, options?: IGeometryBoardChangeOptions
+) {
+  const { addBuffers, includeUnits } = options ?? {};
   const axisMin: JXGCoordPair = [xAxis.min, yAxis.min];
   const axisRange: JXGCoordPair = [xAxis.range ?? kGeometryDefaultWidth / xAxis.unit,
                                    yAxis.range ?? kGeometryDefaultHeight / yAxis.unit];
   const [xMin, yMax, xMax, yMin] = getBoardBounds(axisMin, axisRange);
   const unitX = xAxis.unit || kGeometryDefaultPixelsPerUnit;
   const unitY = yAxis.unit || kGeometryDefaultPixelsPerUnit;
-  const xMinBufferRange = kXAxisMinBuffer / unitX;
-  const xMaxBufferRange = kAxisBuffer / unitX;
-  const yBufferRange = kAxisBuffer / unitY;
+  const xMinBufferRange = addBuffers ? kXAxisMinBuffer / unitX : 0;
+  const xMaxBufferRange = addBuffers ? kAxisBuffer / unitX : 0;
+  const yBufferRange = addBuffers ? kAxisBuffer / unitY : 0;
   const boundingBox = [xMin - xMinBufferRange, yMax + yBufferRange, xMax + xMaxBufferRange, yMin - yBufferRange];
+  const units = includeUnits ? { unitX, unitY } : {};
   const change: JXGChange = {
     operation: "create",
     target: "board",
     properties: {
       axis: true,
       boundingBox,
-      unitX,
-      unitY,
+      ...units,
       ...overrides
     }
   };

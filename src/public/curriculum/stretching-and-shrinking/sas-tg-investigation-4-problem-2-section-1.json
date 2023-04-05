@@ -1,0 +1,80 @@
+{
+  "type": "overview",
+  "content": {
+    "tiles":
+    [
+      {
+        "id": "FeYcb3I0Dq0yofcS",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Overview</strong></p>",
+            "<p>In this Problem, students use shadows and mirror reflections to estimate the heights of real objects that are difficult to measure directly. Students recognize that the mathematics they have learned so far in this Unit is helpful for solving problems in real life.</p>",
+            "<p>If it is not sunny or you do not have the resources to complete this Problem outside, you can use an alternative method of measuring inaccessible heights or lengths using a picture.</p>",
+            "<p>Students recognize that the mathematics they have learned so far in this Unit is helpful for solving problems in real life.</p>",
+            "<p>The parallel lines of the rays can be used to show that the corresponding angles are equal. This was done in Shapes and Designs. In the Shapes and Designs Unit students find that they can only draw one (unique) triangle given three angle measures. This means that if two triangles have corresponding angles equal, then the figures are congruent and hence similar. Sun and shadows always produce similar triangles.</p>",
+            "<p><strong>Mathematics Note:</strong>  We have only used adjacent sides because we are dealing with are triangles and rectangles. The sides being compared do not have to be adjacent if we are working with other figures. For example, in a hexagon the ratio of any two sides will work as long as the ratio of the same corresponding side lengths in the other hexagon work.</p>",
+            "Implementation Note:  What If Situation A has two experiments. One is using the shadow method to find the height of a tall object near the school.  The second experiment is using the mirror method to find the heigh of a tall object in your school.  You could do one or both of these with your students."
+          ]
+        }
+      },
+    {
+      "id": "09IInFs2V7vjmEov",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": [
+                        "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'>Revision Comments</a></strong></p>",
+                        "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>CMP STEM Problem Format</a></strong></p>",
+                        "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>Unit Descriptions</a></strong></p>",
+                        "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'>Goals of the Units</a></strong></p>",
+                        "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'>Unit Alignments</a></strong></p>",
+                        "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'>General Arc of Learning </a></strong></p>",
+                        "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'>Unit Arc of Learning</a></strong></p>",
+                        "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'>Mathematical Overview</a></strong></p>",
+                        "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'>Learning Aids</a></strong></p>",
+                        "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'>Teaching Aids</a></strong></p>",
+                        "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'>Family Letters </a></strong></p>",
+                        "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'>Assessments</a></strong></p>",
+                        "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'>ACE Homework</a></strong></p>"
+                      ]
+      }
+    },
+    {
+      "id": "ZviCcrVWhuFq75t1",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": [
+          "<p><strong>AoL:</strong> Synthesis, Synthesis</p>",
+          "<p><strong>CCSSM:</strong> 7.G.A.1, 7.RP.A.2, 7.RP.A.2.A, 7.RP.A.2.B, 7.EE.B.3, 7.EE.B.4</p>"
+        ]
+      }
+    },
+    {
+      "display": "teacher",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": [
+          "<p><strong>NWDYK</strong></p>",
+          "<p>If two figures are similar, how can you use information about the figures to find unknown lengths, perimeters, areas, or angle measures?</p>"        ]
+      }
+    },
+    {
+      "id": "oYRvxR4A4_PwKS0N",
+      "content": {
+        "type": "Text",
+        "format": "html",
+        "text": [
+          "<p><strong>Emerging Mathematical Ideas</strong></p>",
+          "<p>Explore the use of similarity to solve real world problems. Use understanding of similar figures, including scale factors and ratios, to find a distance that is difficult to measure.</p>",
+          "<p>Understand that ratios of corresponding adjacent side lengths within two similar figures are equal</p>",
+          "<ul><li>use scale factor and/or ratio relationships between corresponding side lengths to determine if two figures are similar</li><li>use understanding of scale factor and/or ratios of adjacent sides  to find missing lengths, perimeter, and area</li></ul>"
+        ]
+      }
+    }
+    ]
+  }
+}

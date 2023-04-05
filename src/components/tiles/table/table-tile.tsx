@@ -141,9 +141,10 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
     setColumnEditingName: handleSetColumnEditingName, onShowExpressionsDialog: handleShowExpressionsDialog
   });
 
+  // deleteSelected is a function that clears the value of the currently selected cell
   // dataGridProps contains callbacks to pass to ReactDataGrid
   // hasLinkableRows is used to determine if the table can meaningfully be linked to a geometry tile
-  const { hasLinkableRows, ...dataGridProps } = useDataSet({
+  const { deleteSelected, hasLinkableRows, ...dataGridProps } = useDataSet({
     gridRef, model, dataSet, triggerColumnChange, rows, rowChanges, triggerRowChange,
     readOnly: !!readOnly, changeHandlers, columns, onColumnResize, selectedCell, inputRowId });
 
@@ -204,7 +205,7 @@ const TableToolComponent: React.FC<ITileProps> = observer(function TableToolComp
   return (
     <div className="table-tool">
       <TableToolbar documentContent={documentContent} tileElt={tileElt} {...toolbarProps}
-                    onSetExpression={showExpressionsDialog} scale={scale}/>
+                    deleteSelected={deleteSelected} onSetExpression={showExpressionsDialog} scale={scale}/>
       <div className="table-grid-container" ref={containerRef} onClick={handleBackgroundClick}>
         <EditableTableTitle
           content={content}

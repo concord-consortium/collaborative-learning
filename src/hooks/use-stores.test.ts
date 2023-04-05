@@ -14,6 +14,7 @@ import {
   useProblemPath, useProblemPathWithFacet, useProblemStore, useSharedSelectionStore,
   useTypeOfTileInDocumentOrCurriculum, useUIStore, useUserStore
 } from "./use-stores";
+import { unitConfigDefaults } from "../test-fixtures/sample-unit-configurations";
 
 jest.mock("@concord-consortium/slate-editor", () => ({}));
 
@@ -32,7 +33,7 @@ describe("useStores", () => {
   describe("simple store hooks", () => {
     beforeEach(() => resetMocks());
     it("should return the requested store", () => {
-      const appConfig = AppConfigModel.create();
+      const appConfig = AppConfigModel.create({ curriculumBaseUrl: "https://curriculum.example.com", config: unitConfigDefaults });
       const _class = ClassModel.create({ name: "Class 1", classHash: "hash-1" });
       const demo = DemoModel.create({ class : DemoClassModel.create({ id: "class-1", name: "Class 1" }) });
       const groups = GroupsModel.create();

@@ -20,5 +20,11 @@ class Header{
     getVersionNumber(){
         return cy.get('.app-header .version');
     }
+    getNetworkStatus(){
+        return cy.get('.firebase.status.connected');
+    }
+    getDashboardWorkspaceToggleButtons(){
+        return cy.get('.middle [orientation="horizontal"]');
+    }
 }
 export default Header;

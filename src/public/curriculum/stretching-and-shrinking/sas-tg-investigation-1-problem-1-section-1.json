@@ -1,0 +1,72 @@
+{
+  "type": "overview",
+  "content":
+  {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Overview</strong></p>",
+            "<p>This Problem can be used to assess students’ initial ideas about the concept of scaled drawings/similarity. The P.I. Mystery Club enters a contest to guess the identity of a teacher in disguise. A photo of the mystery teacher is shown, and students use a known measure (height of a magazine) to estimate an unknown measure (height of the mystery teacher). Students are asked to express their informal ideas about the mathematical meaning of similarity.</p>",
+            "<p><strong>Note</strong>: The word <strong>similar</strong> is not defined in the Student Edition yet. Students are formulating their own working definition of mathematical similarity. Scaled drawings and the concept of similarity are used to set the backdrop for the students’ work in 7th grade on proportional reasoning. The words scaled drawings and similarity can be used interchangeably at this point for students. Students’ understanding will develop throughout the Unit and is revisited in each of the Mathematical Reflections. Students will take this understanding into 8th grade where they will study similarity more formally as they study what happens to congruent and similar figures under transformations in the Flip, Spin, Slide, and Stretch Unit.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>AoL:</strong>  Introduction, Analysis</p>",
+            "<p><strong>CCSSM:</strong> 7.G.A.1, 7.RP.A.2, 7.RP.A.2.B</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Build off the common language of “similar” to informally introduce the idea of two figures being mathematically similar.</p>",
+            "<p>Apply knowledge of ratios and begin to recognize proportional relationships between quantities to estimate length of enlarged figure.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>NWDYK</strong></p>",
+            "<p>The Mystery Club advisor says that the picture is similar to the actual scene. What do you suppose the advisor means by similar? How is the photo similar to the actual scene that is photographed? </p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'>Revision Comments</a></strong></p>",
+            "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>CMP STEM Problem Format</a></strong></p>",
+            "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>Unit Descriptions</a></strong></p>",
+            "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'>Goals of the Units</a></strong></p>",
+            "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'>Unit Alignments</a></strong></p>",
+            "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'>General Arc of Learning </a></strong></p>",
+            "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'>Unit Arc of Learning</a></strong></p>",
+            "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'>Mathematical Overview</a></strong></p>",
+            "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'>Learning Aids</a></strong></p>",
+            "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'>Teaching Aids</a></strong></p>",
+            "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'>Family Letters </a></strong></p>",
+            "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'>Assessments</a></strong></p>",
+            "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'>ACE Homework</a></strong></p>"
+          ]
+        }
+      }
+    ]
+  }
+}

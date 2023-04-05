@@ -1,8 +1,5 @@
 import { inject, observer } from "mobx-react";
 import React from "react";
-import Modal from "react-modal";
-import { ModalProvider } from "react-modal-hook";
-import { QueryClient, QueryClientProvider } from "react-query";
 import { authenticate } from "../lib/auth";
 import { syncTeacherClassesAndOfferings } from "../lib/teacher-network";
 import { AppContentContainerComponent } from "./app-content";
@@ -18,7 +15,7 @@ import ErrorAlert from "./utilities/error-alert";
 
 // used for tooltips in various parts of the application
 import "react-tippy/dist/tippy.css";
-import "./app.sass";
+import "./app.scss";
 
 interface IProps extends IBaseProps {}
 interface IState {
@@ -88,7 +85,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
   let rawPortalJWT: string | undefined;
 
   authenticate(appMode, appConfig, urlParams)
-    .then(({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
+    .then(async ({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
       // authentication can trigger appMode change (e.g. preview => demo)
       if (newAppMode && (newAppMode !== appMode)) {
         setAppMode(stores, newAppMode);
@@ -99,7 +96,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
         stores.class.updateFromPortal(classInfo);
       }
       if (unitCode && problemId && isDifferentUnitAndProblem(stores, unitCode, problemId)) {
-        setUnitAndProblem(stores, unitCode, problemId).then( () => {
+        await setUnitAndProblem(stores, unitCode, problemId).then( () => {
           updateProblem(stores, problemId);
         });
       }
@@ -130,8 +127,6 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
     });
 };
 
-const queryClient = new QueryClient();
-
 @inject("stores")
 @observer
 export class AppComponent extends BaseComponent<IProps, IState> {
@@ -149,16 +144,23 @@ export class AppComponent extends BaseComponent<IProps, IState> {
     });
   }
 
-  public componentDidMount() {
-    Modal.setAppElement(".app");
-  }
-
   public componentWillUnmount() {
     this.stores.db.disconnect();
   }
 
+  // TODO: it would be cleaner for render to
+  // just be:
+  // <div className="app">
+  //   {renderContents}
+  // </div>
+  //
+  // And then renderContents is basically the
+  // render method below but it just returns
+  // the results instead of calling renderApp each
+  // time.
+
   public render() {
-    const {appConfig, user, ui, db, groups} = this.stores;
+    const {appConfig, user, ui, db} = this.stores;
 
     if (ui.showDemoCreator) {
       return this.renderApp(<DemoCreatorComponent />);
@@ -182,7 +184,7 @@ export class AppComponent extends BaseComponent<IProps, IState> {
     }
 
     if (user.isStudent) {
-      if (!groups.groupForUser(user.id)) {
+      if (!user.currentGroupId) {
         if (appConfig.autoAssignStudentsToIndividualGroups || this.stores.isPreviewing) {
           // use userId as groupId
           db.joinGroup(user.id);
@@ -196,18 +198,10 @@ export class AppComponent extends BaseComponent<IProps, IState> {
   }
 
   private renderApp(children: JSX.Element | JSX.Element[]) {
-    // We use the ModalProvider from react-modal-hook to place modals at the top of
-    // the React component tree to minimize the potential that events propagating
-    // up the tree from modal dialogs will interact adversely with other content.
-    // cf. https://github.com/reactjs/react-modal/issues/699#issuecomment-496685847
     return (
-      <ModalProvider>
-        <QueryClientProvider client={queryClient}>
-          <div className="app">
-            {children}
-          </div>
-        </QueryClientProvider>
-      </ModalProvider>
+      <div className="app">
+        {children}
+      </div>
     );
   }
 

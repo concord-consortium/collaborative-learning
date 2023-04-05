@@ -1,0 +1,143 @@
+@import "../../../components/vars.sass";
+
+$sort-view-card-width: 177px;
+$card-space-factor: 5px;
+$card-border: 1px solid $charcoal-light-1;
+$sort-view-column-width: $sort-view-card-width + 10px;
+$sort-view-font-size:10px;
+$cards-per-row: 3; // this may be dynamic in the future
+$sort-view-width: ($sort-view-card-width * $cards-per-row ) + 3;
+
+.data-card-tool.display-as-sorted {
+  font-size: $sort-view-font-size;
+  .panel {
+    width: ($sort-view-width);
+  }
+
+  .sorting-cards-data-area {
+    width: $sort-view-width;
+
+    .sort-area-grid {
+      display: grid;
+      grid-template-columns: $sort-view-card-width $sort-view-card-width $sort-view-card-width;
+      border-left: $card-border;
+      border-right: $card-border;
+      border-bottom: $card-border;
+
+      .stack {
+        width: $sort-view-card-width;
+        .stack-heading {
+          background-color: $workspace-teal-light-4;
+          font-size: 13px;
+          font-weight: bold;
+          text-align: center;
+          padding-top: $card-space-factor;
+          padding-bottom: $card-space-factor;
+          border-top: $card-border;
+          height: 27px;
+        }
+        .stack-drop-zone.show-droppable {
+          background-color: $workspace-teal-light-6;
+          height:40px;
+          border:3px dotted $workspace-teal-light-2;
+          border-radius: 5px;
+          margin:3px;
+        }
+        .stack-drop-zone.show-droppable.is-over {
+          background-color: $workspace-teal-light-4;
+        }
+      }
+
+      .empty.cell {
+        width: $sort-view-card-width;
+        background-color: $workspace-teal-light-4;
+        height:27px;
+        border-top: $card-border;
+      }
+    }
+
+    .sortable.card {
+      display: grid;
+      border-radius:$card-space-factor;
+      margin:3px;
+
+      .heading {
+        border: $card-border;
+        padding:$card-space-factor;
+        color: tungsten;
+        font-style: italic;
+        text-align: right;
+        border-radius: 5px 5px 0px 0px;
+        display:flex;
+        align-items: center;
+        text-align: center;
+
+        .card-count-info {
+          translate: 3px .5px;
+        }
+
+        svg {
+          cursor: pointer;
+          background-color: transparent;
+          left: 168px;
+          translate: 74px 0px;
+          height: 20px;
+          path {
+            fill: transparent;
+          }
+        }
+      }
+
+      .content > div {
+        background-color: white;
+        border-left: $card-border;
+        border-right: $card-border;
+        border-bottom: $card-border;
+      }
+
+      .footer {
+        border-left: $card-border;
+        border-right: $card-border;
+        border-bottom: $card-border;
+        height:$card-space-factor;
+        border-radius: 0px 0px 5px 5px;
+      }
+
+      .attribute-value-row {
+        display:flex;
+        .attribute {
+          border-right:$card-border;
+          width:60px;
+          padding:$card-space-factor;
+          background-color: $workspace-teal-light-4;
+          font-weight: bold;
+        }
+        .value {
+          width:106px;
+          padding:$card-space-factor;
+        }
+        .image-value {
+          width: 100%;
+        }
+      }
+      .expand-toggle {
+        cursor:pointer;
+        border:0px;
+        padding: 0px;
+        margin-right:2px;
+        font-size: 12px;
+        text-align: left;
+        transition: all .4s;
+        color:$charcoal-dark-2;
+        background-color: transparent;
+        translate: 0px 1px;
+        height:13px;
+        width:13px;
+      }
+      &.expanded .expand-toggle {
+        transform: rotate(90deg);
+        translate: -1px 3px;
+      }
+    }
+  }
+}

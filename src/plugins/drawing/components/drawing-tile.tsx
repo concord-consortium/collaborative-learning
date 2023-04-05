@@ -13,7 +13,7 @@ import { EditableTileTitle } from "../../../components/tiles/editable-tile-title
 import { measureText } from "../../../components/tiles/hooks/use-measure-text";
 import { defaultTileTitleFont } from "../../../components/constants";
 import { HotKeys } from "../../../utilities/hot-keys";
-import { pasteClipboardImage } from "../../../utilities/clipboard-utils";
+import { getClipboardContent, pasteClipboardImage } from "../../../utilities/clipboard-utils";
 import "./drawing-tile.scss";
 
 type IProps = ITileProps;
@@ -45,10 +45,13 @@ const DrawingToolComponent: React.FC<IProps> = (props) => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handlePaste = () => {
-    pasteClipboardImage(({ image }) => {
-      setImageUrlToAdd(image.contentUrl || '');
-    });
+  const handlePaste = async () => {
+    const osClipboardContents = await getClipboardContent();
+    if (osClipboardContents) {
+      pasteClipboardImage(osClipboardContents, ({ image }) => {
+        setImageUrlToAdd(image.contentUrl || '');
+      });
+    }
   };
 
   const handleDelete = () => {

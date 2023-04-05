@@ -1,0 +1,174 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Situation A. More Claims</strong></p>",
+            "Ms. Cho’s students also made the following claims. Do you agree? Explain why.",
+            "<strong>Mitch’s Claim</strong> All squares are similar."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Yes. The corresponding angles will be 90˚. For corresponding side lengths, you can always find a scale factor. Adjacent sides will always be equivalent ratios of side to side.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Freda’s Claim</strong> All circles are similar."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Yes. All circles are the same shape. Any radius can be scaled to find a corresponding radius. Any diameter can be scaled to find a corresponding diameter.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Juan’s Claim</strong> All quadrilaterals are similar."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>No. All of the following shapes are quadrilaterals. None of them are similar to the other.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "YBpMcjE1W-Ha652l",
+        "title": "Examples of non-similar quadrilaterals",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/nonSimilarQuads4_2.png",
+          "filename": "curriculum/stretching-and-shrinking/images/nonSimilarQuads4_2.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Sze’s Claim</strong> All triangles are similar if their corresponding angles are equal."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Yes. If all of the angles have equivalent measures, the triangles will have the same basic shape. The corresponding side lengths can be scaled to form a similar triangle.</p>",
+            "<p>We saw this idea when we had reptiles.</p>",
+            "<p>And we used this idea when   measuring the river.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "hZT1f8Uxa4UP_9d0",
+        "title": "Similar Triangles in Rep-tiles",
+        "content": {
+          "type": "Geometry",
+          "board": {
+            "properties": {
+              "axisMin": [-4.186, -2.093],
+              "axisRange": [26.23, 17.486],
+              "axisNames": ["x", "y"],
+              "axisLabels": ["x", "y"]
+            }
+          },
+          "objects": [
+            { "type": "image", "parents": { "url": "curriculum/stretching-and-shrinking/images/clipboard-image", "coords": [0, 0], "size": [10.87431693989071, 7.213114754098361] }, "properties": {"id":"IZE4DNq8ehRdNoUC"} },
+            { "type": "point", "parents": [7.87011612021858, 3.0850580601092896], "properties": {"id":"HqsyZzkT7qwKF1yI","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [4.5701161202185805, 2.78505806010929], "properties": {"id":"v68Lgant-ZfThAcY","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [6.5701161202185805, 0.9850580601092895], "properties": {"id":"rJeg1GI3mWlxMCBO","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "polygon", "parents": ["HqsyZzkT7qwKF1yI", "v68Lgant-ZfThAcY", "rJeg1GI3mWlxMCBO"],"properties": {"id":"v0Udd-Z4PVHwSsC6"} },
+            { "type": "point", "parents": [4.646217554644807, 2.7760416666666687], "properties": {"id":"aU_R4N3Y2hRHGuF9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [1.3462175546448067, 2.476041666666669], "properties": {"id":"_zb662FuwMtcXoWj","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [3.3462175546448076, 0.6760416666666687], "properties": {"id":"xavRTiDZhKjte5tt","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "polygon", "parents": ["aU_R4N3Y2hRHGuF9", "_zb662FuwMtcXoWj", "xavRTiDZhKjte5tt"],"properties": {"id":"ZgS-32NV1YjgF7xA"} },
+            { "type": "point", "parents": [5.778850751366122, 4.8958418715847], "properties": {"id":"QYyIzZ33bihqIkfy","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [2.478850751366121, 4.5958418715847005], "properties": {"id":"yYE9PgzRNXCR6KC6","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [4.478850751366121, 2.8958418715847003], "properties": {"id":"BJuAUiOi08f4gtm9","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "polygon", "parents": ["QYyIzZ33bihqIkfy", "yYE9PgzRNXCR6KC6", "BJuAUiOi08f4gtm9"],"properties": {"id":"hKls22r5OqoE2QAI"} },
+            { "type": "point", "parents": [0.2073742597390704, 0.49940912791490233], "properties": {"id":"J9YuthiuorJOLLXz","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [10.586527138203499, 1.0508082760636899], "properties": {"id":"T-Zgg1efvg_3d67S","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "point", "parents": [3.26973631919428, 6.775570965633871], "properties": {"id":"LRYmAA0aTj1MnX_d","snapToGrid":true,"snapSizeX":0.1,"snapSizeY":0.1} },
+            { "type": "polygon", "parents": ["J9YuthiuorJOLLXz", "T-Zgg1efvg_3d67S", "LRYmAA0aTj1MnX_d"],"properties": {"id":"D078io5PeAJEXXWe"} }
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Matt’s Claim</strong> Circles are not similar since the do not have angles or side lengths."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Circles are not polygons. However, like any other shape, circles can be scaled.</p>",
+            "<p>Circles have measures, such as, the radius or diameter.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation B. Creating More Sets</h3>José challenges his group to create another set of shapes that contains an imposter. He suggests that they use coordinate rules to create the set. ",
+            "<p>1. Is this possible? Show your reasoning with sketches of the shapes.</p>",
+            "<p>2.  Include enough information to show which shapes are similar and which one is the imposter.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Answers will vary.  There are many possible solutions. Some possible answers:</p>",
+            "Students may elect to use draw tiles, table tiles, or graph tiles, or a combination, to answer this question. Note that students can also elect to work this on paper, take a picture, and load that into an image tile to capture the work in the platform."
+          ]
+        }
+      }
+    ]
+  }
+}

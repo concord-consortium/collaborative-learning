@@ -14,6 +14,11 @@ class TextToolTile {
         // In the meantime a short wait is added to decrease the chances this might happen
         cy.wait(300);
     }
+    enterAdditionalText(text){
+        this.getTextTile().last().focus();    
+        this.getTextEditor().last().type('{moveToEnd}'+text);
+        cy.wait(300);
+    }
 
     deleteText(text){
         this.getTextTile().last().type(text);
@@ -25,9 +30,19 @@ class TextToolTile {
         // sometimes Ctrl-
         cy.get(`.primary-workspace .text-toolbar [data-original-title^="${titlePrefix}"]`).click();
     }
-
     getVariableChip() {
       return cy.get('.primary-workspace [data-testid=ccrte-editor] .slate-variable-chip .variable-chip');
+    }
+    getTextToolInsertVariable(){
+        return cy.get('.primary-workspace .text-toolbar [data-original-title="Insert Variable"]');
+    }
+    getTextToolNewVariable(){
+        return cy.get('.primary-workspace .text-toolbar [data-original-title="New Variable"]');
+    }
+    deleteTextTile() {
+        this.getTextTile().last().click();
+        cy.get('.tool.delete').click();
+        cy.get('.ReactModalPortal .modal-footer .modal-button.default').click();
     }
 }
 export default TextToolTile;

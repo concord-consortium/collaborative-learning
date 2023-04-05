@@ -17,7 +17,8 @@ export interface TableContentColumnImport {
 export interface TableContentTableImport {
   type: "Table";
   name: string;
-  columns?:TableContentColumnImport[];
+  columns?: TableContentColumnImport[];
+  columnWidths?: Record<string, number>;
 }
 
 export function isTableImportSnapshot(snapshot: any): snapshot is TableContentTableImport {
@@ -30,7 +31,19 @@ export function convertImportToSnapshot(snapshot: TableContentTableImport):
   const columnWidths: Record<string, number> = {};
   const dataSet = DataSet.create();
   const columns = snapshot?.columns;
-  if (!columns) return { dataSet, columnWidths };
+  if (!columns) {
+    // Legacy snapshots included the dataset within the columns property.
+    // Modern snapshots do not include most column information,
+    // because that information is stored in separate shared models.
+    // However, column widths must be stored in the table snapshot.
+    const _columnWidths = snapshot?.columnWidths;
+    if (_columnWidths) {
+      for (const [attrId, width] of Object.entries(_columnWidths)) {
+        columnWidths[attrId] = width;
+      }
+    }
+    return { dataSet, columnWidths };
+  }
 
   // set the name
   snapshot?.name && (dataSet.setName(snapshot?.name));

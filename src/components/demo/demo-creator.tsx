@@ -25,7 +25,7 @@ interface IProblemOption {
 // Pass through any that are not in the exclusion list.
 // Emit non-excluded ones as a URL query string (with an ampersand prepended if not empty).
 export const passThroughQueryItemsFromUrl = (href: string) => {
-  const excludeList = ["demo", "demoName", "unit", "fakeClass", "fakeUser", "problem"];
+  const excludeList = ["demo", "demoName", "fakeClass", "fakeUser", "problem"];
   const incomingUrlQueryPairs = parseUrl(href).query;
   excludeList.forEach((keyToExclude) => {
     delete incomingUrlQueryPairs[keyToExclude];
@@ -120,12 +120,11 @@ export class DemoCreatorComponent extends BaseComponent<IProps> {
   }
 
   private createLink(userType: string, userIndex: number, passThroughQueryItems: string) {
-    const { demo, unit } = this.stores;
+    const { demo } = this.stores;
     const demoNameParam = demo.name ? `&demoName=${demo.name}` : "";
     const fakeUser = `${userType}:${userIndex}`;
-    const unitStr = unit.code ? `&unit=${unit.code}` : "";
     // eslint-disable-next-line max-len
-    const href = `?appMode=demo${demoNameParam}&fakeClass=${demo.class.id}&fakeUser=${fakeUser}${unitStr}&problem=${demo.problemOrdinal}${passThroughQueryItems}`;
+    const href = `?appMode=demo${demoNameParam}&fakeClass=${demo.class.id}&fakeUser=${fakeUser}&problem=${demo.problemOrdinal}${passThroughQueryItems}`;
     return (
       <li key={userIndex}>
         <a href={href} target="_blank" rel="noreferrer">{userType} {userIndex}</a>

@@ -1,5 +1,8 @@
-import { types, Instance, SnapshotIn } from "mobx-state-tree";
+import { types, Instance, SnapshotIn, getSnapshot } from "mobx-state-tree";
+import { isValidHttpUrl } from "../../utilities/url-utils";
 import { SectionModelType } from "../curriculum/section";
+import { gImageMap } from "../image-map";
+import { ToolbarButtonModel } from "../tiles/toolbar-button";
 import { ConfigurationManager, mergeDisabledFeatures } from "./configuration-manager";
 import { NavTabsConfigModel } from "./nav-tabs";
 import { ToolbarModel } from "./problem-configuration";
@@ -14,8 +17,8 @@ export const UnitSpecModel = types
 
 export const AppConfigModel = types
   .model("AppConfig", {
-    // the set of curriculum units available
-    units: types.map(UnitSpecModel),
+    // base URL of external curriculum unit repository
+    curriculumBaseUrl: types.string,
     // unit code overrides (legacy unit code support)
     unitCodeMap: types.map(types.string),
     // default problem to load if none specified
@@ -28,6 +31,7 @@ export const AppConfigModel = types
     navTabs: NavTabsConfigModel.create(self.config?.navTabs || {}),
     disabledFeatures: self.config?.disabledFeatures || [],
     toolbar: ToolbarModel.create(self.config?.toolbar || []),
+    authorTools: ToolbarModel.create(self.config?.authorTools || []),
     settings: self.config?.settings
   }))
   .actions(self => ({
@@ -42,18 +46,19 @@ export const AppConfigModel = types
   .views(self => ({
     getUnit(unitId: string) {
       const unitCode = self.unitCodeMap.get(unitId) || unitId;
-      return self.units.get(unitCode);
+      const unitCodeIsUrl = isValidHttpUrl(unitCode);
+      const unitUrl = unitCodeIsUrl ? unitCode : `${self.curriculumBaseUrl}/branch/main/${unitCode}/content.json`;
+      const teacherGuideUrl = unitUrl.replace(/content\.json$/, "teacher-guide/content.json");
+      gImageMap.setUnitUrl(unitUrl);
+      gImageMap.setUnitCodeMap(getSnapshot(self.unitCodeMap));
+      return {"content": unitUrl, "guide": teacherGuideUrl};
     }
   }))
   .views(self => ({
     getUnitBasePath(unitId: string) {
       const unitSpec = self.getUnit(unitId);
       if (!unitSpec) return "";
-      const parts = unitSpec.content.split("/");
-      if (parts.length > 0) {
-        parts.splice(parts.length - 1, 1);
-      }
-      return parts.join("/");
+      return `${unitId}`;
     }
   }))
   .views(self => ({
@@ -85,6 +90,12 @@ export const AppConfigModel = types
     get placeholderText() { return self.configMgr.placeholderText; },
     get stamps() { return self.configMgr.stamps; },
     get tools() { return self.configMgr.tools; },
+    get authorToolbar() {
+      return ToolbarModel.create([
+        ...self.toolbar.map(button => ToolbarButtonModel.create(getSnapshot(button))),
+        ...self.authorTools.map(button => ToolbarButtonModel.create(getSnapshot(button)))
+      ]);
+    },
     getSetting(key: string, group?: string) {
       const groupSettings = group ? self.settings?.[group] as SnapshotIn<typeof SettingsGroupMstType> : undefined;
       return groupSettings?.[key] || self.settings?.[key];

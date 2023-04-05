@@ -264,6 +264,17 @@ export const DocumentContentModel = types
       getSharedModelsByType<IT extends typeof SharedModel>(type: string): IT["Type"][] {
         const sharedModelEntries = Array.from(self.sharedModelMap.values());
         return sharedModelEntries.map(entry => entry.sharedModel).filter(model => model.type === type);
+      },
+      getSharedModelsUsedByTiles(tileIds: string[]) {
+        const sharedModels: Record<string, SharedModelEntryType> = {};
+        Array.from(self.sharedModelMap.values()).forEach(sharedModel => {
+          sharedModel.tiles.forEach(tile => {
+            if (tileIds.includes(tile.id)) {
+              sharedModels[sharedModel.sharedModel.id] = sharedModel;
+            }
+          });
+        });
+        return sharedModels;
       }
     };
   })
@@ -333,7 +344,7 @@ export const DocumentContentModel = types
       const tile = self.getTile(tileInfo.tileId);
       const json = tile?.exportJson(tileOptions);
       if (json) {
-        return json.concat(comma(!!options?.appendComma));
+        return json;
       }
     }
   }))
@@ -368,25 +379,14 @@ export const DocumentContentModel = types
       });
       return counts;
     },
-    exportAsJson(options?: IDocumentExportOptions) {
+    exportRowsAsJson(rows: (TileRowModelType | undefined)[], options?: IDocumentExportOptions) {
       const builder = new StringBuilder();
       builder.pushLine("{");
-
-      const sharedModelsArray = Array.from(self.sharedModelMap.values());
-      if (sharedModelsArray.length > 0){
-        builder.pushLine(`"sharedModels":${stringify(sharedModelsArray)},`, 2);
-      }
-
       builder.pushLine(`"tiles": [`, 2);
 
-      // identify rows with exportable tiles
-      const rowsToExport = self.rowOrder.map(rowId => {
-        const row = self.getRow(rowId);
-        return row && !row.isSectionHeader && !row.isEmpty && !self.isPlaceholderRow(row) ? row : undefined;
-      }).filter(row => !!row);
-
-      const exportRowCount = rowsToExport.length;
-      rowsToExport.forEach((row, rowIndex) => {
+      const includedTileIds: string[] = [];
+      const exportRowCount = rows.length;
+      rows.forEach((row, rowIndex) => {
         const isLastRow = rowIndex === exportRowCount - 1;
         // export each exportable tile
         const tileExports = row?.tiles.map((tileInfo, tileIndex) => {
@@ -394,6 +394,7 @@ export const DocumentContentModel = types
           const showComma = row.tiles.length > 1 ? !isLastTile : !isLastRow;
           const rowHeight = self.rowHeightToExport(row, tileInfo.tileId);
           const rowHeightOption = rowHeight ? { rowHeight } : undefined;
+          includedTileIds.push(tileInfo.tileId);
           return self.exportTileAsJson(tileInfo, { ...options, appendComma: showComma, ...rowHeightOption });
         }).filter(json => !!json);
         if (tileExports?.length) {
@@ -411,10 +412,65 @@ export const DocumentContentModel = types
           }
         }
       });
+      const sharedModels = Object.values(self.getSharedModelsUsedByTiles(includedTileIds));
 
-      builder.pushLine("]", 2);
+      const tilesComma = sharedModels.length > 0 ? "," : "";
+      builder.pushLine(`]${tilesComma}`, 2);
+
+      if (sharedModels.length > 0) {
+        builder.pushLine(`"sharedModels": [`, 2);
+        sharedModels.forEach((sharedModel, index) => {
+          const sharedModelLines = stringify(sharedModel).split("\n");
+          sharedModelLines.forEach((sharedModelLine, lineIndex) => {
+            const lineComma =
+              lineIndex === sharedModelLines.length - 1 && index < sharedModels.length - 1
+              ? "," : "";
+            builder.pushLine(`${sharedModelLine}${lineComma}`, 4);
+          });
+        });
+        builder.pushLine("]", 2);
+      }
+
       builder.pushLine("}");
       return builder.build();
+    }
+  }))
+  .views(self => ({
+    exportAsJson(options?: IDocumentExportOptions) {
+      // identify rows with exportable tiles
+      const rowsToExport = self.rowOrder.map(rowId => {
+        const row = self.getRow(rowId);
+        return row && !row.isSectionHeader && !row.isEmpty && !self.isPlaceholderRow(row) ? row : undefined;
+      }).filter(row => !!row);
+
+      return self.exportRowsAsJson(rowsToExport, options);
+    },
+    exportSectionsAsJson(options?: IDocumentExportOptions) {
+      const sections: Record<string, string> = {};
+      let section = "";
+      let rows: (TileRowModelType | undefined)[] = [];
+
+      self.rowOrder.forEach(rowId => {
+        const row = self.getRow(rowId);
+        if (row) {
+          if (row.isSectionHeader) {
+            if (section !== "") {
+              // We've finished the last section
+              sections[section] = self.exportRowsAsJson(rows.filter(r => !!r), options);
+            }
+            section = row.sectionId ?? "unknown";
+            rows = [];
+          } else if (!row.isEmpty && !self.isPlaceholderRow(row)) {
+            rows.push(row);
+          }
+        }
+      });
+      if (section !== "") {
+        // Save the final section
+        sections[section] = self.exportRowsAsJson(rows.filter(r => !!r), options);
+      }
+
+      return sections;
     }
   }))
   .views(self => ({

@@ -76,7 +76,7 @@ export function syncLinkedPoints(board: JXG.Board, links: ITableLinkProperties) 
 export const kAxisBuffer = 20;
 // twice as much buffer for left side of X axis for Y axis labels
 export const kXAxisMinBuffer = 2 * kAxisBuffer;
-export const kXAxisTotalBuffer = 3 * kAxisBuffer;
+export const kXAxisTotalBuffer = kXAxisMinBuffer + kAxisBuffer;
 export const kYAxisTotalBuffer = 2 * kAxisBuffer;
 
 export const getAxisType = (v: any) => {
@@ -182,13 +182,19 @@ function scaleBoundingBoxToElement(domElementID: string, changeProps: any) {
   return [xMin, yMax, xMax, yMin] as JXG.BoundingBox;
 }
 
-export function guessUserDesiredBoundingBox(board: JXG.Board) {
-  const [xMin, yMax, xMax, yMin] = board.getBoundingBox();
-  const unitX = board.unitX;
-  const unitY = board.unitY;
+export function getBoardUnitsAndBuffers(board: JXG.Board) {
+  const unitX = board.unitX || kGeometryDefaultPixelsPerUnit;
+  const unitY = board.unitY || kGeometryDefaultPixelsPerUnit;
   const xMinBufferRange = kXAxisMinBuffer / unitX;
   const xMaxBufferRange = kAxisBuffer / unitX;
   const yBufferRange = kAxisBuffer / unitY;
+
+  return { unitX, unitY, xMinBufferRange, xMaxBufferRange, yBufferRange };
+}
+
+export function guessUserDesiredBoundingBox(board: JXG.Board) {
+  const [xMin, yMax, xMax, yMin] = board.getBoundingBox();
+  const { xMinBufferRange, xMaxBufferRange, yBufferRange } = getBoardUnitsAndBuffers(board);
 
   return [xMin + xMinBufferRange, yMax - yBufferRange, xMax - xMaxBufferRange, yMin + yBufferRange];
 }
@@ -301,7 +307,7 @@ export const boardChangeAgent: JXGChangeAgent = {
                           ...toObj("xAnnotation", xAnnotation), ...toObj("yAnnotation", yAnnotation)
                         });
     return [board, ...axes];
-},
+  },
 
   update: (board: JXG.Board, change: JXGChange) => {
     if (!change.properties) { return; }

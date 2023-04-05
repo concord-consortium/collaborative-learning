@@ -60,6 +60,7 @@ export interface ITileExportOptions {
   excludeTitle?: boolean;
   rowHeight?: number;
   transformImageUrl?: (url: string, filename?: string) => string;
+  appendComma?: boolean;
 }
 
 export interface IDocumentExportOptions extends ITileExportOptions {

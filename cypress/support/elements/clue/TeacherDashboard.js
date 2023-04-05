@@ -117,6 +117,15 @@ class TeacherDashboard {
         dialog.getDialogTextInput().type(text);
         dialog.getDialogOKButton().click();
     }
+    sendStudentNoteWorkaround(group, student, quadrant, text){
+        const quadrants = ["north-west", "north-east", "south-east", "south-west"];
+          cy.get('.four-up-overlay').eq(quadrants.indexOf(quadrant)).click();
+          this.getZoomedStudentID().click();
+          this.getStickyNoteIcon().eq(group-1).click();
+          dialog.getDialogTitle().should('contain','Message '+ student);
+          dialog.getDialogTextInput().type(text);
+          dialog.getDialogOKButton().click();
+    }
     verifyWorkForGroupReadOnly(group) {
         for (let i = 0; i < group.students.length; i++) {
             if (group.students[i].tools.textTool > 0) {
@@ -200,6 +209,9 @@ class TeacherDashboard {
     // }
     selectGroup(group) {
         this.getGroupName().contains(group).click();
+    }
+    getPlaybackToolBar() {
+        return cy.get('[data-testid="playback-component"]');
     }
 
 }

@@ -1,0 +1,79 @@
+{
+  "type": "overview",
+  "content": {
+     "tiles":
+     [
+      {
+        "id": "ovvJHkobWDzhb_zE",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Overview</strong></p>",
+            "<p>Students continue to work with the Wump family as they investigate side lengths, angles, perimeters, and areas of similar rectangles and triangles. Students use the idea of same shape to discover that scaled drawings/similar figures have corresponding angles that have the same measure and that corresponding sides grow or shrink by the same factor. Proportional reasoning is the ability to make comparisons between objects using multiplicative thinking instead of additive thinking.</p>",
+            "<p></p>",
+            "<p>The vocabulary of <strong>scale factor</strong> is introduced. As students analyze the diagram of noses and mouths from the Wump family, they will notice that scale factor only applies to these scaled drawings or similar figures. Scale factor does not apply to non-similar figures, as pairs of corresponding sides do not grow or shrink by the same factor. This problem will help solidify for students how using a scale factor is applying their proportional reasoning. </p>"
+          ]
+        }
+      },
+      {
+        "id": "sAJjxH9FPFssquGv",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'>Revision Comments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>CMP STEM Problem Format</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>Unit Descriptions</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'>Goals of the Units</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'>Unit Alignments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'>General Arc of Learning </a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'>Unit Arc of Learning</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'>Mathematical Overview</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'>Learning Aids</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'>Teaching Aids</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'>Family Letters </a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'>Assessments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'>ACE Homework</a></strong></p>"
+                        ]
+        }
+      },
+      {
+        "id": "Nb1_pNNKjB6ISoMv",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>AoL:</strong> Analysis, Analysis</p>",
+            "<p><strong>CCSSM:</strong> 7.G.A.1, 7.RP.A.2, 7.RP.A.2.B</p>"
+          ]
+        }
+      },
+      {
+        "id": "t4ywTGWG4fNWrps-",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Introduce the terms “scale factor” and connect it to “multiplier” to describe the relationship between corresponding side lengths of similar figures. </p>",
+            "<p>Use knowledge of scale drawings/similar figures to determine if any two rectangles or two triangles are similar. </p>",
+            "<p>Identify the scale factor of any two similar figures</p>",
+            "<p>Represent the relationship between corresponding sides of similar figures with a ratio. </p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>NWDYK</strong></p>",
+            "<p>How can you decide if two shapes are similar? How can you determine the scale factor between two similar shapes? </p>"
+          ]
+        }
+      }
+     ]
+  }
+}

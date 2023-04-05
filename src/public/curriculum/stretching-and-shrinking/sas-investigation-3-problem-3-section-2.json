@@ -1,0 +1,68 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Durrell, Angie, and Tonya are designing a boardwalk that crosses a river for a science project. They make several measurements and use stakes to mark the distances to create triangles. They also make a sketch like the diagram below.",
+            "<p>The students use similar triangles to find distances that are difficult to measure. The diagram shows a specific type of similar triangles, nested triangles, which are triangles that share a common angle.</p>"
+          ]
+        }
+      },
+       {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "•  What is the distance across the river from Stake 1 to Tree 1? Explain your reasoning."
+          ]
+        }
+      },
+      [{
+        "id": "-6wzAUG202201df45pM",
+        "title": "Diagram of the river with similar triangles",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_3_3_In_26_river_triangle_350w.png"
+        }
+      },
+      {
+        "id": "Gxtx7JsemG3EXVsl",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The triangles in the diagram are similar. </p>",
+            "<p>The angles that look like right angles are right angles. </p>",
+            "<p>The angle at Stake 3 is shared by both triangles.</p>"
+          ]
+        }
+      }],
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>90ft. The distance from Tree 1 to Tree 2 is 140 ft. and the corresponding side length of the smaller triangle is 80 ft. Then the scale factor from the small triangle to the large one is 1.75 (80 × 1.75 = 140). This would make the distance from Stake 3 to Tree 1 is 210 ft (120 × 1.75 = 210), the distance across the river from Stake 1 to Tree 1 is 90 ft. (210 – 120 = 90)</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": [
+    {
+      "text": "What shapes do you see in the diagram? Are they similar? Why?"
+    },
+    {
+      "text": "What measurements in the diagram might be useful?"
+    },
+   {
+      "text": "How can corresponding sides and angles in two similar triangles help find the missing measurements?"
+    }
+  ]
+}

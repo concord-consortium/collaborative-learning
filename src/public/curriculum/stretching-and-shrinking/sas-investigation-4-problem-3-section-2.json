@@ -1,0 +1,361 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The Art Club created sets of figures, some of which had an imposter.</p>",
+            "<p>For each set,</p>",
+            "<ul><li>Which shapes are similar? That is, which one is the imposter? Give reasons for your choice.</li><li>For those that are similar how do the lengths, angles, perimeter, and area compare?</li></ul>"
+          ]
+        }
+      },
+      [{
+          "id": "21AUG20220235PM",
+          "title": "Rectangles 1, 2, and 3",
+          "content": {
+            "type": "Image",
+            "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_1.png"
+          }
+        },
+        {
+          "id": "21AUG20220236PM",
+          "title": "Stars 1, 2, and 3",
+          "content": {
+            "type": "Image",
+            "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_2.png"
+          }
+        }],
+      [{
+          "id": "21AUG20220237PM",
+          "title": "Flags 1, 2, and 3",
+          "content": {
+            "type": "Image",
+            "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_8.png"
+          }
+        },
+        {
+          "id": "21AUG20220238PM",
+          "title": "Circles 1, 2, and 3",
+          "content": {
+            "type": "Image",
+            "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_9.png"
+          }
+      }],
+      [{
+          "id": "21AUG20220239PM",
+          "title": "Squares 1, 2, and 3",
+          "content": {
+            "type": "Image",
+            "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_13.png"
+          }
+        },
+        {
+          "id": "21AUG20220240PM",
+          "title": "Hats 1, 2, and 3",
+          "content": {
+            "type": "Image",
+            "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_14.png"
+          }
+      }],
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>For measurements, see Teaching Aid 4.3.</p>",
+            "<p>Rectangles 2 and 3 are similar</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220241PM",
+        "title": "Geometric reasoning for similar Rectangles 2 and 3",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_6.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Ratio reasoning</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220242PM",
+        "title": "Ratio reasoning for similar and non-similar rectangles",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_7.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Possible Reasoning:</p>",
+            "<p>Rectangle #1 is not similar to the #2 or #3.</p>",
+            "<p>From #1 to #2, corresponding sides grow by 2 (short side) or 3 (long side).</p>",
+            "<p>From #1 to #3, corresponding side grow by 3 (short side) or 4.5 (long side).</p>",
+            "<p>The ratio of short to long sides for the rectangle #1 would not be equivalent to the ratio of short to long sides for either #2 or #3.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220243PM",
+        "title": "Geometric reasoning for non-similar Rectangle 1",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_4.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Rectangles #2 and #3 are similar</p>",
+            "<p>Corresponding angles are equivalent. All angles are 90˚ in rectangles.</p>",
+            "<p>Comparing rectangle #2 to rectangle #3</p>",
+            "<p>Scale Reasoning:</p>",
+            "<p>From #2 to# 3, scale factor is 1.5.</p>",
+            "<p>From #3 to #2, scale factor is 2/3.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Stars 1 and 3 are similar</p>",
+            "<p>Possible Reasoning:</p>",
+            "<p>Star #2 is not a scale drawing because corresponding angles are not equivalent to either Star #1 or #3.</p>",
+            "<p>Scale Reasoning</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220244PM",
+        "title": "Scale factor reasoning for similar Stars 1 and 3",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_3.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Ratio Reasoning:"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220245PM",
+        "title": "Ratio reasoning for similar and non-similar stars",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_5.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Flags 1 and 3 are similar</p>",
+            "<p>Possible Reasoning:</p>",
+            "<p>All corresponding angles have the same measures in all three flags.</p>",
+            "<p>The triangle on Flag #1 and #2 are congruent. Students must use the measures of the whole shape including the pole. The length of the pole makes Flag #2 not similar to the other flags.</p>",
+            "<p>All corresponding angles have the same measures in all three flags.</p>",
+            "<p>Scale Reasoning:</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220246PM",
+        "title": "Scale factor reasoning for similar Triangles 1 and 3",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_10.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Ratio Reasoning:</p>",
+            "<p>Shape #1 is small and difficult to get an accurate measure. But with the ratios, it shows that Shape #1 and Shape #3 almost have equivalent ratios. (within our measuring error)</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220247PM",
+        "title": "Ratio reasoning for similar and non-similar triangles",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_11.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Circles – all circles are similar to other circles</p>",
+            "<p>Possible Reasoning:</p>",
+            "<p>All circles are the same shape. Any radius can be scaled to find a corresponding radius. Any diameter can be scaled to find a corresponding diameter.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220248PM",
+        "title": "Ratio reasoning for circles",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_11.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Squares – all squares are similar to other squares</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220249PM",
+        "title": "Ratio reasoning for squares",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_11.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Possible Reasoning:</p>",
+            "<p>The corresponding angles will be 90˚.</p>",
+            "<p>Scale Reasoning:</p>",
+            "<p>For corresponding side lengths, you can always find a scale factor.</p>",
+            "<p>Ratio Reasoning:</p>",
+            "<p>Adjacent sides will always be equivalent ratios of side to side.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Hats 1 and 3 are similar</p>",
+            "<p>Possible Reasoning:</p>",
+            "<p>Why Shape #2 is not a scale drawing:</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220250PM",
+        "title": "Ratio reasoning for similar and non-similar hats",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_16.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Hats #1 and #3 are similar</p>",
+            "<p>Corresponding angles are equivalent</p>",
+            "<p>Scale Reasoning:</p>",
+            "<p>Shape #1 to Shape# 2 is scale factor = 2.</p>",
+            "<p>Shape #2 to Shape #1 is scale factor = ½ .</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220251aPM",
+        "title": "Geometric reasoning for similar Hats 1 and 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Ratio Reasoning:</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220252PM",
+        "title": "Geometric reasoning for similar Hats 1 and 3",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_17.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG20220455PM",
+        "title": "Ratio reasoning for similar and non-similar hats",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/4-3_Initial_Challenge_18.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Corresponding lengths of similar figures increase by the scale factor.",
+            "Corresponding angles of similar figures have the same measure.",
+            "Perimeters are lengths, so they increase by the scale factor.",
+            "Areas increase by the scale factor • scale factor because the length has a scale factor increase in two dimensions."
+          ]
+        }
+      }
+    ]
+  }
+}
