@@ -2,13 +2,15 @@ import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import GraphToolTile from '../../../../support/elements/clue/GraphToolTile';
 import TableToolTile from '../../../../support/elements/clue/TableToolTile';
+import TextToolTile from '../../../../support/elements/clue/TextToolTile';
 
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const graphToolTile = new GraphToolTile;
 const tableToolTile = new TableToolTile;
+const textToolTile = new TextToolTile;
 
-context.skip('Graph Table Integration', function () {
+context('Graph Table Integration', function () {
   before(function () {
     const queryParams = "?appMode=qa&fakeClass=5&fakeUser=student:5&problem=2.3&qaGroup=5"; //using different problem bec. 2.1 disables graph table integration
     cy.clearQAData('all');
@@ -45,7 +47,7 @@ context.skip('Graph Table Integration', function () {
         tableToolTile.getTableCell().eq(17).click();
       });
       clueCanvas.addTile('geometry');
-      clueCanvas.deleteTile('text');
+      textToolTile.deleteTextTile();
     });
     describe('Link graph dialog', () => {
       it('verify correct graph names appear in selection list', function () {
@@ -69,23 +71,26 @@ context.skip('Graph Table Integration', function () {
         graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).children('svg').attribute('data-indicator-width').should('exist');
         graphToolTile.getGraph().should('have.class', 'is-linked');
       });
-      it.skip('verify points added has p1 label in table and graph', function () {
+      it('verify points added has label in table and graph', function () {
         tableToolTile.getIndexNumberToggle().click();
         tableToolTile.getTableIndexColumnCell().first().should('contain', '1');
-        graphToolTile.getGraphPointLabel().contains('p1').should('exist');
+        graphToolTile.getGraphPointLabel().contains('A').should('exist');
+        graphToolTile.getGraphPointLabel().contains('B').should('exist');
+        graphToolTile.getGraphPointLabel().contains('C').should('exist');
+        graphToolTile.getGraphPointLabel().contains('D').should('exist');
       });
       it('verify table can be linked to two graphs', function () {
         clueCanvas.addTile('geometry');
         cy.linkTableToGraph('Table 1', "Graph 2");
         graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('have.length', 2);
       });
-      it.skip('verify unlink of graph and table', function () {
+      it('verify unlink of graph and table', function () {
         cy.unlinkTableToGraph('Table 1', "Graph 2");
         graphToolTile.getGraphTile().siblings(clueCanvas.linkIconEl()).should('have.length', 1);
         graphToolTile.getGraph().last().should('not.have.class', 'is-linked');
       });
-      it.skip('verify point no longer has p1 in table and graph', function () {
-        graphToolTile.getGraphPointLabel().contains('p1').should('have.length', 1);
+      it('verify point no longer has p1 in table and graph', function () {
+        graphToolTile.getGraphPointLabel().contains('A').should('have.length', 1);
       });
       after(function () {
         clueCanvas.deleteTile('graph');
@@ -185,7 +190,7 @@ context.skip('Graph Table Integration', function () {
     });
 
   });
-  context.skip('Save and restore keeps the connection between table and graph', function () {
+  context('Save and restore keeps the connection between table and graph', function () {
     before(function () {
       let title = '2.3 Mouthing Off and Nosing Around';
       canvas.createNewExtraDocumentFromFileMenu("empty",'my-work');
@@ -196,7 +201,7 @@ context.skip('Graph Table Integration', function () {
       cy.closeResourceTabs();
     });
     it('verify connection of table and graph on restored canvas', function () {
-      graphToolTile.getGraphPointLabel().contains('p1').should('exist');
+      graphToolTile.getGraphPointLabel().contains('A').should('exist');
     });
   });
   context.skip('Delete connected table', function () {

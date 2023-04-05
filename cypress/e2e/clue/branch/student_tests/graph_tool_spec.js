@@ -38,7 +38,7 @@ context('Graph Tool', function() {
                 canvas.createNewExtraDocumentFromFileMenu(ptsDoc, "my-work");
                 clueCanvas.addTile('geometry');
                 cy.get('.spacer').click();
-                clueCanvas.deleteTile('text');
+                textToolTile.deleteTextTile();
                 graphToolTile.getGraphTile().last().click();
                 graphToolTile.addPointToGraph(5,5);
                 graphToolTile.addPointToGraph(10,5);
@@ -48,7 +48,7 @@ context('Graph Tool', function() {
                 canvas.createNewExtraDocumentFromFileMenu(polyDoc, "my-work");
                 clueCanvas.addTile('geometry');
                 cy.get('.spacer').click();
-                clueCanvas.deleteTile('text');
+                textToolTile.deleteTextTile();
                 graphToolTile.getGraphTile().last().click();
                 graphToolTile.addPointToGraph(4.2,2);
                 graphToolTile.addPointToGraph(10.4, 7.2);

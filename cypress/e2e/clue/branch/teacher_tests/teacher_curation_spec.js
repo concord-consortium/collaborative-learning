@@ -9,7 +9,7 @@ let dashboard = new TeacherDashboard();
 let resourcesPanel = new ResourcesPanel();
 let clueCanvas = new ClueCanvas;
 
-describe.skip('verify document curation', function() {//adding a star to a student document
+describe('verify document curation', function() {//adding a star to a student document
     before(function() {
         const queryParams = "?appMode=demo&demoName=CLUE-Test&fakeClass=5&fakeOffering=5&problem=2.1&fakeUser=teacher:6";
         cy.clearQAData('all');
@@ -17,14 +17,13 @@ describe.skip('verify document curation', function() {//adding a star to a stude
         cy.visit(queryParams);
         cy.waitForLoad();
         dashboard.switchView("Workspace & Resources");
-        cy.wait(2000);
+        cy.wait(5000);
         clueCanvas.getInvestigationCanvasTitle().text().as('investigationTitle');
     });
 
     let studentDoc = "Student 5: SAS 2.1 Drawing Wumps";
 
     it('verify starring a student published investigation',function(){
-        // cy.openResourceTab();
         cy.openTopTab('class-work');
         cy.openSection('class-work','workspaces');
         resourcesPanel.starCanvasItem('class-work','workspaces',studentDoc);
