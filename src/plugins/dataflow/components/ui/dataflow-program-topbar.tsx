@@ -103,7 +103,6 @@ interface IRecordStopOrClearProps {
 const RecordStopOrClearButton = (props: IRecordStopOrClearProps) => {
   const { disabled, onRecordDataChange, programRecordState } = props;
   if (programRecordState === 2){ //stop button pressed
-    // console.log("<RecordStopOrClearButton Stop pressed");
   }
   return (
     <div className="record-btn-container">
@@ -133,7 +132,6 @@ interface IPlaybackProps {
 
 const PlaybackButton = (props: IPlaybackProps) => {
   const {programRecordState, isPlaying, handleChangeIsPlaying} = props;
-  // console.log("<PlaybackButton> with isPLaying:", isPlaying);
   return (
     <div className="playback-btn-container">
       <button

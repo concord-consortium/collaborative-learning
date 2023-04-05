@@ -41,7 +41,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       isPlaying: false,
       playBackIndex: 0,
     };
-      // console.log("<DataflowToolComponent with context", props.context);
   }
 
   public render() {
@@ -176,10 +175,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     // 0 - cleared, ready to record
     // 1 - recording in progress
     // 2 - stopped, ready to clear
-    // console.log("📁 dataflow-tile.tsx > 🔨 handleChangeOfRecordingMode with state:", this.state.programRecordingMode);
-    // if (this.state.programRecordingMode === 0){
-    //   console.log("lesssss goooooo");
-    // }
 
     const mode = this.state.programRecordingMode;
     const model = this.getContent();
@@ -188,7 +183,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       this.setState({isPlaying: false}); //reset isPlaying
       this.pairNodesToAttributes();
     }
-
     if (mode === 2){
       const allAttributes = model.dataSet.attributes;
       const ids = model.dataSet.cases.map(({__id__}) => ( __id__));
@@ -202,9 +196,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     this.setState({
       programRecordingMode:  (mode + 1) % 3
     });
-    // console.log("📁 dataflow-tile.tsx > 🔨 handleChangeOfRecordingMode EOF with state:", this.state.programRecordingMode);
-
-
   };
 
   private handleChangeIsPlaying = () => {

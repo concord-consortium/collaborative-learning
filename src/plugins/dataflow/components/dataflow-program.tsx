@@ -39,7 +39,6 @@ import { addCanonicalCasesToDataSet, newCaseId } from "../../../models/data/data
 import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
-import { addCanonicalCasesToDataSet, ICaseCreation } from "../../../models/data/data-set";
 
 import "./dataflow-program.sass";
 interface NodeNameValuePair {
@@ -539,26 +538,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
   private tick = () => { //can get rid of isPlaying since we can access that inside here
     const {tileModel, playBackIndex, programRecordState, isPlaying} = this.props;
-    // console.log("programRecordState:", programRecordState);
     const dataSet = tileModel.dataSet;
-
-
-    /* ==[ Console logs for Ticks ] == */
-    switch (programRecordState){
-      case 0:
-        break;
-      case 1:
-        console.log(`-------tick--RECORDING---`);
-        break;
-      case 2:
-        if (isPlaying){
-          if (playBackIndex === 0){
-            console.log("\n**** HIT PLAYBACK **** \n");
-          }
-          console.log(`-------tick--PLAYBACK--idx:${playBackIndex}`);
-        }
-        break;
-    }
 
     /* ==[ Time Setup ] == */
     const now = Date.now();
@@ -578,14 +558,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.programEditor.nodes.forEach((node, idx) => {
           const key = existingAttributes[idx] as keyof typeof aCase;
           aCase[key] = node.data.nodeValue as string;
-          console.log("recording node:", node.name, aCase[key]);
         });
         addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
       }
       /* ==[ Update Node ] == */
       if (programRecordState !== 2){
         /* ==[ Update Node ] == */
-        console.log("updateNode");
         const nodeProcessMap: { [name: string]: (n: Node) => void } = {
           Generator: this.updateGeneratorNode,
           Timer: this.updateTimerNode,
@@ -634,7 +612,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           const attrId = dataSet.attributes[idx].id;
           const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
           let nodeControl;
-          // console.log("valueToSendToNode:", valueToSendToNode);
           switch (node.name){
             case "Sensor":
               nodeControl = node.controls.get("nodeValue") as SensorValueControl;
@@ -646,11 +623,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               break;
             case "Generator":
               nodeControl = node.controls.get("nodeValue") as ValueControl;
-              // console.log("in Generator switch with valueToSendNode", valueToSendToNode);
               nodeControl.setValue(valueToSendToNode);
               break;
             case "Timer":
-              console.log("timer node:", node);
               nodeControl = node.controls.get("nodeValue") as ValueControl; //not working
               nodeControl.setValue(valueToSendToNode);
               break;
@@ -673,19 +648,16 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
               break;
             default:
-              console.log("other node option");
           }
-          console.log("playback node:", node.name, valueToSendToNode);
         });
-        
-       
+
+
       }
     }
 
     //* ==[ Playback Index ] == */
 
     if (this.props.programRecordState === 2 && this.props.isPlaying) {
-      console.log("dataSet during Record = ", dataSet);
       this.props.updatePlayBackIndex(UpdateMode.Increment);
     }
     else {
@@ -735,7 +707,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private sendDataToSerialDevice(n: Node){
-    // console.log("data-flow-program.tsx > sendDataToSerialDevice > n:", n);
     if (isFinite(n.data.nodeValue as number)){
       this.stores.serialDevice.writeToOut(n.data.nodeValue as number);
     }
@@ -842,7 +813,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateGeneratorNode = (n: Node) => {
-    // console.log("📁 dataflow-program.tsx > 🔨 updateGeneratorNode >  🍔 n:", n);
     const generatorType = n.data.generatorType;
     const period = Number(n.data.period);
     const amplitude = Number(n.data.amplitude);
@@ -854,8 +824,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       const nodeValue = n.controls.get("nodeValue") as NumControl;
       if (nodeValue) {
         nodeValue.setValue(val);
-        // console.log("📁 dataflow-program.tsx > 🔨 updateGeneratorNode > nodeValue being set to val:", val);
-
       }
     }
   };

@@ -38,7 +38,6 @@ export class SensorValueControl extends Rete.Control {
   }
 
   public setValue = (val: number) => {
-    // console.log("\tsensorValueControl > setValue:", val);
     this.props.value = val;
     this.putData(this.key, val);
     this.updateUnits();
