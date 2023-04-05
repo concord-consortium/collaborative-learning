@@ -57,6 +57,11 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
 
     const initialValue = this.getValue();
 
+    if (DEBUG_CMS) {
+      // eslint-disable-next-line no-console
+      console.log("DEBUG: CMS ClueControl initial content value is: ", initialValue);
+    }
+
     initializeAppPromise.then((stores) => {
 
       // Wait to construct the document until the main CLUE stuff is
@@ -98,10 +103,8 @@ export class ClueControl extends React.Component<CmsWidgetControlProps, IState> 
             const immutableValue = Map(parsedJson);
             this.props.onChange(immutableValue);
             if (DEBUG_CMS) {
-              // eslint-disable
+              // eslint-disable-next-line no-console
               console.log("DEBUG: CMS ClueControl onChange called with new content value: ", parsedJson);
-              console.log("DEBUG: CMS ClueControl initial content value was: ", initialValue);
-              // eslint-enable
             }
           }
         }
