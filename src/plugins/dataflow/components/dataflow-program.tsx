@@ -2,7 +2,7 @@ import React from "react";
 import "regenerator-runtime/runtime";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../../components/base";
-import Rete, { NodeEditor, Engine, Node, Control, Input } from "rete";
+import Rete, { NodeEditor, Engine, Node } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
 import { autorun } from "mobx";
@@ -36,11 +36,12 @@ import { DocumentContextReact } from "../../../components/document/document-cont
 import { SerialDevice } from "../../../models/stores/serial";
 import { dataflowLogEvent } from "../dataflow-logger";
 import { addCanonicalCasesToDataSet, newCaseId } from "../../../models/data/data-set";
-
-import "./dataflow-program.sass";
 import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
+
+import "./dataflow-program.sass";
+
 interface NodeNameValuePair {
   name: string;
   val: number;
