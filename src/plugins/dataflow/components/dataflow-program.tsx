@@ -388,7 +388,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (this.intervalHandle) {
       clearInterval(this.intervalHandle);
     }
-    this.intervalHandle = setInterval(() => this.tick(this.props.isPlaying), rate);
+    this.intervalHandle = setInterval(() => this.tick(), rate);
   };
 
   private processAndSave = async () => {
@@ -538,24 +538,30 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  private tick = (isPlaying: boolean) => { //can get rid of isPlaying since we can access that inside here
-
-    const dataSet = this.props.tileModel.dataSet;
-    const {playBackIndex} = this.props;
+  private tick = () => { //can get rid of isPlaying since we can access that inside here
+    const {tileModel, playBackIndex, programRecordState, isPlaying} = this.props;
+    // console.log("programRecordState:", programRecordState);
+    const dataSet = tileModel.dataSet;
 
 
     /* ==[ Console logs for Ticks ] == */
     // console.log("playBackIndex", playBackIndex);
 
-    switch (this.props.programRecordState){
+    switch (programRecordState){
       case 0:
         break;
       case 1:
+
         console.log(`-------tick--RECORDING---`);
         break;
 
       case 2:
         if (isPlaying){
+          if (playBackIndex === 0){
+            console.log("              ");
+            console.log("**** HIT PLAYBACK **** ");
+            console.log("              ");
+          }
           console.log(`-------tick--PLAYBACK--idx:${playBackIndex}`);
         }
         break;
@@ -570,41 +576,44 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // console.log("isPlaying:", isPlaying);
     if (!isPlaying){ //isPlaying stands for playback
 
-      /* ==[ Update Node ] == */
-      const nodeProcessMap: { [name: string]: (n: Node) => void } = {
-        Generator: this.updateGeneratorNode,
-        Timer: this.updateTimerNode,
-        Sensor: (n: Node) => {
-          this.updateNodeChannelInfo(n);
-          this.updateNodeSensorValue(n);
-        },
-        "Live Output": (n: Node) => {
-          this.sendDataToSerialDevice(n);
-        }
-      };
-      let processNeeded = false;
-      this.programEditor.nodes.forEach((n: Node) => {
-        // console.log("node update forEach:");
+      if (programRecordState !== 2){
+        /* ==[ Update Node ] == */
+        const nodeProcessMap: { [name: string]: (n: Node) => void } = {
+          Generator: this.updateGeneratorNode,
+          Timer: this.updateTimerNode,
+          Sensor: (n: Node) => {
+            this.updateNodeChannelInfo(n);
+            this.updateNodeSensorValue(n);
+          },
+          "Live Output": (n: Node) => {
+            this.sendDataToSerialDevice(n);
+          }
+        };
+        let processNeeded = false;
+        this.programEditor.nodes.forEach((n: Node) => {
+          // console.log("node update forEach:");
 
-        const nodeProcess = nodeProcessMap[n.name];
-        if (nodeProcess) {
-          processNeeded = true;
-          nodeProcess(n);
+          const nodeProcess = nodeProcessMap[n.name];
+          if (nodeProcess) {
+            processNeeded = true;
+            nodeProcess(n);
+          }
+          if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
+            this.updateNodeRecentValues(n);
+          }
+        });
+        if (processNeeded) {
+            // if we've updated values on 1 or more nodes (such as a generator),
+            // we need to abort any current processing and reprocess all
+            // nodes so current values are up to date
+          (async () => {
+            await this.programEngine.abort();
+            await this.programEngine.process(this.programEditor.toJSON());
+          })();
         }
-        if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
-          this.updateNodeRecentValues(n);
-        }
-      });
-      if (processNeeded) {
-          // if we've updated values on 1 or more nodes (such as a generator),
-          // we need to abort any current processing and reprocess all
-          // nodes so current values are up to date
-        (async () => {
-          await this.programEngine.abort();
-          await this.programEngine.process(this.programEditor.toJSON());
-        })();
+        /* ==[ End Update Node ] == */
       }
-      /* ==[ End Update Node ] == */
+
 
       /* ==[ Record into Dataset ] == */
       if (isRecording){
@@ -668,7 +677,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               nodeControl.putData(nodeControl.key, valueToSendToNode); //doesn't work for on/off
               break;
             case "Live Output":
-              // console.log("live output node", node);
+              console.log("live output node", node);
+              nodeControl = node.inputs.get("nodeValue") as Input;
+              nodeControl.control?.putData("nodeValue", 1); //doesn't work
+
               // nodeControl = node.inputs.get("nodeValue")?.control as Control;
               // nodeControl.putData("nodeValue", 1); //doesn't work
 
@@ -678,8 +690,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               // nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
               // nodeControl.putData("nodeValue", 1); //doesn't work
 
-              // nodeControl = node.inputs.get("nodeValue") as Input;
-              // nodeControl.control?.putData("nodeValue", 1); //doesn't work
+
               // console.log("Live Output Node > nodeControl > ", nodeControl);
               break;
             default:
