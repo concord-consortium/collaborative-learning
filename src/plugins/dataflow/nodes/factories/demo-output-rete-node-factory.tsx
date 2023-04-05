@@ -102,6 +102,8 @@ export class DemoOutputReteNodeFactory extends DataflowReteNodeFactory {
   }
 
   private addInput(node: Node, inputKey: string, displayLabel = "") {
+    console.log("demo-output-rete-node-factory > addInput > ", node);
+
     if (this.editor) {
       const oldInput = node.inputs.get(inputKey);
       if (!oldInput) {

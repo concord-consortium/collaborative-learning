@@ -1,6 +1,6 @@
 import React from "react";
 import classNames from "classnames";
-import Rete, { NodeEditor, Node } from "rete";
+import Rete, { NodeEditor, Node} from "rete";
 import { roundNodeValue } from "../../model/utilities/node";
 import "./value-control.sass";
 
@@ -49,6 +49,7 @@ export class ValueControl extends Rete.Control {
   };
 
   public setValue = (val: number) => {
+    // console.log(`value-control.tsx > ${this.props.class} setValue > val:`, val);
     this.props.value = val;
     this.putData(this.key, val);
     (this as any).update();

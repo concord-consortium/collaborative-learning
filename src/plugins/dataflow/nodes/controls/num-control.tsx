@@ -131,6 +131,7 @@ export class NumControl extends Rete.Control {
   };
 
   public setValue = (val: number) => {
+    console.log("num-control.tsx with val:", val);
     if (this.min && val < this.min) {
       val = this.min;
     }

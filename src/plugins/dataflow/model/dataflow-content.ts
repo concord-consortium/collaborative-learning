@@ -55,11 +55,6 @@ export const DataflowContentModel = TileContentModel
   .views(self => ({
     get sharedModel() {
       const sharedModelManager = self.tileEnv?.sharedModelManager;
-      // Perhaps we should pass the type to getTileSharedModel, so it can return the right value
-      // just like findFirstSharedModelByType does
-      //
-      // For now we are checking the type ourselves, and we are assuming the shared model we want
-      // is the first one.
       const firstSharedModel = sharedModelManager?.getTileSharedModels(self)?.[0];
       if (!firstSharedModel || getType(firstSharedModel) !== SharedDataSet) {
         return undefined;
@@ -254,7 +249,7 @@ export const DataflowContentModel = TileContentModel
       if (!foundFlag){
         self.dataSet.removeAttribute(attribute);
       }
-    }
+    },
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;
