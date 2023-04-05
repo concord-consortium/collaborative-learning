@@ -35,7 +35,7 @@ import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { SerialDevice } from "../../../models/stores/serial";
 import { dataflowLogEvent } from "../dataflow-logger";
-import { addCanonicalCasesToDataSet, newCaseId } from "../../../models/data/data-set";
+import { ICaseCreation, addCanonicalCasesToDataSet } from "../../../models/data/data-set";
 import { SensorValueControl } from "../nodes/controls/sensor-value-control";
 import { InputValueControl } from "../nodes/controls/input-value-control";
 import { DemoOutputControl } from "../nodes/controls/demo-output-control";
@@ -550,13 +550,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (!isPlaying){
       /* ==[ Record into Dataset ] == */
       if (isRecording){
-        const aCase = {
-          __id__: newCaseId(),
-        };
-        const existingAttributes = this.props.tileModel.existingAttributes();
+        const aCase: ICaseCreation = {};
         //loop through attribute (nodes) and write each value
         this.programEditor.nodes.forEach((node, idx) => {
-          const key = existingAttributes[idx] as keyof typeof aCase;
+          const key = dataSet.attributes[idx].id;
           aCase[key] = node.data.nodeValue as string;
         });
         addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
