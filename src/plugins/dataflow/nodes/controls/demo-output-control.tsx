@@ -65,7 +65,6 @@ export class DemoOutputControl extends Rete.Control {
   };
 
   public setValue = (val: number) => {
-    console.log("demo-output-control > setValue > val:", val);
     this.props.value = val;
     this.props.percentClosed = this.getPercentClosed(val);
     this.putData(this.key, val);

@@ -545,39 +545,48 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
 
     /* ==[ Console logs for Ticks ] == */
-    // console.log("playBackIndex", playBackIndex);
-
     switch (programRecordState){
       case 0:
         break;
       case 1:
-
         console.log(`-------tick--RECORDING---`);
         break;
-
       case 2:
         if (isPlaying){
           if (playBackIndex === 0){
-            console.log("              ");
-            console.log("**** HIT PLAYBACK **** ");
-            console.log("              ");
+            console.log("\n**** HIT PLAYBACK **** \n");
           }
           console.log(`-------tick--PLAYBACK--idx:${playBackIndex}`);
         }
         break;
     }
 
-
     /* ==[ Time Setup ] == */
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
     const isRecording = this.props.programRecordState === 1;
-    // console.log("isPlaying:", isPlaying);
-    if (!isPlaying){ //isPlaying stands for playback
 
+    /* ==[ Logic for Default, Recording and Playback ] ==  TO DO - abstract this */
+    if (!isPlaying){
+      /* ==[ Record into Dataset ] == */
+      if (isRecording){
+        const aCase = {
+          __id__: newCaseId(),
+        };
+        const existingAttributes = this.props.tileModel.existingAttributes();
+        //loop through attribute (nodes) and write each value
+        this.programEditor.nodes.forEach((node, idx) => {
+          const key = existingAttributes[idx] as keyof typeof aCase;
+          aCase[key] = node.data.nodeValue as string;
+          console.log("recording node:", node.name, aCase[key]);
+        });
+        addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
+      }
+      /* ==[ Update Node ] == */
       if (programRecordState !== 2){
         /* ==[ Update Node ] == */
+        console.log("updateNode");
         const nodeProcessMap: { [name: string]: (n: Node) => void } = {
           Generator: this.updateGeneratorNode,
           Timer: this.updateTimerNode,
@@ -591,8 +600,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         };
         let processNeeded = false;
         this.programEditor.nodes.forEach((n: Node) => {
-          // console.log("node update forEach:");
-
           const nodeProcess = nodeProcessMap[n.name];
           if (nodeProcess) {
             processNeeded = true;
@@ -614,21 +621,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         /* ==[ End Update Node ] == */
       }
 
-
-      /* ==[ Record into Dataset ] == */
-      if (isRecording){
-        const aCase = {
-          __id__: newCaseId(),
-        };
-        const existingAttributes = this.props.tileModel.existingAttributes();
-        //loop through attribute (nodes) and write each value
-        this.programEditor.nodes.forEach((node, idx) => {
-          const key = existingAttributes[idx] as keyof typeof aCase;
-          aCase[key] = node.data.nodeValue as string;
-          console.log("recording node:", node.name, aCase[key]);
-        });
-        addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
-      }
 
 
 
@@ -659,6 +651,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               nodeControl.setValue(valueToSendToNode);
               break;
             case "Timer":
+              console.log("timer node:", node);
               nodeControl = node.controls.get("nodeValue") as ValueControl; //not working
               nodeControl.setValue(valueToSendToNode);
               break;
@@ -671,27 +664,14 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
             case "Control":
               break;
             case "Demo Output":
-              // console.log("Demo Output!!!", node);
               nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
-              nodeControl.setValue(1); //---> shines light bulb on, but the off should say on!
-              nodeControl.putData(nodeControl.key, valueToSendToNode); //doesn't work for on/off
+              nodeControl.setValue(valueToSendToNode); //---> shows correct animation
+              nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
+              nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
               break;
             case "Live Output":
-              console.log("live output node", node);
-              nodeControl = node.inputs.get("nodeValue") as Input;
-              nodeControl.control?.putData("nodeValue", 1); //doesn't work
-
-              // nodeControl = node.inputs.get("nodeValue")?.control as Control;
-              // nodeControl.putData("nodeValue", 1); //doesn't work
-
-              // nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-              // nodeControl.setValue(1); //doesn't work
-
-              // nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-              // nodeControl.putData("nodeValue", 1); //doesn't work
-
-
-              // console.log("Live Output Node > nodeControl > ", nodeControl);
+              nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
+              nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
               break;
             default:
               console.log("other node option");
