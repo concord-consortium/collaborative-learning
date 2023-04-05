@@ -24,7 +24,6 @@ export function defaultDataflowContent(): DataflowContentModelType {
 export const kDataflowDefaultHeight = 480;
 export const kDefaultLabel = "Dataflow Node";
 
-
 export function defaultDataSet() {
   const dataSet = DataSet.create();
   addAttributeToDataSet(dataSet, { name: kDefaultLabel });
@@ -101,16 +100,7 @@ export const DataflowContentModel = TileContentModel
         `}`
       ].join("\n");
     },
-    existingAttributesWithNames(){
-      return self.dataSet.attributes.map((a) => {
-        return { "attrName": a.name, "attrId": a.id };
-      });
-    },
-    existingAttributes(){
-      return self.dataSet.attributes.map((a) => {
-        return a.id;
-      });
-    },
+
   }))
   .actions(self => tileModelHooks({
     doPostCreate(metadata: ITileMetadataModel){
@@ -119,17 +109,8 @@ export const DataflowContentModel = TileContentModel
   }))
   .actions(self => ({
     afterAttach() { //
-      // Monitor our parents and update our shared model when we have a document parent
       addDisposer(self, reaction(() => {
-        // disposers call the function passed to it when model is disposed
-        // and here we pass a reaction, which is a mobx thing that watches the stuff in the first argument
-        // it calls second argument when first is done
-        // looking in the tileEnv for the shared modelManager - "environment" is a mobx context,
-        // but must be set at root of tree
-        // tile env proxies the actual mechanism
         const sharedModelManager = self.tileEnv?.sharedModelManager;
-
-        // collecting the stats on current sharedModels here so we can pass on to reaction on 119
         const sharedDataSet = sharedModelManager?.isReady
           ? sharedModelManager?.findFirstSharedModelByType(SharedDataSet, self.metadata.id)
           : undefined;
@@ -140,12 +121,8 @@ export const DataflowContentModel = TileContentModel
 
         return { sharedModelManager, sharedDataSet, tileSharedModels };
       },
-      // reaction/effect ("second argument" above), a mobx reaction watches the model
-      // and "reacts" there are various flavors, e.g.
-      // autorun, when, (what we are watching, what we do if what watching changes)
       ({sharedModelManager, sharedDataSet, tileSharedModels}) => {
         if (!sharedModelManager?.isReady) {
-          // We aren't added to a document yet so we can't do anything yet
           return;
         }
 
@@ -159,9 +136,6 @@ export const DataflowContentModel = TileContentModel
             const dataSet = defaultDataSet();
             sharedDataSet = SharedDataSet.create({ providerId: self.metadata.id, dataSet });
           }
-
-         // SharedDataSet.providerId (might be a table, in the case of a new table)
-              // DataSet
 
           // Add the shared model to both the document and the tile
           sharedModelManager.addTileSharedModel(self, sharedDataSet);
