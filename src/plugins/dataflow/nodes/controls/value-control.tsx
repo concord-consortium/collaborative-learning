@@ -49,7 +49,7 @@ export class ValueControl extends Rete.Control {
   };
 
   public setValue = (val: number) => {
-    // console.log(`value-control.tsx > ${this.props.class} setValue > val:`, val);
+    // console.log(`\tvalue-control.tsx > ${this.props.class} setValue > val:`, val);
     this.props.value = val;
     this.putData(this.key, val);
     (this as any).update();

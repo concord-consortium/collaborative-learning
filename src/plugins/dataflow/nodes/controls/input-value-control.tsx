@@ -85,7 +85,7 @@ export class InputValueControl extends Rete.Control {
 
   public setValue = (val: number) => {
     this.props.value = val;
-    console.log("this.key", this.key);
+    // console.log("this.key", this.key);
     this.putData(this.key, val);
     this.tryUpdate();
   };
