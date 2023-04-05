@@ -1,0 +1,142 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "HVO_UABj7CO7pYUY",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Below are descriptions for two experiments that can help us find the height of an object using similar triangles. </p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "One method for finding heights of objects is called the “mirror method”. Ashton’s class experiments with the mirror method. They want to understand how it works. They use it to measure the height of their principal. From science class, they knew that light reflects off a mirror at the same angle (angle of reflection) at which it hits the mirror (angle of incidence). This creates two similar right triangles."
+          ]
+        }
+      },
+      {
+        "id": "21AUG2022M20214pm",
+        "title": "Mirror method",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Mirror_IC.png"
+        }
+      },
+      {
+        "id": "Kgs1t9rZB89gXWnX",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>On a sunny day, any upright object casts a shadow. A middle school class used the shadow method to measure the Statue of Liberty. The diagram shows two triangles. </p>",
+            "<p>The triangles sides are the height of the object, the length of the objects shadow, and the side connecting these two points. This creates two similar right triangles. </p>"
+          ]
+        }
+      },
+      {
+        "id": "21AUG2022M20217pm",
+        "title": "Shadow Method",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_4_2_IC_39_statue_liberty_500w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>Explain why each method works.</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Mirror Method</strong>",
+            "<p>The triangles are scaled. The angles located at the mirror are congruent. If we imagined flipping the triangle created by the distance from the mirror to Ashton, we can see the triangles are similar. These triangles look like the ones that we created with the rep-tiles and with measuring the river distance.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG2022M20215pm",
+        "title": "Diagram showing similar triangles in the mirror method",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Initial_Challenge_2.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Shadow Method</strong>",
+            "The statue and the stick are at a right angle to the ground. Another angle is formed by the sun and the ground. For two nearby points at a common time, the sun appears at the same angle, making these corresponding angles congruent. The third angle must be the same in each triangle since all three interior angles of a triangle must add to 180 degrees.",
+            "The length of the shadow depends on the height of the object. The shadow of the taller object will be longer. The stick and its shadow are two legs of the right triangle, and the statue and its shadow also form a right triangle. These two triangles are similar. You can compare the lengths of shadows, and then you will get the scale factor. Then you can find the height of the statue using the scale factor and the length of the stick. "
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li>What is the height of the principal? The height of the Statue of Liberty?</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "L7ZsKHbtgaErObb0",
+        "title": "Text 3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Principal</strong></p>",
+            "<p> 72 inches from the floor to the principal’s eyes. </p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "21AUG2022M20216pm",
+        "title": "Sample reasoning to find the principal’s height",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_4_2_Initial_Challenge_3.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "xBNE3N6-nY7NutSb",
+        "title": "Text 4",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Statue of Liberty</strong></p>",
+            "<p>We cannot tell the height of the statue without knowing the measurements. To find the height, we can compare the lengths of shadows to get the scale factor. Then you can find the height of the statue using the scale factor and the length of the stick.  </p>",
+            "<p>Statue shadow ÷ stick shadow → gives scale factor </p>",
+            "<p>Scale factor • height of stick → height of statue </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

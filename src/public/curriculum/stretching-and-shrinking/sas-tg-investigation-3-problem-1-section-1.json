@@ -1,0 +1,85 @@
+{
+  "type": "overview",
+  "content":
+  {
+    "tiles": [
+      {
+        "id": "IUSufsyYKWg_vBj2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Overview</strong></p>",
+            "<p>This Problem challenges students to find ways of putting multiple copies of a figure together to make a larger, similar figure. This process is called rep‑tiling. Rep‑tiling allows students to revisit similarity in a new context. In deciding how to put rep‑tiles together, students identify relationships between the scale factor, side lengths, and areas of similar figures. For example, they find that if the scale factor from a smaller quadrilateral to a larger quadrilateral is 2, the side lengths and perimeter grow by a factor of 2. The area, however, grows by a factor of 22, or 4.</p>"
+          ]
+        }
+      },
+      {
+        "id": "7V6e84Fe_H68M-eN",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Implementation Note:</strong> Creating the rep-tiles takes time for students to cut, manipulate and draw. Due to this it may take 1.5 days to complete this task. Having a conversation after students have completed the Initial Challenge can help them focus their thinking between the two class periods. </p>"
+          ]
+        }
+      },
+      {
+        "id": "LKSiCguVxd9sXlyT",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+                    "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'>Revision Comments</a></strong></p>",
+                    "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>CMP STEM Problem Format</a></strong></p>",
+                    "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>Unit Descriptions</a></strong></p>",
+                    "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'>Goals of the Units</a></strong></p>",
+                    "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'>Unit Alignments</a></strong></p>",
+                    "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'>General Arc of Learning </a></strong></p>",
+                    "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'>Unit Arc of Learning</a></strong></p>",
+                    "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'>Mathematical Overview</a></strong></p>",
+                    "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'>Learning Aids</a></strong></p>",
+                    "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'>Teaching Aids</a></strong></p>",
+                    "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'>Family Letters </a></strong></p>",
+                    "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'>Assessments</a></strong></p>",
+                    "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'>ACE Homework</a></strong></p>"
+                  ]
+        }
+      },
+      {
+        "id": "weCzudF9TinRuAHG",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>AoL</strong>:  Analysis, Synthesis</p>",
+            "<p><strong>CCSSM:</strong> 7.G.A.1, 7.G.A.2, 7.RP.A.1</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>NWDYK</strong></p>",
+            "<p>How do rep-tiles show the relationship between the scale factor and the perimeter and area of similar shape? </p>"
+          ]
+        }
+      },
+      {
+        "id": "4CVY5J6FiZFc7wCe",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Explore enlarging a geometric figure using “rep-tiling. Expand understanding of similar figures and which attributes change and which stay the same: </p>",
+            "<ul><li>corresponding angles of two similar figures are the same measure while angles of non-similar figures may not be.</li><li>corresponding side length of the rep-tile (similar figure) increases by the scale factor used to create a new figure. </li><li>perimeter of the rep-tile (similar) figure increases by the scale factor </li><li>area of the rep-tile (similar) figure increases by the scale factor squared. </li></ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

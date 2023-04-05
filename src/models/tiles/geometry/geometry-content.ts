@@ -17,7 +17,7 @@ import {
   isPointModel, isPolygonModel, MovableLineModel, PointModel, PolygonModel, VertexAngleModel
 } from "./geometry-model";
 import {
-  getObjectById, guessUserDesiredBoundingBox, kAxisBuffer, kXAxisMinBuffer, kXAxisTotalBuffer, kYAxisTotalBuffer,
+  getBoardUnitsAndBuffers, getObjectById, guessUserDesiredBoundingBox, kXAxisTotalBuffer, kYAxisTotalBuffer,
   resumeBoardUpdates, suspendBoardUpdates
 } from "./jxg-board";
 import {
@@ -258,7 +258,7 @@ export const GeometryContentModel = GeometryBaseContentModel
       return board.objectsList.filter(obj => self.isSelected(obj.id));
     },
     exportJson(options?: ITileExportOptions) {
-      const changes = convertModelToChanges(self);
+      const changes = convertModelToChanges(self, { addBuffers: false, includeUnits: false});
       const jsonChanges = changes.map(change => JSON.stringify(change));
       return exportGeometryJson(jsonChanges, options);
     }
@@ -395,7 +395,7 @@ export const GeometryContentModel = GeometryBaseContentModel
     // actions
     function initializeBoard(domElementID: string, onCreate?: onCreateCallback): JXG.Board | undefined {
       let board: JXG.Board | undefined;
-      const changes = convertModelToChanges(self);
+      const changes = convertModelToChanges(self, { addBuffers: true, includeUnits: true});
       applyChanges(domElementID, changes, getDispatcherContext())
         .filter(result => result != null)
         .forEach(changeResult => {
@@ -427,13 +427,9 @@ export const GeometryContentModel = GeometryBaseContentModel
       const scaledHeight = Math.trunc(height) / (scale || 1);
       const widthMultiplier = (scaledWidth - kXAxisTotalBuffer) / (board.canvasWidth - kXAxisTotalBuffer);
       const heightMultiplier = (scaledHeight - kYAxisTotalBuffer) / (board.canvasHeight - kYAxisTotalBuffer);
-      const unitX = board.unitX || kGeometryDefaultPixelsPerUnit;
-      const unitY = board.unitY || kGeometryDefaultPixelsPerUnit;
       // Remove the buffers to correct the graph proportions
       const [xMin, yMax, xMax, yMin] = guessUserDesiredBoundingBox(board);
-      const xMinBufferRange = kXAxisMinBuffer / unitX;
-      const xMaxBufferRange = kAxisBuffer / unitX;
-      const yBufferRange = kAxisBuffer / unitY;
+      const { xMinBufferRange, xMaxBufferRange, yBufferRange } = getBoardUnitsAndBuffers(board);
       // Add the buffers back post-scaling
       const newBoundingBox: JXG.BoundingBox = [
         xMin * widthMultiplier - xMinBufferRange,

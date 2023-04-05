@@ -27,7 +27,7 @@ class DrawToolTile{
       return cy.get('.primary-workspace .drawing-tool-button.button-stamp');
     }
     getDrawToolStampExpand(){
-      return cy.get('.primary-workspace .drawing-tool-button.button-stamp expand-collapse');
+      return cy.get('.primary-workspace .drawing-tool-button.button-stamp .expand-collapse');
     }
     getDrawToolStrokeColor(){
       return cy.get('.primary-workspace .drawing-tool-button.button-stroke-color');
@@ -75,6 +75,9 @@ class DrawToolTile{
     getVariableChip() {
       return cy.get('.primary-workspace [data-testid=drawing-tool] .drawing-layer .drawing-variable.variable-chip');
     }
+    getDrawTileTitle(workspaceClass){
+      return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
+  }
 }
 
 export default DrawToolTile;

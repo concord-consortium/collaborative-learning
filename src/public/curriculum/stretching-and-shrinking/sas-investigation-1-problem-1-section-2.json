@@ -1,0 +1,67 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "One of Daphne’s photos looks like the picture below. Daphne has a copy of the P.I. Monthly magazine shown in the picture. The P.I. Monthly magazine is 10 inches high. She thinks the photo might be helpful in determining the height of the mystery teacher."
+          ]
+        }
+      },
+      {
+        "id": "20AUG20220932",
+        "title": "Daphne’s photo of the mystery teacher by a magazine rack",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_1_1_06_magazine_rack_500w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li> Is Daphne's claim correct? Is it possible to use the magazine and the picture to estimate the teacher's height? Explain.</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Daphne’s claim is correct. In her picture, we can measure both the height of the P.I. magazine and the height of the teacher and then compare two values. Knowing the P.I. magazine is 10 inches high in real life, you can estimate the teacher’s real height.</p>",
+            "<p> Possible student strategies:</p>",
+            "<ul><li>Students can use rulers or edges of a piece of paper to make informal estimates of various measurements. Do not push for precise measurement at this time. Pay attention, though, to which students measure naturally and easily and which struggle with measurement. This will help you to plan your teaching in later Problems in the Unit where careful measurement is important.</li><li>Some students will measure the height in inches on the magazine and of the mystery teacher. They will then divide the height of the teacher by the height of the magazine to find how many magazines tall the teacher is. This is a more precise version of the first strategy. Make sure students are clear about the comparisons that they are making. They may compare the real magazine to the magazine in the picture or the magazine in the picture to the teacher in the picture.</li><li>The magazine is 10 inches tall. The teacher is about 7 magazines, or 70 inches, tall.</li><li>In the picture, the height of the P.I. Monthly is 0.5 in. We know that the height of the real magazine is 10 in. So, the real magazine is 10 \u00f7 0.5=20 times larger than in the picture. The teacher should also be 20 times larger in real life than he/she is in the picture. The teacher’s height in the picture is about  in. So, the actual height is about 20  =72.5 in.</li><li>Students may use ratio or “for every” statements, such as “The ratio of the teacher’s height in the picture to her height in real life is about 1 to 20.” Or “For every inch in height of the magazine in the picture there are 20 inches in height for the real magazine.”</li><li>Students may also compare the magazine in the picture to the teacher in the picture. In this case, the teacher is / = 7 times as tall as the magazine. Students may say that the teacher is 7 magazines tall. This should be true in real life as well. Since the height of the magazine is 10 in., the teacher is 10x7=72.5 in. tall.</li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li> Could you find the height of the teacher if you did not know that the magazine was 10 inches tall? Explain.</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content":
+          {
+            "type": "Text",
+            "format": "html",
+            "text": [
+              "<p>Answers will vary. Possible answers:</p>",
+              "<ul><li>Yes. Instead of the height of the magazine, I could have measured the height of the actual bookshelf shown in the picture and used it to figure out the teacher’s height.</li><li>No. If I do not know the real height of the magazine is 10 inches, I would not be able to find the real height of the teacher. I only know the teacher is 7.25 times taller than the magazine.</li></ul>",
+          "<p>Students will think about the proportional relationship of heights between the picture and the reality. <strong></strong></p>"
+            ]
+          }
+        }
+    ]
+  }
+}

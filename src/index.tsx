@@ -3,6 +3,7 @@ import "ts-polyfill";
 import { Provider } from "mobx-react";
 import React from "react";
 import ReactDOM from "react-dom";
+import { setLivelinessChecking } from "mobx-state-tree";
 import { appConfigSnapshot, appIcons, createStores } from "./app-config";
 import { AppConfigContext } from "./app-config-context";
 import { AppComponent } from "./components/app";
@@ -16,7 +17,6 @@ import { Logger } from "./lib/logger";
 import { setPageTitle } from "./lib/misc";
 import { gImageMap } from "./models/image-map";
 import PackageJson from "../package.json";
-import { setLivelinessChecking } from "mobx-state-tree";
 // set to true to enable MST liveliness checking
 const kEnableLivelinessChecking = false;
 

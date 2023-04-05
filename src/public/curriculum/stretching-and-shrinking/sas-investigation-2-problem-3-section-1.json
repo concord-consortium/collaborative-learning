@@ -1,0 +1,51 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "In the computer game the characters were members of the Wump family. We found a way to decide which characters were imposters using the coordinate rule."
+          ]
+        }
+      },
+      {
+        "id": "AUG20221120AM",
+        "title":"Character animations for the Wumps and imposters",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_2_3_In_17_three_characters_500w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<em>How can you decide whether two shapes are similar?</em>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "We have experimented with rubber-band stretchers, copiers, and coordinate plots. Your experiments suggest that for two figures to be similar, there must be the following correspondence between the figures:<ul><li>Corresponding angles are the same size</li><li>The side lengths of one figure are multiplied by the same number to get the corresponding side lengths in the second figure.</li></ul>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "The <strong>scale factor</strong> is the number that the side lengths of one figure are multiplied by to give the corresponding side lengths of a similar figure. <ul><li>What is the multiplier or scale factor when you use two rubber bands to enlarge a figure?</li><li>What is the multiplier or scale factor when you use a copier setting of <em>150%</em>? <em>75%</em>?</li><ul>"
+          ]
+        }
+      }
+    ]
+  }
+}

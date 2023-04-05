@@ -9,6 +9,8 @@ import { TextContentModel } from "../tiles/text/text-content";
 import { IDocumentExportOptions } from "../tiles/tile-content-info";
 import { safeJsonParse } from "../../utilities/js-utils";
 import placeholderImage from "../../assets/image_placeholder.png";
+import { TableContentModelType } from "../tiles/table/table-content";
+import { kDefaultColumnWidth } from "../../components/tiles/table/table-types";
 
 // This is needed so MST can deserialize snapshots referring to tools
 import { registerTileTypes } from "../../register-tile-types";
@@ -40,8 +42,7 @@ jest.mock("../tiles/log/log-tile-document-event", () => ({
   logTileDocumentEvent: (...args: any[]) => mockLogTileDocumentEvent()
 }));
 
-function parsedExport(content: DocumentContentModelType, options?: IDocumentExportOptions) {
-  const json = content.exportAsJson(options);
+function parseJson(json: string) {
   const parsed = safeJsonParse(json);
   if (parsed) {
     // console.log("Parsed Content\n--------------\n", json);
@@ -73,6 +74,34 @@ function parsedExport(content: DocumentContentModelType, options?: IDocumentExpo
   return parsed;
 }
 
+function parsedExport(content: DocumentContentModelType, options?: IDocumentExportOptions) {
+  const json = content.exportAsJson(options);
+  return parseJson(json);
+}
+
+function parsedSections(content: DocumentContentModelType, options?: IDocumentExportOptions) {
+  const jsonSections = content.exportSectionsAsJson(options);
+  const sections: Record<string, any> = {};
+  for (const [section, json] of Object.entries(jsonSections)) {
+    sections[section] = parseJson(json);
+  }
+  return sections;
+}
+
+// Returns the columnWidths of the tile with the given id.
+// Creating a table automatically creates a dataset with two attributes (columns).
+// Exporting the table will include widths for the attributes, keyed by the attribute ids.
+// This function returns the table's columnWidths so it can be used to evaluate the tile's exported json.
+function getColumnWidths(documentContent: DocumentContentModelType, tileId?: string) {
+  const _tileId = tileId ?? "no-tile-id";
+  const tableTile = documentContent.getTile(_tileId);
+  const dataSet = (tableTile?.content as TableContentModelType)?.dataSet;
+  const attrIds = dataSet?.attributes.map(attribute => attribute.id) ?? [];
+  const columnWidths: Record<string, number> = {};
+  attrIds.forEach(attrId => columnWidths[attrId] = kDefaultColumnWidth);
+  return columnWidths;
+}
+
 describe("DocumentContentModel", () => {
   let documentContent: DocumentContentModelType;
 
@@ -102,7 +131,8 @@ describe("DocumentContentModel", () => {
     documentContent.addTile("geometry", { addSidecarNotes: true });
     expect(documentContent.tileMap.size).toBe(3);
     expect(documentContent.defaultInsertRow).toBe(2);
-    documentContent.addTile("table");
+    const newRowTile = documentContent.addTile("table");
+    const columnWidths = getColumnWidths(documentContent, newRowTile?.tileId);
     expect(documentContent.tileMap.size).toBe(4);
     documentContent.addTile("drawing");
     expect(documentContent.tileMap.size).toBe(5);
@@ -113,7 +143,7 @@ describe("DocumentContentModel", () => {
           { title: "Graph 1", content: { type: "Geometry", objects: [] } },
           { content: { type: "Text", format: "html", text: ["<p></p>"] } }
         ],
-        { title: "Table 1", content: { type: "Table" } },
+        { title: "Table 1", content: { type: "Table", columnWidths } },
         { title: "Drawing 1", content: { type: "Drawing", objects: [] } }
       ]
     });
@@ -750,6 +780,7 @@ describe("DocumentContentModel", () => {
 describe("DocumentContentModel -- move/copy tiles --", () => {
 
   let documentContent: DocumentContentModelType;
+  let columnWidths: Record<string, number>;
 
   const srcContent: DocumentContentSnapshotType = {
     rowMap: {
@@ -947,6 +978,8 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
   };
   beforeEach(() => {
     documentContent = DocumentContentModel.create(srcContent);
+    const tableTileIds = documentContent.getTilesOfType("Table");
+    columnWidths = getColumnWidths(documentContent, tableTileIds[0]);
   });
 
   const getDragTiles = (tileIds: string[]) => {
@@ -1029,6 +1062,7 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
           {
             content: {
               type: "Table",
+              columnWidths
             }
           },
           { content: { type: "Image", url: "image/url" } }
@@ -1040,6 +1074,35 @@ describe("DocumentContentModel -- move/copy tiles --", () => {
           { content: { type: "Drawing", objects: [] }, layout: { height: 320 } }
         ]
       ]
+    });
+  });
+
+  it("can parse content into sections", () => {
+    expect(parsedSections(documentContent)).toEqual({
+      "introduction": { tiles: [
+        { content: { type: "Text", format: "html", text: ["<p>Some text</p>"] } },
+        // explicit row height exported since it differs from drawing tool default
+        { content: { type: "Drawing", objects: [] }, layout: { height: 320 } }
+      ]},
+      "initialChallenge": { tiles: [
+        [
+          {
+            content: {
+              type: "Table",
+              columnWidths
+            }
+          },
+          { content: { type: "Image", url: "image/url" } }
+        ],
+        [
+          { content: { type: "Geometry", objects: [] } },
+          { content: { type: "Text", format: "html", text: ["<p>More text</p>"] } },
+          // explicit row height exported since it differs from drawing tool default
+          { content: { type: "Drawing", objects: [] }, layout: { height: 320 } }
+        ]
+      ]},
+      "whatIf": { tiles: [] },
+      "nowWhatDoYouKnow": { tiles: [] }
     });
   });
 

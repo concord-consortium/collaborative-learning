@@ -1,0 +1,16 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Earlier in this unit we looked at several shapes of Wumps to see which one was an imposter. In this problem, we will look to see which shape is the imposter.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

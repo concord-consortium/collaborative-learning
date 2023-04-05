@@ -5,8 +5,8 @@ import TextToolTile from '../../../../support/elements/clue/TextToolTile';
 
 let clueCanvas = new ClueCanvas,
   diagramTile = new DiagramToolTile,
-  drawTile = new DrawToolTile,
-  textTile = new TextToolTile;
+  drawTile = new DrawToolTile;
+  const textTile = new TextToolTile;
 
 const cmdKey = Cypress.platform === "darwin" ? "cmd" : "ctrl";
 const undoKeystroke = `{${cmdKey}}z`;
@@ -91,6 +91,42 @@ context('Diagram Tool Tile', function () {
       diagramTile.getVariableCardField("name").should("have.value", vName);
       diagramTile.getVariableCardField("value").should("have.value", vValue);
       diagramTile.getVariableCardField("unit").should("have.value", vUnit);
+
+      // Edit directly in variable card
+      const eName = "name4";
+      const eValue = "888.888";
+      const eUnit = "M";
+      diagramTile.getVariableCardField("name").clear();
+      diagramTile.getVariableCardField("name").type(eName);
+      diagramTile.getVariableCardField("value").clear();
+      diagramTile.getVariableCardField("value").type(eValue);
+      diagramTile.getVariableCardField("unit").clear();
+      diagramTile.getVariableCardField("unit").type(eUnit);
+      diagramTile.getVariableCardField("name").should("have.value", eName);
+      diagramTile.getVariableCardField("value").should("have.value", eValue);
+      diagramTile.getVariableCardField("unit").should("have.value", eUnit);
+
+      // Add notes in variable card
+      diagramTile.getVariableCardNotesField().should("not.exist");
+      diagramTile.getVariableCardDescriptionToggle().click();
+      diagramTile.getVariableCardNotesField().should("exist");
+      diagramTile.getVariableCardNotesField().clear();
+      diagramTile.getVariableCardNotesField().type("test notes");
+      diagramTile.getVariableCardNotesField().should("have.value", "test notes");
+
+      // Edit variable card color
+      diagramTile.getColorEditorDialog().should("not.exist");
+      diagramTile.getVariableCardColorEditButton().click();
+      diagramTile.getColorEditorDialog().should("exist");
+      diagramTile.getColorPicker().last().click();
+      diagramTile.getVariableCard().children().should("have.class", "red");
+      diagramTile.getVariableCardColorEditButton().click();
+      diagramTile.getColorPicker().eq(3).click();
+      diagramTile.getVariableCard().children().should("have.class", "green");
+
+      // Fit view
+      diagramTile.getDiagramToolbarButton("button-fit-view").click();
+      diagramTile.getVariableCard().parent().should("have.attr", "style").and("contain", "scale(2)");
 
       // Delete button works
       diagramDeleteButton().should("be.enabled").click();
@@ -184,6 +220,25 @@ context('Diagram Tool Tile', function () {
       diagramTile.getVariableCardField("value").should("have.value", newValue);
       diagramTile.getVariableCardField("unit").should("have.value", newUnit);
 
+      // Editing variable in diagram tile also changes it in drawing tile
+      const eName = "vn3";
+      const eValue = "2.5";
+      const eUnit = "meter";
+      diagramTile.getVariableCardField("name").clear();
+      diagramTile.getVariableCardField("name").type(eName);
+      diagramTile.getVariableCardField("value").clear();
+      diagramTile.getVariableCardField("value").type(eValue);
+      diagramTile.getVariableCardField("unit").clear();
+      diagramTile.getVariableCardField("unit").type(eUnit);
+      diagramTile.getVariableCardField("name").should("have.value", eName);
+      diagramTile.getVariableCardField("value").should("have.value", eValue);
+      diagramTile.getVariableCardField("unit").should("have.value", eUnit);
+
+      drawTile.getDrawTile().click();
+      drawTile.getVariableChip().should("contain", eName);
+      drawTile.getVariableChip().should("contain", eValue);
+      drawTile.getVariableChip().should("contain", eUnit);
+
       // Draw tile insert variable dialog works
       const listChip = otherClass => cy.get(`.variable-chip-list .variable-chip${otherClass || ""}`);
       drawTile.getDrawTile().click();
@@ -204,13 +259,68 @@ context('Diagram Tool Tile', function () {
       // Undoing previous step in diagram tile by pressing control+z or command+z on
       // the keyboard does not undo the most recent step in a different tile
       diagramTile.getDiagramTile().click();
-      diagramTile.getVariableCardField("name").should("have.value", newName);
+      diagramTile.getVariableCardField("name").should("have.value", eName);
       diagramTile.getVariableCardField("name").clear();
       textTile.getTextTile().click();
       textTile.enterText("Hello");
       cy.get("body").type(undoKeystroke);
       diagramTile.getVariableCardField("name").should("have.value", "");
       textTile.getTextTile().should("contain", "Hell");
+    });
+   
+    it("Undo Redo Actions", () => {
+      // Creation - Undo/Redo
+      clueCanvas.addTile('diagram');
+      diagramTile.getDiagramTile().should("exist");
+      clueCanvas.getUndoTool().should("not.have.class", "disabled");
+      clueCanvas.getRedoTool().should("have.class", "disabled");
+      clueCanvas.getUndoTool().click();
+      diagramTile.getDiagramTile().should("not.exist");
+      clueCanvas.getUndoTool().should("have.class", "disabled");
+      clueCanvas.getRedoTool().should("not.have.class", "disabled");
+      clueCanvas.getRedoTool().click();
+      diagramTile.getDiagramTile().should("exist");
+      clueCanvas.getUndoTool().should("not.have.class", "disabled");
+      clueCanvas.getRedoTool().should("have.class", "disabled");
+
+      diagramNewVariableButton().click();
+      diagramTile.getDiagramDialog().should("exist");
+      const name = "name1";
+      dialogField("name").should("exist").type(name);
+      dialogOkButton().click();
+      diagramTile.getVariableCard().should("exist");
+
+      //undo redo
+      clueCanvas.getUndoTool().click();
+      diagramTile.getVariableCard().should("not.exist");
+      clueCanvas.getRedoTool().click();
+      diagramTile.getVariableCard().should("exist");
+
+      // undo redo on text tile after inserting a variable card
+      const dialogChip = () => diagramTile.getDiagramDialog().find(".variable-chip");
+      clueCanvas.addTile("text");
+      textTile.getTextTile().click();
+      textTile.getTextToolInsertVariable().click();
+      diagramTile.getDiagramDialog().should("contain.text", "other tiles:");
+      dialogChip().click();
+      dialogOkButton().click();
+      textTile.getVariableChip().should("exist");
+      clueCanvas.getUndoTool().click();
+      textTile.getVariableChip().should("not.exist");
+      clueCanvas.getRedoTool().click();
+      textTile.getVariableChip().should("exist");
+      clueCanvas.getUndoTool().click();
+
+      //undo redo on text tile after adding a new variable
+      textTile.getTextTile().click();
+      textTile.getTextToolNewVariable().click();
+      dialogField("name").should("exist").type("name2");
+      dialogOkButton().click();
+      textTile.getVariableChip().should("exist");
+      clueCanvas.getUndoTool().click();
+      textTile.getVariableChip().should("not.exist");
+      clueCanvas.getRedoTool().click();
+      textTile.getVariableChip().should("exist");
     });
   });
 });

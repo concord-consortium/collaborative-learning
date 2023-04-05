@@ -1,0 +1,76 @@
+{
+  "type": "overview",
+  "content":
+  {
+    "tiles":
+    [
+      {
+        "id": "pnK778cR92W9ycRu",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Overview</strong></p>",
+            "<p>In Problem 4.1, students find a ratio for adjacent side lengths within a figure. They compare this ratio to the ratio for adjacent sides in corresponding positions within another figure. They recognize that, for similar figures, these ratios are equivalent. Students also find the scale factor between similar figures. They then compare the information that is given by the scale factor to the information that is given by the ratios of adjacent side lengths. Students notice that they can use angle measures and side-length ratios to test for similarity in triangles. </p>",
+            "<p><strong>Note:</strong> In Grade 6, ratios were expressed as comparison statements such as “For every $3 Mary raises, Liz raises $5.” The ratio of the amount of money Mary raises to the amount Liz raises is 3 : 5. In this Investigation, ratios are also written as fractions such as 3/5  or 5/3.  This Unit, and in particular this Investigation, leads naturally to the next Unit, Comparing and Scaling. In Comparing and Scaling, students will continue to explore ratio and proportion, and develop strategies to solve problems that involve proportions.</p>"
+          ]
+        }
+      },
+      {
+        "id": "MM1nzD_uXVDaKJJM",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'>Revision Comments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>CMP STEM Problem Format</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>Unit Descriptions</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'>Goals of the Units</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'>Unit Alignments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'>General Arc of Learning </a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'>Unit Arc of Learning</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'>Mathematical Overview</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'>Learning Aids</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'>Teaching Aids</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'>Family Letters </a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'>Assessments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'>ACE Homework</a></strong></p>"
+                        ]
+        }
+      },
+      {
+        "id": "OIZx5Jp-28LUKgJg",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>AoL:</strong>  Analysis, Synthesis</p>",
+            "<p><strong>CCSSM: </strong>7.RP.A.2, 7.RP.A.2.A 7.RP.A.2.B, 7.RP.A.3</p>"
+          ]
+        }
+      },
+      {
+        "id": "33hlke2HE4n9Tj3f",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Introduce the idea that ratios can be represented as fractions, extending their use from just comparison statements. </p>",
+            "<p>Explore the relationship between ratios of corresponding adjacent side lengths within two similar figures. Build off understanding of scale factor between similar figures to begin to understand why these ratios are equal. </p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>NWDYK</strong></p>",
+            "<p>What information do the ratios of adjacent side lengths within two similar figures provide about similar figures? How are these ratios helpful in solving problems?</p>"        ]
+        }
+      }
+    ]
+  }
+}

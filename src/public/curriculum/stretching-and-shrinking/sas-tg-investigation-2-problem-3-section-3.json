@@ -1,0 +1,57 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles":
+    [
+      {
+        "id": "_GXqnxOFkvtp6q55",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Explore (Digging In)</strong></u></p>",
+            "<p><u>Providing for Individual Needs</u></p>",
+            "<p>As the students work in pairs, look for students who are having trouble sorting out corresponding sides when finding side lengths.</p>",
+            "<p>Urge the students to organize their work. They can record their measurements on the figures. If they use a chart, they will need some way to distinguish the sides (such as “vertical” and “horizontal” or “base” and “height”). (Language)</p>",
+            "<p>To compare areas, some students may find the area of each rectangle and triangle by using formulas for areas. Others may count the squares that cover each figure.</p>",
+            "<p>If some students finish early, encourage them to draw two more rectangles—one that is similar to the Wump family’s mouth and one that is not similar. Repeat for triangles. Be sure to use these figures in the Summarize. There are additional Going Further suggestions in the Summarize. (Time)</p>"
+          ]
+        }
+      },
+      {
+        "id": "wEd1wGjAqJbHn-we",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>Have you considered the corresponding angles? (They must be congruent to be similar)</li><li>How might you compare corresponding side lengths? (Look for a scale factor)</li><li>How can you find the scale factor if you used a rubber band stretcher?  Coordinate graphs? (Scale factor is the number of rubber bands used or the coefficient of the x and y coordinate.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Planning for the Summary</u></p>",
+            "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>",
+            "<p><em>Now What Do You Know?</em></p>",
+            "<p><em>How can you decide if two shapes are similar? How can you determine the scale factor between two similar shapes? </em></p>"
+          ]
+        }
+      },
+      {
+        "id": "HCcvncK10APPCBOj",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>During the Initial Challenge take note of the strategies that students are using to find the scale factor. How are students providing evidence for the similar figures in the Initial Challenge? Do they measure all angles and sides? Are some students informally seeing that angle alone for triangles can determine similarity? For the rectangles are they ignoring the right angles and only looking at the side lengths. During the What If look for how students describe the ideas using proportional reasoning to find a scale factor. </p>"
+          ]
+        }
+      }
+    ]
+  }
+}

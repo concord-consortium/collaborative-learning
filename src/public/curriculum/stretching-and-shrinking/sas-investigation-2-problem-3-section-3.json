@@ -1,0 +1,96 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation A. Finding Scale Factors</h3>",
+            "Marta and her Friends make claims. For each claim, decide if it is correct? Explain why.",
+            "<p><strong>Marta, Billie, and Zack's claims</strong></p>",
+            "Marta and Zack agree that rectangles J and L are similar. Marta says the lengths are growing by a factor of 2. Billie claims the lengths grow by 200%. Zack says the scale factor is ½.  Zack says the scale factor is ½. Who is correct?"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>All are correct. Rectangles J and L are similar because each corresponding side length has the same ratio. </p>",
+            "<p>If you multiply ½ to each side length of rectangle J, then you will get rectangle L that is similar to J. In this way, the scale factor is ½. </p>",
+            "<p>If you multiply 2 to each side length of rectangle L, then you will get rectangle J that is similar to L. In this way, the scale factor is 2. </p>",
+            "<p>A scale factor is 2 is the same as growing by 200%.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Mia's Claim</strong></p>",
+            "To determine if two rectangles are similar, I can use ratios to show that the scale factor is the same for corresponding side lengths. For example, if the ratio of original side to corresponding side in two similar rectangles is 3 units for every 4 units, then the scale factor from the original to similar rectangle is ¾."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Not correct. To increase an original side of 3 to a corresponding side of 4, ou would use a multiplier of 1 \u2153. The scale factor is the same as the multiplier. So, the scale factor is 1 \u2153, not 3/4 as Mia thought.</p>",
+            "To find the multiplier, you can use the relationship between the sides. You can scale the ratio of the sides to a unit rate. ",
+            "For every 3 units on the original there are 4 units on the image. ",
+            "<strong>\u2938 \u00f7 3                                           \u2938 \u00f7 3</strong>",
+            "So, for every 1 unit on the original there are 1 \u2153 units on the image.",
+            "Note that students have often found it easier to think of the scale factor as a multiplier rather than a ratio."
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Jacob's Claim</strong> I think that if two triangles are similar, you can use ratios to show that the scale factor is the same for corresponding sides.  "
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Partially true. If two triangles are similar, you know that the corresponding angle measures are the same.</p>",
+            "So, you can show that the scale factor is the same for corresponding side lengths. However, you need to find the multiplier from one shape to the other using the ratio of the sides."
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Sam's Claim</strong> If you know the perimeter of one shape, you can predict the perimeter of a similar shape. "
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Correct. As you can see in the similar rectangles J and L, when the width and length of rectangles grow by 2, the perimeters also grow by 2. So, if you know the perimeter of one shape and if you know the scale factor of the similar shape, then you can predict the perimeter of the similar shape. The perimeter is a length, so it behaves like the width and length.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

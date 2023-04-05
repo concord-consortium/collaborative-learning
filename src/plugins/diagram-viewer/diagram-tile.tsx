@@ -69,8 +69,10 @@ export const DiagramToolComponent: React.FC<ITileProps> = observer((
   };
   const insertVariable = (variable: VariableType, x?: number, y?: number) => insertVariables([variable], x, y);
 
-  const [showNewVariableDialog] =
-    useNewVariableDialog({ addVariable: insertVariable, sharedModel: content.sharedModel as SharedVariablesType });
+  const [showNewVariableDialog] = useNewVariableDialog({
+    addVariable: insertVariable,
+    sharedModel: content.sharedModel as SharedVariablesType
+  });
 
   const { selfVariables, otherVariables, unusedVariables } = variableBuckets(content, content.sharedModel);
   const [showInsertVariableDialog] = useInsertVariableDialog({

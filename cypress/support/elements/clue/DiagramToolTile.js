@@ -28,6 +28,24 @@ class DiagramToolTile {
   getVariableCardField(field, workspaceClass) {
     return cy.get(`.variable-info.${field}`);
   }
+  getVariableCardDescriptionToggle() {
+    return cy.get(`.variable-description-toggle`);
+  }
+  getVariableCardNotesField() {
+    return cy.get('.variable-description-area');
+  }
+  getVariableCardColorEditButton() {
+    return cy.get('.color-palette-toggle');
+  }
+  getColorEditorDialog() {
+    return cy.get('.color-editor-dialog');
+  }
+  getColorPicker() {
+    return cy.get('.color-editor-dialog span span');
+  }
+  getDiagramTileTitle(workspaceClass){
+    return cy.get(`${workspaceClass || ".primary-workspace"} .editable-tile-title`);
+  }
 }
 
 export default DiagramToolTile;

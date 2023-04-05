@@ -35,11 +35,6 @@
       "title": "Now What Do You Know?",
       "placeholder": "Work area for\nNow What Do You Know? section"
     },
-    "didYouKnow": {
-      "initials": "DY",
-      "title": "Did You Know?",
-      "placeholder": "Work area for\nDid You Know? section"
-    },
     "MathReflection1": {
       "initials": "R1",
       "title": "Math Reflection 1",
@@ -135,7 +130,125 @@
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "U2swJZ438zmrg1n3",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 1.1 Negotiating Screen Time:  Tossing Coins and Cups to Find Probability</strong></p><p>This problem begins the story of Kaleb looking for ways to get more time on his electronic devices.  In the Initial Challenge students will conduct two experiments for possible ways for Kaleb to get more screen time- tossing a coin or flipping a cup.  In the What If Situation students will analyze claims about these experiments. </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "m2tkNg91Sp3QFo70",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p><p>How can you use an experiment to predict future results?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "v4hF_UdvgIfGKrhT",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p><p>Experimental and Theoretical Probability: <em>Introduction </em></p><p>Proportional Relationships: <em>Analysis</em><strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "bKOwiY7IJbOmV_n6",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Xf1tgzld0ACq_uEN",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p><p>Learning Aid 1.1A Coin-Toss Results</p><p>Learning Aid 1.1B Cup-toss Results<strong></strong></p><p>Coins (2 per group)</p><p>Paper Cups (1 per group)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "90iwGZgITQ8LRqer",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p><p>1 Day</p><p><strong>Groups</strong></p><p><strong></strong></p><p>2-3</p><p><strong>A</strong> #1-7</p><p><strong>C </strong>#18-20</p><p><strong>E </strong>#32</p><p><strong>CCSSM</strong></p><p>7.SP.C.6 </p><p>7.SP.C.7.B </p><p>7.RP.A.2</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "O9tZNEIT0vhy_VAa",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p><p><strong>LAUNCH</strong></p><p>CONNECTING TO PRIOR KNOWLEDGE</p><p>The questions in the Problem’s introduction are examples of probability situations to help students consider the likelihood of particular events.</p><p><em>Teacher Moves: Making Predictions</em></p><p>PRESENTING THE CHALLENGE</p><p>Introduce Problem 1.1 by telling Kaleb’s story about how his mother wants to limit the time he spends on his electronic devices. He has decided to toss a cup to decide the amount of screen time he can have that day. His mother has decided he should toss a coin to decide the amount of screen time he can have that day.  Before students conduct the experiments, have them predict, before they conduct the experiments, if they think Kaleb will get to have two hours of screen time.</p><p>Let students know that collecting data in a random way can help to better predict what to expect when a coin/cup is tossed. In this case, random means that the coin’s/cup’s behavior is not affected in a predictable way by how it is tossed. That means there is no systematic bias in the data.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "6r4zo9_peEn2fQGG",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p><p>PROVIDING FOR INDIVIDUAL NEEDS</p><p>As students work, observe the way they are tossing the coins/cups to make sure they are not introducing bias. Check to see that they are recording their data correctly. Remind students to handle the cup with care. If cups become misshapen, you may need to replace them before students continue.</p><p>After students have collected their data, you may want to have conversations about fraction, and percent of heads/sides that have occurred so far.</p><p><strong>Suggested questions</strong></p><ul><li>Can you write a “for every” statement for this situation?</li><li>Do you think your results and other groups’ results will be the same?<strong></strong></li></ul><p>PLANNING FOR THE SUMMARY</p><p>As you are circulating during the Explore, listen for how students are using the data they have collected to predict future results. Are they using proportional reasoning, are they holding on to “luck” as a predictor, are they keeping the trials of their experiment as random as possible, do they see that the more data collected the better it is as a predictor of future events?</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "3ouRFQZUzQykosO8",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p><p>SOLUTIONS AND STRATEGIES </p><p>Facilitate the combining of the class’s data in tables. You may want to also make a line plot.</p><p>MAKING THE MATHEMATICS EXPLICIT</p><p><strong>Suggested questions</strong></p><ul><li>How did the results of the coin toss compare to our predictions?</li><li>As the number of trials increases, what is happening to the percent of heads?</li><li>How did the results of the cup toss compare to our predictions?</li><li>Did you all arrive at the same conclusion about which outcome is more likely?</li><li>Does this fraction represent a ratio? </li><li>Is my (side landings)/50 = or ≠(class combined side landings)/50?</li><li>The 30 trials scale by how many groups of data we are collecting as a class?  Do the number of side landings scale that way too?  Does it create a proportion? </li><li>Do you agree with Ashley or Eli in What If Situation A?</li></ul><p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p><p><strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 1.2",
@@ -144,35 +257,154 @@
           "subtitle": "Finding Experimental Probabilities",
           "sections": [
             {
-            "type": "introduction",
-            "content": {
-            "tiles": []
-            },
-            "supports": []
+              "type": "introduction",
+              "content": {
+              "tiles": []
+              }
             },
             {
               "type": "initialChallenge",
               "content": {
-                "tiles": []
-              },
-              "supports": []
+                "tiles": [
+
+                ]
+              }
             },
             {
               "type": "whatIf",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": [ ]
               }
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": [ ]
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "3Bo2QpiWVL-FjOMZ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 1.2 Match, No Match:  More Experimental Probabilities</strong></p><p>In this Problem, students experiment with a fair game that is not as obviously fair as a single toss of a coin. In the Initial Challenge they toss two coins and determine the results of getting a match or no match. The What If Situations help students to focus on all outcomes and using them to scale their data up and down.<strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "A8cTh4U3jLFBzdYe",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p><p>How does collecting more experimental data help you predict the likelihood of each possible outcome occurring? How does proportional reasoning help you make predictions?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "PcJ0kYEBrFCOEv-d",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p><p>Experimental and Theoretical Probability: <em>Introduction/Explore</em></p><p>Proportional Relationships:  <em>Analysis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "w_pjJuuS21JXdx2Y",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p><p>Probability</p><p>Experimental Probability</p><p>Trial</p><p>Favorable outcomes<strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "M0tB9OhLxoVH39mp",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p><p>Learning Aid  1.2</p><p>Matching Coins</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "1bxlWoCvm9_JCr7J",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p><p> 1 Day</p><p><strong>Groups</strong></p><p>2-3</p><p><strong>A </strong>#8-10<strong></strong></p><p><strong>C </strong>#21-26<strong></strong></p><p><strong>E </strong>#33<strong></strong></p><p><strong></strong></p><p><strong>CCSSM</strong></p><p>7.SP.C.6 </p><p>7.SP.C.7.A </p><p>7.SP.C.7.B </p><p>7.RP.A.2 </p><p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "_HU6deoYUqFW6uJM",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p><p><strong>LAUNCH</strong></p><p><em>Teacher Moves: Language</em></p><p>CONNECTING TO PRIOR KNOWLEDGE</p><p>Introduce the vocabulary in the introduction to the problem:  <em>Probability, Experimental Probability, Trial,</em> and <em>Favorable Outcomes</em>. Discuss the use of ratios expressed as fractions or percents as ways to represent the chances in probability.  Use the idea of writing <em>for every statements</em> that is discussed in the Student Edition Introduction to connect previous learning to this new setting.</p><p><em>Teacher Moves: Make Predictions</em></p><p>PRESENTING THE CHALLENGE</p><p>Talk to students about how Kaleb’s new idea to use two coins to determine his amount of screen time. If the coins match, he gets one hour of screen time. If they do not match, he gets two hours of screen time. <strong></strong></p><p><strong>Suggested questions</strong></p><ul><li>What is your prediction of what will happen if Kaleb uses the match/no-match method for choosing his breakfast?</li></ul><p>Save these conjectures where you can display them to revisit in the Summarize.</p><ul><li>If Kaleb uses this method for the month of June, how many days in June do you think Kaleb will have two hours of screen time?</li></ul><p><strong>Implementation Note:</strong> Have a brief summary combining the class data in the Initial Challenge before the students do the What If Situations.</p><p><strong></strong></p>"
+                      ]
+                    }
+                  }
+              
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "Zk07whPolyJOXoWG",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p><p>PROVIDING FOR INDIVIDUAL NEEDS</p><p>Some students may perceive only one way to get no match, one heads and one tails. Because the two coins are the same, students may not see heads-tails as being different from tails-heads. Pat’s Analysis in What If Situation A is an opportunity to address this.  One way to address this is to toss one coin twice, paying attention to the order that heads and tails come up. Not all students will see this as being the same as tossing two coins at the same time.</p><p><em>Teacher Moves: Selecting and Sequencing</em></p><p>PLANNING FOR THE SUMMARY</p><p>Listen for students discussing how their predictions change as they gather more data and use their thinking in the Summary.  Select examples of student work where they have scaled their experimental data up or down to make predictions.</p>"
+                      ]
+                    }
+                  }
+               
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "MpkvSjbx8pfrBLDt",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p><p>SOLUTIONS AND STRATEGIES </p><p>After students have collected their data, bring the class back together to compile the class’s data.</p><p><em>Teacher Moves: Language, Time</em></p><p>MAKING THE MATHEMATICS EXPLICIT</p><p><strong>Suggested questions</strong></p><ul><li>What did you find out about the probability of a match and the probability of a no match?</li></ul><p>Revisit the conjectures made at the beginning of the Problem and encourage students to comment on them. As students discuss their results, encourage them to explain why the probability of a match should be the same as of no match. This will be a counterintuitive result for many students. </p><p>It is reasonable for this conversation to take up the bulk of your time for the Summarize since students will likely be comfortable with experimental probabilities. This will set the stage for working with theoretical probability later. </p><ul><li>In What If Situation B, what does the numerator in each probability tell us? </li><li>In What If Situation B, what does the denominator in each probability tell us? </li><li>Which probability is greater? </li></ul><p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p><p><strong></strong></p>"
+                      ]
+                    }
+                  }
+               
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 1.3",
@@ -181,35 +413,149 @@
           "subtitle": "Equally Likely",
           "sections": [
             {
-            "type": "introduction",
-            "content": {
-            "tiles": []
-            },
-            "supports": []
+              "type": "introduction",
+              "content": {
+              "tiles": []
+            }
             },
             {
               "type": "initialChallenge",
               "content": {
                 "tiles": []
-              },
-              "supports": []
+              }
             },
             {
               "type": "whatIf",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "HFTzNQoojoddF9o5",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 1.3 Analyzing Events:  Equally Likely</strong></p><p>This Problem is designed to deepen students’ understanding of equally likely outcomes and to make sure they recognize results that are equally likely.  In the Initial Challenge students will analyze outcomes using a number cube.  The What If Situations will have them look at several actions and determine if all the possible outcomes are equally likely.<strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ZKw5N1aP_MjvSSPn",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p><p>How can you determine whether the outcomes of a probability event are all equally likely? Why would this information matter if you are using the outcomes to make a decision? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "D99tcgSv1BL93Aj8",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p><p>Experimental and Theoretical Probability: <em>Introduction/Explore</em></p><p>Proportional Relationships: <em>Analysis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "MlbsI0uoEmjvoHfr",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p><p>Equally likely</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "iT_Lmo6uux8uPJ4p",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Z1vMrjlRC-3BSJ-l",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p><p> 1 Day</p><p><strong>Groups</strong></p><p>Think-Pair-Share</p><p><strong>A </strong>#11-17</p><p><strong>C</strong> #27-31</p><p><strong>E </strong>#34</p><p><strong></strong></p><p><strong>CCSSM</strong></p><p>7.SP.C.5 </p><p>7.SP.C.6 </p><p>7.SP.C.7.A </p><p>7.SP.C.7.B </p><p>7.RP.A.2 </p><p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "k7zbOlCR17zoambm",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p><p><strong>LAUNCH</strong></p><p>CONNECTING TO PRIOR KNOWLEDGE</p><p>Tell the story of Kaleb’s coin and his mother’s suspicion that it is not a fair coin that is described in the Introduction to the Problem.</p><p><strong>Suggested questions</strong></p><ul><li>Why do you think Kaleb’s mother is suspicious of the coin? </li></ul><ul><li>What do you think it means for a coin to be fair?</li></ul><p>PRESENTING THE CHALLENGE</p><p>Tell students they will be looking at several situations and analyzing if they are equally likely situations.  Have students take a few minutes to work on the Problem individually and then gather in pairs or small groups to discuss their answers. </p><p><strong>Implementation Note: </strong>You may want to divide up the outcomes in the Initial Challenge and have each group do three outcomes and then discuss all of them during the Summary.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "tgV2M1euHosOAXkI",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p><p>PROVIDING FOR INDIVIDUAL NEEDS</p><p>Make sure groups understand that they should try to reach a consensus about each situation. As you circulate, restrict your role to listening and asking questions. Listen to how students defend their answers and be on the lookout for inventive ways of arguing for a particular answer. </p><p><strong>Suggested question</strong></p><ul><li>For What If Situation B, Kaleb puts his name on ten cards in the hat. How many cards with their names do Kaleb and his father need to put into the hat to make all three names equally likely to be chosen?<strong></strong></li></ul><p><em>Teacher Moves: Selecting and Sequencing</em></p><p>PLANNING FOR THE SUMMARY</p><p>As you are circulating during the Explore, listen for how students are deciding on equally likely.  They should be considering all the possible outcome and see if each outcome has an equal chance of occurring.  Select actions to discuss that have generated a lot of conversation to discuss in the Summary.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "KxaRbFChoUjHJYRz",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p><p><em>﻿Teacher Moves: Language</em></p><p>SOLUTIONS AND STRATEGIES </p><p>Discuss the groups’ answers as a class. There may be some disagreement. Encourage students to explain their reasoning as they share their answers. </p><p><em>Teacher Moves: Claim, Support, Question</em></p><p>MAKING THE MATHEMATICS EXPLICIT</p><p>Be sure to analyze the possible outcomes. This will provide background for analyzing theoretical probabilities in the next Investigation.</p><p><strong>Suggested questions</strong></p><ul><li>What strategies did you use to decide if events were equally likely</li><li>How did you come to consensus as a group when you disagreed on whether an event was equally likely? </li><li>If a situation is equally likely does it mean the probability is 50%?</li><li>Which experimental trials in Problem 1.1 and 1.2 had equally likely outcomes?</li></ul><p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p><p><strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         }
       ]
     },
@@ -224,36 +570,150 @@
           "title": "HL 2.1 Gee Whiz Everyone Wins",
           "subtitle": "Finding Theoretical Probabilities",
           "sections": [
-            {
-            "type": "introduction",
-            "content": {
-            "tiles": []
-            },
-            "supports": []
+              {
+              "type": "introduction",
+              "content": {
+              "tiles": []
+              }
             },
             {
               "type": "initialChallenge",
               "content": {
                 "tiles": []
-              },
-              "supports": []
+              }
             },
             {
               "type": "whatIf",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "5AvlEj1QanUOyYiQ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 2.1 Gee Whiz Everyone Wins Game:  Finding Theoretical Probabilities</strong></p><p>In the Initial Challenge students choose colored blocks from a bag to determine experimental probabilities. They also find the theoretical probabilities by counting the number of each color and then finding the fraction of blocks of a certain color in the bag. In the What If Situations students contrast the theoretical probabilities with experimental probabilities.<strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "3PXjgk3ECpXM9EUW",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p><p>How does experimental probability compare to theoretical probability for a given situation? What can you say about the sum of theoretical probabilities for all possible outcomes</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "gP5K1T8aYsWTTO3Y",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p><p>Experimental and Theoretical Probability: <em>Introduction/Explore</em></p><p>Proportional Relationships: <em>Analysis/Synthesis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "XF_w5AQBZz8cJPMR",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p><p>Theoretical Probability</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "1Zx36YoNQOoYlwAl",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p><p>One bucket or bag containing 9 red blocks, 6 yellow blocks, and 3 blue blocks</p><p>Teaching Aid 2.1 Gee Whiz! Class Data</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "nQIBiTUbcqyf0arq",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p><p> 2 Days</p><p><strong>Groups</strong></p><p>2</p><p><strong>A</strong> #1-5</p><p><strong>C</strong> #17-20</p><p><strong>E</strong> #28-30</p><p><strong>CCSSM</strong></p><p>7.SP.C.5 </p><p>7.SP.C.6 </p><p>7.SP.C.7.B </p><p>7.RP.A.2 </p><p>7.RP.A.2.A </p><p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [ 
+                  {
+                    "id": "xRdld5IyvjZbFz_6",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p><p><strong>LAUNCH</strong></p><p>CONNECTING TO PRIOR KNOWLEDGE</p><p>Introduce the idea of theoretical probability before doing this Problem or while you are doing the Initial Challenge with your students.</p><p>Tell the story about the <em>Gee Whiz Everyone Wins!</em> game.</p><p><strong>Suggested questions</strong></p><ul><li>What do you think <em>random</em> means? </li><li>Suppose you are a member of the audience. Would you rather be called to the stage first or last? Explain. </li><li>Does it matter that the block is returned to the bucket and the bucket is stirred after each contestant? Explain.</li></ul><p>PRESENTING THE CHALLENGE</p><p>Play the game as a whole class.  You will be the host and students will be the contestants. Explain how they will take turns choosing from the container. They should keep careful track of the outcome of each choice. Explain that after each turn, you will return the container to its original state by replacing the block and then mixing the blocks.</p><p><strong>Suggested question</strong></p><ul><li>What color do you think will most likely occur?  </li></ul><p><strong>Implementation Note: </strong>The first day do the Initial Challenge as a whole class and then on Day 2 have students work with a partner on the What If Situations.<strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "LUu3pi0ZdgxB4Vcq",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p><p>PROVIDING FOR INDIVIDUAL NEEDS</p><p><strong>Suggested questions</strong></p><ul><li>What color do you think will most likely occur?</li></ul><p>As more and more students take a turn, ask the following questions:</p><ul><li>Are the data that are accumulating useful for making your prediction? Explain. </li><li>What is the experimental probability of choosing each color?</li></ul><p>As students work, pay attention to which ideas seem to be difficult for them. If students struggle with the probability of something not happening, you may want to ask them about what <em>could</em> happen to make the “not” statement true or the “not” outcome occur, rather than pointing them to a formula.<strong></strong></p><p>PLANNING FOR THE SUMMARY</p><p>As you are circulating during the Explore listen for how students are making sense of experimental and theoretical probabilities.  Are they recognizing that experimental probability changes and gets closer to the theoretical probability as more data is collected?  Do they see how to use these probabilities to make predictions using proportional reasoning?  Do they see the sum of theoretical probabilities for all possible outcome is always 1?</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "VlDtcD1_xMNMYLeW",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p><p><em>Teacher Moves: Compare Thinking</em></p><p>SOLUTIONS AND STRATEGIES </p><p>Have a conversation where students share their thinking about the experimental and theoretical probabilities of the <em>Gee Whiz Everyone Wins</em> game.</p><p>MAKING THE MATHEMATICS EXPLICIT</p><p><strong>Suggested questions </strong></p><ul><li>How did you determine the theoretical probability for each color?</li><li>What is the sum of the theoretical probabilities?  Why?</li><li>Would you rather be called to the stage first or last? </li><li>Does it matter if the block is returned to the bucket after each contestant?</li><li>What is the probability of drawing a green block?  (0)  Why? </li><li>Suppose you have a different bucket.  You can’t see inside, but you know there are 30 blocks in all.  How can you use your observations of others picking blocks to predict how many of each color there are?</li><li>How can you compute the probability of something not happening? </li><li>How can you find P(blue) or P(yellow)? </li><li>Can a probability ever be a value greater than one?</li></ul><p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p><p><strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 2.2",
@@ -262,18 +722,16 @@
           "subtitle": "Pondering Possible and Probable",
           "sections": [
             {
-            "type": "introduction",
-            "content": {
-            "tiles": []
-            },
-            "supports": []
+              "type": "introduction",
+              "content": {
+              "tiles": []
+              }
             },
             {
               "type": "initialChallenge",
               "content": {
                 "tiles": []
-              },
-              "supports": []
+              }
             },
             {
               "type": "whatIf",
@@ -285,12 +743,129 @@
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "OPbW-OURJRdGQLJ2",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 2.2 Designing a Fair Game:  Pondering Possible and Probable</strong></p><p>In the Initial Challenge students analyze a coin-tossing game and discover that the games is not a fair game of chance.  In the What If Situations students learn how to create and use a tree diagram.<strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "VPSWos9c_z9JC4mT",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p><p>What are some strategies for listing all the outcomes in a sample space when you have two or more events happening at the same time? How do you decide whether a game is fair or not?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "IuA2FB2wK3x27N01",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p><p>Experimental and Theoretical Probability: <em>Introduction/Explore</em></p><p>Proportional Relationships: <em>Analysis/Synthesis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "i5Doyo0IcGPliWOo",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p><p>Fair Game</p><p>Tree Diagram</p><p>Sample Space<strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "DGfLdK-ZBUKUVBX7",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p><p>Coins (3 per group)</p><p>Red, yellow, blue blocks (2 of each per partner group)</p><p>2 boxes, buckets, or bags</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "JljQj2G-ThDWfm8H",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p><p> 1 Day</p><p><strong>Groups</strong></p><p>2</p><p><strong>A </strong>#6-11<strong></strong></p><p><strong>C </strong>#21-24<strong></strong></p><p><strong>E </strong>#31-34<strong></strong></p><p><strong>CCSSM</strong></p><p>7.SP.C.5 </p><p>7.SP.C.6 </p><p>7.SP.C.7 </p><p>7.SP.C.7.A </p><p>7.SP.C.7.B </p><p>7.SP.C.8 </p><p>7.SP.C.8.A </p><p>7.RP.A.2 </p><p>7.RP.A.2.A </p><p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "6CW5C4fr9BtTPkKa",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p><p><strong>LAUNCH</strong></p><p><em>Teacher Moves: Agency, Identity, Ownership</em></p><p>CONNECTING TO PRIOR KNOWLEDGE</p><p>The coin-tossing game is a two-person game, so students need to think in terms of two players. In fair games of chance, each player has the same chance, or probability, of winning. If your students need more time with experimental probability you may want to collect experimental data as a whole class.</p><p>PRESENTING THE CHALLENGE</p><p>Let students know that they are to examine the coin tossing game for fairness. Tell them that, in mathematical terms, a game of chance is fair if everyone has an equally likely chance of winning.</p><p>It is important for students to realize that they are using the theoretical probabilities to determine the fairness of the game. Their challenge is to determine whether the game is fair or not and, if it is not a fair game, to figure out a way to make it fair.<strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "vnJHblCshr18GdgZ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p><p><em>Teacher Moves: Language</em></p><p>PROVIDING FOR INDIVIDUAL NEEDS</p><p>As you listen to students discuss the coin toss game, remind them that they must be prepared to explain why they think the game is fair or unfair. </p><p>Be sure students know what the sample space is. They should know that there are eight outcomes and that all of them are equally likely.</p><p><strong>Suggested questions</strong></p><ul><li>Describe what you see in Santo’s strategy in What If Situation A.</li><li>How can you make the game fair? </li></ul><p>Some students may want to have blocks to make sense of What If Situation C.</p><p><strong>Note</strong>:  You may want to play a few rounds of the game in What If Situation C with the whole class.</p><p><em>Teacher Moves: Selecting and Sequencing</em></p><p>PLANNING FOR THE SUMMARY</p><p>As you are circulating during the Explore listen for students making sense of organized lists and tree diagrams for listing all the outcomes.  Choose student groups to explain how they would decide if a game is fair.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [ 
+                  {
+                    "id": "kkcqZaGk4h_JD9fC",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p><p><em>Teacher Moves: Compare Thinking</em></p><p>SOLUTIONS AND STRATEGIES </p><p>To determine the theoretical probabilities, ask the class to share their strategies. Be sure that both an organized list and a tree diagram are discussed.</p><p><strong>Suggested question</strong></p><ul><li>Do you have any What If questions?</li></ul><p>MAKING THE MATHEMATICS EXPLICIT</p><p><strong>Suggested questions</strong></p><ul><li>What is the sample space for tossing three coins? </li><li>Is the game fair? </li><li>How can you make the game fair?</li><li>What is the probability of getting zero heads? 1head? 2 heads? 3 heads? 2 heads and 1 tail?  No coins matching? At least 1 head?</li><li>Compare an organized list to a tree diagram. </li><li>How did you determine the theoretical probabilities in What If Situation A? </li><li>Compare the theoretical probabilities to the experimental probabilities in the What If.</li><li>What are the outcomes for which Akimi will win in What If Situation C? Brelynn? </li><li>If Brelynn and Akimin play the game 18 times, how many times does each person expect to win?</li></ul><p>Going further:  Have students analyze how many outcomes would be in the sample space if you have four coins. </p><p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p><p><strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 2.3",
@@ -299,35 +874,149 @@
           "subtitle":"",
           "sections": [
             {
-            "type": "introduction",
-            "content": {
-            "tiles": []
-            },
-            "supports": []
+              "type": "introduction",
+              "content": {
+              "tiles": []
+              }
             },
             {
               "type": "initialChallenge",
               "content": {
                 "tiles": []
-              },
-              "supports": []
+              }
             },
             {
               "type": "whatIf",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "3rtqX0f91wk79YcZ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 2.3 Designing a Spinner to Find Probabilities</strong></p><p>In the Initial Challenge students investigate a spinner that Kaleb might use to determine his bedtime. In the What If Situation students will look at spinners for choosing what to eat for lunch.  Students confront some possible misconceptions about the relationship between angle measure and probability situations involving spinners. <strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "_1zKSjLISPXjJxeP",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p><p>How do you determine experimental and theoretical probability using a spinner? Compare spinners to the methods of finding probabilities used in Investigations 1 and 2 to determine probability.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "naY00Rg23hEMKVqE",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p><p>Experimental and Theoretical Probability: <em>Explore</em></p><p>Proportional Relationships: <em>Analysis/Synthesis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "WmwGK9PSmSU0vlrf",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p><p>Compound Events</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "lz2YYzaWmeh_lo8A",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p><p>Learning Aid 2.3 Spinning for Lunch</p><p>Teaching Aid 2.3 Bedtime Spinner</p><p>Paper clips, or blank plastic spinners (optional)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "9FhJDpp4eetwYNSa",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p><p> 1 Day</p><p><strong>Groups</strong></p><p>Think-Pair-Share</p><p><strong>A</strong> #12-16</p><p><strong>C</strong> #25-27</p><p><strong>E</strong> #35-36</p><p><strong>CCSSM</strong></p><p>7.SP.C.5 </p><p>7.SP.C.6 </p><p>7.SP.C.7 </p><p>7.SP.C.7.A </p><p>7.SP.C.7.B </p><p>7.SP.C.8 </p><p>7.SP.C.8.A </p><p>7.RP.A.2 </p><p>7.RP.A.2.A </p><p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "G3gITKgY9aPAX2Et",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p><p><strong>LAUNCH</strong></p><p>CONNECTING TO PRIOR KNOWLEDGE</p><p>Randomness requires proper technique for carrying out the trial. For number cubes, one technique is to shake the number cubes in your hand, and roll them so they hit a wall and bounce back. Another is to put the number cubes in a container, shake it, and then dump them out. With spinners, achieving randomness requires using a strong flick of the finger to put the pointer in motion. Electronic spinners would be useful.</p><p>PRESENTING THE CHALLENGE</p><p>Point out the three blue and yellow spinners Kaleb has created as shown in the Student Edition. Discuss Kaleb’s idea to determine his bedtime during spring vacation by using one of the three spinners.</p><p><strong>Suggested question</strong></p><ul><li>Which spinner will give Kaleb the best chance of going to bed at 11:00? Explain your reasoning.</li></ul><p>Explain to students that Kaleb decided to make his own spinner for determining his bedtime. Demonstrate a few spins on <strong>Learning Aid 2.3A: Kaleb’s Spinner</strong>. Record each result and demonstrate how to keep a tally for each spin. After spinning two or three times, ask whether you have a large enough sample. Students should realize that a few spins do not generate enough data to predict the behavior of the spinner over the long run.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "0pNt-fIm4MgwnOpA",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p><p>PROVIDING FOR INDIVIDUAL NEEDS</p><p><strong>Suggested questions</strong></p><ul><li>Look at one of the 9:00 sections. Is the spinner as likely to land there as in the 11:00 section? </li><li>What is the angular size of each section? </li><li>How much of the total area of the circle is each bedtime option? </li><li>Would it help to collect some experimental data for What If Situation A?<strong></strong></li></ul><p>PLANNING FOR THE SUMMARY</p><p>As students are working during the Explore they should be able to explain that experimental probability is using the spinner and recording the results and theoretical probability involves determining the portion of the angle measure to determine how likely a result might be.  These ideas are similar to what was done in Investigation 1 and 2 with the difference needing to analyze the portions of the spinner.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "txK4_jQPFAWubi0o",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p><p><em>Teacher Moves: Portrayal</em></p><p>SOLUTIONS AND STRATEGIES </p><p>Have students share how they determined the theoretical probabilities. Display students’ ideas for the spinner design that Kaleb’s grandparent might use in the Initial Challenge. </p><p><em>Teacher Moves: Compare Thinking</em></p><p>MAKING THE MATHEMATICS EXPLICIT</p><p><strong>Suggested questions</strong></p><ul><li>In the Initial Challenge the spinner has three 9:00 options, two 10:00 options and one 11:00 option.  Does this mean that 9:00 is most likely to occur? </li><li>How did you determine the theoretical probabilities for 9:00, 10:00 and 11:00?</li><li>How did you determine the amount of times out of 64 spins that it would land on 9:00, 10:00 and 11:00?</li><li>What do Kaleb’s grandparents have to consider when designing a spinner if they want Kaleb to go to bed at 9:00? </li><li>In the What If, will a tree diagram and an organized list work for the lunch menu spinners?</li><li>How did you determine the probability of Kaleb getting his favorite lunch of pizza, corn, and milk?</li><li>How is a spinner similar to or different from using coins, cups, or number cubes?</li></ul><p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p><p><strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         }
       ]
     },
@@ -343,35 +1032,165 @@
           "subtitle": "",
           "sections": [
             {
-            "type": "introduction",
-            "content": {
-            "tiles": []
-            },
-            "supports": []
+              "type": "introduction",
+              "content": {
+              "tiles": []
+              },
+              "config": {
+                "planningTemplate": {
+                  "overview": {
+                    "tiles": [ ]
+                  },
+                  "launch": {
+                    "tiles": [ ]
+                  },
+                  "explore": {
+                    "tiles": [ ]
+                  },
+                  "summarize": {
+                    "tiles": [  ]
+                  }
+                }
+              }
             },
             {
               "type": "initialChallenge",
               "content": {
                 "tiles": []
-              },
-              "supports": []
+              }
             },
             {
               "type": "whatIf",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "OMQnLTe0QbEsg8zY",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 3.1 Making Decisions:  Analyzing Fairness</strong></p><p>In this Problem, students analyze various methods for making fair decisions. In the Initial Challenge students look at using spinners, number cubes, blocks, and drawing straws to choose which student in Kaleb’s classroom will deliver a message to the office.  In the What If Situations students will analyze other situations for making decisions and decide if they are fair. <strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "qfJZ_ous9LG8i2xk",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p><p>What does it mean to be a fair game? When creating a simulation, what things must you consider?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "dte2ryn2DdSfoUSj",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p><p>Experimental and Theoretical Probability: <em>Explore/Analysis</em></p><p>Proportional Relationships: <em>Analysis/Synthesis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "F_FL3lVs7SFszURg",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "PVlZZO3AAW0tTpYP",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p><p>Learning Aid 3.1 Blank Spinner</p><p>Paper clips or plastic blank spinners, number cubes, coins, colored blocks, bags, buckets, or boxes, Aangle rulers</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "FnIOY7OkKZRvIGQU",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p><p> 1 Day</p><p><strong>Groups</strong></p><p>2-3</p><p><strong>A </strong>#1-4</p><p><strong>C</strong> #12-16</p><p><strong>E</strong> #22-23</p><p><strong>CCSSM</strong></p><p>7.SP.C.5 </p><p>7.SP.C.6 </p><p>7.SP.C.7 </p><p>7.SP.C.7.A </p><p>7.SP.C.7.B   </p><p>7.SP.C.8 </p><p>7.SP.C.8.A </p><p>7.RP.A.2 </p><p>7.RP.A.2.A </p><p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "0mLg5YEyt3K8vdwP",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p><p><strong>LAUNCH</strong></p><p>CONNECTING TO PRIOR KNOWLEDGE</p><p>In this Problem, students use all of the methods and tools they have learned (coins, number cubes, blocks, and spinners) to evaluate the fairness of an activity. Students must use what they have already learned to decide if their chosen strategy is fair and how to use that strategy to create a fair event.</p><p><strong>Suggested question</strong></p><ul><li>What does it mean to choose fairly?</li></ul><p>PRESENTING THE CHALLENGE</p><p>Explain the context in the Introduction on choosing a messenger to send to the office.  Ask students if they have any suggestions to fairly select a student.  For the Initial Challenge you might want to divide up the possible methods to investigate and have each group analyze two to three methods to save time</p><p><strong>Implementation Note: Y</strong>ou might want to have a brief conversation after the Initial Challenge before having groups work on the What If Situations.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "UnqPNO4KPXYY1P1x",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p><p><em>Teacher Moves: Language</em></p><p>PROVIDING FOR INDIVIDUAL NEEDS</p><p>As students work, listen for whether they are being precise about the outcomes in each suggestion. </p><p><strong>Suggested questions</strong></p><ul><li>How do you know you have looked at all the possible outcomes?</li></ul><ul><li>How do you know if an idea is fair?</li></ul><p>As you are circulating around the room look to see if number cubes, coins, blocks, etc. would help groups reach decisions. <strong></strong></p><p>PLANNING FOR THE SUMMARY</p><p>As you are circulating during the Explore, listen for how students are deciding on the fairness of each suggestion.  Students should be using the vocabulary of equally likely when deciding on fairness.  As students are choosing a tool to simulate a situation they should consider all the possible outcomes and if the tool can represent them.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "oubwLkgDE1ViqdDA",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p><p><em>﻿Teacher Moves: Language</em></p><p>SOLUTIONS AND STRATEGIES </p><p>Base your Summary on what students did and did not understand in the Problem. Make sure that students can specify the outcomes in each suggestion and determine whether each is a fair way to make a decision. If your students struggled with certain suggestions, you will want to spend time carefully discussing the various outcomes and the ways to determine whether they are fair. </p><p>MAKING THE MATHEMATICS EXPLICIT</p><p><strong>Suggested questions</strong></p><ul><li>What are the possible outcomes when you roll a number cube? Flip a coin? Use colored cube?  Use playing cards? Use a spinner?  Draw straws?</li><li>How did your group decide if the methods in the Initial Challenge would be fair to choose a messenger to send to the office?</li><li>In What If Situation A, Is Ethan’s suggestion fair?</li><li>Is Ava’s suggestion fair?</li><li>Is Beno’s suggestion fair?</li><li>For What If Situation B, which method should Moe choose to play soccer and why?</li></ul><p>In What If Situation C, the outcomes are not equally likely. The easiest way to see this is to note that the smallest possible sum is 10. Therefore, students 1 through 9 would not have a chance.</p><ul><li>How does student 60 win? 50? 10?</li><li>Does every student have the same chance of winning? </li></ul><p>Have students discuss Sal’s method. You may want to demonstrate how to choose and determine the numbers.</p><p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p><p><strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 3.2",
@@ -380,35 +1199,149 @@
           "subtitle": "",
           "sections": [
             {
-            "type": "introduction",
-            "content": {
-            "tiles": []
-            },
-            "supports": []
+              "type": "introduction",
+              "content": {
+              "tiles": []
+              }
             },
             {
               "type": "initialChallenge",
               "content": {
                 "tiles": []
-              },
-              "supports": []
+              }
             },
             {
               "type": "whatIf",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "TqQDvysJOWx7QQX2",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 3.2 Roller Derby Game:  Analyzing a Game</strong></p><p>In the Initial Challenge students play and analyze a game called Roller Derby. After playing the game, students list all the possible outcomes and use the list to devise strategies for winning the game. In What If Situation A they look at scaling up the theoretical probabilities of various game outcomes.  In What If Situation B students design their own game with number cubes.<strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "58Tez7PJpImUSk2Q",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p><p>How does understanding probability help you design a winning strategy for a game? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "X5-7NwKkH2iy4zA9",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p><p>Experimental and Theoretical Probability: <em>Analysis</em></p><p>Proportional Relationships: <em>Analysis/Synthesis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "LLbbHC_HGS6ClUz8",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "hc83x2JVkCmOa7v7",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p><p>Learning Aid 3.2 Roller Derby</p><p>Number cubes (2 per partner group)</p><p>Game markers (counters, buttons, or equivalent)</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "v2ZkJzNVKMxqwv88",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p><p> 1-2 Days</p><p><strong>Groups</strong></p><p>4</p><p><strong>A</strong> #5-9</p><p><strong>C</strong> #17-19</p><p><strong>E</strong> #24-26</p><p><strong>CCSSM</strong></p><p>7.SP.C.5 </p><p>7.SP.C.6 </p><p>7.SP.C.7 </p><p>7.SP.C.7.A </p><p>7.SP.C.7.B </p><p>7.SP.C.8 </p><p>7.SP.C.8.A </p><p>7.SP.C.8.C </p><p>7.RP.A.2 </p><p>7.RP.A.2.A </p><p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "WG3QPxoPXaeL8JZA",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p><p><strong>LAUNCH</strong></p><p>CONNECTING TO PRIOR KNOWLEDGE</p><p>Students use their knowledge of the sums of number cubes to play the Roller Derby game. Students also need to consider different strategies they have used to play games with their friends or family members, since the Roller Derby game requires strategy to win. </p><p><em>Teacher Moves: Agency, Identity, Ownership</em></p><p>PRESENTING THE CHALLENGE</p><p>Illustrate the game by displaying <strong>Learning Aid 3.2: Roller Derby</strong>, putting markers in the columns at random, and taking a few turns.</p><p><strong>Suggested question</strong></p><ul><li>What is your best guess at a strategy for placing your markers so that you will be able to remove them before your opponent removes their markers?</li></ul><p>Be sure students understand that the goal of the game is to remove all the markers. Refer students to the rules for Roller Derby.</p><p><strong>Implementation Note</strong>: Having students design their own game in What If Situation B will take two days.  However, this time is valuable for students to synthesize their understanding about theoretical probability in this new setting and for the teacher to gather formative assessment on the students’ understanding of these ideas.  </p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "BRfnVfKhurtcJLUz",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p><p><em>Teacher Moves: Agency, Indentity, Ownership</em></p><p>PROVIDING FOR INDIVIDUAL NEEDS</p><p>While students play the game, observe the strategies they use and the knowledge they display about sums of the numbers on the cubes. Take note of the methods they use to systematically list all the possible outcomes. See how students adjust their strategies for playing the game after determining the theoretical probabilities. </p><p><strong>Suggested questions</strong></p><ul><li>How did you decide where to put your markers? </li><li>What could help you make choices on where to place your markers? </li><li>Check to see if students are paying attention to order.  Is rolling a 1, 2 different than rolling a 2, 1? </li><li>For What If Situation A, how could the possible outcomes from the Initial Challenge help you? </li></ul><p>For What If Situation B remind students that their rules should be easy for someone else to understand, that they know the probability of winning and that they have decided if it is a fair game.</p><ul><li>How do you know all the outcomes of your game?  <strong></strong></li></ul><p>PLANNING FOR THE SUMMARY</p><p>As students analyze the Rolling Derby game they should be able to discuss how knowing the probability of each outcome would help them select moves in a game.  As students are designing their own game look for how they use the probabilities of those outcomes to create a fair game.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "GT8uPbzMD3GGSHvK",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p><p>SOLUTIONS AND STRATEGIES </p><p>Have groups discuss strategies for placing their markers on the game board.  Have groups share how they found the theoretical probabilities for each sum.  Have groups share the games they designed for What If Situation B.</p><p><strong>Implementation Note</strong>: This may mean a second day to play and analyze the games.</p><p>MAKING THE MATHEMATICS EXPLICIT</p><p><strong>Suggested questions</strong></p><ul><li>What was the first strategy your team used for placing markers in the 12 columns? </li><li>Did you change your strategy the second time you played? Explain why or why not. </li><li>If you were going to play the game again, what strategy would you use now? Explain. </li><li>How did you determine the theoretical probability for each sum? </li><li>When you roll two number cubes, how many different number pairs are possible? Are they equally likely?</li><li>How many different sums are possible? </li><li>Are these sums equally likely? </li></ul><p>Have students share their game from Situation B with another group.  Have each group analyze if this is a fair game.  Share some of these and discuss why they are or are not fair.</p><p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p><p><strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 3.3",
@@ -416,36 +1349,152 @@
           "title": "HL 3.3 Scratching Spots",
           "subtitle": "Designing and Using a Simulation",
           "sections": [
-            {
-            "type": "introduction",
-            "content": {
-            "tiles": []
-            },
-            "supports": []
+              {
+              "type": "introduction",
+              "content": {
+              "tiles": [
+
+              ]
+              }
             },
             {
               "type": "initialChallenge",
               "content": {
                 "tiles": []
-              },
-              "supports": []
+              }
             },
             {
               "type": "whatIf",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "Y9q1DqOLn5QQ_WzU",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 3.3 Scratching Spots Game:  Designing and Using a Simulation</strong></p><p>In the Initial Challenge students analyze a toy store’s scratch-off prize card contest. They are asked to devise a simulation to find experimental probabilities. In the What If Situations students will look at using proportional reasoning to analyze their results, use these ideas in advertising and create their own game. <strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "loYvkmTb07_pg4-7",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p><p>What factors do you have to consider to design a simulation? Suppose you run your simulation 20 times, how does proportional reasoning help you report your estimated theoretical probability as a ratio or percent?</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "8m2MJ5EJ3pmP8CQU",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p><p>Experimental and Theoretical Probability: <em>Analysis</em></p><p>Proportional Relationships: <em>Analysis/Synthesis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "6PQydx2NaNuYOEbA",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p><p>Simulation</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ShPvx76nyM6aZZ2O",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p><p>Paper clips or plastic blank spinners</p><p>number cubes</p><p>coins</p><p>colored blocks</p><p>bags, buckets, or boxes</p><p>angle rulers</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "PHxPVyg8ePR2G8U6",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p><p> 1 Day</p><p><strong>Groups</strong></p><p>2-4</p><p><strong>A</strong> #10-11</p><p><strong>C</strong> #20-21</p><p><strong>E </strong>#27-28</p><p><strong>CCSSM</strong></p><p>7.SP.C.5 </p><p>7.SP.C.7 </p><p>7.SP.C.7.A </p><p>7.SP.C.7.B </p><p>7.SP.C.8 </p><p>7.SP.C.8.A </p><p>7.SP.C.8.C </p><p>7.RP.A.2 </p><p>7.RP.A.2.A </p><p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "WZe9HLLdyytNp93J",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p><p><strong>LAUNCH</strong></p><p>CONNECTING TO PRIOR KNOWLEDGE</p><p>Describe the context to the students and discuss possible ways of finding the experimental probability of winning a prize with one prize card. This will involve doing a simulation. Students will need to devise a simulation that is mathematically equivalent to scratching off two spots on a five-spot prize card. Discuss with students when a simulation would be helpful or necessary.</p><p>PRESENTING THE CHALLENGE</p><p>Collect various simulation suggestions. Analyze these suggestions with the class briefly. There should be exactly one matching pair among five choices.  For example, if students suggest using spinners, help them to see that in order to simulate the situation, the part the spinner lands on for the first spin can no longer be available on the second spin.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "CAfq8BjVk45JTlfv",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p><p><em>Teacher Moves: Agency, Identity, Ownership, Portryal</em></p><p>PROVIDING FOR INDIVIDUAL NEEDS</p><p>Each group must decide for itself how to collect the data and when they have collected enough data to find a reasonable experimental probability. Be sure that each method is mathematically equivalent to the scratch-off prize card. If the class does different simulations, display the posters around the room and give the class time to examine and comment on them.</p><p>Allow the groups to plan and carry out their simulations, collect their data, and find the experimental probability. When they have completed their experiment, students should move onto finding theoretical probabilities and the What If. </p><p>PLANNING FOR THE SUMMARY</p><p>As you are circulating during the Explore look for the ways that students are finding all the outcomes for an event.  As students select a tool take note of how they determine the number of outcomes possible for the tool.  As students are discussing What If Situation A, listen for how they scale up the theoretical probability to find out the number of wins out of 100 prize cards.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "d5asIgFOs29g08_O",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p><p><em>Teacher Moves: Gallery Walk</em></p><p>SOLUTIONS AND STRATEGIES </p><p>Have the groups share their solutions and strategies with the class. Discuss the different methods.  You may want to do a gallery walk and allow students to comment on the simulations used by the other groups. </p><p>MAKING THE MATHEMATICS EXPLICIT</p><p><strong>Suggested questions</strong></p><ul><li>When you were finding the theoretical probability, what strategy did you use to list all the outcomes?</li><li>How is this like/not like drawing a color cube from a bucket, replacing it and then drawing a second cube?</li><li>How is this like/not like drawing a color cube from each of two buckets? </li><li>If you had to theoretically look at the Prize Card game what tool would you use?</li></ul><p>Discuss What If Situation B.</p><ul><li>Is every card a winner?</li><li>What is a better ad for Tawanda’s Toys?</li></ul><p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p><p><strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         }
       ]
     },
@@ -460,36 +1509,150 @@
           "title": "HL 4.1 Making Purple Game",
           "subtitle": "Using Area Models to Find Sample Spaces",
           "sections": [
-            {
-            "type": "introduction",
-            "content": {
-            "tiles": []
-            },
-            "supports": []
+              {
+              "type": "introduction",
+              "content": {
+              "tiles": []
+              }
             },
             {
               "type": "initialChallenge",
               "content": {
                 "tiles": []
-              },
-              "supports": []
+              }
             },
             {
               "type": "whatIf",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "8lN5IEEfP5u7qYx_",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 4.1 Making Purple Game:  Using Area Models to Find Sample Spaces</strong></p><p>Students are introduced to an area model for analyzing probabilities with two-stage outcomes. In the Initial Challenge students will use an area model for a game involving two spinners.  In the What If Situations they will look at another game with buckets and marbles. <strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "F3ACxzcrhOrJyRFI",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p><p>How can an area model help represent and analyze the outcomes of a compound event? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "dmZBbv7Mxe95P_GU",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p><p>Experimental and Theoretical Probability: <em>Analysis</em></p><p>Proportional Relationships: <em>Analysis/Synthesis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "VADMMSpvMwlNNmyN",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p><p>Area Model</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "y3jjJfd3W8bNIj-r",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p><p>Learning Aid 4.1 Making Purple</p><p>Paper clips or blank plastic spinners</p><p>Teaching Aid 4.1 Tree Diagrams Transformed to Area Models</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "lQYlIyCyRWe_9KwZ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p><p> 1 Day</p><p><strong>Groups</strong></p><p>2</p><p><strong>A</strong> #1-4</p><p><strong>C</strong> #17-20</p><p><strong>E</strong> #30-32</p><p><strong>CCSSM</strong></p><p>7.SP.C.5</p><p>7.SP.C.6 </p><p>7.SP.C.7 </p><p>7.SP.C.7.A </p><p>7.SP.C.7.B </p><p>7.SP.C.8 </p><p>7.SP.C.8.A </p><p>7.SP.C.8.B </p><p>7.RP.A.2 </p><p>7.RP.A.2.A </p><p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "kabGWnl_0wMNKW0T",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p><p><strong>LAUNCH</strong></p><p>CONNECTING TO PRIOR KNOWLEDGE</p><p>Discuss Miquel’s suggestion of using an area model for finding all the possible outcomes for the Match/No Match game.  Go through all the steps in creating the area model. T<strong>eaching Aid 4.1: Tree Diagrams Transformed to Area Models</strong> can be used to help students make the connections.</p><p>PRESENTING THE CHALLENGE</p><p>Introduce the game Making Purple by playing a few rounds with the class.</p><p><strong>Suggested question</strong></p><ul><li>Do you think purple and not purple are equally likely outcomes? Explain.</li></ul><p><strong>Implementation Note:</strong> You may want to have a brief discussion of students’ area models in the Initial Challenge before having them try another one in What If Situation A. <strong></strong></p><p>For What If Situation B, assign partner groups one of the cases for the two buckets. Have them put their explanations on large paper to use during the Summary.<strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "1hzYuLv2w2HrJ3Ol",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p><p><em>Teacher Moves: Portryal</em></p><p>PROVIDING FOR INDIVIDUAL NEEDS</p><p>Circulate as pairs work, assisting those who are having trouble analyzing this two-stage game. Some students may need help in labeling and interpreting the area model. <strong></strong></p><p><strong>Suggested questions</strong></p><ul><li>For spinner A, what are the probabilities of getting each color? Spinner B?</li><li>How can you represent this on the square?</li><li>What does each region represent?</li><li>Which regions represent purple? </li><li>What are some other probabilities for this game? </li><li>What are all the possible outcomes of drawing a marble from Bucket 1 and then Bucket 2? <strong></strong></li></ul><p><strong>Note:  </strong>You may want to relate the area model to a tree diagram if students are having difficulty grasping the concept.  <strong></strong></p><p><em>Teacher Moves: Selecting and Sequencing</em></p><p>PLANNING FOR THE SUMMARY</p><p>As you are circulating during the Explore select students/groups that can talk about or show how the square area represents the entire situation/game; that each piece inside the square represents an outcome; and that the fractional size of the piece represents the probability of the outcome occurring.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "eJd1FqLetEQ04B41",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p><p>SOLUTIONS AND STRATEGIES </p><p>Have students discuss how an area model is used to find probability.</p><p>MAKING THE MATHEMATICS EXPLICIT</p><p><strong>Suggested questions</strong></p><ul><li>What is the probability of getting purple? </li><li>What are some other probabilities for this game? </li><li>How did you determine the theoretical probability for Making Purple?</li><li>Is Making Purple a fair game?</li><li>What are all the possible outcomes of drawing a marble from Bucket 1 and then Bucket 2? </li><li>Why is the probability of getting RB   while the probability of getting GB is  ? </li><li>Why is the probability of drawing at least one green the highest? </li><li>Drawing one marble from each bucket, what is the probability of drawing at least one blue or one yellow? Explain. </li></ul><p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p><p><strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 4.2",
@@ -498,35 +1661,151 @@
           "subtitle": "Simulating a Probability Situation",
           "sections": [
             {
-            "type": "introduction",
-            "content": {
-            "tiles": []
-            },
-            "supports": []
+              "type": "introduction",
+              "content": {
+              "tiles": [
+
+              ]
+              }
             },
             {
               "type": "initialChallenge",
               "content": {
                 "tiles": []
-              },
-              "supports": []
+              }
             },
             {
               "type": "whatIf",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "csUr6tRfYrB-OkjR",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 4.2 One-and-One Free Throws:  Simulating a Probability Situation</strong></p><p>In the Initial Challenge students investigate two-stage outcomes in the context of a one-and-one free-throw situation. A player with a 60% free throw percentage goes for a one-and-one. In What If Situation A students will find the theoretical probability of this one-and-one situation using an area model.  In What If Situation B students explore a game with pathways and use an area model to find the theoretical probability of winning.<strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "w2mMFWXHccs-37rU",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p><p>How is an area model for the one-and-one free throw situation like or unlike the area model for the Marble game or Making Purple game in Problem 4.1? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "GQkjsntA4XsdbdfN",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p><p>Experimental and Theoretical Probability: <em>Analysis/Synthesis</em></p><p>Proportional Relationships: <em>Analysis/Synthesis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "trLehcSWcWjjxd1-",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ECjRu4x2XRer6D6Y",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p><p>Learning Aid 4.2A Nishi’s One-and-One</p><p>Learning Aid 4.2B 10 x 10 grid</p><p>Paper clips or blank plastic spinners</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "3E9t5h3hc1NpbtN1",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p><p> 1 Day</p><p><strong>Groups</strong></p><p>2</p><p><strong>A </strong>#5-8</p><p><strong>C</strong> #21-23</p><p><strong>E</strong> #30-32</p><p><strong>CCSSM</strong></p><p>7.SP.C.5 </p><p>7.SP.C.6 </p><p>7.SP.C.7 </p><p>7.SP.C.7.A </p><p>7.SP.C.7.B </p><p>7.SP.C.8 </p><p>7.SP.C.8.A </p><p>7.SP.C.8.B </p><p>7.RP.A.2 </p><p>7.RP.A.2.A </p><p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "jA2zCOhKcoKnpujw",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p><p><strong>LAUNCH</strong></p><p><em>Teacher Moves: Language</em></p><p>CONNECTING TO PRIOR KNOWLEDGE</p><p>Make sure everyone understands what free throw and one-and-one situations are. Students who are not interested in basketball may need the one- and-one free throw situation explained to them. </p><p><em>Teacher Moves: Make Predictions</em></p><p>PRESENTING THE CHALLENGE</p><p><strong>Suggested questions</strong></p><ul><li>What are the possible numbers of points that Nishi could score in a one- and-one situation? </li><li>Explain how each of these can happen. </li></ul><p>Pose the first question of the Initial Challenge.</p><p>Is it most likely that Nishi will score 0 points, 1 point, or 2 points? Make a prediction about what will happen and record it before you analyze the situation.<strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "G1YzjX_Uu3EshRII",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p><p>PROVIDING FOR INDIVIDUAL NEEDS</p><p>Some students may need help with the area model. On the first free throw the area of the square is separated into two parts to represent 60% and 40%. The area that represents 40% of the square represents a score of 0. On the second free throw, only the area that represents 60% is further subdivided to represent 40% and 60%.</p><p><strong>Suggested questions</strong></p><ul><li>What happens if Nishi misses her first shot? Is this reflected in your area model? </li><li>In the pathway game, what happens at the first fork in the path?  Does your area model reflect that? </li><li>In the pathway game, what happens if you take the top path at the first fork?  Does your area model reflect that? </li><li>In the pathway game, what happens if you take the bottom path at the first fork?  Does your area model reflect that? </li><li>In the pathway game, what happens if you take the bottom path at the first fork and then choose the upper path?<strong></strong></li></ul><p>PLANNING FOR THE SUMMARY</p><p>Students should recognize that the area models are alike in that the square represent the entire situation and it is divided into pieces based on the outcomes.  The difference is that for the one-and-one free throws only one part is broken up to represent the second free throw.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [ 
+                  {
+                    "id": "QQMxDQNbK5fGu_iH",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p><p><em>﻿Teacher Moves: Agency, Identity, Ownership</em></p><p>SOLUTIONS AND STRATEGIES </p><p>Have the class combine all their data and find an overall experimental probability for Nishi’s one-and-one free throw situation.</p><p>Have students discuss how they would design an experiment for Situation B to simulate randomly choosing pathways. </p><p>MAKING THE MATHEMATICS EXPLICIT</p><p>Spend time working through making and interpreting the area models for the free throw situation and the Choosing Paths game.  Ask two or three pairs to explain how they found their theoretical probabilities.</p><p>Help students compare the class’s experimental probabilities to the theoretical probabilities. </p><p><strong>Suggested questions</strong></p><ul><li>Did your area model and prediction match up for the pathway game?</li><li>How does your area model reflect the different paths in the pathway game?</li><li>Would this area model work for the scratch off game in Problem 3.3?</li></ul><p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p><p><strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 4.3",
@@ -535,35 +1814,149 @@
           "subtitle": "",
           "sections": [
             {
-            "type": "introduction",
-            "content": {
-            "tiles": []
-            },
-            "supports": []
+              "type": "introduction",
+              "content": {
+              "tiles": []
+              }
             },
             {
               "type": "initialChallenge",
               "content": {
                 "tiles": []
-              },
-              "supports": []
+              }
             },
             {
               "type": "whatIf",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "9XTQfmZoAiOg1a_O",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 4.3 Finding Long-Term Averages</strong></p><p>In this Problem, students consider long-term average. This is also called expected value, which is studied in more depth in high school.  In the Initial Challenge students will look at Nishi from Problem 4.2 and find her long-term average.  In the What If Situation students will look at a basketball shooter fouled when taking a three-point basket.<strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "Inyxk-hOsHyQ75MU",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p><p>How is the long-term average calculated from the probabilities of outcomes for an event? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "TdXpUx-fNX3b2uO6",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p><p>Experimental and Theoretical Probability: <em>Synthesis/Abstraction</em></p><p>Proportional Relationships: <em>Synthesis</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "AL5DQCpiR5-0K1--",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p><p>Long Term Average</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "olrvEbxZgHEXp7nJ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "oZ_ivOerd0dwKwJG",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p><p> 1 Day</p><p><strong>Groups</strong></p><p>2</p><p><strong>A </strong>#9-12</p><p><strong>C</strong> #24-26</p><p><strong>E</strong> #34</p><p><strong>CCSSM</strong></p><p>7.SP.C.5 </p><p>7.SP.C.6 </p><p>7.SP.C.7 </p><p>7.SP.C.7.A </p><p>7.SP.C.7.B </p><p>7.SP.C.8 </p><p>7.SP.C.8.A </p><p>7.SP.C.8.B </p><p>7.SP.C.8.C </p><p>7.RP.A.2 </p><p>7.RP.A.2.A </p><p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "H8FcQO-0A6y6rj7L",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p><p><strong>LAUNCH</strong></p><p>CONNECTING TO PRIOR KNOWLEDGE</p><p>Review with students the concept of mean average.  Relate this to looking at the average number of points for each one-and-one free throw situation.  Introduce the vocabulary word <em>long-term average</em>.</p><p>PRESENTING THE CHALLENGE</p><p>Discuss how students will be computing Nishi’s long-term average for 100 one-and-one free throw situations.</p><p><strong>Suggested question</strong></p><ul><li>In 100 one-and-one free throw situations, how many times could Nishi expect to get a score of 0? A score of 1? A score of 2?<strong></strong></li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "X5kJfXcuw76dDjft",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p><p>PROVIDING FOR INDIVIDUAL NEEDS</p><p><strong>Suggested questions</strong></p><ul><li>How do you find a mean average? </li><li>How can knowing how to find a mean average help to find Nishi’s long-term average? </li><li>How did we solve proportions in the Comparing and Scaling unit?<strong></strong></li></ul><p>PLANNING FOR THE SUMMARY</p><p>Students will multiply each of the possible outcomes by the likelihood each outcome will occur and the add all of those values, then divide by the number of trials.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [ 
+                  {
+                    "id": "-rqE_zMnwAvorxWI",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p><p>SOLUTIONS AND STRATEGIES </p><p>Have students share how they found the long-term average for Nishi.</p><p><strong>Suggested question</strong></p><ul><li>Do you have any What If questions?</li></ul><p>MAKING THE MATHEMATICS EXPLICIT</p><p><strong>Suggested questions</strong></p><ul><li>What is the average number of points per trip that a player with a 60% free throw percentage can expect?</li><li>How did you find your answers? </li></ul><p>Have the students consider the probabilities and long-term average of a player with a 50% free throw percentage.</p><ul><li>What score is a player with a 50% free throw percentage most likely to get? </li><li>Compute the long-term average for a player with a 50% free throw percentage and explain how you did it.</li></ul><p>The analysis using 10-by-10 grids is quite efficient. However, some students may have begun to multiply probabilities to analyze such situations. If your class or some groups have started to look at this you may want to take the time to analyze it further. </p><p>Discuss What If Situation A.</p><ul><li>Which parts of the lettered shapes represents Luis in making all three baskets? Two baskets? One basket?  Missing all three baskets? </li><li>What is the probability of getting 3 points?  2 points?  1 point?  0 points?</li></ul><p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p><p><strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         },
         {
           "description": "Problem 4.4",
@@ -572,35 +1965,149 @@
           "subtitle": "",
           "sections": [
             {
-            "type": "introduction",
-            "content": {
-            "tiles": []
-            },
-            "supports": []
+              "type": "introduction",
+              "content": {
+              "tiles": []
+              }
             },
             {
               "type": "initialChallenge",
               "content": {
                 "tiles": []
-              },
-              "supports": []
+              }
             },
             {
               "type": "whatIf",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             },
             {
               "type": "nowWhatDoYouKnow",
               "content": {
-                "tiles": [],
-                "supports": []
+                "tiles": []
               }
             }
           ],
-          "supports": []
+          "config": {
+            "planningTemplate": {
+              "overview": {
+                "tiles": [
+                  {
+                    "id": "qxe6mt2o1RWkee-Z",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Problem 4.4 Back to Tossing Coins:  Binomial Outcomes</strong></p><p>Students are introduced to binomial situations. In the Initial Challenge students use lists or tree diagrams to determine binomial probabilities in situations, such as  taking a true/false test; programming robots to turn right or left on command, or the winning of a baseball series between two evenly matched teams. In the What If Situation students will design their own binomial situation.<strong></strong></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "WkyqV2PV4_2J2iyQ",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>NWDYK</strong></p><p>Compare these Problems to those in the Unit. How are they the same? Different? In what ways are the proportional relationships in this Unit the sameas or different from those in other Units you have studied this year? </p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "yTkUywYE9YaEzq7R",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Arc of Learning</strong></p><p>Experimental and Theoretical Probability: <em>Synthesis/Abstraction</em></p><p>Proportional Relationships: <em>Synthesis/Abstraction</em></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "5WiPW0nA82DtkgOL",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Key Terms</strong></p><p>Binomial Probability</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "XgvxFTW-sr0eD5GK",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Materials</strong></p><p>Learning Aid 4.4A Experiments1, 2, 3</p><p>Learning Aid 4.4B Optional Experiment 4</p><p>Poster paper, markers</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "IBkaMMAks3-UqFX0",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Pacing</strong></p><p> 1 Day</p><p><strong>Groups</strong></p><p>3-4</p><p><strong>A </strong>#13-16<strong></strong></p><p><strong>C </strong>#27-29<strong></strong></p><p><strong>E</strong> #35-38<strong></strong></p><p><strong></strong></p><p><strong></strong></p><p><strong>CCSSM</strong></p><p>7.SP.C.5 </p><p>7.SP.C.6 </p><p>7.SP.C.7 </p><p>7.SP.C.7.A </p><p>7.SP.C.7.B </p><p>7.SP.C.8 </p><p>7.SP.C.8.A </p><p>7.SP.C.8.B </p><p>7.RP.A.2 </p><p>7.RP.A.2.A </p><p>7.RP.A.3</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "launch": {
+                "tiles": [
+                  {
+                    "id": "9GOEEyPbQSfN9GwW",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Facilitating Discourse</strong></p><p><strong>LAUNCH</strong></p><p>CONNECTING TO PRIOR KNOWLEDGE</p><p>As in the previous Problems of this Unit, students will compare their experimental results with those of their classmates to determine the experimental probabilities. Students will also determine the theoretical probabilities for each outcome.</p><p>PRESENTING THE CHALLENGE</p><p>Assign each group of 3-4 students one of the Binomial Situations in the Initial Challenge. They are to follow the directions in the Initial Challenge and prepare a poster to share with the class.  Use these in a Gallery Walk or have groups give presentations.</p><p><strong>Implementation Note:</strong> This problem can be seen as a mini project.  There are three binomial situations given.  Assign one to a group of three to four students</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "explore": {
+                "tiles": [
+                  {
+                    "id": "bY1Dv4DlOcaku5EK",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>EXPLORE</strong></p><p><em>Teacher Moves: Portrayal</em></p><p>PROVIDING FOR INDIVIDUAL NEEDS</p><p>Students may need help analyzing theoretical outcomes. They can use tree diagrams or lists. Students may also need help in interpreting each result. <strong></strong></p><p><strong>Suggested questions</strong></p><ul><li>What tools could you use to simulate this situation to collect experimental data?</li><li>What tools could you use to help you find the theoretical probabilities? </li><li>Are any of these situation compound events?  <strong></strong></li></ul><p>PLANNING FOR THE SUMMARY</p><p>As students work on their experiment and then hear from the other groups, they should recognize that what makes these all unique is that for each part of the Situation there are two outcomes.  They should be able to discuss that the Problems in the Units are ratio comparisons that are part-to-whole and other Units have had both part-to-part and part-to -hole.  They are the same as other proportional relationships because they can be scaled up or down to make predictions using equivalent ratios.</p>"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "summarize": {
+                "tiles": [
+                  {
+                    "id": "C-Xus6EE28F1u4te",
+                    "title": "Text 1",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>SUMMARIZE</strong></p><p>SOLUTIONS AND STRATEGIES </p><p>Have students display posters of their work from the Initial Challenge.  Group the posters by experiments so students can look at groups that did the same experiment and then look at the other experiments.</p><p>MAKING THE MATHEMATICS EXPLICIT</p><p><strong>Suggested questions</strong></p><ul><li>What do you notice/wonder about the experiments in the Initial Challenge?</li><li>How are the experiments in this Problem the same?  Different? How does knowing about one of the experiments help you to solve similar ones? </li><li>Why did each experiment have the same number of outcomes?</li><li>What if there were six questions for the true/false quiz, six moves for the robots, six games in the baseball series; how many outcomes would there be?</li><li>Are there other examples of binomial situations we’ve studied in this Unit? Give examples. </li><li>Why is binomial a good name for these situations? </li><li>Not all binomial situations will have equally likely outcomes. What are some examples of binomial situations that do not have equally likely outcomes? </li><li>In what ways are the proportional relationships in this Unit the same as or different from those in other Units you have studied this year?</li></ul><p>As you finish the mathematical discussions, have students reflect on the Now What Do You Know question(s).</p><p><strong></strong></p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
         }
       ]
     },
@@ -628,8 +2135,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [ ]
+              }
             },
             {
               "type": "MathReflection2",
@@ -645,8 +2151,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [ ]
+              }
             },
             {
               "type": "MathReflection3",
@@ -662,8 +2167,7 @@
                     }
                   }
                 ]
-              },
-              "supports": [ ]
+              }
             },
             {
               "type": "MathReflection4",
@@ -679,15 +2183,142 @@
                     }
                   }
                 ]
-              },
-              "supports": [ ]
+              }
             }
           ]
         }
       ],
-      "supports": [
-      ]
+      "config": {
+        "planningTemplate": {
+          "overview": {
+            "tiles": [
+              {
+                "id": "yrToJEcbUykCy28L",
+                "title": "Text 1",
+                "content": {
+                  "type": "Text",
+                  "format": "html",
+                  "text": [
+                    "<p><strong>Investigation 4 Mathematical Reflection</strong></p><p>The Mathematical Reflection provides an opportunity to discuss the goals of the Investigation. Students can pull together their reasoning from the Now What Do You Know questions to summarize their learning over time. <strong></strong></p>"
+                  ]
+                }
+              },
+              {
+                "id": "BSMx4x7Z1nvUC_Iv",
+                "title": "Text 1",
+                "content": {
+                  "type": "Text",
+                  "format": "html",
+                  "text": [
+                    "<p><strong>Mathematical Reflection</strong></p><p>What do you know about probability? About proportional relationships?</p>"
+                  ]
+                }
+              },
+              {
+                "id": "_xIwVugJNKqyIV8P",
+                "title": "Text 1",
+                "content": {
+                  "type": "Text",
+                  "format": "html",
+                  "text": [
+                    "<p><strong>Arc of Learning</strong></p><p>Experimental and Theoretical Probability: <em>Synthesis/Abstraction</em></p><p>Proportional Relationships: <em>Synthesis/Abstraction</em></p>"
+                  ]
+                }
+              },
+              {
+                "id": "HxAJw8XKpNPGVq6X",
+                "title": "Text 1",
+                "content": {
+                  "type": "Text",
+                  "format": "html",
+                  "text": [
+                    "<p><strong>Key Terms</strong></p>"
+                  ]
+                }
+              },
+              {
+                "id": "LMS7KcUhaoP4U9AO",
+                "title": "Text 1",
+                "content": {
+                  "type": "Text",
+                  "format": "html",
+                  "text": [
+                    "<p><strong>Materials</strong>"
+                  ]
+                }
+              },
+              {
+                "id": "FjZdmet6NNjNX31r",
+                "title": "Text 1",
+                "content": {
+                  "type": "Text",
+                  "format": "html",
+                  "text": [
+                    "<p><strong>Pacing</strong></p><p> 1/2 Day</p><p><strong>Groups</strong></p><p>Whole Class and Individual</p><p><strong>CCSSM</strong></p><p><em>Responses to the reflection are informed by the work in the Investigation and thus also reflect:</em></p><p>7.SP.C.5</p><p>7.SP.C.6</p><p>7.SP.C.7</p><p>7.SP.C.7.A</p><p>7.SP.C.7.B</p><p>7.SP.C.8</p><p>7.SP.C.8.A</p><p>7.SP.C.8.B</p><p>7.SP.C.8.C</p><p>7.RP.A.2</p><p>7.RP.A.2.A</p><p>7.RP.A.3<em></em></p>"
+                  ]
+                }
+              },
+              {
+                "id": "yNoaVFqIDx1fSvyR",
+                "title": "Text 1",
+                "content": {
+                  "type": "Text",
+                  "format": "html",
+                  "text": [
+                    "<p><strong>Facilitating Discourse</strong></p><p><strong>LAUNCH</strong></p><p><em>Teacher Moves: Time </em>and <em>Anchor Chart</em></p><p>After the class discussion, students can record their responses to the Mathematical Reflection to create a record of their current understandings of the big ideas of the Unit. The teacher may want to keep an Anchor Chart of the conversation so it can be added to at the end of each Investigation. </p>"
+                  ]
+                }
+              }
+            ]
+          },
+          "launch": {
+            "tiles": [
+
+            ]
+          },
+          "explore": {
+            "tiles": [
+              {
+                "id": "sAG-1XbI4xk3ZLnM",
+                "title": "Text 1",
+                "content": {
+                  "type": "Text",
+                  "format": "html",
+                  "text": [
+                    "<p><strong>EXPLORE</strong></p><p><em>Teacher Moves: Portrayal, Language</em></p><p>A teacher can gain an understanding of student thinking during a discussion of the reflection question. Then one can assess individual understanding based on each student’s written work.</p><p>Having students pull out their notes from the Now What Do You Know from each Problem in the Investigation can help them to synthesize all their ideas around probability and proportional relationships.</p>"
+                  ]
+                }
+              }
+            ]
+          },
+          "summarize": {
+            "tiles": [
+              {
+                "id": "XdCuGJhVXxYwXg2w",
+                "title": "Text 1",
+                "content": {
+                  "type": "Text",
+                  "format": "html",
+                  "text": [
+                    "<p><strong>SUMMARIZE</strong></p><p>Student answers should indicate that when using an area model to represent a compound event the area of the model represents the entire situation/game.  They should understand that the probability of a compound even is the fraction of the outcomes in the sample space.  Students should understand that to find the long-term average, they need to multiply each of the possible outcomes by the likelihood each outcome will occur and add all of those values, then divide by the number of trials. They should understand when finding the theoretical probability for the binomial situations that there are two outcomes for each part of the situation</p>"
+                  ]
+                }
+              },
+              {
+                "id": "JzCXKoeIkoqS9t6h",
+                "title": "Text 2",
+                "content": {
+                  "type": "Text",
+                  "format": "html",
+                  "text": [
+                    "<p><strong>Reflecting on Student Learning</strong></p><p>Use the following questions to assess student understanding at the end of the lesson. </p><ul><li>What evidence in students’ work shows an understanding of the ideas in this Unit?</li><li>What mathematical ideas will still need emphasis?</li><li>What opportunities exist in the rest of the Unit, or in future Units, to extend and connect the students’ learning?</li></ul>"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
     }
-  ],
-  "supports": []
+  ]
 }

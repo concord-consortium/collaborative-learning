@@ -1,0 +1,19 @@
+{
+  "type": "introduction",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "In the last Problem you found two ways to find missing lengths in pairs of similar figures. ",
+            "<h3>Scale Factor method</h3>Use the ratio of corresponding side lengths across each figure to find the scale factor. Use scale factor to find the missing lengths.<h3>OR</h3>",
+            "<h3>Ratios of Side Lengths within Figures method</h3>Use the ratios of adjacent side lengths with each figure. The ratios have the same unit rate.",
+            "<p>In Problem 3.3, we found the distance across a river using similar triangles. We can find the height of a school building by climbing a ladder and using a long tape measure. We can also use easier and less dangerous ways to find the height.  In the next Problem we will find the height of an object using similar triangles.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

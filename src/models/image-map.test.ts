@@ -21,6 +21,8 @@ function unsafeUpdate(func: () => void) {
 }
 
 describe("ImageMap", () => {
+  const kCurriculumUnitBaseUrl = "https://example.com/clue-curriculum/branch/main/sas";
+  const kCurriculumUnitUrl = `${kCurriculumUnitBaseUrl}/config.json`;
   const kLocalImageUrl = "assets/logo_tw.png";
   const kHttpImageUrl = "http://icon.cat/img/icon_loop.png";
   const kHttpsImageUrl = "https://icon.cat/img/icon_loop.png";
@@ -49,6 +51,8 @@ describe("ImageMap", () => {
           Promise.resolve({ src: placeholderImage, width: 200, height: 150 }));
     if (sImageMap) { destroy(sImageMap); }
     sImageMap = ImageMapModel.create();
+    sImageMap.setUnitUrl(kCurriculumUnitUrl);
+    sImageMap.setUnitCodeMap({"stretching-and-shrinking": "sas"});
   });
           
   function createMockDB(overrides?: Record<string, any>) {
@@ -89,13 +93,17 @@ describe("ImageMap", () => {
     expect(sImageMap.isPlaceholder(kDataUri)).toBe(false);
   });
 
-  it("test localAssetsImagesHandler", () => {
+  it("test localAssetsImagesHandler", async () => {
     expectToMatch(localAssetsImagesHandler, [kLocalImageUrl]);
-    return localAssetsImagesHandler.store(kLocalImageUrl)
+    await localAssetsImagesHandler.store(kLocalImageUrl)
             .then(storeResult => {
               expect(storeResult.contentUrl).toBe(kLocalImageUrl);
-              expect(storeResult.displayUrl).toBe(kLocalImageUrl);
+              expect(storeResult.displayUrl).toBe(`${kLocalImageUrl}`);
             });
+    await localAssetsImagesHandler.store("curriculum/stretching-and-shrinking/images/image.png")
+             .then(storeResult => {
+               expect(storeResult.displayUrl).toBe(`${kCurriculumUnitBaseUrl}/images/image.png`);
+             });
   });
 
   it("test externalUrlImagesHandler", () => {
@@ -138,7 +146,7 @@ describe("ImageMap", () => {
       const storeSpy = jest.spyOn(ImageUtils, "storeImage")
                             .mockImplementation(() =>
                               Promise.resolve({ imageUrl: placeholderImage, imageData: placeholderImage}));
-      p1 = externalUrlImagesHandler.store(kHttpsImage2, { db: createMockDB() })
+      p1 = externalUrlImagesHandler.store(kHttpsImage2, {db: createMockDB() })
         .then(storeResult => {
           expect(storeSpy).toHaveBeenCalled();
           expect(storeResult.contentUrl).toBe(kHttpsImage2);
@@ -303,6 +311,18 @@ describe("ImageMap", () => {
     }));
   });
 
+  describe("isImageUrl", () => {
+    it("returns true for valid image URLs and paths", () => {
+      expect(kInputs.every((url) => {
+        expect(sImageMap.isImageUrl(url)).toBe(true);
+      }));
+    });
+    it("returns false for an invalid image URL or path", () => {
+      const invalidImageUrl = "hi";
+      expect(sImageMap.isImageUrl(invalidImageUrl)).toBe(false);
+    });
+  });
+
   describe("getImage", () => {
     it("can handle falsy urls", () => {
       const consoleSpy = jest.spyOn(global.console, "warn").mockImplementation();
@@ -376,7 +396,7 @@ describe("ImageMap", () => {
   
       const image = await firstGetImagePromise;
       expect(image.contentUrl).toBe(kLocalImageUrl);
-      expect(image.displayUrl).toBe(kLocalImageUrl);
+      expect(image.displayUrl).toBe(`${kLocalImageUrl}`);
       expect(image.width).toBe(200);
       expect(image.height).toBe(150);
       expect(image.status).toBe(EntryStatus.Ready);
@@ -387,7 +407,7 @@ describe("ImageMap", () => {
 
     it("returns the placeholder for unmatched images", () => {
       const consoleSpy = jest.spyOn(global.console, "warn").mockImplementation();
-      return sImageMap.getImage("foo")
+      return sImageMap.getImage(":")
               .then(image => {
                 expect(image.displayUrl).toBe(placeholderImage);
                 expect(consoleSpy).toBeCalled();
@@ -495,7 +515,7 @@ describe("ImageMap", () => {
       expect(returnedEntry).toEqual({
         status: EntryStatus.Ready,
         contentUrl: kLocalImageUrl,
-        displayUrl: kLocalImageUrl,
+        displayUrl: `${kLocalImageUrl}`,
         height: 150,
         width: 200,
         retries: 1
@@ -570,6 +590,9 @@ describe("ImageMap", () => {
   });
 
   describe("getImageEntry", () => {
+    it("returns undefined when no URL is passed to it", () => {
+      expect(sImageMap.getImageEntry("")).toBeUndefined();
+    });
     it("limits the number times it retries entries that have failed", () => {
       const mockHandler: any = {
         async store(url: string, options?: IImageHandlerStoreOptions): Promise<IImageHandlerStoreResult> {

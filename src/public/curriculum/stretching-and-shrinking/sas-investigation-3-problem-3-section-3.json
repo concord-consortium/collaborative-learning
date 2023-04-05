@@ -1,0 +1,60 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation A. Durrell's Claim</h3> I used unit rep-tiles to show that the smaller right triangle is similar to the larger right triangle. Is he correct? Explain."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Durrell’s Claim is not correct.</p>",
+            "<p>Students may refer back to Problem 3.1 Kazuko’s Claim. The scale factor is not a whole number. So, we cannot consider the smaller triangle as a unit rep-tile. The distance from Stake 1 to Stake 2 in smaller triangle is 80ft. The corresponding distance in larger triangle is 140ft (from Tree 1 to Tree 2). If you put two small triangles, it will be 160 ft long, which is longer than 140 ft. You cannot fit whole amounts of the small triangles in the large triangle. Therefore, you cannot use rep-tiles to show the similarity.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<h3>Situation B. Angie Moves the Stakes</h3>",
+            "Angie’s Strategy",
+            "I put the stakes in different places and made a sketch. It does not change my answer.",
+            "Is she correct? Explain."
+          ]
+        }
+      },
+      {
+        "id": "-6wzAUG202201df46pM",
+        "title": "Another Diagram of the river with similar triangles",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_3_3_WI_27_river_triangle2_500w.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Yes, the distance will be the same. The scale factor from the small to the large triangle is 4. This gives the distance between Stake 3 and Tree 1 as 120 ft. From this, we subtract the 30 ft from Stake 3 to Stake 1 to get 90 ft across the river. In this case, you can use rep-tiles because you can fit 16 small triangles into the large triangle.</p>"
+          ]
+        }
+      }
+    ]
+  },
+  "supports": [
+    {"text": "How is the new diagram in the <em>What If?</em> section different from the diagram in the <em>initialChallenge</em>? How is it the same?"}
+  ]
+}

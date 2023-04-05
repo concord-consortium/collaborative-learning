@@ -1,0 +1,62 @@
+{
+  "type": "explore",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Explore (Digging In)</strong></u></p>",
+            "<p><u>Providing for Individual Needs</u></p>",
+            "<p>As students work, suggest that their drawings will be more accurate if they hold the pencil vertically and keep the rubber band as close to the point of the pencil as possible.</p>",
+            "<p></p>",
+            "<p>Remind students to trace the figure they are trying to copy with the knot, as they may be tempted to draw the object freehand. Accuracy is not the issue here, but students can get better drawings by being careful with the placement of the rubber bands on the pencil and the path of the knot on the figure.</p>",
+            "<p></p>",
+            "<p>A stretcher made from two rubber bands gives a figure enlarged by a factor of 2. This means the new length measures are twice as large as the original. Students may guess different factors for the growth of the lengths, which is fine at this stage, but they should be reasonably close to 2. In any case, this process is not very precise. Student error as well as variation in the length and stretchiness of the rubber bands will result in images that are not exactly twice as large.</p>",
+            "<p></p>",
+            "<p>Look for language such as ratio, rates, fractions, percentage, more than, or less than as students express their comparisons. In the Summarize you can come back to the comparisons and ask students to describe them using terms they learned in previous grades. This is a good assessment of what understanding students bring from Grade 6 about ratios and rational numbers. Paying particular attention to What If Situation A will give you information on students emerging understanding of proportional reasoning. </p>",
+            "<p></p>",
+            "<p>Transparent grids may be a helpful visual aid for some students to compare lengths of sides, perimeters, or areas of the figures. You may want to have them available throughout this Unit. </p>",
+            "<p></p>",
+            "<p>For What If Situation A, some students may benefit from the circle and square drawings that are in the ACE problems. They are located on the back of Learning Aid 1.2A: Right-handed version or Learning Aid 1.2B: Left-handed version.</p>"
+          ]
+        }
+      },
+      {
+        "id": "e2SbUyQojinsijtk",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Suggested Questions</strong></p>",
+            "<ul><li>What would happen if I made a three-band stretcher? (Notice that with a three-band stretcher there are two knots. The size change is different based on whether you use the knot closer to the anchor point (3 times larger) or the knot closer to the pencil (1.5 times larger).)</li><li>Do I get exactly the same drawing if I switch the ends of my two-band stretcher? (No. It is rarely the case that the two rubber bands are exactly alike in stretchiness and length. Furthermore, it is very difficult to get the bands to contribute equally to the knot. The net result is usually that the image is a bit more (less) than twice as large as the original in length. Switching the ends of the rubber band will then make the image a bit less (more) than twice as large.)</li><li>How could we use something like the rubber band stretcher to make an image smaller than the original? (This is a bit tricky, but possible to imagine. The standard stretcher method uses the knot to trace the smaller original and the end of the stretcher to trace the larger image. To shrink a figure, we need to switch the roles of the knot and the end. We would need to put a pencil at the knot and use the end of the stretcher to trace the original and have a friend or third hand to help.)</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Planning for the Summary</u></p>",
+            "<p>What evidence will you use in the Summary to clarify and deepen understanding of the Now What Do You Know? What will you do if you do not have evidence? </p>",
+            "<p><em>Now What Do You Know?</em></p>",
+            "<p><em>The original figure and its image are similar figures or scale drawings. The image is also called the scale drawing of the original figure. For two similar figures, what characteristics and measures are the same?  Different? Explain how you know.</em></p>"
+          ]
+        }
+      },
+      {
+        "id": "daWPsfAvzdapd-jW",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>As you are observing students working with the rubber band stretchers and comparing their drawings to the originals listen to how they are describing them. Students will worry about the drawing being “perfect”. Help them to focus on the mathematical changes from the original shape to the image they are creating. How do they describe the change in the lengths of the line segments? The areas? Have they noticed that the angle measures stay the same? Take note of students who have ways to describe what has changed and what stayed the same so you can have them share this in the Summary discussion. (Agency, Identity, Ownership)</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

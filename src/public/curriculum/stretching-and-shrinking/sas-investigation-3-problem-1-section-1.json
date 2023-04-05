@@ -1,0 +1,94 @@
+{
+  "type": "introduction",
+  "content": {
+     "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "In <em>Shapes and Designs</em>, we learned that some polygons fit together to cover, or tile, a flat surface. For example, the surface of a honeycomb has a pattern of regular hexagons. Many bathroom and kitchen floors are covered with a pattern of square tiles. These patterns of polygons that fit together are called <em>tessellations.</em>"
+          ]
+        }
+      },
+      {
+        "id": "21AUG20221123AM",
+        "title": "Examples of tesselations",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_3_1_In_20_rep_tiles_350w.png"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Look closely at the pattern of squares. We can see that the large square consists of nine small squares. The large square is similar to each of the nine small squares. The large square has sides formed by the sides of three small squares, so the scale factor from the small square to the large square is 3."
+          ]
+        }
+      },
+      {
+        "id": "21AUG20221124AM",
+        "title": "Similar squares with a scale factor of 3 or 1/3",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_3_1_Intro_scale3.jpg"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "We can also put four small squares together to make a four-tile square. This four-tile square is similar to both the large nine-tile square and the small single-tile square."
+          ]
+        }
+      },
+      {
+        "id": "21AUG20221125AM",
+        "title": "Similar squares with a scale factor of 2 or 1/2",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_3_1_Intro_scale2.jpg"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "The scale factor from the single-tile square to the four-tile square is 2. The scale factor from the four-tile square to the single-tile square is 1/2."
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "No matter how closely we look at the hexagon pattern, however, you cannot find a large hexagon made up of similar smaller hexagons."
+          ]
+        }
+      },
+      {
+        "id": "6wzAUG20221255AM",
+        "title": "Tiling with hexagons",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/SS_3_1_Intro_hexagons.jpg"
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "A shape is a <strong>rep-tile</strong> if you can put together copies that are the same size and shape (congruent) copies of the shape to make a larger, similar shape. The copies may be rotated in order to fit together. A square is a rep-tile. \n\nIn this problem we will investigate which rectangles and triangles are rep-tiles."
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

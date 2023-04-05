@@ -7,10 +7,12 @@ import { addCanonicalCasesToDataSet } from "../../models/data/data-set";
 import { DataCardContentModelType } from "./data-card-content";
 import { DataCardRows } from "./components/data-card-rows";
 import { DataCardToolbar } from "./data-card-toolbar";
+import { SortSelect } from "./components/sort-select";
 import { useToolbarTileApi } from "../../components/tiles/hooks/use-toolbar-tile-api";
 import { AddIconButton, RemoveIconButton } from "./components/add-remove-icons";
 import { useCautionAlert } from "../../components/utilities/use-caution-alert";
 import { EditFacet } from "./data-card-types";
+import { DataCardSortArea } from "./components/sort-area";
 
 import "./data-card-tile.scss";
 
@@ -27,7 +29,9 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const [imageUrlToAdd, setImageUrlToAdd] = useState<string>("");
   const shouldShowAddCase = !readOnly && isTileSelected;
   const shouldShowDeleteCase = !readOnly && isTileSelected && content.dataSet.cases.length > 1;
-  const shouldShowAddField = !readOnly && isTileSelected;
+  const displaySingle = !content.selectedSortAttributeId;
+  const shouldShowAddField = !readOnly && isTileSelected && displaySingle;
+  const attrIdsNames = content.existingAttributesWithNames();
 
   useEffect(() => {
     if (!content.title) {
@@ -90,6 +94,10 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
     }
     setIsEditingTitle(false);
   };
+
+  function setSort(event: React.ChangeEvent<HTMLSelectElement>){
+    content.setSelectedSortAttributeId(event.target.value);
+  }
 
   function addNewCase(){
     content.addNewCaseFromAttrKeys(content.existingAttributes());
@@ -163,6 +171,10 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   const addCardClasses = classNames("add-card", "teal-bg", { hidden: !shouldShowAddCase });
   const removeCardClasses = classNames("remove-card", { hidden: !shouldShowDeleteCase });
 
+  const toolClasses = classNames(
+    "data-card-tool", `display-as-${ displaySingle ? 'single' : 'sorted'}`
+  );
+
   const toolbarProps = useToolbarTileApi(
     {
       id: model.id,
@@ -178,7 +190,7 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
   };
 
   return (
-    <div className="data-card-tool">
+    <div className={toolClasses}>
       <DataCardToolbar
         model={model}
         documentContent={documentContent}
@@ -207,6 +219,17 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
               </div>
             }
           </div>
+        </div>
+
+        <div className="panel sort">
+          <SortSelect
+            model={model}
+            onSortAttrChange={setSort}
+            attrIdNamePairs={attrIdsNames}
+          />
+        </div>
+
+        { displaySingle &&
           <div className="panel nav">
             <div className="card-number-of-listing">
               <div className="cell-text">
@@ -226,25 +249,33 @@ export const DataCardToolComponent: React.FC<ITileProps> = observer((props) => {
               </div>
             }
           </div>
-        </div>
-        <div className="data-area">
-          { content.totalCases > 0 &&
-            <DataCardRows
-              caseIndex={content.caseIndex}
-              model={model}
-              totalCases={content.totalCases}
-              readOnly={readOnly}
-              currEditAttrId={currEditAttrId}
-              currEditFacet={currEditFacet}
-              setCurrEditAttrId={setCurrEditAttrId}
-              setCurrEditFacet={setCurrEditFacet}
-              imageUrlToAdd={imageUrlToAdd}
-              setImageUrlToAdd={setImageUrlToAdd}
-            />
-          }
-        </div>
+        }
+        { displaySingle &&
+          <div className="single-card-data-area">
+            { content.totalCases > 0 &&
+              <DataCardRows
+                caseIndex={content.caseIndex}
+                model={model}
+                totalCases={content.totalCases}
+                readOnly={readOnly}
+                currEditAttrId={currEditAttrId}
+                currEditFacet={currEditFacet}
+                setCurrEditAttrId={setCurrEditAttrId}
+                setCurrEditFacet={setCurrEditFacet}
+                imageUrlToAdd={imageUrlToAdd}
+                setImageUrlToAdd={setImageUrlToAdd}
+              />
+            }
+          </div>
+        }
         { shouldShowAddField && !readOnly &&
-          <AddIconButton className="add-field" onClick={handleAddField} /> }
+          <AddIconButton className="add-field" onClick={handleAddField} />
+        }
+        { !displaySingle &&
+          <div className="sorting-cards-data-area">
+            <DataCardSortArea model={model} />
+          </div>
+        }
       </div>
     </div>
   );

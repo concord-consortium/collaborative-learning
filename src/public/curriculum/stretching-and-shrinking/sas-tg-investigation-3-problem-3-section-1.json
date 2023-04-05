@@ -1,0 +1,77 @@
+{
+  "type": "overview",
+  "content":
+  {
+     "tiles":
+    [
+      {
+        "id": "Z0xs98UKVcYAQUKT",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Problem Overview</strong></p>",
+            "<p>In this Problem, students use similar triangles to measure distances on the ground that cannot be measured directly. The Student Edition provides a diagram to illustrate this idea. However, if possible, you can reenact the Problem in a  real‑life setting.</p>",
+            "<p>Students revisit what it means for triangles to be similar. They recall that they can use similar triangles, and the scale factor between the triangles, to find unknown corresponding lengths. They apply these ideas in finding an inaccessible distance across a river.</p>"
+          ]
+        }
+      },
+      {
+        "id": "l1dhAasWy2KM0vZh",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#RevisionComments'>Revision Comments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>CMP STEM Problem Format</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#StemProblemFormat'>Unit Descriptions</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitGoals'>Goals of the Units</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAlignment'>Unit Alignments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#GeneralAoL'>General Arc of Learning </a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#UnitAoL'>Unit Arc of Learning</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#MathOverview'>Mathematical Overview</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#LearningAids'>Learning Aids</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#TeachingAids'>Teaching Aids</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#FamilyLetters'>Family Letters </a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#Assessments'>Assessments</a></strong></p>",
+                          "<p><strong><a href='https://connectedmath.msu.edu/teacher-guide/stretching-and-shrinking/#ACEHomework'>ACE Homework</a></strong></p>"
+                        ]
+        }
+      },
+      {
+        "id": "uk3VHDTWt6l77_X3",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>AoL:</strong> Synthesis, Synthesis</p>",
+            "<p><strong>CCSSM:</strong> 7.G.A.1, 7.G.A.2, 7.G.B.6, 7.RP.A.2, 7.RP.A.2.A, 7.RP.A.2.B, 7.RP.A.3</p>"
+          ]
+        }
+      },
+      {
+        "id": "OoM5ngnfxg8DAwNT",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Emerging Mathematical Ideas</strong></p>",
+            "<p>Introduce the term “nested triangles” and broaden understanding of similar triangles.</p>",
+            "<p>Use knowledge of similar figures/scale drawings and apply it to nested triangles to solve real world distance problems that are difficult to physically measure.</p>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>NWDYK</strong></p>",
+            "<p>How can you use similar triangles to find a distance that is difficult to measure?</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

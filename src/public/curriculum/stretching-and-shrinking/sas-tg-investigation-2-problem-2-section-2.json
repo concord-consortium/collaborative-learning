@@ -1,0 +1,43 @@
+{
+  "type": "launch",
+  "content": {
+    "tiles":
+    [
+      {
+        "id": "66i04XHDIBPv4_Zn",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u><strong>Launch (Getting Started)</strong></u></p>",
+            "<p><u>Connecting to Prior Knowledge</u></p>",
+            "<p>Tell the students that this Problem is related to drawing the Wump family and imposters. In this case they are looking at hats for the Wump family. The hat is made from a rectangle and a triangle and has 6 vertices. This makes the figure simple enough that the students can concentrate on what is happening as they manipulate the rule by adding to each coordinate and/or multiplying each coordinate by a number.</p>"
+          ]
+        }
+      },
+      {
+        "id": "HGNzJNBK1L3nxex9",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><u>Presenting the Challenge</u></p>",
+            "<p>Hand out <strong>Learning Aid 2.2A: Table for Mug’s Hat and Learning Aid 2.2B: Four First-Quadrant Grids</strong>. Have students look at the table and the grids that are provided. They should have little trouble drawing the figures. However, it is important that the students start the Problem knowing that the main point of the Problem is to look back over their drawings and make sense of what adding or multiplying in the rule does to the image.</p>",
+            "<p></p>",
+            "<p>After they have the hat and rules to look at, challenge students to find a way to predict what will happen to the image only by analyzing the rule and not drawing the figure.</p>"
+          ]
+        }
+      },
+      {
+        "id": "ijQrGok8lJIM1k4k",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Implementation Note</strong>:  Drawing the hats in the Initial Challenge can be time consuming but it is necessary for students to understand the effects of addition and subtraction versus multiplication on the algebraic rules.  During the What If you could have students do one of the situations and then have groups share the findings during the summary conversation.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

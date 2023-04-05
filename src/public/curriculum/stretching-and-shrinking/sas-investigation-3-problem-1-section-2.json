@@ -1,0 +1,282 @@
+{
+  "type": "initialChallenge",
+  "content": {
+    "tiles": [
+      {
+        "id": "ujgPQJsFj2b5NXYR",
+        "title": "Text 1",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>The Art Club at P.I. Middle school is also exploring similar figures to create rep-tiles. They need to know which rectangles and triangles are rep-tiles.</p>",
+            "<p>To answer this question, sketch or use your Shape Set to make several larger and similar copies of each of the following shapes:</p>"
+          ]
+        }
+      },
+      {
+        "id": "WvD_PaWCvl86TUzv",
+        "title": "Text 2",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p><strong>Quadrilaterals</strong>                                     <strong>         Triangles </strong>       </p>",
+            "<p>A non-square rectangle                            A right triangle </p>",
+            "<p>A non-rectangular parallelogram       An isosceles triangle</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<ul><li> Which shapes are a rep-tile? Make a sketch to show how the copies fit together.</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "Student answers will vary.",
+            "<strong>Quadrilaterals</strong>",
+            "All rectangles and parallelograms have copies that can fit together to make a larger shape that is similar to the original. Also, there are some trapezoids that have copies that can fit together to make a larger, similar shape. Not every trapezoid is a rep-tile. Possible sketches are below. ",
+            "<strong>Triangles</strong>",
+            "All triangles have copies that can fit together to make a larger, similar triangle. Possible sketches shown below."
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "For the shapes that rep-tile, what is the <ul><li>Scale factor from the original figure to the image? Explain your reasoning.</li><li>How does the perimeter of the larger figure relate to the perimeter of the original figure?</li><li>How does the area of the larger figure relate to the area of the original figure?</li></ul>"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "id": "6wzAUG20221256AM",
+        "title": "Summary of results for rep-tiles",
+        "content": {
+          "type": "Image",
+          "url": "curriculum/stretching-and-shrinking/images/3-1_Initial_Challenge.png"
+        }
+      },
+      {
+        "display": "teacher",
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>See the chart above for answers.</p>",
+            "<p>The side lengths and perimeter of the larger figure are the scale factor times the side lengths of the smaller figure. Note: The perimeter change can be explained by the Distributive Property. The scale factor multiplies by every length.</p>",
+            "<p>So, if we have a rectangle with length of L, width of W, and scale factor of s, then the perimeter change is s(L) + s(L) + s(W) +  s(W) = s(L + L + S + S).</p>",
+            "<p>The angle measures don’t change since corresponding angles for similar figures are congruent. The corresponding angles would all have equal measures.</p>",
+            "<p>The corresponding angles would all have equal measures.</p>",
+            "<p>The area of the larger figure is the square of the scale factor, or scale factor time scale factor, times the area of the smaller figure. For example, if you have a scale factor of 5, each length would be 5 times larger. To make the reptile, you would need 25 copies of the original. The area grows by the square of the scale factor, or 52, so you need 25 copies. If we consider a rectangle with a scale factor of 5, then the area of the image would be 5L.</p>",
+            "<p>Original rectangle:                                             L・W</p>",
+            "<p>Image with scale factor of 5:                        5(L)・5(W) =</p>",
+            "<p>Using associative property:                          5・5・L・W =</p>",
+            "<p>See the impact of scale factor on area:   5²・L・W</p>"
+          ]
+        }
+      },
+      {
+        "id": "21AUG20220509PM",
+        "title": "Reptile shapes for reuse",
+        "layout": {
+          "height": 360
+        },
+        "content": {
+          "type":"Geometry",
+          "objects": [
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [19, 14],
+                  "properties": {
+                    "name": "A"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [18, 12],
+                  "properties": {
+                    "name": "B"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [24, 12],
+                  "properties": {
+                    "name": "C"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [23, 14],
+                  "properties": {
+                    "name": "D"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [9, 12],
+                  "properties": {
+                    "name": "E"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [11, 14],
+                  "properties": {
+                    "name": "F"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [16, 14],
+                  "properties": {
+                    "name": "G"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [14, 12],
+                  "properties": {
+                    "name": "H"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [1, 12],
+                  "properties": {
+                    "name": "I"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [1, 14],
+                  "properties": {
+                    "name": "J"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [6, 14],
+                  "properties": {
+                    "name": "K"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [6, 12],
+                  "properties": {
+                    "name": "L"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [1, 10],
+                  "properties": {
+                    "name": "M"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [1, 7],
+                  "properties": {
+                    "name": "N"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [4, 7],
+                  "properties": {
+                    "name": "O"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [10, 10],
+                  "properties": {
+                    "name": "P"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [8, 5],
+                  "properties": {
+                    "name": "Q"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [12, 5],
+                  "properties": {
+                    "name": "R"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "polygon",
+              "parents": [
+                {
+                  "type": "point",
+                  "parents": [15, 10],
+                  "properties": {
+                    "name": "S"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [17, 6],
+                  "properties": {
+                    "name": "T"
+                  }
+                },
+                {
+                  "type": "point",
+                  "parents": [20, 6],
+                  "properties": {
+                    "name": "U"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "supports": []
+}

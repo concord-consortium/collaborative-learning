@@ -41,7 +41,7 @@ export const useNewVariableDialog = ({
         onClick: handleClick
       }
     ],
-    onClose
+    onClose,
   }, [addVariable, newVariable]);
 
   // Wrap useCustomModal's show so we can prefill with variable description

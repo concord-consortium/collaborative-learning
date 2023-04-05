@@ -2,12 +2,14 @@
 import Canvas from '../../../../support/elements/common/Canvas';
 import ClueCanvas from '../../../../support/elements/clue/cCanvas';
 import ResourcesPanel from "../../../../support/elements/clue/ResourcesPanel";
+import Dialog from '../../../../support/elements/common/Dialog';
 
 // const primaryWorkspace = new PrimaryWorkspace;
 const resourcesPanel = new ResourcesPanel;
 const canvas = new Canvas;
 const clueCanvas = new ClueCanvas;
 const problemSubTabTitles = ['Introduction', 'Initial Challenge', 'What If', 'Now What'];
+const dialog = new Dialog;
 
 context('Nav Panel', function () {
   before(()=>{
@@ -147,12 +149,22 @@ context('Nav Panel', function () {
           cy.openSection("class-work", "workspaces");
           cy.openDocumentThumbnail('workspaces', copyDocumentTitle);
         });
+        it('will verify that published canvas does not have Edit button', function () {
+          cy.get('.edit-button').should("not.be.visible");
+        });
         it('verify open published canvas from Investigations list', function () { //this assumes there are published work
           cy.openSection("class-work", "workspaces");
           cy.openDocumentThumbnail('workspaces', this.title);
         });
         it('will verify that published canvas does not have Edit button', function () {
           cy.get('.edit-button').should("not.be.visible");
+        });
+        it('verify delete document from Workspace list', function () { //this assumes there are published work
+          cy.openSection("class-work", "workspaces");
+          cy.deleteDocumentThumbnail("class-work", 'workspaces', copyDocumentTitle);
+          dialog.getDialogTitle().should('exist').contains('Confirm Delete');
+          dialog.getDialogOKButton().click();
+          cy.getCanvasItemTitle('workspaces').should('not.contain', copyDocumentTitle);
         });
       });
     });

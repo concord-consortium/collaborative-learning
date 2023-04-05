@@ -1,0 +1,49 @@
+{
+  "type": "whatIf",
+  "content": {
+    "tiles": [
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Situation A. Changing Percents</strong>\nWhat if we wanted to create an image whose side lengths were twice the length of the original? What percent setting should we choose on the copier?"
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content":
+        {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>To increase a figure’s size by twice the length, you would want to make each side length 2 times as long as the side length of the original. The percent setting of 200% on the copier would make the side length of image 2 times longer than in the original.</p>"
+          ]
+        }
+      },
+      {
+        "content": {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<strong>Situation B. Amelia’s Claim</strong>",
+            "The copier creates images that are similar to those made with the rubber band stretchers and the photograph. Do you agree? Explain why or why not."
+          ]
+        }
+      },
+      {
+        "display": "teacher",
+        "content":
+        {
+          "type": "Text",
+          "format": "html",
+          "text": [
+            "<p>Agree. The copier creates a more accurate image, but the relationships stay the same.</p>",
+            "<p>When you want to create an image twice bigger than the original, you would use two rubber bands. You can also use the copier with 200% percent setting. If you want to make an image three times bigger than the original, you would use three rubber bands. It is the same as when you use the copier with 300% percent setting. You can use both the rubber bands and the copier when you want to make a similar image.</p>"
+          ]
+        }
+      }
+    ]
+  }
+}

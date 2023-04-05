@@ -18,7 +18,7 @@ import ErrorAlert from "./utilities/error-alert";
 
 // used for tooltips in various parts of the application
 import "react-tippy/dist/tippy.css";
-import "./app.sass";
+import "./app.scss";
 
 interface IProps extends IBaseProps {}
 interface IState {
@@ -88,7 +88,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
   let rawPortalJWT: string | undefined;
 
   authenticate(appMode, appConfig, urlParams)
-    .then(({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
+    .then(async ({appMode: newAppMode, authenticatedUser, classInfo, problemId, unitCode}) => {
       // authentication can trigger appMode change (e.g. preview => demo)
       if (newAppMode && (newAppMode !== appMode)) {
         setAppMode(stores, newAppMode);
@@ -99,7 +99,7 @@ export const authAndConnect = (stores: IStores, onQAClear?: (result: boolean, er
         stores.class.updateFromPortal(classInfo);
       }
       if (unitCode && problemId && isDifferentUnitAndProblem(stores, unitCode, problemId)) {
-        setUnitAndProblem(stores, unitCode, problemId).then( () => {
+        await setUnitAndProblem(stores, unitCode, problemId).then( () => {
           updateProblem(stores, problemId);
         });
       }

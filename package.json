@@ -1,6 +1,6 @@
 {
   "name": "collaborative-learning",
-  "version": "3.6.1",
+  "version": "3.8.0",
   "description": "Collaborative Learning environment",
   "main": "index.js",
   "config": {
@@ -189,12 +189,12 @@
     "xhr-mock": "^2.5.1"
   },
   "dependencies": {
-    "@concord-consortium/diagram-view": "^0.0.39",
+    "@concord-consortium/diagram-view": "^0.0.41",
     "@concord-consortium/mobx-state-tree": "5.1.5-cc.1",
     "@concord-consortium/react-components": "^0.7.1",
     "@concord-consortium/react-modal-hook": "^3.0.0-cc.1",
     "@concord-consortium/rete-react-render-plugin": "^0.2.1-cc.2",
-    "@concord-consortium/slate-editor": "^0.9.0-pre.8",
+    "@concord-consortium/slate-editor": "^0.9.1",
     "@dnd-kit/core": "^6.0.5",
     "chart.js": "^2.9.4",
     "classnames": "^2.3.1",
@@ -212,6 +212,7 @@
     "mobx": "^6.6.1",
     "mobx-react": "^7.5.2",
     "nanoid": "^3.3.4",
+    "netlify-cms-app": "^2.15.72",
     "object-hash": "^3.0.0",
     "patch-package": "^6.4.7",
     "query-string": "7.1.1",

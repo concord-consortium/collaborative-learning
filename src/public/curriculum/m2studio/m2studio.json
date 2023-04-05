@@ -48,12 +48,17 @@
           "label": "Activities",
           "sections": [
             {
-              "initials": "help",
-              "title": "Get Started",
+              "initials": "Help",
+              "title": "Help",
               "type": "problem-documents"
             },
             {
-              "initials": "TSK",
+              "initials": "START",
+              "title": "Welcome",
+              "type": "problem-documents"
+            },
+            {
+              "initials": "ACT",
               "title": "Task",
               "type": "problem-documents"
             },
@@ -212,17 +217,28 @@
         "title": "Redo",
         "iconId": "icon-redo-tool",
         "isTileTool": false
+      },
+      {
+        "id": "delete",
+        "title": "Delete",
+        "iconId": "icon-delete-tool",
+        "isTileTool": false
       }
     ]
   },
   "sections": {
     "help": {
       "initials": "DOC",
-      "title": "Get Started",
+      "title": "Help",
       "placeholder": "Notes on Help"
     },
+    "welcome": {
+      "initials": "START",
+      "title": "Welcome",
+      "placeholder": "Work on the task here"
+    },
     "task": {
-      "initials": "TSK",
+      "initials": "ACT",
       "title": "Task",
       "placeholder": "Work on the task here"
     },
@@ -1023,9 +1039,9 @@
       ]
     },
     {
-      "description": "M2Studio Spring 2023",
+      "description": "M2Studio Exercises Test February 2023",
       "ordinal": 3,
-      "title": "M2Studio Exercises Spring 2023",
+      "title": "M2Studio Exercises Test February 2023",
       "problems": [
         {
           "description": "M2S Problem 3.1 Description",
@@ -1804,6 +1820,736 @@
                       "text": [
                         "<p><strong>Generalize your model</strong></p><p>Explain how your model can be used to solve similar problems. Describe an example.</p><p>{Write your answer here}</p>"
                       ]
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                {
+                  "id": "nOJeRQ3yJUqSvVrg",
+                  "title": "AnalyzeModel_FinalProject",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Analyze the initial model</strong></p><ul><li>What concerns do you have about the initial model?</li><li>Bold the concerns that you will try to fix in your revision.</li></ul><p>{Write your answer here}</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "R-rvC2XAZcNLC1-N",
+                  "title": "Assumptions_FinalProject",
+                  "content": {
+                    "type": "Text",
+                    "format": "html",
+                    "text": [
+                      "<p><strong>Assumptions and variables</strong></p><p>What assumptions AND variables are you using in your model?</p><p>{Write your answer here}</p>"
+                    ]
+                  }
+                },
+                {
+                  "id": "8CTbvD6g6kF7pjLL",
+                  "title": "Final Project Drawing",
+                  "content": {"type": "Drawing", "objects": []}
+                },
+                {
+                  "id": "Mej9OD48adiPZMCq",
+                  "title": "Final Project Diagram",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "description": "M2Studio Spring 2023",
+      "ordinal": 4,
+      "title": "M2Studio Spring 2023",
+      "problems": [
+        {
+          "description": "M2S Activity 4.1",
+          "ordinal": 1,
+          "title": "Getting Started with M2Studio",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "welcome",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "gkdRjlQhXk8uLNaG",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to your work space! In here, you will find information and questions. You will work both individually and in groups, so be sure to listen to your teacher about what to do when. </strong></p><p><strong></strong></p><p>Some tips for this workspace:</p><ul><li>You can rearrange your spaces by clicking on the top right-hand corner of the tile (where you will see 6 dots). This will allow you drag and move the tiles. </li><li>You can click on the bottom right corner of any tile and then drag it up or down to make it smaller or bigger. </li><li>You can share your work with your group-mates by using the Share slider on the top right corner, or publish your work to the whole class by clicking the button with the up-arrow next to the File menu.</li><li>You can also look at the work of your group-mates by clicking the Group View icon on the top bar (it looks like a window). </li><li>If you click on the X next to the tab called &quot;Class Work&quot;, the Resources side of the screen on the left will collapse to give you more room to work.</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "gkdRjlQhXk8uLNaG",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Workspace</strong></p>",
+                        "<p>Your workspace is on the right. You can create content in it by dragging tiles from any tab on the left, or by using one of the tile tools in the toolbar.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "njCI4Wmr6eYNc5go",
+                    "title": "CLUE Workspace Vertical Toolbar",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/CLUEToolbar.png",
+                      "filename": "curriculum/m2studio/images/CLUEToolbar.png"
+                    }
+                  },
+                  {
+                    "id": "TextTile12MAR2023",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Text Tile</strong></p>",
+                        "<p>Text tiles can be used to document your ideas, make lists, and to display or define variables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "cP2E6t6w3HOYTCUi",
+                    "title": "Toolbar buttons for the text tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Text.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Text.png"
+                    }
+                  },
+                  {
+                    "id": "7QvQa97zBd4PZLP6",
+                    "title": "Text 10",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Table Tiles</strong></p>",
+                        "<p>You can store reference data in tables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "FDAYvugP7pz6d3Oh",
+                    "title": "Table 1",
+                    "content": {
+                      "type": "Table",
+                      "name": "World Population by Age Range",
+                      "columns": [
+                        {"name":"Age Group","width":120,"values":["<20 years","20-39 years","40-59 years","60-79 years","80-99 years","100+ years"]},
+                        {"name":"Number of People","width":230,"values":["2.6 billion","2.3 billion","1.8 billion","918 million","147 million","0.6 million"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "DrawTile12MAR2023",
+                    "title": "Drawtiledoc",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Drawing Tile</strong></p>",
+                        "<p>Drawing tiles can be used to document your ideas as sketches, make annotations on top of embedded images, and to display or define variables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ePTfYCm7Q-oWGR2R",
+                    "title": "Toolbar buttons for the drawing tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Drawing.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Drawing.png"
+                    }
+                  },
+                  {
+                    "id": "DiagramTile12MAR2023",
+                    "title": "Diagramtiledoc",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Diagram Tile</strong></p>",
+                        "<p>Diagram tiles can be used to define and create relationships between variables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "r8R3q6_aIIroLzYl",
+                    "title": "Toolbar buttons for the diagram tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Diagram.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Diagram.png"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                [
+                  {
+                    "id": "TemplateTextTile12MAR2023",
+                    "title": "TemplateTextTile",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "TemplateDrawTile12MAR2023",
+                    "title": "Template Drawing Tile",
+                    "content": {"type": "Drawing", "objects": []}
+                  }
+                ],
+                {
+                  "id": "TemplateDeagramTile12MAR2023",
+                  "title": "Template Diagram Tile",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                }
+              ]
+            }
+          }
+        },
+        {
+          "description": "M2S Activity 4.2",
+          "ordinal": 2,
+          "title": "Mathematizing 1",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "task",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "gkdRjlQhXk8uLNaG",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to your work space! In here, you will find information and questions. You will work both individually and in groups, so be sure to listen to your teacher about what to do when. </strong></p><p><strong></strong></p><p>Some tips for this workspace:</p><ul><li>You can rearrange your spaces by clicking on the top right-hand corner of the tile (where you will see 6 dots). This will allow you drag and move the tiles. </li><li>You can click on the bottom right corner of any tile and then drag it up or down to make it smaller or bigger. </li><li>You can share your work with your group-mates by using the Share slider on the top right corner, or publish your work to the whole class by clicking the button with the up-arrow next to the File menu.</li><li>You can also look at the work of your group-mates by clicking the Group View icon on the top bar (it looks like a window). </li><li>If you click on the X next to the tab called &quot;Class Work&quot;, the Resources side of the screen on the left will collapse to give you more room to work.</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "gkdRjlQhXk8uLNaG",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Workspace</strong></p>",
+                        "<p>Your workspace is on the right. You can create content in it by dragging tiles from any tab on the left, or by using one of the tile tools in the toolbar.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "njCI4Wmr6eYNc5go",
+                    "title": "CLUE Workspace Vertical Toolbar",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/CLUEToolbar.png",
+                      "filename": "curriculum/m2studio/images/CLUEToolbar.png"
+                    }
+                  },
+                  {
+                    "id": "TextTile12MAR2023",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Text Tile</strong></p>",
+                        "<p>Text tiles can be used to document your ideas, make lists, and to display or define variables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "cP2E6t6w3HOYTCUi",
+                    "title": "Toolbar buttons for the text tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Text.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Text.png"
+                    }
+                  },
+                  {
+                    "id": "7QvQa97zBd4PZLP6",
+                    "title": "Text 10",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Table Tiles</strong></p>",
+                        "<p>You can store reference data in tables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "FDAYvugP7pz6d3Oh",
+                    "title": "Table 1",
+                    "content": {
+                      "type": "Table",
+                      "name": "World Population by Age Range",
+                      "columns": [
+                        {"name":"Age Group","width":120,"values":["<20 years","20-39 years","40-59 years","60-79 years","80-99 years","100+ years"]},
+                        {"name":"Number of People","width":230,"values":["2.6 billion","2.3 billion","1.8 billion","918 million","147 million","0.6 million"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "DrawTile12MAR2023",
+                    "title": "Drawtiledoc",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Drawing Tile</strong></p>",
+                        "<p>Drawing tiles can be used to document your ideas as sketches, make annotations on top of embedded images, and to display or define variables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ePTfYCm7Q-oWGR2R",
+                    "title": "Toolbar buttons for the drawing tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Drawing.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Drawing.png"
+                    }
+                  },
+                  {
+                    "id": "DiagramTile12MAR2023",
+                    "title": "Diagramtiledoc",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Diagram Tile</strong></p>",
+                        "<p>Diagram tiles can be used to define and create relationships between variables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "r8R3q6_aIIroLzYl",
+                    "title": "Toolbar buttons for the diagram tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Diagram.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Diagram.png"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                [
+                  {
+                    "id": "TemplateTextTile12MAR2023",
+                    "title": "TemplateTextTile",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "TemplateDrawTile12MAR2023",
+                    "title": "Template Drawing Tile",
+                    "content": {"type": "Drawing", "objects": []}
+                  }
+                ],
+                {
+                  "id": "TemplateDeagramTile12MAR2023",
+                  "title": "Template Diagram Tile",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                }
+              ]
+            }
+          }
+        },
+        {
+          "description": "M2S Activity 4.3",
+          "ordinal": 3,
+          "title": "Mathematizing 2",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "task",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "gkdRjlQhXk8uLNaG",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Welcome to your work space! In here, you will find information and questions. You will work both individually and in groups, so be sure to listen to your teacher about what to do when. </strong></p><p><strong></strong></p><p>Some tips for this workspace:</p><ul><li>You can rearrange your spaces by clicking on the top right-hand corner of the tile (where you will see 6 dots). This will allow you drag and move the tiles. </li><li>You can click on the bottom right corner of any tile and then drag it up or down to make it smaller or bigger. </li><li>You can share your work with your group-mates by using the Share slider on the top right corner, or publish your work to the whole class by clicking the button with the up-arrow next to the File menu.</li><li>You can also look at the work of your group-mates by clicking the Group View icon on the top bar (it looks like a window). </li><li>If you click on the X next to the tab called &quot;Class Work&quot;, the Resources side of the screen on the left will collapse to give you more room to work.</li></ul>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "gkdRjlQhXk8uLNaG",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Workspace</strong></p>",
+                        "<p>Your workspace is on the right. You can create content in it by dragging tiles from any tab on the left, or by using one of the tile tools in the toolbar.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "njCI4Wmr6eYNc5go",
+                    "title": "CLUE Workspace Vertical Toolbar",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/CLUEToolbar.png",
+                      "filename": "curriculum/m2studio/images/CLUEToolbar.png"
+                    }
+                  },
+                  {
+                    "id": "TextTile12MAR2023",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Text Tile</strong></p>",
+                        "<p>Text tiles can be used to document your ideas, make lists, and to display or define variables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "cP2E6t6w3HOYTCUi",
+                    "title": "Toolbar buttons for the text tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Text.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Text.png"
+                    }
+                  },
+                  {
+                    "id": "7QvQa97zBd4PZLP6",
+                    "title": "Text 10",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Table Tiles</strong></p>",
+                        "<p>You can store reference data in tables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "FDAYvugP7pz6d3Oh",
+                    "title": "Table 1",
+                    "content": {
+                      "type": "Table",
+                      "name": "World Population by Age Range",
+                      "columns": [
+                        {"name":"Age Group","width":120,"values":["<20 years","20-39 years","40-59 years","60-79 years","80-99 years","100+ years"]},
+                        {"name":"Number of People","width":230,"values":["2.6 billion","2.3 billion","1.8 billion","918 million","147 million","0.6 million"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "DrawTile12MAR2023",
+                    "title": "Drawtiledoc",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Drawing Tile</strong></p>",
+                        "<p>Drawing tiles can be used to document your ideas as sketches, make annotations on top of embedded images, and to display or define variables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ePTfYCm7Q-oWGR2R",
+                    "title": "Toolbar buttons for the drawing tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Drawing.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Drawing.png"
+                    }
+                  },
+                  {
+                    "id": "DiagramTile12MAR2023",
+                    "title": "Diagramtiledoc",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Diagram Tile</strong></p>",
+                        "<p>Diagram tiles can be used to define and create relationships between variables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "r8R3q6_aIIroLzYl",
+                    "title": "Toolbar buttons for the diagram tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Diagram.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Diagram.png"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "config": {
+            "defaultDocumentTemplate": {
+              "tiles": [
+                [
+                  {
+                    "id": "TemplateTextTile12MAR2023",
+                    "title": "TemplateTextTile",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p></p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "TemplateDrawTile12MAR2023",
+                    "title": "Template Drawing Tile",
+                    "content": {"type": "Drawing", "objects": []}
+                  }
+                ],
+                {
+                  "id": "TemplateDeagramTile12MAR2023",
+                  "title": "Template Diagram Tile",
+                  "content": {
+                    "type": "Diagram",
+                    "nodes":{},"flowTransform":{"x":0,"y":0,"zoom":1}}
+                }
+              ]
+            }
+          }
+        },
+        {
+          "description": "M2S Problem 4.4",
+          "ordinal": 4,
+          "title": "Math Modeling Final Project",
+          "subtitle": "",
+          "disabled": [],
+          "sections": [
+            {
+              "type": "task",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "Ttl0eb3ZgxnuTIaD",
+                    "title": "TestModel_FinalProject",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Test your model</strong></p><p>It is time to test your model. Complete at least <u>three</u> tests. Then drag this tile into your workspace and answer the following questions:</p><p></p><p><u>Test 1</u></p><p>How are you testing your model? {Write your answer here}</p><p>What are your test results? {Write your answer here}</p><p>What do these results mean in the problem context? {Write your answer here}</p><p></p><p><u>Test 2</u></p><p>How are you testing your model? {Write your answer here}</p><p>What are your test results? {Write your answer here}</p><p>What do these results mean in the problem context? {Write your answer here}</p><p></p><p><u>Test 3</u></p><p>How are you testing your model? {Write your answer here}</p><p>What are your test results? {Write your answer here}</p><p>What do these results mean in the problem context? {Write your answer here}</p><p></p><p>Feel free to add more tests.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "nbTrPHfoC-NSGgBg",
+                    "title": "CompareModel_FinalProject",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Compare your model with the initial model</strong></p><p>Explain how your model compares with the initial model. </p><p>{Write your answer here}</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "m5g_CqB8YPf-WF_V",
+                    "title": "GeneralizeModel_FinalProject",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Generalize your model</strong></p><p>Explain how your model can be used to solve similar problems. Describe an example.</p><p>{Write your answer here}</p>"
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "help",
+              "content": {
+                "tiles": [
+                  {
+                    "id": "gkdRjlQhXk8uLNaG",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Workspace</strong></p>",
+                        "<p>Your workspace is on the right. You can create content in it by dragging tiles from any tab on the left, or by using one of the tile tools in the toolbar.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "njCI4Wmr6eYNc5go",
+                    "title": "CLUE Workspace Vertical Toolbar",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/CLUEToolbar.png",
+                      "filename": "curriculum/m2studio/images/CLUEToolbar.png"
+                    }
+                  },
+                  {
+                    "id": "TextTile12MAR2023",
+                    "title": "Text 5",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Text Tile</strong></p>",
+                        "<p>Text tiles can be used to document your ideas, make lists, and to display or define variables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "cP2E6t6w3HOYTCUi",
+                    "title": "Toolbar buttons for the text tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Text.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Text.png"
+                    }
+                  },
+                  {
+                    "id": "7QvQa97zBd4PZLP6",
+                    "title": "Text 10",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Table Tiles</strong></p>",
+                        "<p>You can store reference data in tables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "FDAYvugP7pz6d3Oh",
+                    "title": "Table 1",
+                    "content": {
+                      "type": "Table",
+                      "name": "World Population by Age Range",
+                      "columns": [
+                        {"name":"Age Group","width":120,"values":["<20 years","20-39 years","40-59 years","60-79 years","80-99 years","100+ years"]},
+                        {"name":"Number of People","width":230,"values":["2.6 billion","2.3 billion","1.8 billion","918 million","147 million","0.6 million"]}
+                      ]
+                    }
+                  },
+                  {
+                    "id": "DrawTile12MAR2023",
+                    "title": "Drawtiledoc",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Drawing Tile</strong></p>",
+                        "<p>Drawing tiles can be used to document your ideas as sketches, make annotations on top of embedded images, and to display or define variables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "ePTfYCm7Q-oWGR2R",
+                    "title": "Toolbar buttons for the drawing tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Drawing.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Drawing.png"
+                    }
+                  },
+                  {
+                    "id": "DiagramTile12MAR2023",
+                    "title": "Diagramtiledoc",
+                    "content": {
+                      "type": "Text",
+                      "format": "html",
+                      "text": [
+                        "<p><strong>Diagram Tile</strong></p>",
+                        "<p>Diagram tiles can be used to define and create relationships between variables.</p>"
+                      ]
+                    }
+                  },
+                  {
+                    "id": "r8R3q6_aIIroLzYl",
+                    "title": "Toolbar buttons for the diagram tile",
+                    "content": {
+                      "type": "Image",
+                      "url": "curriculum/m2studio/images/Toolbar_Diagram.png",
+                      "filename": "curriculum/m2studio/images/Toolbar_Diagram.png"
                     }
                   }
                 ]

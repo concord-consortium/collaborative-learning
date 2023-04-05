@@ -7,6 +7,7 @@ import { DataCardContentModelType } from "../data-card-content";
 import { looksLikeDefaultLabel, EditFacet } from "../data-card-types";
 import { RemoveIconButton } from "./add-remove-icons";
 import { useCautionAlert } from "../../../components/utilities/use-caution-alert";
+import { useErrorAlert } from "../../../components/utilities/use-error-alert";
 
 import '../data-card-tile.scss';
 
@@ -105,9 +106,23 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
 
   const handleCompleteName = () => {
     if (labelCandidate !== getLabel()) {
-      caseId && content.setAttName(attrKey, labelCandidate);
+      const names = content.existingAttributesWithNames().map(a => a.attrName);
+      if (!names.includes(labelCandidate)){
+        caseId && content.setAttName(attrKey, labelCandidate);
+      } else {
+        showRequireUniqueAlert();
+      }
     }
   };
+
+  const RequireUniqueAlert = () => {
+    return <p>Each field should have a unique name.  Enter a name that is not already in use in this collection.</p>;
+  };
+
+  const [showRequireUniqueAlert] = useErrorAlert({
+    title: "Error Naming Data Card Field",
+    content: RequireUniqueAlert
+  });
 
   const handleCompleteValue = () => {
     if (valueCandidate !== getValue()) {
@@ -121,7 +136,7 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     }
   }
 
-  const AlertContent = () => {
+  const DeleteAttributeAlertContent = () => {
     return (
       <p>
         Are you sure you want to remove the <em style={{ fontWeight: "bold"}}>{ getLabel() }</em>&nbsp;
@@ -131,15 +146,15 @@ export const CaseAttribute: React.FC<IProps> = observer(props => {
     );
   };
 
-  const [showAlert] = useCautionAlert({
+  const [showDeleteAttributeAlert] = useCautionAlert({
     title: "Delete Attribute",
-    content: AlertContent,
+    content: DeleteAttributeAlertContent,
     confirmLabel: "Delete Attribute",
     onConfirm: () => deleteAttribute()
   });
 
   const handleDeleteAttribute = () => {
-    showAlert();
+    showDeleteAttributeAlert();
   };
 
   const valueIsImage = () => {
