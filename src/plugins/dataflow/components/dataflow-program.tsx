@@ -540,6 +540,23 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const {tileModel, playBackIndex, programRecordState, isPlaying} = this.props;
     const dataSet = tileModel.dataSet;
 
+    /* ==[ Console logs for Ticks ] == */
+    switch (programRecordState){
+      case 0:
+        break;
+      case 1:
+        console.log(`-------tick--RECORDING---`);
+        break;
+      case 2:
+        if (isPlaying){
+          if (playBackIndex === 0){
+            console.log("\n**** HIT PLAYBACK **** \n");
+          }
+          console.log(`-------tick--PLAYBACK--idx:${playBackIndex}`);
+        }
+        break;
+    }
+
     /* ==[ Time Setup ] == */
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
@@ -555,6 +572,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         this.programEditor.nodes.forEach((node, idx) => {
           const key = dataSet.attributes[idx].id;
           aCase[key] = node.data.nodeValue as string;
+          console.log("recording node:", node.name, aCase[key]);
+
         });
         addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
       }
@@ -646,6 +665,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
               break;
             default:
           }
+          console.log("playback node:", node.name, valueToSendToNode);
         });
 
 
