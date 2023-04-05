@@ -35,9 +35,6 @@ It would be helpful if the unit configuration could be edited in the CMS. Perhap
 ## Preview of a section on the right side of the CMS
 This would allow the author to see the section in its read-only mode like what is seen in the CLUE curriculum tabs.
 
-## Debug flag to log CMS onChange document export
-To help track down issues like the image tile changes, it would be useful to log each CMS onChange along with the value being sent. This should make it easy to see what changes are being sent. I suspect we'll routinely find things that cause unexpected changes in the export.
-
 # Known Issues
 
 ## Backup Draft
