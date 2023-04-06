@@ -754,8 +754,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // update virtual sensors
       if (chInfo?.virtualValueMethod && chInfo.timeFactor) {
-          const time = Math.floor(Date.now() / chInfo.timeFactor);
-          chInfo.value = chInfo.virtualValueMethod(time);
+        const time = Math.floor(Date.now() / chInfo.timeFactor);
+        chInfo.value = chInfo.virtualValueMethod(time);
       }
 
       if (chInfo && chInfo.value) {
@@ -764,7 +764,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         sensorSelect.setSensorValue(NaN);
       }
     }
-
   };
 
   private updateNodeRecentValues = (n: Node) => {
