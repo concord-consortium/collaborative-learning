@@ -36,7 +36,8 @@ input.onButtonPressed(Button.B, function () {
 })
 
 radio.onReceivedString(function (receivedString) {
-    if (mode == 1) {
+    const isIncoming = ["s", "r"].includes(receivedString.substring(0,1))
+    if (mode == 1 && isIncoming) {
         serial.writeLine(receivedString)
     }
 })
