@@ -24,17 +24,17 @@ interface TopbarProps {
   programRecordState: number;
   isPlaying: boolean;
   handleChangeIsPlaying: () => void;
-  // playBackIndex: number | null;
+  recordedTime: number;
+  updateRecordedTime: (num: number) => void;
   numNodes: number;
 }
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates, dataRate, onRateSelectClick,
-          onRecordDataChange, programRecordState, isPlaying, handleChangeIsPlaying, numNodes } = props;
+          onRecordDataChange, programRecordState, isPlaying, handleChangeIsPlaying, recordedTime,
+          updateRecordedTime, numNodes } = props;
 
   const disableRecordButton = readOnly && programRecordState === 0; //hides RecordButton on leftside read only docs
-  //create a piece of state
-  const [playBackReset, setPlayBackReset] = useState(false);
 
   return (
     <div className="program-editor-topbar">
@@ -66,6 +66,9 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
             handleChangeIsPlaying={handleChangeIsPlaying}
             numNodes={numNodes}
             onRecordDataChange={onRecordDataChange}
+            recordedTime={recordedTime}
+            updateRecordedTime={updateRecordedTime}
+
           />
           <RecordStopOrClearButton
             disabled={disableRecordButton}
@@ -77,7 +80,6 @@ export const DataflowProgramTopbar = (props: TopbarProps) => {
         <div className="topbar-right">
           {props.showRateUI && <span className={"rate-ui"}>{`${props.lastIntervalDuration}ms`}</span>}
         </div>
-
     </div>
   );
 };

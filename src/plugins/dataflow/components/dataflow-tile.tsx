@@ -26,6 +26,7 @@ interface IDataflowTileState {
   programRecordingMode: number; // TO DO: convert to enum
   isPlaying: boolean;
   playBackIndex: number;
+  recordedTime: number;
 }
 
 @inject("stores")
@@ -40,11 +41,14 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       programRecordingMode: 0,
       isPlaying: false,
       playBackIndex: 0,
+      recordedTime: 0,
     };
   }
 
   public render() {
     const { readOnly, height, model } = this.props;
+    // console.log("<DataflowToolComponent>");
+
     const editableClass = readOnly ? "read-only" : "editable";
     const classes = `dataflow-tool disable-tile-content-drag ${editableClass}`;
     const { program, programDataRate, programZoom } = this.getContent();
@@ -72,12 +76,16 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
                   size={size}
                   tileHeight={height}
                   tileId={model.id}
-                  onRecordDataChange={this.handleChangeOfRecordingMode}
+                  //state
                   programRecordState={this.state.programRecordingMode}
                   isPlaying={this.state.isPlaying}
-                  handleChangeIsPlaying={this.handleChangeIsPlaying}
                   playBackIndex={this.state.playBackIndex}
+                  recordedTime={this.state.recordedTime}
+                  //state handlers
+                  onRecordDataChange={this.handleChangeOfRecordingMode}
+                  handleChangeIsPlaying={this.handleChangeIsPlaying}
                   updatePlayBackIndex={this.updatePlayBackIndex}
+                  updateRecordedTime={this.updateRecordedTime}
                   numNodes={numNodes}
                   tileModel={tileModel}
                 />
@@ -156,9 +164,11 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   };
 
   private pairNodesToAttributes = () => {
+    // console.log("pairNodeToAttributes");
     const model = this.getContent();
 
     //#1 check nodes on tile against dataset attributes, if already there do nothing, otherwise write.
+    model.addNewAttrFromNode(0, "Time"); //0 is unique # for time?
     model.program.nodes.forEach((n) => {
       model.addNewAttrFromNode(n.id, n.name);
     });
@@ -166,9 +176,16 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     //#2 check dataset attributes against nodes on tile, if an attribute is not on the tile - remove it.
     const dataSet = model.dataSet;
     const dataSetAttributes = dataSet.attributes;
+    console.log("dataSetAttributes.length:", dataSetAttributes.length);
+
+    // TO DO !!!!  ______________ SKIP IDX 0 ____ because thats time
     dataSetAttributes.forEach((attribute, idx) => {
-      model.removeAttributesInDatasetMissingInTile(attribute.id);
+      if (idx !== 0) { //skip first index, because that attribute is "Time"
+        model.removeAttributesInDatasetMissingInTile(attribute.id);
+      }
     });
+
+    console.log("dataSetAttributes.length:", dataSetAttributes.length);
   };
 
   private handleChangeOfRecordingMode = () => {
@@ -179,7 +196,8 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     const mode = this.state.programRecordingMode;
     const model = this.getContent();
 
-    if (mode === 0){
+    if (mode === 0){ //when Record is pressed
+      // console.log("mode 0 invoked");
       this.setState({isPlaying: false}); //reset isPlaying
       this.pairNodesToAttributes();
     }
@@ -187,7 +205,6 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
       const allAttributes = model.dataSet.attributes;
       const ids = model.dataSet.cases.map(({__id__}) => ( __id__));
       model.dataSet.removeCases(ids);
-
       allAttributes.forEach((attr)=>{
         model.dataSet.removeAttribute(attr.id);
       });
@@ -209,6 +226,11 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
     if (update === UpdateMode.Reset){
       this.setState({playBackIndex: 0});
     }
+  };
+
+  private updateRecordedTime = (num: number) => {
+    // console.log("in update Recorded Time with num", num);
+    this.setState({recordedTime: num});
   };
 
   private getContent() {

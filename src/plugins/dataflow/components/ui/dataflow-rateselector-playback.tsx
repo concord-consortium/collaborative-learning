@@ -3,6 +3,7 @@ import Slider from "rc-slider";
 import { ProgramDataRate } from "../../model/utilities/node";
 
 import "./dataflow-rateselector-playback.scss";
+import { update } from "lodash";
 
 const totalSamples = 10000;
 
@@ -15,6 +16,9 @@ interface IRateSelectorProps {
   programRecordState: number;
   isPlaying: boolean; //for playback of data
   handleChangeIsPlaying: () => void;
+  recordedTime: number;
+  updateRecordedTime: (num: number) => void;
+
   numNodes: number;
   onRecordDataChange: () => void;
 }
@@ -29,7 +33,7 @@ function formatTime(seconds: number) {
 
 export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
   const { onRateSelectClick, readOnly, dataRate, rateOptions, programRecordState,
-          isPlaying, handleChangeIsPlaying, numNodes, onRecordDataChange} = props;
+          isPlaying, handleChangeIsPlaying, numNodes, onRecordDataChange, recordedTime, updateRecordedTime} = props;
 
   /* ==[ Total Recording Time  - Calculate] format as "MMM:SS" */
   const totalTimeSec = Math.floor((dataRate / 1000) * (totalSamples/numNodes));
@@ -69,6 +73,7 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
       const timer = setInterval(() => {
         timerSec.current++;
         sliderSec.current++;
+        updateRecordedTime(sliderSec.current);
         if (timerSec.current === 60){
           timerMin.current++;
           timerSec.current = 0;
@@ -80,6 +85,7 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
       const playBackTimer = setInterval(() => {
         playBackTimerSec.current++;
         sliderSec.current++;
+        updateRecordedTime(sliderSec.current);
         if (playBackTimerSec.current === 60){
           playBackTimerMin.current++;
           playBackTimerSec.current = 0;
@@ -87,6 +93,7 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
       }, 1000);
       return () => clearInterval(playBackTimer);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timerSec, timerRunning, sliderSec, playBackTimerRunning, programRecordState, playBackIsFinished]);
 
   /* ==[ Stop Mode - Reset slider and counter to 0 ] == */

@@ -80,6 +80,8 @@ interface IProps extends SizeMeProps {
   handleChangeIsPlaying: () => void;
   playBackIndex: number;
   updatePlayBackIndex: (update: string) => void;
+  recordedTime: number;
+  updateRecordedTime: (num: number) => void;
   numNodes: number;
   tileModel: DataflowContentModelType;
 }
@@ -123,6 +125,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   public render() {
+    // console.log("<DataflowProgram");
     const { readOnly, documentProperties, numNodes} = this.props;
     const editorClassForDisplayState = "full";
     const editorClass = `editor ${editorClassForDisplayState}`;
@@ -146,6 +149,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           programRecordState={this.props.programRecordState}
           isPlaying={this.props.isPlaying}
           handleChangeIsPlaying={this.props.handleChangeIsPlaying}
+          recordedTime={this.props.recordedTime}
+          updateRecordedTime={this.props.updateRecordedTime}
           numNodes={numNodes}
         />
         <div className={toolbarEditorContainerClass}>
@@ -537,8 +542,10 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private tick = () => { //can get rid of isPlaying since we can access that inside here
-    const {tileModel, playBackIndex, programRecordState, isPlaying} = this.props;
+
+    const {tileModel, playBackIndex, programRecordState, isPlaying, recordedTime} = this.props;
     const dataSet = tileModel.dataSet;
+    console.log("recordedTime:", recordedTime);
 
     /* ==[ Console logs for Ticks ] == */
     switch (programRecordState){
@@ -563,23 +570,27 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.lastIntervalTime = now;
     const isRecording = this.props.programRecordState === 1;
 
-    /* ==[ Logic for Default, Recording and Playback ] ==  TO DO - abstract this */
+    /* ==[ Logic for Default and Recording ] ==  TO DO - abstract this */
     if (!isPlaying){
       /* ==[ Record into Dataset ] == */
       if (isRecording){
         const aCase: ICaseCreation = {};
         //loop through attribute (nodes) and write each value
+        // console.log("nodes:", this.programEditor.nodes);
+
         this.programEditor.nodes.forEach((node, idx) => {
+
           const key = dataSet.attributes[idx].id;
           aCase[key] = node.data.nodeValue as string;
-          console.log("recording node:", node.name, aCase[key]);
+          // console.log("recording node:", node.name, aCase);
+
+          // console.log("recording node:", node.name, aCase[key]);
 
         });
         addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
       }
       /* ==[ Update Node ] == */
       if (programRecordState !== 2){
-        /* ==[ Update Node ] == */
         const nodeProcessMap: { [name: string]: (n: Node) => void } = {
           Generator: this.updateGeneratorNode,
           Timer: this.updateTimerNode,
@@ -620,7 +631,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
     else {
       /* ==[ Playback Dataset ] == */
-
       const currentCase = dataSet.getCaseAtIndex(playBackIndex);
       if (currentCase){
         const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
@@ -680,6 +690,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     else {
       this.props.updatePlayBackIndex(UpdateMode.Reset);
     }
+
+    //* ==[ End of Tick ] == */
+    // look at dataset
+    console.log("dataSet", dataSet);
+
+
   };
 
   private passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo){
