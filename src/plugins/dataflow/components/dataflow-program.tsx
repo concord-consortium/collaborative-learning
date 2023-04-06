@@ -1,7 +1,7 @@
+import React from "react";
 import "regenerator-runtime/runtime";
 import { inject, observer } from "mobx-react";
 import { BaseComponent } from "../../../components/base";
-import React from "react";
 import Rete, { NodeEditor, Engine, Node } from "rete";
 import ConnectionPlugin from "rete-connection-plugin";
 import ReactRenderPlugin from "rete-react-render-plugin";
@@ -24,6 +24,7 @@ import { LiveOutputReteNodeFactory } from "../nodes/factories/live-output-rete-n
 import { GeneratorReteNodeFactory } from "../nodes/factories/generator-rete-node-factory";
 import { TimerReteNodeFactory } from "../nodes/factories/timer-rete-node-factory";
 import { NumControl } from "../nodes/controls/num-control";
+import { ValueControl } from "../nodes/controls/value-control";
 import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
@@ -35,7 +36,10 @@ import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { SerialDevice } from "../../../models/stores/serial";
 import { dataflowLogEvent } from "../dataflow-logger";
-import { addCanonicalCasesToDataSet, ICaseCreation } from "../../../models/data/data-set";
+import { ICaseCreation, addCanonicalCasesToDataSet } from "../../../models/data/data-set";
+import { SensorValueControl } from "../nodes/controls/sensor-value-control";
+import { InputValueControl } from "../nodes/controls/input-value-control";
+import { DemoOutputControl } from "../nodes/controls/demo-output-control";
 
 import "./dataflow-program.sass";
 interface NodeNameValuePair {
@@ -55,6 +59,11 @@ export interface IStartProgramParams {
   title: string;
 }
 
+export enum UpdateMode {
+  Increment = "Increment",
+  Reset = "Reset",
+}
+
 interface IProps extends SizeMeProps {
   readOnly?: boolean;
   documentProperties?: { [key: string]: string };
@@ -68,6 +77,10 @@ interface IProps extends SizeMeProps {
   tileId: string;
   onRecordDataChange: () => void;
   programRecordState: number;
+  isPlaying: boolean;
+  handleChangeIsPlaying: () => void;
+  playBackIndex: number;
+  updatePlayBackIndex: (update: string) => void;
   numNodes: number;
   tileModel: DataflowContentModelType;
 }
@@ -132,6 +145,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
           serialDevice={this.stores.serialDevice}
           onRecordDataChange={this.props.onRecordDataChange}
           programRecordState={this.props.programRecordState}
+          isPlaying={this.props.isPlaying}
+          handleChangeIsPlaying={this.props.handleChangeIsPlaying}
           numNodes={numNodes}
         />
         <div className={toolbarEditorContainerClass}>
@@ -372,7 +387,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     if (this.intervalHandle) {
       clearInterval(this.intervalHandle);
     }
-    this.intervalHandle = setInterval(this.tick, rate);
+    this.intervalHandle = setInterval(() => this.tick(), rate);
   };
 
   private processAndSave = async () => {
@@ -522,24 +537,66 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  private tick = () => {
-    const now = Date.now();
-    this.setState({lastIntervalDuration: now - this.lastIntervalTime});
-    this.lastIntervalTime = now;
-    const isRecording = this.props.programRecordState === 1;
+  private recordCase = () => {
+    const aCase: ICaseCreation = {};
+    //loop through attribute (nodes) and write each value
+    this.programEditor.nodes.forEach((node, idx) => {
+      const key = this.props.tileModel.dataSet.attributes[idx].id;
+      aCase[key] = node.data.nodeValue as string;
+    });
+    addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
+  };
 
-    /* ==[ Per tick - create a case and write it to the dataSet ] == */
-    if (isRecording){
-      const aCase: ICaseCreation = {};
-      const dataSet = this.props.tileModel.dataSet;
-      //loop through attribute (nodes) and write each value
-      this.programEditor.nodes.forEach((node, idx) => {
-        const key = dataSet.attributes[idx].id;
-        aCase[key] = node.data.nodeValue as string;
+  private playbackNodesWithCaseData = (dataSet: any, playBackIndex: number) => {
+    const currentCase = dataSet.getCaseAtIndex(playBackIndex);
+    if (currentCase){
+      const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
+      this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
+        const attrId = dataSet.attributes[idx].id;
+        const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
+        let nodeControl;
+        switch (node.name){
+          case "Sensor":
+            nodeControl = node.controls.get("nodeValue") as SensorValueControl;
+            nodeControl.setValue(valueToSendToNode);
+            break;
+          case "Number":
+            nodeControl = node.controls.get("nodeValue") as NumControl;
+            nodeControl.setValue(valueToSendToNode);
+            break;
+          case "Generator":
+            nodeControl = node.controls.get("nodeValue") as ValueControl;
+            nodeControl.setValue(valueToSendToNode);
+            break;
+          case "Timer":
+            nodeControl = node.controls.get("nodeValue") as ValueControl; //not working
+            nodeControl.setValue(valueToSendToNode);
+            break;
+          case "Math":
+            break;
+          case "Logic":
+            break;
+          case "Transform":
+            break;
+          case "Control":
+            break;
+          case "Demo Output":
+            nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
+            nodeControl.setValue(valueToSendToNode); //---> shows correct animation
+            nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
+            nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
+            break;
+          case "Live Output":
+            nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
+            nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
+            break;
+          default:
+        }
       });
-      addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
     }
+  };
 
+  private updateNodes = () => {
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
       Generator: this.updateGeneratorNode,
       Timer: this.updateTimerNode,
@@ -552,7 +609,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       }
     };
     let processNeeded = false;
-
     this.programEditor.nodes.forEach((n: Node) => {
       const nodeProcess = nodeProcessMap[n.name];
       if (nodeProcess) {
@@ -571,6 +627,33 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         await this.programEngine.abort();
         await this.programEngine.process(this.programEditor.toJSON());
       })();
+    }
+  };
+
+  private tick = () => {
+    const {tileModel, playBackIndex, isPlaying} = this.props;
+    const dataSet = tileModel.dataSet;
+    const now = Date.now();
+    this.setState({lastIntervalDuration: now - this.lastIntervalTime});
+    this.lastIntervalTime = now;
+
+    const isCleared = this.props.programRecordState === 0;
+    const isRecording = this.props.programRecordState === 1;
+    const isRecorded = this.props.programRecordState === 2;
+
+    if (isCleared){
+      this.updateNodes();
+    }
+
+    if (isRecording){
+      this.recordCase();
+      this.updateNodes();
+    }
+
+    if (isRecorded){
+      isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
+      isPlaying && this.props.updatePlayBackIndex(UpdateMode.Increment);
+      !isPlaying && this.props.updatePlayBackIndex(UpdateMode.Reset);
     }
   };
 
@@ -673,7 +756,9 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   };
 
   private updateNodeSensorValue = (n: Node) => {
+
     const sensorSelect = n.controls.get("sensorSelect") as SensorSelectControl;
+
     if (sensorSelect) {
       const chInfo = this.channels.find(ci => ci.channelId === n.data.sensor);
 
