@@ -171,7 +171,10 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
             </select> :
             numNodes > 0 &&
             <div className="countdown-timer">
-              {programRecordState === 1 ? `${formattedTime} / ${totalTimeFormatted}` : `${playBackFormattedTime}/${formattedTime}`}
+              {
+                programRecordState === 1 ? `${formattedTime} / ${totalTimeFormatted}`
+                : `${playBackFormattedTime}/${formattedTime}`
+              }
             </div>
           }
 

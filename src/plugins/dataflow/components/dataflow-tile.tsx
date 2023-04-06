@@ -23,7 +23,7 @@ interface IProps extends ITileProps{
 }
 
 interface IDataflowTileState {
-  programRecordingMode: number; // TO DO: convert to enum
+  programRecordingMode: number; // TODO: convert to enum
   isPlaying: boolean;
   playBackIndex: number;
 }
