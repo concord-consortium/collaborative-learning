@@ -20,7 +20,8 @@ const gTileRegistration: Record<string, () => void> = {
     import(/* webpackChunkName: "Table" */"./models/tiles/table/table-registration"),
     import(/* webpackChunkName: "SharedDataSet" */"./models/shared/shared-data-set-registration")
   ]),
-  "Text": () => import(/* webpackChunkName: "Text" */"./models/tiles/text/text-registration")
+  "Text": () => import(/* webpackChunkName: "Text" */"./models/tiles/text/text-registration"),
+  "XYplot": () => import(/* webpackChunkName: "XYplot" */"./plugins/xyplot/xyplot-registration")
 };
 
 export function registerTileTypes(tileTypeIds: string[]) {

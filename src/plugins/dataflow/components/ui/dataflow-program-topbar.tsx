@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { RateSelectorOrPlayBack } from "./dataflow-rateselector-playback";
 import { ProgramDataRate } from "../../model/utilities/node";
 import { SerialDevice } from "../../../../models/stores/serial";
@@ -24,15 +24,12 @@ interface TopbarProps {
   programRecordState: number;
   isPlaying: boolean;
   handleChangeIsPlaying: () => void;
-  recordedTime: number;
-  updateRecordedTime: (num: number) => void;
   numNodes: number;
 }
 
 export const DataflowProgramTopbar = (props: TopbarProps) => {
   const { onSerialRefreshDevices, readOnly, serialDevice, programDataRates, dataRate, onRateSelectClick,
-          onRecordDataChange, programRecordState, isPlaying, handleChangeIsPlaying, recordedTime,
-          updateRecordedTime, numNodes } = props;
+          onRecordDataChange, programRecordState, isPlaying, handleChangeIsPlaying, numNodes } = props;
 
   const disableRecordButton = readOnly && programRecordState === 0; //hides RecordButton on leftside read only docs
 

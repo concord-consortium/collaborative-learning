@@ -23,7 +23,7 @@ interface IProps extends ITileProps{
 }
 
 interface IDataflowTileState {
-  programRecordingMode: number; // TO DO: convert to enum
+  programRecordingMode: number; // TODO: convert to enum
   isPlaying: boolean;
   playBackIndex: number;
   recordedTime: number;
@@ -189,9 +189,12 @@ export default class DataflowToolComponent extends BaseComponent<IProps, IDatafl
   };
 
   private handleChangeOfRecordingMode = () => {
-    // 0 - cleared, ready to record
-    // 1 - recording in progress
-    // 2 - stopped, ready to clear
+    //0 program: executing, dataSet: empty
+    //1 program: executing, dataSet: writing in progress
+    //2 program: not executing,  dataSet: populated
+    //below are "substates" of #2 above
+    //isPlaying: playbackIndex incrementing, Nodes updated "by hand" rather than via execution
+    //isPaused: playbackIndex not incrementing, nodes stay as they were at last index above
 
     const mode = this.state.programRecordingMode;
     const model = this.getContent();

@@ -29,8 +29,9 @@ import { DataflowProgramToolbar } from "./ui/dataflow-program-toolbar";
 import { DataflowProgramTopbar } from "./ui/dataflow-program-topbar";
 import { DataflowProgramCover } from "./ui/dataflow-program-cover";
 import { DataflowProgramZoom } from "./ui/dataflow-program-zoom";
-import { NodeChannelInfo, NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo,
-         virtualSensorChannels, serialSensorChannels} from "../model/utilities/node";
+import { NodeChannelInfo, serialSensorChannels } from "../model/utilities/channel";
+import { NodeGeneratorTypes, ProgramDataRates, NodeTimerInfo } from "../model/utilities/node";
+import { virtualSensorChannels } from "../model/utilities/virtual-channel";
 import { Rect, scaleRect, unionRect } from "../utilities/rect";
 import { DocumentContextReact } from "../../../components/document/document-context";
 import { SerialDevice } from "../../../models/stores/serial";
@@ -541,168 +542,135 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  private tick = () => { //can get rid of isPlaying since we can access that inside here
+  private recordCase = () => {
+    const aCase: ICaseCreation = {};
+    //loop through attribute (nodes) and write each value
+    this.programEditor.nodes.forEach((node, idx) => {
+      const key = this.props.tileModel.dataSet.attributes[idx].id;
+      aCase[key] = node.data.nodeValue as string;
+    });
+    addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
+  };
 
-    const {tileModel, playBackIndex, programRecordState, isPlaying, recordedTime} = this.props;
-    const dataSet = tileModel.dataSet;
-    console.log("recordedTime:", recordedTime);
-
-    /* ==[ Console logs for Ticks ] == */
-    switch (programRecordState){
-      case 0:
-        break;
-      case 1:
-        console.log(`-------tick--RECORDING---`);
-        break;
-      case 2:
-        if (isPlaying){
-          if (playBackIndex === 0){
-            console.log("\n**** HIT PLAYBACK **** \n");
-          }
-          console.log(`-------tick--PLAYBACK--idx:${playBackIndex}`);
+  private playbackNodesWithCaseData = (dataSet: any, playBackIndex: number) => {
+    const currentCase = dataSet.getCaseAtIndex(playBackIndex);
+    if (currentCase){
+      const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
+      this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
+        const attrId = dataSet.attributes[idx].id;
+        const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
+        let nodeControl;
+        switch (node.name){
+          case "Sensor":
+            nodeControl = node.controls.get("nodeValue") as SensorValueControl;
+            nodeControl.setValue(valueToSendToNode);
+            break;
+          case "Number":
+            nodeControl = node.controls.get("nodeValue") as NumControl;
+            nodeControl.setValue(valueToSendToNode);
+            break;
+          case "Generator":
+            nodeControl = node.controls.get("nodeValue") as ValueControl;
+            nodeControl.setValue(valueToSendToNode);
+            break;
+          case "Timer":
+            nodeControl = node.controls.get("nodeValue") as ValueControl; //not working
+            nodeControl.setValue(valueToSendToNode);
+            break;
+          case "Math":
+            break;
+          case "Logic":
+            break;
+          case "Transform":
+            break;
+          case "Control":
+            break;
+          case "Demo Output":
+            nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
+            nodeControl.setValue(valueToSendToNode); //---> shows correct animation
+            nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
+            nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
+            break;
+          case "Live Output":
+            nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
+            nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
+            break;
+          default:
         }
-        break;
+      });
     }
+  };
 
-    /* ==[ Time Setup ] == */
+  private updateNodes = () => {
+    const nodeProcessMap: { [name: string]: (n: Node) => void } = {
+      Generator: this.updateGeneratorNode,
+      Timer: this.updateTimerNode,
+      Sensor: (n: Node) => {
+        this.updateNodeChannelInfo(n);
+        this.updateNodeSensorValue(n);
+      },
+      "Live Output": (n: Node) => {
+        this.sendDataToSerialDevice(n);
+      }
+    };
+    let processNeeded = false;
+    this.programEditor.nodes.forEach((n: Node) => {
+      const nodeProcess = nodeProcessMap[n.name];
+      if (nodeProcess) {
+        processNeeded = true;
+        nodeProcess(n);
+      }
+      if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
+        this.updateNodeRecentValues(n);
+      }
+    });
+    if (processNeeded) {
+        // if we've updated values on 1 or more nodes (such as a generator),
+        // we need to abort any current processing and reprocess all
+        // nodes so current values are up to date
+      (async () => {
+        await this.programEngine.abort();
+        await this.programEngine.process(this.programEditor.toJSON());
+      })();
+    }
+  };
+
+  private tick = () => {
+    const {tileModel, playBackIndex, isPlaying} = this.props;
+    const dataSet = tileModel.dataSet;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
+
+    const isCleared = this.props.programRecordState === 0;
     const isRecording = this.props.programRecordState === 1;
+    const isRecorded = this.props.programRecordState === 2;
 
-    /* ==[ Logic for Default and Recording ] ==  TO DO - abstract this */
-    if (!isPlaying){
-      /* ==[ Record into Dataset ] == */
-      if (isRecording){
-        const aCase: ICaseCreation = {};
-        //loop through attribute (nodes) and write each value
-        // console.log("nodes:", this.programEditor.nodes);
-
-        this.programEditor.nodes.forEach((node, idx) => {
-
-          const key = dataSet.attributes[idx].id;
-          aCase[key] = node.data.nodeValue as string;
-          // console.log("recording node:", node.name, aCase);
-
-          // console.log("recording node:", node.name, aCase[key]);
-
-        });
-        addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
-      }
-      /* ==[ Update Node ] == */
-      if (programRecordState !== 2){
-        const nodeProcessMap: { [name: string]: (n: Node) => void } = {
-          Generator: this.updateGeneratorNode,
-          Timer: this.updateTimerNode,
-          Sensor: (n: Node) => {
-            this.updateNodeChannelInfo(n);
-            this.updateNodeSensorValue(n);
-          },
-          "Live Output": (n: Node) => {
-            this.sendDataToSerialDevice(n);
-          }
-        };
-        let processNeeded = false;
-        this.programEditor.nodes.forEach((n: Node) => {
-          const nodeProcess = nodeProcessMap[n.name];
-          if (nodeProcess) {
-            processNeeded = true;
-            nodeProcess(n);
-          }
-          if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
-            this.updateNodeRecentValues(n);
-          }
-        });
-        if (processNeeded) {
-            // if we've updated values on 1 or more nodes (such as a generator),
-            // we need to abort any current processing and reprocess all
-            // nodes so current values are up to date
-          (async () => {
-            await this.programEngine.abort();
-            await this.programEngine.process(this.programEditor.toJSON());
-          })();
-        }
-        /* ==[ End Update Node ] == */
-      }
-
-
-
-
-    }
-    else {
-      /* ==[ Playback Dataset ] == */
-      const currentCase = dataSet.getCaseAtIndex(playBackIndex);
-      if (currentCase){
-        const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
-        this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
-          const attrId = dataSet.attributes[idx].id;
-          const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
-          let nodeControl;
-          switch (node.name){
-            case "Sensor":
-              nodeControl = node.controls.get("nodeValue") as SensorValueControl;
-              nodeControl.setValue(valueToSendToNode);
-              break;
-            case "Number":
-              nodeControl = node.controls.get("nodeValue") as NumControl;
-              nodeControl.setValue(valueToSendToNode);
-              break;
-            case "Generator":
-              nodeControl = node.controls.get("nodeValue") as ValueControl;
-              nodeControl.setValue(valueToSendToNode);
-              break;
-            case "Timer":
-              nodeControl = node.controls.get("nodeValue") as ValueControl; //not working
-              nodeControl.setValue(valueToSendToNode);
-              break;
-            case "Math":
-              break;
-            case "Logic":
-              break;
-            case "Transform":
-              break;
-            case "Control":
-              break;
-            case "Demo Output":
-              nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
-              nodeControl.setValue(valueToSendToNode); //---> shows correct animation
-              nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-              nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
-              break;
-            case "Live Output":
-              nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-              nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
-              break;
-            default:
-          }
-          console.log("playback node:", node.name, valueToSendToNode);
-        });
-
-
-      }
+    if (isCleared){
+      this.updateNodes();
     }
 
-    //* ==[ Playback Index ] == */
-
-    if (this.props.programRecordState === 2 && this.props.isPlaying) {
-      this.props.updatePlayBackIndex(UpdateMode.Increment);
-    }
-    else {
-      this.props.updatePlayBackIndex(UpdateMode.Reset);
+    if (isRecording){
+      this.recordCase();
+      this.updateNodes();
     }
 
-    //* ==[ End of Tick ] == */
-    // look at dataset
-    console.log("dataSet", dataSet);
-
-
+    if (isRecorded){
+      isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
+      isPlaying && this.props.updatePlayBackIndex(UpdateMode.Increment);
+      !isPlaying && this.props.updatePlayBackIndex(UpdateMode.Reset);
+    }
   };
 
   private passSerialStateToChannel(sd: SerialDevice, channel: NodeChannelInfo){
     if (sd.hasPort()){
       channel.serialConnected = true;
-      channel.missing = false;
-    } else {
+      const deviceMismatch = sd.deviceFamily !== channel.deviceFamily;
+      const timeSinceActive = channel.usesSerial && channel.lastMessageRecievedAt
+        ? Date.now() - channel.lastMessageRecievedAt: 0;
+      channel.missing = deviceMismatch || timeSinceActive > 5000;
+    }
+    else {
       channel.serialConnected = false;
       channel.missing = true;
     }
@@ -712,12 +680,11 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     // implementing with a "count" of 1 or 0 in case we need to count nodes in future
     let serialNodesCt = 0;
 
-    //sensor will need serial once these particular sensors are chosen
     nodes.forEach((n) => {
-      if(n.data.sensor === "emg" || n.data.sensor === "fsr"){
+      const isLiveSensor = /fsr|emg|[th]-[abcd]/; // match ids any live sensor channels
+      if(isLiveSensor.test(n.data.sensor as string)){
         serialNodesCt++;
       }
-
       //live output block will alert need for serial
       // only after connection to another node is made
       // this allows user to drag a block out and work on program before connecting
@@ -740,8 +707,15 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
   }
 
   private sendDataToSerialDevice(n: Node){
-    if (isFinite(n.data.nodeValue as number)){
-      this.stores.serialDevice.writeToOut(n.data.nodeValue as number);
+    const isNumberOutput = isFinite(n.data.nodeValue as number);
+    const { deviceFamily } = this.stores.serialDevice;
+
+    if (deviceFamily === "arduino" && isNumberOutput){
+      this.stores.serialDevice.writeToOutForArduino(n.data.nodeValue as number);
+    }
+    if (deviceFamily === "microbit"){
+      // UPCOMING PT: #184753741 control messages out to hubs
+      this.stores.serialDevice.writeToOutForMicroBit(n.data.nodeValue as any);
     }
   }
 
@@ -754,7 +728,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       Click the ⚡️ button on the upper left, then select your device in the popup.
       Devices differ, but it may contain the words "usbserial" or "usbmodem"`;
 
-      // no physical connection
     if (lastMsg !== "connect" && this.stores.serialDevice.serialNodesCount > 0){
       alertMessage += `1. Connect the arduino to your computer.  2.${btnMsg}`;
     }
@@ -796,8 +769,8 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
 
       // update virtual sensors
       if (chInfo?.virtualValueMethod && chInfo.timeFactor) {
-          const time = Math.floor(Date.now() / chInfo.timeFactor);
-          chInfo.value = chInfo.virtualValueMethod(time);
+        const time = Math.floor(Date.now() / chInfo.timeFactor);
+        chInfo.value = chInfo.virtualValueMethod(time);
       }
 
       if (chInfo && chInfo.value) {
@@ -806,7 +779,6 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         sensorSelect.setSensorValue(NaN);
       }
     }
-
   };
 
   private updateNodeRecentValues = (n: Node) => {
@@ -892,5 +864,4 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     const { transform } = this.programEditor.view.area;
     this.props.onZoomChange(transform.x, transform.y, transform.k);
   };
-
 }
