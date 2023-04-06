@@ -546,7 +546,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
   };
 
-  private updateNodesWithCaseData = (dataSet: any, playBackIndex: number) => {
+  private playbackNodesWithCaseData = (dataSet: any, playBackIndex: number) => {
     const currentCase = dataSet.getCaseAtIndex(playBackIndex);
     if (currentCase){
       const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
@@ -650,7 +650,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (isRecorded){
-      isPlaying && this.updateNodesWithCaseData(dataSet, playBackIndex);
+      isPlaying && this.playbackNodesWithCaseData(dataSet, playBackIndex);
       isPlaying && this.props.updatePlayBackIndex(UpdateMode.Increment);
       !isPlaying && this.props.updatePlayBackIndex(UpdateMode.Reset);
     }
