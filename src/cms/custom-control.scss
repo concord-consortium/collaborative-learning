@@ -5,12 +5,16 @@
   border-top-right-radius: 5px;
 
   /*
-   * To override or revert Decap CMS styling that adversely affects
-   * Clue content styling in the editor, place related style rules
+   * To override or revert Decap CMS style rules that adversely affect
+   * CLUE content styling in the editor, place related style rules
    * within the .canvas .document-content block below.
    */
   .canvas .document-content {
     .text-tool-tile {
+      a {
+        color: revert;
+        text-decoration: revert;
+      }
       ul, ol {
         color: rgb(49, 61, 62);
         font-size: 15px;
