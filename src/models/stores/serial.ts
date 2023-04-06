@@ -1,8 +1,6 @@
-import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/node";
+import { NodeChannelInfo } from "src/plugins/dataflow/model/utilities/channel";
 
 export class SerialDevice {
-  value: string;
-  outValue: number;
   localBuffer: string;
   private port: SerialPort | null;
   connectChangeStamp: number | null;
@@ -11,10 +9,9 @@ export class SerialDevice {
   serialNodesCount: number;
   writer: WritableStreamDefaultWriter;
   serialModalShown: boolean | null;
+  deviceFamily: string | null;
 
   constructor() {
-    this.value = "0";
-    this.outValue = 0;
     this.localBuffer = "";
 
     navigator.serial?.addEventListener("connect", (e) => {
@@ -30,35 +27,28 @@ export class SerialDevice {
     this.serialNodesCount = n;
   }
 
+  // TODO, revise this so it is more clear how its used
   public updateConnectionInfo(timeStamp: number | null, status: string ){
     this.connectChangeStamp = timeStamp;
     this.lastConnectMessage = status;
     localStorage.setItem("last-connect-message", status);
   }
 
+  public determineDeviceFamily(info: SerialPortInfo){
+    return info.usbProductId === 516 && info.usbVendorId === 3368
+      ? "microbit"
+      : "arduino";
+  }
+
   public hasPort(){
-    const portHere = this.port !== undefined;
-    const readablePort = this.port?.readable;
-    return portHere && readablePort;
+    return this.port !== undefined && this.port?.readable;
   }
 
   public async requestAndSetPort(){
-
-    /* The filters commented out below were set up so that only Arduino boards (and close-match non-Arduinos
-    such as the DFRobot one) will show as options for users to connect.  It turns out that there are working
-    Arduino clones that do not match these filters, one of which is being shipped with the latest generation
-    of BB hardware. Rather than attempt to match every non-standard board, we are removing the filters
-    for now and adding a message to the dialog that should help users make the right selection. A TODO item
-    would be to import an updatable and comprehensive list and use it to dynamically create filters. */
-
-    // const filters = [
-    //   { usbVendorId: 0x2341, usbProductId: 0x0043 },
-    //   { usbVendorId: 0x2341, usbProductId: 0x0001 }
-    // ];
-
     try {
       this.port = await navigator.serial.requestPort();
       this.deviceInfo = await this.port.getInfo();
+      this.deviceFamily = this.determineDeviceFamily(this.deviceInfo);
     }
     catch (error) {
       console.error("error requesting port: ", error);
@@ -66,10 +56,7 @@ export class SerialDevice {
   }
 
   public async handleStream(channels: Array<NodeChannelInfo>){
-    //our port cannot be null if we are to open streams
-    if (!this.port){
-      return;
-    }
+    if (!this.port) return;
     await this.port.open({ baudRate: 9600 }).catch((e: any) => console.error(e));
 
     // set up writer
@@ -77,7 +64,7 @@ export class SerialDevice {
     textEncoder.readable.pipeTo(this.port.writable as any);
     this.writer = textEncoder.writable.getWriter();
 
-    // listen for serial data coming up from Arduino
+    // listen for serial data coming in to computer
     while (this.port.readable) {
       const textDecoder = new TextDecoderStream();
       this.port.readable.pipeTo(textDecoder.writable);
@@ -88,7 +75,12 @@ export class SerialDevice {
           if (done){
             break;
           }
-          this.handleStreamObj(value, channels);
+          if (this.deviceFamily === "arduino"){
+            this.handleArduinoStreamObj(value, channels);
+          }
+          if (this.deviceFamily === "microbit"){
+            this.handleMicroBitStreamObj(value, channels);
+          }
         }
       }
       catch (error) {
@@ -100,7 +92,43 @@ export class SerialDevice {
     }
   }
 
-  public handleStreamObj(value: string, channels: Array<NodeChannelInfo>){
+  public handleMicroBitStreamObj(value: string, channels: Array<NodeChannelInfo>){
+    this.localBuffer += value;
+
+    // [sc]   signal or control
+    // [abcd] which micro:bit
+    // [rth]  relay, temp, humidity
+    const pattern = /([sc]{1})([abcd]{1})([rth]{1})([0-9.]+)\s{0,}[\r][\n]/g;
+    let match: RegExpExecArray | null;
+
+    do {
+      match = pattern.exec(this.localBuffer);
+      if (!match) break;
+
+      const [fullMatch, signalType, microbitId, element, reading] = match;
+      this.localBuffer = this.localBuffer.substring(match.index + fullMatch.length);
+
+      const targetChannelId = `${element}-${microbitId}`;
+      const targetChannel = channels.find((c: NodeChannelInfo) => {
+        return c.channelId === targetChannelId;
+      });
+
+      if (targetChannel && signalType === "s" ){
+        if (["h", "t"].includes(element)){
+          // handle message from a humidity or temperature sensor
+          targetChannel.value = Number(reading);
+          targetChannel.lastMessageRecievedAt = Date.now();
+        }
+        if (["r"].includes(element)){
+          // handle message about relays state
+          targetChannel.relaysState = reading.split('').map(s => Number(s));
+          targetChannel.lastMessageRecievedAt = Date.now();
+        }
+      }
+    } while (match);
+  }
+
+  public handleArduinoStreamObj(value: string, channels: Array<NodeChannelInfo>){
     this.localBuffer += value;
 
     const pattern = /(emg|fsr):([0-9]+)[\r][\n]/g;
@@ -123,20 +151,20 @@ export class SerialDevice {
     } while (match);
   }
 
-  public writeToOut(n:number){
+  public writeToOutForMicroBit(data: string | number){
+    // UPCOMING PT #184753741 compute control message string
+    // const controlMessage = makeCotrolMessage(data)
+    // this.writer.write(`${controlMessage}\n`)
+  }
+
+  public writeToOutForArduino(n:number){
     // number visible to user represents "percent closed"
     // so we need to map x percent to an angle in range where
     // 100% (closed) is 120deg, and 0% (open) is 180deg
     const percent = n / 100;
     let openTo = Math.round(180 - (percent * 60));
-
-    if (openTo > 160){
-      openTo = 180;
-    }
-
-    if (openTo < 130){
-      openTo = 120;
-    }
+    if (openTo > 160) openTo = 180;
+    if (openTo < 130) openTo = 120;
 
     // Arduino readBytesUntil() expects newline as delimiter
     if(this.hasPort()){
@@ -144,3 +172,4 @@ export class SerialDevice {
     }
   }
 }
+
