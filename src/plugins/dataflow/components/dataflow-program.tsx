@@ -536,129 +536,123 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     this.programEditor.clear();
   };
 
-  private tick = () => { //can get rid of isPlaying since we can access that inside here
-    const {tileModel, playBackIndex, programRecordState, isPlaying} = this.props;
-    const dataSet = tileModel.dataSet;
+  private recordCase = () => {
+    const aCase: ICaseCreation = {};
+    //loop through attribute (nodes) and write each value
+    this.programEditor.nodes.forEach((node, idx) => {
+      const key = this.props.tileModel.dataSet.attributes[idx].id;
+      aCase[key] = node.data.nodeValue as string;
+    });
+    addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
+  }
 
-    /* ==[ Time Setup ] == */
+  private updateNodesWithCaseData = (dataSet: any, playBackIndex: number) => {
+    const currentCase = dataSet.getCaseAtIndex(playBackIndex);
+    if (currentCase){
+      const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
+      this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
+        const attrId = dataSet.attributes[idx].id;
+        const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
+        let nodeControl;
+        switch (node.name){
+          case "Sensor":
+            nodeControl = node.controls.get("nodeValue") as SensorValueControl;
+            nodeControl.setValue(valueToSendToNode);
+            break;
+          case "Number":
+            nodeControl = node.controls.get("nodeValue") as NumControl;
+            nodeControl.setValue(valueToSendToNode);
+            break;
+          case "Generator":
+            nodeControl = node.controls.get("nodeValue") as ValueControl;
+            nodeControl.setValue(valueToSendToNode);
+            break;
+          case "Timer":
+            nodeControl = node.controls.get("nodeValue") as ValueControl; //not working
+            nodeControl.setValue(valueToSendToNode);
+            break;
+          case "Math":
+            break;
+          case "Logic":
+            break;
+          case "Transform":
+            break;
+          case "Control":
+            break;
+          case "Demo Output":
+            nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
+            nodeControl.setValue(valueToSendToNode); //---> shows correct animation
+            nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
+            nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
+            break;
+          case "Live Output":
+            nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
+            nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
+            break;
+          default:
+        }
+      });
+    }
+  }
+
+  private updateNodes = () => {
+    const nodeProcessMap: { [name: string]: (n: Node) => void } = {
+      Generator: this.updateGeneratorNode,
+      Timer: this.updateTimerNode,
+      Sensor: (n: Node) => {
+        this.updateNodeChannelInfo(n);
+        this.updateNodeSensorValue(n);
+      },
+      "Live Output": (n: Node) => {
+        this.sendDataToSerialDevice(n);
+      }
+    };
+    let processNeeded = false;
+    this.programEditor.nodes.forEach((n: Node) => {
+      const nodeProcess = nodeProcessMap[n.name];
+      if (nodeProcess) {
+        processNeeded = true;
+        nodeProcess(n);
+      }
+      if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
+        this.updateNodeRecentValues(n);
+      }
+    });
+    if (processNeeded) {
+        // if we've updated values on 1 or more nodes (such as a generator),
+        // we need to abort any current processing and reprocess all
+        // nodes so current values are up to date
+      (async () => {
+        await this.programEngine.abort();
+        await this.programEngine.process(this.programEditor.toJSON());
+      })();
+    }
+  }
+
+  private tick = () => {
+    const {tileModel, playBackIndex, isPlaying} = this.props;
+    const dataSet = tileModel.dataSet;
     const now = Date.now();
     this.setState({lastIntervalDuration: now - this.lastIntervalTime});
     this.lastIntervalTime = now;
+
+    const isCleared = this.props.programRecordState === 0;
     const isRecording = this.props.programRecordState === 1;
+    const isRecorded = this.props.programRecordState === 2;
 
-    /* ==[ Logic for Default, Recording and Playback ] ==  TO DO - abstract this */
-    if (!isPlaying){
-      /* ==[ Record into Dataset ] == */
-      if (isRecording){
-        const aCase: ICaseCreation = {};
-        //loop through attribute (nodes) and write each value
-        this.programEditor.nodes.forEach((node, idx) => {
-          const key = dataSet.attributes[idx].id;
-          aCase[key] = node.data.nodeValue as string;
-        });
-        addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
-      }
-      /* ==[ Update Node ] == */
-      if (programRecordState !== 2){
-        /* ==[ Update Node ] == */
-        const nodeProcessMap: { [name: string]: (n: Node) => void } = {
-          Generator: this.updateGeneratorNode,
-          Timer: this.updateTimerNode,
-          Sensor: (n: Node) => {
-            this.updateNodeChannelInfo(n);
-            this.updateNodeSensorValue(n);
-          },
-          "Live Output": (n: Node) => {
-            this.sendDataToSerialDevice(n);
-          }
-        };
-        let processNeeded = false;
-        this.programEditor.nodes.forEach((n: Node) => {
-          const nodeProcess = nodeProcessMap[n.name];
-          if (nodeProcess) {
-            processNeeded = true;
-            nodeProcess(n);
-          }
-          if (Object.prototype.hasOwnProperty.call(n.data, "nodeValue")) {
-            this.updateNodeRecentValues(n);
-          }
-        });
-        if (processNeeded) {
-            // if we've updated values on 1 or more nodes (such as a generator),
-            // we need to abort any current processing and reprocess all
-            // nodes so current values are up to date
-          (async () => {
-            await this.programEngine.abort();
-            await this.programEngine.process(this.programEditor.toJSON());
-          })();
-        }
-        /* ==[ End Update Node ] == */
-      }
-
-
-
-
-    }
-    else {
-      /* ==[ Playback Dataset ] == */
-
-      const currentCase = dataSet.getCaseAtIndex(playBackIndex);
-      if (currentCase){
-        const {__id__} = currentCase; //this is the id of the case we are looking at for each frame
-        this.programEditor.nodes.forEach((node, idx) => { //update each node in the frame
-          const attrId = dataSet.attributes[idx].id;
-          const valueToSendToNode = dataSet.getValue(__id__, attrId) as number;
-          let nodeControl;
-          switch (node.name){
-            case "Sensor":
-              nodeControl = node.controls.get("nodeValue") as SensorValueControl;
-              nodeControl.setValue(valueToSendToNode);
-              break;
-            case "Number":
-              nodeControl = node.controls.get("nodeValue") as NumControl;
-              nodeControl.setValue(valueToSendToNode);
-              break;
-            case "Generator":
-              nodeControl = node.controls.get("nodeValue") as ValueControl;
-              nodeControl.setValue(valueToSendToNode);
-              break;
-            case "Timer":
-              nodeControl = node.controls.get("nodeValue") as ValueControl; //not working
-              nodeControl.setValue(valueToSendToNode);
-              break;
-            case "Math":
-              break;
-            case "Logic":
-              break;
-            case "Transform":
-              break;
-            case "Control":
-              break;
-            case "Demo Output":
-              nodeControl = node.controls.get("demoOutput") as DemoOutputControl;
-              nodeControl.setValue(valueToSendToNode); //---> shows correct animation
-              nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-              nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
-              break;
-            case "Live Output":
-              nodeControl = node.inputs.get("nodeValue")?.control as InputValueControl;
-              nodeControl.setDisplayMessage(valueToSendToNode === 0 ? "off" : "on");
-              break;
-            default:
-          }
-        });
-
-
-      }
+    if (isCleared){
+      this.updateNodes();
     }
 
-    //* ==[ Playback Index ] == */
-
-    if (this.props.programRecordState === 2 && this.props.isPlaying) {
-      this.props.updatePlayBackIndex(UpdateMode.Increment);
+    if (isRecording){
+      this.updateNodes();
+      this.recordCase();
     }
-    else {
-      this.props.updatePlayBackIndex(UpdateMode.Reset);
+
+    if (isRecorded){
+      this.updateNodesWithCaseData(dataSet, playBackIndex);
+      isPlaying && this.props.updatePlayBackIndex(UpdateMode.Increment);
+      !isPlaying && this.props.updatePlayBackIndex(UpdateMode.Reset);
     }
   };
 
