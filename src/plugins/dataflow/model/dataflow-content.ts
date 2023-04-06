@@ -164,26 +164,6 @@ export const DataflowContentModel = TileContentModel
       self.programZoom.dy = dy;
       self.programZoom.scale = scale;
     },
-    addNewCaseFromAttrKeys(atts: string[], caseId: string, beforeId?: string){
-      if (caseId){
-        const obj = atts.reduce((o, key) => Object.assign(o, {[key]: ""}), {});
-        const newCases = cloneDeep([obj]) as ICase[];
-        newCases.forEach((aCase) => {
-          if (!aCase.__id__) {
-            aCase.__id__ = caseId;
-          }
-        });
-        self.dataSet.addCanonicalCasesWithIDs(newCases);
-      }
-    },
-    setAttrName(attrId: string, name: string){
-      self.dataSet.setAttributeName(attrId, name);
-    },
-    setAttrValue(caseId: string, attrId: string, val: string){
-       self.dataSet.setCanonicalCaseValues([
-         { __id__: caseId, [attrId]: val }
-       ]);
-    },
     updateAfterSharedModelChanges(sharedModel?: SharedModelType){
       //do nothing
     },
@@ -223,7 +203,7 @@ export const DataflowContentModel = TileContentModel
       if (!foundFlag){
         self.dataSet.removeAttribute(attribute);
       }
-    },
+    }
   }));
 
 export type DataflowContentModelType = Instance<typeof DataflowContentModel>;

@@ -544,7 +544,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
       aCase[key] = node.data.nodeValue as string;
     });
     addCanonicalCasesToDataSet(this.props.tileModel.dataSet, [aCase]);
-  }
+  };
 
   private updateNodesWithCaseData = (dataSet: any, playBackIndex: number) => {
     const currentCase = dataSet.getCaseAtIndex(playBackIndex);
@@ -593,7 +593,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         }
       });
     }
-  }
+  };
 
   private updateNodes = () => {
     const nodeProcessMap: { [name: string]: (n: Node) => void } = {
@@ -627,7 +627,7 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
         await this.programEngine.process(this.programEditor.toJSON());
       })();
     }
-  }
+  };
 
   private tick = () => {
     const {tileModel, playBackIndex, isPlaying} = this.props;
@@ -645,12 +645,12 @@ export class DataflowProgram extends BaseComponent<IProps, IState> {
     }
 
     if (isRecording){
-      this.updateNodes();
       this.recordCase();
+      this.updateNodes();
     }
 
     if (isRecorded){
-      this.updateNodesWithCaseData(dataSet, playBackIndex);
+      isPlaying && this.updateNodesWithCaseData(dataSet, playBackIndex);
       isPlaying && this.props.updatePlayBackIndex(UpdateMode.Increment);
       !isPlaying && this.props.updatePlayBackIndex(UpdateMode.Reset);
     }

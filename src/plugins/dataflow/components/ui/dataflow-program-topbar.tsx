@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { RateSelectorOrPlayBack } from "./dataflow-rateselector-playback";
 import { ProgramDataRate } from "../../model/utilities/node";
 import { SerialDevice } from "../../../../models/stores/serial";
