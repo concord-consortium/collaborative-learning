@@ -87,7 +87,6 @@ export const RateSelectorOrPlayBack = (props: IRateSelectorProps) => {
       }, 1000);
       return () => clearInterval(playBackTimer);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timerSec, timerRunning, sliderSec, playBackTimerRunning, programRecordState, playBackIsFinished]);
 
   /* ==[ Stop Mode - Reset slider and counter to 0 ] == */
