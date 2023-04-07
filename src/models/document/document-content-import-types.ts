@@ -7,7 +7,7 @@
  */
 
 import { DisplayUserType } from "../stores/user-types";
-import { SharedModelEntryType } from "./document-content";
+import { SharedModelEntrySnapshotType } from "./document-content";
 
 // authored content is converted to current content on the fly
 export interface IAuthoredBaseTileContent {
@@ -42,6 +42,7 @@ export function isOriginalSectionHeaderContent(content: IAuthoredTileContent | O
 
 export interface OriginalTileModel {
   id?: string;
+  title?: string;
   display?: DisplayUserType;
   layout?: OriginalTileLayoutModel;
   content: IAuthoredTileContent | OriginalSectionHeaderContent;
@@ -56,7 +57,7 @@ export function isOriginalAuthoredTileModel(tile: OriginalTileModel): tile is Or
 export type OriginalTilesSnapshot = Array<OriginalTileModel | OriginalTileModel[]>;
 
 export interface IDocumentImportSnapshot {
-  sharedModels?: SharedModelEntryType[];
+  sharedModels?: SharedModelEntrySnapshotType[];
   tiles: OriginalTilesSnapshot;
 }
 

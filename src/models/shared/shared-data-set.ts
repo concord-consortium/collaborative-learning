@@ -1,4 +1,4 @@
-import { Instance, types } from "mobx-state-tree";
+import { Instance, SnapshotIn, types } from "mobx-state-tree";
 import { DataSet } from "../data/data-set";
 import { SharedModel } from "./shared-model";
 
@@ -20,3 +20,4 @@ export const SharedDataSet = SharedModel
   },
 }));
 export interface SharedDataSetType extends Instance<typeof SharedDataSet> {}
+export interface SharedDataSetSnapshotType extends SnapshotIn<typeof SharedDataSet> {}
